@@ -96,10 +96,15 @@ type VertexTagManager with
 
                 let totalSrcToken = v.System.GetSourceTokenCount()
 
-                //처음에는 자기 순서로 시작
-                yield (tempInit.Expr   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
-                //이후부터는 전체 값 만큼 증가
-                yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                if RuntimeDS.Package.IsPLCorPLCSIM()
+                then
+                    //처음에는 자기 순서로 시작
+                    yield (fbRising[tempInit.Expr]   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
+                    //이후부터는 전체 값 만큼 증가
+                    yield (fbRising[!@tempInit.Expr] <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                else 
+                    yield (tempInit.Expr   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
+                    yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
             |]
         |None -> [||]
 

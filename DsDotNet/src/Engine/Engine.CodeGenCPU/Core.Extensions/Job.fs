@@ -27,3 +27,12 @@ module ConvertCpuJob =
             else 
                 None
 
+        member j.ActionOutExpr = 
+            let outExprs =
+                j.TaskDefs.Where(fun d-> d.ExistOutput)
+                          .Select(fun d-> d.GetOutExpr(j))
+
+            if outExprs.any() 
+            then outExprs.ToAnd()|>Some  
+            else None
+

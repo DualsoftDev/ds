@@ -17,10 +17,10 @@ module CodeConvertUtil =
             |> map fst
 
     let getOriginIOExprs(vr:RealVertexTagManager, initialType:InitialType) =
-        getOriginCalls(vr, initialType).Select(fun d-> d.End)
+        getOriginCalls(vr, initialType)
+            .Where(fun c-> not(c.IsAnalog))  //test ahn  Analog input도 범위로 입력 추가 필요 
+            .Select(fun c-> c.End)
 
- 
-   
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =

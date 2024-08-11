@@ -27,7 +27,6 @@ type VertexTagManager with
             else
                 call.End
 
-
         let parentReal = call.Parent.GetCore() :?> Vertex
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
 
@@ -88,7 +87,7 @@ type VertexTagManager with
                     let setEnd =  call.End
 
                      //아날로그 전용 job 은 기다리지 않고 값 성립하면 Coin 뒤집기
-                    if call.IsAnalogOutput then
+                    if call.IsAnalog then
                         yield (setStart<&&>setEnd, rsts) ==| (coin.ET, f )
                     else
                         yield! (setEnd, coin.System)  --^ (coin.GP, f) 

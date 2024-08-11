@@ -29,16 +29,17 @@ type Job with
                             yield (sets, _off) --| (td.OutTag:?> Tag<bool>, fn)
 
                     else
+                        let valExpr = outParam.DevValue.Value|>literal2expr
                         if j.ActionType = Push then
-                            yield (sets, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, fn)
+                            yield (sets, valExpr) --> (td.OutTag, fn)
                         else 
                             if RuntimeDS.Package.IsPLCorPLCSIM() then
-                                yield (fbRising[sets], outParam.DevValue.Value|>literal2expr) --> (td.OutTag, fn)
+                                yield (fbRising[sets], valExpr) --> (td.OutTag, fn)
 
                             elif RuntimeDS.Package.IsPCorPCSIM() then                                
                                 let tempRising  = getSM(j).GetTempBoolTag(td.QualifiedName) 
                                 yield! (sets, j.System) --^ (tempRising,  fn)
-                                yield (tempRising.Expr, outParam.DevValue.Value|>literal2expr) --> (td.OutTag, fn)
+                                yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
                             else    
                                 failWithLog $"Not supported {RuntimeDS.Package} package"
         |]

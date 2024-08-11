@@ -74,20 +74,17 @@ module ConvertCpuVertex =
                 None   
                         
         member c.End = c.EndAction.DefaultValue(c.EndPlan)
-                
-
+        
         member c.EndWithTimer = 
             if  c.UsingTon then
                 c.VC.TDON.DN.Expr
             else
                 c.End
 
-
-        member c.IsAnalogOutput = 
+        member c.IsAnalog = 
             c.TargetJob.TaskDefs
-                .All(fun td-> 
-                    td.OutTag.IsNonNull() 
-                    && td.OutTag.DataType <> typedefof<bool>) 
+                .any(fun td-> td.IsAnalogActuator || td.IsAnalogSensor)
+        
 
         member c.GetEndAction() =
             let tds =
@@ -160,20 +157,14 @@ module ConvertCpuVertex =
             | :? Real as r ->
                 let rv = r.TagManager :?>  RealVertexTagManager
                 let initOnCalls  = rv.OriginInfo.CallInitials
-                                     .Where(fun (_,ty) -> ty = InitialType.On)
-                                     .Select(fun (call,_)->call)
+                                     .Where(fun (_c, ty) -> ty = InitialType.On && not(c.IsAnalog))
+                                     .Select(fun (c, _)->c)
                
                 if initOnCalls.Contains(c)
                     then 
                         (r.VR.OB.Expr <||> r.VR.OA.Expr) 
                         <&&> r.Flow.mop.Expr <&&> !@r.VR.OG.Expr <&&> !@c.End
-                        
-                        //(// 실제에서는 수동일때만 h_st 가능 ,시뮬레이션은 자동수동 둘다가능
-                        //             (!@c.EndActionOnlyIO <&&> !@c.System._sim.Expr)    
-                        //             <||>
-                        //             (!@c.EndPlan <&&>  c.System._sim.Expr )
-                        //             )   
-
+    
                     else c._off.Expr
             | _ ->  
                 c._off.Expr

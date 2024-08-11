@@ -11,7 +11,7 @@ type TaskDevManager with
     member d.TD1_PlanSend(activeSys:DsSystem, coins:Vertex seq) =
         let fn = getFuncName()
         [|
-            if d.TaskDev.IsAnalogSensor
+            if d.TaskDev.IsAnalog
             then
                 for coin in coins do
                     let ps = d.PlanStart(coin.GetPureCall().TargetJob)

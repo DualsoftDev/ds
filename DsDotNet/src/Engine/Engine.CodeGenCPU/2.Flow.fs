@@ -45,7 +45,11 @@ type VertexTagManager with
         let sets =
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr )
             <||>
-            ( v.RF.Expr <||> (*real.VR.OB.Expr <||> *)real.VR.OA.Expr )
+            ( v.RF.Expr 
+             <||>  
+             real.VR.OB.Expr <&&> real.Flow.mop.Expr
+             <||> 
+             real.VR.OA.Expr )
 
         let rsts = real.V.R.Expr
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이

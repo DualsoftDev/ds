@@ -208,9 +208,12 @@ module TagKindList =
 
     /// 14000 ~ 14999
     [<Flags>]
-    type TaskDevTag    =
+    type TaskDevTag =
+    /// Plan start
     | planStart                = 14000
+    /// Plan end: PlanStart on 이후에 특별히 내부적 문제 없으면 on 된다.
     | planEnd                  = 14001
+    /// Plan output: 실출력 on 시키기 위한 용도. Start && End
     | planOutput               = 14002
     | actionIn                 = 14010
     | actionOut                = 14011

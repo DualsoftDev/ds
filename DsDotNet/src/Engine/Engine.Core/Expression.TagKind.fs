@@ -52,6 +52,7 @@ module TagKindModule =
                 @ EnumEx.Extract<TaskDevTag>(ft)
                 @ EnumEx.Extract<HwSysTag>(ft)
                 @ EnumEx.Extract<VariableTag>(ft)
+                @ EnumEx.Extract<JobTag>(ft)
 
     let allTagKindWithTypes = getTagKindFullSet true
     let allTagKinds = getTagKindFullSet false |> dict
@@ -104,9 +105,7 @@ type TagKindExt =
         | EventTaskDev   (i, _, _) -> i
         | EventHwSys     (i, _, _) -> i
         | EventVariable  (i, _, _) -> i
-
-
-
+        | EventJob       (i, _, _) -> i
 
     [<Extension>]
     static member GetTarget(x:TagEvent) =
@@ -164,6 +163,7 @@ type TagKindExt =
         | EventTaskDev   (_, obj, _) -> obj.ParnetSystem
         | EventHwSys     (_, obj, _) -> obj.System
         | EventVariable  (_, obj, _) -> obj
+        | EventJob       (_, obj, _) -> obj.System
 
     [<Extension>]
     static member IsStatusTag(x:TagEvent) =
@@ -304,4 +304,4 @@ type TagKindExt =
                     )
             | EventHwSys (_, _, _) -> false
             | EventVariable (_, _, _) -> true
-            | EventJob (_, _, _) -> false
+            | EventJob (_, _, _) -> true

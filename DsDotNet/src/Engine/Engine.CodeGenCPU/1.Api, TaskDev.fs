@@ -28,9 +28,11 @@ type TaskDevManager with
             for kv in d.TaskDev.DicTaskTaskDevParamIO do
                 let jobFqdn = kv.Key
                 let apiParam = kv.Value
-
                 let sets = 
-                    apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
+                    if d.TaskDev.IsAnalog then
+                        apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
+                    else 
+                        apiParam.ApiItem.ApiItemEnd.Expr 
 
                 yield (sets, activeSys._off.Expr) --| (d.PlanEnd(jobFqdn), fn)
         |]

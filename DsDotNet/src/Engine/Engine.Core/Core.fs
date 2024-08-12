@@ -472,6 +472,7 @@ module CoreModule =
         member val OutTag = getNull<ITag>() with get, set
 
         member val IsRootOnlyDevice = false  with get, set
+   
 
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =

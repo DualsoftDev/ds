@@ -67,7 +67,7 @@ public partial class UcView : UserControl
         viewer.SetCalculatedLayout(viewer.CalculateLayout(viewer.Graph));
     }
 
-    int node_attr_linewidthH = 4;
+    int node_attr_linewidthH = 2;
     int node_attr_linewidthL = 1;
     int edge_attr_linewidthWeek = 1;
     int edge_attr_HeadSize = 7;
@@ -139,6 +139,7 @@ public partial class UcView : UserControl
         else
             nNode.LabelText = org;
 
+        nNode.Label.FontColor = Color.White;
         if (viewNode.ViewType == ViewType.VREAL)
         {
             nNode.Label.FontSize = nnode_label_fontsize;
@@ -514,7 +515,7 @@ public partial class UcView : UserControl
     {
         Node node = findNode(viewNode);
         if (node == null) return;
-        UpdateFillColor(item2, node, Color.CornflowerBlue);
+        UpdateLineWidth(item2, node);
 
         if (vRefresh) RefreshGraph();
     }
@@ -540,7 +541,7 @@ public partial class UcView : UserControl
     {
         Node node = findNode(viewNode);
         if (node == null) return;
-        Color color = isOn ? Color.DarkSalmon : Color.White;
+        Color color = isOn ? Color.OrangeRed : Color.White;
         UpdateLabelColor(node, color);
         if (vRefresh) RefreshGraph();
     }
@@ -548,7 +549,6 @@ public partial class UcView : UserControl
     public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)
     {
         bool vRefresh = false;
-        Node node = findNode(viewNode);
 
         UpdateStatus(viewNode, vRefresh);
         UpdateOriginValue(viewNode, vv.LampOrigin, vRefresh);

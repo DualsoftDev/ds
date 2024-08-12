@@ -47,10 +47,12 @@ module RunTime =
                 )
             disposables.Add subscription
 
+
+            //외부에서 누르게 변경
             if RuntimeDS.Package.IsPackageSIM() then
-                stopBtn.BoxedValue <- false
+                //stopBtn.BoxedValue <- false
                 systems.Iter(fun sys-> cpuSimOn(sys))
-                systems.Iter(fun sys-> preAutoDriveAction(sys))
+            //    systems.Iter(fun sys-> preAutoDriveAction(sys))
 
 
             let subscription =

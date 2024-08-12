@@ -289,7 +289,6 @@ module internal XgiSymbolsModule =
     let storagesToGlobalXml (prjParam: XgxProjectParams) (globalStorages: IStorage seq) =
         //storagesToXml false globalStorages
         let symbolInfos =
-            // todo: 최적화 필요 함수
             storagesToSymbolInfos prjParam (int Variable.Kind.VAR_GLOBAL) globalStorages
 
         (* check any error *)

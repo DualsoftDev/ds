@@ -15,11 +15,14 @@ module LSEAddressPattern =
         | true, v when v < size -> Some(v)
         | _ -> None
 
+    /// for speed up, use memoized cache
+    let private deviceTypeFromStringMemoized = DU.fromStringMemoized<DeviceType>
+
     let (|ByteSubBitPattern|_|) = subBitPattern 8
     let (|WordSubBitPattern|_|) = subBitPattern 16
     let (|DWordSubBitPattern|_|) = subBitPattern 32
     let (|LWordSubBitPattern|_|) = subBitPattern 64
-    let (|DevicePattern|_|) (str: string) = DU.fromString<DeviceType> str
+    let (|DevicePattern|_|) (str: string) = deviceTypeFromStringMemoized str
     let (|DataTypePattern|_|) (str:string)=
         try
             Some <|  str.FromDeviceMnemonic()

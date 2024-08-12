@@ -493,7 +493,6 @@ module XgiExportModule =
     and XgxProjectParams with
         member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
 
-        // todo: 최적화 필요 함수
         member x.GenerateXmlDocument() : XmlDocument =
             let xdoc, prjParam =
                 let prjParam = x
@@ -644,7 +643,6 @@ module XgiExportModule =
                             t.DataType.GetBitSize())
                     |> Array.ofSeq
 
-                // todo: 최적화 필요 함수
                 let globalStoragesXmlNode =
                     storagesToGlobalXml x globalStoragesSortedByAllocSize |> DualXmlNode.ofString
 

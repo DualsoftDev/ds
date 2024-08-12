@@ -59,8 +59,14 @@ module rec DsTaskDevType =
     
         member x.ToText() =
             match x.Min, x.TargetValue, x.Max with
-            | None, Some value, None ->
-                $"{x.DataType.ToStringValue(value)}"
+            | None, Some value, None  ->
+                if x.DataType <> DuBOOL then
+                    $"{x.DataType.ToStringValue(value)}"
+                elif not(Convert.ToBoolean(value))
+                then
+                    "False"
+                else
+                    ""
             | Some min, None, Some max when isInclusiveMin && isInclusiveMax ->
                 $"{min} <= x <= {max}"
             | Some min, None, Some max when isInclusiveMin && not isInclusiveMax ->
@@ -124,7 +130,7 @@ module rec DsTaskDevType =
         do
             match symbolAlias, valueParam with
             | Some s,  v ->
-                if s.DataType <> v.DataType
+                if s.DataType <> v.DataType && not(valueParam.IsDefaultValue)
                 then
                     failWithLog $"SymbolAlias DataType({s.DataType}) and ValueParam DataType({v.DataType}) do not match"
             |_-> () 
@@ -317,5 +323,9 @@ module rec DsTaskDevType =
             let sym = nameOpt |> Option.map (fun n -> SymbolAlias(n, typeOpt.Value))
             match valueOpt with
             | Some vp -> addr, TaskDevParam(sym, vp, timeOpt)
-            | None -> addr, TaskDevParam(sym, defaultValueParam(Some(true)), timeOpt)
+            | None -> 
+                if sym.IsNone then
+                    addr, TaskDevParam(sym, defaultValueParam(Some(true)), timeOpt)
+                else
+                    addr, TaskDevParam(sym, defaultValueParam(None), timeOpt)
             

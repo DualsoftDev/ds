@@ -9,16 +9,16 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module ModelLoaderModule =
     type ModelConfig = {
-        DsFilePath: string 
-        HwIP: string 
+        DsFilePath: string
+        HwIP: string
         HwDriver: string //LS-XGI, LS-XGK, Paix hw drive 이름
-        RuntimeMotionMode: RuntimeMotionMode 
+        RuntimeMotionMode: RuntimeMotionMode
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
     }
     type Model = {
         Config: ModelConfig
-        System : DsSystem 
+        System : DsSystem
         LoadingPaths : string list
     }
 
@@ -48,11 +48,11 @@ module ModelLoader =
 
     let SaveConfigWithPath (path: string) (sysRunPaths: string) =
         let cfg = createModelConfigWithPath sysRunPaths
-        SaveConfig path cfg 
+        SaveConfig path cfg
         path
 
     let exportLoadedSystem (s: LoadedSystem) =
-       
+
         let absFilePath =  PathManager.changeExtension (s.AbsoluteFilePath.ToFile())  "ds"
         let dsFile = absFilePath.ToFile()
         createDirectory dsFile
@@ -73,10 +73,10 @@ module ModelLoader =
 type ModelLoaderExt =
 
 
-    [<Extension>] 
-    static member ExportToDS (sys:DsSystem, dsFilePath:string) = 
+    [<Extension>]
+    static member ExportToDS (sys:DsSystem, dsFilePath:string) =
         //sys.CheckValidInterfaceNchageParsingAddress() //test ahn ppt로부터 가져오면 체크시 주소가 없다.
-        
+
         for s in sys.GetRecursiveLoadeds() do
             match s with
             | :? Device -> exportLoadedSystem s |> ignore
@@ -85,8 +85,8 @@ type ModelLoaderExt =
 
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))
 
-    [<Extension>] 
-    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq) = 
+    [<Extension>]
+    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq) =
         let targetPaths = (loadingPaths @ [activeFilePath])
         let zipPathDS  = targetPaths.ToDsZip()
 
@@ -94,8 +94,8 @@ type ModelLoaderExt =
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
                               .ToZipPpt()
 
-        let zipDir    = PathManager.getDirectoryName (zipPathDS|>DsFile)   
-        let zipFile   = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)   
+        let zipDir    = PathManager.getDirectoryName (zipPathDS|>DsFile)
+        let zipFile   = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)
 
         let jsFilePath = $"{zipDir}{TextDSJson}" |> getValidFile
 
@@ -103,7 +103,7 @@ type ModelLoaderExt =
         let baseTempFilePath = $"{zipDir}{zipFile}/base.ext"  //상대 경로 구하기 위한 임시경로
         let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
 
-        let config = SaveConfigWithPath jsFilePath activeRelaPath 
+        let config = SaveConfigWithPath jsFilePath activeRelaPath
 
         addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;config]@layoutImgFiles.ToList())
 
@@ -112,4 +112,3 @@ type ModelLoaderExt =
 
 
 
-   

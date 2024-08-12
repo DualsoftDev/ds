@@ -7,7 +7,7 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module ValidateMoudle =
-    
+
 
 
     let private validateChildrenVertexType (mei:ModelingEdgeInfo<Vertex>) =
@@ -23,7 +23,7 @@ module ValidateMoudle =
         graph.Edges
             .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
             .Iter(fun edge ->
-                    match getPure edge.Target with 
+                    match getPure edge.Target with
                     | :? Real    -> ()
                     | _ -> failwithlog $"Reset 연결은 Work 타입에만 연결가능합니다. \t[{edge.Source.Name} |> {edge.Target.Name}]"
                     //| _ -> failwithlog $"ResetEdge can only be used on Type Work \t[{edge.Source.Name} |> {edge.Target.Name}]"
@@ -33,7 +33,7 @@ module ValidateMoudle =
             graph.Edges
                 .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Start))
                 .Iter(fun edge ->
-                    match getPure edge.Target with 
+                    match getPure edge.Target with
                     | :? Real    -> ()
                     | _ -> failwithlog $"Action 시작 연결은 Work 내에서만 가능합니다. Work-Action 그룹작업이 필요합니다. [{edge.Source.Name} > {edge.Target.Name}]"
                     //| _ -> failwithlog $"The 'Action' start command must occur within the 'Work'. ((Work-Action Group work is required.))[{edge.Source.Name} > {edge.Target.Name}]"
@@ -64,7 +64,7 @@ module ValidateMoudle =
     let validateJobs(sys:DsSystem) =
         sys.ApiUsages.Iter(fun a->
             let parentJob = sys.Jobs.Where(fun j-> j.ApiDefs.Contains(a))
-            if parentJob.Count() > 1 then 
+            if parentJob.Count() > 1 then
                 let jobNames = StringExt.JoinWith(parentJob.Select(fun j->j.QualifiedName), ", ")
                 failwithf $"{a.QualifiedName} is 중복 assigned ({jobNames})"
         )
@@ -74,8 +74,7 @@ module ValidateMoudle =
         sys.GetVerticesCallOperator().Iter(fun callOp->
             if rootEdgeSrcs.Contains (callOp) then
                 ()
-            else 
+            else
                 failWithLog $"Flow에 존재하는 Action은 반드시 연결이 필요합니다. {callOp.QualifiedName}"
             )
 
-                

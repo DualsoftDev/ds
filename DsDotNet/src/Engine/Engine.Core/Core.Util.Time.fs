@@ -35,10 +35,10 @@ module TimeModule =
                 if maxTime.Value > -1 then Some maxTime.Value else None
 
         let getDummyAliasTarget name vertex =
-            let aliasTarget = 
+            let aliasTarget =
                 match getPure(vertex) with
-                | :? Call as c -> DuAliasTargetCall c 
-                | :? Real as r -> DuAliasTargetReal r 
+                | :? Call as c -> DuAliasTargetCall c
+                | :? Real as r -> DuAliasTargetReal r
                 | _ -> failWithLog "Invalid source vertex type"
 
             let alias = Alias.Create(name, aliasTarget, vertex.Parent, false)
@@ -62,7 +62,7 @@ module TimeModule =
         //flow Graph에서도 삭제해야함
         dummySrc.Parent.GetGraph().RemoveVertex (dummySrc :> Vertex) |> ignore
         dummyTgt.Parent.GetGraph().RemoveVertex (dummyTgt :> Vertex) |> ignore
-        time    
+        time
 
     [<Extension>]
     type TimeExt() =

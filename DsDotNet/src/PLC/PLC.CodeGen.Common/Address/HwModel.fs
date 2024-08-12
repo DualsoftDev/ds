@@ -1,13 +1,13 @@
 [<AutoOpen>]
-module PLCHwModel 
+module PLCHwModel
 open System.Runtime.CompilerServices
-    
+
     type TagType = Bit | I1 | I2 | I4 | I8 | F4
 
     type DataLengthType = Undefined | Bit | Byte | Word | DWord | LWord
     type CpuType = Xgk | Xgi | Xgr | XgbMk | XgbIEC | Unknown
     type DataType = Bit | Byte | Word | DWord | LWord | Continuous
-    
+
     type DeviceType =
         | P  | T
         | M  | C
@@ -18,7 +18,7 @@ open System.Runtime.CompilerServices
         | U  | W
         | N  | S
         | Z  | ZR //S Step제어용 디바이스 수집 불가
-      
+
     let toText = function
         | Xgk -> "XGK" | Xgi -> "XGI" | Xgr -> "XGR" | XgbMk -> "XGBMK" | XgbIEC -> "XGBIEC" | _ -> failwith "ERROR"
 
@@ -49,4 +49,3 @@ open System.Runtime.CompilerServices
         [<Extension>] static member ToMnemonic(x:DataType)  = toMnemonic x
         [<Extension>] static member GetByteLength(x:DataType)  = getByteLength x
         [<Extension>] static member ToDeviceText(x:DeviceType)  = toDeviceText x
-        

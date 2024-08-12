@@ -24,7 +24,7 @@ using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Core.TagKindList;
 using static Engine.Core.TagKindModule;
-using static Engine.Core.TagKindModule.TagDS;
+using static Engine.Core.TagKindModule.TagEvent;
 using static Engine.Import.Office.ImportViewModule;
 using static Engine.Import.Office.ViewModule;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -38,7 +38,7 @@ namespace Diagram.View.MSAGL
     public static class ViewUtil
     {
         public static List<UcView> UcViews { get; set; } = new();
-        public static Subject<TagDS> VertexChangeSubject = new();
+        public static Subject<TagEvent> VertexChangeSubject = new();
         public static Dictionary<Vertex, ViewVertex> DicNode = new();
 
         static IDisposable _Disposable;

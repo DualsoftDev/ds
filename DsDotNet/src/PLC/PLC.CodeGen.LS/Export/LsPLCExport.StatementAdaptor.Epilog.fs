@@ -29,7 +29,7 @@ module XgxTypeConvertorModule =
         member internal x.ToCommentedStatements (prjParam: XgxProjectParams, newLocalStorages: XgxStorage) : CommentedStatements =
             let (CommentedStatement(comment, statement)) = x
             let originalComment = statement.ToText()
-            tracefn $"Statement:: {originalComment}"
+            debugfn $"Statement:: {originalComment}"
             let augs = Augments(newLocalStorages, StatementContainer())
             let createPack (prjParam:XgxProjectParams) (augs:Augments) : DynamicDictionary =
                 let kvs:array<string*obj> =

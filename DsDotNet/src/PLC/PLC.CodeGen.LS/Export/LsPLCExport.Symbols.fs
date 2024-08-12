@@ -19,27 +19,30 @@ module internal XgiSymbolsModule =
         | DuStorage of IStorage
 
 
-    let storagesToXgxSymbol (storages: IStorage seq) : (IStorage * XgxSymbol) list =
+    let storagesToXgxSymbol (storages: IStorage seq) : (IStorage * XgxSymbol)[] =
         let timerOrCountersNames =
             storages
                 .Filter(fun s -> s :? TimerCounterBaseStruct)
                 .Select(fun struc -> struc.Name)
             |> HashSet
 
-        [ for s in storages do
-              match s with
-              | :? IXgxVar as xgi -> Some(s, XgxSymbol.DuXgiVar xgi)
-              | :? TimerStruct as ts -> Some(s, XgxSymbol.DuTimer ts)
-              | :? CounterBaseStruct as cs -> Some(s, XgxSymbol.DuCounter cs)
-              | _ ->
-                  let name = (s :> INamed).Name
+        tracefn($"Storages to xgx symbol : {storages.Count()}")
 
-                  if timerOrCountersNames.Contains(name.Split(".")[0]) then
-                      // skip timer/counter structure member : timer 나 counter 명 + "." + field name
-                      None
-                  else
-                      Some(s, XgxSymbol.DuStorage s) ]
-        |> List.choose id
+        [|
+            for s in storages do
+                match s with
+                | :? IXgxVar as xgi -> yield (s, XgxSymbol.DuXgiVar xgi)
+                | :? TimerStruct as ts -> yield (s, XgxSymbol.DuTimer ts)
+                | :? CounterBaseStruct as cs -> yield (s, XgxSymbol.DuCounter cs)
+                | _ ->
+                    let name = (s :> INamed).Name
+
+                    if timerOrCountersNames.Contains(name.Split(".")[0]) then
+                        // skip timer/counter structure member : timer 나 counter 명 + "." + field name
+                        ()
+                    else
+                        yield (s, XgxSymbol.DuStorage s)
+        |]
 
     let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) =
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.
@@ -84,8 +87,8 @@ module internal XgiSymbolsModule =
         | XGI ->
             match tryParseXGITag address with
             | Some tag ->
-                address, tag.Device.ToString()
-                , if tag.DataType = PLCHwModel.DataType.Bit then tag.BitOffset else tag.ByteOffset
+                let offset = if tag.DataType = PLCHwModel.DataType.Bit then tag.BitOffset else tag.ByteOffset
+                address, tag.Device.ToString(), offset
             | None ->
                 failwithlog $"tryParse{targetType} {name} {address} error"
 
@@ -111,10 +114,10 @@ module internal XgiSymbolsModule =
             let name = t.Name
             //전처리  XGI % 생략시 자동 붙히기
             match prjParam.TargetType with
-                | XGI -> if t.Address <> TextAddrEmpty && not(t.Address.StartsWith("%"))
-                         then
-                            t.Address <- $"%%{t.Address}"
-                | _ ->   ()
+            | XGI ->
+                if t.Address <> TextAddrEmpty && not(t.Address.StartsWith("%")) then
+                    t.Address <- $"%%{t.Address}"
+            | _ -> ()
 
             autoAllocatorAdress t prjParam
             let address, device, devPos = getXGXTagInfo prjParam.TargetType t.Address t.Name
@@ -122,7 +125,8 @@ module internal XgiSymbolsModule =
             let comment = ""
             let initValue = null // PLCTag 는 값을 초기화 할 수 없다.
 
-            {   defaultSymbolInfo with
+            {
+                defaultSymbolInfo with
                     Name = name
                     Comment = comment
                     Type = plcType
@@ -260,11 +264,11 @@ module internal XgiSymbolsModule =
         (prjParam: XgxProjectParams)
         (kindVar: int)
         (xgxSymbols: XgxSymbol seq)
-      : SymbolInfo list =
-        xgxSymbols |> choose (xgxSymbolToSymbolInfo prjParam kindVar) |> List.ofSeq
+      : SymbolInfo[] =
+        xgxSymbols |> choose (xgxSymbolToSymbolInfo prjParam kindVar) |> toArray
 
 
-    let private storagesToSymbolInfos (prjParam: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo list) =
+    let private storagesToSymbolInfos (prjParam: XgxProjectParams) (kindVar: int) : (IStorage seq -> SymbolInfo[]) =
         storagesToXgxSymbol >> map snd >> xgxSymbolsToSymbolInfos prjParam kindVar
 
     /// <LocalVariable .../> 문자열 반환

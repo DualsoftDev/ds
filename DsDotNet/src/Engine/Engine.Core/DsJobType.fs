@@ -28,8 +28,8 @@ module DsJobType =
             OutCount : int option
         }
         with
-            member x.AddressInCount  = match x.InCount  with | Some c -> c | None -> x.TaskDevCount
-            member x.AddressOutCount = match x.OutCount with | Some c -> c | None -> x.TaskDevCount
+            member x.AddressInCount  = x.InCount  |? x.TaskDevCount
+            member x.AddressOutCount = x.OutCount |? x.TaskDevCount
             member x.ToText() =
                 if x.TaskDevCount = 1 && x.AddressInCount = 1 && x.AddressOutCount = 1 then
                     ""
@@ -49,12 +49,9 @@ module DsJobType =
                 x.JobTaskDevInfo.ToText()
             |] |> filter (String.any) |> String.concat("; ")
 
-        member x.TaskDevCount =
-            x.JobTaskDevInfo.TaskDevCount
-        member x.TaskInCount =
-            x.JobTaskDevInfo.InCount
-        member x.TaskOutCount =
-            x.JobTaskDevInfo.OutCount
+        member x.TaskDevCount = x.JobTaskDevInfo.TaskDevCount
+        member x.TaskInCount  = x.JobTaskDevInfo.InCount
+        member x.TaskOutCount = x.JobTaskDevInfo.OutCount
 
     let getJobTypeAction (name: string) =
         let endContents = GetSquareBrackets(name, false)

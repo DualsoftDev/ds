@@ -188,7 +188,7 @@ module DBWriterModule =
 
         member x.EnqueLog (log: DsLog) : unit = x.EnqueLogs ([ log ])
 
-        member x.InsertValueLog(time: DateTime, tag: TagDS, tokenId:TokenIdType) =
+        member x.InsertValueLog(time: DateTime, tag: TagEvent, tokenId:TokenIdType) =
             let vlog = DBLog.ValueLog(time, tag, tokenId)
             if tag.IsNeedSaveDBLog() then
                 x.EnqueLog(vlog)
@@ -227,7 +227,7 @@ module DBWriterModule =
                 let theSystem = systems.First()
                 let rt, mt, st = int VertexTag.realToken, int VertexTag.mergeToken, int VertexTag.sourceToken
                 let now = DateTime.Now
-                TagDSSubject.Subscribe(fun tag ->
+                TagEventSubject.Subscribe(fun tag ->
                     let mutable tokenId = TokenIdType()
                     if tag.GetSystem() = theSystem && tag.IsVertexTokenTag() then
                         let target = tag.GetTarget()

@@ -479,7 +479,7 @@ module XgiExportModule =
                     for r in tails.Reverse() do
                         node.InsertAfter r |> ignore
             )
-            forceTrace ($"Total {ms} milliseconds")
+            forceTrace ($"Total {ms} ms elapsed while generating PLC xml {prjParam.ProjectName}/{pouName}")
             (*
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)
@@ -579,8 +579,7 @@ module XgiExportModule =
                     let kind = if i = 0 then 0 else 2 //0:스캔프로그램Task 2:user Task
                     let priority = kind
                     let device = if kind =0 then 0 else 10  //정주기 10msec 디바이스항목으로 저장
-                    if kind = 2 //user task 만 삽입 (스캔프로그램Task는 template에 항상 있음)
-                    then
+                    if kind = 2 then //user task 만 삽입 (스캔프로그램Task는 template에 항상 있음)
                         createXmlStringTask pou.TaskName kind priority index device
                         |> DualXmlNode.ofString
                         |> xnTasks.AdoptChild
@@ -693,6 +692,7 @@ module XgiExportModule =
                     | p::_ -> p |> fst
 
 
+                // [optimization] todo : 최적화 optimization : pous 별 (Active / Device) 병렬 처리.  Address alloc 루틴 lock 필요?
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
                     let mainScan =   if i = 0 then Some(mainScanName) else None
                     // POU 단위로 xml rung 생성

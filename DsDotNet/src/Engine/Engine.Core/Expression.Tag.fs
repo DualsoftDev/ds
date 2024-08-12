@@ -88,7 +88,7 @@ module TagModule =
         | _  -> failwithlog "ERROR"
 
     type Statement with
-        
+
         member x.GetTargetStorages() =
             match x with
             | DuAssign (_, _expr, target) -> [ target ]
@@ -103,18 +103,18 @@ module TagModule =
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
                 failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
-                
+
         member x.GetSourceStorages() =
             match x with
             | DuAssign (condi, expr, _target) ->
                 [
                     if condi.IsSome then
                         yield! condi.Value.CollectStorages()
-                    else 
+                    else
                         yield! expr.CollectStorages()
-                ]                        
+                ]
             | DuVarDecl (expr, _var) -> expr.CollectStorages()
-            | DuTimer timerStatement -> 
+            | DuTimer timerStatement ->
                 [ for s in timerStatement.Timer.InputEvaluateStatements do
                     yield! s.GetSourceStorages() ]
             | DuCounter counterStatement ->
@@ -132,10 +132,10 @@ module TagModule =
                     yield! condi.Value.CollectStorages()
                 ]
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
-            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) -> failwith "ERROR: Not yet implemented"    
-                
+            | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) -> failwith "ERROR: Not yet implemented"
 
-      
+
+
 
     let getTargetStorages (x:Statement) = x.GetTargetStorages() |> List.toSeq
     let getSourceStorages (x:Statement) = x.GetSourceStorages() |> List.toSeq
@@ -165,7 +165,6 @@ module TagModule =
                     | Some sts -> sts |> Seq.map snd
                     | None -> Seq.empty
                 tag, statementsWithTag)
-            |> Map.ofSeq
+            |> Tuple.toReadOnlyDictionary
 
         map
-        

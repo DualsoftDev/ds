@@ -18,7 +18,7 @@ module rec CoreCloneModule =
         member private x.Clone(newSys: DsSystem) =
             // 향후 ApiResetInfo 항목 추가시 깊은복사 구현
             ApiResetInfo.Create(newSys, x.Operand1, x.Operator, x.Operand2, x.AutoGenByFlow) |> ignore
-                
+
 
     type Flow with
         member private x.Clone(newSystem: DsSystem) =
@@ -40,9 +40,9 @@ module rec CoreCloneModule =
     type Alias with
         member private x.Clone(newFlow: Flow, newReal: Real) =
             // 향후 Alias 항목 추가시 깊은복사 구현
-            Alias.Create(x.Name, DuAliasTargetReal newReal, DuParentFlow newFlow, x.IsExFlowReal) 
+            Alias.Create(x.Name, DuAliasTargetReal newReal, DuParentFlow newFlow, x.IsExFlowReal)
 
-            
+
     type DsSystem with
         member x.Clone(newName:string) =
             if x.GetVertices().OfType<Call>().Filter(fun c -> c.IsJob).Any() then
@@ -56,17 +56,17 @@ module rec CoreCloneModule =
             for f in x.Flows do
                 let newFlow = f.Clone(news)
                 news.Flows.Add(newFlow) |> ignore
-                dicFlow.Add(f, newFlow) |> ignore  
+                dicFlow.Add(f, newFlow) |> ignore
 
             // Clone Reals
             for r in x.GetVertices().OfType<Real>() do
-                let newReal = r.Clone(dicFlow[r.Parent.GetFlow()]) 
-                dicVertex.Add(r, newReal)   
+                let newReal = r.Clone(dicFlow[r.Parent.GetFlow()])
+                dicVertex.Add(r, newReal)
 
             // Clone Aliases
             for a in x.GetVertices().OfType<Alias>() do
                 match a.TargetWrapper with
-                | DuAliasTargetReal r -> 
+                | DuAliasTargetReal r ->
                     let newReal = dicVertex[r] :?> Real
                     let newFlow = dicFlow[a.Parent.GetFlow()]
                     let newAlias = a.Clone(newFlow, newReal)

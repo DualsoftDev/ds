@@ -38,7 +38,7 @@ module CodeConvertUtil =
         [<Extension>]
         static member GetResetCausals(xs:Vertex seq) =
 
-                if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1 then 
+                if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1 then
                     let error = String.Join("\r\n", (xs.Select(fun f->f.DequotedQualifiedName)))
                     failwithlog $"리셋은 하나의 작업에서 가능합니다. \r\n(복수 작업 :\r\n {error})"
 

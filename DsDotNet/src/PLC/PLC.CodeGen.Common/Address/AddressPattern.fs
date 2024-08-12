@@ -151,74 +151,48 @@ module LSEAddressPattern =
 
 
     let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string)) =
-        let regexXGK1   =  @"^([PMKFTC])(\d{4})$"
-        let regexXGK1_1 =  @"^([PMKFTC])(\d+)$"
-        let regexXGK2   =  @"^([PMKF])(\d{4})([\da-fA-F])$"
-        let regexXGK2_1 =  @"^([PMKF])([\da-fA-F])$"
-        let regexXGK2_2 =  @"^([PMKF])(\d+)([\da-fA-F])$"
-        let regexXGK3   =  @"^([LNDRZR])(\d+)$"
-        let regexXGK4   =  @"^([LNDRZR])(\d+)\.([\da-fA-F])$"
-        let regexXGK5   =  @"^([U])(\d+)\.(\d+)$"
-        let regexXGK6   =  @"^([U])(\d+)\.(\d+)\.([\da-fA-F])$"
-        let regexXGK7   =  @"^([S])(\d+)\.(\d+)$"
-        let regexXGK8   =  @"^([Z])(\d+)\$"
-
         let tag = tag.ToUpper()
+
+        if tag.StartsWith("R") then
+            noop()
+
+        let getInfoFromHexaBitString(hexaBit:string) : DataType * int =
+            if hexaBit.IsNullOrEmpty() then
+                DataType.Word, 0
+            else
+                let hexaBit = if hexaBit.StartsWith(".") then hexaBit.Substring(1) else hexaBit
+                match (|HexPattern|_|) hexaBit with
+                | Some hexaBit -> DataType.Bit, hexaBit
+                | None -> DataType.Word, 0
+
         match tag with
-        //P1341, M2341
-        | RegexPattern regexXGK1 [ DevicePattern device; Int32Pattern word; ] ->
-            let totalBitOffset = word * 16
-            createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
+        // Bit or Word (HEX),
+        // PMKF: 4 or 5 digits
+        | RegexPattern @"^([PMKF])(\d{4})([\da-fA-F]?)$" [ DevicePattern device; Int32Pattern word; hexaBitString] ->
+            let dataType, bitOffset = getInfoFromHexaBitString hexaBitString
+            let totalBitOffset = word * 16 + bitOffset
+            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
 
-        //P12, M3
-        | RegexPattern regexXGK1_1 [ DevicePattern device; Int32Pattern word; ]  ->
-            let totalBitOffset = word * 16
-            createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
+        // Bit or Word (HEX)
+        | RegexPattern @"^([TCLNDRZR])(\d+)(\.[\da-fA-F]?)?$" [ DevicePattern device; Int32Pattern word; hexaBitString ] ->
+            let dataType, bitOffset = getInfoFromHexaBitString hexaBitString
+            let totalBitOffset = word * 16 + bitOffset
+            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
 
-        //P13412, M2341F
-        | RegexPattern regexXGK2 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ]  ->
+        // Bit or Word (HEX)
+        // U23.31  //채널 31max
+        | RegexPattern @"^([U])(\d+)\.(\d+)(\.[\da-fA-F])?$" [ DevicePattern device; Int32Pattern file; Int32Pattern sub; hexaBitString ] ->
+            let dataType, bitOffset = getInfoFromHexaBitString hexaBitString
+            let totalBitOffset = (file * 32 * 16) + (sub * 16) + bitOffset
+            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
+
+        | RegexPattern @"^([S])(\d+)\.(\d+)$" [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] ->
             let totalBitOffset = word * 16 + hexaBit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
 
-        //PF, M0
-        | RegexPattern regexXGK2_1 [ DevicePattern device; HexPattern hexaBit ]  ->
-            let totalBitOffset = hexaBit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-
-        //P0F, M00
-        | RegexPattern regexXGK2_2 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ]  ->
-            let totalBitOffset = word * 16 + hexaBit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-
-
-          //D13411, R13411
-        | RegexPattern regexXGK3 [ DevicePattern device; Int32Pattern word; ] ->
+        | RegexPattern @"^(ZR)(\d+)$" [ DevicePattern device; Int32Pattern word ] ->
             let totalBitOffset = word * 16
             createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
-
-          //D13411.9, R13411.F
-        | RegexPattern regexXGK4 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] ->
-            let totalBitOffset = word * 16 + hexaBit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-
-        //U23.31  //채널 31max
-        | RegexPattern regexXGK5 [ DevicePattern device; Int32Pattern file; DWordSubBitPattern sub ] ->
-            let totalBitOffset = (file * 32 * 16) + (sub * 16)
-            createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
-
-        //U23.31.F  //채널 31max
-        | RegexPattern regexXGK6 [ DevicePattern device; Int32Pattern file; DWordSubBitPattern sub; HexPattern hexaBit ] ->
-            let totalBitOffset = (file * 32 * 16) + (sub * 16) + hexaBit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-
-        //S23.31  //bit만 가능
-        | RegexPattern regexXGK7 [ DevicePattern device; Int32Pattern word; WordSubBitPattern bit] ->
-            let totalBitOffset = word * 16 + bit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-        //Z23  //word만 가능
-        | RegexPattern regexXGK8 [ DevicePattern device; Int32Pattern word]  ->
-            let totalBitOffset = word * 16
-            createTagInfo (tag, device, DataType.Word , totalBitOffset, modelId)
 
         | _ ->
             logWarn $"Failed to parse XGK tag : {tag}"

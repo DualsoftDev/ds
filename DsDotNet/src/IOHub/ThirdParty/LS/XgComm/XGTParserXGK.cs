@@ -11,12 +11,12 @@ namespace XGTComm
     /// </summary>
     public static class XGTParserXGK
     {
-        static string regexXGK1 = @"^([PMKFTCLNDRZR])(\d+)([\da-fA-F])$";
-        static string regexXGK2 = @"^([PMKFTCLNDRZR])(\d+)\.([\da-fA-F])$";
-        static string regexXGK3 = @"^([S])(\d+)\.(\d+)$";
-        static string regexXGK4 = @"^([U])(\d+)\.(\d+)$";
-        static string regexXGK5 = @"^([U])(\d+)\.(\d+)\\.([\da-fA-F])$";
-        static string regexXGK7 = @"^(ZR)(\d+)$";
+        static string regexXGK1 = @"^([PMKFTCLNDRZR])(\d+)([\da-fA-F])$";       // BIT
+        static string regexXGK2 = @"^([PMKFTCLNDRZR])(\d+)\.([\da-fA-F])$";     // BIT
+        static string regexXGK3 = @"^([S])(\d+)\.(\d+)$";                       // BIT
+        static string regexXGK4 = @"^([U])(\d+)\.(\d+)$";                       // WORD
+        static string regexXGK5 = @"^([U])(\d+)\.(\d+)\\.([\da-fA-F])$";        // BIT
+        static string regexXGK7 = @"^(ZR)(\d+)$";                               // WORD
 
         /// <summary>
         /// Parses the given XGK tag string and returns a tuple containing device, size, and bit offset information.
@@ -29,6 +29,7 @@ namespace XGTComm
         {
             tag = tag.ToUpper().Split('[').First(); //ZR123321[Z01]
 
+            //static string regexXGK1 = @"^([PMKFTCLNDRZR])(\d+)([\da-fA-F])$";       // BIT
             if (Regex.Match(tag, regexXGK1).Success)
             {
                 Match m = Regex.Match(tag, regexXGK1);
@@ -38,6 +39,7 @@ namespace XGTComm
                 int totalBitOffset = isBit ? word * 16 + hexaBit : (word * 10 + hexaBit) * 16;
                 return XGTParserUtil.CreateTagInfo(tag, device, isBit ? XGTDeviceSize.Bit : XGTDeviceSize.Word, totalBitOffset);
             }
+            //static string regexXGK2 = @"^([PMKFTCLNDRZR])(\d+)\.([\da-fA-F])$";     // BIT
             else if (Regex.Match(tag, regexXGK2).Success)
             {
                 Match m = Regex.Match(tag, regexXGK2);
@@ -47,6 +49,7 @@ namespace XGTComm
                 int totalBitOffset = isBit ? word * 16 + hexaBit : (word * 10 + hexaBit) * 16;
                 return XGTParserUtil.CreateTagInfo(tag, device, XGTDeviceSize.Bit, totalBitOffset);
             }
+            //static string regexXGK4 = @"^([U])(\d+)\.(\d+)$";                       // WORD
             else if (Regex.Match(tag, regexXGK4).Success)
             {
                 Match m = Regex.Match(tag, regexXGK4);
@@ -56,6 +59,7 @@ namespace XGTComm
                 int totalBitOffset = (file * 32 * 16) + (sub * 16);
                 return XGTParserUtil.CreateTagInfo(tag, device, XGTDeviceSize.Word, totalBitOffset);
             }
+            //static string regexXGK5 = @"^([U])(\d+)\.(\d+)\\.([\da-fA-F])$";        // BIT
             else if (Regex.Match(tag, regexXGK5).Success)
             {
                 Match m = Regex.Match(tag, regexXGK5);
@@ -66,6 +70,7 @@ namespace XGTComm
                 int totalBitOffset = (file * 32 * 16) + (sub * 16) + hexaBit;
                 return XGTParserUtil.CreateTagInfo(tag, device, XGTDeviceSize.Bit, totalBitOffset);
             }
+            //static string regexXGK3 = @"^([S])(\d+)\.(\d+)$";                       // BIT
             else if (Regex.Match(tag, regexXGK3).Success)
             {
                 Match m = Regex.Match(tag, regexXGK3);
@@ -75,6 +80,7 @@ namespace XGTComm
                 int totalBitOffset = word * 16 + bit;
                 return XGTParserUtil.CreateTagInfo(tag, device, XGTDeviceSize.Bit, totalBitOffset);
             }
+            //static string regexXGK7 = @"^(ZR)(\d+)$";                               // WORD
             else if (Regex.Match(tag, regexXGK7).Success)
             {
                 Match m = Regex.Match(tag, regexXGK7);

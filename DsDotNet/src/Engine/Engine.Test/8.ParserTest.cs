@@ -134,7 +134,7 @@ namespace Engine
         }
     }
     [jobs] = {
-        STN1.외부시작.""ADV(INTrue)"" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.외부시작.""ADV(INTrue)"" = { STN1_외부시작.ADV(IB0.2, -); }
         STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
         STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
@@ -498,7 +498,7 @@ namespace Engine
         }
     }
     [jobs] = {
-        STN1.외부시작.""ADV(INTrue)"" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.외부시작.""ADV(INTrue)"" = { STN1_외부시작.ADV(IB0.2, -); }
         STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
         STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
@@ -596,8 +596,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        F.mv1.up = { A.""+""(%I300:symbol1:UInt16:0us:12ms, %Q300:ABC); }
-        F.mv1.dn = { A.""-""(%I301:1ms, %Q301:Single:0f); }
+        F.mv1.up = { A.""+""(%I300:symbol1:UInt16:0us:12ms, %Q300:ABC:Boolean); }
+        F.mv1.dn = { A.""-""(%I301:1ms, %Q301:0f); }
     }
     [variables] = {}
     [operators] = {

@@ -135,7 +135,7 @@ module ConvertErrorCheck =
             for td in j.TaskDefs do
                 if td.ExistOutput then 
                     let outParam = td.GetOutParam(j)
-                    if j.ActionType = Push && outParam.Type = DuBOOL then
+                    if j.ActionType = Push && outParam.DataType = DuBOOL then
                             failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
-                    elif outParam.Type <> DuBOOL && outParam.DevValue.IsNull() then 
+                    elif outParam.DataType <> DuBOOL && outParam.ValueParam.IsNull() then 
                             failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다." 

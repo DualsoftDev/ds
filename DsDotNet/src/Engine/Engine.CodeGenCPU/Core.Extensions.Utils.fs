@@ -44,19 +44,16 @@ module ConvertCoreExtUtils =
         if devTag.IsNull() then
             sysOff.Expr  :> IExpression
         else
-            if x.IsNone then
-                devTag.ToExpression()
-            else
-                let x = x |> Option.get
-                if x.Type = DuBOOL then
-                    if x.DevValue.IsNull() then
-                        devTag.ToExpression()
-                    elif Convert.ToBoolean(x.Value) then
+            match x with
+            | None -> devTag.ToExpression()
+            | Some x ->
+                if x.DataType = DuBOOL then
+                    if Convert.ToBoolean(x.ReadBoolValue) then
                         devTag.ToExpression()
                     else
                         !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
                 else // bool 타입아닌 경우 비교문 생성
-                    createCustomFunctionExpression TextEQ [literal2expr x.DevValue.Value; devTag.ToExpression()]
+                    devTag.ToExpression() <@< x.ReadRangeValue
 
     [<AutoOpen>]
     [<Extension>]

@@ -600,13 +600,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let createDeviceVariable (system: DsSystem)  (taskDevParam:TaskDevParam option) (stgKey:string) address =
             match taskDevParam with
             | Some tdp ->
-                match tdp.DevName with
-                | Some name ->
-                    let dataType = tdp.Type
-                    let variable = createVariableByType name dataType
+                match tdp.SymbolAlias with
+                | Some sym ->
+                    let variable = createVariableByType sym.Name sym.DataType
 
-                    system.AddActionVariables (ActionVariable(name, address, stgKey, dataType)) |> ignore
-                    options.Storages.Add(name, variable) |> ignore
+                    system.AddActionVariables (ActionVariable(sym.Name, address, stgKey, sym.DataType)) |> ignore
+                    options.Storages.Add(sym.Name, variable) |> ignore
 
                 | None -> ()
             | None -> ()

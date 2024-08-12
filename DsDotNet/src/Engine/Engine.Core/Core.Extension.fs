@@ -182,7 +182,7 @@ module CoreExtensionModule =
         member x.GetLoadedSys   (loadSys:DsSystem) = x.LoadedSystems.TryFind(fun f-> f.ReferenceSystem = loadSys)
 
     let getType (xs:TaskDevParam seq) =
-        let types = xs.Choose(fun f -> f.DevType).Distinct().ToArray()
+        let types = xs.Map(fun f -> f.DataType).Distinct().ToArray()
         if types.Any() then
             if types.Length > 1 then
                 failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f -> f.ToText()))}"
@@ -251,23 +251,21 @@ module CoreExtensionModule =
         member x.IsMaunualAddressEmpty       = x.MaunualAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
-        member x.SetInSymbol(symName:string option) =
-            if symName.IsSome then
-                for param in x.DicTaskTaskDevParamIO.Values do
-                    match param.TaskDevParamIO.InParam with
-                    | Some inParam ->
-                        inParam.DevName <- symName
-                    | None ->
-                        param.TaskDevParamIO.InParam <- Some(TaskDevParam(symName, None, None, None))
+        member x.SetInSymbol(symName:SymbolAlias) =
+            for param in x.DicTaskTaskDevParamIO.Values do
+                match param.TaskDevParamIO.InParam with
+                | Some inParam ->
+                    inParam.SymbolAlias <- Some symName
+                | None ->
+                    param.TaskDevParamIO.InParam <- Some(TaskDevParam(Some symName, None, None))
 
-        member x.SetOutSymbol(symName:string option) =
-            if symName.IsSome then
-                for param in x.DicTaskTaskDevParamIO.Values do
-                    match param.TaskDevParamIO.OutParam with
-                    | Some outParam ->
-                        outParam.DevName <- symName
-                    | None ->
-                        param.TaskDevParamIO.OutParam <- Some(TaskDevParam(symName, None, None, None))
+        member x.SetOutSymbol(symName:SymbolAlias) =
+            for param in x.DicTaskTaskDevParamIO.Values do
+                match param.TaskDevParamIO.OutParam with
+                | Some outParam ->
+                    outParam.SymbolAlias <- Some symName
+                | None ->
+                    param.TaskDevParamIO.OutParam <- Some(TaskDevParam(Some symName, None, None))
 
 
         member x.InDataType  = getType (x.InParams)
@@ -282,7 +280,6 @@ module CoreExtensionModule =
         //    then
         //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.DequotedQualifiedName].Time}"))
         //        failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
-
         //    if times.any() then times.First() |> Some else None
 
         member x.GetNullAddressDevTask() =

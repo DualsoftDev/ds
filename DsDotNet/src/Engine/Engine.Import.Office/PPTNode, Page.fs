@@ -127,7 +127,7 @@ module PptNodeModule =
 
                     else
                         if isRoot then
-                            let inPara = createTaskDevParam  None (Some(DuBOOL)) None None |> Some
+                            let inPara = createTaskDevParam  None None None |> Some
                             taskDevParam <-TaskDevParamIO(inPara, None)
 
                         elif nodeType = AUTOPRE then

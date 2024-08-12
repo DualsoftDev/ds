@@ -11,17 +11,6 @@ module ExpressionExtension =
 
     let inline binaryOp f left right = f [left; right]
     let inline unaryOp  f exp = f [exp]
-    
-    /// logical AND for expression 
-    //let (<&&>) (left:IExpression) (right:IExpression) =
-    //    let l, r = left.ToText(), right.ToText()
-    //    match l, r with
-    //    | "$_ON", _  -> right :?> Expression<bool>
-    //    | _, "$_ON"  -> left  :?> Expression<bool>
-    //    | "$_OFF", _ -> left  :?> Expression<bool>
-    //    | _, "$_OFF" -> right :?> Expression<bool>
-    //    | _ ->
-    //        binaryOp fbLogicalAnd left right
 
 
     /// logical AND for expression 
@@ -38,7 +27,48 @@ module ExpressionExtension =
     let (<=!^) falling exp = DuAssign(None, exp, falling)
     /// logical equal for expression 
     let (==@) left right = binaryOp fbEqual left right
-  
+    /// logical not equal for expression
+    let (!=@) left right = binaryOp fbNotEqual left right
+    /// logical greater than for expression
+    let (>>@) left right = binaryOp fbGt left right
+    /// logical less than for expression
+    let (<<@) left right = binaryOp fbLt left right
+    /// logical greater than or equal for expression
+    let (>=@) left right = binaryOp fbGte left right
+    /// logical less than or equal for expression
+    let (<=@) left right = binaryOp fbLte left right
+    /// Check if target is within the range [min, max], or [min, max] is None eq  targetVariable, targetValue  
+    let (<@<) (targetVariable:IExpression) (vp:ValueParam) :IExpression=
+        let targetValue, (min: obj option), (max: obj option), minEQ, maxEQ
+            = vp.TargetValue, vp.Min, vp.Max, vp.IsInclusiveMin, vp.IsInclusiveMax
+
+        let minExpr = min |> Option.map literal2expr
+        let maxExpr = max |> Option.map literal2expr
+
+        let minCondition = 
+            match minExpr with
+            | Some expr -> 
+                let minOp = if minEQ then (<=@) else (<<@)
+                Some (minOp expr targetVariable)
+            | None -> None
+
+        let maxCondition =
+            match maxExpr with
+            | Some expr ->
+                let maxOp = if maxEQ then (<=@) else (<<@)
+                Some (maxOp targetVariable expr)
+            | None -> None
+
+        match minCondition, maxCondition with
+        | Some minCond, Some maxCond -> minCond <&&> maxCond
+        | Some minCond, None -> minCond
+        | None, Some maxCond -> maxCond
+        | None, None ->
+            match targetValue with
+            | Some value -> literal2expr value ==@ targetVariable
+            | None -> failwith "Both min and max are None, and targetValue is also None."
+
+
     /// set 조건, reset 조건을 op 에 의해서 coil 에 assign 하는 CommentedStatement 생성
     let inline coilOp op sets rsts (coil, comment) = 
         (op sets rsts coil) |> withExpressionComment comment

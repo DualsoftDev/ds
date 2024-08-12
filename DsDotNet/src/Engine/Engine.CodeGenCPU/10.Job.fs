@@ -22,14 +22,14 @@ type Job with
 
                     let outParam = td.GetOutParam(j)
                   
-                    if outParam.Type = DuBOOL then 
+                    if outParam.DataType = DuBOOL then 
                         if j.ActionType = Push then 
                             yield (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)
                         else 
                             yield (sets, _off) --| (td.OutTag:?> Tag<bool>, fn)
 
                     else
-                        let valExpr = outParam.DevValue.Value|>literal2expr
+                        let valExpr = outParam.WriteValue|>literal2expr
                         if j.ActionType = Push then
                             yield (sets, valExpr) --> (td.OutTag, fn)
                         else 

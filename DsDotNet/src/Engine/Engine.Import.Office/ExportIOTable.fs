@@ -45,15 +45,18 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
 
-    let toTextPptFunc (x:TaskDevParam option) =
-        if x.IsSome then
-            let x = x |> Option.get
-            match x.DevValue, x.DevTime with
-            | Some(v), Some(t) -> $"{v}:{t}ms"
-            | Some(v), None    -> $"{v}"
-            | None, Some(v)    -> $"{v}ms"
-            | None, None       -> $""
-        else ""
+
+
+    //test ahn btn lamp 처리
+    //let toTextPptFunc (x:TaskDevParam option) =
+    //    if x.IsSome then
+    //        let x = x |> Option.get
+    //        match x.ValueParam.Value.TargetValue, x.DevTime with
+    //        | Some(v), Some(t) -> $"{v}:{t}ms"
+    //        | Some(v), None    -> $"{v}"
+    //        | None, Some(v)    -> $"{v}ms"
+    //        | None, None       -> $""
+    //    else ""
 
     let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
 
@@ -63,22 +66,22 @@ module ExportIOTable =
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    let inSym =  toTextPptFunc btn.TaskDevParamIO.InParam
-                    let outSym =  toTextPptFunc btn.TaskDevParamIO.OutParam
+                    //let inSym =  toTextPptFunc btn.TaskDevParamIO.InParam
+                    //let outSym =  toTextPptFunc btn.TaskDevParamIO.OutParam
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
                     let dType = getPptHwDevDataTypeText btn
 
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,inSym, outSym)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,"", "")
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    let inSym =  toTextPptFunc lamp.TaskDevParamIO.InParam
-                    let outSym =  toTextPptFunc lamp.TaskDevParamIO.OutParam
+                    //let inSym =  toTextPptFunc lamp.TaskDevParamIO.InParam
+                    //let outSym =  toTextPptFunc lamp.TaskDevParamIO.OutParam
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
                     let dType = getPptHwDevDataTypeText lamp
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,inSym, outSym)
+                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,"", "")
                     |> ignore
 
 
@@ -109,8 +112,8 @@ module ExportIOTable =
         head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-        let inSym  =  dev.GetInParam(job).Name
-        let outSym =  dev.GetOutParam(job).Name
+        let inSym  =  dev.GetInParam(job).SymbolName
+        let outSym =  dev.GetOutParam(job).SymbolName
         let inSkip, outSkip = dev.GetSkipInfo(job)
 
         let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.GetApiItem(job).PureName}"
@@ -210,8 +213,8 @@ module ExportIOTable =
                     getPptHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.Name else ""
-                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.Name else ""
+                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.SymbolName else ""
+                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.SymbolName else ""
                 ]
             )
 

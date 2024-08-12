@@ -260,7 +260,7 @@ module DsAddressModule =
             elif addr = TextSkip then TextSkip 
                 
             else
-                if driver = LS_XGK_IO
+                if cpu = XGK || (cpu = WINDOWS && driver = LS_XGK_IO)
                 then
                     match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
                     | Some (t) -> t |> getXgKTextByTag

@@ -365,7 +365,7 @@ module ModelAnswers =
         "4 SelfReset 연결 Unit".RBT.투입 = { "4 SelfReset 연결 Unit_RBT".투입(_, _); }
         "5 Group 연결 Unit".RBT.투입 = { "5 Group 연결 Unit_RBT".투입(_, _); }
         "3 Interlock 연결 Unit".RBT.투입 = { "3 Interlock 연결 Unit_RBT".투입(_, _); }
-        "6 심볼 정의".Device1.ADV = { "6 심볼 정의_Device1".ADV(P00000:Dev1ADV_I, P00040:Dev1ADV_O); }
+        "6 심볼 정의".Device1.ADV = { "6 심볼 정의_Device1".ADV(P00000:Dev1ADV_I:Boolean, P00040:Dev1ADV_O:Boolean); }
         "1 기본 연결 Unit".드릴장치.드릴링B위치 = { "1 기본 연결 Unit_드릴장치".드릴링B위치(_, _); }
         "2 StartReset 연결 Unit".드릴장치.드릴링B위치 = { "2 StartReset 연결 Unit_드릴장치".드릴링B위치(_, _); }
         "4 SelfReset 연결 Unit".드릴장치.드릴링B위치 = { "4 SelfReset 연결 Unit_드릴장치".드릴링B위치(_, _); }
@@ -793,7 +793,7 @@ module ModelAnswers =
         }
     }
     [jobs] = {
-        STN1.외부시작."ADV(INTrue)" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.외부시작."ADV(INTrue)" = { STN1_외부시작.ADV(IB0.2, -); }
         STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
         STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }
@@ -962,7 +962,7 @@ module ModelComponentAnswers =
         }
     }
     [jobs] = {
-        STN1.외부시작."ADV(INTrue)" = { STN1_외부시작.ADV(IB0.2:Boolean:True, -); }
+        STN1.외부시작."ADV(INTrue)" = { STN1_외부시작.ADV(IB0.2, -); }
         STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
         STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
     }

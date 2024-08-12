@@ -32,7 +32,7 @@ type TaskDevManager with
                 let sets = 
                     let inParam = apiParam.TaskDevParamIO.InParam
 
-                    if inParam.IsSome && inParam.Value.Type <> DuBOOL then 
+                    if inParam.IsSome && inParam.Value.DataType <> DuBOOL then 
                         apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
                     else 
                         apiParam.ApiItem.ApiItemEnd.Expr 

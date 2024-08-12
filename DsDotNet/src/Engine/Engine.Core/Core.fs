@@ -497,8 +497,8 @@ module CoreModule =
         //SettingFlows 없으면 전역 시스템 설정
         member val IsGlobalSystemHw = flows.IsEmpty()
         member val TaskDevParamIO = taskDevParamIO with get, set
-        member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.Type | None -> DuBOOL
-        member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.Type | None -> DuBOOL
+        member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.DataType | None -> DuBOOL
+        member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.DataType | None -> DuBOOL
 
         member val InAddress = addr.In with get, set
         member val OutAddress = addr.Out with get, set

@@ -551,17 +551,6 @@ module ImportU =
                             dicJob[jobFqdn.Combine()]
                         else
                             failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
-                    //let condJob =
-                    //    match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with
-                    //    | Some existingJob -> existingJob
-                    //    | None ->
-                            //match mySys.Jobs.TryFind(fun f -> f.QualifiedName = jobFqdn.CombineQuoteOnDemand()) with //기존에서 masterJob Task 추출용
-                            //| Some masterJob ->
-                            //        let job = Job(jobFqdn, mySys, masterJob.TaskDefs)
-                            //        //job.UpdateTaskDevPara(TaskDevParas)
-                            //        mySys.Jobs.Add(job); job
-
-                            //| None ->
 
                     match doc.DicVertex.[node.Key].GetPure() |> box with
                     | :? ISafetyAutoPreRequisiteHolder as holder ->

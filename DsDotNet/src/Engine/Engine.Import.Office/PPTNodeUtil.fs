@@ -14,16 +14,21 @@ module PptNodeUtilModule =
         let trimSpaceNewLine (text: string) = text |> trimSpace |> trimNewLine
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
-
+        //api 이름 구분용 totext
         let getPostParam(param:TaskDevParam option) (prefix:string)=
             if param.IsNone then ""
             else
                 let param = param |> Option.get
-                match param.DevValue, param.DevTime with
-                | Some v, None -> $"{prefix}{v}"
-                | Some v, Some t -> $"{prefix}{v}_{t}ms"
-                | None, Some t -> $"{prefix}{t}ms"
-                | None, None -> $""
+                match param.ValueParam with
+                |Some vp ->
+                     match param.DevTime with
+                     | Some t -> $"{prefix}{vp.ToText()}{t}ms"
+                     | None -> $"{prefix}{vp.ToText()}"
+                    
+                |None ->
+                     match param.DevTime with
+                     | Some t -> $"{prefix}{t}ms"
+                     | None -> $""
 
         let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
             let newJob =
@@ -63,12 +68,12 @@ module PptNodeUtilModule =
                         if x = TextSkip then
                             "" |> getTaskDevParam |> snd
                         else
-                            match getTextValueNType x with
-                            | Some (v, t) ->
+                            match createValueParam x with
+                            | Some vp ->
                                 //if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
                                 //    $":{v}s" |> getTaskDevParam |> snd
                                 //else
-                                    $":{x}" |> getTaskDevParam |> snd
+                                    $":{vp.ToText()}" |> getTaskDevParam |> snd
                             | None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine

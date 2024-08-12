@@ -45,5 +45,23 @@ type Job with
         |]
 
 
-   
+
+    member j.J2_InputDetected() =
+        let _off = j.System._off.Expr
+        let jm = getJM(j)
+        let sets =  match j.ActionInExpr with
+                    | Some inExprs -> inExprs
+                    | None -> _off
+
+        (sets, _off) --| (jm.InDetected, getFuncName())
+
+
+    member j.J3_OutputDetected() =
+        let _off = j.System._off.Expr
+        let jm = getJM(j)
+        let sets =  match j.ActionOutExpr with
+                    | Some outExprs -> outExprs
+                    | None -> _off
+         
+        (sets, _off) --| (jm.OutDetected, getFuncName())
 

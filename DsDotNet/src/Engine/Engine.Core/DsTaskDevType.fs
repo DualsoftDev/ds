@@ -30,6 +30,8 @@ module rec DsTaskDevType =
                 |> Seq.map (fun x -> x.GetType()) 
                 |> Seq.distinct  // Get distinct types
 
+
+
             if Seq.length types > 1 then
                 raise (System.ArgumentException("All values (valTarget, valMin, valMax) must be of the same type."))
             elif Seq.length types = 1 then

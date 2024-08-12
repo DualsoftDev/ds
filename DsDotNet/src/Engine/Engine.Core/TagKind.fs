@@ -232,3 +232,10 @@ module TagKindList =
     | PlcSysVariable               = 16002
     | PlcUserVariable              = 16003
     
+    
+    /// 17000 ~ 17999
+    [<Flags>]
+    type JobTag    =
+    | inDetected                   = 17000
+    | outDetected                  = 17001
+    

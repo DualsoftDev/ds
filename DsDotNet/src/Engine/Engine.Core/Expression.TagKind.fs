@@ -18,6 +18,7 @@ module TagKindModule =
         | EventTaskDev  of Tag: IStorage * Target: TaskDev      * TagKind: TaskDevTag
         | EventHwSys    of Tag: IStorage * Target: HwSystemDef  * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
+        | EventJob      of Tag: IStorage * Target: Job          * TagKind: JobTag
         with 
             member x.TagKind =
                 match x with
@@ -28,6 +29,7 @@ module TagKindModule =
                 | EventTaskDev  (_, _, kind) -> kind |> int
                 | EventHwSys    (_, _, kind) -> kind |> int
                 | EventVariable (_, _, kind) -> kind |> int
+                | EventJob      (_, _, kind) -> kind |> int
 
     let TagDSSubject = new Subject<TagDS>()
     type TagKind = int
@@ -50,6 +52,7 @@ module TagKindModule =
                 @ EnumEx.Extract<TaskDevTag>(ft)
                 @ EnumEx.Extract<HwSysTag>(ft)
                 @ EnumEx.Extract<VariableTag>(ft)
+                @ EnumEx.Extract<JobTag>(ft)
 
     let allTagKindWithTypes = getTagKindFullSet true
     let allTagKinds = getTagKindFullSet false |> dict
@@ -69,6 +72,7 @@ type TagKindExt =
     [<Extension>] static member GetTaskDevTagKind   (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>(x.TagKind)
     [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.tryGetEnumValue<HwSysTag>(x.TagKind)
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.tryGetEnumValue<VariableTag>(x.TagKind)
+    [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.tryGetEnumValue<JobTag>(x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
 
     [<Extension>]
@@ -87,6 +91,7 @@ type TagKindExt =
             | :? ApiItem as a      -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
             | :? TaskDev  as d     -> Some( EventTaskDev (x, d, x.GetTaskDevTagKind().Value))
             | :? HwSystemDef as h  -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
+            | :? Job as j          -> Some( EventJob     (x, j, x.GetJobTagKind().Value))
             | _ -> None
         | None -> None
    
@@ -100,6 +105,7 @@ type TagKindExt =
         | EventTaskDev   (i, _, _) -> i
         | EventHwSys     (i, _, _) -> i
         | EventVariable  (i, _, _) -> i
+        | EventJob       (i, _, _) -> i
 
 
 
@@ -114,6 +120,7 @@ type TagKindExt =
         | EventTaskDev   ( _, target, _) -> target |> box
         | EventHwSys     ( _, target, _) -> target |> box
         | EventVariable  ( _, target, _) -> target |> box
+        | EventJob       ( _, target, _) -> target |> box
 
     [<Extension>]
     static member GetTagContents(x:TagDS) =
@@ -125,6 +132,7 @@ type TagKindExt =
         | EventTaskDev   (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
         | EventHwSys     (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
         | EventVariable  (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.Name, kind|>int
+        | EventJob       (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.DequotedQualifiedName, kind|>int
         
      
     [<Extension>]
@@ -158,6 +166,7 @@ type TagKindExt =
         | EventTaskDev   (_, obj, _) -> obj.ParnetSystem
         | EventHwSys     (_, obj, _) -> obj.System
         | EventVariable  (_, obj, _) -> obj
+        | EventJob       (_, obj, _) -> obj.System
         
     [<Extension>]
     static member IsStatusTag(x:TagDS) =
@@ -296,3 +305,4 @@ type TagKindExt =
                     )
             | EventHwSys (_, _, _) -> false
             | EventVariable (_, _, _) -> true
+            | EventJob (_, _, _) -> false

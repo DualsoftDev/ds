@@ -8,16 +8,16 @@ open Dual.Common.Core.FS
 
 type VertexTagManager with
     member v.C1_CallMemo() =
-        let v = v :?> CallVertexTagManager
+        let v = v :?> CoinVertexTagManager
         let call = v.Vertex.GetPureCall()
        
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
 
         let sets =
             (
-                call.StartPointExpr
-                <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
+                     (mop <&&> call.StartPointExpr)
                 <||> (mop <&&> v.SF.Expr)
+                <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
             )
             <&&> call.SafetyExpr
 

@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 open Engine.Parser.FS
 
 
-type CallVertexTagManager with
+type CoinVertexTagManager with
 
   
     member v.C1_DoOperator() =

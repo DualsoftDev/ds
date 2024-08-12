@@ -111,7 +111,7 @@ module ConvertCpuDsSystem =
 
             for call in calls do
 
-                let cv =  call.TagManager :?> CallVertexTagManager
+                let cv =  call.TagManager :?> CoinVertexTagManager
                 let target = getTarget(x)
                 cv.ErrShort.Address             <- getMemory  cv.ErrShort target 
                 cv.ErrOpen.Address              <- getMemory  cv.ErrOpen  target 
@@ -202,7 +202,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationCallManualMemory()  = 
             let devCalls = x.GetDevicesForHMI() 
             for (dev, call) in devCalls do
-                let cv =  call.TagManager :?> CallVertexTagManager
+                let cv =  call.TagManager :?> CoinVertexTagManager
                 if call.TargetJob.JobTaskDevInfo.TaskDevCount = 1
                     ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
                 then

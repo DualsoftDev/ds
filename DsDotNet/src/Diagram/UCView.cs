@@ -139,8 +139,6 @@ public partial class UcView : UserControl
         else
             nNode.LabelText = org;
 
-        nNode.Label.FontColor = Color.White;
-
         if (viewNode.ViewType == ViewType.VREAL)
         {
             nNode.Label.FontSize = nnode_label_fontsize;
@@ -149,6 +147,10 @@ public partial class UcView : UserControl
         {
             nNode.Label.FontSize = nnode_label_fontsize_call;
         }
+    }
+    private void UpdateLabelColor(Node nNode, Color color)
+    {
+        nNode.Label.FontColor = color;
     }
 
     private void DrawMEdge(Subgraph subgraph, ModelingEdgeInfo<ViewNode> edge)
@@ -527,20 +529,19 @@ public partial class UcView : UserControl
     }
 
 
-    public void UpdateInValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    public void UpdateInValue(ViewNode viewNode, bool isOn, bool vRefresh)
     {
-        Node node = findNode(viewNode);  //시뮬레이션 임시 막음
+        Node node = findNode(viewNode); 
         if (node == null) return;
-        bool dataExist = Convert.ToDouble(item2) != 0;
-        UpdateFillColor(dataExist, node, Color.DarkBlue);
+        UpdateFillColor(isOn, node, Color.DarkBlue);
         if (vRefresh) RefreshGraph();
     }
-    public void UpdateOutValue(ViewNode viewNode, object item2, bool vRefresh = true)
+    public void UpdateOutValue(ViewNode viewNode, bool isOn, bool vRefresh)
     {
-        Node node = findNode(viewNode); //시뮬레이션 임시 막음
+        Node node = findNode(viewNode);
         if (node == null) return;
-        bool dataExist = Convert.ToDouble(item2) != 0;
-        UpdateLineWidth(dataExist, node);
+        Color color = isOn ? Color.DarkSalmon : Color.White;
+        UpdateLabelColor(node, color);
         if (vRefresh) RefreshGraph();
     }
 

@@ -78,12 +78,13 @@ module CpuLoader =
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f))
             sys.ApiItems.Iter(fun a->a.TagManager <- ApiItemManager(a))
             sys.TaskDevs.Iter(fun td->td.TagManager <- TaskDevManager(td, sys))
+            sys.Jobs.Iter(fun job->job.TagManager <- JobManager(job))
             sys.GetVertices().Iter(fun v->
                 match v with
                 | :? Real
                     ->  v.TagManager <- RealVertexTagManager(v)
                 | (:? Call | :? Alias)
-                    -> v.TagManager <-  CallVertexTagManager(v)
+                    -> v.TagManager <-  CoinVertexTagManager(v)
                 | _ -> failwithlog (getFuncName()))
 
 

@@ -31,6 +31,7 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
 using static Engine.Info.DBWriterModule;
+using static Engine.CodeGenCPU.JobManagerModule;
 
 namespace Diagram.View.MSAGL
 {
@@ -42,6 +43,7 @@ namespace Diagram.View.MSAGL
 
         static IDisposable _Disposable;
         static Dictionary<IStorage, List<ViewVertex>> DicTaskDevTag = new();
+        static Dictionary<IStorage, List<ViewVertex>> DicJobTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
         static private DsSystem _sys = null;
 
@@ -77,6 +79,9 @@ namespace Diagram.View.MSAGL
                         : new List<TaskDev>();
                     var viewVertex = CreateViewVertex(fv, v, dicViewNodes[v], tasks);
                     DicNode[v] = viewVertex;
+
+                    if (v.GetPure() is Call call && call.IsJob)
+                        UpdateDicJobTag(call.TargetJob, viewVertex);
 
                     viewVertex.TaskDevs.Cast<TaskDev>().Iter(t =>
                     {
@@ -148,21 +153,15 @@ namespace Diagram.View.MSAGL
                 });
             }
 
-            //    td.ApiParams.Iter(apiParam =>
-            //{
-            //    var planEndTag = (td.TagManager as TaskDevManager).PlanEnd(apiParam);
-            //    var planStartTag = (td.TagManager as TaskDevManager).PlanStart(apiParam);
-            //    var planOutputTag = (td.TagManager as TaskDevManager).PlanOutput(apiParam);
-
-            //    if (!DicTaskDevTag.ContainsKey(planEndTag)) DicTaskDevTag.Add(planEndTag, new List<ViewVertex>());
-            //    if (!DicTaskDevTag.ContainsKey(planStartTag)) DicTaskDevTag.Add(planStartTag, new List<ViewVertex>());
-            //    if (!DicTaskDevTag.ContainsKey(planOutputTag)) DicTaskDevTag.Add(planOutputTag, new List<ViewVertex>());
-            //    //TaskDev는 여러군대 사용 하므로 처음에 한번만 추가
-            //    if (DicTaskDevTag[planEndTag].Count == 0) DicTaskDevTag[planEndTag].Add(viewVertex);
-            //    if (DicTaskDevTag[planStartTag].Count == 0) DicTaskDevTag[planStartTag].Add(viewVertex);
-            //    if (DicTaskDevTag[planOutputTag].Count == 0) DicTaskDevTag[planOutputTag].Add(viewVertex);
-            //});
-            //}
+            void UpdateDicJobTag(Job job, ViewVertex viewVertex)
+            {
+                var dic = DicJobTag;
+                var jm = job.TagManager as JobManager;
+                var inDetect = jm.InDetected;
+                var outDetect = jm.OutDetected;
+                if (!dic.ContainsKey(inDetect))   dic.Add(inDetect, new List<ViewVertex>() { viewVertex }); else dic[inDetect].Add(viewVertex);
+                if (!dic.ContainsKey(outDetect)) dic.Add(outDetect, new List<ViewVertex>() { viewVertex }); else dic[outDetect].Add(viewVertex);
+            }
 
             void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
             {
@@ -186,6 +185,10 @@ namespace Diagram.View.MSAGL
                     else if (rx.IsEventTaskDev)
                     {
                         HandleTaskDevEvent(rx as EventTaskDev);
+                    }
+                    else if (rx.IsEventJob)
+                    {
+                        HandleJobEvent(rx as EventJob);
                     }
                 });
             }
@@ -250,7 +253,6 @@ namespace Diagram.View.MSAGL
 
         private static void HandleTaskDevEvent(EventTaskDev td)
         {
-            //if (!DicMemoryTag.ContainsKey(td.Tag)) return;
             var viewNodes = DicTaskDevTag[td.Tag];
 
             viewNodes.Iter(n =>
@@ -264,22 +266,19 @@ namespace Diagram.View.MSAGL
                     {
                         case (int)TaskDevTag.actionIn:
                             {
-                                var on = Convert.ToUInt64(td.Tag.BoxedValue) != 0;
-                                n.LampInput = on;
-                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-                                ucView?.UpdateInValue(node, on);
+                                //io table 만들기
                                 break;
                             }
                         case (int)TaskDevTag.actionOut:
                             {
-                                var on = Convert.ToUInt64(td.Tag.BoxedValue) != 0;
-                                n.LampOutput = on;
-                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-                                ucView?.UpdateOutValue(node, on);
+                                //io table 만들기
+
                                 break;
                             }
                         case (int)TaskDevTag.planEnd:
                             {
+                                if (!RuntimeDS.Package.IsPackageSIM()) return;
+
                                 bool on = false;
 
                                 bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)
@@ -307,6 +306,39 @@ namespace Diagram.View.MSAGL
                                 break;
                             }
 
+                    }
+                });
+            });
+        }
+        private static void HandleJobEvent(EventJob jobEv)
+        {
+            var viewNodes = DicJobTag[jobEv.Tag];
+
+            viewNodes.Iter(n =>
+            {
+                n.DisplayNodes.Iter(node =>
+                {
+                    if (!IsThisSystem(node)) return;
+
+
+                    switch (jobEv.Tag.TagKind)
+                    {
+                        case (int)JobTag.inDetected:
+                            {
+                                var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
+                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+                                n.LampInput = on;
+                                ucView?.UpdateInValue(node, on, true);
+                                break;
+                            }
+                        case (int)JobTag.outDetected:
+                            {
+                                var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
+                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+                                n.LampOutput = on;
+                                ucView?.UpdateOutValue(node, on, true);
+                                break;
+                            }
                     }
                 });
             });

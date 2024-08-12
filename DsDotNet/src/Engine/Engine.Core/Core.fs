@@ -485,7 +485,7 @@ module CoreModule =
 
         member x.System = system
         member x.TaskDefs = tasks
-        member x.Name = failWithLog $"{names.Combine()} Name using 'QualifiedName'"
+        member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
 
 
     [<AbstractClass>]

@@ -30,12 +30,7 @@ type TaskDevManager with
                 let apiParam = kv.Value
 
                 let sets = 
-                    let inParam = apiParam.TaskDevParamIO.InParam
-
-                    if inParam.IsSome && inParam.Value.DataType <> DuBOOL then 
-                        apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
-                    else 
-                        apiParam.ApiItem.ApiItemEnd.Expr 
+                    apiParam.ApiItem.ApiItemEnd.Expr <&&> d.PlanStart(jobFqdn).Expr
 
                 yield (sets, activeSys._off.Expr) --| (d.PlanEnd(jobFqdn), fn)
         |]

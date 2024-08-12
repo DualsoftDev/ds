@@ -52,7 +52,7 @@ module ConvertHMI =
 
     type Call with
         member private x.GetHMI()   =
-            let tm = x.TagManager :?> CallVertexTagManager
+            let tm = x.TagManager :?> CoinVertexTagManager
             {
                 Name = x.Name
                 TimeOnShortageErrorLamp  = getLamp  tm (i VertexTag.txErrOnTimeShortage)

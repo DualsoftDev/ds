@@ -11,7 +11,7 @@ module ConvertCpuVertex =
 
     type Vertex with
         member r.V = r.TagManager :?> VertexTagManager
-        member r.VC = r.TagManager :?> CallVertexTagManager
+        member r.VC = r.TagManager :?> CoinVertexTagManager
         member r.VR = r.TagManager :?> RealVertexTagManager
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
@@ -61,18 +61,13 @@ module ConvertCpuVertex =
 
         member c.EndPlan =  
             if c.IsCommand then
-                (c.TagManager :?> CallVertexTagManager).CallCommandEnd.Expr
+                (c.TagManager :?> CoinVertexTagManager).CallCommandEnd.Expr
             elif c.IsOperator then
-                (c.TagManager :?> CallVertexTagManager).CallOperatorValue.Expr
+                (c.TagManager :?> CoinVertexTagManager).CallOperatorValue.Expr
             else 
                 c.TargetJob.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
-        member c.EndAction = 
-            if c.IsJob then
-                c.TargetJob.ActionInExpr 
-            else
-                None   
-                        
+        member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None           
         member c.End = c.EndAction.DefaultValue(c.EndPlan)
         
         member c.EndWithTimer = 
@@ -157,7 +152,7 @@ module ConvertCpuVertex =
             | :? Real as r ->
                 let rv = r.TagManager :?>  RealVertexTagManager
                 let initOnCalls  = rv.OriginInfo.CallInitials
-                                     .Where(fun (_c, ty) -> ty = InitialType.On && not(c.IsAnalog))
+                                     .Where(fun (_c, ty) -> ty = InitialType.On)// && not(c.IsAnalog))
                                      .Select(fun (c, _)->c)
                
                 if initOnCalls.Contains(c)
@@ -208,4 +203,12 @@ type RealExt =
 type CallExt =
     [<Extension>]
     static member GetSourceToken(c:Call):uint32 = c.SourceToken  
+    //[<Extension>]
+    //static member GetInputDetect(c:Call):bool = 
+    //        if c.IsJob then getJM(c.TargetJob).InDetected.Value
+    //        else false  
+    //[<Extension>]
+    //static member GetOutputDetect(c:Call):bool = 
+    //        if c.IsJob then getJM(c.TargetJob).OutDetected.Value
+    //        else false
 

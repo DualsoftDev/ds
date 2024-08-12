@@ -72,18 +72,18 @@ module ConvertCPU =
                 yield vm.F3_RealEndInFlow()    
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
-                let vc = v.TagManager :?> CallVertexTagManager
+                let vc = v.TagManager :?> CoinVertexTagManager
                 yield vc.F4_CallEndInFlow()
                 yield! vc.F5_SourceTokenNumGeneration()
 
             if IsSpec (v, CallInReal , AliasFalse) then
-                let vc = v.TagManager :?> CallVertexTagManager
+                let vc = v.TagManager :?> CoinVertexTagManager
                 yield! vc.E2_CallErrorTXMonitor() 
                 yield! vc.E3_CallErrorRXMonitor() 
                 yield vc.E5_CallErrorTotalMonitor() 
                 
             if IsSpec (v, CallInReal, AliasNotCare) then
-                let vc = v.TagManager :?> CallVertexTagManager
+                let vc = v.TagManager :?> CoinVertexTagManager
                 yield vc.C1_CallMemo() 
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
@@ -207,8 +207,13 @@ module ConvertCPU =
             
             for _, call in callDevices do
                 yield! call.TargetJob.J1_JobActionOuts(call)
-        |]
 
+
+            for j in s.Jobs do
+                yield j.J2_InputDetected()
+                yield j.J3_OutputDetected()
+        |]
+        
     let private applyCallOnDelay(s:DsSystem) =
         [|
            yield!  s.T1_DelayCall()  

@@ -111,4 +111,4 @@ type VertexTagManager with
 
     member v.F7_HomeCommand() =
         let real = v.Vertex :?> Real
-        (real.Flow.HomeExpr , v._off.Expr) --| (real.VR.OA, getFuncName())
+        (real.Flow.HomeExpr <&&> real.Flow.mop.Expr , v._off.Expr) --| (real.VR.OA, getFuncName())

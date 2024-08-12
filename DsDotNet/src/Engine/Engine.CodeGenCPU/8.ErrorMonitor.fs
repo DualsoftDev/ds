@@ -11,7 +11,7 @@ type VertexTagManager with
 
 
     member v.E2_CallErrorTXMonitor() =
-        let v= v :?> CallVertexTagManager
+        let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         let vOff = v._off.Expr
 
@@ -31,7 +31,7 @@ type VertexTagManager with
     member v.E3_CallErrorRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
-        let v = v:?> CallVertexTagManager
+        let v = v:?> CoinVertexTagManager
         
         let dop = call.V.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
@@ -72,7 +72,7 @@ type VertexTagManager with
 
    
     member v.E5_CallErrorTotalMonitor() =
-        let v= v :?> CallVertexTagManager
+        let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
 

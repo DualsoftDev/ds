@@ -16,6 +16,7 @@
         <Compile Include="TagManager/TagManager.Flow.fs" />
         <Compile Include="TagManager/TagManager.Vertex.fs" />
         <Compile Include="TagManager/TagManager.Api.fs" />
+        <Compile Include="TagManager\TagManager.Job.fs" />
         <Compile Include="TagManager\TagManager,TaskDev.fs" />
         <Compile Include="TagManager\TagManager.Variable.fs" />
         <Compile Include="TagManager\TagManager.ActionVariable.fs" />

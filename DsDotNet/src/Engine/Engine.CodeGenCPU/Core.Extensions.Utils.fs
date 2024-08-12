@@ -13,7 +13,7 @@ module ConvertCoreExtUtils =
 
     let getVM(v:Vertex)     = v.TagManager :?> VertexTagManager
     let getVMReal(v:Vertex) = v.TagManager :?> RealVertexTagManager
-    let getVMCall(v:Vertex) = v.TagManager :?> CallVertexTagManager
+    let getVMCall(v:Vertex) = v.TagManager :?> CoinVertexTagManager
 
     let getTarget (x:DsSystem) = (x.TagManager :?> SystemManager).TargetType
     let getSM (x:DsSystem) = x.TagManager :?> SystemManager

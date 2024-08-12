@@ -14,6 +14,7 @@ open System
 [<AutoOpen>]
 module ConvertCpuJob =
     let getSM(j:Job) = j.System.TagManager:?> SystemManager
+    let getJM(j:Job) = j.TagManager:?> JobManager
     type Job with
         member j.ActionInExpr = 
             let inExprs =
@@ -33,6 +34,6 @@ module ConvertCpuJob =
                           .Select(fun d-> d.GetOutExpr(j))
 
             if outExprs.any() 
-            then outExprs.ToAnd()|>Some  
+            then outExprs.ToOr()|>Some  
             else None
 

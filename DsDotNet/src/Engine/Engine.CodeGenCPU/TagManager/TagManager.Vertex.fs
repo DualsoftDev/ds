@@ -111,7 +111,7 @@ module TagManagerModule =
         member val ErrTRX = createTag false VertexTag.errorTRx
 
         member x.GetVertexTag (vt:VertexTag) :IStorage =
-            let callM() = v.TagManager:?> CallVertexTagManager
+            let callM() = v.TagManager:?> CoinVertexTagManager
             let realM() = v.TagManager:?> RealVertexTagManager
 
             match vt with
@@ -233,7 +233,7 @@ module TagManagerModule =
         member val MotionRelay  = createTag true VertexTag.motionRelay
         member val TimeRelay    = createTag true VertexTag.timeRelay
 
-    and CallVertexTagManager(v:Vertex) =
+    and CoinVertexTagManager(v:Vertex) =
         inherit VertexTagManager(v)
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
@@ -279,6 +279,8 @@ module TagManagerModule =
 
         ///Call Operator 연산결과 값 (T/F)
         member val CallOperatorValue  =  createTag false VertexTag.callOperatorValue
+
+   
 
         member x.ErrorList =
             [|

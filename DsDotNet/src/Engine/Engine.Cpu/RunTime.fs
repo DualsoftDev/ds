@@ -63,15 +63,15 @@ module RunTime =
 
         let scanOnce() =
             //나머지 수식은 Changed Event가 있는것만 수행해줌
-            let chTags = cpuStorages.ChangedTags()
+            let chTags = cpuStorages.GetChangedTags() |> toArray
 
             //Changed 있는것만 IO Hub로 전송
             if chTags.any() then tagChangedForIOHub.OnNext chTags
 
-            //ChangedTagsClear 전에 exeStates 만들기
+            //ClearChangedTags 전에 exeStates 만들기
             let exeStates = chTags.ExecutableStatements(mapRungs)
-            //ChangedTagsClear
-            chTags.ChangedTagsClear(systems)
+            //ClearChangedTags
+            chTags.ClearChangedTags(systems)
 
             // 상태보고/물리Out 처리
             chTags.Iter(notifyPreExcute)
@@ -130,9 +130,7 @@ module RunTime =
             let mutable endStepByStatus = false
             while not(endStepByStatus) do
                 let chTags = scanOnce()
-                endStepByStatus <- chTags.isEmpty()
-                                || chTags.Where(fun f->f.DsSystem = activeSys)
-                                            .Where(fun f-> f.IsStatusTag()).any()
+                endStepByStatus <- chTags |> Seq.exists (fun f -> f.DsSystem = activeSys && f.IsStatusTag())
 
         interface IDisposable with
             member x.Dispose() = x.Dispose()

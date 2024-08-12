@@ -479,7 +479,7 @@ module XgiExportModule =
                     for r in tails.Reverse() do
                         node.InsertAfter r |> ignore
             )
-            forceTrace ($"Total {ms} milliseconds")
+            forceTrace ($"Total {ms} ms elapsed while generating PLC xml {prjParam.ProjectName}/{pouName}")
             (*
              * Local variables 삽입 - 동일 코드 중복.  수정시 동일하게 변경 필요
              *)
@@ -493,6 +493,7 @@ module XgiExportModule =
     and XgxProjectParams with
         member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
 
+        // todo: 최적화 필요 함수
         member x.GenerateXmlDocument() : XmlDocument =
             let xdoc, prjParam =
                 let prjParam = x
@@ -643,6 +644,7 @@ module XgiExportModule =
                             t.DataType.GetBitSize())
                     |> Array.ofSeq
 
+                // todo: 최적화 필요 함수
                 let globalStoragesXmlNode =
                     storagesToGlobalXml x globalStoragesSortedByAllocSize |> DualXmlNode.ofString
 

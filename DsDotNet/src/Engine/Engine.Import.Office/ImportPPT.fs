@@ -273,7 +273,7 @@ module ImportPptModule =
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
 
             let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths |> Tuple.first)
-            tracefn $"Elapsed time for reading1 {fullName}: {millisecond} ms"
+            forceTrace $"Elapsed time for reading1 {fullName}: {millisecond} ms"
 
             let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds"
 
@@ -284,7 +284,7 @@ module ImportPptModule =
                     else
                         model.System.ExportToDS activePath
                         ParserLoader.LoadFromActivePath activePath (Util.runtimeTarget|>fst) false )
-            tracefn $"Elapsed time for reading2 {fullName}: {millisecond} ms"
+            forceTrace $"Elapsed time for reading2 {fullName}: {millisecond} ms"
 
             {
                 System = system

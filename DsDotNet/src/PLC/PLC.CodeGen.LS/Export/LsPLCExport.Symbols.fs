@@ -280,6 +280,7 @@ module internal XgiSymbolsModule =
 
         XGITag.generateLocalSymbolsXml prjParam symbolInfos
 
+    // todo: 최적화 필요 함수
     /// <GlobalVariable .../> 문자열 반환
     /// 내부 변환: Storages => [XgiSymbol] => [SymbolInfo] => Xml string
     let storagesToGlobalXml (prjParam: XgxProjectParams) (globalStorages: IStorage seq) =

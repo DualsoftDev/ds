@@ -15,14 +15,14 @@ module ParserLoader =
 
         let text = File.ReadAllText(dsFilePath)
 
-        if text.TrimStart().StartsWith("[sys]") then 
+        if text.TrimStart().StartsWith("[sys]") then
             let dir = Path.GetDirectoryName(dsFilePath)
             let option =
                 if loadedName.IsSome then
                     ParserOptions.Create4RuntimeLoadedSystem(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, loadedName.Value)
-                else 
+                else
                     ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, false)
-                    
+
 
             let system = ModelParser.ParseFromString(text, option)
             system
@@ -38,7 +38,7 @@ module ParserLoader =
                 dsFile |> FileManager.fileExistChecker
             else
                 PathManager.getFullPath (dsFile.ToFile()) (loadingConfigDir |> DsDirectory)
-                |> FileManager.fileExistChecker 
+                |> FileManager.fileExistChecker
 
         let system = loadSystemFromDsFile  systemRepo sysPath loadedName autoGenDevice
 
@@ -72,14 +72,14 @@ module ParserLoader =
             System = system
             LoadingPaths = loadings
         }
-          
+
 
     let LoadFromActivePath (activePath: string) (target:PlatformTarget) (usingGpt:bool)=
         ModelParser.ClearDicParsingText()
 
-        let f() = 
+        let f() =
             let dir = PathManager.getDirectoryName (activePath.ToFile())
-            loadingDS dir activePath None usingGpt target 
+            loadingDS dir activePath None usingGpt target
 
         let ret, millisecond = duration f
         printfn $"Elapsed time: {millisecond} ms"
@@ -88,9 +88,8 @@ module ParserLoader =
 
     let LoadFromDevicePath (activePath: string) (loadedName: string) (target:PlatformTarget)=
         let dir = PathManager.getDirectoryName (activePath.ToFile())
-        loadingDS dir activePath (Some(loadedName)) false  target 
+        loadingDS dir activePath (Some(loadedName)) false  target
 
     let LoadFromChatGptPath (activePath: string) (target:PlatformTarget)=
         LoadFromActivePath activePath  target true
 
-        

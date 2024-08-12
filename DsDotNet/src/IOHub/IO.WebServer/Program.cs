@@ -8,6 +8,7 @@ using IO.WebServer.Demons;
 
 using System.Diagnostics;
 using Log4NetLogger = Dual.Common.Core.Log4NetLogger;
+using Dual.Common.Base.CS;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 PresetAppSettings(isWinService);
@@ -26,7 +27,7 @@ string asService = isWinService ? " as a window service" : "";
 
 IServiceCollection services = builder.Services;
 ILog logger = services.AddLog4net("IOWebServerLogger");
-Log4NetLogger.Logger = logger;
+DcLogger.Logger = logger;
 services.AddTraceLogAppender("IOWebServerLogger");
 logger.Info($"======================= IOWebServer started.");
 logger.Info($"Debugger.IsAttached = {Debugger.IsAttached}");

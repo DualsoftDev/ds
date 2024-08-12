@@ -104,7 +104,7 @@ module MemoryAllocator =
                         else
                             failwithlog "ERROR"
 #if DEBUG
-                    tracefn "Address %s allocated" address
+                    //debugfn "Address %s allocated" address
 #endif
                     address
 
@@ -152,7 +152,7 @@ module MemoryAllocator =
                             failwithlog "ERROR"
 
 #if DEBUG
-                    tracefn "Address %s allocated" address
+                    //debugfn "Address %s allocated" address
 #endif
                     address
             | _ -> failwithlog "ERROR"

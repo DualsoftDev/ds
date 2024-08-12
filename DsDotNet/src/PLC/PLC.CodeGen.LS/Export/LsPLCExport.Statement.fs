@@ -13,7 +13,9 @@ module StatementExtensionModule =
         if exp.Terminal.IsSome then
             exp
         else
-            tracefn $"exp: {exp.ToText()}"
+#if DEBUG
+            debugfn $"exp: {exp.ToText()}"
+#endif
             let newExp =
                 let args =
                     exp.FunctionArguments
@@ -222,7 +224,9 @@ module StatementExtensionModule =
                 if exp.Terminal.IsSome then
                     exp
                 else
-                    tracefn $"ApplyLambda:: exp: {exp.ToText()}"
+#if DEBUG
+                    //debugfn $"ApplyLambda:: exp: {exp.ToText()}"
+#endif
                     // exp 이 FunctionSpec 값을 가지면서, FunctionSpec 내부에 LambdaApplication 이 존재하면
                     // 해당 LambdaApplication 적용 결과를 임시 변수에 저장하고, 그 값을 반환한다.
                     match exp.FunctionSpec |> bind (fun fs -> fs.LambdaApplication) with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"

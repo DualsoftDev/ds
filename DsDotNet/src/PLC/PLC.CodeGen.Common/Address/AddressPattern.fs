@@ -147,7 +147,7 @@ module LSEAddressPattern =
 
 
 
-    let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string), (isBool: bool option)) =
+    let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string)) =
         let regexXGK1   =  @"^([PMKFTC])(\d{4})$"
         let regexXGK1_1 =  @"^([PMKFTC])(\d+)$"
         let regexXGK2   =  @"^([PMKF])(\d{4})([\da-fA-F])$"
@@ -160,33 +160,30 @@ module LSEAddressPattern =
         let regexXGK7   =  @"^([S])(\d+)\.(\d+)$"
         let regexXGK8   =  @"^([Z])(\d+)\$"
 
-        let bitCheck  = isBool.IsSome && isBool.Value
-        let wordCheck = isBool.IsSome && not(isBool.Value)
-
         let tag = tag.ToUpper()
         match tag with
         //P1341, M2341
-        | RegexPattern regexXGK1 [ DevicePattern device; Int32Pattern word; ] when isBool.IsNone ->
+        | RegexPattern regexXGK1 [ DevicePattern device; Int32Pattern word; ] ->
             let totalBitOffset = word * 16
             createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
 
         //P12, M3
-        | RegexPattern regexXGK1_1 [ DevicePattern device; Int32Pattern word; ] when wordCheck ->
+        | RegexPattern regexXGK1_1 [ DevicePattern device; Int32Pattern word; ]  ->
             let totalBitOffset = word * 16
             createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
 
         //P13412, M2341F
-        | RegexPattern regexXGK2 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] when isBool.IsNone ->
+        | RegexPattern regexXGK2 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ]  ->
             let totalBitOffset = word * 16 + hexaBit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
 
         //PF, M0
-        | RegexPattern regexXGK2_1 [ DevicePattern device; HexPattern hexaBit ] when bitCheck ->
+        | RegexPattern regexXGK2_1 [ DevicePattern device; HexPattern hexaBit ]  ->
             let totalBitOffset = hexaBit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
 
         //P0F, M00
-        | RegexPattern regexXGK2_2 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] when bitCheck ->
+        | RegexPattern regexXGK2_2 [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ]  ->
             let totalBitOffset = word * 16 + hexaBit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
 
@@ -202,21 +199,21 @@ module LSEAddressPattern =
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
 
         //U23.31  //채널 31max
-        | RegexPattern regexXGK5 [ DevicePattern device; Int32Pattern file; DWordSubBitPattern sub ] when wordCheck ->
+        | RegexPattern regexXGK5 [ DevicePattern device; Int32Pattern file; DWordSubBitPattern sub ] ->
             let totalBitOffset = (file * 32 * 16) + (sub * 16)
             createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
 
         //U23.31.F  //채널 31max
-        | RegexPattern regexXGK6 [ DevicePattern device; Int32Pattern file; DWordSubBitPattern sub; HexPattern hexaBit ] when bitCheck->
+        | RegexPattern regexXGK6 [ DevicePattern device; Int32Pattern file; DWordSubBitPattern sub; HexPattern hexaBit ] ->
             let totalBitOffset = (file * 32 * 16) + (sub * 16) + hexaBit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
 
         //S23.31  //bit만 가능
-        | RegexPattern regexXGK7 [ DevicePattern device; Int32Pattern word; WordSubBitPattern bit] when bitCheck->
+        | RegexPattern regexXGK7 [ DevicePattern device; Int32Pattern word; WordSubBitPattern bit] ->
             let totalBitOffset = word * 16 + bit
             createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
         //Z23  //word만 가능
-        | RegexPattern regexXGK8 [ DevicePattern device; Int32Pattern word] when wordCheck ->
+        | RegexPattern regexXGK8 [ DevicePattern device; Int32Pattern word]  ->
             let totalBitOffset = word * 16
             createTagInfo (tag, device, DataType.Word , totalBitOffset, modelId)
 
@@ -227,11 +224,11 @@ module LSEAddressPattern =
 
     let tryParseXGITag tag = (|LsTagXGIPattern|_|) (None, tag)
     ///XGK 검증필요
-    let tryParseXGKTag tag = (|LsTagXGKPattern|_|) (None, tag, None)
-    let tryParseXGKTagByBitType tag isBit = (|LsTagXGKPattern|_|) (None, tag, Some isBit)
+    let tryParseXGKTag tag = (|LsTagXGKPattern|_|) (None, tag)
+    let tryParseXGKTagByBitType tag = (|LsTagXGKPattern|_|) (None, tag)
     let tryParseXGITagByCpu (tag: string) (modelId: int) = (|LsTagXGIPattern|_|) (modelId |> Some, tag)
     ///XGK 검증필요
-    let tryParseXGKTagByCpu (tag: string) (modelId: int) = (|LsTagXGKPattern|_|) (modelId |> Some, tag, None)
+    let tryParseXGKTagByCpu (tag: string) (modelId: int) = (|LsTagXGKPattern|_|) (modelId |> Some, tag)
 
     let isXgiTag tag = tryParseXGITag tag |> Option.isSome
     ///XGK 검증필요

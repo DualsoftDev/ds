@@ -258,7 +258,14 @@ module DsAddressModule =
             else
                 if target = PlatformTarget.XGK
                 then
-                    match tryParseXGKTagByBitType addr (dataType = DuBOOL) with
+                    let xgkAddress (addr: string) =
+                        if List.contains addr.[0] ['P'; 'M'; 'K'; 'F'] then
+                            let padCnt = if dataType = DuBOOL then 5 else 4
+                            addr.[0].ToString() + addr.Substring(1).PadLeft(padCnt, '0')
+                        else
+                            addr
+
+                    match tryParseXGKTagByBitType (xgkAddress addr) with
                     | Some (t) -> t |> getXgKTextByTag
                                   
                     | _ ->  failwithf $"주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"

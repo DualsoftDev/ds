@@ -1,6 +1,7 @@
 namespace Engine.Core
 
 open System
+open System.Linq
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Collections.Generic
@@ -48,6 +49,13 @@ module rec DsTaskDevType =
         member x.Max = valMax
         member x.IsInclusiveMin = isInclusiveMin  // True if the min comparison is >=, False if >
         member x.IsInclusiveMax = isInclusiveMax  // True if the max comparison is <=, False if <
+        member x.IsDefaultValue = 
+                    match valTarget, valMin, valMax with
+                    | None, None, None -> true
+                    | Some v, None, None when (v :? bool) 
+                        -> Convert.ToBoolean valTarget.Value
+                    | _ ->
+                        false
     
         member x.ToText() =
             match x.Min, x.TargetValue, x.Max with
@@ -70,7 +78,7 @@ module rec DsTaskDevType =
             | None, None, Some max ->
                 $"x < {max}"
             | _ ->
-                failWithLog $"error: {x} Invalid ValueParam"
+                "" //공란으로 처리
 
         member x.ToDataTypeText() = x.DataType.ToText()
 
@@ -111,11 +119,11 @@ module rec DsTaskDevType =
             | Some _ -> ValueParam(Some(toValue text), None, None, false, false) |> Some
             | None -> None
 
-    type TaskDevParam(symbolAlias: SymbolAlias option, valueParam: ValueParam option, devTime: int option) =
+    type TaskDevParam(symbolAlias: SymbolAlias option, valueParam: ValueParam, devTime: int option) =
         let mutable symbol = symbolAlias  //symbol name
         do
             match symbolAlias, valueParam with
-            | Some s, Some v ->
+            | Some s,  v ->
                 if s.DataType <> v.DataType
                 then
                     failWithLog $"SymbolAlias DataType({s.DataType}) and ValueParam DataType({v.DataType}) do not match"
@@ -135,67 +143,51 @@ module rec DsTaskDevType =
         
         /// 기본값은 true
         member x.ReadBoolValue = 
-            if valueParam.IsSome then
-                match valueParam.Value.TargetValue with
-                | Some v -> if(v :? bool)
-                            then v:?> bool
-                            else
-                                failWithLog $"ReadValue {v} is not valid"
-                | None -> true
-            else
-                true
+            match valueParam.TargetValue with
+            | Some v -> if(v :? bool)
+                        then v:?> bool
+                        else
+                            failWithLog $"ReadValue {v} is not valid"
+            | None -> true
 
         member x.ReadSimValue = 
-            if x.ValueParam.IsSome then
-                let vp = x.ValueParam.Value
-                let avg =
-                    match vp.Min, vp.Max with
-                    | Some mi, Some ma -> 
-                            match vp.IsInclusiveMin ,vp.IsInclusiveMax with
-                            | true, false -> vp.Min
-                            | false, true -> vp.Max
-                            | true, true ->  vp.Max //둘다 포함되면 max값으로 처리
-                            | false, false -> middleValue mi ma
+            let vp = x.ValueParam
+            let avg =
+                match vp.Min, vp.Max with
+                | Some mi, Some ma -> 
+                        match vp.IsInclusiveMin ,vp.IsInclusiveMax with
+                        | true, false -> vp.Min
+                        | false, true -> vp.Max
+                        | true, true ->  vp.Max //둘다 포함되면 max값으로 처리
+                        | false, false -> middleValue mi ma
 
-                    | Some mi, None -> if vp.IsInclusiveMin then vp.Min
-                                       else middleValue mi (mi.GetType() |> typeMaxValue)
+                | Some mi, None -> if vp.IsInclusiveMin then vp.Min
+                                    else middleValue mi (mi.GetType() |> typeMaxValue)
 
-                    | None, Some ma -> if vp.IsInclusiveMax then vp.Max
-                                       else middleValue ma (ma.GetType() |> typeDefaultValue)
-                    | None, None ->
-                        match vp.TargetValue with
-                        | Some v -> Some v
-                        | None -> Some true
+                | None, Some ma -> if vp.IsInclusiveMax then vp.Max
+                                    else middleValue ma (ma.GetType() |> typeDefaultValue)
+                | None, None ->
+                    match vp.TargetValue with
+                    | Some v -> Some v
+                    | None -> Some true
 
-                if avg.IsSome then
-                    avg.Value
-                else 
-                    failWithLog $"ReadValue {vp.ToText()}is not valid"
-            else
-                box true
+            if avg.IsSome then
+                avg.Value
+            else 
+                failWithLog $"ReadValue {vp.ToText()}is not valid"
 
         ///기본값은 true
-        member x.ReadRangeValue = 
-            if valueParam.IsSome 
-            then
-                valueParam.Value
-            else
-                defaultValueParam(Some(true))
+        member x.ReadRangeValue = valueParam
+
+                
 
         ///기본값은 true
         member x.WriteValue = 
-            if valueParam.IsSome 
-            then
-                match valueParam.Value.TargetValue with
-                | Some v -> v
-                | _ -> true
-            else 
-                true
+            match valueParam.TargetValue with
+            | Some v -> v
+            | _ -> true
 
-        member x.DataType =
-            match valueParam with 
-            | Some vp-> vp.DataType 
-            | None -> DuBOOL
+        member x.DataType = valueParam.DataType 
   
         member x.Time = devTime
 
@@ -203,14 +195,14 @@ module rec DsTaskDevType =
             symbol.IsNone &&
             devTime.IsNone &&
             x.DataType = DuBOOL &&
-            (valueParam |> Option.isNone)
+            valueParam.IsDefaultValue
 
         member x.ToTextWithAddress(addr: string) =
             let address = addressPrint addr
             let symNameNType = match symbol with
                                 | Some sym -> $"{sym.Name}:{sym.DataType.ToText()}"
                                 | None -> ""
-            let valueText = valueParam |> Option.map (fun vp -> vp.ToText()) |> Option.defaultValue ""
+            let valueText = valueParam.ToText()
             let time = devTime |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
 
             [address; symNameNType; valueText; time]
@@ -244,18 +236,21 @@ module rec DsTaskDevType =
             | _ -> failwithlog "TaskDevParamIO is not valid"
 
     let defaultTaskDevParam() =
-        TaskDevParam(None, None, None)
+        TaskDevParam(None, defaultValueParam(Some(true)), None)
 
     let defaultTaskDevParamIO() = TaskDevParamIO(None, None)
 
     let defaultValueParam(valTarget: obj option) = ValueParam(valTarget, None, None, false, false)
 
     let createTaskDevParam(symbolAlias: SymbolAlias option)  (valTarget: obj option) (t: int option) =
-        TaskDevParam(symbolAlias, Some(defaultValueParam(valTarget)), t)
+        TaskDevParam(symbolAlias, defaultValueParam(valTarget), t)
 
     let createTaskDevParaIOInTrue() =
         let inParam = createTaskDevParam None (Some(true)) None
         TaskDevParamIO(Some inParam, None)
+
+    let createTaskDevParamWithSymbol(symbolAlias: SymbolAlias) =
+        createTaskDevParam (Some(symbolAlias)) (Some(true)) None
 
     let changeSymbolTaskDevParam(x: TaskDevParam option) (symbol: SymbolAlias option) =
         match x with
@@ -320,4 +315,7 @@ module rec DsTaskDevType =
             failwithlog $"Type is required for {nameOpt.Value}"
         else 
             let sym = nameOpt |> Option.map (fun n -> SymbolAlias(n, typeOpt.Value))
-            addr, TaskDevParam(sym, valueOpt, timeOpt)
+            match valueOpt with
+            | Some vp -> addr, TaskDevParam(sym, vp, timeOpt)
+            | None -> addr, TaskDevParam(sym, defaultValueParam(Some(true)), timeOpt)
+            

@@ -200,18 +200,18 @@ module CoreExtensionModule =
         member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
   
         member x.GetInParam(jobFqdn:string) =
-            match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
+            match x.DicTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
             | Some v -> v
             | None -> defaultTaskDevParam()
         member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
 
         member x.GetOutParam(jobFqdn:string) =
-            match x.DicTaskTaskDevParamIO[jobFqdn].TaskDevParamIO.OutParam with
+            match x.DicTaskDevParamIO[jobFqdn].TaskDevParamIO.OutParam with
             | Some v -> v
             | None -> defaultTaskDevParam()
         member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
 
-        member x.GetApiParam(jobFqdn:string) = x.DicTaskTaskDevParamIO[jobFqdn]
+        member x.GetApiParam(jobFqdn:string) = x.DicTaskDevParamIO[jobFqdn]
         member x.GetApiParam(job:Job) = x.GetApiParam(job.DequotedQualifiedName)
 
         member x.GetApiItem(jobFqdn:string) = x.GetApiParam(jobFqdn).ApiItem
@@ -232,8 +232,8 @@ module CoreExtensionModule =
             if x.ApiItems.any(fun f->f.PureName <> api.PureName) then
                 failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
 
-            if not (x.DicTaskTaskDevParamIO.ContainsKey jobFqdn) then
-                x.DicTaskTaskDevParamIO.Add(jobFqdn, {TaskDevParamIO = taskDevParamIO; ApiItem = api})
+            if not (x.DicTaskDevParamIO.ContainsKey jobFqdn) then
+                x.DicTaskDevParamIO.Add(jobFqdn, {TaskDevParamIO = taskDevParamIO; ApiItem = api})
             else
                 ()
                 //failWithLog $"중복된 TaskDevParamIO {jobFqdn} {x.QualifiedName}"
@@ -251,20 +251,20 @@ module CoreExtensionModule =
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
         member x.SetInSymbol(symName:SymbolAlias) =
-            for param in x.DicTaskTaskDevParamIO.Values do
+            for param in x.DicTaskDevParamIO.Values do
                 match param.TaskDevParamIO.InParam with
                 | Some inParam ->
                     inParam.SymbolAlias <- Some symName
                 | None ->
-                    param.TaskDevParamIO.InParam <- Some(TaskDevParam(Some symName, None, None))
+                    param.TaskDevParamIO.InParam <- Some(createTaskDevParamWithSymbol (symName))
 
         member x.SetOutSymbol(symName:SymbolAlias) =
-            for param in x.DicTaskTaskDevParamIO.Values do
+            for param in x.DicTaskDevParamIO.Values do
                 match param.TaskDevParamIO.OutParam with
                 | Some outParam ->
                     outParam.SymbolAlias <- Some symName
                 | None ->
-                    param.TaskDevParamIO.OutParam <- Some(TaskDevParam(Some symName, None, None))
+                    param.TaskDevParamIO.OutParam <- Some(createTaskDevParamWithSymbol (symName))
 
 
         member x.InDataType  = getType (x.InParams)

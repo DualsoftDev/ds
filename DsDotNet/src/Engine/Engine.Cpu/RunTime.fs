@@ -24,7 +24,6 @@ module RunTime =
         let mapRungs = getRungMap(statements)
         let cpuStorages = mapRungs.Keys |> toArray
         let tagStorages = mySystem.TagManager.Storages
-        let stopBtn = (mySystem.TagManager :?> SystemManager).GetSystemTag(SystemTag.pause_btn)
         let systems = [mySystem] @ loadedSystems |> toArray
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false

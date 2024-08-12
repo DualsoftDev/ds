@@ -445,9 +445,9 @@ module CoreModule =
 
     type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
         inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
-        let dicTaskTaskDevParamIO = Dictionary<string, ApiParam>()
+        let dicTaskDevParamIO = Dictionary<string, ApiParam>()
         do
-            dicTaskTaskDevParamIO.Add (parentJob, apiParam)
+            dicTaskDevParamIO.Add (parentJob, apiParam)
 
         member x.ApiPureName = (x:>FqdnObject).QualifiedName
         member x.ApiSystemName = apiParam.ApiItem.ApiSystem.Name //needs test animation
@@ -455,12 +455,12 @@ module CoreModule =
         member x.DeviceName = deviceName
         member x.ParnetSystem = parentSys
 
-        member x.ApiParams = dicTaskTaskDevParamIO.Values
+        member x.ApiParams = dicTaskDevParamIO.Values
         member x.ApiItems  = x.ApiParams.Select(fun f -> f.ApiItem)
         member x.InParams  = x.ApiParams.Choose(fun tdPara -> tdPara.TaskDevParamIO.InParam)
         member x.OutParams = x.ApiParams.Choose(fun tdPara -> tdPara.TaskDevParamIO.OutParam)
 
-        member x.DicTaskTaskDevParamIO = dicTaskTaskDevParamIO
+        member x.DicTaskDevParamIO = dicTaskDevParamIO
 
         member val InAddress      = TextAddrEmpty with get, set
         member val OutAddress     = TextAddrEmpty with get, set

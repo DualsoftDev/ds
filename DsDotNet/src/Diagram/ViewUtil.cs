@@ -141,7 +141,7 @@ namespace Diagram.View.MSAGL
             void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
             {
                 var dic = DicTaskDevTag;
-                td.DicTaskTaskDevParamIO.Keys.Iter(jobFqdn =>
+                td.DicTaskDevParamIO.Keys.Iter(jobFqdn =>
                 {
                     var tm = td.TagManager as TaskDevManager;
                     var ps = tm.PlanStart(jobFqdn);
@@ -312,6 +312,8 @@ namespace Diagram.View.MSAGL
         }
         private static void HandleJobEvent(EventJob jobEv)
         {
+            if (!DicJobTag.ContainsKey(jobEv.Tag)) return;
+
             var viewNodes = DicJobTag[jobEv.Tag];
 
             viewNodes.Iter(n =>

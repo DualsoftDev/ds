@@ -19,16 +19,18 @@ module PptNodeUtilModule =
             if param.IsNone then ""
             else
                 let param = param |> Option.get
-                match param.ValueParam with
-                |Some vp ->
-                     match param.DevTime with
-                     | Some t -> $"{prefix}{vp.ToText()}{t}ms"
-                     | None -> $"{prefix}{vp.ToText()}"
-                    
-                |None ->
-                     match param.DevTime with
-                     | Some t -> $"{prefix}{t}ms"
-                     | None -> $""
+                if param.IsDefaultParam then ""
+                else 
+                    if param.ValueParam.IsDefaultValue 
+                    then
+                        match param.DevTime with
+                        | Some t -> $"{prefix}{t}ms"
+                        | None -> $""
+                    else 
+                        match param.DevTime with
+                        | Some t -> $"{prefix}{param.ValueParam.ToText()}{t}ms"
+                        | None -> $"{prefix}{param.ValueParam.ToText()}"
+                        
 
         let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
             let newJob =

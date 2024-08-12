@@ -25,7 +25,7 @@ type TaskDevManager with
     member d.TD2_PlanReceive(activeSys:DsSystem) =
         let fn = getFuncName()
         [|
-            for kv in d.TaskDev.DicTaskTaskDevParamIO do
+            for kv in d.TaskDev.DicTaskDevParamIO do
                 let jobFqdn = kv.Key
                 let apiParam = kv.Value
                 let sets = 
@@ -40,7 +40,7 @@ type TaskDevManager with
     member d.TD3_PlanOutput(activeSys:DsSystem) =
         let fn = getFuncName()
         [|
-            for kv in d.TaskDev.DicTaskTaskDevParamIO do
+            for kv in d.TaskDev.DicTaskDevParamIO do
                 let jobFqdn = kv.Key
                 let sets =  d.PlanStart(jobFqdn).Expr <&&> d.PlanEnd(jobFqdn).Expr
                 yield (sets, activeSys._off.Expr) --| (d.PlanOutput(jobFqdn), fn)

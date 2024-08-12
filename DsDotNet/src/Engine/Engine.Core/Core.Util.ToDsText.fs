@@ -158,7 +158,7 @@ module internal ToDsTextModule =
             if system.Jobs.Any() then
                 let printDev (d:TaskDev) (job:Job) skipApiPrint=
                     let apiName = if skipApiPrint then "" else d.DeviceApiToDsText(job)
-                    let para = d.DicTaskTaskDevParamIO[job.DequotedQualifiedName].TaskDevParamIO
+                    let para = d.DicTaskDevParamIO[job.DequotedQualifiedName].TaskDevParamIO
                     if para.IsDefaultParam then
                         $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
                     else

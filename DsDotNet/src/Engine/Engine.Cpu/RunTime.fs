@@ -22,10 +22,10 @@ module RunTime =
 
         let statements = css |> Seq.map(fun f -> f.Statement) |> toArray
         let mapRungs = getRungMap(statements)
-        let cpuStorages = mapRungs.Keys
+        let cpuStorages = mapRungs.Keys |> toArray
         let tagStorages = mySystem.TagManager.Storages
         let stopBtn = (mySystem.TagManager :?> SystemManager).GetSystemTag(SystemTag.pause_btn)
-        let systems = [mySystem] @ loadedSystems
+        let systems = [mySystem] @ loadedSystems |> toArray
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
         let mutable scanSimDelay:int = 10
@@ -67,9 +67,6 @@ module RunTime =
 
             //Changed 있는것만 IO Hub로 전송
             if chTags.any() then tagChangedForIOHub.OnNext chTags
-
-            if chTags.Select(fun s ->s.Name).any(fun f->f.Contains "STN1__Device1__GO_O") then
-                ()
 
             //ChangedTagsClear 전에 exeStates 만들기
             let exeStates = chTags.ExecutableStatements(mapRungs)
@@ -141,7 +138,7 @@ module RunTime =
             member x.Dispose() = x.Dispose()
 
         ///MySystem + LoadedSystems
-        member x.Systems = [x.MySystem] @ loadedSystems
+        member x.Systems = systems
         member x.MySystem = mySystem
         member x.Storages = storages
         member x.LoadedSystems = loadedSystems

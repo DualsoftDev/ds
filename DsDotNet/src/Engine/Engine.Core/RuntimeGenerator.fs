@@ -7,26 +7,30 @@ open System.Collections.Generic
 [<AutoOpen>]
 module RuntimeGeneratorModule =
 
-    type PlatformTarget = 
-        | WINDOWS 
-        | XGI 
-        | XGK 
-        | AB 
+    //제어 HW CPU 기기 타입
+    type PlatformTarget =
+        | WINDOWS
+        | XGI
+        | XGK
+        | AB
         | MELSEC
 
-    type HwDriveTarget = 
-        | LS_XGI_IO 
+    //제어 Driver IO 기기 타입
+    type HwDriveTarget =
+        | LS_XGI_IO
         | LS_XGK_IO
         | AB_IO
         | MELSEC_IO
         | SIEMENS_IO
         | PAIX_IO
+    //HW CPU,  Driver IO  조합
+    type HwTarget = PlatformTarget*HwDriveTarget
 
-    type RuntimeMotionMode = 
+    type RuntimeMotionMode =
         | MotionAsync
         | MotionSync
-        
-    type TimeSimutionMode = 
+
+    type TimeSimutionMode =
         | TimeNone
         | TimeX0_1
         | TimeX0_5
@@ -37,11 +41,11 @@ module RuntimeGeneratorModule =
         | TimeX16
         | TimeX100
 
-    type RuntimePackage = 
-        | PC 
-        | PCSIM 
+    type RuntimePackage =
+        | PC
+        | PCSIM
         | PLC
-        | PLCSIM 
+        | PLCSIM
     with
         member x.IsPCorPCSIM() =
             match x with
@@ -83,14 +87,13 @@ module RuntimeGeneratorModule =
     let HMITempManualAction =  "%HX0"  //iec xgk 구분안함
 
 
-    let getExternalTempMemory (target:PlatformTarget, index:int) =
+    let getExternalTempMemory (target:HwTarget, index:int) =
         match target with
-        | XGI -> ExternalTempIECMemory+index.ToString()
-        | XGK -> ExternalTempNoIECMemory+index.ToString("00000")
-        | WINDOWS  -> ExternalTempMemory+($"{index/8}.{index%8}")
-        | AB 
-        | MELSEC  -> failwithlog $"{target} not support"
-   
+        | XGI, _ -> ExternalTempIECMemory+index.ToString()
+        | XGK, _ -> ExternalTempNoIECMemory+index.ToString("00000")
+        | WINDOWS, _-> ExternalTempMemory+($"{index/8}.{index%8}")
+        | _ -> failwithlog $"{target} not support"
+
     type RuntimeDS() =
         static let mutable runtimePackage = PCSIM
         static let packageChangedSubject = new Subject<RuntimePackage>()
@@ -108,7 +111,7 @@ module RuntimeGeneratorModule =
         static member val EmulationAddress = emulationAddress  with get, set
         static member val RuntimeMotionMode = runtimeMotionMode  with get, set
         static member val TimeSimutionMode = timeSimutionMode  with get, set
-        
+
         static member Package
             with get() = runtimePackage
             and set v =
@@ -123,7 +126,7 @@ module RuntimeGeneratorModule =
 
 
     let clearNFullSlotHwSlotDataTypes() =
-        let hw = 
+        let hw =
             [0 .. 11]
             |> List.map (fun i ->
                 if i % 2 = 0 then
@@ -134,8 +137,8 @@ module RuntimeGeneratorModule =
         // 기존의 리스트를 지우고 새로운 데이터로 대체합니다.
         RuntimeDS.HwSlotDataTypes.Clear()
         RuntimeDS.HwSlotDataTypes.AddRange(hw)
-        
-        
+
+
 module PlatformTargetExtensions =
         let fromString s =
             match s with
@@ -146,11 +149,11 @@ module PlatformTargetExtensions =
             | "MELSEC" -> MELSEC
             | _ -> failwithf $"Error ToPlatformTarget: {s}"
 
-        let allPlatforms = 
+        let allPlatforms =
             [ WINDOWS; XGI; XGK; AB; MELSEC]
 
 
-module HwDriveTargetExtensions =     
+module HwDriveTargetExtensions =
     let fromString s =
             match s with
             | "LS_XGI_IO"  -> LS_XGI_IO
@@ -161,10 +164,10 @@ module HwDriveTargetExtensions =
             | "PAIX_IO"    -> PAIX_IO
             | _ -> failwithf $"Error ToHwDriveTarget: {s}"
 
-    let allDrivers = 
+    let allDrivers =
         [ LS_XGI_IO; LS_XGK_IO; AB_IO; MELSEC_IO; SIEMENS_IO; PAIX_IO ]
 
-        
+
 module TimeSimutionModeExtensions =
 
         let toString mode =
@@ -192,5 +195,5 @@ module TimeSimutionModeExtensions =
             | "100x Speed" -> TimeX100
             | _ -> failwithf $"Error ToTimeSimutionMode: {s}"
 
-        let allModes = 
+        let allModes =
             [ TimeNone; TimeX0_1; TimeX0_5; TimeX1; TimeX2; TimeX4; TimeX8; TimeX16; TimeX100 ]

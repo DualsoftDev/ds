@@ -44,7 +44,7 @@ module rec CounterModule =
         ACC: VariableBase<CountUnitType>
     }
 
-    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType,  target:PlatformTarget) =
+    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, target:PlatformTarget) =
         let nullB = getNull<VariableBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit
@@ -60,11 +60,11 @@ module rec CounterModule =
         let add = addTagsToStorages storages
         let dnName = if target = XGK
                      then $"{name}{xgkTimerCounterContactMarking}"
-                     else 
-                        if typ = CTUD 
-                        then $"{name}.QU" 
-                        else $"{name}.Q" 
-                                
+                     else
+                        if typ = CTUD
+                        then $"{name}.QU"
+                        else $"{name}.Q"
+
         match target, typ with
         | (WINDOWS | XGI| XGK), CTU ->
             cu  <- createBool     $"{name}.CU" false  // Count up enable bit

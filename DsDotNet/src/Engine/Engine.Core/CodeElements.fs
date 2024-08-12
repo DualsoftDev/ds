@@ -1,31 +1,26 @@
 namespace Engine.Core
 
-open System
-open System.Linq
-open System.Runtime.CompilerServices
-open System.Text.RegularExpressions
 open Dual.Common.Core.FS
-open System.Collections.Generic
 
 [<AutoOpen>]
 module rec CodeElements =
 
-    type VariableType = 
+    type VariableType =
         | Mutable
         | Immutable
-    
-           
+
+
     type VariableData(name:string, varType:DataType, variableType:VariableType)  =
         inherit FqdnObject(name, createFqdnObject([||]))
         member x.Name = name
         member x.Type = varType
         member x.VariableType = variableType
-        member x.ToDsText() = 
+        member x.ToDsText() =
             match variableType with
             | Mutable ->  $"{varType.ToText()} {name}"
             | Immutable -> $"const {varType.ToText()} {name} = {x.InitValue}"
         member val InitValue = getNull<string>() with get, set
-         
+
     //action 주소를 가지는 변수
     type ActionVariable(name:string, address:string, targetName:string, varType:DataType)  =
         inherit FqdnObject(name, createFqdnObject([||]))
@@ -44,12 +39,12 @@ module rec CodeElements =
             | (DuOPUnDefined | DuOPCode) -> ""
             | DuOPNot -> "$not"
             | DuOPTimer -> "$time"
-     
 
 
-    let updateOperator (op:OperatorFunction) (funcBodyText:string) = 
-        if funcBodyText <> "" then 
-            op.OperatorType <- DuOPCode 
+
+    let updateOperator (op:OperatorFunction) (funcBodyText:string) =
+        if funcBodyText <> "" then
+            op.OperatorType <- DuOPCode
             op.OperatorCode <- funcBodyText
 
     type CommandFunctionTypes =
@@ -84,4 +79,3 @@ module rec CodeElements =
         member val CommandCode = "" with get, set
 
         member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode
-    

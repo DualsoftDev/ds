@@ -14,7 +14,12 @@ module MSG_TEST =
 
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
     RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
-
+    let setXGK() = 
+        RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();
+        RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGK_IO.ToString();
+    let setXGI() = 
+        RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGI.ToString();
+        RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGI_IO.ToString();
 
     [<Fact>]
     let ``MSG_CHECK`` () =
@@ -24,22 +29,23 @@ module MSG_TEST =
         MSG_DSEXPORT.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENIOLIST`` () =
+        setXGK()
         MSG_GENIOLIST.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLC XGI`` () =
-        RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGI.ToString();
+        setXGI()
         MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLCEMULATION XGI`` () =
-        RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGI.ToString();
+        setXGI()
         MSG_GENLSPLCEMULATION.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLC XGK`` () =
-        RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();
+        setXGK()
         MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_GENLSPLCEMULATION XGK`` () =
-        RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();
+        setXGK()
         MSG_GENLSPLCEMULATION.Do(testPath, "",false)|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
@@ -52,12 +58,14 @@ module MSG_TEST =
         MSG_HWSETTING.Do(false)|> Assert.True
     [<Fact>]
     let ``MSG_SIMULATION`` () =
+        setXGK()
         MSG_SIMULATION.Do(testPath, SimViewEnum.FromPptPage, false, false)|> Assert.True
     [<Fact>]
     let ``MSG_ANIMATION`` () =
         MSG_ANIMATION.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_TIMECHART`` () =
+        setXGK()
         MSG_TIMECHART.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_LAYOUT`` () =

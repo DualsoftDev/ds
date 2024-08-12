@@ -53,7 +53,8 @@ module rec DsTaskDevType =
         member x.DevType = devType
         member x.DevValue= devValue
         member x.DevTime = devTime
-        member x.Value = devValue |> Option.toObj
+        member x.Value = 
+            devValue |> Option.defaultValue true
         member x.Type =
             devType |> Option.defaultValue DuBOOL
         member x.Name =

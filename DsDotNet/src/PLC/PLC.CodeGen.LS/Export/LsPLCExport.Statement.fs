@@ -13,7 +13,9 @@ module StatementExtensionModule =
         if exp.Terminal.IsSome then
             exp
         else
-            tracefn $"exp: {exp.ToText()}"
+#if DEBUG
+            debugfn $"exp: {exp.ToText()}"
+#endif
             let newExp =
                 let args =
                     exp.FunctionArguments
@@ -97,10 +99,10 @@ module StatementExtensionModule =
                     assert(exp.FunctionName.IsNone || isOpL(exp.FunctionName.Value))
                     assert(condition.IsNone)
                     let newExp = exp.CollectExpandedExpression(pack)
-                    DuAssign(None, newExp, target) |> augs.Statements.Add 
+                    DuAssign(None, newExp, target) |> augs.Statements.Add
 
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
-                augs.Statements.Add statement 
+                augs.Statements.Add statement
 
             | DuAction(DuCopy(condition, source, target)) ->
                 let funcName = XgiConstants.FunctionNameMove
@@ -125,7 +127,7 @@ module StatementExtensionModule =
             let statement = x
             /// IExpression option 인 경우의 visitor
             let tryVisit (expPath:IExpression list) (exp:IExpression<bool> option) : IExpression<bool> option =
-                exp |> map (fun exp -> visit pack expPath exp :?> IExpression<bool> ) 
+                exp |> map (fun exp -> visit pack expPath exp :?> IExpression<bool> )
 
             let visitTop exp = visit pack [] exp
             let tryVisitTop exp = tryVisit [] exp
@@ -204,7 +206,7 @@ module StatementExtensionModule =
                 UpCondition = up; DownCondition = down; ResetCondition = reset; LoadCondition = load} as ctr) ->
                 DuCounter {
                     ctr with
-                        UpCondition    = toAssignOndemand up 
+                        UpCondition    = toAssignOndemand up
                         DownCondition  = toAssignOndemand down
                         ResetCondition = toAssignOndemand reset
                         LoadCondition  = toAssignOndemand load }
@@ -222,7 +224,9 @@ module StatementExtensionModule =
                 if exp.Terminal.IsSome then
                     exp
                 else
-                    tracefn $"ApplyLambda:: exp: {exp.ToText()}"
+#if DEBUG
+                    //debugfn $"ApplyLambda:: exp: {exp.ToText()}"
+#endif
                     // exp 이 FunctionSpec 값을 가지면서, FunctionSpec 내부에 LambdaApplication 이 존재하면
                     // 해당 LambdaApplication 적용 결과를 임시 변수에 저장하고, 그 값을 반환한다.
                     match exp.FunctionSpec |> bind (fun fs -> fs.LambdaApplication) with     // e.g LambdaDecl: "int sum(int a,int b) = $a + $b;"
@@ -238,7 +242,7 @@ module StatementExtensionModule =
                                 | Some _ -> arg
                                 | None -> arg.BoxedEvaluatedValue |> any2expr
                             let stgVar = prjParam.GlobalStorages[encryptedFormalParamName]
-                            
+
                             prjParam.GlobalStorages[encryptedFormalParamName].BoxedValue <- value.BoxedEvaluatedValue
                             if prjParam.TargetType = XGI && pack.Get<Statement>("original-statement").IsDuCaseVarDecl() then
                                 ()

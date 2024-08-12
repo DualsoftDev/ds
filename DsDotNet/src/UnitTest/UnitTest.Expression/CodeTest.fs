@@ -17,7 +17,7 @@ module CodeTestModule =
 
         [<Test>]
         member __.``1 var declaration test`` () =
-            use _ = setRuntimeTarget WINDOWS
+            use _ = setRuntimeTarget (WINDOWS)
             let storages = Storages()
             let numericDeclarations = """
 int8 myInt8 = 0y;
@@ -66,13 +66,13 @@ double myDouble = 0.0;
                 "Type mismatch", "int myInt2 = 0.0;"
             ]
             for (expectedFailMessage, failText) in fails do
-                (fun () -> failText |> tryParseStatement4UnitTest WINDOWS storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
+                (fun () -> failText |> tryParseStatement4UnitTest (WINDOWS) storages |> ignore) |> ShouldFailWithSubstringT expectedFailMessage
 
             ()
 
         [<Test>]
         member __.``1 var initialization test`` () =
-            use _ = setRuntimeTarget WINDOWS
+            use _ = setRuntimeTarget (WINDOWS)
             let storages = Storages()
             let integers = """
 int8 myInt8 = 32y;

@@ -22,7 +22,7 @@ module TextImpl =
         match identifier with
         | null | "" -> false
         | "_" -> true
-        | _ -> 
+        | _ ->
             let chars = identifier.ToCharArray()
             isValidStart(chars.[0]) && chars.Skip(1).All(isValid)
 
@@ -46,12 +46,12 @@ module TextImpl =
 
     /// Need quoteOnDemand use combineQuoteOnDemand
     let combine (separator:string) (nameComponents:string seq) =
-        nameComponents 
-        |> List.ofSeq 
+        nameComponents
+        |> List.ofSeq
         |> function
            | [] -> failwithlog "ERROR"
            | [ n ] -> n
-           | ns -> ns |> String.concat separator 
+           | ns -> ns |> String.concat separator
 
     let combineQuoteOnDemand (separator:string) (nameComponents:string seq) =
         combine separator (nameComponents.Select(quoteOnDemand))
@@ -109,4 +109,4 @@ type TextExt =
     /// fqdn -> component []
     [<Extension>] static member SplitToFqdn (fqdn:string, [<Optional; DefaultParameterValue(".")>] separator) = split separator fqdn
     [<Extension>] static member SplitToFqdnDeQuoteOnDemand (fqdn:string) = fqdn.DeQuoteOnDemand() |> split "." |> Seq.map(fun f->f.DeQuoteOnDemand())
-    
+

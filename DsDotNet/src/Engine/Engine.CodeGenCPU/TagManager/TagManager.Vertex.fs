@@ -45,11 +45,11 @@ module TagManagerModule =
         member _.Vertex = v
 
         member val IsOperator =
-            match v with 
+            match v with
             | :? Call as c -> c.CallOperatorType = DuOPCode
-            |_-> false  
+            |_-> false
         member val IsCommand =
-            match v with 
+            match v with
             | :? Call as c -> c.CallCommandType = DuCMDCode
             |_-> false
         member _.Flow   = v.Parent.GetFlow()
@@ -69,16 +69,16 @@ module TagManagerModule =
         ///Segment End Tag
         member val ET =
             let et = createTag  true  VertexTag.endTag
-            if RuntimeDS.Package.IsPackageSIM() then 
-                if v :? Real && (v :?> Real).Finished then 
-                    et.Value <- true           
+            if RuntimeDS.Package.IsPackageSIM() then
+                if v :? Real && (v :?> Real).Finished then
+                    et.Value <- true
             et
 
 
         //Force
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member val ON = createTag true VertexTag.forceOn
-        
+
         ///forceStartBit HMI
         member val SF = createTag true VertexTag.forceStart
         ///forceResetBit HMI
@@ -107,14 +107,14 @@ module TagManagerModule =
         member val GPR = createTag false VertexTag.goingPulseRelay
         /// Going Pulse Hold
         member val GPH = createTag false VertexTag.goingPulseHold
- 
+
         member val ErrTRX = createTag false VertexTag.errorTRx
-        
+
         member x.GetVertexTag (vt:VertexTag) :IStorage =
             let callM() = v.TagManager:?> CallVertexTagManager
             let realM() = v.TagManager:?> RealVertexTagManager
 
-            match vt with 
+            match vt with
             | VertexTag.startTag -> x.ST :> IStorage
             | VertexTag.resetTag -> x.RT :> IStorage
             | VertexTag.endTag   -> x.ET :> IStorage
@@ -125,7 +125,7 @@ module TagManagerModule =
             | VertexTag.origin   -> x.OG :> IStorage
             | VertexTag.pause    -> x.PA :> IStorage
 
-            
+
             | VertexTag.errorTRx            -> x.ErrTRX :> IStorage
 
             | VertexTag.forceStart          -> x.SF :> IStorage
@@ -135,7 +135,7 @@ module TagManagerModule =
             | VertexTag.goingPulse          -> x.GP :> IStorage
             | VertexTag.goingPulseRelay     -> x.GPR :> IStorage
             | VertexTag.goingPulseHold      -> x.GPH :> IStorage
-            
+
             | VertexTag.txErrOnTimeShortage  -> callM().ErrOnTimeShortage  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
             | VertexTag.txErrOffTimeShortage -> callM().ErrOffTimeShortage :> IStorage
@@ -151,13 +151,13 @@ module TagManagerModule =
             | VertexTag.goingRealy           -> realM().GG :> IStorage
             | VertexTag.realToken            -> realM().RealTokenData :> IStorage
             | VertexTag.mergeToken           -> realM().MergeTokenData :> IStorage
-          
+
             | (VertexTag.counter | VertexTag.timerOnDelay) ->
                 failwithlog $"Error : Time Counter Type {vt} not support!!"
 
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"
-         
-   
+
+
 
     and RealVertexTagManager(v:Vertex) =
         inherit VertexTagManager(v)
@@ -169,8 +169,8 @@ module TagManagerModule =
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag = createTagOnVertex v
 
-        //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys 
-                  
+        //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys
+
         let createTokenData (vertexTag, tokenType)  =
             let vertexTagInt = vertexTag |> int
             let name = $"{v.QualifiedName}_{tokenType}" |> validStorageName
@@ -189,19 +189,19 @@ module TagManagerModule =
         member val RealTokenData = realTokenData
         ///병합되기전 사라진 SEQ Data
         member val MergeTokenData = mergeTokenData
-        
+
         /// Real Origin Init
         member val RO         = createTag false VertexTag.realOriginInit
         /// Real Origin Btn
         member val OB         = createTag false VertexTag.realOriginButton
         /// Real Origin Action
         member val OA         = createTag false VertexTag.realOriginAction
-        
+
         ///Real Init Relay
         member val RR         = createTag false VertexTag.relayReal
         ///Real Going Relay
         member val GG         = createTag false VertexTag.goingRealy
-    
+
 
         ///link with physical sensors
         member val Link       = createTag false VertexTag.realLink
@@ -216,14 +216,14 @@ module TagManagerModule =
         member val CoinAnyOnET  = createTag false VertexTag.dummyCoinETs
 
         ///Timer time avg
-        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
+        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType |> fst)
 
         member x.IsFinished = x.Real.Finished
         member x.NoTransData = x.Real.NoTransData
 
         member val ScriptStart  = createTag true VertexTag.scriptStart
         member val MotionStart  = createTag true VertexTag.motionStart
-        member val TimeStart    = createTag true VertexTag.timeStart  
+        member val TimeStart    = createTag true VertexTag.timeStart
 
         member val ScriptEnd    = createTag true VertexTag.scriptEnd
         member val MotionEnd    = createTag true VertexTag.motionEnd
@@ -239,44 +239,44 @@ module TagManagerModule =
         let s =  sys.TagManager.Storages
         let sysManager = sys.TagManager :?> SystemManager
         let createTag (autoAddr:bool) (vertexTag:VertexTag) : PlanVar<bool> = createTagOnVertex v autoAddr vertexTag
-        
-        let sourceTokenData  = 
+
+        let sourceTokenData  =
             let vertexTag = VertexTag.sourceToken |> int
             let name = $"{v.QualifiedName}_{VertexTag.sourceToken}" |> validStorageName
-            createPlanVar s name DuUINT32 true v vertexTag sys  
+            createPlanVar s name DuUINT32 true v vertexTag sys
 
         ///Source SEQ Data
         member val SourceTokenData = sourceTokenData
 
         ///Ring Counter
-        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
+        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType|>fst)
         ///Timer on delay
-        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
+        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType|>fst)
 
         member val MM   = createTag  false VertexTag.callMemo
 
-        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
+        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType|>fst)
 
         member val RXErrOpen          = createTag true VertexTag.rxErrOpen
-        member val RXErrShort         = createTag true VertexTag.rxErrShort       
+        member val RXErrShort         = createTag true VertexTag.rxErrShort
         member val RXErrOpenRising    = createTag true VertexTag.rxErrOpenRising
-        member val RXErrShortRising   = createTag true VertexTag.rxErrShortRising   
+        member val RXErrShortRising   = createTag true VertexTag.rxErrShortRising
 
-        member val ErrOnTimeShortage  = createTag true VertexTag.txErrOnTimeShortage 
-        member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver   
-        member val ErrOffTimeShortage = createTag true VertexTag.txErrOffTimeShortage   
-        member val ErrOffTimeOver     = createTag true VertexTag.txErrOffTimeOver    
+        member val ErrOnTimeShortage  = createTag true VertexTag.txErrOnTimeShortage
+        member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver
+        member val ErrOffTimeShortage = createTag true VertexTag.txErrOffTimeShortage
+        member val ErrOffTimeOver     = createTag true VertexTag.txErrOffTimeOver
 
-        member val ErrShort           = createTag true VertexTag.rxErrShort      
-        member val ErrShortRising     = createTag true VertexTag.rxErrShortRising           
-        member val ErrOpen            = createTag true VertexTag.rxErrOpen    
-        member val ErrOpenRising      = createTag true VertexTag.rxErrOpenRising    
+        member val ErrShort           = createTag true VertexTag.rxErrShort
+        member val ErrShortRising     = createTag true VertexTag.rxErrShortRising
+        member val ErrOpen            = createTag true VertexTag.rxErrOpen
+        member val ErrOpenRising      = createTag true VertexTag.rxErrOpenRising
 
         ///callCommandEnd
         member val CallCommandEnd     =  createTag  false VertexTag.callCommandEnd
-        ///callCommandPulse  
+        ///callCommandPulse
         member val CallCommandPulse   =  createTag  false VertexTag.callCommandPulse
-        
+
         ///Call Operator 연산결과 값 (T/F)
         member val CallOperatorValue  =  createTag false VertexTag.callOperatorValue
 
@@ -289,11 +289,10 @@ module TagManagerModule =
                 if x.ErrShort.Value           then yield "센서감지"
                 if x.ErrOpen.Value            then yield "센서오프"
             |]
-        member x.ErrorText   = 
+        member x.ErrorText   =
             let errors = x.ErrorList
             if errors.any() then
                 let errText = String.Join(",", errors)
                 $"{errText} 이상"
-            else 
+            else
                 ""
-        

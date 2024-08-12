@@ -10,11 +10,13 @@ module MemoryAllocator =
     type PLCMemoryAllocatorType = unit -> string
 
     type PLCMemoryAllocator =
-        { BitAllocator: PLCMemoryAllocatorType
-          ByteAllocator: PLCMemoryAllocatorType
-          WordAllocator: PLCMemoryAllocatorType
-          DWordAllocator: PLCMemoryAllocatorType
-          LWordAllocator: PLCMemoryAllocatorType }
+        {
+            BitAllocator: PLCMemoryAllocatorType
+            ByteAllocator: PLCMemoryAllocatorType
+            WordAllocator: PLCMemoryAllocatorType
+            DWordAllocator: PLCMemoryAllocatorType
+            LWordAllocator: PLCMemoryAllocatorType
+        }
 
     type IntRange = int * int
 
@@ -56,9 +58,10 @@ module MemoryAllocator =
         ///XGK 16bit 최소, XGI 8bit 최소
         let unitSize = if target = XGK then 16 else 8
         let getMemType(memType) =
-                if target = XGK && memType = "B"
-                then "W" //XGK는 byte 단위가 없어서 Word로 치환
-                else memType
+                if target = XGK && memType = "B" then
+                    "W" //XGK는 byte 단위가 없어서 Word로 치환
+                else
+                    memType
 
         let rec getAddress (reqMemType: string) : string =
             let reqMemType = getMemType reqMemType
@@ -101,7 +104,7 @@ module MemoryAllocator =
                         else
                             failwithlog "ERROR"
 #if DEBUG
-                    tracefn "Address %s allocated" address
+                    //debugfn "Address %s allocated" address
 #endif
                     address
 
@@ -149,36 +152,38 @@ module MemoryAllocator =
                             failwithlog "ERROR"
 
 #if DEBUG
-                    tracefn "Address %s allocated" address
+                    //debugfn "Address %s allocated" address
 #endif
                     address
             | _ -> failwithlog "ERROR"
 
 
-        { BitAllocator = fun () -> getAddress "X"
-          ByteAllocator = fun () -> getAddress "B"
-          WordAllocator = fun () -> getAddress "W"
-          DWordAllocator = fun () -> getAddress "D"
-          LWordAllocator = fun () -> getAddress "L" }
+        {
+            BitAllocator   = fun () -> getAddress "X"
+            ByteAllocator  = fun () -> getAddress "B"
+            WordAllocator  = fun () -> getAddress "W"
+            DWordAllocator = fun () -> getAddress "D"
+            LWordAllocator = fun () -> getAddress "L"
+        }
 
 
     type System.Type with
 
         member x.GetBitSize() =
             match x.Name with
-            | BOOL -> 1
-            | CHAR -> 8
+            | BOOL    -> 1
+            | CHAR    -> 8
             | FLOAT32 -> 32
             | FLOAT64 -> 64
-            | INT16 -> 16
-            | INT32 -> 32
-            | INT64 -> 64
-            | INT8 -> 8
-            | STRING -> (32*8)
-            | UINT16 -> 16
-            | UINT32 -> 32
-            | UINT64 -> 64
-            | UINT8 -> 8
+            | INT16   -> 16
+            | INT32   -> 32
+            | INT64   -> 64
+            | INT8    -> 8
+            | STRING  -> (32*8)
+            | UINT16  -> 16
+            | UINT32  -> 32
+            | UINT64  -> 64
+            | UINT8   -> 8
             | _ -> failwithlog "ERROR"
 
         member x.GetByteSize() =
@@ -208,12 +213,14 @@ module IECAddressModule =
         match address with
         | "_" -> "_"
         | _ ->
-            let addr = if address.StartsWith("%")
-                       then  address.ToUpper()
-                       else  "%"+address.ToUpper()
+            let addr =
+                if address.StartsWith("%") then
+                    address.ToUpper()
+                else
+                    "%"+address.ToUpper()
 
             match addr with
-            | RegexPattern @"^%([IQUMLKFNRAW])(\d+)$" [ m; _ ]
-            | RegexPattern @"^%([IQUMLKFNRAW])(\d+\.\d+)$" [ m; _ ]
-            | RegexPattern @"^%([IQUMLKFNRAW])(\d+\.\d+\.\d+)$" [ m; _ ] -> Regex.Replace(addr, m, m + "X")
-            | _ -> addr
+            | RegexPattern @"^%[IQUMLKFNRAW](\d+(?:\.\d+){0,2})$" [ m; _ ] ->
+                Regex.Replace(addr, m, m + "X")
+            | _ ->
+                addr

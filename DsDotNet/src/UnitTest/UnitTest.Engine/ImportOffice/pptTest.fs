@@ -22,7 +22,7 @@ module PptTestModule =
         let reGenerated = helperSys.ToDsText(true, false)
         reGenerated.Length =!= 0 //파싱 확인만 text 비교는 순서바뀌어서 불가능
     let testpptPath = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/ImportOfficeExample/ppt/"
-    let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true}
+    let pptParms:PptParams = defaultPptParams()
 
     type PptTest() =
         inherit EngineTestBaseClass()

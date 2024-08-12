@@ -20,8 +20,9 @@ type XgxConvertDsCPU(target:PlatformTarget) =
 
     member __.``Test DS Case`` () =
         RuntimeDS.Package <- RuntimePackage.PLC
-        
+
         let f = getFuncName()
+
         let testCode = """
              [sys] HelloDS = {
                 [flow] STN1 = {
@@ -36,9 +37,9 @@ type XgxConvertDsCPU(target:PlatformTarget) =
                     }
                 }
                 [jobs] = {
-                    STN1.Device1.ADV = (_, _);
-                    STN1.Device1.RET = (_, _);
-                    STN1.외부시작.ADV = (_, -);
+                    STN1.Device1.ADV[N1(0,0)] =  (_, _);
+                    STN1.Device1.RET[N1(0,0)] =  (_, _);
+                    STN1.외부시작.ADV[N1(0,0)] = (_, _);
                 }
                 [prop] = {
                     [layouts] = {
@@ -49,9 +50,9 @@ type XgxConvertDsCPU(target:PlatformTarget) =
                         STN1.Work2;
                     }
                 }
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"]
                     STN1__Device1,
-                    STN1__외부시작; 
+                    STN1__외부시작;
                 [versions] = {
                     DS-Langugage-Version = 1.0.0.1;
                     DS-Engine-Version = 0.9.9.7;
@@ -62,10 +63,10 @@ type XgxConvertDsCPU(target:PlatformTarget) =
 
         let systemRepo = ShareableSystemRepository()
         let referenceDir = $"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
-        DsAddressModule.setMemoryIndex(0) 
-        ModelParser.ClearDicParsingText() 
+        DsAddressModule.setMemoryIndex(0)
+        ModelParser.ClearDicParsingText()
         let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
-        
+
         let result = exportXMLforLSPLC(target, helperSys, myTemplate f, None, 0, 0)
         result === result
 

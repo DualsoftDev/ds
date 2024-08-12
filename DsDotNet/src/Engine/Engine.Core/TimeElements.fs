@@ -4,7 +4,7 @@ open System
 
 [<AutoOpen>]
 module TimeElements =
-    
+
     type DsTime() = //최소 입력단위 0.01초(10msec)
         member val AVG: float option = None with get, set //  Average  sec
         member val STD: float option = None with get, set //  Standard Deviation  sec
@@ -17,14 +17,14 @@ module TimeElements =
         LSL: float  // Lower Specification Limit
     }
     with
-        member x.CPK = 
+        member x.CPK =
             let cpu = (x.USL - x.Average) / (3.0 * x.StdDev)
             let cpl = (x.Average - x.LSL) / (3.0 * x.StdDev)
             Math.Min(cpu, cpl)
 
-        member x.ToText() = 
+        member x.ToText() =
             $"Mean: {x.Average}, StdDev: {x.StdDev}, USL: {x.USL}, LSL: {x.LSL}, CPK: {x.CPK}"
-  
+
     let createTimeParamUsingMeanStd average stdDev =
         // 상한과 하한을 평균 기준으로 ±3σ(6σ)로 설정합니다.
         let upsl = average + 3.0 * stdDev
@@ -33,8 +33,8 @@ module TimeElements =
 
     let createTimeParamUsingMean average =
         // 평균의 10%를 기본 표준편차로 설정합니다.
-        let stdDev = average * 0.1 
-        createTimeParamUsingMeanStd average stdDev 
+        let stdDev = average * 0.1
+        createTimeParamUsingMeanStd average stdDev
 
 
     let validateDecimalPlaces name (valueSec:float)=

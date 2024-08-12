@@ -2,28 +2,31 @@
 module Engine.CodeGenCPU.ConvertEmulation
 
 open System
+open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 type TaskDev with
 
-    member d.SensorEmulation(sys:DsSystem, job:Job) =
-        let set = d.GetPlanEnd(job).Expr
+    member d.SensorEmulation(sys:DsSystem, coins:Vertex seq) =
+        let job = coins.OfType<Call>().First().TargetJob
         let rst = sys._off.Expr
 
         let inParam = d.GetInParam(job)
-        if inParam.Type = DuBOOL then // || api.PureName = api.Name //bool type 은 파라메터 있는 타입은 제외            
-            let setBool =
-                if inParam.Value.IsNull() || (inParam.Value |> Convert.ToBoolean) then
-                    set
-                else
-                    !@set
+        [|
+        if inParam.Type = DuBOOL then 
+            let set = coins.GetPureCalls()
+                           .Select(fun c-> d.GetPlanEnd(c.TargetJob)).ToOr()
 
-            (setBool, rst) --| (d.InTag, getFuncName())
+            let positiveBool = inParam.Value |> Convert.ToBoolean
+            yield ((if positiveBool then set else !@set), rst) --| (d.InTag, getFuncName())
         else 
-            let setData = inParam.Value|>literal2expr
-            (set, setData) --> (d.InTag, getFuncName())
+            for c in coins.GetPureCalls() do
+                let setData = d.GetInParam(c.TargetJob).Value|>literal2expr
+                let set = d.GetPlanEnd(c.TargetJob).Expr
+                yield (set, setData) --> (d.InTag, getFuncName())
+        |]
 
 type DsSystem with
 

@@ -11,7 +11,7 @@ module ConvertCpuDsSystem =
         if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip then
             failwithf $"{name} 해당 주소가 없습니다."
 
-    let getMemory (tag:IStorage) (target:PlatformTarget) = 
+    let getMemory (tag:IStorage) (target:HwTarget) = 
         getValidAddress(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
 
     type DsSystem with

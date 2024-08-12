@@ -14,7 +14,7 @@ type VertexTagManager with
         let startCausals =  v.Vertex.GetStartRootAndCausals()
         let plans = v.System.GetApiSets(real).ToOrElseOff()
         let actionLinks = v.System.GetApiSensorLinks(real).ToOrElseOff()
-        
+
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
             if shareds.any() then
@@ -24,7 +24,7 @@ type VertexTagManager with
 
         let sets =
                 ((startCausals <||> wsShareds  <||> v.SF.Expr) <&&> v.Flow.d_st.Expr)
-                <||> plans 
+                <||> plans
                 <||> actionLinks
 
         let rsts = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
@@ -43,8 +43,8 @@ type VertexTagManager with
                 v._off.Expr
 
         let sets =
-            ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr ) 
-            <||> 
+            ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr )
+            <||>
             ( v.RF.Expr <||> (*real.VR.OB.Expr <||> *)real.VR.OA.Expr )
 
         let rsts = real.V.R.Expr
@@ -64,15 +64,15 @@ type VertexTagManager with
     member v.F4_CallEndInFlow() =
         let sets =
             let callExpr = v.SF.Expr <&&> !@v.RF.Expr
-            let getExpr(call:Call) = 
+            let getExpr(call:Call) =
                 if call.IsOperator then
                     call.VC.CallOperatorValue.Expr  <||> callExpr
-                else 
+                else
                     call.End  <||> callExpr
 
             match v.Vertex  with
             | :? Call as c ->   getExpr c
-            | :? Alias as rf -> 
+            | :? Alias as rf ->
                 match  rf.TargetWrapper with
                 | DuAliasTargetReal _ -> failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
                 | DuAliasTargetCall c ->    getExpr c
@@ -89,20 +89,25 @@ type VertexTagManager with
         let fn = getFuncName()
         match v.Vertex.TokenSourceOrder with
         | Some order ->
-            [|  
-                let tempInit= v.System.GetTempBoolTag("tempInitCheckTokenSrc") 
-                let initExpr = 0u|>literal2expr ==@ vc.SourceTokenData.ToExpression() 
+            [|
+                let tempInit= v.System.GetTempBoolTag("tempInitCheckTokenSrc")
+                let initExpr = 0u|>literal2expr ==@ vc.SourceTokenData.ToExpression()
                 yield (initExpr, v._off.Expr) --| (tempInit, fn)
 
-                let totalSrcToken = v.System.GetSourceTokenCount() 
-                
-                //처음에는 자기 순서로 시작
-                yield (tempInit.Expr   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
-                //이후부터는 전체 값 만큼 증가
-                yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                let totalSrcToken = v.System.GetSourceTokenCount()
+
+                if RuntimeDS.Package.IsPLCorPLCSIM()
+                then
+                    //처음에는 자기 순서로 시작
+                    yield (fbRising[tempInit.Expr]   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
+                    //이후부터는 전체 값 만큼 증가
+                    yield (fbRising[!@tempInit.Expr] <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                else 
+                    yield (tempInit.Expr   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
+                    yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
             |]
         |None -> [||]
-     
+
 
     member v.F7_HomeCommand() =
         let real = v.Vertex :?> Real

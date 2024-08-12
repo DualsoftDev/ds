@@ -17,7 +17,7 @@ module RuntimeTest =
     let testPpt =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS/testA/testMy/my.pptx"
     RuntimeDS.HwIP  <- "192.168.9.100"
     RuntimeDS.Package <- RuntimePackage.PCSIM
-    let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true;  CreateFromPpt = false; CreateBtnLamp = true}
+    let pptParms:PptParams =  defaultPptParams()
 
     let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (testPpt, pptParms)
     let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)
@@ -39,7 +39,7 @@ module RuntimeTest =
 
         let cleanExistingDb = true      //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
         let queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), Nullable<DateTime>());
-        DBLogger.InitializeLogWriterOnDemandAsync(queryCriteria, systems, cleanExistingDb).Wait()
+        DbWriter.CreateAsync(queryCriteria, systems, cleanExistingDb).Wait()
         DsSimulator.Do(runtimeModel.Cpu, 3000) |> Assert.True //값변경있으면서 구동하면 true
 
 

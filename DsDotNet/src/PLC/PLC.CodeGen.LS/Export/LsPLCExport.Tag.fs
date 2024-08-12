@@ -112,7 +112,7 @@ module XGITag = //IEC61131Tag =
         /// Symbol 관련 XML tag attributes 생성
         member private x.GetXmlArgs (prjParam: XgxProjectParams) =
             let targetType = prjParam.TargetType
-            [  
+            [
                 match targetType with
                 | XGI ->
                     $"Name=\"{x.Name}\""
@@ -142,15 +142,15 @@ module XGITag = //IEC61131Tag =
 
                         | ("BYTE" | "STRING" | "REAL" | "LREAL" ) -> "WORD"        // xxx 이거 맞나??
 
-                        | ("LINT" | "ULINT" | _ ) -> 
+                        | ("LINT" | "ULINT" | _ ) ->
                             failwithlog $"Not supported data type {x.Type}"
 
                     if x.IsDirectAddress  //주소 별칭이 있으면 이름 생성하지 않고 직접변수 스타일로 사용 (실제 이름은 Comment에 저장)
-                    then 
+                    then
                         $"Name=\"\""
                         let aliasNames = x.AddressAlias.JoinWith(", ")
                         $"Comment=\"{escapeXml x.Comment}//Alias List: {aliasNames}\""
-                    else 
+                    else
 #if DEBUG
                         $"Name=\"{x.Name}\"";$"Comment=\"{escapeXml x.Comment}\""
 #else
@@ -180,7 +180,7 @@ module XGITag = //IEC61131Tag =
             |> String.concat "\r\n"
 
         member x.GenerateDirectAddressXml () =
-            [  
+            [
                 $"\t<DirectVar  "
                 $"Device=\"{x.Address}\""
                 $"Name=\"\""
@@ -192,31 +192,31 @@ module XGITag = //IEC61131Tag =
     /// Symbol variable 정의 구역 xml 의 string 을 생성
     let private generateSymbolVarDefinitionXml (prjParam: XgxProjectParams) (varType: string) (FList(symbolInfos: SymbolInfo list)) =
         let symbols:SymbolInfo list =
-            symbolInfos 
+            symbolInfos
             |> List.filter (fun s -> not(s.Name.Contains(xgkTimerCounterContactMarking)))
             |> List.filter (fun s -> not(s.IsDirectAddress))
             |> List.sortBy (fun s -> s.Name)
 
         let directSymbols =
-            symbolInfos 
+            symbolInfos
             |> Seq.filter (fun s -> s.IsDirectAddress)
             |> Seq.distinctBy (fun s -> s.Address)
             |> Seq.toList
-        let xmls = 
+        let xmls =
             [   yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
-                yield "<Symbols>"  
+                yield "<Symbols>"
                 let symbols = //xgk는 Symbols 규격에 directSymbols 을 넣는다.  xgi는 DirectVarComment 별도 구역에 생성
                     if prjParam.TargetType = XGK && varType = "GlobalVariable" then  //LocalVar 에는 DirectVarComment 없음
-                        symbols@directSymbols 
-                    else 
+                        symbols@directSymbols
+                    else
                         symbols
 
                 yield! symbols |> map (fun s -> s.GenerateXml prjParam)
                 yield "</Symbols>"
-           
+
                 yield "<TempVar Count=\"0\"></TempVar>"
 
-                if prjParam.TargetType = XGI && varType = "GlobalVariable" && directSymbols.length() > 0 then 
+                if prjParam.TargetType = XGI && varType = "GlobalVariable" && directSymbols.length() > 0 then
                     yield $"<DirectVarComment Count=\"{directSymbols.length()}\">"
                     yield! directSymbols |> map (fun s -> s.GenerateDirectAddressXml())
                     yield "</DirectVarComment>"

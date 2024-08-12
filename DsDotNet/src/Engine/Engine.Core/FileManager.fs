@@ -20,7 +20,7 @@ module FileManager =
     let fileExistFirstSelector (paths:string list) =
         let path = paths.FirstOrDefault(fun f -> File.Exists(f|> getValidFile))
         if path = null
-        then 
+        then
             let errorMsg1 = $"loading path : {paths.Head}\n"
             let errorMsg2 = $"user environment path : {paths.Tail}"
             raise (new FileNotFoundException($"File not found at paths: \n{errorMsg1+errorMsg2}"))
@@ -32,19 +32,19 @@ module FileManager =
         let dir = getDirectoryName (path|>DsFile)
         if not (Directory.Exists dir)
         then Directory.CreateDirectory dir |> ignore
-        
+
         File.WriteAllText(path, fileContent)
 
     // Ensure that the directory of the specified path exists; create it if not
     let createDirectory (path: DsPath) =
-        if not(isPathRooted (path.ToString())) then 
+        if not(isPathRooted (path.ToString())) then
             raise (new ArgumentException($"createDirectory path must be an absolute path: {path}"))
 
-        let directoryPath = 
+        let directoryPath =
             match path with
             |DsFile f-> Path.GetDirectoryName(f)
             |DsDirectory d-> d
-            
+
         if not (Directory.Exists(directoryPath)) then
             Directory.CreateDirectory(directoryPath) |> ignore
 
@@ -65,13 +65,13 @@ module FileManager =
 
     let getValidZipFileName(topDir:string, extenstion:string): string  =
         let dir = topDir|>getValidDirectory
-        let zipName = 
+        let zipName =
             if isRuntimeLinux
-            then 
+            then
                 if dir.Split('/').Length = 2 //root
                 then $"{dir}/[{dir.Split('/').[1]}]"// /home  => /home/[home]
                 else dir.TrimEnd('/')
-            else 
+            else
                 if dir.Split(':').[1].Split('/').[1] = "" //root
                 then $"{dir}[{dir.Split(':').[0]}]" //E:/  => E:/[E]
                 else dir.TrimEnd('/')
@@ -81,33 +81,33 @@ module FileManager =
     let getTopLevelDirectory (filePaths: string list) : string =
         if List.isEmpty filePaths then
             raise (new ArgumentException("getTopLevelDirectory: empty paths"))
-        if filePaths.Length = 1 then 
+        if filePaths.Length = 1 then
             getDirectoryName (filePaths.First().ToFile())
         else
             let splitPaths = filePaths |> List.map (fun path -> path.Split([|'\\'; '/'|]))
             let minLength = splitPaths |> List.map Array.length |> List.min
 
-            let commonParts = 
+            let commonParts =
                 [0 .. minLength - 1]
-                |> List.map (fun i -> 
+                |> List.map (fun i ->
                     let part = splitPaths.[0].[i]
                     if splitPaths |> List.forall (fun sp -> sp.[i] = part) then
                         Some(part)
                     else
                         None)
 
-            let commonPrefix = 
+            let commonPrefix =
                 match List.choose id commonParts with
                 | [] -> raise (new ArgumentException("getTopLevelDirectory: error paths"))
                 | cp -> String.Join(Path.DirectorySeparatorChar.ToString(), cp) |> getValidDirectory
 
             if PathManager.isPathRooted (commonPrefix)
             then commonPrefix
-            else 
-                let topLevelDirSplit = 
+            else
+                let topLevelDirSplit =
                     commonPrefix.Split(directorySeparatorDS) |> Array.rev |> Array.skip 1 |> Array.rev
                 String.Join(directorySeparatorDS, topLevelDirSplit)
-        
+
 
     //모델 최상단 폴더에 Zip형태로 생성
     let saveZip(filePaths: string seq, extention:string) =
@@ -118,9 +118,9 @@ module FileManager =
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
-            
+
         try
-           
+
             for filePath in filePaths do
                 if File.Exists(filePath) then
                     let fileDir  = PathManager.getDirectoryName (filePath|>DsFile)
@@ -147,7 +147,7 @@ module FileManager =
         fileStream.CopyTo(memoryStream)
         zipFilePath, memoryStream
 
-    
+
     let addFilesToExistingZipAndDeleteFiles (existingZipPath:string) (additionalFilePaths:string seq) =
         if not (File.Exists existingZipPath) then
             printfn "The specified ZIP file doesn't exist."
@@ -164,7 +164,7 @@ module FileManager =
                         use fileStream = new FileStream(filePath, FileMode.Open)
                         use entryStream = newEntry.Open()
                         fileStream.CopyTo(entryStream)
-                        fileStream.Close()        
+                        fileStream.Close()
                         // Delete the file after adding it to the ZIP archive
                         File.Delete(filePath)
                     else
@@ -198,14 +198,14 @@ module FileManager =
 
         // Return the path where the files are extracted
         PathManager.getFullPath ($"{TextDSJson}"|>DsFile)(extractPath|>DsDirectory)
-        
+
 [<Extension>]
 type FileHelper =
-    [<Extension>] static member ToDsZip(filePaths: string seq)  = 
+    [<Extension>] static member ToDsZip(filePaths: string seq)  =
                         saveZip (filePaths, ".dsz")|> fst
-    [<Extension>] static member ToZipPpt(filePaths: string seq)  = 
+    [<Extension>] static member ToZipPpt(filePaths: string seq)  =
                         saveZip (filePaths, ".7z")|> fst  //".Zip" 형태지만 구분위해 확장자 다르게
-    [<Extension>] static member ToZipStream(filePaths: string seq)  = 
-                        saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()    
-    [<Extension>] static member ToUnZip(zipDsPath:string)  = 
+    [<Extension>] static member ToZipStream(filePaths: string seq)  =
+                        saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()
+    [<Extension>] static member ToUnZip(zipDsPath:string)  =
                         unZip zipDsPath

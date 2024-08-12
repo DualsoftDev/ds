@@ -5,32 +5,32 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module DsJobType =
 
-    type JobTypeAction = 
-        | ActionNormal  
-        | Push    
-        member x.ToText() = 
+    type JobTypeAction =
+        | ActionNormal
+        | Push
+        member x.ToText() =
             match x with
             | ActionNormal -> ""
             | Push -> TextJobPush
-    
-    type JobTypeSensing = 
-        | SensingNormal  
-        | SensingNegative 
-        member x.ToText() = 
+
+    type JobTypeSensing =
+        | SensingNormal
+        | SensingNegative
+        member x.ToText() =
             match x with
             | SensingNormal -> ""
             | SensingNegative -> TextJobNegative
 
-    type JobTypeTaskDevInfo = 
+    type JobTypeTaskDevInfo =
         {
             TaskDevCount: int
             InCount : int option
             OutCount : int option
         }
-        with  
-            member x.AddressInCount  = match x.InCount  with | Some c -> c | None -> x.TaskDevCount
-            member x.AddressOutCount = match x.OutCount with | Some c -> c | None -> x.TaskDevCount
-            member x.ToText() = 
+        with
+            member x.AddressInCount  = x.InCount  |? x.TaskDevCount
+            member x.AddressOutCount = x.OutCount |? x.TaskDevCount
+            member x.ToText() =
                 if x.TaskDevCount = 1 && x.AddressInCount = 1 && x.AddressOutCount = 1 then
                     ""
                 else
@@ -41,7 +41,7 @@ module DsJobType =
         member _.JobAction = action
         member _.JobSensing = jobTypeSensing
         member _.JobTaskDevInfo = jobTypeTaskDevInfo
-        
+
         member x.ToText() =
             [|
                 x.JobAction.ToText()
@@ -49,12 +49,9 @@ module DsJobType =
                 x.JobTaskDevInfo.ToText()
             |] |> filter (String.any) |> String.concat("; ")
 
-        member x.TaskDevCount =
-            x.JobTaskDevInfo.TaskDevCount
-        member x.TaskInCount =
-            x.JobTaskDevInfo.InCount
-        member x.TaskOutCount =
-            x.JobTaskDevInfo.OutCount
+        member x.TaskDevCount = x.JobTaskDevInfo.TaskDevCount
+        member x.TaskInCount  = x.JobTaskDevInfo.InCount
+        member x.TaskOutCount = x.JobTaskDevInfo.OutCount
 
     let getJobTypeAction (name: string) =
         let endContents = GetSquareBrackets(name, false)
@@ -65,7 +62,7 @@ module DsJobType =
     let getJobTypeSensing (name: string) =
         let endContents = GetSquareBrackets(name, false)
         match endContents with
-        | Some e when e = TextJobNegative -> JobTypeSensing.SensingNegative     
+        | Some e when e = TextJobNegative -> JobTypeSensing.SensingNegative
         | _ -> JobTypeSensing.SensingNormal
 
     let getJobTypeTaskDevInfo (param: string) =
@@ -106,20 +103,20 @@ module DsJobType =
         let param = param.TrimStart('[').TrimEnd(']')
         let items = param.Split(';')
 
-        let jobTypeTaskDevInfo = 
+        let jobTypeTaskDevInfo =
             items
             |> Array.tryFind (fun item -> item.StartsWith(TextJobMulti))
             |> Option.map getJobTypeTaskDevInfo
             |> Option.defaultValue (defaultJobTypeTaskDevInfo())
 
-        let jobTypeAction = 
+        let jobTypeAction =
             items
             |> Array.exists (fun item -> item.Trim() = TextJobPush)
             |> function
                 | true -> JobTypeAction.Push
                 | false -> JobTypeAction.ActionNormal
 
-        let jobTypeSensing = 
+        let jobTypeSensing =
             items
             |> Array.exists (fun item -> item.Trim() = TextJobNegative)
             |> function

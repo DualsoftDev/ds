@@ -50,7 +50,7 @@ module CollectStoragesModule =
                     | None -> ()
                     yield! exp.CollectStorages()
                     yield tgt
-                
+
                 /// 변수 선언.  PLC rung 생성시에는 관여되지 않는다.
                 | DuVarDecl(exp, var) ->
                     yield! exp.CollectStorages()

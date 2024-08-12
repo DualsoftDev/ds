@@ -33,7 +33,7 @@ module ExpressionFixtures =
         try
             let parser = createParser (text)
             let ctx = parser.expr ()
-            let parserData = ParserData(WINDOWS, Storages(), None)
+            let parserData = ParserData((WINDOWS), Storages(), None)
 
             createExpression parserData (defaultStorageFinder storages) ctx
         with exn ->
@@ -45,4 +45,4 @@ module ExpressionFixtures =
         inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
         do
             //Engine.CodeGenCPU.ModuleInitializer.Initialize()
-            setRuntimeTarget WINDOWS|> ignore
+            setRuntimeTarget (WINDOWS)|> ignore

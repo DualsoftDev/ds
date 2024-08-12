@@ -24,26 +24,26 @@ using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Core.TagKindList;
 using static Engine.Core.TagKindModule;
-using static Engine.Core.TagKindModule.TagDS;
+using static Engine.Core.TagKindModule.TagEvent;
 using static Engine.Import.Office.ImportViewModule;
 using static Engine.Import.Office.ViewModule;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
+using static Engine.Info.DBWriterModule;
 
 namespace Diagram.View.MSAGL
 {
     public static class ViewUtil
     {
         public static List<UcView> UcViews { get; set; } = new();
-        public static Subject<TagDS> VertexChangeSubject = new();
+        public static Subject<TagEvent> VertexChangeSubject = new();
         public static Dictionary<Vertex, ViewVertex> DicNode = new();
 
         static IDisposable _Disposable;
         static Dictionary<IStorage, List<ViewVertex>> DicTaskDevTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
         static private DsSystem _sys = null;
-        static public bool SaveLog = false;
 
         public static List<ViewNode> CreateViews(DsSystem sys)
         {
@@ -84,6 +84,7 @@ namespace Diagram.View.MSAGL
                         UpdateDicTaskDevTag(t.OutTag, viewVertex);
                         UpdateDicTaskDevPlanTag(t, viewVertex);
                     });
+
                 }
             });
 
@@ -134,21 +135,34 @@ namespace Diagram.View.MSAGL
 
             void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
             {
-                td.ApiParams.Iter(apiParam =>
+                var dic = DicTaskDevTag;
+                td.DicTaskTaskDevParamIO.Keys.Iter(jobFqdn =>
                 {
-                    var planEndTag = (td.TagManager as TaskDevManager).PlanEnd(apiParam);
-                    var planStartTag = (td.TagManager as TaskDevManager).PlanStart(apiParam);
-                    var planOutputTag = (td.TagManager as TaskDevManager).PlanOutput(apiParam);
-
-                    if (!DicTaskDevTag.ContainsKey(planEndTag)) DicTaskDevTag.Add(planEndTag, new List<ViewVertex>());
-                    if (!DicTaskDevTag.ContainsKey(planStartTag)) DicTaskDevTag.Add(planStartTag, new List<ViewVertex>());
-                    if (!DicTaskDevTag.ContainsKey(planOutputTag)) DicTaskDevTag.Add(planOutputTag, new List<ViewVertex>());
-
-                    DicTaskDevTag[planEndTag].Add(viewVertex);
-                    DicTaskDevTag[planStartTag].Add(viewVertex);
-                    DicTaskDevTag[planOutputTag].Add(viewVertex);
+                    var tm = td.TagManager as TaskDevManager;
+                    var ps = tm.PlanStart(jobFqdn);
+                    var pe = tm.PlanEnd(jobFqdn);
+                    var po = tm.PlanOutput(jobFqdn);
+                    if (!dic.ContainsKey(ps)) dic.Add(ps, new List<ViewVertex>() { viewVertex }); else dic[ps].Add(viewVertex);
+                    if (!dic.ContainsKey(pe)) dic.Add(pe, new List<ViewVertex>() { viewVertex }); else dic[pe].Add(viewVertex);
+                    if (!dic.ContainsKey(po)) dic.Add(po, new List<ViewVertex>() { viewVertex }); else dic[po].Add(viewVertex);
                 });
             }
+
+            //    td.ApiParams.Iter(apiParam =>
+            //{
+            //    var planEndTag = (td.TagManager as TaskDevManager).PlanEnd(apiParam);
+            //    var planStartTag = (td.TagManager as TaskDevManager).PlanStart(apiParam);
+            //    var planOutputTag = (td.TagManager as TaskDevManager).PlanOutput(apiParam);
+
+            //    if (!DicTaskDevTag.ContainsKey(planEndTag)) DicTaskDevTag.Add(planEndTag, new List<ViewVertex>());
+            //    if (!DicTaskDevTag.ContainsKey(planStartTag)) DicTaskDevTag.Add(planStartTag, new List<ViewVertex>());
+            //    if (!DicTaskDevTag.ContainsKey(planOutputTag)) DicTaskDevTag.Add(planOutputTag, new List<ViewVertex>());
+            //    //TaskDev는 여러군대 사용 하므로 처음에 한번만 추가
+            //    if (DicTaskDevTag[planEndTag].Count == 0) DicTaskDevTag[planEndTag].Add(viewVertex);
+            //    if (DicTaskDevTag[planStartTag].Count == 0) DicTaskDevTag[planStartTag].Add(viewVertex);
+            //    if (DicTaskDevTag[planOutputTag].Count == 0) DicTaskDevTag[planOutputTag].Add(viewVertex);
+            //});
+            //}
 
             void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
             {
@@ -172,39 +186,6 @@ namespace Diagram.View.MSAGL
                     else if (rx.IsEventTaskDev)
                     {
                         HandleTaskDevEvent(rx as EventTaskDev);
-                    }
-
-                    if (SaveLog)
-                    {
-                        var dbWriter = DBLogger.TheDbWriter;
-                        var now = DateTime.Now;
-
-                        long? tokenId = null;
-                        if (rx.IsVertexTokenTag())
-                        {
-                            switch (rx.TagKind)
-                            {
-                                case (int)VertexTag.realToken:
-                                    var realToken = ((Real)rx.GetTarget()).GetRealToken();
-                                    tokenId = dbWriter.GetTokenId(realToken);
-                                    break;
-                                case (int)VertexTag.mergeToken:
-                                    var real = (Real)rx.GetTarget();
-                                    var removedToken = real.GetRealToken(); //삭제된 자신 토큰번호
-                                    var mergedToken  = real.GetMergeToken(); //삭제한 메인경로 토큰번호
-                                    //tokenId = dbWriter.GetTokenId(mergeToken); //작업 필요
-                                    break;
-
-                                case (int)VertexTag.sourceToken:    //UI에서 추후 Call 아닐수 있음 속성있는 Real도 가능 
-                                    var sourceToken = ((Call)rx.GetTarget()).GetSourceToken();
-                                    dbWriter.AllocateTokenId(sourceToken, now);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        //srctoken 처리 대기
-                        dbWriter.InsertValueLog(now, rx, tokenId);
                     }
                 });
             }

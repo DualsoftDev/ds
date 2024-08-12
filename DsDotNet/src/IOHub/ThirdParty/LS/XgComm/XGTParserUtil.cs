@@ -81,5 +81,37 @@ namespace XGTComm
                     throw new ArgumentOutOfRangeException(nameof(dataType), dataType, null);
             }
         }
+
+
+        public static object GetValueByType(Type dataType, object value)
+        {
+            if (dataType == typeof(bool))
+                return value;
+            if (dataType == typeof(byte))
+                return Convert.ToByte(value);
+            if (dataType == typeof(ushort))
+                return Convert.ToUInt16(value);
+            if (dataType == typeof(uint))
+                return Convert.ToUInt32(value);
+            if (dataType == typeof(ulong))
+                return Convert.ToUInt64(value);
+            if (dataType == typeof(sbyte))
+                return Convert.ToSByte(value);
+            if (dataType == typeof(short))
+                return Convert.ToInt16(value);
+            if (dataType == typeof(int))
+                return Convert.ToInt32(value);
+            if (dataType == typeof(long))
+                return Convert.ToInt64(value);
+            if (dataType == typeof(float))
+                return Convert.ToSingle(value);
+            if (dataType == typeof(double))
+                return Convert.ToDouble(value);
+            if (dataType == typeof(char))
+                return Convert.ToChar(value);
+            else
+                return Convert.ToString(value);
+        }
+
     }
 }

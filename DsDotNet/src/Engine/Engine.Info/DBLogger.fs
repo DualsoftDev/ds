@@ -4,68 +4,9 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System
 open System.IO
-open System.Threading.Tasks
-
 
 
 type DBLogger() =
-    //static let queryCriteria = QuerySet()
-    //static let queryCriteria = QuerySet(Nullable<DateTime>(DateTime(2023, 10, 28, 10, 46, 0)), Nullable<DateTime>())
-
-    //static member EnqueLog(log: DsLog) =
-    //    DbWriter.EnqueLog (log: DsLog)
-
-    //static member EnqueLogs(logs: DsLog seq) =
-    //    DbWriter.EnqueLogs (logs: DsLog seq)
-
-    static member val TheDbWriter = getNull<DbWriter>() with get, set
-    static member InitializeLogWriterOnDemandAsync
-        (
-            queryCriteria: QueryCriteria,
-            systems: DsSystem seq,
-            cleanExistingDb: bool
-        ): Task<DbWriter> =
-
-        task {
-            Log4NetWrapper.logWithTrace <- true
-
-            let! dbWriter =
-                DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
-
-            return dbWriter
-        }
-
-    /// model 정보 없이, database schema 만 생성
-    static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings, cleanExistingDb:bool) =
-        DbWriter.InitializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
-
-
-
-    static member InitializeLogReaderOnDemandAsync(queryCriteria: QueryCriteria, systems: DsSystem seq) =
-        task {
-            Log4NetWrapper.logWithTrace <- true
-            let! logSet = DbReader.initializeLogReaderOnDemandAsync (queryCriteria, systems)
-            return logSet :> ILogSet
-        }
-
-    /// Reader + Writer 일체형
-    static member InitializeLogReaderWriterOnDemandAsync
-        (
-            queryCriteria: QueryCriteria,
-            systems: DsSystem seq,
-            cleanExistingDb:bool
-        ) =
-        ()
-        task {
-            Log4NetWrapper.logWithTrace <- true
-
-            let! logSet =
-                DbWriter.InitializeLogWriterOnDemandAsync (queryCriteria, systems, cleanExistingDb)
-
-            return logSet //:> ILogSet
-        }
-
-
 
     /// 조회 기간 변경 (reader)
     /// call site 에서는 기존 인자로 주어진 logSet 은 자동 dispose 되며, 새로 return 되는 logSet 을 이용하여야 한다.
@@ -76,9 +17,8 @@ type DBLogger() =
             failwith "Not yet implemented"
             let modelId = -1
             let queryCriteria = QueryCriteria(commonAppSettings, modelId, startAt, endAt)
-            let! newLogSet = DbReader.changeQueryDurationAsync (logSet, queryCriteria)
-            dispose (logSet :> IDisposable)
-            return newLogSet :> ILogSet
+            let! dbReader = DbReader.Create (logSet, queryCriteria)
+            return dbReader.LogSet.Value :> ILogSet
         }
 
     // { unit test 등의 debugging 용
@@ -99,21 +39,21 @@ type DBLogger() =
     // }
 
     static member Count(fqdns: string seq, tagKinds: int seq) =
-        DBLoggerImpl.count (DBLoggerImpl.logSet, fqdns, tagKinds, true)
+        DBLoggerImpl.count (DbHandler.TheDbHandler.LogSet.Value, fqdns, tagKinds, true)
 
     static member Count(fqdn: string, tagKind: int) =
         DBLogger.Count([| fqdn |], [| tagKind |])
 
     static member GetLastValue(fqdn: string, tagKind: int) =
-        DBLoggerImpl.getLastValue (DBLoggerImpl.logSet, fqdn, tagKind)
+        DBLoggerImpl.getLastValue (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
         |> Option.toNullable
 
 
     static member Sum(fqdn, tagKind) =
-        DBLoggerQueryImpl.sum (DBLoggerImpl.logSet, fqdn, tagKind)
+        DBLoggerQueryImpl.sum (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
 
     static member Average(fqdn, tagKind) =
-        DBLoggerQueryImpl.average (DBLoggerImpl.logSet, fqdn, tagKind)
+        DBLoggerQueryImpl.average (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
 
     static member GetDsFilePath(connectionString: string) =
         let filePathOption = connectionString.Split('=').TryLast()

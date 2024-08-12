@@ -21,7 +21,7 @@ module TimerModuleApi =
 
     [<DllImport("winmm.dll", SetLastError = true)>]
     extern uint timeEndPeriod(uint uPeriod)
-   
+
 
 [<AutoOpen>]
 module rec TimerModule =
@@ -37,7 +37,7 @@ module rec TimerModule =
 
     let [<Literal>] MinTickInterval = 10u    //<ms>
     let [<Literal>] TimerResolution  = 1u    //<ms> windows timer resolution (1~ 1000000)
-    
+
     /// 10ms timer: 최소 주기.  Windows 상에서의 더 짧은 주기는 시스템에 무리가 있음!!!!
     let theMinTickTimer = Observable.Timer(TimeSpan.FromSeconds(0.0), TimeSpan.FromMilliseconds(int MinTickInterval))//.Timestamp()
 
@@ -80,7 +80,7 @@ module rec TimerModule =
             | TOF -> accumulateTOF()
             | TMR -> accumulateRTO()
 
-        let timerCallback (_: obj) = accumulate() 
+        let timerCallback (_: obj) = accumulate()
 
         let disposables = new CompositeDisposable()
 
@@ -139,7 +139,7 @@ module rec TimerModule =
         interface IDisposable with
             member this.Dispose() =
                 TimerModuleApi.timeEndPeriod(TimerResolution) |> ignore
-                
+
                 for d in disposables do
                     d.Dispose()
                 disposables.Clear()
@@ -164,7 +164,7 @@ module rec TimerModule =
             member x.ObjValue = x.This
             member x.ToText() = unsupported()
             member _.ToBoxedExpression() = unsupported()
-            member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name) 
+            member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name)
 
         member private x.This = x
         member _.Name:string = name
@@ -219,8 +219,8 @@ module rec TimerModule =
         member _.TT:VariableBase<bool> = tt
         member _.Type = typ
 
-        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys,  target:PlatformTarget) =
-            let suffixes  = 
+        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+            let suffixes  =
                 match target with
                 | XGK -> [".IN"; ".TT"; xgkTimerCounterContactMarking; ".PT"; ".ET"; ".RST"] // XGK 이름에 . 있으면 걸러짐 storagesToXgxSymbol
                 | XGI | WINDOWS -> [".IN"; "._TT"; ".Q"; ".PT"; ".ET"; ".RST"]
@@ -239,7 +239,7 @@ module rec TimerModule =
             let pre = createUInt32            $"{pre}" preset
             let acc = createUInt32            $"{acc}" accum
             let res = createBool              $"{res}" false
-            
+
             storages.Add(en.Name, en)
             storages.Add(tt.Name, tt)
             storages.Add(dn.Name, dn)

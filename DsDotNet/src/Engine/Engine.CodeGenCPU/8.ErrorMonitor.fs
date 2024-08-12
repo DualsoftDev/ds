@@ -38,7 +38,7 @@ type VertexTagManager with
         let fn = getFuncName()
 
         [|
-            let using      = if call.HasSensor then v._on.Expr else  v._off.Expr 
+            let using      = if call.HasSensor && not(call.HasAnalogSensor) then v._on.Expr else  v._off.Expr 
             let input      = call.End
             let checkCondi = using <&&> dop <&&> real.V.G.Expr 
 

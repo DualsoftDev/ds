@@ -10,7 +10,7 @@ module OriginModule =
         | Off         // 행동 값이 반드시 0인 상태
         | On          // 행동 값이 반드시 1인 상태
         //NeedCheck 삭제 (조건 Safety 추가로 해결)
-        //| NeedCheck   // 인터락 구성요소 중 하나가 1인지를 체크하는 상태  
+        //| NeedCheck   // 인터락 구성요소 중 하나가 1인지를 체크하는 상태
         | NotCare     // On 또는 Off의 상태를 따르지 않음
 
     // 기본 Origin 정보를 정의합니다.
@@ -22,7 +22,7 @@ module OriginModule =
         Real  = real
         CallInitials = [||]
     }
- 
+
     // 상호 정보를 얻습니다.
     let getMutualInfo (vertices: Vertex seq) =
         let coinNapi =
@@ -36,7 +36,7 @@ module OriginModule =
             |> dict
 
 
-        let findCoins api = 
+        let findCoins api =
             coinNapi.Where(fun dic -> dic.Value = api)
                     .Select(fun dic -> dic.Key)
 
@@ -57,12 +57,12 @@ module OriginModule =
             | Some fwd -> if fwd then InitialType.Off else InitialType.On
             | None -> InitialType.NotCare
 
-        let getTypeForMuiltTarget (vs:bool option seq)= 
+        let getTypeForMuiltTarget (vs:bool option seq)=
             if vs.any(fun d-> d.IsNone) then //하나라도 순서없으면
                 InitialType.NotCare
             else
                 if vs.Choose(id).AllEqual(true) then
-                    InitialType.Off 
+                    InitialType.Off
                 elif vs.Choose(id).AllEqual(false) then
                     InitialType.On
                 else
@@ -78,28 +78,19 @@ module OriginModule =
             |> Seq.map (fun t -> graphOrder source t)
             |> getTypeForMuiltTarget
 
-    let getOriginInfo (real: Real) =  
+    let getOriginInfo (real: Real) =
         let graphOrder = real.Graph.BuildPairwiseComparer()
-        let pureCalls =
-            let realJobs =
-                real.Graph.Vertices
-                    .OfType<Call>()
-                    .Where(fun c->c.IsJob)
-            let aliasJobs =
-                real.Graph.Vertices.OfType<Alias>() 
-                    .Select(fun f -> f.GetPure():?>Call)
-                    .Where(fun c -> c.IsJob)
-            ( realJobs @ aliasJobs )
-                .Distinct()
-                .Cast<Vertex>()
-        
+        let pureCalls = real.Graph.Vertices
+                            .GetPureCalls().Where(fun c->c.IsJob)
+                            .Cast<Vertex>()
+
         let mutualInfo = getMutualInfo pureCalls
         let calls =
             pureCalls
             |> Seq.map (fun v ->
                 let initialType = getInitialType v (mutualInfo.[v]) graphOrder
                 v.GetPure() :?> Call, initialType)
-                
+
         { Real = real; CallInitials = calls }
 
 

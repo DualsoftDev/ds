@@ -17,10 +17,10 @@ module CodeConvertUtil =
             |> map fst
 
     let getOriginIOExprs(vr:RealVertexTagManager, initialType:InitialType) =
-        getOriginCalls(vr, initialType).Select(fun d-> d.End)
+        getOriginCalls(vr, initialType)
+            .Where(fun c-> not(c.IsAnalog))  //test ahn  Analog input도 범위로 입력 추가 필요 
+            .Select(fun c-> c.End)
 
- 
-   
     [<AutoOpen>]
     [<Extension>]
     type CodeConvertUtilExt =
@@ -38,7 +38,7 @@ module CodeConvertUtil =
         [<Extension>]
         static member GetResetCausals(xs:Vertex seq) =
 
-                if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1 then 
+                if xs.Where(fun f -> f.GetPure() :? Real).Count() > 1 then
                     let error = String.Join("\r\n", (xs.Select(fun f->f.DequotedQualifiedName)))
                     failwithlog $"리셋은 하나의 작업에서 가능합니다. \r\n(복수 작업 :\r\n {error})"
 

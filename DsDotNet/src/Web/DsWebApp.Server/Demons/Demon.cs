@@ -11,7 +11,7 @@ using System.ServiceModel.Channels;
 using Dual.Common.Base.FS;
 using Newtonsoft.Json;
 using DsWebApp.Server.Common;
-using static Engine.Core.TagKindModule.TagDS;
+using static Engine.Core.TagKindModule.TagEvent;
 using static Engine.CodeGenCPU.ConvertCpuVertex;
 using static Engine.CodeGenCPU.RealExt;
 using static Engine.Info.DBWriterModule;
@@ -72,9 +72,8 @@ public partial class Demon : BackgroundService
             var loggerDBSettings = serverGlobal.DsCommonAppSettings.LoggerDBSettings;
             (var modelId, var path) = loggerDBSettings.FillModelId();
             var queryCriteria = new QueryCriteria(_serverGlobal.DsCommonAppSettings, modelId, DateTime.Now.Date.AddDays(-1), null);
-            _dbWriter = DBLogger.InitializeLogReaderWriterOnDemandAsync(queryCriteria, systems, cleanExistingDb:false).Result;
-            DBLogger.TheDbWriter = _dbWriter;
-            _modelSubscription.Add(_dbWriter.LogSet.Value);
+            _dbWriter = DbWriter.CreateAsync(queryCriteria, systems, cleanExistingDb:false).Result;
+            _modelSubscription.Add(_dbWriter);
 
 
             IDisposable subscription =

@@ -162,6 +162,9 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSPilot.Winform", "Apps\DSPilot\DSPilot.Winform.csproj", "{D3AD31C8-DCF3-4F26-ABDC-14974D1F73F9}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Nuget", "Nuget", "{E6C42E55-8BA2-46A1-BAFA-A345A019C387}"
+	ProjectSection(SolutionItems) = preProject
+		src\Nuget.Candidates\Readm.txt = src\Nuget.Candidates\Readm.txt
+	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Nuget.Common", "src\Nuget.Candidates\Engine.Nuget.Common\Engine.Nuget.Common.csproj", "{9F9E4240-D8A8-4356-97ED-0EC8FA8BEEA7}"
 EndProject

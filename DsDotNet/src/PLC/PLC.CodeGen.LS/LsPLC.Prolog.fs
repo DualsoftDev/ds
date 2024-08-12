@@ -32,13 +32,13 @@ module XgiPrologModule =
         | _ ->
             Ok true
 
-    let validateAddress name (address:string) targetType = 
-        match targetType with       
-        |PlatformTarget.XGI  ->   if address.IsXGIAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
-        |PlatformTarget.XGK  ->   if address.IsXGKAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'" 
+    let validateAddress name (address:string) targetType =
+        match targetType with
+        |PlatformTarget.XGI  ->   if address.IsXGIAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'"
+        |PlatformTarget.XGK  ->   if address.IsXGKAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'"
         |_->
-             Error $"Invalid targetType: '{targetType}'" 
-        
+             Error $"Invalid targetType: '{targetType}'"
+
 
     /// Xml Symbol tag 가 가지는 속성
     type SymbolInfo = {
@@ -61,7 +61,7 @@ module XgiPrologModule =
             result {
                 let! _ = validateVariableName x.Name targetType
                 let! _ = if  x.Address.IsNullOrEmpty() && x.Device = ""  //빈주소 자동 변수로 허용
-                         then Ok true 
+                         then Ok true
                          else validateAddress x.Name x.Address targetType
                 return! Ok()
             }

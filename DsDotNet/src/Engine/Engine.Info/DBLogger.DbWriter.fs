@@ -1,42 +1,70 @@
 namespace Engine.Info
 open System
-open Dapper
-open Engine.Core
-open Dual.Common.Core.FS
-open Dual.Common.Db
+open System.Linq
 open System.Threading.Tasks
 open System.Collections.Concurrent
-open DBLoggerORM
 open System.Collections.Generic
+open System.Reactive.Disposables
+open Dapper
+
+open Dual.Common.Core.FS
+open Dual.Common.Db
+open DBLoggerORM
+open Engine.Core
+open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module DBWriterModule =
+    /// DbReader 및 DbWriter 의 공통 조상 class
     [<AbstractClass>]
-    type DbHandler(commonAppSettings: DSCommonAppSettings, logSet:LogSet option) =
+    type DbHandler(queryCriteria:QueryCriteria, logSet:LogSet option) as this =
+        do
+            DbHandler.TheDbHandler <- this
+        static member val TheDbHandler = getNull<DbHandler>() with get, set
+        interface IDisposable with
+            member x.Dispose() = x.Dispose()
+        member val Disposables = new CompositeDisposable() with get, set
         member val LogSet = logSet with get, set
-        member x.CommonAppSettings = commonAppSettings
+        member x.CommonAppSettings = queryCriteria.CommonAppSettings
+        abstract member Dispose: unit -> unit
+        default x.Dispose() =
+            tracefn "------------------ DbHandler disposing.."
+            x.Disposables.Dispose()
+            x.Disposables <- new CompositeDisposable()
 
     /// DB log writer.  Runtime engine
-    type DbWriter(commonAppSettings: DSCommonAppSettings, logSet) =
-        inherit DbHandler(commonAppSettings, logSet)
+    type DbWriter private (queryCriteria:QueryCriteria, logSet) =
+        inherit DbHandler(queryCriteria, logSet)
         let queue = ConcurrentQueue<ORMLog>()
         let originalToken2TokenIdDic = Dictionary<uint, int>()
 
-        new(commonAppSettings) = DbWriter(commonAppSettings, None)
-        //시뮬레이션 초기화 시에만 사용 
+        private new (queryCriteria) = new DbWriter(queryCriteria, None)
+
+        static member val TheDbWriter = getNull<DbWriter>() with get, set
+
+
+        //시뮬레이션 초기화 시에만 사용
         member x.ClearToken() = originalToken2TokenIdDic.Clear()
         member x.GetTokenId(originalToken:uint) = originalToken2TokenIdDic[originalToken]
         member x.AllocateTokenId(originalToken:uint, at:DateTime) =
             assert(!! originalToken2TokenIdDic.ContainsKey(originalToken))
 
-            use conn = commonAppSettings.CreateConnection()
+            use conn = x.CommonAppSettings.CreateConnection()
             let tokenId =
                 conn.InsertAndQueryLastRowIdAsync(
                     null,
                     $"INSERT INTO {Tn.Token} (at, originalToken, modelId) VALUES (@At, @OriginalToken, @ModelId)",
-                    {|At = at; OriginalToken=originalToken; ModelId=commonAppSettings.LoggerDBSettings.ModelId|}).Result
-            
-            originalToken2TokenIdDic.Add(originalToken, tokenId)
+                    {|At = at; OriginalToken=originalToken; ModelId=x.CommonAppSettings.LoggerDBSettings.ModelId|}).Result
+
+            originalToken2TokenIdDic.Add(originalToken, tokenId) |> ignore
+            tokenId
+
+        /// branchToken 이 trunkToken 에 병합되는 event 를 db 에 기록
+        member x.OnTokenMerged(branchToken, trunkToken) =
+            let bTokenId, tTokenId = x.GetTokenId(branchToken), x.GetTokenId(trunkToken)
+            use conn = x.CommonAppSettings.CreateConnection()
+            conn.Execute($"UPDATE {Tn.Token} SET mergedTokenId = {tTokenId} WHERE id = {bTokenId}")
+
 
 
         /// 주기적으로 memory -> DB 로 log 를 write
@@ -65,13 +93,13 @@ module DBWriterModule =
 
                 if newLogs.any () then
                     logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
-                    use conn = commonAppSettings.CreateConnection()
+                    use conn = x.CommonAppSettings.CreateConnection()
                     use! tr = conn.BeginTransactionAsync()
 
                     if (x.LogSet.Value.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log x.LogSet.Value) |> toList
                         x.LogSet.Value.BuildIncremental newLogs
-                    let currentModelId = commonAppSettings.LoggerDBSettings.ModelId
+                    let currentModelId = x.CommonAppSettings.LoggerDBSettings.ModelId
                     for l in newLogs do
                         let! stg = conn.QueryFirstAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
                         let modelId = stg.ModelId
@@ -105,7 +133,7 @@ module DBWriterModule =
         member x.writePeriodicAsync = x.dequeAndWriteDBAsync
 
 
-        member x.createLogInfoSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
+        member x.createLogSetForWriterAsync (queryCriteria: QueryCriteria) (systems: DsSystem seq) : Task<LogSet> =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
 
@@ -160,19 +188,27 @@ module DBWriterModule =
 
         member x.EnqueLog (log: DsLog) : unit = x.EnqueLogs ([ log ])
 
-        /// Log DB schema 생성
-        static member InitializeLogDbOnDemandAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
+        member x.InsertValueLog(time: DateTime, tag: TagEvent, tokenId:TokenIdType) =
+            let vlog = DBLog.ValueLog(time, tag, tokenId)
+            if tag.IsNeedSaveDBLog() then
+                x.EnqueLog(vlog)
+            vlog
+
+        override x.Dispose() =
+            base.Dispose()
+
+        /// Log DB schema 생성: model 정보 없이, database schema 만 생성
+        static member CreateSchemaAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
                 logDebug $":::initializeLogDbOnDemandAsync()"
                 let loggerDBSettings = commonAppSettings.LoggerDBSettings
                 if cleanExistingDb then
                     loggerDBSettings.DropDatabase()
                 loggerDBSettings.FillModelId() |> ignore
-                return DbWriter(commonAppSettings)
             }
 
 
-        static member InitializeLogWriterOnDemandAsync
+        static member CreateAsync
             (
                 queryCriteria: QueryCriteria,      // reader + writer 인 경우에만 non null 값
                 systems: DsSystem seq,
@@ -180,13 +216,41 @@ module DBWriterModule =
             ) =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
-                let! dbWriter = DbWriter.InitializeLogDbOnDemandAsync commonAppSettings cleanExistingDb
-                let! logSet = dbWriter.createLogInfoSetForWriterAsync queryCriteria systems
+                do! DbWriter.CreateSchemaAsync commonAppSettings cleanExistingDb
+                let dbWriter = new DbWriter(queryCriteria)
+                let! logSet = dbWriter.createLogSetForWriterAsync queryCriteria systems
                 dbWriter.LogSet <- Some logSet
 
                 commonAppSettings.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> dbWriter.writePeriodicAsync(counter).Wait())
-                |> logSet.Disposables.Add
+                |> dbWriter.Disposables.Add
 
+                let theSystem = systems.First()
+                let rt, mt, st = int VertexTag.realToken, int VertexTag.mergeToken, int VertexTag.sourceToken
+                let now = DateTime.Now
+                TagEventSubject.Subscribe(fun tag ->
+                    let mutable tokenId = TokenIdType()
+                    if tag.GetSystem() = theSystem && tag.IsVertexTokenTag() then
+                        let target = tag.GetTarget()
+                        let t = tag.TagKind
+                        if t = rt then
+                            let real = target :?> Real
+                            let realToken = real.GetRealToken()
+                            tokenId <- TokenIdType(dbWriter.GetTokenId(realToken));
+                        elif t = mt then
+                            let real = target :?> Real
+                            let branchToken = real.GetRealToken()  //삭제된 자신 토큰번호
+                            let trunkToken  = real.GetMergeToken() //삭제한 메인경로 토큰번호
+                            dbWriter.OnTokenMerged(branchToken, trunkToken) |> ignore
+                        elif t = st then
+                            let call = target :?> Call
+                            let sourceToken = call.GetSourceToken()
+                            dbWriter.AllocateTokenId(sourceToken, now) |> ignore
+
+                    dbWriter.InsertValueLog(now, tag, tokenId) |> ignore
+
+                ) |> dbWriter.Disposables.Add
+
+                DbWriter.TheDbWriter <- dbWriter
                 return dbWriter
             }
 

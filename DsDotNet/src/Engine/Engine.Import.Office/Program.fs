@@ -15,7 +15,7 @@ module testMain =
     let main _ =
         let testPath = "F:/Git/ds/DsDotNet/bin/net7.0-windows/HelloDS.pptx";
         let testPath = "F:/DsModeling/Side9/Side9.pptx";
-        let pptParms:PptParams = {TargetType = WINDOWS; AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true}
+        let pptParms:PptParams = {TargetType = (WINDOWS); DriverIO = (LS_XGK_IO); AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true}
 
 
         clearNFullSlotHwSlotDataTypes()

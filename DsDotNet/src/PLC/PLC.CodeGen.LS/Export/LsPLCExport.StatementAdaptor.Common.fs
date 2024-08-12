@@ -59,7 +59,7 @@ module ConvertorPrologModule =
         match typ.Name with
         | BOOL -> "BIT"
         | (INT8 | UINT8 | CHAR)
-        | (INT16 | UINT16) 
+        | (INT16 | UINT16)
         | (INT32 | UINT32) -> "WORD"
 
         | (STRING | FLOAT32 | FLOAT64 | INT64 | UINT64) -> "WORD"     // xxx 이거 맞나?
@@ -80,7 +80,7 @@ module ConvertorPrologModule =
 
     let systemTypeToXgxTypeName (target:PlatformTarget) (typ: System.Type) =
         match target with
-        | XGI -> systemTypeToXgiTypeName typ 
+        | XGI -> systemTypeToXgiTypeName typ
         | XGK -> systemTypeToXgkTypeName typ
         | _ -> failwithlog "ERROR"
 
@@ -171,7 +171,7 @@ module ConvertorPrologModule =
         | UINT64  -> XgxVar<uint64>(createParam ())
         | UINT8   -> XgxVar<uint8> (createParam ())
         | "DuFunction" ->
-            let defaultBool = 
+            let defaultBool =
                 {   defaultStorageCreationParams false (VariableTag.PlcUserVariable|>int) with
                         Name = name
                         Comment = Some comment }

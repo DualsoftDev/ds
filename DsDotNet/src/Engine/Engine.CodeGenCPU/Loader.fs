@@ -23,7 +23,7 @@ module CpuLoader =
             | ExternalPou  (e, _p) -> e.ReferenceSystem
 
         member x.ToExternalSystem() =
-            match x with
+            match x with 
             | ActivePou    (_, _p) -> None
             | DevicePou    (_, _p) -> None 
             | ExternalPou  (e, _p) -> Some e
@@ -66,7 +66,7 @@ module CpuLoader =
 
 
 
-    let applyTagManager(system:DsSystem, storages:Storages, target) =
+    let applyTagManager(system:DsSystem, storages:Storages, target:HwTarget) =
         let createTagM  (rootSys:DsSystem) (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 

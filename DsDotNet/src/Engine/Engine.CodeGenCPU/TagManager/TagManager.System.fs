@@ -10,13 +10,14 @@ module SystemManagerModule =
 
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (sys:DsSystem, rootSys:DsSystem, stg:Storages, target:PlatformTarget) =
-        // 시스템 TAG는 root 시스템   TAG 공용 사용 ex)curSys._ON  = rootSys._ON  
+    type SystemManager (sys:DsSystem, rootSys:DsSystem, stg:Storages, target:HwTarget) =
+        let cpu, _driverIO = target
+        // 시스템 TAG는 root 시스템   TAG 공용 사용 ex)curSys._ON  = rootSys._ON
         let dsSysTag (dt:DataType) autoAddr target (systemTag:SystemTag) (internalSysTag:bool) =
-            let name =  
+            let name =
                 if internalSysTag then
                     $"{systemTag}" |> validStorageName
-                else 
+                else
                     getStorageName rootSys (int systemTag)
 
             if stg.ContainsKey(name) then
@@ -40,6 +41,7 @@ module SystemManagerModule =
 
         let on           = dsSysBit false sys SystemTag._ON          true
         let off          = dsSysBit false sys SystemTag._OFF         true
+
         let auto_btn     = dsSysBit true  sys SystemTag.auto_btn     false
         let manual_btn   = dsSysBit true  sys SystemTag.manual_btn   false
         let drive_btn    = dsSysBit true  sys SystemTag.drive_btn    false
@@ -79,13 +81,13 @@ module SystemManagerModule =
         let manualMonitor    = dsSysBit true sys SystemTag.manualMonitor    false
         let driveMonitor     = dsSysBit true sys SystemTag.driveMonitor     false
         let errorMonitor     = dsSysBit true sys SystemTag.errorMonitor     false
-        let emergencyMonitor = dsSysBit true sys SystemTag.emergencyMonitor false  
+        let emergencyMonitor = dsSysBit true sys SystemTag.emergencyMonitor false
         let testMonitor      = dsSysBit true sys SystemTag.testMonitor      false
         let readyMonitor     = dsSysBit true sys SystemTag.readyMonitor     false
         let idleMonitor      = dsSysBit true sys SystemTag.idleMonitor      false
         let originMonitor    = dsSysBit true sys SystemTag.originMonitor    false
         let goingMonitor     = dsSysBit true sys SystemTag.goingMonitor     false
-        
+
         let flicker20msec  = dsSysBit true sys SystemTag._T20MS  true
         let flicker100msec = dsSysBit true sys SystemTag._T100MS true
         let flicker200msec = dsSysBit true sys SystemTag._T200MS true
@@ -97,12 +99,12 @@ module SystemManagerModule =
         let emulation      = dsSysBit true sys SystemTag.emulation false
 
 
-        do 
- 
+        do
+
             on.Value <- true
             off.Value <- false
 
-            if target = PlatformTarget.XGK then
+            if cpu = PlatformTarget.XGK then
                 on.Address  <- "F00099"
                 off.Address <- "F0009A"
 
@@ -115,15 +117,15 @@ module SystemManagerModule =
         interface ITagManager with
             member x.Target = sys
             member x.Storages = stg
-            
-        member s.TargetType = target 
-        member s.MutualCalls = mutualCalls 
+
+        member s.TargetType = target
+        member s.MutualCalls = mutualCalls
         member s.GetTempBoolTag(name:string) : PlanVar<bool>=
                 createPlanVar  stg  name DuBOOL true sys (int SystemTag.temp) sys :?> PlanVar<bool>
 
         member s.GetTempTimerTag(name:string) : TimerStruct =
-                timer stg name sys target
-            
+                timer stg name sys cpu
+
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with
             | SystemTag._ON        ->    on
@@ -156,27 +158,27 @@ module SystemManagerModule =
             //| SystemTag.datet_m         ->    dtimem
             //| SystemTag.datet_s         ->    dtimes
             | SystemTag.timeout     ->    tout
-            
+
             | SystemTag.pauseMonitor      -> pauseMonitor
-            | SystemTag.idleMonitor       -> idleMonitor     
-            | SystemTag.autoMonitor       -> autoMonitor     
-            | SystemTag.manualMonitor     -> manualMonitor   
-            | SystemTag.driveMonitor      -> driveMonitor    
-            | SystemTag.errorMonitor      -> errorMonitor    
+            | SystemTag.idleMonitor       -> idleMonitor
+            | SystemTag.autoMonitor       -> autoMonitor
+            | SystemTag.manualMonitor     -> manualMonitor
+            | SystemTag.driveMonitor      -> driveMonitor
+            | SystemTag.errorMonitor      -> errorMonitor
             | SystemTag.emergencyMonitor  -> emergencyMonitor
-            | SystemTag.testMonitor       -> testMonitor     
-            | SystemTag.readyMonitor      -> readyMonitor    
-            | SystemTag.originMonitor     -> originMonitor   
-            | SystemTag.goingMonitor      -> goingMonitor    
-            
-            
+            | SystemTag.testMonitor       -> testMonitor
+            | SystemTag.readyMonitor      -> readyMonitor
+            | SystemTag.originMonitor     -> originMonitor
+            | SystemTag.goingMonitor      -> goingMonitor
+
+
             | SystemTag._T20MS  -> flicker20msec
             | SystemTag._T100MS -> flicker100msec
             | SystemTag._T200MS -> flicker200msec
             | SystemTag._T1S    -> flicker1sec
             | SystemTag._T2S    -> flicker2sec
 
-            
+
             | SystemTag.emulation -> emulation
             | SystemTag.sim       -> sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"
@@ -185,4 +187,4 @@ module SystemManagerModule =
     type SystemManagerExt =
         [<Extension>] static member OnTag  (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag._ON)  :?> PlanVar<'T>
         [<Extension>] static member OffTag (x:ISystem) = ((x:?>DsSystem).TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<'T>
-       
+

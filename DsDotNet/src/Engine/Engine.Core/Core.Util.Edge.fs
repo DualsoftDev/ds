@@ -9,8 +9,6 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module EdgeModule =
 
-    
-
     /// Edge source 검색 결과 정보 : target 으로 들어오는 source vertices list 와 그것들이 약연결로 들어오는지, 강연결로 들어오는지 정보
     type EdgeSourcesWithStrength =
         | DuEssWeak of Vertex list
@@ -53,10 +51,10 @@ module EdgeModule =
 
     /// returns  reset outgoing edges for target
     let getResetEdgeTargets(source:Vertex) =
-        getEdgeTargets (source.Parent.GetGraph(), source, false) 
+        getEdgeTargets (source.Parent.GetGraph(), source, false)
     /// returns  Start outgoing edges for target
     let getStartEdgeTargets(source:Vertex) =
-        getEdgeTargets (source.Parent.GetGraph(), source, true) 
+        getEdgeTargets (source.Parent.GetGraph(), source, true)
 
 
 
@@ -67,7 +65,7 @@ module EdgeModule =
                 yield edge
          |]
 
-   
+
     let validateParentOfEdgeVertices (mei:ModelingEdgeInfo<Vertex>) (parent:FqdnObject) =
         let invalid = (mei.Sources @ mei.Targets).Select(fun v -> v.Parent.GetCore()).TryFind(fun c -> c <> parent)
         match invalid with
@@ -86,7 +84,7 @@ module EdgeModule =
     let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) =
         $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
 
-    
+
     let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
         edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
 
@@ -154,10 +152,10 @@ module EdgeModule =
 
     let isResetEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Reset)
     let isStartEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Start)
-    
+
 
     let mergeGraphs (graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge>  =
-        
+
         let g = Graph<Vertex, Edge>(None)
 
         for graph in graphs do
@@ -170,9 +168,9 @@ module EdgeModule =
 
 
     let changeRealGraph (graph: Graph<Vertex, Edge>) : Graph<Vertex, Edge>  =
-        
+
         let g = Graph<Vertex, Edge>(None)
-       
+
         for vertex in graph.Islands do
             if vertex.TryGetPureCall().IsNone then  //flow에서 조건으로 Call은 제외
                 g.Vertices.Add (vertex.GetPureReal():>Vertex) |>ignore
@@ -182,18 +180,18 @@ module EdgeModule =
                 let isEdgeMatch =
                     g.Edges.any(fun (e:Edge) ->
                         e.EdgeType = edge.EdgeType
-                        && e.Source = edge.Source.GetPureReal() 
+                        && e.Source = edge.Source.GetPureReal()
                         && e.Target = edge.Target.GetPureReal())
                 if not isEdgeMatch then
-                    Edge.Create(g, edge.Source.GetPureReal(), edge.Target.GetPureReal(), edge.EdgeType) |> ignore 
-                
+                    Edge.Create(g, edge.Source.GetPureReal(), edge.Target.GetPureReal(), edge.EdgeType) |> ignore
+
         g
 
 
     // Recursive function to find all Real objects connected via Start edges
     let getPathReals (graph: Graph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
         let graphOrder = graph.BuildPairwiseComparer()
-    
+
         let getStartReals (src: Vertex, visited: HashSet<Real>) : Real seq =
             graph.Edges
             |> filter isStartEdge
@@ -201,12 +199,12 @@ module EdgeModule =
             |> filter (fun n -> graphOrder src n = Some true)
             |> choose (fun r ->
                 match r with
-                | :? Real as real -> 
-                    if not (visited.Contains real) 
-                    then 
+                | :? Real as real ->
+                    if not (visited.Contains real)
+                    then
                         visited.Add real |> ignore
                         Some(real)
-                    else 
+                    else
                         None
                 | _ -> failwithlog $"{r.QualifiedName} is not real vertex"
                 )
@@ -246,7 +244,7 @@ module EdgeModule =
         |> iter (fun (api, resetAbleReals) ->
             sys.ApiItems
                 .Where(fun f -> f <> api && resetAbleReals.Contains(f.RX))
-                .Iter (fun f -> 
+                .Iter (fun f ->
                         ApiResetInfo.Create(sys, api.Name, "|>"|> toModelEdge ,f.Name, true) |> ignore
             )
         )
@@ -256,7 +254,7 @@ module EdgeModule =
         let calls = x.GetVerticesHasJob()
         calls.SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
              |> groupBy fst
-             |> iter(fun (k, vs) -> 
+             |> iter(fun (k, vs) ->
                     k.IsRootOnlyDevice <- not(vs.any(fun (_, c)->c.Parent.GetCore() :? Real))
                 )
 
@@ -282,10 +280,9 @@ module EdgeModule =
 [<Extension>]
 type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
-    
+
     [<Extension>] static member OfResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
 
-   
+
     [<Extension>] static member GetPathReals(inits:Real seq, g:Graph<Vertex,Edge>) : Real seq = getPathReals g (inits.OfType<Vertex>())
-    

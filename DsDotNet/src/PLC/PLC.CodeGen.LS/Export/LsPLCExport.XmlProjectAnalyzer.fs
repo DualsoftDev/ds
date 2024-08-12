@@ -31,7 +31,7 @@ module XgiXmlProjectAnalyzerModule =
                   | "X" -> index / 8
                   | ("B" | "W" | "D" | "L") ->
                       let byteSize = getByteSizeFromPrefix m target
-                      let s = index * byteSize 
+                      let s = index * byteSize
                       let e = s + byteSize - 1
                       yield! [ s..e ]
                   | _ -> failwithlog "ERROR"

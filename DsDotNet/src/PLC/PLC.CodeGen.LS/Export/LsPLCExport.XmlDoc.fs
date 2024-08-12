@@ -21,7 +21,7 @@ module internal XgxXmlExtensionImpl =
 type XgxXmlExtension =
     /// XmlNode '//Configurations/Configuration/GlobalVariables/{GlobalVariable, VariableComment}' 반환
     [<Extension>]
-    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:PlatformTarget) : XmlNode = getXPathGlobalVariable xgx |> xdoc.SelectSingleNode 
+    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:PlatformTarget) : XmlNode = getXPathGlobalVariable xgx |> xdoc.SelectSingleNode
 
     /// XGK 에서 사용할 수 없는 변수명 체크
     [<Extension>]
@@ -49,7 +49,7 @@ type XgxXmlExtension =
             |> map(fun x -> x.Attributes["Name"].Value, x)
             |> Tuple.toDictionary
 
-        // LocalVar 에서만 정의된 symbols 
+        // LocalVar 에서만 정의된 symbols
         let localOnlySymbolss:XmlNode[] =
             xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol")
             |> filter(fun x ->
@@ -77,7 +77,7 @@ type XgxXmlExtension =
             let xPathGlobalVar = getXPathGlobalVariable xgx
             let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()
             let localSymbolss:XmlNode[] = xdoc.GetXmlNodes($"{xPathLocalVar}/Symbols/Symbol").ToArray()
-        
+
             let check (s:XmlNode) =
                 let name = s.Attributes.["Name"].Value
                 let devPos = s.Attributes["DevicePos"]

@@ -59,7 +59,6 @@ module internal DBLoggerImpl =
 
             x.TheLastLog <- logs |> Seq.tryLast
 
-    let mutable logSet = getNull<LogSet> ()
 
     let internal createLogInfoSetCommonAsync
         (

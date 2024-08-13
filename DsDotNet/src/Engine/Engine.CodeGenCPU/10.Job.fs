@@ -34,7 +34,7 @@ type Job with
                         if j.ActionType = Push then
                             yield (sets, valExpr) --> (td.OutTag, fn)
                         else 
-                            let tempRising  = getSM(j).GetTempBoolTag(td.QualifiedName) 
+                            let tempRising  = getJSM(j).GetTempBoolTag(td.QualifiedName) 
                             yield! (sets, j.System) --^ (tempRising,  fn)
                             yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
                             yield (emg, valDefalut) --> (td.OutTag, fn)

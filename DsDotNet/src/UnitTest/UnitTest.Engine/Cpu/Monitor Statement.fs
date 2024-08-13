@@ -22,7 +22,7 @@ type Spec05_MonitorStatement() =
 
     [<Test>]
     member __.``M2 Pause Monitor`` () =
-        for v in t.ALL do
+        for v in t.Reals do
             v.M2_PauseMonitor() |> doCheck
 
    

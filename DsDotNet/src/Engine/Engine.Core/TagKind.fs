@@ -164,8 +164,6 @@ module TagKindList =
     | dummyCoinETs              = 11034
 
     | goingPulse                = 11037
-    | goingPulseRelay           = 11038
-    | goingPulseHold            = 11039
 
     | callCommandPulse          = 11040
     
@@ -189,9 +187,7 @@ module TagKindList =
     | txErrOffTimeShortage      = 11062
     | txErrOffTimeOver          = 11063
     | rxErrShort                = 11070
-    | rxErrShortRising          = 11071
     | rxErrOpen                 = 11074
-    | rxErrOpenRising           = 11075
 
     | workErrOriginGoing        = 11080
 
@@ -199,10 +195,8 @@ module TagKindList =
     [<Flags>]
     type ApiItemTag =
     | apiItemSet                = 12000
-    | apiItemSetPusle           = 12001
-    | apiItemSetPusleRelay      = 12002
-    | apiItemSetPusleHold       = 12003
-    | apiItemEnd                = 12005
+    | apiItemEnd                = 12001
+
     | sensorLinking             = 12006
     | sensorLinked              = 12007
 

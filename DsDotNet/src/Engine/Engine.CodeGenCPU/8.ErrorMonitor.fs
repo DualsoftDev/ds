@@ -44,23 +44,25 @@ type VertexTagManager with
 
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
-            if RuntimeDS.Package.IsPLCorPLCSIM() then
-                yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, fn)
-                yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  fn)
+            //if RuntimeDS.Package.IsPLCorPLCSIM() then
+            //    yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, fn)
+            //    yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  fn)
 
-            elif RuntimeDS.Package.IsPCorPCSIM() then 
-                yield! (input, v.System) --^ (v.ErrShortRising, fn)
-                yield! (!@input, v.System) --^ (v.ErrOpenRising,  fn)
-            else    
-                failWithLog $"Not supported {RuntimeDS.Package} package"
+            //elif RuntimeDS.Package.IsPCorPCSIM() then 
+            let errShortRising = v.System.GetTempBoolTag("errShortRising")
+            let errOpenRising = v.System.GetTempBoolTag("errOpenRising")
+            yield! (input, v.System) --^ (errShortRising, fn)
+            yield! (!@input, v.System) --^ (errOpenRising,  fn)
+            //else    
+            //    failWithLog $"Not supported {RuntimeDS.Package} package"
             
             (* short error *)
-            yield (checkCondi <&&>  rxReadyExpr <&&> v.ErrShortRising.Expr,  rst)  ==| (v.ErrShort, fn)
+            yield (checkCondi <&&>  rxReadyExpr <&&> errShortRising.Expr,  rst)  ==| (v.ErrShort, fn)
             (* open  error *)
             if call.UsingTon then
-                yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
+                yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
             else
-                yield (checkCondi <&&> rxFinishExpr                      <&&> v.ErrOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
+                yield (checkCondi <&&> rxFinishExpr                      <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         |]
         
 

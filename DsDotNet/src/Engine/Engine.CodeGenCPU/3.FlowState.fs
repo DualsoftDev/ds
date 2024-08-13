@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 type Flow with
 
     member f.ST1_OriginState() =
-        let set = f.Graph.Vertices.OfType<Real>().Select(getVM)
+        let set = f.Graph.Vertices.OfType<Real>().Select(getVMReal)
                    .Select(fun r-> r.OG).ToAndElseOn()
         let rst = f._off.Expr
 
@@ -39,7 +39,7 @@ type Flow with
         (set, rst) --| (f.emg_st, getFuncName())
 
     member f.ST5_ErrorState() =
-        let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVM) 
+        let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVMReal) 
                                 |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
         let setConditionError = !@f.readyCondition.Expr <&&> f.r_st.Expr //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         let set =  setDeviceError<||> setConditionError

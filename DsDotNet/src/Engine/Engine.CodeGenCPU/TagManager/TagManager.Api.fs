@@ -18,9 +18,6 @@ module ApiTagManagerModule =
 
         let apiItemTags = [|
             ApiItemTag.apiItemSet
-            ApiItemTag.apiItemSetPusle
-            ApiItemTag.apiItemSetPusleRelay
-            ApiItemTag.apiItemSetPusleHold
             ApiItemTag.apiItemEnd
             ApiItemTag.sensorLinking
             ApiItemTag.sensorLinked
@@ -42,9 +39,6 @@ module ApiTagManagerModule =
         member _.ApiItem = apiItem
 
         member val ApiItemSet           = apiItemDic[ApiItemTag.apiItemSet]
-        member val ApiItemSetPusle      = apiItemDic[ApiItemTag.apiItemSetPusle]
-        member val ApiItemSetPusleRelay = apiItemDic[ApiItemTag.apiItemSetPusleRelay]
-        member val ApiItemSetPusleHold  = apiItemDic[ApiItemTag.apiItemSetPusleHold]
         member val ApiItemEnd           = apiItemDic[ApiItemTag.apiItemEnd]
         member val SL1                  = apiItemDic[ApiItemTag.sensorLinking]
         member val SL2                  = apiItemDic[ApiItemTag.sensorLinked]

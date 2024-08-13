@@ -558,7 +558,7 @@ public partial class UcView : UserControl
         UpdateStatus(viewNode, false);//먼저 처리 나중에 에러 처리
         if (vv.Vertex is Real real)
         {
-            vv.LampOrigin = (real.TagManager as VertexTagManager).OG.Value;
+            vv.LampOrigin = (real.TagManager as RealVertexTagManager).OG.Value;
             UpdateOriginValue(viewNode, vv.LampOrigin, false);
         }
         if (vv.Vertex is Call || vv.Vertex is Alias s)

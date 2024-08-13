@@ -44,5 +44,5 @@ type VertexTagManager with
     member v.M2_PauseMonitor() =
         let set = v.Flow.p_st.Expr
         let rst = v._off.Expr
-
+        let v = getVMReal(v.Vertex)
         (set, rst) --| (v.PA, getFuncName())

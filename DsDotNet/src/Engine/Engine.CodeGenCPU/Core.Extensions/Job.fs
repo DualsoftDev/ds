@@ -13,7 +13,7 @@ open System
 
 [<AutoOpen>]
 module ConvertCpuJob =
-    let getSM(j:Job) = j.System.TagManager:?> SystemManager
+    let getJSM(j:Job) = j.System.TagManager:?> SystemManager
     let getJM(j:Job) = j.TagManager:?> JobManager
     type Job with
         member j.ActionInExpr = 

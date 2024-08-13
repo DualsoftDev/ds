@@ -86,8 +86,10 @@ type ApiItemManager with
         [|
             let api = am.ApiItem
             let pss = calls.Select(fun c-> td.GetPlanStart(c.GetPureCall().TargetJob)).ToOr()
-            yield! (pss, td.ParnetSystem) --^ (am.ApiItemSetPusle, fn)
-            yield  (am.ApiItemSetPusle.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
+            let tempRising  = getSM(td.ParnetSystem).GetTempBoolTag(td.QualifiedName) 
+
+            yield! (pss, td.ParnetSystem) --^ (tempRising, fn)
+            yield  (tempRising.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
         |]
 
     member am.A2_ApiEnd() =

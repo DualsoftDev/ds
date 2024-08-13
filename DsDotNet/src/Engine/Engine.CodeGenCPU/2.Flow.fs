@@ -27,7 +27,10 @@ type VertexTagManager with
                 <||> plans
                 <||> actionLinks
 
-        let rsts = (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
+        let rsts = if real.Graph.Vertices.any()
+                    then (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
+                    else real.V.RT.Expr <||> real.V.F.Expr
+
         (sets, rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
 
 

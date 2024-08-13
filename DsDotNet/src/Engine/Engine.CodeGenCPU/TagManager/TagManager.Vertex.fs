@@ -93,21 +93,9 @@ module TagManagerModule =
         member val F = createTag true VertexTag.finish
         ///Homing Status
         member val H = createTag true VertexTag.homing
-
-        //Monitor
-        ///Origin Monitor
-        member val OG = createTag false VertexTag.origin
-        ///Pause Monitor
-        member val PA = createTag false VertexTag.pause
-
-
         /// Going Pulse
         member val GP = createTag false VertexTag.goingPulse
-        /// Going Pulse Relay
-        member val GPR = createTag false VertexTag.goingPulseRelay
-        /// Going Pulse Hold
-        member val GPH = createTag false VertexTag.goingPulseHold
-
+        //ErrTRX Monitor
         member val ErrTRX = createTag false VertexTag.errorTRx
 
         member x.GetVertexTag (vt:VertexTag) :IStorage =
@@ -115,26 +103,18 @@ module TagManagerModule =
             let realM() = v.TagManager:?> RealVertexTagManager
 
             match vt with
-            | VertexTag.startTag -> x.ST :> IStorage
-            | VertexTag.resetTag -> x.RT :> IStorage
-            | VertexTag.endTag   -> x.ET :> IStorage
-            | VertexTag.ready    -> x.R  :> IStorage
-            | VertexTag.going    -> x.G  :> IStorage
-            | VertexTag.finish   -> x.F  :> IStorage
-            | VertexTag.homing   -> x.H  :> IStorage
-            | VertexTag.origin   -> x.OG :> IStorage
-            | VertexTag.pause    -> x.PA :> IStorage
-
-
-            | VertexTag.errorTRx            -> x.ErrTRX :> IStorage
-
-            | VertexTag.forceStart          -> x.SF :> IStorage
-            | VertexTag.forceReset          -> x.RF :> IStorage
-            | VertexTag.forceOn             -> x.ON :> IStorage
-
-            | VertexTag.goingPulse          -> x.GP :> IStorage
-            | VertexTag.goingPulseRelay     -> x.GPR :> IStorage
-            | VertexTag.goingPulseHold      -> x.GPH :> IStorage
+            | VertexTag.startTag   -> x.ST     :> IStorage
+            | VertexTag.resetTag   -> x.RT     :> IStorage
+            | VertexTag.endTag     -> x.ET     :> IStorage
+            | VertexTag.ready      -> x.R      :> IStorage
+            | VertexTag.going      -> x.G      :> IStorage
+            | VertexTag.finish     -> x.F      :> IStorage
+            | VertexTag.homing     -> x.H      :> IStorage
+            | VertexTag.forceStart -> x.SF     :> IStorage
+            | VertexTag.forceReset -> x.RF     :> IStorage
+            | VertexTag.forceOn    -> x.ON     :> IStorage
+            | VertexTag.goingPulse -> x.GP     :> IStorage
+            | VertexTag.errorTRx   -> x.ErrTRX :> IStorage
 
             | VertexTag.txErrOnTimeShortage  -> callM().ErrOnTimeShortage  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
@@ -143,7 +123,9 @@ module TagManagerModule =
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
             | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
-
+            
+            | VertexTag.origin               -> realM().OG     :> IStorage
+            | VertexTag.pause                -> realM().PA     :> IStorage
             | VertexTag.realOriginInit       -> realM().RO :> IStorage
             | VertexTag.realOriginButton     -> realM().OB :> IStorage
             | VertexTag.realOriginAction     -> realM().OA :> IStorage
@@ -165,7 +147,13 @@ module TagManagerModule =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
         let real = v:?> Real
+        let hasChildren = real.Graph.Vertices.any()
+        let useScript   = real.Script.IsSome
+        let useMotion   = real.Motion.IsSome
+        let useTime     = real.Time.IsSome
+        
         let sysManager = sys.TagManager :?> SystemManager
+        let off = sysManager.GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
         let createTag = createTagOnVertex v
 
@@ -197,6 +185,12 @@ module TagManagerModule =
         /// Real Origin Action
         member val OA         = createTag false VertexTag.realOriginAction
 
+        ///Origin Monitor
+        member val OG = createTag false VertexTag.origin
+        ///Pause Monitor
+        member val PA = createTag false VertexTag.pause
+
+   
         ///Real Init Relay
         member val RR         = createTag false VertexTag.relayReal
         ///Real Going Relay
@@ -209,11 +203,17 @@ module TagManagerModule =
         member val ErrGoingOrigin = createTag false VertexTag.workErrOriginGoing
 
         ///DAG Coin Start Coil
-        member val CoinAnyOnST  = createTag false VertexTag.dummyCoinSTs
+        member val CoinAnyOnST  = if hasChildren
+                                    then createTag false VertexTag.dummyCoinSTs 
+                                    else off
         ///DAG Coin Reset Coil
-        member val CoinAnyOnRT  = createTag false VertexTag.dummyCoinRTs
+        member val CoinAnyOnRT  = if hasChildren
+                                    then createTag false VertexTag.dummyCoinRTs
+                                    else off
         ///DAG Coin End Coil
-        member val CoinAnyOnET  = createTag false VertexTag.dummyCoinETs
+        member val CoinAnyOnET  = if hasChildren
+                                    then createTag false VertexTag.dummyCoinETs 
+                                    else off
 
         ///Timer time avg
         member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType |> fst)
@@ -221,17 +221,17 @@ module TagManagerModule =
         member x.IsFinished = x.Real.Finished
         member x.NoTransData = x.Real.NoTransData
 
-        member val ScriptStart  = createTag true VertexTag.scriptStart
-        member val MotionStart  = createTag true VertexTag.motionStart
-        member val TimeStart    = createTag true VertexTag.timeStart
+        member val ScriptStart  = if useScript then createTag true VertexTag.scriptStart else off
+        member val MotionStart  = if useMotion then createTag true VertexTag.motionStart else off
+        member val TimeStart    = if useTime   then createTag true VertexTag.timeStart   else off
 
-        member val ScriptEnd    = createTag true VertexTag.scriptEnd
-        member val MotionEnd    = createTag true VertexTag.motionEnd
-        member val TimeEnd      = createTag true VertexTag.timeEnd
+        member val ScriptEnd    = if useScript then createTag true VertexTag.scriptEnd   else off
+        member val MotionEnd    = if useMotion then createTag true VertexTag.motionEnd   else off
+        member val TimeEnd      = if useTime   then createTag true VertexTag.timeEnd     else off
 
-        member val ScriptRelay  = createTag true VertexTag.scriptRelay
-        member val MotionRelay  = createTag true VertexTag.motionRelay
-        member val TimeRelay    = createTag true VertexTag.timeRelay
+        member val ScriptRelay  = if useScript then createTag true VertexTag.scriptRelay else off
+        member val MotionRelay  = if useMotion then createTag true VertexTag.motionRelay else off
+        member val TimeRelay    = if useTime   then createTag true VertexTag.timeRelay   else off
 
     and CoinVertexTagManager(v:Vertex) =
         inherit VertexTagManager(v)
@@ -252,15 +252,12 @@ module TagManagerModule =
         member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType|>fst)
         ///Timer on delay
         member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType|>fst)
+        ///Timer time
+        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType|>fst)
+
 
         member val MM   = createTag  false VertexTag.callMemo
 
-        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType|>fst)
-
-        member val RXErrOpen          = createTag true VertexTag.rxErrOpen
-        member val RXErrShort         = createTag true VertexTag.rxErrShort
-        member val RXErrOpenRising    = createTag true VertexTag.rxErrOpenRising
-        member val RXErrShortRising   = createTag true VertexTag.rxErrShortRising
 
         member val ErrOnTimeShortage  = createTag true VertexTag.txErrOnTimeShortage
         member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver
@@ -268,9 +265,7 @@ module TagManagerModule =
         member val ErrOffTimeOver     = createTag true VertexTag.txErrOffTimeOver
 
         member val ErrShort           = createTag true VertexTag.rxErrShort
-        member val ErrShortRising     = createTag true VertexTag.rxErrShortRising
         member val ErrOpen            = createTag true VertexTag.rxErrOpen
-        member val ErrOpenRising      = createTag true VertexTag.rxErrOpenRising
 
         ///callCommandEnd
         member val CallCommandEnd     =  createTag  false VertexTag.callCommandEnd

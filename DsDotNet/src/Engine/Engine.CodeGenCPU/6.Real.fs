@@ -70,13 +70,15 @@ type RealVertexTagManager with
         let fn = getFuncName()
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
-        [|
-            (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, fn)     // S
-            (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, fn)     // R
-            (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
-        |]
-
-
+        if real.Graph.Vertices.any()
+        then
+            [|
+                (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, fn)     // S
+                (real.CoinRTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnRT, fn)     // R
+                (real.CoinETContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnET, fn)     // E
+            |]
+        else
+            [||]
 
     member v.R6_RealTokenMoveNSink() = 
         let fn = getFuncName()

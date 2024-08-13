@@ -16,16 +16,8 @@ module ConvertCpuApiItem =
         member td.GetPlanEnd(job:Job)    = getTM(td).PlanEnd(job)   
         member td.GetPlanOutput(job:Job) = getTM(td).PlanOutput(job)   
         
-        //member td.GetPlanStart(api:ApiItem)  = getTM(td).PlanStart
-        //member td.GetPlanEnd(api:ApiItem)    = getTM(td).PlanEnd(api)   
-        //member td.GetPlanOutput(api:ApiItem) = getTM(td).PlanOutput(api)   
-        
     type ApiItem with
-        member a.ApiItemSet                 = getAM(a).ApiItemSet
-        member a.ApiItemSetPusle        = getAM(a).ApiItemSetPusle
-        member a.ApiItemSetPusleRelay   = getAM(a).ApiItemSetPusleRelay
-        member a.ApiItemSetPusleHold    = getAM(a).ApiItemSetPusleHold
-
+        member a.ApiItemSet     = getAM(a).ApiItemSet
         member a.ApiItemEnd     = getAM(a).ApiItemEnd
 
         ///sensorLinking

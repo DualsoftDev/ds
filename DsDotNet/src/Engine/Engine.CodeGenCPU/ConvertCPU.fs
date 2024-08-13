@@ -69,6 +69,7 @@ module ConvertCPU =
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                 let vm = v.TagManager :?> RealVertexTagManager
+                yield vm.M2_PauseMonitor()
                 yield vm.F3_RealEndInFlow()    
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
@@ -88,7 +89,6 @@ module ConvertCPU =
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
                 let vm = v.TagManager :?> VertexTagManager
-                yield vm.M2_PauseMonitor()
                 yield! vm.S1_RGFH()
 
         ]

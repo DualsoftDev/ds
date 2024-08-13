@@ -15,8 +15,8 @@
     </ItemGroup>
 
     <ItemGroup>
-		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.1.7" />
-		<PackageReference Include="DualSoft-Common-Core" Version="0.2.10" />
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.1.8" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.2.11" />
         <PackageReference Include="DualSoft-Web-Blazor" Version="0.2.11" />
         <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.4" />
         <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />

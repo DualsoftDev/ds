@@ -108,6 +108,8 @@ module LSEAddressPattern =
             1, DataType.Bit
             8, DataType.Byte
             16, DataType.Word
+            32, DataType.DWord
+            64, DataType.LWord
         |] |> Tuple.toReadOnlyDictionary
 
 

@@ -29,10 +29,10 @@ module LSEAddressPattern =
         with exn ->
             None
 
-    let (|HexPattern|_|) (str: string) =
-            match System.Int32.TryParse(str, NumberStyles.HexNumber, CultureInfo.CurrentCulture) with
-            | true, v -> Some(v)
-            | _ -> None
+    //let (|HexPattern|_|) (str: string) =
+    //        match System.Int32.TryParse(str, NumberStyles.HexNumber, CultureInfo.CurrentCulture) with
+    //        | true, v -> Some(v)
+    //        | _ -> None
 
 
     let list5Digit = [ "L"; "N"; "D"; "R" ]

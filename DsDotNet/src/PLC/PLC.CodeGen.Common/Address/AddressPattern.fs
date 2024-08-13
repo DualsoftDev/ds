@@ -4,6 +4,7 @@ open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
+open Dual.PLC.TagParser.FS
 
 
 [<AutoOpen>]
@@ -96,108 +97,37 @@ module LSEAddressPattern =
             else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
 
 
+    let private deviceTypeDic =
+        [|
+            for t in DU.getEnumValues(typedefof<DeviceType>) do
+                t.ToString(), t :?> DeviceType
+        |] |> Tuple.toReadOnlyDictionary
+
+    let private dataTypeDic =
+        [|
+            1, DataType.Bit
+            8, DataType.Byte
+            16, DataType.Word
+        |] |> Tuple.toReadOnlyDictionary
+
+
     let createTagInfo = LsTagInfo.Create >> Some
     let (|LsTagXGIPattern|_|) ((modelId: int option), (tag: string)) =
-        let regexXGI1 = @"^%([IQUMLKFNRAW])X([\d]+)$"
-        let regexXGI2 = @"^%([IQU])X(\d+)\.(\d+)\.(\d+)$"
-        let regexXGI3 = @"^%([IQUMLKFNRAW])([BWDL])(\d+)$"
-        let regexXGI4 = @"^%([IQUMLKFNRAW])([BWDL])(\d+)\.(\d+)$"
-
-
-        let tag = tag.ToUpper()
-        match tag with
-        //%IX13412, %MX123423414
-        | RegexPattern regexXGI1 [ DevicePattern device; Int32Pattern bit ] ->
-            createTagInfo (tag, device, DataType.Bit, bit, modelId)
-
-        //%IX0.0.1, %QX0.0.1, %UX0.0.1
-        | RegexPattern regexXGI2 [ DevicePattern device; Int32Pattern file; WordSubBitPattern element; LWordSubBitPattern bit ] ->
-            let baseStep, slotStep = if device.Equals(DeviceType.U) then 512 * 16, 512 else 64 * 16, 64
-            let totalBitOffset = file * baseStep + element * slotStep + bit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-
-        //%IW0, %IL120, %MD120
-        | RegexPattern regexXGI3 [ DevicePattern device; DataTypePattern dataType; Int32Pattern offset ] ->
-            let byteOffset = offset * dataType.GetByteLength()
-            let totalBitOffset = byteOffset * 8
-            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
-
-        //%IW0.0, %IL120.45, %MD120.31
-        | RegexPattern regexXGI4 [ DevicePattern device; DataTypePattern dataType;Int32Pattern element; Int32Pattern bit ] ->
-            let validBit =
-                match dataType with
-                |Bit    ->  failwithf $"Pattern Error: {tag}"
-                |Byte  ->   (|ByteSubBitPattern|_|)  $"{bit}"
-                |Word  ->   (|WordSubBitPattern|_|)  $"{bit}"
-                |DWord  ->  (|DWordSubBitPattern|_|) $"{bit}"
-                |LWord  ->  (|LWordSubBitPattern|_|) $"{bit}"
-                |Continuous -> failwithf $"Pattern Error : {tag}"
-
-            if validBit.IsSome then
-                let uMemStep = if device.Equals(DeviceType.U) then 8 else 1
-                let bitStandard = 8 * uMemStep / dataType.GetByteLength()
-
-                let bitSet = (bit % bitStandard) * dataType.GetByteLength() * 8
-                let elementSet = (element % 16 + bit / bitStandard) * 8 * 8 * uMemStep
-
-                let offset = bitSet + elementSet
-                createTagInfo (tag, device, DataType.Bit, offset, modelId)
-            else None
-
-        | _ ->
-            logWarn $"Failed to parse XGI tag : {tag}"
+        match tryParseXgiTag tag with
+        | Some (device, dataSize, bitOffset) ->
+            let deviceType, dataType = deviceTypeDic[device], dataTypeDic[dataSize]
+            createTagInfo(tag, deviceType, dataType, bitOffset, modelId)
+        | None ->
             None
-
 
 
     let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string)) =
-        let tag = tag.ToUpper()
-
-        if tag.StartsWith("R") then
-            noop()
-
-        let getInfoFromHexaBitString(hexaBit:string) : DataType * int =
-            if hexaBit.IsNullOrEmpty() then
-                DataType.Word, 0
-            else
-                let hexaBit = if hexaBit.StartsWith(".") then hexaBit.Substring(1) else hexaBit
-                match (|HexPattern|_|) hexaBit with
-                | Some hexaBit -> DataType.Bit, hexaBit
-                | None -> DataType.Word, 0
-
-        match tag with
-        // Bit or Word (HEX),
-        // PMKF: 4 or 5 digits
-        | RegexPattern @"^([PMKF])(\d{4})([\da-fA-F]?)$" [ DevicePattern device; Int32Pattern word; hexaBitString] ->
-            let dataType, bitOffset = getInfoFromHexaBitString hexaBitString
-            let totalBitOffset = word * 16 + bitOffset
-            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
-
-        // Bit or Word (HEX)
-        | RegexPattern @"^([TCLNDRZR])(\d+)(\.[\da-fA-F]?)?$" [ DevicePattern device; Int32Pattern word; hexaBitString ] ->
-            let dataType, bitOffset = getInfoFromHexaBitString hexaBitString
-            let totalBitOffset = word * 16 + bitOffset
-            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
-
-        // Bit or Word (HEX)
-        // U23.31  //채널 31max
-        | RegexPattern @"^([U])(\d+)\.(\d+)(\.[\da-fA-F])?$" [ DevicePattern device; Int32Pattern file; Int32Pattern sub; hexaBitString ] ->
-            let dataType, bitOffset = getInfoFromHexaBitString hexaBitString
-            let totalBitOffset = (file * 32 * 16) + (sub * 16) + bitOffset
-            createTagInfo (tag, device, dataType, totalBitOffset, modelId)
-
-        | RegexPattern @"^([S])(\d+)\.(\d+)$" [ DevicePattern device; Int32Pattern word; HexPattern hexaBit ] ->
-            let totalBitOffset = word * 16 + hexaBit
-            createTagInfo (tag, device, DataType.Bit, totalBitOffset, modelId)
-
-        | RegexPattern @"^(ZR)(\d+)$" [ DevicePattern device; Int32Pattern word ] ->
-            let totalBitOffset = word * 16
-            createTagInfo (tag, device, DataType.Word, totalBitOffset, modelId)
-
-        | _ ->
-            logWarn $"Failed to parse XGK tag : {tag}"
+        match tryParseXgkTag tag with
+        | Some (device, dataSize, bitOffset) ->
+            let deviceType, dataType = deviceTypeDic[device], dataTypeDic[dataSize]
+            createTagInfo(tag, deviceType, dataType, bitOffset, modelId)
+        | None ->
             None
-
 
     let tryParseXGITag tag = (|LsTagXGIPattern|_|) (None, tag)
     ///XGK 검증필요

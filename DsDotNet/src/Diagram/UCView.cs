@@ -11,6 +11,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Windows.Forms;
+using static Engine.CodeGenCPU.JobManagerModule;
+using static Engine.CodeGenCPU.TagManagerModule;
+using static Engine.CodeGenCPU.TaskDevManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.DsConstants;
 using static Engine.Core.DsText;
@@ -130,7 +133,6 @@ public partial class UcView : UserControl
         });
     }
 
-
     private void UpdateLabelText(Node nNode, ViewNode viewNode)
     {
         var goingCnt = viewNode.GoingCnt;
@@ -140,6 +142,10 @@ public partial class UcView : UserControl
         else
             nNode.LabelText = org;
 
+    }
+    private void InitLabelText(Node nNode, ViewNode viewNode)
+    {
+        UpdateLabelText(nNode, viewNode);
         nNode.Label.FontColor = Color.White;
         if (viewNode.ViewType == ViewType.VREAL)
         {
@@ -194,7 +200,7 @@ public partial class UcView : UserControl
         }
 
         Edge gEdge = viewer.Graph.AddEdge(subGraph.Id, "", subGraph.Id);
-        UpdateLabelText(gEdge.SourceNode, viewNode);
+        InitLabelText(gEdge.SourceNode, viewNode);
         UpdateNodeView(gEdge.SourceNode, viewNode);
         gEdge.IsVisible = false;
 
@@ -305,8 +311,8 @@ public partial class UcView : UserControl
            throw new Exception($"Error {et.ToText()} not DrawEdgeStyle");
         }
 
-        UpdateLabelText(gEdge.SourceNode, edge.Sources.First());
-        UpdateLabelText(gEdge.TargetNode, edge.Targets.First());
+        InitLabelText(gEdge.SourceNode, edge.Sources.First());
+        InitLabelText(gEdge.TargetNode, edge.Targets.First());
 
         if (model)
         {
@@ -549,17 +555,35 @@ public partial class UcView : UserControl
 
     public void UpdateViewNode(ViewNode viewNode, ViewVertex vv)
     {
-        bool vRefresh = false;
+        UpdateStatus(viewNode, false);//먼저 처리 나중에 에러 처리
+        if (vv.Vertex is Real real)
+        {
+            vv.LampOrigin = (real.TagManager as VertexTagManager).OG.Value;
+            UpdateOriginValue(viewNode, vv.LampOrigin, false);
+        }
+        if (vv.Vertex is Call || vv.Vertex is Alias s)
+        {
+            if (vv.Vertex.TryGetPureCall() != null)
+            {
+                var call = vv.Vertex.GetPureCall();
+                if (call.IsJob)
+                {
+                    vv.LampInput = (call.TargetJob.TagManager as JobManager).InDetected.Value;
+                    vv.LampOutput = (call.TargetJob.TagManager as JobManager).OutDetected.Value;
+                    vv.LampPlanEnd = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(call.TargetJob).Value));
 
-        UpdateStatus(viewNode, vRefresh);
-        UpdateOriginValue(viewNode, vv.LampOrigin, vRefresh);
+                    bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)
+                    {
+                        return call.TargetJob.TaskDefs.Select(t => (TaskDevManager)t.TagManager).All(predicate);
+                    }
+                }
+            }
 
-        UpdateInValue(viewNode, vv.LampInput, vRefresh);
-        UpdateOutValue(viewNode, vv.LampOutput, vRefresh);
-        UpdateError(viewNode, vv.IsError, vv.ErrorText, vRefresh);
-
-        UpdatePlanEndValue(viewNode, vv.LampPlanEnd, vRefresh);
-
+            UpdateInValue(viewNode, vv.LampInput, false);
+            UpdateOutValue(viewNode, vv.LampOutput, false);
+            UpdateError(viewNode, vv.IsError, vv.ErrorText, false);
+            UpdatePlanEndValue(viewNode, vv.LampPlanEnd, false);
+        }
         RefreshGraph();
     }
 
@@ -580,8 +604,9 @@ public partial class UcView : UserControl
         Node node = findNode(viewNode);
         if (node != null)
         {
-            UpdateFillColor(isError, node, Color.Red);
-            //UpdateFontColor(isError, errorText, node, viewNode.ViewType);
+            UpdateFontColor(isError, errorText, node, viewNode.ViewType);
+            UpdateBackColor(isError ? null : viewNode.Status4 , node);
+
             if (vRefresh) RefreshGraph();
         }
     }
@@ -592,13 +617,11 @@ public partial class UcView : UserControl
         var org = node.Label.Text.Split('\n')[0];
         if (err)
         {
-            node.Label.FontColor = Color.Red;
             if (viewType != ViewType.VREAL)
                 node.Label.Text = $"{org}\n{errText}";
         }
         else
         {
-            node.Label.FontColor = Color.White;
             if (viewType != ViewType.VREAL)
                 node.Label.Text = org;
         }
@@ -606,6 +629,10 @@ public partial class UcView : UserControl
 
     private void UpdateBackColor(Status4 newStatus, Node node)
     {
+        if(newStatus == null) //  null 일경우 상태이상
+        {
+            node.Attr.FillColor = Color.DarkRed;
+        }
         if (newStatus == Status4.Ready)
         {
             node.Attr.FillColor = Color.DarkGreen;

@@ -277,8 +277,6 @@ namespace Diagram.View.MSAGL
                             }
                         case (int)TaskDevTag.planEnd:
                             {
-                                if (!RuntimeDS.Package.IsPackageSIM()) return;
-
                                 bool on = false;
 
                                 bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)

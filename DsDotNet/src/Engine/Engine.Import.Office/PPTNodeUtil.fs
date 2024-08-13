@@ -75,7 +75,10 @@ module PptNodeUtilModule =
                                 //if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
                                 //    $":{v}s" |> getTaskDevParam |> snd
                                 //else
-                                    $":{vp.ToText()}" |> getTaskDevParam |> snd
+                                    if vp.IsDefaultValue then
+                                        $":True" |> getTaskDevParam |> snd
+                                    else
+                                        $":{vp.ToText()}" |> getTaskDevParam |> snd
                             | None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine

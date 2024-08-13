@@ -17,6 +17,7 @@ type IHwTag =
     abstract member DataType : DataType
     [<Browsable(false)>]
     abstract member Index  : int
+    [<Browsable(false)>]
     abstract member MemoryName : string
     abstract member GetTarget : unit -> IQualifiedNamed
     abstract member GetDeviceAddress : unit -> string

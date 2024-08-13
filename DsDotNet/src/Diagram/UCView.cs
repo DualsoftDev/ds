@@ -1,3 +1,4 @@
+using Antlr4.Runtime.Tree;
 using Dual.Common.Core;
 using Dual.Common.Winform;
 using Engine.Core;
@@ -579,7 +580,8 @@ public partial class UcView : UserControl
         Node node = findNode(viewNode);
         if (node != null)
         {
-            UpdateFontColor(isError, errorText, node, viewNode.ViewType);
+            UpdateFillColor(isError, node, Color.Red);
+            //UpdateFontColor(isError, errorText, node, viewNode.ViewType);
             if (vRefresh) RefreshGraph();
         }
     }

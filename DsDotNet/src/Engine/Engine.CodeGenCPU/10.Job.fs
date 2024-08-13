@@ -21,30 +21,30 @@ type Job with
                         else td.GetPlanOutput(j).Expr
 
                     let outParam = td.GetOutParam(j)
+                    let emg = call.Flow.emg_st.Expr
                   
                     if outParam.DataType = DuBOOL then 
                         if j.ActionType = Push then 
-                            yield (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)
+                            yield (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)  //단동 실린더? 멈추면 반대로 움직여서 emg 삽입??
                         else 
-                            yield (sets, _off) --| (td.OutTag:?> Tag<bool>, fn)
-
+                            yield (sets, emg) --| (td.OutTag:?> Tag<bool>, fn)
                     else
                         let valExpr = outParam.WriteValue|>literal2expr
+                        let valDefalut = outParam.DefaultValue|>literal2expr
                         if j.ActionType = Push then
                             yield (sets, valExpr) --> (td.OutTag, fn)
                         else 
-                            if RuntimeDS.Package.IsPLCorPLCSIM() then
-                                yield (fbRising[sets], valExpr) --> (td.OutTag, fn)
-
-                            elif RuntimeDS.Package.IsPCorPCSIM() then                                
-                                let tempRising  = getSM(j).GetTempBoolTag(td.QualifiedName) 
-                                yield! (sets, j.System) --^ (tempRising,  fn)
-                                yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
-                            else    
-                                failWithLog $"Not supported {RuntimeDS.Package} package"
+                            let tempRising  = getSM(j).GetTempBoolTag(td.QualifiedName) 
+                            yield! (sets, j.System) --^ (tempRising,  fn)
+                            yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
+                            yield (emg, valDefalut) --> (td.OutTag, fn)
         |]
 
-
+                            //if RuntimeDS.Package.IsPLCorPLCSIM() then
+                            //    yield (fbRising[sets], valExpr) --> (td.OutTag, fn)
+                            //elif RuntimeDS.Package.IsPCorPCSIM() then                                
+                            //else    
+                            //    failWithLog $"Not supported {RuntimeDS.Package} package"
 
     member j.J2_InputDetected() =
         let _off = j.System._off.Expr

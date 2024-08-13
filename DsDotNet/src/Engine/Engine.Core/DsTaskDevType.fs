@@ -193,6 +193,12 @@ module rec DsTaskDevType =
             | Some v -> v
             | _ -> true
 
+        ///기본값은 true
+        member x.DefaultValue = 
+            match valueParam.TargetValue with
+            | Some v -> v.GetType() |> typeDefaultValue
+            | _ -> failWithLog $"DefaultValue {x}is not valid"
+
         member x.DataType = valueParam.DataType 
   
         member x.Time = devTime

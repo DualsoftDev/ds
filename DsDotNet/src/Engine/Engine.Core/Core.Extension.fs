@@ -195,9 +195,6 @@ module CoreExtensionModule =
     type TaskDev with
 
         member x.FirstApi = x.ApiItems.First()
-        member x.IsAnalogSensor = x.InTag.IsNonNull() && x.InTag.DataType <> typedefof<bool>
-        member x.IsAnalogActuator = x.OutTag.IsNonNull() && x.OutTag.DataType <> typedefof<bool>
-        member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
   
         member x.GetInParam(jobFqdn:string) =
             match x.DicTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
@@ -364,6 +361,7 @@ module CoreExtensionModule =
 
     type Call with
         member x.IsFlowCall = x.Parent.GetCore() :? Flow
+        member x.Flow = x.Parent.GetFlow()
         member x.NameForGraph = getCallName x
 
         member x.System = x.Parent.GetSystem()

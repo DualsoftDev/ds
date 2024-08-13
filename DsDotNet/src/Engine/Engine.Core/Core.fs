@@ -471,8 +471,11 @@ module CoreModule =
         //CPU 생성시 할당됨 OutTag
         member val OutTag = getNull<ITag>() with get, set
 
+        member x.IsAnalogSensor = x.InTag.IsNonNull() && x.InTag.DataType <> typedefof<bool>
+        member x.IsAnalogActuator = x.OutTag.IsNonNull() && x.OutTag.DataType <> typedefof<bool>
+        member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
+
         member val IsRootOnlyDevice = false  with get, set
-   
 
     /// Job 정의: Call 이 호출하는 Job 항목
     type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =

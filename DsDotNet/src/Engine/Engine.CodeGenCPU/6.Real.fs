@@ -135,14 +135,24 @@ type RealVertexTagManager with
     member v.R10_RealGoingTime(): CommentedStatement [] =
         let fn = getFuncName()
         [|
+            let getTimeStatement() =
+                [|  yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, fn)
+                    yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, fn)     |]
+                   
             if v.Real.Time.IsSome then
+                
                 yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
                 yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
                 
                 if RuntimeDS.Package.IsPackageSIM() then
                     if RuntimeDS.RuntimeMotionMode = MotionAsync then
-                        yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, fn)
-                        yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, fn)                        
+                        yield! getTimeStatement() 
+                    elif RuntimeDS.RuntimeMotionMode = MotionSync then
+                        if v.Real.Motion.IsSome then
+                            yield (v.MotionEnd.Expr  , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
+                        else 
+                            yield! getTimeStatement() 
+
                 else 
                     yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, fn)
                     
@@ -162,13 +172,6 @@ type RealVertexTagManager with
                         else 
                             yield (v.MotionStart.Expr, v._off.Expr) --| (v.MotionEnd, fn)   
 
-                    elif RuntimeDS.RuntimeMotionMode = MotionSync then
-                        if v.Real.TimeAvg.IsSome then
-                            yield (v.MotionEnd.Expr    , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
-                        else 
-                            ()
-                    else 
-                        failwithlog $"RuntimeMotionMode err : {RuntimeDS.RuntimeMotionMode}"
                 else
                     let realSensor  = v.Real.ParentApiSensorExpr
                     if realSensor.IsNull() then

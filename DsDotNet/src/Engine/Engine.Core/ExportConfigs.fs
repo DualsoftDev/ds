@@ -18,7 +18,7 @@ module ExportConfigsMoudle =
 
     type InterfaceConfig = {
         SystemName: string
-        HwName: string //LS-XGI, LS-XGK, PC
+        HwName: string //LS-XGI-IO, LS-XGK-IO, PC
         DsPlanInterfaces: DsPlanInterface[]
         DsActionInterfaces: DsActionInterface[]
     }

@@ -398,19 +398,20 @@ module XgiExportModule =
                     Comment = prologComment
                     GlobalStorages = globalStorages
                     LocalStorages = localStorages
-                    CommentedStatements = commentedStatements } =
-                x
+                    CommentedStatements = commentedStatements
+                } = x
 
             let newLocalStorages, newCommentedXgiStatements =
                 css2Css prjParam localStorages.Values commentedStatements
 
             let globalStoragesRefereces =
-                [
+                seq {
                     // POU 에 사용된 모든 storages (global + local 모두 포함)
                     let allUsedStorages =
-                        [ for cstmt in commentedStatements do
-                              yield! cstmt.CollectStorages() ]
-                        |> List.distinct
+                        seq {
+                            for cstmt in commentedStatements do
+                              yield! cstmt.CollectStorages() }
+                        |> distinct
 
                     yield! newLocalStorages.Where(fun s -> s.IsGlobal)
 
@@ -418,15 +419,16 @@ module XgiExportModule =
                         (* 'Timer1.Q' 등의 symbol 이 사용되었으면, Timer1 을 global storage 의 reference 로 간주하고, 이를 local var 에 external 로 등록한다. *)
                         match stg.Name with
                         | RegexPattern @"(^[^\.]+)\.(.*)$" [ structName; _tail ] ->
-                            if globalStorages.ContainsKey structName then
-                                yield globalStorages[structName]
-                            else
+                            match globalStorages.TryFindValue(structName) with
+                            | Some v -> yield v
+                            | _ ->
                                 logWarn $"Unknown struct name {structName}"
-                        | _ -> yield stg ]
+                        | _ -> yield stg }
                 |> distinct
                 |> getGlobalTagSkipSysTag
                 |> Seq.sortBy (fun stg -> stg.Name)
 
+#if DEBUG
             (* storage 참조 무결성 체크 *)
             do
                 for ref in globalStoragesRefereces do
@@ -436,6 +438,7 @@ module XgiExportModule =
 
                     if not (inGlobal || inLocal) then
                         failwithf "Storage '%s' is not defined" name
+#endif
 
             let newLocalStorages = newLocalStorages.Except(globalStoragesRefereces)
 
@@ -526,11 +529,9 @@ module XgiExportModule =
                     POUs = pous
                 } = prjParam
 
-            tracefn("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
             // todo : 사전에 처리 되었어야...
             for g in globalStorages.Values do
                 g.IsGlobal <- true
-            noop()
 
             EnableXmlComment <- enableXmlComment
 
@@ -619,14 +620,6 @@ module XgiExportModule =
                         |> map standardizeAddress
                         |> filter (fun addr -> addr[0] = '%' && addr[1].IsOneOf('I', 'Q'))
 
-                    //let standardize (addrs: string seq) =
-                    //    addrs
-                    //    |> filter notNullAny
-                    //    |> map standardizeAddress
-                    //    |> filter (function
-                    //        | RegexPattern @"^%[IQ]" _ -> true
-                    //        | _ -> false)
-
                     let existingGlobalAddresses = existingGlobalSymbols |> map address |> standardize
 
                     let currentGlobalAddresses =
@@ -707,6 +700,7 @@ module XgiExportModule =
                 for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
                     let mainScan =   if i = 0 then Some(mainScanName) else None
                     // POU 단위로 xml rung 생성
+                    // [optimize] : 1.5초 정도 소요
                     let programXml =
                         pou
                             .DuplicateExcludingUdtDeclarations()

@@ -24,20 +24,21 @@ module XgiPrologModule =
             xml
 
     let validateVariableName (name:string) (targetType:PlatformTarget) =
-        match name.ToUpper() with
-        | RegexPattern @"^([NMR][XBWDL]?)(\d+)$" [_reserved; _num] when targetType = XGI ->
-            Error $"'{name}' is not valid symbol name.  (Can't use direct variable name)"
-        | RegexPattern @"([\s]+)" [_ws] ->
-            Error $"'{name}' contains white space char"
-        | _ ->
+        let n = name.ToUpper()
+        if targetType = XGI && n[0].IsOneOf('N', 'M', 'R') && Regex.IsMatch(n.Substring(1), @"^([XBWDL]?)(\d+)$") then
+            // @"^([NMR][XBWDL]?)(\d+)$"
+            Error $"'{n}' is not valid symbol name.  (Can't use direct variable name)"
+        elif Regex.IsMatch(n, @"[\s]+") then
+            Error $"'{n}' contains white space char"
+        else
             Ok true
+
 
     let validateAddress name (address:string) targetType =
         match targetType with
-        |PlatformTarget.XGI  ->   if address.IsXGIAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'"
-        |PlatformTarget.XGK  ->   if address.IsXGKAddress() then Ok true  else Error $"Invalid address: '{name} ({address})'"
-        |_->
-             Error $"Invalid targetType: '{targetType}'"
+        | XGI -> if address.IsXGIAddress() then Ok true else Error $"Invalid address: '{name} ({address})'"
+        | XGK -> if address.IsXGKAddress() then Ok true else Error $"Invalid address: '{name} ({address})'"
+        | _ -> Error $"Invalid targetType: '{targetType}'"
 
 
     /// Xml Symbol tag 가 가지는 속성
@@ -60,9 +61,11 @@ module XgiPrologModule =
         member x.Validate(targetType) =
             result {
                 let! _ = validateVariableName x.Name targetType
-                let! _ = if  x.Address.IsNullOrEmpty() && x.Device = ""  //빈주소 자동 변수로 허용
-                         then Ok true
-                         else validateAddress x.Name x.Address targetType
+                let! _ =
+                    if x.Address.IsNullOrEmpty() && x.Device = "" then   //빈주소 자동 변수로 허용
+                         Ok true
+                    else
+                        validateAddress x.Name x.Address targetType
                 return! Ok()
             }
         member x.IsDirectAddress = x.AddressAlias.any()

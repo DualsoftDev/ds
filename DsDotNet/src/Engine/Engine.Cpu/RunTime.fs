@@ -131,7 +131,8 @@ module RunTime =
             let mutable endStepByStatus = false
             while not(endStepByStatus) do
                 let chTags = scanOnce()
-                endStepByStatus <- chTags |> Seq.exists (fun f -> f.DsSystem = activeSys && f.IsStatusTag())
+                endStepByStatus <- chTags.isEmpty()
+                                   || chTags |> Seq.exists (fun f -> f.DsSystem = activeSys && f.IsStatusTag())
 
         interface IDisposable with
             member x.Dispose() = x.Dispose()

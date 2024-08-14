@@ -49,8 +49,8 @@ type VertexTagManager with
             //    yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  fn)
 
             //elif RuntimeDS.Package.IsPCorPCSIM() then 
-            let errShortRising = v.System.GetTempBoolTag("errShortRising")
-            let errOpenRising = v.System.GetTempBoolTag("errOpenRising")
+            let errShortRising = v.System.GetTempBoolTag($"{call.QualifiedName}errShortRising")
+            let errOpenRising = v.System.GetTempBoolTag($"{call.QualifiedName}errOpenRising")
             yield! (input, v.System) --^ (errShortRising, fn)
             yield! (!@input, v.System) --^ (errOpenRising,  fn)
             //else    
@@ -65,6 +65,8 @@ type VertexTagManager with
                 yield (checkCondi <&&> rxFinishExpr                      <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         |]
         
+
+
 
     member v.E4_RealErrorTotalMonitor() =
         let real = v.Vertex :?> Real

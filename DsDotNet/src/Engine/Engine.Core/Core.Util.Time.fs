@@ -4,49 +4,42 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System.Linq
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module TimeModule =
 
-    let rec dfs (graph: Graph<Vertex, Edge>, current: Vertex, target: Vertex, visited: HashSet<Vertex>, timeAcc: int, maxTime: int ref) =
+    let rec dfs (graph: Graph<Vertex, Edge>, current: Vertex, target: Vertex, visited: HashSet<Vertex>, timeAcc: float, maxTime: float ref) =
         if current = target then
             maxTime.Value <- max maxTime.Value timeAcc
         else
             visited.Add(current) |> ignore
             for edge in graph.GetOutgoingEdges(current) do
-                if not (visited.Contains(edge.Target)) && edge.Target.Time.IsSome then
-                    dfs(graph, edge.Target, target, visited, timeAcc + edge.Target.Time.Value, maxTime)
+                if not (visited.Contains(edge.Target)) && edge.Target.GetPureReal().Time.IsSome then
+                    dfs(graph, edge.Target, target, visited, timeAcc + edge.Target.GetPureReal().Time.Value, maxTime)
             visited.Remove(current) |> ignore
 
-
-
-    let find_max_path_time (graph: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<int> =
-        let find_time (graph: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<int> =
-            if src.Time.IsNone || tgt.Time.IsNone then
+    let find_max_path_time (graph: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
+        let find_time (graph: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<float> =
+            if src.GetPureReal().Time.IsNone || tgt.GetPureReal().Time.IsNone then
                 None
             elif src = tgt then
-                Some src.Time.Value
+                Some (src.GetPureReal().Time.Value)
             else
-                let maxTime = ref -1
+                let maxTime = ref -1.0
                 let visited = HashSet<Vertex>()
 
-                dfs(graph, src, tgt, visited, src.Time.Value, maxTime)
+                dfs(graph, src, tgt, visited, src.GetPureReal().Time.Value, maxTime)
 
-                if maxTime.Value > -1 then Some maxTime.Value else None
+                if maxTime.Value > -1.0 then Some maxTime.Value else None
 
-        let getDummyAliasTarget name vertex =
-            let aliasTarget =
-                match getPure(vertex) with
-                | :? Call as c -> DuAliasTargetCall c
-                | :? Real as r -> DuAliasTargetReal r
-                | _ -> failWithLog "Invalid source vertex type"
+        let getDummyTarget (vertex:Vertex) =
+            let real = Real.Create(Guid.NewGuid().ToString(), vertex.Parent.GetFlow())
+            real.Time <- Some 0.0
+            real
 
-            let alias = Alias.Create(name, aliasTarget, vertex.Parent, false)
-            alias.Time <- Some 0
-            alias
-
-        let dummySrc = getDummyAliasTarget "dummySrc"  (srcs.First())
-        let dummyTgt = getDummyAliasTarget "dummyTgt"  (tgts.First())
+        let dummySrc = getDummyTarget (srcs.First())
+        let dummyTgt = getDummyTarget (tgts.First())
         let dummyEdges = HashSet<Edge>()
 
         for src in srcs do
@@ -62,19 +55,20 @@ module TimeModule =
         //flow Graph에서도 삭제해야함
         dummySrc.Parent.GetGraph().RemoveVertex (dummySrc :> Vertex) |> ignore
         dummyTgt.Parent.GetGraph().RemoveVertex (dummyTgt :> Vertex) |> ignore
-        time
+
+        time 
 
     [<Extension>]
     type TimeExt() =
         [<Extension>]
-        static member GetDuration(g: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<int> =
+        static member GetDuration(g: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<float> =
             find_max_path_time(g, [src], [tgt])
 
         [<Extension>]
-        static member GetDuration(g: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<int> =
+        static member GetDuration(g: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
             find_max_path_time (g, srcs, tgts)
 
         [<Extension>]
-        static member GetDuration(api:ApiItem) : option<int> =
+        static member GetDuration(api:ApiItem) : option<float> =
             let g = api.ApiSystem.Flows.Select(fun f -> f.Graph) |> mergeGraphs |> changeRealGraph
             g.GetDuration(api.TX, api.RX)

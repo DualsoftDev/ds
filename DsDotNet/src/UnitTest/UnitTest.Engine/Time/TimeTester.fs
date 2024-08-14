@@ -14,22 +14,22 @@ module TimeTestModule =
         let flow = Flow.Create("F", system)
 
         let createVertex name time =
-            let r = Real.Create(name, flow) :> Vertex
+            let r = Real.Create(name, flow) 
             r.Time <- Some time
-            r
+            r :> Vertex
 
         let createEdge source target =
             Edge.Create(flow.Graph, source, target, EdgeType.Start) |> ignore
 
         let initializeGraph() =
             // DAG Group 1
-            let v0 = createVertex "V0" 0
-            let v1 = createVertex "V1" 1
-            let v2 = createVertex "V2" 2
-            let v3 = createVertex "V3" 3
-            let v4 = createVertex "V4" 4
-            let v5 = createVertex "V5" 5
-            let v6 = createVertex "V6" 6
+            let v0 = createVertex "V0" 0.0
+            let v1 = createVertex "V1" 1.0
+            let v2 = createVertex "V2" 2.0
+            let v3 = createVertex "V3" 3.0
+            let v4 = createVertex "V4" 4.0
+            let v5 = createVertex "V5" 5.0
+            let v6 = createVertex "V6" 6.0
 
             createEdge v0 v1
             createEdge v1 v2
@@ -41,12 +41,12 @@ module TimeTestModule =
             createEdge v4 v5
 
             // DAG Group 2
-            let v7 = createVertex "V7" 7
-            let v8 = createVertex "V8" 8
-            let v9 = createVertex "V9" 9
-            let v10 = createVertex "V10" 10
-            let v11 = createVertex "V11" 0
-            let v12 = createVertex "V12" 0
+            let v7 = createVertex "V7" 7.0
+            let v8 = createVertex "V8" 8.0
+            let v9 = createVertex "V9" 9.0
+            let v10 = createVertex "V10" 10.0
+            let v11 = createVertex "V11" 0.0
+            let v12 = createVertex "V12" 0.0
 
             createEdge v7 v8
             createEdge v8 v9
@@ -64,7 +64,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v1)
 
             // Verify the result
-            Assert.AreEqual(Some 1, duration) // Expected duration: V0 -> V1 = 0 + 1
+            Assert.AreEqual(Some 1.0, duration) // Expected duration: V0 -> V1 = 0 + 1
 
         [<Test>]
         member _.``Single Source Single Target Test Group 2`` () =
@@ -74,7 +74,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v7, v12)
 
             // Verify the result
-            Assert.AreEqual(Some 34, duration) // Expected duration: V7 -> V8 -> V9 -> V10 -> V11 -> V12 = 7 + 8 + 9 + 10 + 0 + 0
+            Assert.AreEqual(Some 34.0, duration) // Expected duration: V7 -> V8 -> V9 -> V10 -> V11 -> V12 = 7 + 8 + 9 + 10 + 0 + 0
 
         [<Test>]
         member _.``Multiple Paths Test Group 1`` () =
@@ -84,7 +84,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v5)
 
             // Verify the result
-            Assert.AreEqual(Some 13, duration) // Expected duration: V0 -> V1 -> V4 -> V3 -> V5 = 0 + 1 + 4 + 3 + 5
+            Assert.AreEqual(Some 13.0, duration) // Expected duration: V0 -> V1 -> V4 -> V3 -> V5 = 0 + 1 + 4 + 3 + 5
 
         [<Test>]
         member _.``Disconnected Path Test Group 1`` () =
@@ -144,7 +144,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v0)
 
             // Verify the result
-            Assert.AreEqual(Some 0, duration) // Expected duration: Self loop, duration 0
+            Assert.AreEqual(Some 0.0, duration) // Expected duration: Self loop, duration 0
 
         [<Test>]
         member _.``Complex Path with All Nodes`` () =
@@ -154,7 +154,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v4)
 
             // Verify the result
-            Assert.AreEqual(Some 5, duration) // Expected duration: V0 ->  V1 -> V4 = 0 + 1 + 4
+            Assert.AreEqual(Some 5.0, duration) // Expected duration: V0 ->  V1 -> V4 = 0 + 1 + 4
 
         [<Test>]
         member _.``Complex Path with Partial Nodes`` () =
@@ -174,7 +174,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v11, v12)
 
             // Verify the result
-            Assert.AreEqual(Some 0, duration) // Expected duration: V11 -> V12 = 0 + 0
+            Assert.AreEqual(Some 0.0, duration) // Expected duration: V11 -> V12 = 0 + 0
 
 
         [<Test>]
@@ -185,7 +185,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, [v0; v7], [v5; v12])
 
             // Verify the result
-            Assert.AreEqual(Some 34, duration) // Expected duration: Longest path from any source to any target
+            Assert.AreEqual(Some 34.0, duration) // Expected duration: Longest path from any source to any target
 
         [<Test>]
         member _.``Multiple Sources Multiple Targets Test 2`` () =
@@ -195,7 +195,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, [v1; v7], [v3; v12])
 
             // Verify the result
-            Assert.AreEqual(Some 34, duration) // Expected duration: Longest path from any source to any target
+            Assert.AreEqual(Some 34.0, duration) // Expected duration: Longest path from any source to any target
 
         [<Test>]
         member _.``Multiple Sources Multiple Targets Test 3`` () =
@@ -205,4 +205,4 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, [v0; v1], [v4; v5])
 
             // Verify the result
-            Assert.AreEqual(Some 13, duration) // Expected duration: Longest path from any source to any target, satisfying all targets
+            Assert.AreEqual(Some 13.0, duration) // Expected duration: Longest path from any source to any target, satisfying all targets

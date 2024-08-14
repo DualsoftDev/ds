@@ -23,7 +23,7 @@ type RealVertexTagManager with
                     v.GG.Expr
                     <&&> real.CoinETContacts.ToAndElseOn() 
                     <&&> if v.Real.Script.IsSome then   v.ScriptRelay.Expr else v._on.Expr
-                    <&&> if v.Real.TimeAvg.IsSome then  v.TimeRelay.Expr   else v._on.Expr
+                    <&&> if v.Real.Time.IsSome   then   v.TimeRelay.Expr   else v._on.Expr
                     <&&> if v.Real.Motion.IsSome then   v.MotionRelay.Expr else v._on.Expr
 
 
@@ -135,7 +135,7 @@ type RealVertexTagManager with
     member v.R10_RealGoingTime(): CommentedStatement [] =
         let fn = getFuncName()
         [|
-            if v.Real.TimeAvg.IsSome then
+            if v.Real.Time.IsSome then
                 yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
                 yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
                 

@@ -276,7 +276,6 @@ module CoreModule =
         member _.Parent = parent
 
         member _.PureNames = names
-        member val Time: int option = None with get, set
         member val TokenSourceOrder: int option = None with get, set //1 부터 할당
 
         member _.ParentNPureNames = ([parent.GetCore().Name] @ names).ToArray()
@@ -308,9 +307,11 @@ module CoreModule =
             with get() = script
             and set(v) = script <- setIfNotAlreadySet script v "Script"
 
+        member x.Time
+            with get() = x.DsTime.AVG
+            and set(v) = x.DsTime.AVG <- v
 
         member x.Flow = flow
-
         member val Graph = DsGraph(flow.System.VertexAddRemoveHandlers)
         member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
         member val ExternalTags = HashSet<ExternalTagSet>()

@@ -462,7 +462,7 @@ module XgiExportModule =
 
             let _, ms = duration(fun() ->
                 (*
-                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  ``ADD 5000 items test`` 기준, 112 ms vs 25 ms
+                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  ``ADD 500 items test`` 기준, 112 ms vs 25 ms
                  *)
                 // (* Naive version *)
                 //for r in rungsXml.GetChildrenNodes() do
@@ -526,13 +526,17 @@ module XgiExportModule =
                     POUs = pous
                 } = prjParam
 
+            tracefn("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")
             // todo : 사전에 처리 되었어야...
             for g in globalStorages.Values do
                 g.IsGlobal <- true
+            noop()
 
             EnableXmlComment <- enableXmlComment
 
+#if DEBUG
             pous |> iter (fun pou -> pou.SanityCheck(prjParam))
+#endif
 
 
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
@@ -589,9 +593,10 @@ module XgiExportModule =
 
             let xPathGlobalVar = getXPathGlobalVariable targetType
 
+            // [optimize]
             (* Global variables 삽입 *)
             do
-                let xnGlobalSymbols = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol") |> List.ofSeq
+                let xnGlobalSymbols = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol") |> toArray
 
                 let countExistingGlobal = xnGlobalSymbols.Length
 
@@ -612,9 +617,15 @@ module XgiExportModule =
                         addrs
                         |> filter notNullAny
                         |> map standardizeAddress
-                        |> filter (function
-                            | RegexPattern @"^%[IQ]" _ -> true
-                            | _ -> false)
+                        |> filter (fun addr -> addr[0] = '%' && addr[1].IsOneOf('I', 'Q'))
+
+                    //let standardize (addrs: string seq) =
+                    //    addrs
+                    //    |> filter notNullAny
+                    //    |> map standardizeAddress
+                    //    |> filter (function
+                    //        | RegexPattern @"^%[IQ]" _ -> true
+                    //        | _ -> false)
 
                     let existingGlobalAddresses = existingGlobalSymbols |> map address |> standardize
 

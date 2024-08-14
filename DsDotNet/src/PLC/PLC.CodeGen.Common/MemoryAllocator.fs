@@ -205,9 +205,6 @@ module MemoryAllocator =
 
 [<AutoOpen>]
 module IECAddressModule =
-    open Dual.Common.Core.FS
-    open System.Text.RegularExpressions
-
     /// IEC address 를 표준화한다.  e.g "%i3" => "%IX3" ; "m34" => "%MX34"
     let standardizeAddress (address: string) =
         match address with
@@ -219,8 +216,7 @@ module IECAddressModule =
                 else
                     "%"+address.ToUpper()
 
-            match addr with
-            | RegexPattern @"^%[IQUMLKFNRAW](\d+(?:\.\d+){0,2})$" [ m; _ ] ->
-                Regex.Replace(addr, m, m + "X")
-            | _ ->
-                addr
+            let dev, remaining = addr[1], addr.Substring(2)
+            match dev, remaining with
+            | ('I'|'Q'|'U'|'M'|'L'|'K'|'F'|'N'|'R'|'A'|'W'), RegexMatches @"^(\d+(\.\d+)?(\.\d+)?)$" -> $"%%{dev}X{remaining}"
+            | _ -> addr

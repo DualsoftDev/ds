@@ -123,6 +123,7 @@ module LSEAddressPattern =
             None
 
 
+    let private memoizedTryParseXgkTag = memoize tryParseXgkTag
     let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string)) =
         match tryParseXgkTag tag with
         | Some (device, dataSize, bitOffset) ->

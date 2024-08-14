@@ -146,6 +146,7 @@ module ConvertorPrologModule =
             | _ -> failwith $"Invalid XGI variable name {name}.  Use longer name"
 
         match name with
+        //| RegexMatches @"^ld(\d)+" -> failwith $"Invalid XGI variable name {name}."
         | RegexPattern @"^ld(\d)+" _ -> failwith $"Invalid XGI variable name {name}."
         | _ -> ()
 

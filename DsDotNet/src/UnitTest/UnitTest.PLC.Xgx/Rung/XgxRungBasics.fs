@@ -13,6 +13,9 @@ open Engine.Parser.FS
 type XgxRungTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
 
+    let getProjectParams4Test xgx funName = { getXgxProjectParams xgx funName with EnableXmlComment = true }
+
+
     member __.PrepareWithSymbols(numTags:int) =
         let storages = Storages()
         let qx, i, q =
@@ -69,7 +72,7 @@ type XgxRungTest(xgx:PlatformTarget) =
             ] |> String.concat "\r\n"
 
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
@@ -106,7 +109,7 @@ type XgxRungTest(xgx:PlatformTarget) =
             ] |> String.concat "\r\n"
 
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
@@ -143,27 +146,27 @@ type XgxRungTest(xgx:PlatformTarget) =
             ] |> String.concat "\r\n"
 
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member x.``Generate local variables test``() =
-        let devType, tAddress, devPos= 
+        let devType, tAddress, devPos=
             if xgx = XGI then  "I", "%IX0.0.0", 0
             elif xgx = XGK then "P", "P0000A", 10
             else failwithf $"not support {xgx}"
 
         let t =  createTag("myBit00", tAddress, false)
-          
+
         // name, comment, device, kind, address, plcType 를 받아서 SymbolInfo 를 생성한다.
         let symbolInfo: SymbolInfo =
             { defaultSymbolInfo with Name=t.Name; Type="BOOL"; Address=t.Address; DevicePos=devPos; Device=devType; }
 
         let symbolInfoXml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             symbolInfo.GenerateXml prjParam
-        symbolInfoXml =~= 
-        
+        symbolInfoXml =~=
+
             if xgx = XGI then  """<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
 	</Symbol>"""
             elif xgx = XGK then """<Symbol Name="myBit00" Comment="" Device="P" DevicePos="10" Type="BIT">
@@ -172,12 +175,12 @@ type XgxRungTest(xgx:PlatformTarget) =
 
 
         let symbolsLocalXml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             XGITag.generateLocalSymbolsXml prjParam [ symbolInfo ]
 
         symbolsLocalXml =~=
-        
-            
+
+
             if xgx = XGI then  """<LocalVar Version="Ver 1.0" Count="1">
 <Symbols>
 	<Symbol Name="myBit00" Comment="" Device="I" Kind="1" Type="BOOL" Address="%IX0.0.0" State="0">
@@ -232,7 +235,7 @@ type XgxRungTest(xgx:PlatformTarget) =
             ] |> String.concat "\r\n"
 
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
@@ -271,20 +274,20 @@ type XgxRungTest(xgx:PlatformTarget) =
             ] |> String.concat "\r\n"
 
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam rungs localSymbolInfos emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member x.``Generate simplest with local variables test``() =
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam simplestProgramXml (getSimpleLocalSymbolInfos(xgx)) emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 
     member x.``Generate simplest with local, global variables test``() =
         let symbolsGlobalXml =
-            
-            if xgx = XGI then  
+
+            if xgx = XGI then
                 """
     <GlobalVariable Version="Ver 1.0" Count="2">
     <Symbols>
@@ -304,7 +307,7 @@ type XgxRungTest(xgx:PlatformTarget) =
     <TempVar Count="0"></TempVar>
     </GlobalVariable>
     """
-            elif xgx = XGK then 
+            elif xgx = XGK then
                 """
     <GlobalVariable Version="Ver 1.0" Count="2">
     <Symbols>
@@ -329,7 +332,7 @@ type XgxRungTest(xgx:PlatformTarget) =
 
 
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam simplestProgramXml (getSimpleLocalSymbolInfos(xgx)) symbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
         ()
@@ -337,7 +340,7 @@ type XgxRungTest(xgx:PlatformTarget) =
     member x.``Prolog comment test``() =
         let rungsXml = wrapWithRung $"""<Element ElementType="{RungCommentMode}" Coordinate="1">DS Logic for XGI</Element>"""
         let xml =
-            let prjParam = getXgxProjectParams xgx (getFuncName())
+            let prjParam = getProjectParams4Test xgx (getFuncName())
             wrapWithXml prjParam rungsXml [] emptySymbolsGlobalXml None
         x.saveTestResult (getFuncName ()) xml
 

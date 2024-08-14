@@ -170,10 +170,10 @@ type ExportModuleExt =
     [<Extension>]
     static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC ((XGI), system, path, existingLSISprj, startTimer, startCounter)
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter)
 
     [<Extension>]
     static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC ((XGK), system, path, existingLSISprj,  startTimer, startCounter)
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter)
 

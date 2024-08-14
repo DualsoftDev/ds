@@ -15,7 +15,7 @@ type AutoMemoryAllocTest(xgx:PlatformTarget) =
     member x.``Auto memory allocation test`` () =
         let globalStorages = Storages()
         let pouIQMap =
-           
+
             let code =
                 let data =
                     [   for i in [ 0..128] -> $"bool ax{i} = false;"
@@ -26,13 +26,13 @@ type AutoMemoryAllocTest(xgx:PlatformTarget) =
                             [
                                 for i in [ 0..10] -> $"byte ab{i} = 0uy;"
                                 for i in [ 0..10] -> $"uint64 al{i} = 0UL;"
-                            ] 
+                            ]
                         | XGK ->
-                            [] 
+                            []
                         | _ ->
                             failwithf $"not support {xgx}"
 
-                data |> String.concat "\n" 
+                data |> String.concat "\n"
             let statements = parseCodeForTarget globalStorages code  xgx |> map withNoComment
             for t in globalStorages.Values do
                 t.Address <- TextAddrEmpty
@@ -50,6 +50,7 @@ type AutoMemoryAllocTest(xgx:PlatformTarget) =
         let prjParam = {
             getXgxProjectParams xgx (getFuncName()) with
                 GlobalStorages = globalStorages
+                EnableXmlComment = true
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedByteIndices xgx)    // 640K M memory 영역
                 POUs = [pouIQMap]
         }

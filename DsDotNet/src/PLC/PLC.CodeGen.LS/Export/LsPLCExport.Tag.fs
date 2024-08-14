@@ -145,17 +145,15 @@ module XGITag = //IEC61131Tag =
                         | ("LINT" | "ULINT" | _ ) ->
                             failwithlog $"Not supported data type {x.Type}"
 
-                    if x.IsDirectAddress  //주소 별칭이 있으면 이름 생성하지 않고 직접변수 스타일로 사용 (실제 이름은 Comment에 저장)
-                    then
+                    if x.IsDirectAddress then //주소 별칭이 있으면 이름 생성하지 않고 직접변수 스타일로 사용 (실제 이름은 Comment에 저장)
                         $"Name=\"\""
                         let aliasNames = x.AddressAlias.JoinWith(", ")
                         $"Comment=\"{escapeXml x.Comment}//Alias List: {aliasNames}\""
                     else
-#if DEBUG
-                        $"Name=\"{x.Name}\"";$"Comment=\"{escapeXml x.Comment}\""
-#else
-                        $"Name=\"{x.Name}\""
-#endif
+                        if prjParam.EnableXmlComment then
+                            $"Name=\"{x.Name}\"";$"Comment=\"{escapeXml x.Comment}\""
+                        else
+                            $"Name=\"{x.Name}\""
 
                     $"Device=\"{x.Device}\""
                     $"DevicePos=\"{x.DevicePos}\""

@@ -5,6 +5,7 @@ open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
 open Dual.PLC.TagParser.FS
+open System
 
 
 [<AutoOpen>]
@@ -146,6 +147,7 @@ module LSEAddressPattern =
 
 
 type XgkAddress private () =
+    [<Obsolete("성능 개선 필요")>]
     static let parseXgkAddress (addr:string) =
 
         assert(isInUnitTest())      // 일단 unit test 사용 only 로..  완전하게 구현 불가능한 함수.

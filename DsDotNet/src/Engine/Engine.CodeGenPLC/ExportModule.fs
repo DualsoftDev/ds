@@ -32,7 +32,7 @@ module ExportModule =
                 LocalStorages = localStorages
                 GlobalStorages = globalStorages
                 CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList
-                }
+            }
 
             pouParams
 
@@ -120,8 +120,8 @@ module ExportModule =
         let _, millisecond = duration (fun () ->
             let targetNDriver =
                 match target with
-                | XGI -> XGI,  LS_XGI_IO
-                | XGK -> XGK,  LS_XGK_IO
+                | XGI -> XGI, LS_XGI_IO
+                | XGK -> XGK, LS_XGK_IO
                 | _ -> failwith $"Not supported plc {target} type"
 
             //use _ = logTraceEnabler()

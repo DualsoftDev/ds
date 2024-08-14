@@ -52,8 +52,9 @@ module MSG_TEST =
             MSG_GENLSPLCEMULATION.Do(testPath, "",false)|> Assert.True
             MSG_SIMULATION.Do(testPath, SimViewEnum.FromPptPage, false, false)|> Assert.True
             MSG_TIMECHART.Do(testPath, false)|> Assert.True
-
-        setXGI()  //XGI 기준으로 테스트
-        testXGT()
+        
         setXGK()  //XGK 기준으로 테스트
         testXGT()
+        setXGI()  //XGI 기준으로 테스트
+        testXGT()
+      

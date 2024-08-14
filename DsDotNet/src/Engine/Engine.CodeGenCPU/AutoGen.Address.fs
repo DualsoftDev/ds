@@ -272,7 +272,7 @@ module DsAddressModule =
                     match tryParseXGKTagByBitType (xgkAddress addr) with
                     | Some (t) -> t |> getXgKTextByTag
                                   
-                    | _ ->  failwithf $"주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
+                    | _ ->  failwithf $"XGK 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
                 else addr
      
         newAddr

@@ -18,7 +18,7 @@
   </ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.1.6" />
+		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.1.7" />
 	</ItemGroup>
 
 	<ItemGroup>

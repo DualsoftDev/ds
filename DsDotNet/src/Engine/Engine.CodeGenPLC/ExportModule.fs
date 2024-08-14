@@ -117,41 +117,50 @@ module ExportModule =
         prjParam.GenerateXmlString()
 
     let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter) =
-        let targetNDriver =
-            match target with
-            | XGI -> XGI,  LS_XGI_IO
-            | XGK -> XGK,  LS_XGK_IO
-            | _ -> failwith $"Not supported plc {target} type"
+        let _, millisecond = duration (fun () ->
+            let targetNDriver =
+                match target with
+                | XGI -> XGI,  LS_XGI_IO
+                | XGK -> XGK,  LS_XGK_IO
+                | _ -> failwith $"Not supported plc {target} type"
 
-        //use _ = logTraceEnabler()
-        let globalStorage = new Storages()
-        let localStorage = new Storages()
-        let pous = CpuLoaderExt.LoadStatements(system, globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
+            //use _ = logTraceEnabler()
+            let globalStorage = new Storages()
+            let localStorage = new Storages()
+            let pous = CpuLoaderExt.LoadStatements(system, globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
-        let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
+            let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
 
-        // Create a list to hold <C>ommented <S>tatement<S>
-        let css = [|
-            // Add commented statements from each CPU
-            for cpu in pous do
-                yield! cpu.CommentedStatements()
-        |]
+            // Create a list to hold <C>ommented <S>tatement<S>
+            let css = [|
+                // Add commented statements from each CPU
+                for cpu in pous do
+                    yield! cpu.CommentedStatements()
+            |]
 
-        let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
-        globalStorage.Iter(fun tagKV->
+            let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
+            globalStorage.Iter(fun tagKV->
 
-            if not (usedTagNames.ContainsKey(tagKV.Key))
-               && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
-               && TagKindExt.GetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
-            then
-                globalStorage.Remove(tagKV.Key)|>ignore
-            )
+                if not (usedTagNames.ContainsKey(tagKV.Key))
+                   && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
+                   && TagKindExt.GetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
+                then
+                    globalStorage.Remove(tagKV.Key)|>ignore
+                )
 
-        let xml = generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter
+            let xml, millisecond = duration (fun () ->
+                generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter)
+
+            forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 
 
-        let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-        File.WriteAllText(path, crlfXml)
+
+            let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
+            File.WriteAllText(path, crlfXml)
+        )
+        forceTrace $"exportXMLforLSPLC : elapsed {millisecond} ms"
+
+
 
 
     let exportTextforDS () = ()

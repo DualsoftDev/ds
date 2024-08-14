@@ -11,7 +11,7 @@ type VertexTagManager with
     ///Status
     member v.S1_RGFH() =
         let r = v.R <==  (( (!@) v.ST.Expr                       <&&> (!@) v.ET.Expr) //    R      x   -   x
-                            <||> ( v.ST.Expr <&&>       v.RT.Expr  <&&> (!@) v.ET.Expr))//           o   o   x
+                            <||> ( v.ST.Expr <&&>     v.RT.Expr  <&&> (!@) v.ET.Expr))//           o   o   x
         let g = v.G <==        ( v.ST.Expr <&&>  (!@) v.RT.Expr  <&&> (!@) v.ET.Expr) //    G      o   x   x
         let f = v.F <==        (                 (!@) v.RT.Expr  <&&>      v.ET.Expr) //    F      -   x   o
         let h = v.H <==        (                      v.RT.Expr  <&&>      v.ET.Expr) //    H      -   o   o

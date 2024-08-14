@@ -43,7 +43,7 @@ module CpuExtensionsModule =
         // Update manual button values
         let bManual = not bAuto
         updateStorageValues sys SystemTag.manual_btn bManual
-        updateStorageValues sys SystemTag.home_btn bManual
+        //updateStorageValues sys SystemTag.home_btn bManual
 
         // Update ready button values
         updateStorageValues sys SystemTag.ready_btn true

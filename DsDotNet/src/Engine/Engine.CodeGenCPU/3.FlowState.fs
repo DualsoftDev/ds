@@ -17,13 +17,10 @@ type Flow with
         (set, rst) --| (f.o_st, getFuncName())   
 
         
-    member f.ST2_ReadyState(isActive) =  //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
+    member f.ST2_ReadyState() =  //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         let set = f.ReadyExpr <&&> f.readyCondition.Expr
         let rst = f.e_st.Expr <||> f.emg_st.Expr <||> f.p_st.Expr
-        if isActive then 
-            (set, rst) ==| (f.r_st, getFuncName())
-        else
-            (f._on.Expr, f._off.Expr) --| (f.r_st, getFuncName())
+        (set, rst) ==| (f.r_st, getFuncName())
 
     member f.ST3_GoingState() =
         let set = f.Graph.Vertices.OfType<Real>().Select(getVM)
@@ -47,7 +44,7 @@ type Flow with
            
         (set, rst) ==| (f.e_st, getFuncName())
 
-    member f.ST6_DriveState (_isActive:bool) =
+    member f.ST6_DriveState () =
         let set = f.DriveExpr <&&> f.driveCondition.Expr
         let rst = !@f.aop.Expr <||> f.t_st.Expr  <||> f.p_st.Expr
         (set, rst) ==| (f.d_st, getFuncName())

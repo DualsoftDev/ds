@@ -257,15 +257,15 @@ module PptNodeModule =
 
                         let getRealName (apiReal: string) =
                             if apiReal = "_" || apiReal.IsEmpty() then
-                                failWithLog ErrID._43
+                                failWithLog $"{ErrID._43} {shape.InnerText}"
                             apiReal
 
                         ifTX <- getRealName tx
                         ifRX <- getRealName rx
                     else
-                        failWithLog ErrID._43
+                        failWithLog $"{ErrID._43} {shape.InnerText}"
                 | None ->
-                    failWithLog ErrID._53
+                    failWithLog $"{ErrID._53} {shape.InnerText}"
 
             let updateTime() =
                 let goingT, delayT = updateRealTime shape.InnerText

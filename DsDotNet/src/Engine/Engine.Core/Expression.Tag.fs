@@ -167,6 +167,6 @@ module TagModule =
                 tag, statementsWithTag)
             |> Tuple.toReadOnlyDictionary
 
-        logInfo $"--- getRungMap  usedTags: {dicSource.Count} totalTags:{totalTags.Count()}"
+        logInfo $"--- getRungMap  statements: {statements.Count()} usedTags: {dicSource.Count} totalTags:{totalTags.Count()}"
 
         map

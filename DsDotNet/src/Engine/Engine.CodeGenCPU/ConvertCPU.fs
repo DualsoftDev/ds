@@ -54,17 +54,16 @@ module ConvertCPU =
 
                 yield vr.F1_RootStart()
                 yield vr.F2_RootReset()
+                yield vr.F7_HomeCommand()
 
-                if isActive then
-                    yield! vr.R6_RealTokenMoveNSink() 
-                    yield vr.F7_HomeCommand()
-
-                
                 yield! vr.D1_DAGHeadStart()
                 yield! vr.D2_DAGTailStart()
                 yield! vr.D3_DAGCoinEnd()
                 yield! vr.D4_DAGCoinReset()
-
+                
+                if isActive then
+                    yield! vr.R6_RealTokenMoveNSink() 
+                    
 
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
@@ -108,17 +107,17 @@ module ConvertCPU =
 
 
     ///flow 별 운영모드 적용
-    let private applyOperationModeSpec(f:Flow) isActive =
+    let private applyOperationModeSpec(f:Flow)  =
         [
             yield f.O1_IdleOperationMode()
-            yield f.O2_AutoOperationMode(isActive)
+            yield f.O2_AutoOperationMode()
             yield f.O3_ManualOperationMode()
             yield f.ST1_OriginState()
-            yield f.ST2_ReadyState(isActive)
+            yield f.ST2_ReadyState()
             yield f.ST3_GoingState()
             yield f.ST4_EmergencyState()
             yield f.ST5_ErrorState()
-            yield f.ST6_DriveState(isActive)
+            yield f.ST6_DriveState()
             yield f.ST7_TestState()
         ]
 
@@ -128,7 +127,6 @@ module ConvertCPU =
             yield f.F2_FlowPause()
             yield f.F3_FlowReadyCondition()
             yield f.F4_FlowDriveCondition()
-            
         ]
   
     let getTryMasterCall(calls : Vertex seq) = 
@@ -225,7 +223,7 @@ module ConvertCPU =
 
             let devCallSet =  s.GetTaskDevCalls() 
             for (td, calls) in devCallSet do
-                if not(td.IsRootOnlyDevice) && td.InTag.IsNonNull() then
+                if (*not(td.IsRootOnlyDevice) &&*) td.InTag.IsNonNull() then
                     yield! td.SensorEmulation(s, calls)
         |]
  
@@ -266,7 +264,6 @@ module ConvertCPU =
             updateRealParentExpr(sys)
             sys.GenerationRealActionMemory()
 
-            
         [
             //Active 시스템 적용 
             if isActive then   
@@ -280,20 +277,18 @@ module ConvertCPU =
                 if RuntimeDS.Package.IsPackageSIM() then 
                     yield! emulationDevice sys
 
-
                 yield! sys.Y1_SystemBtnForFlow(sys)
-
-                for subSys in sys.GetRecursiveLoadedSystems() do
-                    yield! subSys.Y1_SystemBtnForFlow(sys) 
-
 
             //Variables  적용 
             yield! applyVariables sys
         
             //Flow 적용
+
             for f in sys.Flows do
-                yield! applyOperationModeSpec f isActive
-                yield! applyFlowMonitorSpec f
+                if isActive
+                then 
+                    yield! applyOperationModeSpec f 
+                    yield! applyFlowMonitorSpec f
 
             //Vertex 적용
             for v in sys.GetVertices() do

@@ -25,7 +25,7 @@ module ZmqTestClient =
         let zmqHWInfo = IOSpecHW.FromJsonFile "zmqhw.json"
       
 
-        let testFile = Path.Combine(AppContext.BaseDirectory   , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip");
+        let testFile = Path.Combine(AppContext.BaseDirectory   , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.dsz");
         let jsonPath = unZip testFile
         RuntimeDS.Package <- RuntimePackage.PCSIM;
         let target = WINDOWS, LS_XGK_IO

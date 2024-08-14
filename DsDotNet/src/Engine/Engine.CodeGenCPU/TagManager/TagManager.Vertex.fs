@@ -97,6 +97,8 @@ module TagManagerModule =
         member val GP = createTag false VertexTag.goingPulse
         //ErrTRX Monitor
         member val ErrTRX = createTag false VertexTag.errorTRx
+        ///Pause Monitor
+        member val PA = createTag false VertexTag.pause
 
         member x.GetVertexTag (vt:VertexTag) :IStorage =
             let callM() = v.TagManager:?> CoinVertexTagManager
@@ -115,6 +117,7 @@ module TagManagerModule =
             | VertexTag.forceOn    -> x.ON     :> IStorage
             | VertexTag.goingPulse -> x.GP     :> IStorage
             | VertexTag.errorTRx   -> x.ErrTRX :> IStorage
+            | VertexTag.pause      -> x.PA     :> IStorage
 
             | VertexTag.txErrOnTimeShortage  -> callM().ErrOnTimeShortage  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
@@ -125,7 +128,6 @@ module TagManagerModule =
             | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
             
             | VertexTag.origin               -> realM().OG     :> IStorage
-            | VertexTag.pause                -> realM().PA     :> IStorage
             | VertexTag.realOriginInit       -> realM().RO :> IStorage
             | VertexTag.realOriginButton     -> realM().OB :> IStorage
             | VertexTag.realOriginAction     -> realM().OA :> IStorage
@@ -187,8 +189,6 @@ module TagManagerModule =
 
         ///Origin Monitor
         member val OG = createTag false VertexTag.origin
-        ///Pause Monitor
-        member val PA = createTag false VertexTag.pause
 
    
         ///Real Init Relay

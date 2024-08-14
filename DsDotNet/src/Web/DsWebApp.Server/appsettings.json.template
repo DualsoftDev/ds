@@ -9,7 +9,7 @@
   "ServerSettings": {
     "ServiceFolder": "z:\\ds\\service",
     "UseHttpsRedirection": true,
-    "_RuntimeModelDsZipPath": "Z:\\ds\\service\\exportDS.zip __ LoggerDBSetting 과 중복됨... LoggerDBSetting 에서 읽어서 채울 것.",
+    "_RuntimeModelDsZipPath": "Z:\\ds\\service\\exportDS.dsz __ LoggerDBSetting 과 중복됨... LoggerDBSetting 에서 읽어서 채울 것.",
     "AutoStartOnSystemPowerUp": true,
     "JwtTokenValidityMinutes": 1440,
     "_RuntimePackageCs": "PCSIM",

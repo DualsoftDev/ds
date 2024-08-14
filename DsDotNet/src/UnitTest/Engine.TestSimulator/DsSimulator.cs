@@ -1,10 +1,12 @@
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using Dual.Common.Core;
+using Engine.Cpu;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using static Engine.CodeGenCPU.SystemManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.RuntimeGeneratorModule;
@@ -18,16 +20,26 @@ namespace Engine.TestSimulator
         public static bool Do(DsCPU dsCpu, int checkTime = 2000)
         {
             RuntimeDS.Package = RuntimePackage.PCSIM;
+ 
+
             bool resultMoving = false;    
             Task.Run(async () => {
+                CpuExtensionsModule.preManualAction(dsCpu.MySystem);
+                var org = (dsCpu.MySystem.TagManager as SystemManager).GetSystemTag(Core.TagKindList.SystemTag.originMonitor);
+                dsCpu.RunInBackground();
+                while (!(bool)org.BoxedValue)
+                {
+                    await Task.Delay(100);   
+                    Console.WriteLine("Waiting for originMonitor");
+                }
 
+                CpuExtensionsModule.preAutoDriveAction(dsCpu.MySystem);
                 dsCpu.MySystem.Flows.Iter(f =>
                 {
                     var reals = f.Graph.Vertices.OfType<Real>();
                     if (reals.Any())
                         ((VertexTagManager)reals.First().TagManager).SF.Value = true;
                 });
-                dsCpu.RunInBackground();
 
                 resultMoving = await CheckEventCountAsync(dsCpu, checkTime);
             }).Wait();

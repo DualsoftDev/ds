@@ -13,6 +13,11 @@ open Microsoft.Data.Sqlite
 open Engine.Info
 open Engine.Cpu
 open System.Text.Json
+open Engine.Runtime
+open System.IO
+open System
+open Engine.TestSimulator
+open T.CPU
 
 
 [<AutoOpen>]
@@ -20,50 +25,23 @@ module HelloDSDBTestModule =
 
     type HelloDSDBTest() =
         inherit EngineTestBaseClass()
-        do
-            RuntimeDS.Package <- PCSIM
+        let runtimeModel, pathDB = 
+            let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
+            RuntimeTestCommon.getRuntimeInfo  helloDSPath
+        let system = runtimeModel.System
 
-        let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-        let getSystem() =
-            let pptParms:PptParams = defaultPptParams()
-            let result = ImportPpt.GetDSFromPptWithLib (helloDSPath, false, pptParms)
-            let {
-                System = system
-                ActivePath =  exportPath
-                LoadingPaths = loadingPaths
-                LayoutImgPaths = layoutImgPaths
-            } = result
-
-            system.TagManager === null
-            let _ = DsCpuExt.GetDsCPU (system) (pptParms.TargetType, pptParms.DriverIO) 
-            system.TagManager.Storages.Count > 0 === true
-
-            system
-
-        let createConnection() =
-            (*
-              HelloDS.Logger.UnitTest.sqlite3 생성 방법
-                - HelloDS.pptx 를 이용해서 시뮬레이션 수행.
-                - DB logging ON 상태로 1 cycle 이상 돌아야 함.
-                - 생성된 database 파일 (Logger.sqlite3) 을 createConnection() 에서 지정한 path 로 복사
-                - 위 과정 수행 후 test 실행.
-             *)
-
+        let createConnection(path) =
             let connStr =
-                let path = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.Logger.UnitTest.sqlite3"
                 $"Data Source={path}"
             new SqliteConnection(connStr) |> tee (fun conn -> conn.Open())
 
-        let getLogs() =
-            use conn = createConnection()
+        let getLogs(path:string) =
+            use conn = createConnection(path)
             let logs = conn.Query<ORMVwLog>($"SELECT * FROM {Vn.Log}")
             logs
 
-
         [<Test>]
         member __.``HelloDS vertices read test``() =
-            let system = getSystem()
-
             let flowNames = system.Flows |> map (fun f -> f.Name) |> toArray
             SeqEq flowNames ["STN1"]          // 숨김 페이지: "STN2"; "STN3"; "Flow1"; "KIT"
             let stn1 = system.Flows |> Seq.exactlyOne
@@ -95,8 +73,6 @@ module HelloDSDBTestModule =
 
         [<Test>]
         member __.``HelloDS stroage test``() =
-            let system = getSystem()
-
             (* Via Storages *)
             let storages = system.TagManager.Storages
             tracefn $"---- Storage"
@@ -116,7 +92,7 @@ module HelloDSDBTestModule =
                 tracefn $"Fqdn: {k} = {v}"
             ()
 
-            let logs = getLogs().ToFSharpList()
+            let logs = getLogs(pathDB).ToFSharpList()
             let lls = logs.DistinctBy(fun l -> l.Name).ToArray()
             for l in logs do
                 dic.ContainsKey(l.Fqdn) === true
@@ -126,8 +102,7 @@ module HelloDSDBTestModule =
 
         [<Test>]
         member __.``HelloDS log anal test``() =
-            let system = getSystem()
-            let logs = getLogs().ToFSharpList()
+            let logs = getLogs(pathDB).ToFSharpList()
             let logAnalInfo = LogAnalInfo.Create(system, logs)
             logAnalInfo.PrintStatistics()
 
@@ -145,7 +120,7 @@ module HelloDSDBTestModule =
 
         [<Test>]
         member __.``Load logger database test``() =
-            let conn = createConnection()
+            let conn = createConnection(pathDB)
             let loggerDb =
                 ORMDBSkeletonDTOExt.CreateAsync(1, conn, null).Result |> ORMDBSkeleton
             let log1 = conn.QueryFirst<ORMLog>($"SELECT * FROM {Vn.Log} WHERE id = 1;")

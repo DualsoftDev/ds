@@ -38,6 +38,7 @@
       <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
       <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
       <ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />
+      <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
     </ItemGroup>
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">

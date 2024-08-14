@@ -10,7 +10,7 @@ module testMain =
         RuntimeDS.Package <- RuntimePackage.PC
         
         //test me ds.zip 
-        let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip"
+        let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.dsz"
         let testRuntimeModel = new RuntimeModel(testFile, WINDOWS)
 
         //test me dualsoft.json 

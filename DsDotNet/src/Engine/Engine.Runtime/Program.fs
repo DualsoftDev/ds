@@ -7,7 +7,7 @@ module testMain =
 
     [<EntryPoint>]
     let main _ = 
-        let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip"
+        let testFile = @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.dsz"
         RuntimeDS.Package <- RuntimePackage.PC
         let testRuntimeModel = new RuntimeModel(testFile, (WINDOWS))
         let _ = testRuntimeModel.HMIPackage

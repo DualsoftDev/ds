@@ -28,26 +28,6 @@ module MSG_TEST =
     let ``MSG_EXPORT`` () =
         MSG_DSEXPORT.Do(testPath, false)|> Assert.True
     [<Fact>]
-    let ``MSG_GENIOLIST`` () =
-        setXGK()
-        MSG_GENIOLIST.Do(testPath, false)|> Assert.True
-    [<Fact>]
-    let ``MSG_GENLSPLC XGI`` () =
-        setXGI()
-        MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
-    [<Fact>]
-    let ``MSG_GENLSPLCEMULATION XGI`` () =
-        setXGI()
-        MSG_GENLSPLCEMULATION.Do(testPath, "", false)|> Assert.True
-    [<Fact>]
-    let ``MSG_GENLSPLC XGK`` () =
-        setXGK()
-        MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
-    [<Fact>]
-    let ``MSG_GENLSPLCEMULATION XGK`` () =
-        setXGK()
-        MSG_GENLSPLCEMULATION.Do(testPath, "",false)|> Assert.True
-    [<Fact>]
     let ``MSG_GENWINPC`` () =
         MSG_GENWINPC.Do(testPath, false)|> Assert.True
     [<Fact>]
@@ -57,16 +37,23 @@ module MSG_TEST =
     let ``MSG_HWSETTING`` () =
         MSG_HWSETTING.Do(false)|> Assert.True
     [<Fact>]
-    let ``MSG_SIMULATION`` () =
-        setXGK()
-        MSG_SIMULATION.Do(testPath, SimViewEnum.FromPptPage, false, false)|> Assert.True
-    [<Fact>]
     let ``MSG_ANIMATION`` () =
         MSG_ANIMATION.Do(testPath, false)|> Assert.True
     [<Fact>]
-    let ``MSG_TIMECHART`` () =
-        setXGK()
-        MSG_TIMECHART.Do(testPath, false)|> Assert.True
-    [<Fact>]
     let ``MSG_LAYOUT`` () =
         MSG_LAYOUT.Do(testPath, false)|> Assert.True
+
+    [<Fact>]
+    let ``MSG_XGT`` () =
+        let testXGT() =
+            MSG_GENLSPLCEMULATION.Do(testPath, "", false)|> Assert.True
+            MSG_GENIOLIST.Do(testPath, false)|> Assert.True
+            MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
+            MSG_GENLSPLCEMULATION.Do(testPath, "",false)|> Assert.True
+            MSG_SIMULATION.Do(testPath, SimViewEnum.FromPptPage, false, false)|> Assert.True
+            MSG_TIMECHART.Do(testPath, false)|> Assert.True
+
+        setXGI()  //XGI 기준으로 테스트
+        testXGT()
+        setXGK()  //XGK 기준으로 테스트
+        testXGT()

@@ -110,7 +110,7 @@
         if (ClientGlobal.ModelDsZipPath == null || !ClientGlobal.IsCpuRunning)
             return true;
 
-        var runtime = getFileName(ClientGlobal.ModelDsZipPath).ToLower();   // exportDS.Zip
+        var runtime = getFileName(ClientGlobal.ModelDsZipPath).ToLower();   // exportDS.dsz
         var file = getFileName(url).ToLower();
         return runtime != file;
 

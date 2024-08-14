@@ -35,13 +35,18 @@
         <Compile Include="TestFixture.fs" />
         <Compile Include="ObjectHolderTest.fs" />
         <Compile Include="CpuTestCommon.fs" />
+        <Compile Include="RuntimeTestCommon.fs" />
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+        <ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />
     </ItemGroup>
 
     <ItemGroup>

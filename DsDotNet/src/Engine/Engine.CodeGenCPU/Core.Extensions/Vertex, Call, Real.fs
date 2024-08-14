@@ -203,12 +203,3 @@ type RealExt =
 type CallExt =
     [<Extension>]
     static member GetSourceToken(c:Call):uint32 = c.SourceToken  
-    //[<Extension>]
-    //static member GetInputDetect(c:Call):bool = 
-    //        if c.IsJob then getJM(c.TargetJob).InDetected.Value
-    //        else false  
-    //[<Extension>]
-    //static member GetOutputDetect(c:Call):bool = 
-    //        if c.IsJob then getJM(c.TargetJob).OutDetected.Value
-    //        else false
-

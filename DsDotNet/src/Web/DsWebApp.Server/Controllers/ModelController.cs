@@ -26,7 +26,7 @@ public class ModelController(ServerGlobal serverGlobal) : ModelControllerConstru
 
     /*
        {
-           "sourceDsZipPath": "C:\\ProgramData\\Dualsoft\\DsModel\\exportDS.Zip",
+           "sourceDsZipPath": "C:\\ProgramData\\Dualsoft\\DsModel\\exportDS.dsz",
            "isCpuRunning": false
        }
     */

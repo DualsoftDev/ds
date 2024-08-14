@@ -16,7 +16,8 @@ open System.Text.Json.Serialization
 [<AutoOpen>]
 module RuntimeTestCommon =
 
-    let getRuntimeInfo(pptPath) =
+    let getRuntimeModelForSim(pptPath) =
+        RuntimeDS.Package <- PCSIM
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms)

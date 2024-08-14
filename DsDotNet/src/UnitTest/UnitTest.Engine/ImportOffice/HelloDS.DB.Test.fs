@@ -27,7 +27,7 @@ module HelloDSDBTestModule =
         inherit EngineTestBaseClass()
         let runtimeModel, pathDB = 
             let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-            RuntimeTestCommon.getRuntimeInfo  helloDSPath
+            RuntimeTestCommon.getRuntimeModelForSim  helloDSPath
         let system = runtimeModel.System
 
         let createConnection(path) =

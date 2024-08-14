@@ -20,29 +20,33 @@ module internal XgiSymbolsModule =
 
 
     let storagesToXgxSymbol (storages: IStorage seq) : (IStorage * XgxSymbol)[] =
-        let timerOrCountersNames =
-            storages
-                .Filter(fun s -> s :? TimerCounterBaseStruct)
-                .Select(fun struc -> struc.Name)
-            |> HashSet
+        let storages = storages.ToArray()
+        let symbols, millisecond = duration (fun () ->
+            let timerOrCountersNames =
+                storages
+                    .Filter(fun s -> s :? TimerCounterBaseStruct)
+                    .Select(fun struc -> struc.Name)
+                |> HashSet
 
-        tracefn($"Storages to xgx symbol : {storages.Count()}")
+            [|
+                for s in storages do
+                    match s with
+                    | :? IXgxVar as xgi -> yield (s, XgxSymbol.DuXgiVar xgi)
+                    | :? TimerStruct as ts -> yield (s, XgxSymbol.DuTimer ts)
+                    | :? CounterBaseStruct as cs -> yield (s, XgxSymbol.DuCounter cs)
+                    | _ ->
+                        let name = (s :> INamed).Name
 
-        [|
-            for s in storages do
-                match s with
-                | :? IXgxVar as xgi -> yield (s, XgxSymbol.DuXgiVar xgi)
-                | :? TimerStruct as ts -> yield (s, XgxSymbol.DuTimer ts)
-                | :? CounterBaseStruct as cs -> yield (s, XgxSymbol.DuCounter cs)
-                | _ ->
-                    let name = (s :> INamed).Name
+                        if timerOrCountersNames.Contains(name.Split(".")[0]) then
+                            // skip timer/counter structure member : timer 나 counter 명 + "." + field name
+                            ()
+                        else
+                            yield (s, XgxSymbol.DuStorage s)
+            |]
 
-                    if timerOrCountersNames.Contains(name.Split(".")[0]) then
-                        // skip timer/counter structure member : timer 나 counter 명 + "." + field name
-                        ()
-                    else
-                        yield (s, XgxSymbol.DuStorage s)
-        |]
+        )
+        forceTrace $"Storages to xgx symbol : {storages.Length}, elapsed {millisecond} ms"
+        symbols
 
     let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) =
         // address 가 "_" 인 symbol 에 한해서 자동으로 address 를 할당.

@@ -76,10 +76,8 @@ module internal XgiSymbolsModule =
                 | "L" -> l
                 | _ -> failwithlog "ERROR"
 
-#if DEBUG
             if t.Name.StartsWith("_") then
                 tracefn $"Something fish: trying to generate auto M address for {t.Name}"
-#endif
 
             if t.Address = TextAddrEmpty || t.Address = TextSkip then
                 let addr:string = allocator()

@@ -19,16 +19,16 @@ type IQMapperTest(xgx:PlatformTarget) =
                 let code = """
                 bool qAvante = false;
                 bool qSonata = false;
-                
+
                 $QCar = $qAvante || $qSonata;
 
                 bool iSonata = false;
                 bool iAvante = false;
-                
+
                 $iAvante = $ICar;
                 $iSonata = $ICar;
                 """
-                let iq = if xgx = XGI then """bool QCar = createTag("%QX1.0.1", false);bool ICar = createTag("%IX1.0.1", false);""" 
+                let iq = if xgx = XGI then """bool QCar = createTag("%QX1.0.1", false);bool ICar = createTag("%IX1.0.1", false);"""
                           elif xgx = XGK then """bool QCar = createTag("P0000F", false);bool ICar = createTag("P0010F", false);"""
                           else failwithf $"not support {xgx}"
 
@@ -47,6 +47,7 @@ type IQMapperTest(xgx:PlatformTarget) =
         let prjParam = {
             getXgxProjectParams xgx (getFuncName()) with
                 GlobalStorages = globalStorages
+                EnableXmlComment = true
                 POUs = [pouIQMap]
         }
 

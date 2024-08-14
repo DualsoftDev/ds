@@ -533,7 +533,7 @@ module XgiExportModule =
             for g in globalStorages.Values do
                 g.IsGlobal <- true
 
-            EnableXmlComment <- enableXmlComment
+            //EnableXmlComment <- enableXmlComment
 
 #if DEBUG
             pous |> iter (fun pou -> pou.SanityCheck(prjParam))

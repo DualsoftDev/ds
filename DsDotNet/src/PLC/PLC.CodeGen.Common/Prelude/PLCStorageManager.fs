@@ -3,6 +3,7 @@ namespace PLC.CodeGen.Common
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections
+open System
 
 (* IEC-61131-3.pdf, pp37.  Table 15 - Location and size prefix features for directly represented variable
 ----------------------------------------------------------------------------------------------
@@ -184,6 +185,7 @@ module NewIEC61131 =    // from Dual.Core.FS/Prelude/PLCStorageManager2.fs
     let (|DataSizePattern|_|) (str: string) = Size.TryParse str
     let (|MemTypePattern|_|) (str: string) = Memory.TryParse str
 
+    [<Obsolete("성능 개선 필요")>]
     /// Tag t 에 대한 index 정보를 추출한다.
     let getTagIndices t =
         printfn "Parsing %s" t
@@ -796,8 +798,10 @@ module IEC61131 =   // from Dual.Core.FS/Prelude/PLCStorageManager.fs
 
         /// 주어진 tag 가 사용된 영역을 marking
         member x.RegisterTags (tags: ITag seq) = x.RegisterTags(tags |> map address)
+
         /// 주어진 tag 가 사용된 영역을 marking
         /// marking 도중 이미 사용된 영역을 marking 하려고 할 때, Exception 발생.    // TODO : Exception 말고, 일반화된 처리 필요
+        [<Obsolete("성능 개선 필요")>]
         member x.RegisterTags (tags: string seq) =
             let allocated = MAS.Allocated
             for t in tags do

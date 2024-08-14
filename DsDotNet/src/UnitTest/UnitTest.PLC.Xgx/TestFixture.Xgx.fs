@@ -126,6 +126,7 @@ module XgxFixtures =
         let prjParam:XgxProjectParams = {
             getXgxProjectParams xgx projName with
                 GlobalStorages = globalStorages
+                EnableXmlComment = true
                 POUs = [pouParams]
         }
 

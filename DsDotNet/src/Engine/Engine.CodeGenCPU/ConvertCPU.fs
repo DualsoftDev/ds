@@ -2,9 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
-open System.Runtime.CompilerServices
 open System.Linq
-open System.Collections.Generic
 
 [<AutoOpen>]
 module ConvertCPU =
@@ -18,7 +16,7 @@ module ConvertCPU =
                 match c.Parent with
                 | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
                 | DuParentReal _ -> aliasNoSpec && vaild.HasFlag(CallInReal)
-                
+
             | :? Alias as a  ->
                  match a.Parent with
                  | DuParentFlow _ ->
@@ -39,18 +37,18 @@ module ConvertCPU =
             if IsSpec (v, RealInFlow, AliasFalse) then
                 let vr = v.TagManager :?> RealVertexTagManager
                 yield vr.M1_OriginMonitor()
-                yield vr.E4_RealErrorTotalMonitor() 
+                yield vr.E4_RealErrorTotalMonitor()
 
                 yield vr.R1_RealInitialStart()
                 yield! vr.R2_RealJobComplete()
                 yield vr.R3_RealStartPoint()
-                yield vr.R4_RealLink() 
-                yield! vr.R5_DummyDAGCoils() 
-                yield! vr.R7_RealGoingOriginError() 
-                yield! vr.R8_RealGoingPulse() 
-                yield! vr.R10_RealGoingTime() 
-                yield! vr.R11_RealGoingMotion() 
-                yield! vr.R12_RealGoingScript() 
+                yield vr.R4_RealLink()
+                yield! vr.R5_DummyDAGCoils()
+                yield! vr.R7_RealGoingOriginError()
+                yield! vr.R8_RealGoingPulse()
+                yield! vr.R10_RealGoingTime()
+                yield! vr.R11_RealGoingMotion()
+                yield! vr.R12_RealGoingScript()
 
                 yield vr.F1_RootStart()
                 yield vr.F2_RootReset()
@@ -60,16 +58,16 @@ module ConvertCPU =
                 yield! vr.D2_DAGTailStart()
                 yield! vr.D3_DAGCoinEnd()
                 yield! vr.D4_DAGCoinReset()
-                
+
                 if isActive then
-                    yield! vr.R6_RealTokenMoveNSink() 
-                    
+                    yield! vr.R6_RealTokenMoveNSink()
+
 
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                 let vm = v.TagManager :?> RealVertexTagManager
                 yield vm.M2_PauseMonitor()
-                yield vm.F3_RealEndInFlow()    
+                yield vm.F3_RealEndInFlow()
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
@@ -78,14 +76,14 @@ module ConvertCPU =
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield! vc.E2_CallErrorTXMonitor() 
-                yield! vc.E3_CallErrorRXMonitor() 
-                yield vc.E5_CallErrorTotalMonitor() 
-                
+                yield! vc.E2_CallErrorTXMonitor()
+                yield! vc.E3_CallErrorRXMonitor()
+                yield vc.E5_CallErrorTotalMonitor()
+
             if IsSpec (v, CallInReal, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield vc.C1_CallMemo() 
-                
+                yield vc.C1_CallMemo()
+
             if IsSpec (v, VertexAll, AliasNotCare) then
                 let vm = v.TagManager :?> VertexTagManager
                 yield! vm.S1_RGFH()
@@ -96,7 +94,7 @@ module ConvertCPU =
         [
             yield! s.B1_HWButtonOutput()
             yield! s.B3_HWModeLamp()
-            
+
             yield s.Y2_SystemPause()
             yield! s.Y3_SystemState()
             yield! s.Y4_SystemConditionError()
@@ -128,28 +126,28 @@ module ConvertCPU =
             yield f.F3_FlowReadyCondition()
             yield f.F4_FlowDriveCondition()
         ]
-  
-    let getTryMasterCall(calls : Vertex seq) = 
-        let pureCalls = 
+
+    let getTryMasterCall(calls : Vertex seq) =
+        let pureCalls =
             calls.OfType<Call>()@calls.OfType<Alias>().Choose(fun a->a.TryGetPureCall())
-        
+
         if pureCalls.Select(fun c->c.TargetJob).Distinct().Count() > 1 then
             failwithlog $"Error : {getFuncName()} {pureCalls.Select(fun c->c.TargetJob).Distinct().Count()}"
 
           // 동일 job으로 선정해서 coin중에서 아무거나 가져옴
         pureCalls.TryFind(fun f->not(f.IsFlowCall))
 
-    let private applyTaskDev(s:DsSystem) = 
+    let private applyTaskDev(s:DsSystem) =
         [|
-            let devCallSet =  s.GetTaskDevCalls() 
+            let devCallSet =  s.GetTaskDevCalls()
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                yield! tm.TD1_PlanSend(s, calls) 
+                yield! tm.TD1_PlanSend(s, calls)
                 yield! tm.TD2_PlanReceive(s)
                 yield! tm.TD3_PlanOutput(s)
         |]
 
-    let private applyApiItem(s:DsSystem) = 
+    let private applyApiItem(s:DsSystem) =
         [|
             let apiDevSet = s.GetDistinctApisWithDeviceCall()
             for (api, td, calls) in apiDevSet do
@@ -158,9 +156,9 @@ module ConvertCPU =
                 yield am.A2_ApiEnd()
         |]
 
-    let private applyTaskDevSensorLink(s:DsSystem) = 
+    let private applyTaskDevSensorLink(s:DsSystem) =
         [|
-            let devCallSet =  s.GetTaskDevsCoin() 
+            let devCallSet =  s.GetTaskDevsCoin()
             for (td, call) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
                 yield! tm.TD4_SensorLinking(call)
@@ -176,15 +174,15 @@ module ConvertCPU =
 
         let pureCommandFuncs =
             s.GetVertices().OfType<Call>().Where(fun c->c.IsCommand)
-                          
+
         [|
 
             for coin in pureOperatorFuncs do
                 yield! coin.VC.C1_DoOperator()   //Operator 함수는 Call 수행후 연산결과를 PEFunc에 반영
-                    
+
             for coin in pureCommandFuncs do
-                yield! coin.VC.C2_DoCommand()  
-                
+                yield! coin.VC.C2_DoCommand()
+
             for coin in flowOperatorFuncs do
                 yield coin.VC.C3_DoOperatorDevice()
         |]
@@ -197,12 +195,12 @@ module ConvertCPU =
 
             for v in s.ActionVariables do
                 yield v.VM.V2_ActionVairableMove(s)
-        |]   
-            
+        |]
+
     let private applyJob(s:DsSystem) =
         [|
             let callDevices =s.GetDevicesHasOutput()
-            
+
             for _, call in callDevices do
                 yield! call.TargetJob.J1_JobActionOuts(call)
 
@@ -211,46 +209,46 @@ module ConvertCPU =
                 yield j.J2_InputDetected()
                 yield j.J3_OutputDetected()
         |]
-        
+
     let private applyCallOnDelay(s:DsSystem) =
         [|
-           yield!  s.T1_DelayCall()  
+           yield!  s.T1_DelayCall()
         |]
-        
+
     let private emulationDevice(s:DsSystem) =
         [|
             yield s.SetFlagForEmulation()
 
-            let devCallSet =  s.GetTaskDevCalls() 
+            let devCallSet =  s.GetTaskDevCalls()
             for (td, calls) in devCallSet do
                 if (*not(td.IsRootOnlyDevice) &&*) td.InTag.IsNonNull() then
                     yield! td.SensorEmulation(s, calls)
         |]
- 
+
     let private updateRealParentExpr(x:DsSystem) =
         for dev, call in x.GetTaskDevsCall() do
-            let sensorExpr = 
+            let sensorExpr =
                 match call.GetEndAction() with
                 | Some e -> e
                 | _ -> call._on.Expr
-            
+
             dev.GetApiItem(call.TargetJob).RX.ParentApiSensorExpr <-sensorExpr
-               
+
     let convertSystem(sys:DsSystem, isActive:bool) =
         RuntimeDS.System <- Some sys
 
         sys.GenerationOrigins()
 
-        if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출           
+        if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출
             sys.GenerationMemory()
             sys.GenerationIO()
 
             updateSourceTokenOrder sys
 
             match RuntimeDS.Package with
-            | PCSIM -> 
+            | PCSIM ->
                 setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
-            | _->  
+            | _->
                 updateDuplicateAddress sys
                 CheckNullAddress sys
                 checkJobs sys
@@ -259,51 +257,51 @@ module ConvertCPU =
 
             checkMultiDevPair(sys)
 
-        else 
+        else
             CheckRealReset(sys)
             updateRealParentExpr(sys)
             sys.GenerationRealActionMemory()
 
         [
-            //Active 시스템 적용 
-            if isActive then   
+            //Active 시스템 적용
+            if isActive then
                 yield! applySystemSpec sys
                 yield! sys.B2_SWButtonOutput()
-                yield! sys.B4_SWModeLamp() 
-                
-                if RuntimeDS.Package.IsPLCorPLCSIM() then 
+                yield! sys.B4_SWModeLamp()
+
+                if RuntimeDS.Package.IsPLCorPLCSIM() then
                     yield! sys.E2_PLCOnly()
 
-                if RuntimeDS.Package.IsPackageSIM() then 
+                if RuntimeDS.Package.IsPackageSIM() then
                     yield! emulationDevice sys
 
                 yield! sys.Y1_SystemBtnForFlow(sys)
 
-            //Variables  적용 
+            //Variables  적용
             yield! applyVariables sys
-        
+
             //Flow 적용
 
             for f in sys.Flows do
                 if isActive
-                then 
-                    yield! applyOperationModeSpec f 
+                then
+                    yield! applyOperationModeSpec f
                     yield! applyFlowMonitorSpec f
 
             //Vertex 적용
             for v in sys.GetVertices() do
                 yield! applyVertexSpec v isActive
 
-            //TaskDev 적용 
+            //TaskDev 적용
             yield! applyTaskDev sys
             //TaskDev Sensor Link 적용
             yield! applyTaskDevSensorLink sys
             //ApiItem 적용
             yield! applyApiItem sys
-            //funcCall 적용 
+            //funcCall 적용
             yield! funcCall sys
-            //allpyJob 적용 
+            //allpyJob 적용
             yield! applyJob sys
-            ///CallOnDelay 적용  
+            ///CallOnDelay 적용
             yield! applyCallOnDelay sys
         ]

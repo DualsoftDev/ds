@@ -23,7 +23,7 @@ module CpuTestUtil =
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- Some sys
             RuntimeDS.Package <- RuntimePackage.PC
-            
+
             applyTagManager (sys, Storages(), targetNDrvier)
             checkCausalModel sys
             sys
@@ -31,11 +31,11 @@ module CpuTestUtil =
         let sys               = LoadSampleSystem()
         let vertices          = sys.GetVertices()
         let flow              = sys.Flows.OrderBy(fun d->d.Name).First()
-        let realInFlow        = flow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Real>().First()  
-        let callInReal        = realInFlow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Call>().First()  
+        let realInFlow        = flow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Real>().First()
+        let callInReal        = realInFlow.Graph.Vertices.OrderBy(fun d->d.Name).OfType<Call>().First()
 
-        let aliasCallInReal   = realInFlow.Graph.Vertices.OfType<Alias>().First()       
-        let aliasRealInFlow   = flow.Graph.Vertices.OfType<Alias>().First()  
+        let aliasCallInReal   = realInFlow.Graph.Vertices.OfType<Alias>().First()
+        let aliasRealInFlow   = flow.Graph.Vertices.OfType<Alias>().First()
         let aliasRealExInFlow = flow.Graph.Vertices.OfType<Alias>()
                                     .First(fun f->f.IsExFlowReal = true)
 
@@ -44,10 +44,10 @@ module CpuTestUtil =
         let realTypeAll       = vertices.OfType<Real>()
         let vertexAll         = vertices
         do
-            
+
             RuntimeGeneratorModule.clearNFullSlotHwSlotDataTypes()
             DsAddressModule.assignAutoAddress(sys, 0, 100000) targetNDrvier
-            
+
             sys.GenerationIO()
             sys.GenerationOrigins()
 
@@ -85,7 +85,7 @@ module CpuTestUtil =
         |> Seq.filter(fun f-> not <| f.Name.StartsWith("_"))
         |> Seq.iter(fun f->f.BoxedValue <- true)
 
-        st.Do()    
+        st.Do()
         st.GetTargetStorages().Head.BoxedValue === st.GetTargetStorages().Head.BoxedValue
 
     let doChecks (commentedStatements:CommentedStatement seq) = commentedStatements.Iter(doCheck)

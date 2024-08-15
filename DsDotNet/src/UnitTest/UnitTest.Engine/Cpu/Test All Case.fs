@@ -67,7 +67,7 @@ type XgxConvertDsCPU(target:PlatformTarget) =
         ModelParser.ClearDicParsingText()
         let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
 
-        let result = exportXMLforLSPLC(target, helperSys, myTemplate f, None, 0, 0, true)
+        let result = exportXMLforLSPLC(target, helperSys, myTemplate f, None, 0, 0, true, None)
         result === result
 
 type XgiConvertDsCPU() =

@@ -4,7 +4,6 @@ open Engine.Core
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Linq
-open System.Collections.Generic
 
 [<AutoOpen>]
 module CpuLoader =
@@ -23,9 +22,9 @@ module CpuLoader =
             | ExternalPou  (e, _p) -> e.ReferenceSystem
 
         member x.ToExternalSystem() =
-            match x with 
+            match x with
             | ActivePou    (_, _p) -> None
-            | DevicePou    (_, _p) -> None 
+            | DevicePou    (_, _p) -> None
             | ExternalPou  (e, _p) -> Some e
 
         member x.CommentedStatements() =
@@ -100,14 +99,14 @@ module CpuLoader =
         static member LoadStatements (system:DsSystem, storages:Storages, targetType) =
                 UniqueName.resetAll()
                 applyTagManager (system, storages, targetType)
-          
+
                 let pous =
                     //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                    let systems = system.GetRecursiveLoadeds() 
+                    let systems = system.GetRecursiveLoadeds()
                     systems
                     |> Seq.distinctBy(fun f->f.ReferenceSystem)
                     |> Seq.map(fun s ->
-                        try 
+                        try
                             match s with
                             | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
                             | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))

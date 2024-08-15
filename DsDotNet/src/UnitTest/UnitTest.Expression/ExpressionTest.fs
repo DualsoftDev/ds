@@ -169,8 +169,8 @@ module Exp =
         //[<Test>]
         //member __.``31 Rising, Falling test`` () =
         //    let t = createTag("t2", "%M1.1", false)
-            //fbFalling [var2expr t] |> evaluate |> ignore    
-            //fbRising [var2expr t] |> evaluate |> ignore     
+            //fbFalling [var2expr t] |> evaluate |> ignore
+            //fbRising [var2expr t] |> evaluate |> ignore
 
         [<Test>]
         member __.``4 Composition test`` () =
@@ -358,7 +358,7 @@ module Exp =
         member __.``8 Operator test`` () =
             let t = fCastBool [v true]
             let f = fCastBool [v false]
-            !@ t |> evaluate === false   
+            !@ t |> evaluate === false
             !@ f |> evaluate === true
             t <&&> t |> evaluate === true
             t <&&> f |> evaluate === false

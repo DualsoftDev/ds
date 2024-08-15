@@ -19,11 +19,11 @@ module ExportModule =
         (globalStorages:Storages) (localStorages:Storages)
         (pous: PouGen seq) (existingLSISprj:string option)
         (startMemory:int) (startTimer:int) (startCounter:int)
-        (enableXmlComment:bool)
+        (enableXmlComment:bool) (maxPouSplit:int option)
       : string =
         let projName = system.Name
 
-        let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
+        let getXgxPOUParamsFromCss (pouName: string) (taskName: string) (css: CommentedStatement seq) =
             let pouParams: XgxPOUParams = {
                 // POU name.  "DsLogic"
                 POUName = pouName
@@ -33,10 +33,13 @@ module ExportModule =
                 Comment = "DsLogic Automatically generate"
                 LocalStorages = localStorages
                 GlobalStorages = globalStorages
-                CommentedStatements = pouGens.Collect(fun p -> p.CommentedStatements()) |> Seq.toList
+                CommentedStatements = css |> Seq.toList
             }
-
             pouParams
+
+        let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
+            let css = pouGens.Collect(fun p -> p.CommentedStatements())
+            getXgxPOUParamsFromCss pouName taskName css
 
         let usedByteIndices =
             let getBytes addr =
@@ -93,6 +96,32 @@ module ExportModule =
 
         let prjParam: XgxProjectParams =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
+
+            // { Split POU's
+            let splitCommentedStatements (max:int) (cs:CommentedStatement seq) =
+                cs |> chunkBySize max
+
+            //let splitLargePou (max:int) (pou:PouGen) =
+            //    match pou with
+            //    | ActivePou    (s, cs) -> splitCommentedStatements max cs |> map (fun cs -> ActivePou(s, cs))
+            //    | DevicePou    (d, cs) -> splitCommentedStatements max cs |> map (fun cs -> DevicePou(d, cs))
+            //    | ExternalPou  (e, cs) -> splitCommentedStatements max cs |> map (fun cs -> ExternalPou(e, cs))
+            //let mergePous (pous: PouGen seq) =
+            //    pous
+            //    ()
+
+            let aCss, dCss = //, eCss =
+                match maxPouSplit with
+                | Some max ->
+                    //let splitLargePou = splitLargePou max
+                    let xxx = pous.Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements())
+                    pous.Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
+                    , pous.Where(fun p -> p.IsDevice).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
+                    //, pous.Where(fun p -> p.IsExternal).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
+                | None ->
+                    [], []//, []
+            // } Split POU's
+
             let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams
             {
                 defaultProjectParams with
@@ -111,15 +140,29 @@ module ExportModule =
                     AutoVariableCounter = counterGenerator 0
 
                     POUs = [
-                        yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
-                        yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
+                        match maxPouSplit with
+                        | Some _ ->
+                            for (n, a) in aCss |> Seq.indexed do
+                                let name = $"Active{n}"
+                                yield getXgxPOUParamsFromCss name name a
+                            for (n, d) in dCss |> Seq.indexed do
+                                let name = $"Devices{n}"
+                                yield getXgxPOUParamsFromCss name name d
+                            //for (n, e) in eCss |> Seq.indexed do
+                            //    yield getXgxPOUParamsFromCss (e.ToSystem().Name) (e.TaskName()) [e]
+                        | None ->
+                            (* No split *)
+                            yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
+                            yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
+
                         for p in pous.Where(fun f -> f.IsExternal) do
-                            yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ] ]
+                            yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ]
+                    ]
             }
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool) =
+    let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool, maxPouSplit:int option) =
         let _, millisecond = duration (fun () ->
             let targetNDriver =
                 match target with
@@ -152,7 +195,7 @@ module ExportModule =
                 )
 
             let xml, millisecond = duration (fun () ->
-                generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter enableXmlComment)
+                generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter enableXmlComment maxPouSplit)
 
             forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 
@@ -171,12 +214,12 @@ module ExportModule =
 [<Extension>]
 type ExportModuleExt =
     [<Extension>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment) =
+    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment, maxPouSplit) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter, enableXmlComment)
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter, enableXmlComment, maxPouSplit)
 
     [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment) =
+    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment, maxPouSplit) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter, enableXmlComment)
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter, enableXmlComment, maxPouSplit)
 

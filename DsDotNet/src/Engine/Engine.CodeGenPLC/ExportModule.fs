@@ -15,9 +15,11 @@ module ExportModule =
     /// 실제 구동용.  Generate XML file for XGI or XGK PLC.
     /// UnitTest 용은 generateXmlForTest 참고
     let private generateXmlXGX
-        (plcType:PlatformTarget) (system: DsSystem) (globalStorages:Storages)
-        (localStorages:Storages) (pous: PouGen seq) (existingLSISprj:string option)
+        (plcType:PlatformTarget) (system: DsSystem)
+        (globalStorages:Storages) (localStorages:Storages)
+        (pous: PouGen seq) (existingLSISprj:string option)
         (startMemory:int) (startTimer:int) (startCounter:int)
+        (enableXmlComment:bool)
       : string =
         let projName = system.Name
 
@@ -99,6 +101,7 @@ module ExportModule =
                     GlobalStorages = globalStorages
                     ExistingLSISprj = existingLSISprj
                     AppendDebugInfoToRungComment = isAddRungComment
+                    EnableXmlComment = enableXmlComment
 
                     RungCounter = counterGenerator 0
                     //XGI 초기값 때문에 M 사용 XGK는 R 사용
@@ -116,7 +119,7 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter) =
+    let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool) =
         let _, millisecond = duration (fun () ->
             let targetNDriver =
                 match target with
@@ -149,7 +152,7 @@ module ExportModule =
                 )
 
             let xml, millisecond = duration (fun () ->
-                generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter)
+                generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter enableXmlComment)
 
             forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 
@@ -168,12 +171,12 @@ module ExportModule =
 [<Extension>]
 type ExportModuleExt =
     [<Extension>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
+    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter)
+        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter, enableXmlComment)
 
     [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter) =
+    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment) =
         let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter)
+        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter, enableXmlComment)
 

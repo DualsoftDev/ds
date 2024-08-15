@@ -176,7 +176,7 @@ module XgiExportModule =
         // Rung 별로 생성
         for CommentAndStatements(cmt, stmts) in commentedStatements do
             // 다중 라인 설명문을 하나의 설명문 rung 에..
-            if cmt.NonNullAny() then
+            if prjParam.EnableXmlComment && cmt.NonNullAny() then
                 let xml =
                     let rungCounter = prjParam.RungCounter()
                     getCommentRungXml rgi.NextRungY $"[{rungCounter}] {cmt}"

@@ -124,7 +124,7 @@ copyStructIf(true, $people[1], $hong);
 
 
     member x.``UDT decl plc gen`` () =
-        let result = exportXMLforLSPLC(XGI, sys, "XXXXXXXXX", None,  0, 0)
+        let result = exportXMLforLSPLC(XGI, sys, "XXXXXXXXX", None,  0, 0, true)
         ()
 
 

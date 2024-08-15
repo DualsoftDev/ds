@@ -121,13 +121,11 @@ module RuntimeGeneratorModule =
 
         static member PackageChangedSubject = packageChangedSubject
 
-        /// UnitTest 전용.  System 설정 안된 상태에서 fakeOnExpression 등을 만들 때, null 상태의 System 접근 막기 위함
-        static member TryGetSystem() =
-            assert (isInUnitTest())
-            dsSystem
-        static member System
-            with get() = dsSystem.Value
-            and set v = dsSystem <- Some v
+        //static member System
+        //    with get() = dsSystem.Value
+        //    and set v = dsSystem <- Some v
+
+        static member val System = dsSystem with get, set
 
 
     let clearNFullSlotHwSlotDataTypes() =

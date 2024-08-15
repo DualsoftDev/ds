@@ -88,8 +88,8 @@ module XgxFixtures =
     let sys = DsSystem.Create4Test("")
     let setRuntimeTarget(target:PlatformTarget) =
         let runtimeTargetBackup = target, LS_XGK_IO
-        RuntimeDS.System <- sys
-        ParserUtil.runtimeTarget <-target
+        RuntimeDS.System <- Some sys
+        ParserUtil.runtimeTarget <- target
         runtimeTarget <- target, LS_XGK_IO
         disposable { runtimeTarget <- runtimeTargetBackup }
 
@@ -202,13 +202,13 @@ module XgxFixtures =
 
         [<SetUp>]
         member x.Setup () =
-            RuntimeDS.System <- sys
+            RuntimeDS.System <- Some sys
             RuntimeDS.Package <- RuntimePackage.PLCSIM
 
 
         [<TearDown>]
         member __.TearDown () =
-            RuntimeDS.System <- sys
+            RuntimeDS.System <- Some sys
 
         member __.saveTestResult testFunctionName (xml:string) = saveXgxTestResult xgx testFunctionName (formatXml xml)
         member __.generateXmlForTest = generateXmlForTest xgx

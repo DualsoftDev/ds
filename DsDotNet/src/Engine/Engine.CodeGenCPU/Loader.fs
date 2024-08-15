@@ -70,7 +70,7 @@ module CpuLoader =
         let createTagM  (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 
-            RuntimeDS.System <- sys
+            RuntimeDS.System <- Some sys
             let isActive = sys = activeSys
             sys.TagManager <- SystemManager(sys, storages, target)
             sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))

@@ -17,7 +17,7 @@ module TagManagerUtil =
         let address = if fillAutoAddress then Some TextAddrEmpty else None
         let createParam () =
             {   defaultStorageCreationParams(unbox v) tagIndex with
-                    Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex; System= system}
+                    Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex; System = Some system}
         let t:IStorage =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam())
@@ -49,12 +49,12 @@ module TagManagerUtil =
         cs
 
     let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =
-        let name = getPlcTagAbleName name storages  
+        let name = getPlcTagAbleName name storages
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
     let createSystemPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =
-        let name = getPlcTagAbleName name storages  
+        let name = getPlcTagAbleName name storages
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
@@ -83,7 +83,7 @@ module TagManagerUtil =
 
             if stg.ContainsKey validTagName then
                 stg[validTagName] :?> ITag  |> Some
-            else 
+            else
                 let t = createTagByBoxedValue validTagName {Object = duType.DefaultValue()} tagKind address sys fqdn
                 stg.Add(t.Name, t)
                 Some t

@@ -139,7 +139,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     exSys
             | _ -> x.TheSystem <- DsSystem.Create(name)
 
-            RuntimeDS.System <- x.TheSystem
+            RuntimeDS.System <- Some(x.TheSystem)
 
             debugfn ($"System: {name}")
         | None -> failwithlog "ERROR"

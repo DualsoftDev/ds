@@ -21,7 +21,7 @@ module CpuTestUtil =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
-            RuntimeDS.System <- sys
+            RuntimeDS.System <- Some sys
             RuntimeDS.Package <- RuntimePackage.PC
             
             applyTagManager (sys, Storages(), targetNDrvier)

@@ -24,7 +24,7 @@ module ExpressionFixtures =
     let mutable runtimeTarget = WINDOWS
     let setRuntimeTarget(target:PlatformTarget) =
             let runtimeTargetBackup = target
-            RuntimeDS.System <- sys
+            RuntimeDS.System <- Some sys
             runtimeTarget <- target
             ParserUtil.runtimeTarget <-target
             disposable { runtimeTarget <- runtimeTargetBackup }

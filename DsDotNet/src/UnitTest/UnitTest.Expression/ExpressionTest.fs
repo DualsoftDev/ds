@@ -412,7 +412,7 @@ module Exp =
             sbyte.DataType === typedefof<sbyte>
             sbyte.BoxedEvaluatedValue === 1y
 
-            let createParam (name, v) = {defaultStorageCreationParams(unbox v) (VariableTag.PcUserVariable|>int) with Name=name; System = sys}
+            let createParam (name, v) = {defaultStorageCreationParams(unbox v) (VariableTag.PcUserVariable|>int) with Name=name; System = Some sys}
             let variables = [
                 Variable<byte>   (createParam("byte",   box 1uy))  |> var2expr |> iexpr
                 Variable<char>   (createParam("char",   box '1'))  |> var2expr |> iexpr

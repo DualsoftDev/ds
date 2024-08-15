@@ -34,9 +34,9 @@ module ConvertCoreExtUtils =
             | _ ->
                 failwithf "bridgeType err"
 
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress, (int)HwSysTag.HwSysIn, bridgeType , sys, hwApi, x.InDataType)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.InAddress,  (int)HwSysTag.HwSysIn, bridgeType,  Some sys, hwApi, x.InDataType)
         |> iter (fun t -> x.InTag   <- t)
-        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress,(int)HwSysTag.HwSysOut ,bridgeType ,sys, hwApi, x.OutDataType)
+        createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress, (int)HwSysTag.HwSysOut, bridgeType, Some sys, hwApi, x.OutDataType)
         |> iter (fun t -> x.OutTag  <- t)
 
     let getTaskDevParamExpr (x:TaskDevParam option, devTag:ITag, sys:DsSystem) =
@@ -68,4 +68,3 @@ module ConvertCoreExtUtils =
 
         [<Extension>] static member GetOutExpr (x:TaskDev, job:Job) =
                             getTaskDevParamExpr (x.GetOutParam(job)|>Some, x.OutTag, x.GetApiItem(job).ApiSystem)  :?> Expression<bool>
-  

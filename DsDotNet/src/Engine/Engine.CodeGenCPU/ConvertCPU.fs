@@ -237,7 +237,7 @@ module ConvertCPU =
             dev.GetApiItem(call.TargetJob).RX.ParentApiSensorExpr <-sensorExpr
                
     let convertSystem(sys:DsSystem, isActive:bool) =
-        RuntimeDS.System <- sys
+        RuntimeDS.System <- Some sys
 
         sys.GenerationOrigins()
 

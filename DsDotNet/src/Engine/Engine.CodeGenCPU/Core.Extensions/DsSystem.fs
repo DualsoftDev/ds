@@ -7,11 +7,11 @@ open ConvertCoreExtUtils
 
 [<AutoOpen>]
 module ConvertCpuDsSystem =
-    let emptyAddressCheck(address:string) (name:string) = 
+    let emptyAddressCheck(address:string) (name:string) =
         if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip then
             failwithf $"{name} 해당 주소가 없습니다."
 
-    let getMemory (tag:IStorage) (target:HwTarget) = 
+    let getMemory (tag:IStorage) (target:HwTarget) =
         getValidAddress(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
 
     type DsSystem with
@@ -61,7 +61,7 @@ module ConvertCpuDsSystem =
         member s._originMonitor    = s.GetPv<bool>(SystemTag.originMonitor  )
         member s._goingMonitor     = s.GetPv<bool>(SystemTag.goingMonitor  )
 
-        
+
 
 
         member s._tout        = s.GetPv<uint32>(SystemTag.timeout)
@@ -70,73 +70,73 @@ module ConvertCpuDsSystem =
         member s._flicker200msec = s.GetPv<bool>(SystemTag._T200MS)
         member s._flicker1sec = s.GetPv<bool>(SystemTag._T1S)
         member s._flicker2sec = s.GetPv<bool>(SystemTag._T2S)
-        
-        member s._homeHW  =  
+
+        member s._homeHW  =
             let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
             if homes.any() then
                 homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
             else
-                s._off.Expr    
+                s._off.Expr
 
         member s.S = s |> getSM
         member s.Storages = s.TagManager.Storages
 
-       
-        member s.GetTempTimer(x:HwSystemDef) = 
+
+        member s.GetTempTimer(x:HwSystemDef) =
             getSM(s).GetTempTimerTag(x.Name)
         member s.GetTempBoolTag(name:string) : PlanVar<bool>=
             getSM(s).GetTempBoolTag(name)
 
-        member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))   
-        member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))   
-        member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))  
-        
-        member private x.GenerationCallConditionMemory()  = 
+        member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))
+        member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))
+        member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))
+
+        member private x.GenerationCallConditionMemory()  =
             for condi in x.HWConditions do
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi (int HwSysTag.HwStopConditionErrLamp) x
                 condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty,DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
 
-        member private x.GenerationButtonEmergencyMemory()  = 
+        member private x.GenerationButtonEmergencyMemory()  =
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true emg (int HwSysTag.HwStopEmergencyErrLamp) x
                 emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))
 
-        member private x.GenerationEmulationMemory()  = 
+        member private x.GenerationEmulationMemory()  =
             x._emulation.Address <- getValidAddress(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
-            RuntimeDS.EmulationAddress <- x._emulation.Address 
-            
-         
-        member private x.GenerationCallAlarmMemory()  = 
-            let calls = x.GetAlarmCalls().Distinct() 
+            RuntimeDS.EmulationAddress <- x._emulation.Address
+
+
+        member private x.GenerationCallAlarmMemory()  =
+            let calls = x.GetAlarmCalls().Distinct()
 
             for call in calls do
 
                 let cv =  call.TagManager :?> CoinVertexTagManager
                 let target = getTarget(x)
-                cv.ErrShort.Address             <- getMemory  cv.ErrShort target 
-                cv.ErrOpen.Address              <- getMemory  cv.ErrOpen  target 
-                cv.ErrOnTimeOver.Address        <- getMemory  cv.ErrOnTimeOver  target 
-                cv.ErrOnTimeShortage.Address    <- getMemory  cv.ErrOnTimeShortage target 
-                cv.ErrOffTimeOver.Address       <- getMemory  cv.ErrOffTimeOver target 
-                cv.ErrOffTimeShortage.Address   <- getMemory  cv.ErrOffTimeShortage target 
+                cv.ErrShort.Address             <- getMemory  cv.ErrShort target
+                cv.ErrOpen.Address              <- getMemory  cv.ErrOpen  target
+                cv.ErrOnTimeOver.Address        <- getMemory  cv.ErrOnTimeOver  target
+                cv.ErrOnTimeShortage.Address    <- getMemory  cv.ErrOnTimeShortage target
+                cv.ErrOffTimeOver.Address       <- getMemory  cv.ErrOffTimeOver target
+                cv.ErrOffTimeShortage.Address   <- getMemory  cv.ErrOffTimeShortage target
                 call.ExternalTags.Add(ErrorSensorOn,        cv.ErrShort           :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorSensorOff,       cv.ErrOpen            :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOnTimeOver,      cv.ErrOnTimeOver      :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOnTimeShortage,  cv.ErrOnTimeShortage  :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOffTimeOver,     cv.ErrOffTimeOver     :> IStorage) |>ignore
                 call.ExternalTags.Add(ErrorOffTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
-         
-         
-        member private x.GenerationRealAlarmMemory()  = 
+
+
+        member private x.GenerationRealAlarmMemory()  =
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
                 rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getTarget(x))
                 real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
 
-        member  x.GenerationRealActionMemory()  = 
+        member  x.GenerationRealActionMemory()  =
             for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
-                  
+
                 rm.ScriptStart.Address  <- getMemory  rm.ScriptStart (getTarget(x))
                 rm.MotionStart.Address  <- getMemory  rm.MotionStart (getTarget(x))
 
@@ -149,8 +149,8 @@ module ConvertCpuDsSystem =
                 real.ExternalTags.Add(ScriptEnd,    rm.ScriptEnd   :> IStorage) |>ignore
                 real.ExternalTags.Add(MotionEnd,    rm.MotionEnd   :> IStorage) |>ignore
 
-    
-        member private x.GenerationFlowHMIMemory()  = 
+
+        member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do
                 let fm =  flow.TagManager :?> FlowManager
                 let target = getTarget(x)
@@ -163,7 +163,7 @@ module ConvertCpuDsSystem =
                 let tag = fm.GetFlowTag(FlowTag.pause_btn)  in tag.Address  <- getMemory tag target
                 let tag = fm.GetFlowTag(FlowTag.pause_state)in tag.Address  <- getMemory tag target
 
-        member private x.GenerationRealHMIMemory()  = 
+        member private x.GenerationRealHMIMemory()  =
             for real in x.GetVerticesOfRealOrderByName().Distinct() do
                 let rm =  real.TagManager :?> RealVertexTagManager
                 let target = getTarget(x)
@@ -179,18 +179,18 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationTaskDevIOM() =
 
-            let jobDevices =x.GetTaskDevsSkipEmptyAddress().Distinct() 
-            
+            let jobDevices =x.GetTaskDevsSkipEmptyAddress().Distinct()
+
             for dev, job in jobDevices do
                 let apiStgName = dev.GetApiStgName(job)
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn , BridgeType.Device, x , dev, dev.GetInParam(job).DataType).Value
+                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.Device, Some x, dev, dev.GetInParam(job).DataType).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootOnlyDevice) then
                     if dev.OutAddress <> TextSkip then
-                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut , BridgeType.Device, x , dev, dev.GetOutParam(job).DataType).Value
+                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.Device, Some x , dev, dev.GetOutParam(job).DataType).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
         member x.GenerationIO() =
@@ -198,40 +198,40 @@ module ConvertCpuDsSystem =
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
-            
-        member private x.GenerationCallManualMemory()  = 
-            let devCalls = x.GetDevicesForHMI() 
+
+        member private x.GenerationCallManualMemory()  =
+            let devCalls = x.GetDevicesForHMI()
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> CoinVertexTagManager
                 if call.TargetJob.JobTaskDevInfo.TaskDevCount = 1
-                    ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)   
+                    ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)
                 then
                     cv.SF.Address    <- getMemory  cv.SF (getTarget(x))
                     dev.MaunualAddress  <- cv.SF.Address
-                else 
+                else
                     dev.MaunualAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.
 
         member x.GenerationMemory() =
-            //Step1)Emulation base + 1 bit 
+            //Step1)Emulation base + 1 bit
             x.GenerationEmulationMemory()
 
-            let startAlarm = DsAddressModule.getCurrentMemoryIndex() 
-            //Step2)Alarm base + (2 ~ N) bit 
+            let startAlarm = DsAddressModule.getCurrentMemoryIndex()
+            //Step2)Alarm base + (2 ~ N) bit
 
             x.GenerationCallAlarmMemory()
             x.GenerationRealAlarmMemory()
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
 
-            if (DsAddressModule.getCurrentMemoryIndex()-startAlarm < BufferAlramSize) //9999개 HMI 리미트    
+            if (DsAddressModule.getCurrentMemoryIndex()-startAlarm < BufferAlramSize) //9999개 HMI 리미트
             then  DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize) //9999개 HMI 리미트
 
-            //Step3)Flow Real HMI base + (N+1 ~ M)bit 
+            //Step3)Flow Real HMI base + (N+1 ~ M)bit
             x.GenerationCallManualMemory()
             x.GenerationFlowHMIMemory()
             x.GenerationRealHMIMemory()
-    
-         
+
+
         member x.GenerationOrigins() =
             let getOriginInfos(sys:DsSystem) =
                 let reals = sys.GetRealVertices()

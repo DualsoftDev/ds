@@ -9,6 +9,9 @@
 	- device, external
 	- props             -> STANDFLMS
 	- versions
+- `[flow]  f = {}`
+	- causals, noncausals, parenting(--> Real), aliases
+
 - DsSystem
 	- Flows, Jobs(-> TaskDevs), Functions, Variables,  loadedDevices, HwSystemDefs, ApiItems,  Versions
 	- GetHMI()

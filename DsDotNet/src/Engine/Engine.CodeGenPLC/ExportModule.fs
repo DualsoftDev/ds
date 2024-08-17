@@ -97,29 +97,17 @@ module ExportModule =
         let prjParam: XgxProjectParams =
             let isAddRungComment = IsDebugVersion || isInUnitTest()
 
-            // { Split POU's
+            // { Split POU's  (external 은 제외)
             let splitCommentedStatements (max:int) (cs:CommentedStatement seq) =
                 cs |> chunkBySize max
 
-            //let splitLargePou (max:int) (pou:PouGen) =
-            //    match pou with
-            //    | ActivePou    (s, cs) -> splitCommentedStatements max cs |> map (fun cs -> ActivePou(s, cs))
-            //    | DevicePou    (d, cs) -> splitCommentedStatements max cs |> map (fun cs -> DevicePou(d, cs))
-            //    | ExternalPou  (e, cs) -> splitCommentedStatements max cs |> map (fun cs -> ExternalPou(e, cs))
-            //let mergePous (pous: PouGen seq) =
-            //    pous
-            //    ()
-
-            let aCss, dCss = //, eCss =
+            let activeCss, deviceCss =
                 match maxPouSplit with
                 | Some max ->
-                    //let splitLargePou = splitLargePou max
-                    let xxx = pous.Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements())
-                    pous.Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
+                    pous  .Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
                     , pous.Where(fun p -> p.IsDevice).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
-                    //, pous.Where(fun p -> p.IsExternal).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
                 | None ->
-                    [], []//, []
+                    [], []
             // } Split POU's
 
             let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams
@@ -142,14 +130,12 @@ module ExportModule =
                     POUs = [
                         match maxPouSplit with
                         | Some _ ->
-                            for (n, a) in aCss |> Seq.indexed do
+                            for (n, a) in activeCss |> Seq.indexed do
                                 let name = $"Active{n}"
                                 yield getXgxPOUParamsFromCss name name a
-                            for (n, d) in dCss |> Seq.indexed do
+                            for (n, d) in deviceCss |> Seq.indexed do
                                 let name = $"Devices{n}"
                                 yield getXgxPOUParamsFromCss name name d
-                            //for (n, e) in eCss |> Seq.indexed do
-                            //    yield getXgxPOUParamsFromCss (e.ToSystem().Name) (e.TaskName()) [e]
                         | None ->
                             (* No split *)
                             yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"

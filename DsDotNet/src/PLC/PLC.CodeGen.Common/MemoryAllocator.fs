@@ -3,6 +3,7 @@ namespace PLC.CodeGen.Common
 open System.Collections.Generic
 open Engine.Core
 open Dual.Common.Core.FS
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module MemoryAllocator =

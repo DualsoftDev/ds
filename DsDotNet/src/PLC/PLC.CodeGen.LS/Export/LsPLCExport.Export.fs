@@ -614,19 +614,23 @@ module XgiExportModule =
 
                 (* I, Q 영역의 existing global address 와 신규 global address 충돌 check *)
                 do
-                    let standardize (addrs: string seq) =
-                        addrs
-                        |> filter notNullAny
-                        |> map standardizeAddress
-                        |> filter (fun addr -> addr[0] = '%' && addr[1].IsOneOf('I', 'Q'))
+                    let standardizeXGI (addrs: string seq) =
+                        match prjParam.TargetType with
+                        | XGI ->
+                            addrs
+                            |> filter notNullAny
+                            |> map standardizeAddress
+                            |> filter (fun addr -> addr[0] = '%' && addr[1].IsOneOf('I', 'Q'))
+                        | _ ->
+                            addrs
 
-                    let existingGlobalAddresses = existingGlobalSymbols |> map address |> standardize
+                    let existingGlobalAddresses = existingGlobalSymbols |> map address |> standardizeXGI
 
                     let currentGlobalAddresses =
                         globalStorages.Values
                         |> filter (fun s -> s :? ITag || s :? IVariable)
                         |> map address
-                        |> standardize
+                        |> standardizeXGI
 
                     match existingGlobalAddresses.Intersect(currentGlobalAddresses) |> Seq.tryHead with
                     | Some duplicated -> failwith $"ERROR: Duplicated address usage : {duplicated}"

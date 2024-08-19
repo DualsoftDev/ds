@@ -4,14 +4,11 @@ open System
 open System.IO
 open Microsoft.Data.Sqlite
 open Engine.Core
-open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open System.Collections.Generic
-open System.Reactive.Disposables
 open System.Data
 open Dapper
 open Dual.Common.Db
-open Newtonsoft.Json
 open System.Runtime.CompilerServices
 
 
@@ -264,7 +261,6 @@ type LoggerDBSettingsExt =
 
 [<AutoOpen>]
 module DBLoggerORM3 =
-    open System.IO
     type DSCommonAppSettings with
         member x.ConnectionString = $"Data Source={x.LoggerDBSettings.ConnectionPath}"
         member x.CreateConnection(): SqliteConnection = x.LoggerDBSettings.CreateConnection()

@@ -1,14 +1,11 @@
 namespace Engine.Info
 
-open System
 open Dapper
 open Engine.Core
 open Dual.Common.Core.FS
 open Dual.Common.Db
 open System.Data
 open System.Threading.Tasks
-open System.Collections.Generic
-open System.Collections.Concurrent
 open DBLoggerORM
 
 

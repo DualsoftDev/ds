@@ -3,7 +3,6 @@ namespace Engine.Info
 open Engine.Core
 open Dual.Common.Core.FS
 open System
-open System.Diagnostics
 open System.Linq
 open System.Runtime.CompilerServices
 
@@ -35,56 +34,54 @@ module DBLoggerApi =
         //x.PauseCount   <- random.Next(0, 1000)
         //x.Efficiency   <- random.Next(0, 1000)
 
-    let getInfoDevices (xs:Device seq) : InfoDevice seq =
-        if xs.isEmpty()
-        then Enumerable.Empty<InfoDevice>()
-        else
-            let sys  = (xs.First():>LoadedSystem).ContainerSystem
-            let calls = sys.GetVerticesOfJobCalls()
-            xs.Select(fun x->
-                let info = InfoDevice.Create(x)
-                let callUseds =
-                    calls.Where(fun c-> c.TargetJob.TaskDefs.any(fun d->d.FirstApi.ApiSystem = x.ReferenceSystem))
+    let getInfoDevices (devices:Device seq) : InfoDevice seq =
+        let sys  = (devices.First():>LoadedSystem).ContainerSystem
+        let calls = sys.GetVerticesOfJobCalls()
+        devices.Select(fun x->
+            let info = InfoDevice.Create(x)
+            let callUseds =
+                calls.Where(fun c-> c.TargetJob.TaskDefs.any(fun d->d.FirstApi.ApiSystem = x.ReferenceSystem))
 
 
-                callUseds
-                |> Seq.iter (fun call ->
-                    let errOpen            = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrOpen)
-                    let errShort           = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrShort)
-                    let errOnTimeOver      = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeOver)
-                    let errOnTimeShortage  = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeShortage)
-                    let errOffTimeOver     = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
-                    let errOffTimeShortage = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeShortage)
+            callUseds
+            |> Seq.iter (fun call ->
+                let errOpen            = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.rxErrOpen)
+                let errShort           = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.rxErrShort)
+                let errOnTimeOver      = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeOver)
+                let errOnTimeShortage  = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeShortage)
+                let errOffTimeOver     = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
+                let errOffTimeShortage = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeShortage)
+                let isTrue(opt:bool Option) = opt.IsSome && opt.Value
 
-                    let errs =
-                        [|
-                            if errOpen.HasValue            && errOpen.Value            then yield $"{call.Name} 센서오프이상"
-                            if errShort.HasValue           && errShort.Value           then yield $"{call.Name} 센서감지이상"
-                            if errOnTimeOver.HasValue      && errOnTimeOver.Value      then yield $"{call.Name} 감지시간초과 이상"
-                            if errOnTimeShortage.HasValue  && errOnTimeShortage.Value  then yield $"{call.Name} 감지시간부족 이상"
-                            if errOffTimeOver.HasValue     && errOffTimeOver.Value     then yield $"{call.Name} 해지시간초과 이상"
-                            if errOffTimeShortage.HasValue && errOffTimeShortage.Value then yield $"{call.Name} 해지시간부족 이상"
-                        |]
+                let errs =
+                    [|
+                        if isTrue(errOpen)            then yield $"{call.Name} 센서오프이상"
+                        if isTrue(errShort)           then yield $"{call.Name} 센서감지이상"
+                        if isTrue(errOnTimeOver)      then yield $"{call.Name} 감지시간초과 이상"
+                        if isTrue(errOnTimeShortage)  then yield $"{call.Name} 감지시간부족 이상"
+                        if isTrue(errOffTimeOver)     then yield $"{call.Name} 해지시간초과 이상"
+                        if isTrue(errOffTimeShortage) then yield $"{call.Name} 해지시간부족 이상"
+                    |]
 
-                    info.ErrorMessages.AddRange errs
-                )
-
-                let errInfos =
-                    callUseds
-                    |> Seq.map (fun c ->
-                        let count = DBLogger.Count(c.QualifiedName, int VertexTag.errorTRx)
-                        let duration = DBLogger.Average(c.QualifiedName, int VertexTag.errorTRx)
-                        (count, duration))
-                    |> Seq.toArray
-
-                    //해당 디바이스가 전체 시스템에서 going된 횟수를 구한다
-                let fqdns = callUseds |> Seq.map (fun call -> call.QualifiedName)
-                info.GoingCount <- DBLogger.Count(fqdns, [| int VertexTag.going |])
-                info.ErrorCount <- errInfos |> Seq.sumBy fst
-                if info.ErrorCount > 0 then
-                    info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
-                info
+                info.ErrorMessages.AddRange errs
             )
+
+            let errInfos =
+                callUseds
+                |> Seq.map (fun c ->
+                    let count = DBLogger.Count(c.QualifiedName, int VertexTag.errorTRx)
+                    let duration = DBLogger.Average(c.QualifiedName, int VertexTag.errorTRx)
+                    (count, duration))
+                |> Seq.toArray
+
+                //해당 디바이스가 전체 시스템에서 going된 횟수를 구한다
+            let fqdns = callUseds |> Seq.map (fun call -> call.QualifiedName)
+            info.GoingCount <- DBLogger.Count(fqdns, [| int VertexTag.going |])
+            info.ErrorCount <- errInfos |> Seq.sumBy fst
+            if info.ErrorCount > 0 then
+                info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
+            info
+        )
 
     let getInfoDevice (x:Device) : InfoDevice =  getInfoDevices([x]) |> Seq.head
 
@@ -93,28 +90,28 @@ module DBLoggerApi =
         let loadedDevices = x.Parent.GetSystem().Devices
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         let infoDevices = x.TargetJob.TaskDefs.Select(fun d->loadedDevices.First(fun f->f.Name = d.DeviceName))
-        info.InfoDevices.AddRange(getInfoDevices(infoDevices)) |>ignore
+        info.InfoDevices.AddRange(getInfoDevices(infoDevices)) |> ignore
         info
 
     let getInfoReal (x:Real) : InfoReal =
         let info = InfoReal.Create(x)
         updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
         let infoCalls = x.Graph.Vertices.OfType<Call>().Select(getInfoCall)
-        info.InfoCalls.AddRange(infoCalls) |>ignore
+        info.InfoCalls.AddRange(infoCalls) |> ignore
         info
 
     let getInfoFlow (x:Flow) : InfoFlow =
         let info = InfoFlow.Create(x)
         updateInfoBase (info, x.QualifiedName, FlowTag.drive_state|>int,  FlowTag.flowStopError|>int, FlowTag.pause_state|>int)
         let infoReals = x.GetVerticesOfFlow().OfType<Real>().Select(getInfoReal)
-        info.InfoReals.AddRange(infoReals) |>ignore
+        info.InfoReals.AddRange(infoReals) |> ignore
         info
 
     let getInfoSystem (x:DsSystem) : InfoSystem =
         let infoSys = InfoSystem.Create(x)
         updateInfoBase (infoSys, x.QualifiedName, SystemTag.driveMonitor|>int,  SystemTag.errorMonitor|>int, SystemTag.pauseMonitor|>int)
         let infoFlows = x.Flows.Select(getInfoFlow)
-        infoSys.InfoFlows.AddRange(infoFlows) |>ignore
+        infoSys.InfoFlows.AddRange(infoFlows) |> ignore
         infoSys
 
 

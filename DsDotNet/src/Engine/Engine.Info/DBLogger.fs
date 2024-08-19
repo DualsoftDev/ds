@@ -44,10 +44,8 @@ type DBLogger() =
     static member Count(fqdn: string, tagKind: int) =
         DBLogger.Count([| fqdn |], [| tagKind |])
 
-    static member GetLastValue(fqdn: string, tagKind: int) =
+    static member TryGetLastValue(fqdn: string, tagKind: int) =
         DBLoggerImpl.getLastValue (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)
-        |> Option.toNullable
-
 
     static member Sum(fqdn, tagKind) =
         DBLoggerQueryImpl.sum (DbHandler.TheDbHandler.LogSet.Value, fqdn, tagKind)

@@ -4,7 +4,6 @@ open System
 open Dual.Common.Core.FS
 open Engine.Core
 open System.Collections.Generic
-open Dual.Common.Core.FS.Functions
 
 [<AutoOpen>]
 module internal DBLoggerQueryImpl =

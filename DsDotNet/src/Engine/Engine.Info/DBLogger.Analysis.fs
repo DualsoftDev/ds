@@ -74,7 +74,9 @@ module internal DBLoggerAnalysisModule =
 
         member x.PrintStatistics() =
             let getTimeSpan (logs: ORMVwLog list) =
-                headAndLast logs |> map (fun (h, t) -> t.At - h.At) |> Option.defaultValue (TimeSpan.FromSeconds 0.0)
+                headAndLast logs
+                |> map (fun (h, t) -> t.At - h.At)
+                |? (TimeSpan.FromSeconds 0.0)
 
             let total = getTimeSpan x.Logs
             tracefn $"Total time duration: {total}"
@@ -125,7 +127,7 @@ module DBLoggerAnalysisDTOModule =
     type RealSpan(span:LogSpan, fqdn: string, flowName:string, callSpans: CallSpan[]) =
         inherit FqdnSpan(span, fqdn)
         new() = RealSpan(dummySpan, "", "", [||])
-        member val FlowName = flowName with get, set 
+        member val FlowName = flowName with get, set
         member val CallSpans = callSpans with get, set
 
     // SystemSpan 클래스 정의
@@ -134,6 +136,9 @@ module DBLoggerAnalysisDTOModule =
         new() = SystemSpan(dummySpan, "", Dictionary<string, RealSpan list>())
         member val RealSpans = realSpans with get, set
 
+    /// FQDN 별로 모든 span 을 flat 하게 펼친 구조.  (fqdn * span[]) tuple
+    type FlatSpan = string * Span[]
+
     type SystemSpan with
         static member CreateSpan(system: DsSystem, logs: ORMVwLog list) : SystemSpan =
             let logAnalInfo = LogAnalInfo.Create(system, logs)
@@ -141,14 +146,14 @@ module DBLoggerAnalysisDTOModule =
             let createCallSpan (logs: ORMVwLog list) (call: Call) : CallSpan =
                 let fqdn = call.QualifiedName
                 let callLogs = logs |> List.filter (fun log -> log.Fqdn = fqdn)
-                let span = 
+                let span =
                     match callLogs with
                     | [] -> dummySpan
                     | _ -> (callLogs.Head.At, callLogs.Last().At)
                 CallSpan(span, fqdn)
 
             let createRealSpan (real: Real) (logs: ORMVwLog list) : RealSpan =
-                let span = 
+                let span =
                     match logs with
                     | [] -> dummySpan
                     | _ -> (logs.Head.At, logs.Last().At)
@@ -164,7 +169,7 @@ module DBLoggerAnalysisDTOModule =
                 |> map (fun (KeyValue(r, lss)) -> r.QualifiedName, createRealSpans lss r)
                 |> Tuple.toDictionary
 
-            let span = 
+            let span =
                 match logs with
                 | [] -> dummySpan
                 | _ ->
@@ -179,7 +184,7 @@ module DBLoggerAnalysisDTOModule =
             SystemSpan(span, system.Name, realSpans)
 
 
-        static member CreatFlatSpan(system: DsSystem, logs: ORMVwLog list) : (string * Span[])[] =
+        static member CreatFlatSpan(system: DsSystem, logs: ORMVwLog list) : FlatSpan[] =
             let sysSpan = SystemSpan.CreateSpan(system, logs)
             let namedSpans =
                 [|
@@ -191,14 +196,13 @@ module DBLoggerAnalysisDTOModule =
                                 yield cs.Fqdn, cs
                 |]
             let grs = namedSpans.GroupBy(fun (fqdn, _) -> fqdn)
-            let result = 
+            let result =
                 grs |> map (fun gr ->
                     gr.Key, gr |> map snd |> toArray
                 ) |> toArray
 
             result
 
-    type FlatSpans = (string * Span[])[]
 
 
 // For C# interop
@@ -209,6 +213,6 @@ module SystemSpanEx =
         let logList = logs |> toFSharpList
         SystemSpan.CreateSpan(system, logList)
 
-    let CreateFlatSpan(system: DsSystem, logs: ORMVwLog seq) : FlatSpans =
+    let CreateFlatSpan(system: DsSystem, logs: ORMVwLog seq) : FlatSpan[] =
         let logList = logs |> toFSharpList
         SystemSpan.CreatFlatSpan(system, logList)

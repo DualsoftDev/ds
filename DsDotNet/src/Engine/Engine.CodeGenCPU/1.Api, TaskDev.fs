@@ -48,7 +48,7 @@ type TaskDevManager with
 
     member d.TD4_SensorLinking(call:Call) =
         let fn = getFuncName()
-        let off = d.TaskDev.ParnetSystem._off.Expr
+        let off = d.TaskDev.ParentSystem._off.Expr
         let input = d.TaskDev.GetInExpr(call.TargetJob)
         [|
             for a in d.TaskDev.ApiItems do
@@ -61,7 +61,7 @@ type TaskDevManager with
 
     member d.TD5_SensorLinked(call:Call) =
         let fn = getFuncName()
-        let off = d.TaskDev.ParnetSystem._off.Expr
+        let off = d.TaskDev.ParentSystem._off.Expr
         let input =  d.TaskDev.GetInExpr(call.TargetJob)
         [|
             for a in d.TaskDev.ApiItems do
@@ -86,9 +86,9 @@ type ApiItemManager with
         [|
             let api = am.ApiItem
             let pss = calls.Select(fun c-> td.GetPlanStart(c.GetPureCall().TargetJob)).ToOr()
-            let tempRising  = getSM(td.ParnetSystem).GetTempBoolTag(td.QualifiedName)
+            let tempRising  = getSM(td.ParentSystem).GetTempBoolTag(td.QualifiedName)
 
-            yield! (pss, td.ParnetSystem) --^ (tempRising, fn)
+            yield! (pss, td.ParentSystem) --^ (tempRising, fn)
             yield  (tempRising.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
         |]
 

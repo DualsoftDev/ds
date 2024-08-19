@@ -18,7 +18,7 @@ module TagKindList =
     let [<Literal>] TagStartJob          = 17000
 
     let skipValueChangedForTagKind = -1
-    
+
 
     [<Flags>]
     /// 0 ~ 9999
@@ -51,7 +51,7 @@ module TagKindList =
     | datet_h                  = 0024
     | datet_m                  = 0025
     | datet_s                  = 0026
-    ///systxErrTimetag             
+    ///systxErrTimetag
     | timeout                  = 0027
 
     | pauseMonitor               = 0031
@@ -68,7 +68,7 @@ module TagKindList =
 
 
 
-    ///flicker                   
+    ///flicker
     | _T20MS                     = 0100  //system timer  LS 특수비트랑 이름 통일
     | _T100MS                    = 0101  //system timer  LS 특수비트랑 이름 통일
     | _T200MS                    = 0102  //system timer  LS 특수비트랑 이름 통일
@@ -83,7 +83,7 @@ module TagKindList =
 
     /// 10000 ~ 10999
     [<Flags>]
-    type FlowTag    =  
+    type FlowTag    =
     | auto_btn                  = 10001
     | manual_btn                = 10002
     | drive_btn                 = 10003
@@ -103,7 +103,7 @@ module TagKindList =
     | emg_lamp                  = 10027
     | test_lamp                 = 10028
     | home_lamp                 = 10029
-    
+
     | flowStopError             = 10041
     | flowReadyCondition        = 10042
     | flowDriveCondition        = 10043
@@ -131,7 +131,7 @@ module TagKindList =
     | startTag                  = 11000
     | resetTag                  = 11001
     | endTag                    = 11002
-    
+
 
     | ready                     = 11006
     | going                     = 11007
@@ -144,7 +144,7 @@ module TagKindList =
     | realOriginInit            = 11016
     | realOriginButton          = 11017
     | relayReal                 = 11018
-    
+
     | forceStart                = 11019
     | forceReset                = 11020 //forceOff 의미
     | forceOn                   = 11021
@@ -158,7 +158,7 @@ module TagKindList =
     | realToken                 = 11029
     | sourceToken               = 11030
     | mergeToken                 = 11031
-    
+
     | dummyCoinSTs              = 11032
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034
@@ -166,10 +166,10 @@ module TagKindList =
     | goingPulse                = 11037
 
     | callCommandPulse          = 11040
-    
+
     | callCommandEnd            = 11043
     | callOperatorValue         = 11044
-    
+
     | scriptStart               = 11045
     | scriptEnd                 = 11046
     | scriptRelay               = 11047
@@ -177,7 +177,7 @@ module TagKindList =
     | motionStart               = 11048
     | motionEnd                 = 11049
     | motionRelay               = 11050
-    
+
     | timeStart                 = 11051
     | timeEnd                   = 11052
     | timeRelay                 = 11053
@@ -220,7 +220,7 @@ module TagKindList =
     | HwSysOut                    = 15001
     | HwStopConditionErrLamp      = 15010
     | HwStopEmergencyErrLamp      = 15011
-    
+
     /// 16000 ~ 16999
     [<Flags>]
     type VariableTag    =
@@ -228,11 +228,11 @@ module TagKindList =
     | PcUserVariable               = 16001
     | PlcSysVariable               = 16002
     | PlcUserVariable              = 16003
-    
-    
+
+
     /// 17000 ~ 17999
     [<Flags>]
     type JobTag    =
     | inDetected                   = 17000
     | outDetected                  = 17001
-    
+

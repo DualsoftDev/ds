@@ -1,4 +1,4 @@
-*.xml text eol=crlf
-*.fs text eol=crlf
-*.cs text eol=crlf
+*.xml text eol=crlf whitespace=fix
+*.fs  text eol=crlf whitespace=fix
+*.cs  text eol=crlf whitespace=fix
 .gitattributes text eol=lf

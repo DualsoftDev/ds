@@ -7,15 +7,15 @@ open ConvertCoreExtUtils
 [<AutoOpen>]
 module ConvertCpuApiItem =
     let getTM(td:TaskDev) = td.TagManager:?> TaskDevManager
-    
+
     type TaskDev with
         member td.ExistInput   = addressExist td.InAddress
         member td.ExistOutput  = addressExist td.OutAddress
 
-        member td.GetPlanStart(job:Job)  = getTM(td).PlanStart(job)   
-        member td.GetPlanEnd(job:Job)    = getTM(td).PlanEnd(job)   
-        member td.GetPlanOutput(job:Job) = getTM(td).PlanOutput(job)   
-        
+        member td.GetPlanStart(job:Job)  = getTM(td).PlanStart(job)
+        member td.GetPlanEnd(job:Job)    = getTM(td).PlanEnd(job)
+        member td.GetPlanOutput(job:Job) = getTM(td).PlanOutput(job)
+
     type ApiItem with
         member a.ApiItemSet     = getAM(a).ApiItemSet
         member a.ApiItemEnd     = getAM(a).ApiItemEnd
@@ -24,12 +24,12 @@ module ConvertCpuApiItem =
         member a.SL1     = getAM(a).SL1
         ///sensorLinked
         member a.SL2     = getAM(a).SL2
-    
-        member a.RxET    = getVMReal(a.RX).ET 
-        member a.TxST    = getVMReal(a.TX).ST 
+
+        member a.RxET    = getVMReal(a.RX).ET
+        member a.TxST    = getVMReal(a.TX).ST
         //member a.UpperLimit =
         //    match a.TimeParam with
-        //    |Some t -> t.USL 
+        //    |Some t -> t.USL
         //    |None -> getUpperLimitFromReals(a)
 
 

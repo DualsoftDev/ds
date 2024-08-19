@@ -72,7 +72,7 @@ type TagKindExt =
     [<Extension>] static member GetTaskDevTagKind   (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>   (x.TagKind)
     [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.tryGetEnumValue<HwSysTag>     (x.TagKind)
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.tryGetEnumValue<VariableTag>  (x.TagKind)
-    [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.tryGetEnumValue<JobTag>(x.TagKind)
+    [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.tryGetEnumValue<JobTag>       (x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
 
     [<Extension>]
@@ -86,12 +86,12 @@ type TagKindExt =
                 | None ->   EventSystem  (x, s, x.GetSystemTagKind().Value)
                 |> Some
 
-            | :? Flow as f         -> Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
-            | :? Vertex as v       -> Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
-            | :? ApiItem as a      -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? TaskDev  as d     -> Some( EventTaskDev (x, d, x.GetTaskDevTagKind().Value))
-            | :? HwSystemDef as h  -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
-            | :? Job as j          -> Some( EventJob     (x, j, x.GetJobTagKind().Value))
+            | :? Flow        as f -> Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
+            | :? Vertex      as v -> Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
+            | :? ApiItem     as a -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
+            | :? TaskDev     as d -> Some( EventTaskDev (x, d, x.GetTaskDevTagKind().Value))
+            | :? HwSystemDef as h -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
+            | :? Job         as j -> Some( EventJob     (x, j, x.GetJobTagKind().Value))
             | _ -> None
         | None -> None
 
@@ -122,14 +122,14 @@ type TagKindExt =
     [<Extension>]
     static member GetTagContents(x:TagEvent) =
         match x with
-        | EventSystem    (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventFlow      (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventVertex    (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventApiItem   (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventTaskDev   (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventHwSys     (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventVariable  (tag, obj, kind) -> tag.Name, tag.BoxedValue, obj.Name, int kind
-        | EventJob       (tag, obj, kind) -> tag.Name,tag.BoxedValue, obj.DequotedQualifiedName, kind|>int
+        | EventSystem    (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventFlow      (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventVertex    (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventApiItem   (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventTaskDev   (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventHwSys     (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventVariable  (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventJob       (tag, target, kind) -> tag.Name, tag.BoxedValue, target.DequotedQualifiedName, kind|>int
 
 
     [<Extension>]
@@ -156,14 +156,14 @@ type TagKindExt =
     [<Extension>]
     static member GetSystem(x:TagEvent) =
         match x with
-        | EventSystem    (_, obj, _) -> obj
-        | EventFlow      (_, obj, _) -> obj.System
-        | EventVertex    (_, obj, _) -> obj.Parent.GetSystem()
-        | EventApiItem   (_, obj, _) -> obj.ApiSystem           //active system이 아니고 loaded 시스템
-        | EventTaskDev   (_, obj, _) -> obj.ParnetSystem
-        | EventHwSys     (_, obj, _) -> obj.System
-        | EventVariable  (_, obj, _) -> obj
-        | EventJob       (_, obj, _) -> obj.System
+        | EventSystem    (_, target, _) -> target
+        | EventFlow      (_, target, _) -> target.System
+        | EventVertex    (_, target, _) -> target.Parent.GetSystem()
+        | EventApiItem   (_, target, _) -> target.ApiSystem           //active system이 아니고 loaded 시스템
+        | EventTaskDev   (_, target, _) -> target.ParentSystem
+        | EventHwSys     (_, target, _) -> target.System
+        | EventVariable  (_, target, _) -> target
+        | EventJob       (_, target, _) -> target.System
 
     [<Extension>]
     static member IsStatusTag(x:TagEvent) =
@@ -260,8 +260,8 @@ type TagKindExt =
 
     [<Extension>]
     static member IsNeedSaveDBLog(x:TagEvent) =
-        if x.IsVertexErrTag()
-        then true
+        if x.IsVertexErrTag() then
+            true
         else
             match x with
             | EventSystem (_, _, kind) ->

@@ -5,7 +5,7 @@
 
 - SystemTag
 	- on, off
-	- button, lamp, monitor of PREDOMICATH (I, O (Idle, Origin)는 monitor 에만 포함됨)
+	- button, lamp, monitor of PREDOMICATH ( - TIO.   I, O (Idle, Origin)는 monitor 에만 포함됨)
 - FlowTag
 	- button, lamp, state of PREDOMICATH (I, O (Idle, Origin) 제외)
 	- mode (auto, manual, idle)
@@ -18,6 +18,7 @@
 		- Call
 			- callCommandPulse, dummyCoinSTs, ...
 - ApiItemTag
+	- ApiItemSet, ApiItemEnd, SensorLinking, SensorLinked
 - TaskDevTag
 	- Plan {Start, End, Output}, 
 	- Action{In, Out, Memory}

@@ -454,7 +454,7 @@ module CoreModule =
         member x.ApiSystemName = apiParam.ApiItem.ApiSystem.Name //needs test animation
 
         member x.DeviceName = deviceName
-        member x.ParnetSystem = parentSys
+        member x.ParentSystem = parentSys
 
         member x.ApiParams = dicTaskDevParamIO.Values
         member x.ApiItems  = x.ApiParams.Select(fun f -> f.ApiItem)

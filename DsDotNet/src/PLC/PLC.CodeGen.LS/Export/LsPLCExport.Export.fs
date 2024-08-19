@@ -292,9 +292,12 @@ module XgiExportModule =
                         rgi <-
                             {   Xmls = rgiSub.Xmls @ rgi.Xmls
                                 NextRungY = 1 + rgiSub.NextRungY }
+                | DuAction(DuCopyUdt _) when isXgk ->
+                    failwith "UDT declaration is not supported in XGK"
 
                 | DuAction(DuCopy(condition, source, target)) when isXgk ->
                     moveCmdRungXgk condition source target
+
 
                 | _ -> failwithlog "Not yet"
 
@@ -521,13 +524,13 @@ module XgiExportModule =
             prjParam.SanityCheck()
 
             let {
-                    ProjectName = projName
-                    TargetType = targetType
-                    ProjectComment = projComment
-                    GlobalStorages = globalStorages
-                    EnableXmlComment = enableXmlComment
-                    POUs = pous
-                } = prjParam
+                ProjectName = projName
+                TargetType = targetType
+                ProjectComment = projComment
+                GlobalStorages = globalStorages
+                //EnableXmlComment = enableXmlComment
+                POUs = pous
+            } = prjParam
 
             // todo : 사전에 처리 되었어야...
             for g in globalStorages.Values do

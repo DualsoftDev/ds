@@ -7,6 +7,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenPLC
 open Dual.UnitTest.Common.FS
+open System
 
 
 
@@ -76,7 +77,7 @@ copyStructIf(true, $people[1], $hong);
             let code = udtBaseCode + "NonExistingType nonExisting;"
             let statements = parseCodeForWindows storages code
             x.generateXmlForTest f storages (map withNoComment statements) |> ignore
-            
+
         doit |> ShouldFailWithSubstringT "ERROR: UDT type NonExistingType is not declared"
 
 
@@ -87,7 +88,7 @@ copyStructIf(true, $people[1], $hong);
             let code = udtBaseCode + "$hong.name = 1;"
             let statements = parseCodeForWindows storages code
             x.generateXmlForTest f storages (map withNoComment statements) |> ignore
-            
+
         doit |> ShouldFailWithSubstringT "Type mismatch"
 
     member x.``UDT member assign test`` () =
@@ -140,13 +141,13 @@ type XgiUdtTest() =
     [<Test>] member __.``UDT member assign test`` () = base.``UDT member assign test``()
     [<Test>] member __.``UDT decl plc gen`` () = base.``UDT decl plc gen``()
 
-
+[<Obsolete("XGK 는 UDT 지원 안함")>]
 type XgkUdtTest() =
     inherit XgxUdtTest(XGK)
-    [<Test>] member __.``UDT copy test`` () = base.``UDT copy test``()
-    [<Test>] member __.``UDT copy test2`` () = base.``UDT copy test2``()
-    [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
-    [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
-    [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
-    [<Test>] member __.``UDT member assign test`` () = base.``UDT member assign test``()
-    [<Test>] member __.``UDT decl plc gen`` () = base.``UDT decl plc gen``()
+//    [<Test>] member __.``UDT copy test`` () = base.``UDT copy test``()
+//    [<Test>] member __.``UDT copy test2`` () = base.``UDT copy test2``()
+//    [<Test>] member __.``UDT decl test`` () = base.``UDT decl test``()
+//    [<Test>] member __.``UDT decl nonexisting test`` () = base.``UDT decl nonexisting test``()
+//    [<Test>] member __.``UDT invalid member assign test`` () = base.``UDT invalid member assign test``()
+//    [<Test>] member __.``UDT member assign test`` () = base.``UDT member assign test``()
+//    [<Test>] member __.``UDT decl plc gen`` () = base.``UDT decl plc gen``()

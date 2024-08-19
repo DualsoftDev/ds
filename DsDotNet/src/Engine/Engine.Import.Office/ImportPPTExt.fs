@@ -579,7 +579,7 @@ module ImportU =
                         else
                             flow.Name, trxName
 
-                    if dicFlow.Values.Where(fun w -> w.Name = flowName).IsEmpty() then
+                    if dicFlow.Values.Where(fun w -> w.Name = flowName).IsEmpty then
                         Office.ErrorPpt(
                             Name,
                             ErrID._42,

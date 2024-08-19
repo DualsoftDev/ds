@@ -12,12 +12,12 @@
 - `[flow]  f = {}`
 	- causals, noncausals, parenting(--> Real), aliases
 
-- DsSystem
+- [[DsSystem]]
 	- Flows, Jobs(-> TaskDevs), Functions, Variables,  loadedDevices, HwSystemDefs, ApiItems,  Versions
 	- GetHMI()
 - Flow
 	- Graph, modelingEdges, AliaseDefs, GetHMI()
-- FQDNObject
+- FQDNObject ![[FQDN.canvas]]
 	- DsSystem
 	- LoadedSystem
 		- Device, ExternalSystem
@@ -29,7 +29,7 @@
 	- ApiItem, Job, VariableData, ActionVariable, TaskDev
 	- HwSystemDef
 		- ButtonDef, LampDef, ConditionDef
-	- 
+- [[TagEvent]]
 - _ITagManager
 	- { System, Flow, TaskDev, ApiItem, ActionVariable, VariableData  }Manager,
 	- VertexTagManager
@@ -44,10 +44,10 @@
 - Real
 	- Graph, ModelingEdges,
 	- ExternalTags
-	- STANDFLMS : T, N, F, M, S (Time, Notrans, Finished, Motion, Script)
+	- TNSFM (TraNSForM) @ STANDFLMS : T, N, F, M, S (Time, Notrans, Finished, Motion, Script)
 	-  _    _   _   _ _
 - Call
-	- Job or Command or Operator, SAD
+	- Job or Command or Operator, SAD(StAnDflms) @ STANDFLMS 
 - ApiItem
 	- Tx/Rx (Real), Time
 - Alias

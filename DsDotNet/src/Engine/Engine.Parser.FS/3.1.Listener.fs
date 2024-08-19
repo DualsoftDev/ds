@@ -680,7 +680,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                     match tryFindCallingApiItem system device api allowAutoGenDevice with
                                                     | Some api -> Some api
                                                     | None ->
-                                                        let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
+                                                        let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty
                                                         if createDevice then
                                                             x.CreateLoadedDeivce(device)
                                                         None

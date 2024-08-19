@@ -7,8 +7,8 @@ open System
 
 [<AutoOpen>]
 module ConvertErrorCheck =
-  
-    let internal checkErrHWItem(sys:DsSystem) = 
+
+    let internal checkErrHWItem(sys:DsSystem) =
         let hwManuFlows = sys.ManualHWButtons |> Seq.collect(fun f -> f.SettingFlows)
         let hwAutoFlows = sys.AutoHWButtons   |> Seq.collect(fun f -> f.SettingFlows)
         for btn in sys.AutoHWButtons do
@@ -41,32 +41,32 @@ module ConvertErrorCheck =
                         failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
                     if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push then
-                        if coin.MutualResetCoins.isEmpty() then 
+                        if coin.MutualResetCoins.isEmpty() then
                             failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
 
 
 
     // unused
-    let private checkErrExternalStartRealExist (sys:DsSystem) = 
-        let flowEdges = (sys.Flows |> Seq.collect(fun f -> f.Graph.Edges))        
+    let private checkErrExternalStartRealExist (sys:DsSystem) =
+        let flowEdges = (sys.Flows |> Seq.collect(fun f -> f.Graph.Edges))
         let exEdges =
             flowEdges
                 .Where(fun e ->
                     e.Source.TryGetPureCall().IsSome
-                        || e.Target.TryGetPureCall().IsSome)  
+                        || e.Target.TryGetPureCall().IsSome)
 
         if not(exEdges.any()) then
             failwithf $"PLC 시스템은 외부시작 신호가 없으면 시작 불가 입니다. HelloDS 모델을 참고하세요"
 
 
-    let internal checkMultiDevPair(sys: DsSystem) = 
-        let devicesCalls = 
+    let internal checkMultiDevPair(sys: DsSystem) =
+        let devicesCalls =
             sys.GetTaskDevsCall()
                 .DistinctBy(fun (td, c) -> (td, c.TargetJob))
                 .Where(fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1)
 
         let groupDev = devicesCalls  |> Seq.groupBy (fun (dev, _) -> dev.DeviceName)
-    
+
         for (_, calls) in groupDev  do
             let jobMultis =
                 calls
@@ -89,7 +89,7 @@ module ConvertErrorCheck =
                     let f = if bStart then getStartEdgeSources else getResetEdgeSources
                     checkList |> Seq.collect(f)
 
-                if checks.IsEmpty() then
+                if checks.IsEmpty then
                     yield real
         |]
 
@@ -99,43 +99,43 @@ module ConvertErrorCheck =
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
-    let CheckNullAddress (sys: DsSystem) = 
+    let CheckNullAddress (sys: DsSystem) =
         // Check for null addresses in jobs
-        let nullTagJobs = 
+        let nullTagJobs =
             sys.Jobs.SelectMany(fun j -> j.GetNullAddressDevTask()) |> toArray
 
-        if nullTagJobs.any() then 
+        if nullTagJobs.any() then
             let errJobs = String.Join ("\n", nullTagJobs.Select(fun s->s.QualifiedName))
             failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
 
         // Check for null buttons
-        let nullBtns = 
+        let nullBtns =
             sys.HWButtons
             |> filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextSkip))
             |> toArray
 
-        if nullBtns.Any() then 
+        if nullBtns.Any() then
             let errBtns =
                 nullBtns
-                |> map (fun b -> 
+                |> map (fun b ->
                     let inout = if b.InTag.IsNull() then "입력" else "출력"
                     $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]")
                 |> String.concat "\n"
-            
+
             failwithf $"버튼 주소가 없습니다. \n{errBtns}"
 
         // Check for null lamps
         let nullLamps = sys.HWLamps |> filter (fun l -> l.OutTag.IsNull()) |> toArray
-        if nullLamps.Any() then 
+        if nullLamps.Any() then
             let errLamps = nullLamps |> map (fun l -> l.Name) |> String.concat "\n"
             failwithf $"램프 주소가 없습니다. \n{errLamps}"
 
-    let internal checkJobs(sys:DsSystem) = 
+    let internal checkJobs(sys:DsSystem) =
         for j in sys.Jobs do
             for td in j.TaskDefs do
-                if td.ExistOutput then 
+                if td.ExistOutput then
                     let outParam = td.GetOutParam(j)
                     if j.ActionType = Push && outParam.DataType = DuBOOL then
-                            failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다." 
-                    elif outParam.DataType <> DuBOOL && outParam.ValueParam.IsNull() then 
-                            failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다." 
+                            failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다."
+                    elif outParam.DataType <> DuBOOL && outParam.ValueParam.IsNull() then
+                            failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다."

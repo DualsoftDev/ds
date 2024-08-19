@@ -113,7 +113,7 @@ module ImportViewModule =
         let newNode = ViewNode("Lamps", VLAMP)
         let addLamps (lamps: seq<LampDef>) (lampType:LampType) =
             lamps 
-            |> Seq.filter (fun w -> w.SettingFlows.Contains(flow) || w.SettingFlows.IsEmpty())
+            |> Seq.filter (fun w -> w.SettingFlows.Contains(flow) || w.SettingFlows.IsEmpty)
             |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, lampType)) |> ignore)
 
         addLamps system.AutoHWLamps DuAutoModeLamp

@@ -175,7 +175,7 @@ module DsAddressModule =
                                             |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
                                             |> Seq.filter(fun (i, _, _) -> i <= currIndex)
 
-                        if sameTypeSlots.IsEmpty() then 0
+                        if sameTypeSlots.IsEmpty then 0
                         else 
                             sameTypeSlots
                             |> Seq.sumBy(fun (_, _, data) -> (data.ToBlockSizeNText() |> fst))

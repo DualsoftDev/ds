@@ -49,8 +49,7 @@ module ExportLayoutTable =
                             c.TargetJob.TaskDefs.Select(fun d->
                                 let points = d.GetDevice(f.System).ChannelPoints
                                 let chs = points.Where(fun kv->kv.Key = TextEmtpyChannel)
-                                if chs.IsEmpty()
-                                then
+                                if chs.IsEmpty then
                                     failwithf $"Device {d.DeviceName} has no channel point"
                                 let xywh = chs.First().Value
                                 rowItem (d.DeviceName, f , xywh)

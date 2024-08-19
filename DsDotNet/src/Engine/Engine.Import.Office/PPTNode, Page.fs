@@ -256,7 +256,7 @@ module PptNodeModule =
                         let rx = (txrx.Split('~')[1]) |> trimSpace
 
                         let getRealName (apiReal: string) =
-                            if apiReal = "_" || apiReal.IsEmpty() then
+                            if apiReal = "_" || apiReal.IsEmpty then
                                 failWithLog $"{ErrID._43} {shape.InnerText}"
                             apiReal
 

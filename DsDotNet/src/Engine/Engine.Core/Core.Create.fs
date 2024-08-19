@@ -19,7 +19,7 @@ module CoreCreateModule =
             match apis with
             | [] ->
                 // Add a default flow if no flows exist
-                if sys.Flows.IsEmpty() then
+                if sys.Flows.IsEmpty then
                     sys.Flows.Add(Flow.Create("genFlow", sys)) |> ignore
 
                 let realName = $"gen{apiName}"

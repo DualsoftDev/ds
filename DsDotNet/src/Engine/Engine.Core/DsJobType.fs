@@ -79,8 +79,8 @@ module DsJobType =
                 match optionalPart with
                 | Some optPart ->
                     let values = optPart.Split(',')
-                    let inCnt = if values.Length > 0 then Some(values.[0] |> int) else None
-                    let outCnt = if values.Length > 1 then Some(values.[1] |> int) else None
+                    let inCnt  = values.TryItem(0).Map(int)
+                    let outCnt = values.TryItem(1).Map(int)
                     (inCnt, outCnt)
                 | None -> (Some cnt, Some cnt)
 

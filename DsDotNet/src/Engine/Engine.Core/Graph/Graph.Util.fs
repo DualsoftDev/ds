@@ -33,7 +33,7 @@ module internal GraphUtilImpl =
         (graphOrder source target) |> fun f-> f.IsNone
 
     let findHeadVertex (xs: 'V seq) (graphOrder: 'V -> 'V -> bool option) : 'V option=
-        if xs.IsEmpty() then None
+        if xs.IsEmpty then None
         else
             let mutable head = xs.Head()
             xs |> Seq.iter (fun x ->

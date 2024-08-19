@@ -71,7 +71,7 @@ type CoinVertexTagManager with
                         d.GetInExpr(call.TargetJob)
                 ) 
 
-        if inOps.IsEmpty() then
+        if inOps.IsEmpty then
             failwithlog $"Device({call.Name})에는 입력이 필요합니다."
         else
             let sets = inOps.ToAndElseOff()    

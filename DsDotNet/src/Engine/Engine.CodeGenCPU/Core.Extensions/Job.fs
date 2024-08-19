@@ -16,24 +16,24 @@ module ConvertCpuJob =
     let getJSM(j:Job) = j.System.TagManager:?> SystemManager
     let getJM(j:Job) = j.TagManager:?> JobManager
     type Job with
-        member j.ActionInExpr = 
+        member j.ActionInExpr =
             let inExprs =
                 j.TaskDefs.Where(fun d-> d.ExistInput)
                           .Select(fun d-> d.GetInExpr(j))
 
             if inExprs.any() then
                 match j.JobParam.JobSensing with
-                | SensingNormal -> inExprs.ToAnd() |>Some  
-                | SensingNegative -> !@inExprs.ToAnd() |>Some  
-            else 
+                | SensingNormal -> inExprs.ToAnd() |>Some
+                | SensingNegative -> !@inExprs.ToAnd() |>Some
+            else
                 None
 
-        member j.ActionOutExpr = 
+        member j.ActionOutExpr =
             let outExprs =
                 j.TaskDefs.Where(fun d-> d.ExistOutput)
                           .Select(fun d-> d.GetOutExpr(j))
 
-            if outExprs.any() 
-            then outExprs.ToOr()|>Some  
+            if outExprs.any()
+            then outExprs.ToOr()|>Some
             else None
 

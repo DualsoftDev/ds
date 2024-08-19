@@ -500,7 +500,7 @@ module CoreModule =
         member x.System = system
         member val SettingFlows = flows with get, set
         //SettingFlows 없으면 전역 시스템 설정
-        member val IsGlobalSystemHw = flows.IsEmpty()
+        member val IsGlobalSystemHw = flows.IsEmpty
         member val TaskDevParamIO = taskDevParamIO with get, set
         member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.DataType | None -> DuBOOL
         member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.DataType | None -> DuBOOL

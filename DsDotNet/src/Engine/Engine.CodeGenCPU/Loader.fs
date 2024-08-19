@@ -7,13 +7,10 @@ open System.Linq
 
 [<AutoOpen>]
 module CpuLoader =
-
-
-
-    //프로그램 내려가는 그룹
+    //프로그램 내려가는 그룹.  *P*rogram *O*rganization *U*nit Gen
     type PouGen =
-    | ActivePou    of DsSystem * CommentedStatement list
-    | DevicePou    of Device * CommentedStatement list
+    | ActivePou    of DsSystem       * CommentedStatement list
+    | DevicePou    of Device         * CommentedStatement list
     | ExternalPou  of ExternalSystem * CommentedStatement list
         member x.ToSystem() =
             match x with
@@ -32,11 +29,13 @@ module CpuLoader =
             | ActivePou    (_s, p) -> p
             | DevicePou    (_d, p) -> p
             | ExternalPou  (_e, p) -> p
+
         member x.TaskName() =
             match x with
             | ActivePou   _ -> "Active"
             | DevicePou   _ -> "Devices"
             | ExternalPou _ -> "ExternalCpu"
+
         member x.IsActive   = match x with | ActivePou   _ -> true | _ -> false
         member x.IsDevice   = match x with | DevicePou   _ -> true | _ -> false
         member x.IsExternal = match x with | ExternalPou _ -> true | _ -> false
@@ -47,19 +46,19 @@ module CpuLoader =
         let rootEdges  = system.Flows.Collect(fun f->f.Graph.Edges)
         for edge in rootEdges do
             match edge.Target with
-            | :? Real            -> ()
+            | :? Real -> ()
             | :? Call as c  ->
                 match c.Parent with
                 | DuParentReal _ -> ()
                 | DuParentFlow _ -> failwithlog $"Call vertex can't using Target [check : {edge.ToText()}]"
 
             | :? Alias as a  ->
-                    match a.Parent with
-                    | DuParentReal _ -> ()
-                    | DuParentFlow _ ->
-                        match a.TargetWrapper with
-                        | DuAliasTargetReal _         -> ()
-                        | DuAliasTargetCall _ -> ()//failwithlog $"AliasCall vertex can't using Target [check : {edge.ToText()}]"
+                match a.Parent with
+                | DuParentReal _ -> ()
+                | DuParentFlow _ ->
+                    match a.TargetWrapper with
+                    | DuAliasTargetReal _ -> ()
+                    | DuAliasTargetCall _ -> ()//failwithlog $"AliasCall vertex can't using Target [check : {edge.ToText()}]"
 
             |_ -> failwithlog $"Error {getFuncName()}"
 
@@ -80,41 +79,42 @@ module CpuLoader =
             sys.Jobs.Iter(fun job->job.TagManager <- JobManager(job))
             sys.GetVertices().Iter(fun v->
                 match v with
-                | :? Real
-                    ->  v.TagManager <- RealVertexTagManager(v)
-                | (:? Call | :? Alias)
-                    -> v.TagManager <-  CoinVertexTagManager(v)
-                | _ -> failwithlog (getFuncName()))
+                | :? Real ->
+                    v.TagManager <- RealVertexTagManager(v)
+                | (:? Call | :? Alias) ->
+                    v.TagManager <-  CoinVertexTagManager(v)
+                | _ ->
+                    failwithlog (getFuncName()))
 
 
         createTagM activeSys //  root와 본인과 같음
         activeSys.GetRecursiveLoadedSystems()
-              .Distinct()
-              .Iter(fun loaded ->  createTagM loaded)
+            .Distinct()
+            .Iter(createTagM)
 
 
     [<Extension>]
     type CpuLoaderExt =
         [<Extension>]
         static member LoadStatements (system:DsSystem, storages:Storages, targetType) =
-                UniqueName.resetAll()
-                applyTagManager (system, storages, targetType)
+            UniqueName.resetAll()
+            applyTagManager (system, storages, targetType)
 
-                let pous =
-                    //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                    let systems = system.GetRecursiveLoadeds()
-                    systems
-                    |> Seq.distinctBy(fun f->f.ReferenceSystem)
-                    |> Seq.map(fun s ->
-                        try
-                            match s with
-                            | :? Device as d         -> DevicePou   (d, convertSystem(d.ReferenceSystem, false))
-                            | :? ExternalSystem as e -> ExternalPou (e, convertSystem(e.ReferenceSystem, false))
-                            | _ -> failwithlog (getFuncName())
-                        with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
-                        )
-                    //자신(Acitve) system을  CPU 변환
-                    |>Seq.append [ActivePou (system, convertSystem(system, true))]
+            let pous =
+                //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
+                let systems = system.GetRecursiveLoadeds()
+                systems
+                |> Seq.distinctBy(fun f->f.ReferenceSystem)
+                |> Seq.map(fun s ->
+                    try
+                        match s with
+                        | :? Device as d         -> DevicePou   (d, generateStatements(d.ReferenceSystem, false))
+                        | :? ExternalSystem as e -> ExternalPou (e, generateStatements(e.ReferenceSystem, false))
+                        | _ -> failwithlog (getFuncName())
+                    with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
+                    )
+                //자신(Acitve) system을  CPU 변환
+                |> Seq.append [ActivePou (system, generateStatements(system, true))]
 
-                pous
+            pous
 

@@ -15,14 +15,14 @@ module DBLoggerApi =
         if DbWriter.TheDbWriter.LogSet.IsNull() then
             failwithf "do InitializeLogDbOnDemandAsync"
 
-        Debug.WriteLine $"updateInfoBase for fqdn: {fqdn}"
+        debugfn $"updateInfoBase for fqdn: {fqdn}"
 
-        x.DriveSpan <- DBLogger.Sum(fqdn, kindDrive)
+        x.DriveSpan    <- DBLogger.Sum(fqdn, kindDrive)
         x.DriveAverage <- DBLogger.Average(fqdn, kindDrive)
-        x.ErrorSpan <- DBLogger.Sum(fqdn, kindError)
+        x.ErrorSpan    <- DBLogger.Sum(fqdn, kindError)
         x.ErrorAverage <- DBLogger.Average(fqdn, kindError)
-        x.ErrorCount <- DBLogger.Count(fqdn, kindError)
-        x.PauseCount <- DBLogger.Count(fqdn, kindPause)
+        x.ErrorCount   <- DBLogger.Count(fqdn, kindError)
+        x.PauseCount   <- DBLogger.Count(fqdn, kindPause)
         if (x.DriveSpan + x.ErrorSpan > 0.0) then
             x.Efficiency <- x.DriveSpan / (x.DriveSpan + x.ErrorSpan)
 
@@ -43,27 +43,31 @@ module DBLoggerApi =
             let calls = sys.GetVerticesOfJobCalls()
             xs.Select(fun x->
                 let info = InfoDevice.Create(x)
-                let callUseds = calls
-                                   .Where(fun c-> c.TargetJob.TaskDefs.any(fun d->d.FirstApi.ApiSystem = x.ReferenceSystem))
+                let callUseds =
+                    calls.Where(fun c-> c.TargetJob.TaskDefs.any(fun d->d.FirstApi.ApiSystem = x.ReferenceSystem))
 
 
-                callUseds |> Seq.iter (fun call ->
-                    let errOpen = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrOpen)
-                    let errShort = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrShort)
-                    let errOnTimeOver = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeOver)
-                    let errOnTimeShortage = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeShortage)
-                    let errOffTimeOver = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
+                callUseds
+                |> Seq.iter (fun call ->
+                    let errOpen            = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrOpen)
+                    let errShort           = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.rxErrShort)
+                    let errOnTimeOver      = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeOver)
+                    let errOnTimeShortage  = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeShortage)
+                    let errOffTimeOver     = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
                     let errOffTimeShortage = DBLogger.GetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeShortage)
 
-                    let err1 = if errOpen.HasValue && errOpen.Value         then $"{call.Name} 센서오프이상" else ""
-                    let err2 = if errShort.HasValue && errShort.Value       then $"{call.Name} 센서감지이상" else ""
-                    let err3 = if errOnTimeOver.HasValue && errOnTimeOver.Value then $"{call.Name} 감지시간초과  이상" else ""
-                    let err4 = if errOnTimeShortage.HasValue && errOnTimeShortage.Value then $"{call.Name}  감지시간부족 이상" else ""
-                    let err5 = if errOffTimeOver.HasValue && errOffTimeOver.Value then $"{call.Name} 해지시간초과  이상" else ""
-                    let err6 = if errOffTimeShortage.HasValue && errOffTimeShortage.Value then $"{call.Name}  해지시간부족 이상" else ""
-                    let errs =[err1;err2;err3;err4;err5;err6]|> Seq.where(fun f->f <> "")
+                    let errs =
+                        [|
+                            if errOpen.HasValue            && errOpen.Value            then yield $"{call.Name} 센서오프이상"
+                            if errShort.HasValue           && errShort.Value           then yield $"{call.Name} 센서감지이상"
+                            if errOnTimeOver.HasValue      && errOnTimeOver.Value      then yield $"{call.Name} 감지시간초과 이상"
+                            if errOnTimeShortage.HasValue  && errOnTimeShortage.Value  then yield $"{call.Name} 감지시간부족 이상"
+                            if errOffTimeOver.HasValue     && errOffTimeOver.Value     then yield $"{call.Name} 해지시간초과 이상"
+                            if errOffTimeShortage.HasValue && errOffTimeShortage.Value then yield $"{call.Name} 해지시간부족 이상"
+                        |]
+
                     info.ErrorMessages.AddRange errs
-                    )
+                )
 
                 let errInfos =
                     callUseds
@@ -74,9 +78,9 @@ module DBLoggerApi =
                     |> Seq.toArray
 
                     //해당 디바이스가 전체 시스템에서 going된 횟수를 구한다
-                let fqdns = callUseds|> Seq.map (fun call -> call.QualifiedName)
-                info.GoingCount <-  DBLogger.Count(fqdns, [| int VertexTag.going |])
-                info.ErrorCount <- errInfos |> Seq.sumBy (fun s -> fst s)
+                let fqdns = callUseds |> Seq.map (fun call -> call.QualifiedName)
+                info.GoingCount <- DBLogger.Count(fqdns, [| int VertexTag.going |])
+                info.ErrorCount <- errInfos |> Seq.sumBy fst
                 if info.ErrorCount > 0 then
                     info.RepairAverage <- (errInfos |> Seq.sumBy (fun s -> (fst s|>float) * snd s)) / Convert.ToDouble(info.ErrorCount)
                 info

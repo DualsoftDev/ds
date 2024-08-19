@@ -1,0 +1,21 @@
+- Log
+	- at
+	- storageId
+	- value
+	- 
+	- tokenId
+	- (modelId)
+- Storage
+	- name
+	- fqdn
+	- tagKind
+	- dataType
+	- modelId
+- TagKind
+	- id
+	- name
+- Token
+	- at
+	- originalToken
+	- mergedTokenId
+	- modelId

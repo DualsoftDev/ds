@@ -22,40 +22,55 @@ type TokenIdType = Nullable<int64>
 module DBLoggerORM =
     // database table names
     module Tn =
-        let Storage = "storage"
-        let Model = "model"
-        let Log = "log"
-        let Token = "token"
-        let Error = "error"
-        let TagKind = "tagKind"
+        let Storage  = "storage"
+        let Model    = "model"
+        let Log      = "log"
+        let Token    = "token"
+        let Error    = "error"
+        let TagKind  = "tagKind"
         let Property = "property"
-        let User = "user"
+        let User     = "user"
     // database view names
     module Vn =
-        let Log = "vwLog"
+        let Log     = "vwLog"
         let Storage = "vwStorage"
 
     // property table 사전 정의 row name
     module PropName =
-        let PptPath = "ppt"
+        let PptPath    = "ppt"
         let ConfigPath = "ds"
-        let Start = "start"
-        let End = "end"
+        let Start      = "start"
+        let End        = "end"
 
-        let ModelRuntime = "modelRuntime"
+        let ModelRuntime  = "modelRuntime"
         let ModelFilePath = "modelFilePath"
 
 
+    (*
+     * [Storage]
+        +---------------------------------------+---------------------------+-----------+-----------+--------
+        | name                                  | fqdn                      | tagKind   | dataType  | modelId
+        +---------------------------------------+---------------------------+-----------+-----------+--------
+        | _ON                                   | SIDE11                    | 0         | Boolean   | 1             // TagKind.[ 0] = SystemTag._ON
+        | _OFF                                  | SIDE11                    | 1         | Boolean   | 1             // TagKind.[ 1] = SystemTag._OFF
+        | SIDE11_auto_btn                       | SIDE11                    | 2         | Boolean   | 1             // TagKind.[ 2] = SystemTag.auto_btn
+        | SIDE11_auto_lamp                      | SIDE11                    | 12        | Boolean   | 1             // TagKind.[12] = SystemTag.auto_lamp
+        | SIDE11_timeout                        | SIDE11                    | 27        | UInt32    | 1             // TagKind.[27] = SystemTag.timeout
+        | SIDE11_MES_idle_mode                  | SIDE11.MES                | 10,100    | Boolean   | 1             // TagKind.[10100] = FlowTag.idle_mode
+        | SIDE11_S200_CARTYPE_MOVE_idle_mode    | SIDE11.S200_CARTYPE_MOVE  | 10,100    | Boolean   | 1             // TagKind.[10100] = FlowTag.idle_mode
+        +---------------------------------------+---------------------------+-----------+-----------+--------
+    *)
     let sqlCreateSchema =
         $"""
 CREATE TABLE [{Tn.Storage}] (
     [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
     , [name]        NVARCHAR(128) NOT NULL CHECK(LENGTH(name) <= 128)
     , [fqdn]        NVARCHAR(128) NOT NULL CHECK(LENGTH(fqdn) <= 128)
-    , [tagKind]     INTEGER NOT NULL
+    , [tagKind]     INTEGER NOT NULL    -- 값 자체가 tagKind table 의 id 이다.
     , [dataType]    NVARCHAR(64) NOT NULL CHECK(LENGTH(dataType) <= 64)
     , [modelId]     INTEGER NOT NULL
     , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name, modelId)
+    , FOREIGN KEY(tagKind) REFERENCES {Tn.TagKind}(id)
 );
 
 CREATE TABLE [{Tn.Model}] (
@@ -69,10 +84,11 @@ CREATE TABLE [{Tn.Log}] (
     , [storageId]   INTEGER NOT NULL
     , [at]          TEXT NOT NULL       -- SQLite DateTime 지원 안함.  DATETIME2(7)
     , [value]       NUMERIC NOT NULL
-    , [modelId]     INTEGER NOT NULL
-    , [tokenId]     INTEGER             -- SEQ token
+    , [modelId]     INTEGER NOT NULL    -- Storage.modelId 와 중복되나, join 피하기 위해서 중복 허용
+    , [tokenId]     INTEGER             -- SEQ token. allow NULL
     , FOREIGN KEY(storageId) REFERENCES {Tn.Storage}(id)
     , FOREIGN KEY(tokenId) REFERENCES {Tn.Token}(id)
+    , FOREIGN KEY(modelId) REFERENCES {Tn.Model}(id)
 );
 
 CREATE TABLE [{Tn.Token}] (

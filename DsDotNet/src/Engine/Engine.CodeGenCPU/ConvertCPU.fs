@@ -39,10 +39,10 @@ module ConvertCPU =
                 yield vr.M1_OriginMonitor()
                 yield vr.E4_RealErrorTotalMonitor()
 
-                yield vr.R1_RealInitialStart()
+                yield  vr.R1_RealInitialStart()
                 yield! vr.R2_RealJobComplete()
-                yield vr.R3_RealStartPoint()
-                yield vr.R4_RealLink()
+                yield  vr.R3_RealStartPoint()
+                yield  vr.R4_RealLink()
                 yield! vr.R5_DummyDAGCoils()
                 yield! vr.R7_RealGoingOriginError()
                 yield! vr.R8_RealGoingPulse()
@@ -71,14 +71,14 @@ module ConvertCPU =
 
             if IsSpec (v, CallInFlow, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield vc.F4_CallEndInFlow()
+                yield  vc.F4_CallEndInFlow()
                 yield! vc.F5_SourceTokenNumGeneration()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
                 yield! vc.E2_CallErrorTXMonitor()
                 yield! vc.E3_CallErrorRXMonitor()
-                yield vc.E5_CallErrorTotalMonitor()
+                yield  vc.E5_CallErrorTotalMonitor()
 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
@@ -95,7 +95,7 @@ module ConvertCPU =
             yield! s.B1_HWButtonOutput()
             yield! s.B3_HWModeLamp()
 
-            yield s.Y2_SystemPause()
+            yield  s.Y2_SystemPause()
             yield! s.Y3_SystemState()
             yield! s.Y4_SystemConditionError()
             yield! s.Y5_SystemEmgAlramError()
@@ -153,7 +153,7 @@ module ConvertCPU =
             for (api, td, calls) in apiDevSet do
                 let am = api.TagManager :?> ApiItemManager
                 yield! am.A1_ApiSet(td, calls)
-                yield am.A2_ApiEnd()
+                yield  am.A2_ApiEnd()
         |]
 
     let private applyTaskDevSensorLink(s:DsSystem) =
@@ -234,7 +234,8 @@ module ConvertCPU =
 
             dev.GetApiItem(call.TargetJob).RX.ParentApiSensorExpr <-sensorExpr
 
-    let convertSystem(sys:DsSystem, isActive:bool) =
+    /// DsSystem 으로부터 CommentedStatement list 생성.
+    let generateStatements(sys:DsSystem, isActive:bool) : CommentedStatement list =
         RuntimeDS.System <- Some sys
 
         sys.GenerationOrigins()

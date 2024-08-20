@@ -183,16 +183,12 @@ type DsCpuExt  =
     static member CreateRuntime (dsSys:DsSystem) (target:HwTarget) : Runtime =
         let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
-        // Initialize storages and load CPU statements
+        // Initialize storages and create POU's for the system
         let storages = Storages()
         let pous = dsSys.GeneratePOUs(storages, target) |> toArray
 
-        // Create a list to hold commented statements
-        let mutable css = []
-
-        // Add commented statements from each CPU
-        for cpu in pous do
-            css <- css @ cpu.CommentedStatements() |> List.ofSeq
+        // Create commented statements from each POU's
+        let css = pous.Collect(_.CommentedStatements())
         let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)
         let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)
         // Create and return a DsCPU object

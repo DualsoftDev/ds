@@ -28,6 +28,7 @@ module ConvertCpuVertex =
 
     let getAgvTimes(c:Call) = c.TargetJob.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeAvgExist))
     let getDelayTimes(c:Call) = c.TargetJob.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeDelayExist))
+
     type Call with
         member c._on     = c.System._on
         member c._off    = c.System._off

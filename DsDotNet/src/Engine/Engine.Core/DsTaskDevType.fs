@@ -292,15 +292,11 @@ module rec DsTaskDevType =
         else None
 
 
-
     let isValidName(name: string) =
         Regex.IsMatch(name, @"^[a-zA-Z_][a-zA-Z0-9_]*$")
 
     let getTaskDevParam (txt: string) =
         let parts = txt.Split(':') |> Seq.toList
-        let addr = parts.Head
-        let remainingParts = parts.Tail
-
         let parseParts (acc: (string option * DataType option * ValueParam option * int option)) part =
             let nameOpt, typeOpt, valueOpt, timeOpt = acc
             match parseTime part, tryTextToDataType part, createValueParam part with
@@ -320,7 +316,7 @@ module rec DsTaskDevType =
                 failwithlog $"Unknown format detected: text '{part}'"
 
         let nameOpt, typeOpt, valueOpt, timeOpt =
-            remainingParts |> List.fold parseParts (None, None, None, None)
+            parts |> List.fold parseParts (None, None, None, None)
 
         if nameOpt.IsSome && typeOpt.IsNone 
         then
@@ -328,10 +324,19 @@ module rec DsTaskDevType =
         else 
             let sym = nameOpt |> Option.map (fun n -> SymbolAlias(n, typeOpt.Value))
             match valueOpt with
-            | Some vp -> addr, TaskDevParam(sym, vp, timeOpt)
+            | Some vp -> TaskDevParam(sym, vp, timeOpt)
             | None -> 
                 if sym.IsNone then
-                    addr, TaskDevParam(sym, defaultValueParam(Some(true)), timeOpt)
+                     TaskDevParam(sym, defaultValueParam(Some(true)), timeOpt)
                 else
-                    addr, TaskDevParam(sym, defaultValueParam(None), timeOpt)
-            
+                     TaskDevParam(sym, defaultValueParam(None), timeOpt)
+
+
+    let getAddressTaskDevParam (txt: string) =
+        let parts = txt.Split(':') |> Seq.toList
+        let addr = parts.Head
+        if parts.Tail.IsEmpty then
+            addr, defaultTaskDevParam()
+        else
+            let taskDevParam = getTaskDevParam (parts.Tail.JoinWith(":"))
+            addr, taskDevParam

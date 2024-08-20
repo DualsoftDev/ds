@@ -68,18 +68,20 @@ module PptNodeUtilModule =
             try
                 let getParam x =
                         if x = TextSkip then
-                            "" |> getTaskDevParam |> snd
+                            defaultTaskDevParam()
                         else
-                            match createValueParam x with
-                            | Some vp ->
-                                //if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
-                                //    $":{v}s" |> getTaskDevParam |> snd
-                                //else
-                                    if vp.IsDefaultValue then
-                                        $":True" |> getTaskDevParam |> snd
-                                    else
-                                        $":{vp.ToText()}" |> getTaskDevParam |> snd
-                            | None -> failwithf $"{x} 입력규격을 확인하세요"
+                            getTaskDevParam x
+
+                            //match  with
+                            //| Some vp ->
+                            //    //if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
+                            //    //    $":{v}s" |> getAddressTaskDevParam |> snd
+                            //    //else
+                            //        if vp.IsDefaultValue then
+                            //            $":True" |> getAddressTaskDevParam |> snd
+                            //        else
+                            //            $":{vp.ToText()}" |> getAddressTaskDevParam |> snd
+                            //| None -> failwithf $"{x} 입력규격을 확인하세요"
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
                 if func.Contains(",") then

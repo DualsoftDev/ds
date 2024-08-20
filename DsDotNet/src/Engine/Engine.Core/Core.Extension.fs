@@ -11,7 +11,7 @@ open System.Runtime.CompilerServices
 module CoreExtensionModule =
     let tryGetTaskDevParamInOut (paramInOutText:string) =
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> Some (getTaskDevParam tx,  getTaskDevParam rx.Head)
+        | tx::rx when rx.Length = 1 -> Some (getAddressTaskDevParam tx,  getAddressTaskDevParam rx.Head)
         | _-> None
 
     let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =

@@ -206,14 +206,10 @@ module ConvertCPU =
 
 
             for j in s.Jobs do
-                yield j.J2_InputDetected()
-                yield j.J3_OutputDetected()
+                yield! j.J2_InputDetected()
+                yield! j.J3_OutputDetected()
         |]
 
-    let private applyCallOnDelay(s:DsSystem) =
-        [|
-           yield!  s.T1_DelayCall()
-        |]
 
     let private emulationDevice(s:DsSystem) =
         [|
@@ -306,5 +302,5 @@ module ConvertCPU =
                 //allpyJob 적용
                 yield! applyJob sys
                 ///CallOnDelay 적용
-                yield! applyCallOnDelay sys
+                yield! sys.T1_DelayCall()
             ]

@@ -97,7 +97,7 @@ module ImportType =
             let addr, (dataType:DataType), func = paramRaw
             if func <> ""
             then
-                getTaskDevParam $"{addr}:{func}" |> snd
+                getAddressTaskDevParam $"{addr}:{func}" |> snd
             else
                 defaultTaskDevParam()
 

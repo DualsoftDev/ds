@@ -14,11 +14,6 @@ type DsSystem with
         let aliasCalls = s.GetVertices().GetAliasTypeCalls()
         let fn = getFuncName()
 
-        //let ends (call:Call) = 
-        //    (call.EndPlan  <&&> call.VC._sim.Expr)
-        //    <||>
-        //    (call.EndActionOnlyIO <&&> !!call.VC._sim.Expr)
-          
         [|
             for call in calls do
                 if call.UsingTon then 

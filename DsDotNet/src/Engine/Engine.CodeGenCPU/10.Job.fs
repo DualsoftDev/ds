@@ -40,28 +40,17 @@ type Job with
                             yield (emg, valDefalut) --> (td.OutTag, fn)
         |]
 
-                            //if RuntimeDS.Package.IsPLCorPLCSIM() then
-                            //    yield (fbRising[sets], valExpr) --> (td.OutTag, fn)
-                            //elif RuntimeDS.Package.IsPCorPCSIM() then                                
-                            //else    
-                            //    failWithLog $"Not supported {RuntimeDS.Package} package"
-
     member j.J2_InputDetected() =
         let _off = j.System._off.Expr
         let jm = getJM(j)
-        let sets =  match j.ActionInExpr with
-                    | Some inExprs -> inExprs
-                    | None -> _off
-
-        (sets, _off) --| (jm.InDetected, getFuncName())
-
+        match j.ActionInExpr with
+        | Some inExprs -> [(inExprs, _off) --| (jm.InDetected, getFuncName())]
+        | None -> []
 
     member j.J3_OutputDetected() =
         let _off = j.System._off.Expr
         let jm = getJM(j)
-        let sets =  match j.ActionOutExpr with
-                    | Some outExprs -> outExprs
-                    | None -> _off
+        match j.ActionOutExpr with
+        | Some outExprs ->[(outExprs, _off) --| (jm.OutDetected, getFuncName())]
+        | None -> []
          
-        (sets, _off) --| (jm.OutDetected, getFuncName())
-

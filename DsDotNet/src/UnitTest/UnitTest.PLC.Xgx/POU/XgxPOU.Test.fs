@@ -64,8 +64,8 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {
-            TaskName = "ZZ Program"
-            POUName = "POU1"
+            TaskName = "Scan Program"
+            POUName = "ZZ Program"
             Comment = "POU1"
             LocalStorages = storages
             GlobalStorages = globalStorages
@@ -83,7 +83,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
     //pou만으로는 xg5000에서 열수 없음
     member x.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
-        let xml = pou11.Value.GenerateXmlString(dummyPrjParams, None)
+        let xml = pou11.Value.GenerateXmlString(dummyPrjParams)
         x.saveTestResult (getFuncName()) xml
 
     member x.``Project test`` () =

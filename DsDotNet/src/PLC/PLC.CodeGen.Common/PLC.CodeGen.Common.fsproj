@@ -22,7 +22,6 @@
         <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
         <Compile Include="Prelude\FakeTypes.fs" />
         <Compile Include="Prelude\Constants.fs" />
-        <Compile Include="Prelude\PLCStorageManager.fs" />
         <Compile Include="TagType.fs" />
         <Compile Include="FlatExpression.fs" />
         <Compile Include="FlatExpression.Proc.fs" />

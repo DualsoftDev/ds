@@ -37,16 +37,16 @@ module LSEAddressPattern =
     //        | _ -> None
 
 
-    let list5Digit = [ "L"; "N"; "D"; "R" ]
-    let list4Digit = [ "P"; "M"; "K"; "F"; "T"; "C" ]
+    let Xgk5Digit = [ "L"; "N"; "D"; "R" ]
+    let Xgk4Digit = [ "P"; "M"; "K"; "F"; "T"; "C" ]
 
     let getXgkBitText (device:string, offset: int) : string =
         let word = offset / 16
         let bit = offset % 16
         match device.ToUpper() with
-        | d when list5Digit |> List.contains d ->
+        | d when Xgk5Digit |> List.contains d ->
             device + sprintf "%05i.%X" word bit
-        | d when list4Digit |> List.contains d ->
+        | d when Xgk4Digit |> List.contains d ->
             device + sprintf "%04i%X" word bit
         | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
 
@@ -56,9 +56,9 @@ module LSEAddressPattern =
 
         let wordIndex = offsetByte / 2
         match device.ToUpper() with
-        | d when list5Digit |> List.contains d ->
+        | d when Xgk5Digit |> List.contains d ->
             sprintf "%s%05i" d wordIndex
-        | d when list4Digit |> List.contains d ->
+        | d when Xgk4Digit |> List.contains d ->
             sprintf "%s%04i" d wordIndex
         | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
 
@@ -124,7 +124,6 @@ module LSEAddressPattern =
             None
 
 
-    let private memoizedTryParseXgkTag = memoize tryParseXgkTag
     let (|LsTagXGKPattern|_|) ((modelId: int option), (tag: string)) =
         match tryParseXgkTag tag with
         | Some (device, dataSize, bitOffset) ->
@@ -134,60 +133,15 @@ module LSEAddressPattern =
             None
 
     let tryParseXGITag tag = (|LsTagXGIPattern|_|) (None, tag)
-    ///XGK 검증필요
     let tryParseXGKTag tag = (|LsTagXGKPattern|_|) (None, tag)
     let tryParseXGKTagByBitType tag = (|LsTagXGKPattern|_|) (None, tag)
+
     let tryParseXGITagByCpu (tag: string) (modelId: int) = (|LsTagXGIPattern|_|) (modelId |> Some, tag)
-    ///XGK 검증필요
     let tryParseXGKTagByCpu (tag: string) (modelId: int) = (|LsTagXGKPattern|_|) (modelId |> Some, tag)
 
     let isXgiTag tag = tryParseXGITag tag |> Option.isSome
-    ///XGK 검증필요
     let isXgkTag tag = tryParseXGKTag tag |> Option.isSome
 
-
-type XgkAddress private () =
-    [<Obsolete("성능 개선 필요")>]
-    static let parseXgkAddress (addr:string) =
-
-        assert(isInUnitTest())      // 일단 unit test 사용 only 로..  완전하게 구현 불가능한 함수.
-
-        match addr with
-        // P/M 에 대한 Bit 지정은 5자리를 full 로 채워야 한다.
-        | RegexPattern @"^([PM])(\d{4})([\da-fA-F]+)$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] ->
-            device, word, Some(hexaBit)
-        // P/M 에 대한 Word 지정은 4자리를 full 로 채워야 한다.
-        | RegexPattern @"^([PM])(\d{4})$" [DevicePattern device; Int32Pattern word] ->
-            device, word, None
-        // 나머지는 모두 bit 로 간주
-        | RegexPattern @"^([PM])(\d{0,4})([\da-fA-F]+)$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] ->
-            device, word, Some(hexaBit)
-
-        // W123456, W12345F : 꽉 채워지는 경우. no ambiguity
-        | RegexPattern @"^([W])(\d{5})([\da-fA-F])$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] ->
-            device, word, Some(hexaBit)
-        // W1234F : 덜 채워졌지만, hex 로 끝나는 경우. no ambiguity
-        | RegexPattern @"^([W])(\d{1,4})([a-fA-F])$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] ->
-            device, word, Some(hexaBit)
-        // W12345 : 덜 채워졌지만, hex 로 끝나지 않는 경우. ambiguous.  마지막은 강제로 hex 로 취급한다.
-        | RegexPattern @"^([W])(\d{4})(\d)$" [DevicePattern device; Int32Pattern word; HexPattern hexaBit] ->
-            device, word, Some(hexaBit)
-
-        | _ -> failwithf $"Invalid XGK address : {addr}"
-
-    member val Device:string = null with get, set
-    member val WordOffset = 0 with get, set
-    member val BitOffset:int option = None with get, set
-    member x.TotalBitOffset =
-        let w = x.WordOffset
-        match x.BitOffset with
-        | Some bit -> w * 16 + bit
-        | None -> w * 16
-
-    static member FromAddress (address:string) =
-        let device, word, bit = parseXgkAddress address
-        let xgkAddress = new XgkAddress(Device = device.ToString(), WordOffset = word, BitOffset = bit)
-        xgkAddress
 
 
 [<Extension>]

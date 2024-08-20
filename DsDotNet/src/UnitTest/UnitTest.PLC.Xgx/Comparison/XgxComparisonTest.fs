@@ -40,9 +40,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         pi.DataType === typeof<double>
         eu.DataType === typeof<double>
         if xgx = XGK then
-            let addrPi = XgkAddress.FromAddress(pi.Address)
-            let addrEu = XgkAddress.FromAddress(eu.Address)
-            abs(addrEu.WordOffset - addrPi.WordOffset) === 4 
+            let addrPi = tryParseXGKTag(pi.Address).Value
+            let addrEu = tryParseXGKTag(eu.Address).Value
+            abs(addrEu.BitOffset - addrPi.BitOffset) === 64 
 
         x.saveTestResult f xml
 
@@ -133,9 +133,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         nn1.DataType === typeof<int32>
         unn1.DataType === typeof<uint32>
         if xgx = XGK then
-            let addrNn1 = XgkAddress.FromAddress(nn1.Address)
-            let addrNn2 = XgkAddress.FromAddress(nn2.Address)
-            addrNn2.WordOffset === addrNn1.WordOffset + 2 
+            let addrNn1 = tryParseXGKTag(nn1.Address).Value
+            let addrNn2 = tryParseXGKTag(nn2.Address).Value
+            addrNn2.BitOffset === addrNn1.BitOffset + 32 
 
         x.saveTestResult f xml
 
@@ -266,9 +266,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         pi.DataType === typeof<single>
         eu.DataType === typeof<single>
         if xgx = XGK then
-            let addrPi = XgkAddress.FromAddress(pi.Address)
-            let addrEu = XgkAddress.FromAddress(eu.Address)
-            abs(addrEu.WordOffset - addrPi.WordOffset) === 2 
+            let addrPi = tryParseXGKTag(pi.Address).Value
+            let addrEu = tryParseXGKTag(eu.Address).Value
+            abs(addrEu.BitOffset - addrPi.BitOffset) === 32 
 
         x.saveTestResult f xml
 

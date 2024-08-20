@@ -15,10 +15,10 @@ type LsTagInfo =
         BitOffset: int
     }
 
-    member x.ByteLength = (max 8 x.BitLength) / 8
-    member x.BitLength = getBitLength x.DataType
-    member x.ByteOffset = x.BitOffset / 8
+    member private x.DataSizeByte = (max 8 x.DataSize) / 8
+    member private x.DataSize = getBitLength x.DataType
 
+    member x.ByteOffset = x.BitOffset / 8
     member x.OffsetByDataType =
         match x.DataType with
         | Bit -> x.BitOffset

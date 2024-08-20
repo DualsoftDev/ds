@@ -47,10 +47,10 @@ module RunTime =
             disposables.Add subscription
 
 
-            
+
             if RuntimeDS.Package.IsPackageSIM() then
                 systems.Iter(fun sys-> cpuSimOn(sys))
-            
+
 
 
             let subscription =
@@ -182,7 +182,7 @@ module RunTime =
 
             // Initialize storages and load CPU statements
             let storages = Storages()
-            let pous = CpuLoaderExt.LoadStatements(dsSys, storages, target) |> Seq.toList
+            let pous = dsSys.GeneratePOUs(storages, target) |> Seq.toList
 
             // Create a list to hold commented statements
             let mutable css = []

@@ -159,7 +159,7 @@ module ExportModule =
             //use _ = logTraceEnabler()
             let globalStorage = new Storages()
             let localStorage = new Storages()
-            let pous = CpuLoaderExt.LoadStatements(system, globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
+            let pous = system.GeneratePOUs(globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
             let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
 

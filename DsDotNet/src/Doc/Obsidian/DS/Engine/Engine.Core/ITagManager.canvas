@@ -10,7 +10,7 @@
 		{"id":"9e49e8bd0409579e","type":"text","text":"FlowManager","x":-280,"y":90,"width":165,"height":60},
 		{"id":"1c11cfdaa465ec2f","type":"text","text":"RealVertexTagManager","x":500,"y":60,"width":180,"height":60},
 		{"id":"8df3b374b09588c6","type":"text","text":"VertexTagManager","x":370,"y":-90,"width":210,"height":60},
-		{"id":"21e45c648c1ebcd1","type":"text","text":"CallVertexTagManager","x":320,"y":60,"width":160,"height":60}
+		{"id":"21e45c648c1ebcd1","type":"text","text":"CoinVertexTagManager","x":320,"y":60,"width":160,"height":60}
 	],
 	"edges":[
 		{"id":"fcc746d6d9b562c9","fromNode":"12ae315b357c950b","fromSide":"top","toNode":"46fbaef90017c549","toSide":"bottom"},

@@ -126,7 +126,7 @@ module TagManagerModule =
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
             | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
-            
+
             | VertexTag.origin               -> realM().OG     :> IStorage
             | VertexTag.realOriginInit       -> realM().RO :> IStorage
             | VertexTag.realOriginButton     -> realM().OB :> IStorage
@@ -153,7 +153,7 @@ module TagManagerModule =
         let useScript   = real.Script.IsSome
         let useMotion   = real.Motion.IsSome
         let useTime     = real.Time.IsSome
-        
+
         let sysManager = sys.TagManager :?> SystemManager
         let off = sysManager.GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
         let mutable originInfo:OriginInfo = defaultOriginInfo (real)
@@ -190,7 +190,7 @@ module TagManagerModule =
         ///Origin Monitor
         member val OG = createTag false VertexTag.origin
 
-   
+
         ///Real Init Relay
         member val RR         = createTag false VertexTag.relayReal
         ///Real Going Relay
@@ -204,7 +204,7 @@ module TagManagerModule =
 
         ///DAG Coin Start Coil
         member val CoinAnyOnST  = if hasChildren
-                                    then createTag false VertexTag.dummyCoinSTs 
+                                    then createTag false VertexTag.dummyCoinSTs
                                     else off
         ///DAG Coin Reset Coil
         member val CoinAnyOnRT  = if hasChildren
@@ -212,7 +212,7 @@ module TagManagerModule =
                                     else off
         ///DAG Coin End Coil
         member val CoinAnyOnET  = if hasChildren
-                                    then createTag false VertexTag.dummyCoinETs 
+                                    then createTag false VertexTag.dummyCoinETs
                                     else off
 
         ///Timer time avg
@@ -275,7 +275,7 @@ module TagManagerModule =
         ///Call Operator 연산결과 값 (T/F)
         member val CallOperatorValue  =  createTag false VertexTag.callOperatorValue
 
-   
+
 
         member x.ErrorList =
             [|

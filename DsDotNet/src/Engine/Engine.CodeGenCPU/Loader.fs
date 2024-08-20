@@ -93,10 +93,9 @@ module CpuLoader =
             .Iter(createTagM)
 
 
-    [<Extension>]
-    type CpuLoaderExt =
-        [<Extension>]
-        static member LoadStatements (system:DsSystem, storages:Storages, targetType) =
+    type DsSystem with
+        /// DsSystem 으로부터 PouGen seq 생성
+        member system.GeneratePOUs (storages:Storages, targetType) : PouGen seq =
             UniqueName.resetAll()
             applyTagManager (system, storages, targetType)
 
@@ -108,13 +107,13 @@ module CpuLoader =
                 |> Seq.map(fun s ->
                     try
                         match s with
-                        | :? Device as d         -> DevicePou   (d, generateStatements(d.ReferenceSystem, false))
-                        | :? ExternalSystem as e -> ExternalPou (e, generateStatements(e.ReferenceSystem, false))
+                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(false))
+                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(false))
                         | _ -> failwithlog (getFuncName())
                     with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
                     )
                 //자신(Acitve) system을  CPU 변환
-                |> Seq.append [ActivePou (system, generateStatements(system, true))]
+                |> Seq.append [ActivePou (system, system.GenerateStatements(true))]
 
             pous
 

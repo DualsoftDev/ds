@@ -234,75 +234,77 @@ module ConvertCPU =
 
             dev.GetApiItem(call.TargetJob).RX.ParentApiSensorExpr <-sensorExpr
 
-    /// DsSystem 으로부터 CommentedStatement list 생성.
-    let generateStatements(sys:DsSystem, isActive:bool) : CommentedStatement list =
-        RuntimeDS.System <- Some sys
 
-        sys.GenerationOrigins()
+    type DsSystem with
+        /// DsSystem 으로부터 CommentedStatement list 생성.
+        member sys.GenerateStatements(isActive:bool) : CommentedStatement list =
+            RuntimeDS.System <- Some sys
 
-        if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출
-            sys.GenerationMemory()
-            sys.GenerationIO()
+            sys.GenerationOrigins()
 
-            updateSourceTokenOrder sys
+            if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출
+                sys.GenerationMemory()
+                sys.GenerationIO()
 
-            match RuntimeDS.Package with
-            | PCSIM ->
-                setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
-            | _->
-                updateDuplicateAddress sys
-                CheckNullAddress sys
-                checkJobs sys
-                checkErrHWItem(sys)
-                checkErrApi(sys)
+                updateSourceTokenOrder sys
 
-            checkMultiDevPair(sys)
+                match RuntimeDS.Package with
+                | PCSIM ->
+                    setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
+                | _->
+                    updateDuplicateAddress sys
+                    CheckNullAddress sys
+                    checkJobs sys
+                    checkErrHWItem(sys)
+                    checkErrApi(sys)
 
-        else
-            CheckRealReset(sys)
-            updateRealParentExpr(sys)
-            sys.GenerationRealActionMemory()
+                checkMultiDevPair(sys)
 
-        [
-            //Active 시스템 적용
-            if isActive then
-                yield! applySystemSpec sys
-                yield! sys.B2_SWButtonOutput()
-                yield! sys.B4_SWModeLamp()
+            else
+                CheckRealReset(sys)
+                updateRealParentExpr(sys)
+                sys.GenerationRealActionMemory()
 
-                if RuntimeDS.Package.IsPLCorPLCSIM() then
-                    yield! sys.E2_PLCOnly()
+            [
+                //Active 시스템 적용
+                if isActive then
+                    yield! applySystemSpec sys
+                    yield! sys.B2_SWButtonOutput()
+                    yield! sys.B4_SWModeLamp()
 
-                if RuntimeDS.Package.IsPackageSIM() then
-                    yield! emulationDevice sys
+                    if RuntimeDS.Package.IsPLCorPLCSIM() then
+                        yield! sys.E2_PLCOnly()
 
-                yield! sys.Y1_SystemBtnForFlow(sys)
+                    if RuntimeDS.Package.IsPackageSIM() then
+                        yield! emulationDevice sys
 
-            //Variables  적용
-            yield! applyVariables sys
+                    yield! sys.Y1_SystemBtnForFlow(sys)
 
-            //Flow 적용
+                //Variables  적용
+                yield! applyVariables sys
 
-            for f in sys.Flows do
-                if isActive
-                then
-                    yield! applyOperationModeSpec f
-                    yield! applyFlowMonitorSpec f
+                //Flow 적용
 
-            //Vertex 적용
-            for v in sys.GetVertices() do
-                yield! applyVertexSpec v isActive
+                for f in sys.Flows do
+                    if isActive
+                    then
+                        yield! applyOperationModeSpec f
+                        yield! applyFlowMonitorSpec f
 
-            //TaskDev 적용
-            yield! applyTaskDev sys
-            //TaskDev Sensor Link 적용
-            yield! applyTaskDevSensorLink sys
-            //ApiItem 적용
-            yield! applyApiItem sys
-            //funcCall 적용
-            yield! funcCall sys
-            //allpyJob 적용
-            yield! applyJob sys
-            ///CallOnDelay 적용
-            yield! applyCallOnDelay sys
-        ]
+                //Vertex 적용
+                for v in sys.GetVertices() do
+                    yield! applyVertexSpec v isActive
+
+                //TaskDev 적용
+                yield! applyTaskDev sys
+                //TaskDev Sensor Link 적용
+                yield! applyTaskDevSensorLink sys
+                //ApiItem 적용
+                yield! applyApiItem sys
+                //funcCall 적용
+                yield! funcCall sys
+                //allpyJob 적용
+                yield! applyJob sys
+                ///CallOnDelay 적용
+                yield! applyCallOnDelay sys
+            ]

@@ -108,47 +108,57 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationCallAlarmMemory()  =
             let calls = x.GetAlarmCalls().Distinct()
+            let target = getTarget(x)
 
             for call in calls do
-
                 let cv =  call.TagManager :?> CoinVertexTagManager
-                let target = getTarget(x)
                 cv.ErrShort.Address             <- getMemory  cv.ErrShort target
                 cv.ErrOpen.Address              <- getMemory  cv.ErrOpen  target
                 cv.ErrOnTimeOver.Address        <- getMemory  cv.ErrOnTimeOver  target
                 cv.ErrOnTimeShortage.Address    <- getMemory  cv.ErrOnTimeShortage target
                 cv.ErrOffTimeOver.Address       <- getMemory  cv.ErrOffTimeOver target
                 cv.ErrOffTimeShortage.Address   <- getMemory  cv.ErrOffTimeShortage target
-                call.ExternalTags.Add(ErrorSensorOn,        cv.ErrShort           :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorSensorOff,       cv.ErrOpen            :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOnTimeOver,      cv.ErrOnTimeOver      :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOnTimeShortage,  cv.ErrOnTimeShortage  :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOffTimeOver,     cv.ErrOffTimeOver     :> IStorage) |>ignore
-                call.ExternalTags.Add(ErrorOffTimeShortage, cv.ErrOffTimeShortage :> IStorage) |>ignore
 
+                [|
+                    ErrorSensorOn,        (cv.ErrShort           :> IStorage)
+                    ErrorSensorOff,       (cv.ErrOpen            :> IStorage)
+                    ErrorOnTimeOver,      (cv.ErrOnTimeOver      :> IStorage)
+                    ErrorOnTimeShortage,  (cv.ErrOnTimeShortage  :> IStorage)
+                    ErrorOffTimeOver,     (cv.ErrOffTimeOver     :> IStorage)
+                    ErrorOffTimeShortage, (cv.ErrOffTimeShortage :> IStorage)
+                |]
+                |> call.ExternalTags.AddRange
+                |> x.VerifyAdded
+
+
+        member private x.VerifyAdded = verifyM "ERROR: 중복 check"
 
         member private x.GenerationRealAlarmMemory()  =
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
                 rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getTarget(x))
-                real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |>ignore
+                real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |> x.VerifyAdded
 
         member  x.GenerationRealActionMemory()  =
+            let target = getTarget(x)
             for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
 
-                rm.ScriptStart.Address  <- getMemory  rm.ScriptStart (getTarget(x))
-                rm.MotionStart.Address  <- getMemory  rm.MotionStart (getTarget(x))
+                rm.ScriptStart.Address  <- getMemory  rm.ScriptStart target
+                rm.MotionStart.Address  <- getMemory  rm.MotionStart target
 
-                rm.ScriptEnd.Address    <- getMemory  rm.ScriptEnd  (getTarget(x))
-                rm.MotionEnd.Address    <- getMemory  rm.MotionEnd  (getTarget(x))
+                rm.ScriptEnd.Address    <- getMemory  rm.ScriptEnd  target
+                rm.MotionEnd.Address    <- getMemory  rm.MotionEnd  target
 
-                real.ExternalTags.Add(ScriptStart,  rm.ScriptStart :> IStorage) |>ignore
-                real.ExternalTags.Add(MotionStart,  rm.MotionStart :> IStorage) |>ignore
+                [|
+                    ScriptStart,  (rm.ScriptStart :> IStorage)
+                    MotionStart,  (rm.MotionStart :> IStorage)
 
-                real.ExternalTags.Add(ScriptEnd,    rm.ScriptEnd   :> IStorage) |>ignore
-                real.ExternalTags.Add(MotionEnd,    rm.MotionEnd   :> IStorage) |>ignore
-
+                    ScriptEnd,    (rm.ScriptEnd   :> IStorage)
+                    MotionEnd,    (rm.MotionEnd   :> IStorage)
+                |]
+                |> real.ExternalTags.AddRange
+                |> x.VerifyAdded
 
         member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do
@@ -223,8 +233,8 @@ module ConvertCpuDsSystem =
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
 
-            if (DsAddressModule.getCurrentMemoryIndex()-startAlarm < BufferAlramSize) //9999개 HMI 리미트
-            then  DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize) //9999개 HMI 리미트
+            if (DsAddressModule.getCurrentMemoryIndex()-startAlarm < BufferAlramSize) then //9999개 HMI 리미트
+                DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize) //9999개 HMI 리미트
 
             //Step3)Flow Real HMI base + (N+1 ~ M)bit
             x.GenerationCallManualMemory()
@@ -233,15 +243,11 @@ module ConvertCpuDsSystem =
 
 
         member x.GenerationOrigins() =
-            let getOriginInfos(sys:DsSystem) =
-                let reals = sys.GetRealVertices()
-                reals.Select(fun r->
-                    let info = OriginHelper.GetOriginInfo r
-                    r, info
-                ) |> Tuple.toDictionary
-            let origins = getOriginInfos x
+            let reals = x.GetRealVertices() |> toArray
+            // real 별 origin info 의 dictionary 구성
+            let origins = reals.ToDictionary(id, fun r -> OriginHelper.GetOriginInfo r)
 
-            let rvms = x.GetRealVertices().Select(fun f -> f.TagManager :?> RealVertexTagManager)
+            let rvms = reals.Select(fun f -> f.TagManager :?> RealVertexTagManager)
             for (rv: RealVertexTagManager) in rvms do
                 rv.OriginInfo <- origins[rv.Vertex :?> Real]
 
@@ -249,12 +255,12 @@ module ConvertCpuDsSystem =
         member x.GetApiSets(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.ApiItemSet)
         member x.GetApiSensorLinks(r:Real) = x.ApiItems.Where(fun api-> api.TX = r).Select(fun api -> api.SL1)
 
-        member x.GetReadAbleTags() =
+        member x.GetReadableTags() =
             SystemTag.GetValues(typeof<SystemTag>)
                 .Cast<SystemTag>()
                 .Select(getSM(x).GetSystemTag)
 
-        member x.GetWriteAbleTags() =
+        member x.GetWritableTags() =
             let writeAble =
                 [
                     SystemTag.auto_btn

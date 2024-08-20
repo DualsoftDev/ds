@@ -14,7 +14,7 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;
-using static Engine.Cpu.RunTime;
+using static Engine.Cpu.RunTimeModule;
 
 
 namespace Engine.TestSimulator
@@ -24,9 +24,9 @@ namespace Engine.TestSimulator
         public static bool Do(DsCPU dsCpu, int checkTime = 2000)
         {
             RuntimeDS.Package = RuntimePackage.PCSIM;
- 
 
-            bool resultMoving = false;    
+
+            bool resultMoving = false;
             Task.Run(async () => {
                 CpuExtensionsModule.preManualAction(dsCpu.MySystem);
                 var homeBtn = (dsCpu.MySystem.TagManager as SystemManager).GetSystemTag(TagKindList.SystemTag.home_btn);
@@ -79,7 +79,7 @@ namespace Engine.TestSimulator
             var subscription = dsCpu.TagWebChangedFromCpuSubject.Subscribe(s =>
             {
                 Console.WriteLine($"Name:{s.Name}\t Value:{s.Value}");
-                changedNames.Add(s.Name); 
+                changedNames.Add(s.Name);
             });
             await Task.Delay(checkTime);
             subscription.Dispose();

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR.Client;
-using static Engine.Cpu.RunTime;
+using static Engine.Cpu.RunTimeModule;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 namespace DsWebApp.Server.Controllers;
 

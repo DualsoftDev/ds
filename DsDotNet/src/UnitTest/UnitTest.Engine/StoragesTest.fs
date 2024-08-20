@@ -24,7 +24,7 @@ type StoragesTest() =
         sys.TagManager === null
         let targetNDrvier =  (WINDOWS, PAIX_IO)
         DsAddressModule.assignAutoAddress(sys, 0, 100000) targetNDrvier
-        let _ = DsCpuExt.GetDsCPU (sys) targetNDrvier
+        let _ = DsCpuExt.CreateRuntime (sys) targetNDrvier
 
         /// CPU 생성후 기본 Storage 생성 확인
         sys.TagManager.Storages.Count > 0 === true

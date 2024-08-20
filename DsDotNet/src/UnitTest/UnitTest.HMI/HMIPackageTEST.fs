@@ -21,6 +21,6 @@ module HMIPackageTEST =
         assignAutoAddress (dsPpt.System, 0 , 0)  (pptParms.TargetType, pptParms.DriverIO)
 
         RuntimeDS.Package <- RuntimePackage.PC
-        let dsCPU, hmiPackage, _ = DsCpuExt.GetDsCPU(dsPpt.System) (pptParms.TargetType, pptParms.DriverIO)
+        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.TargetType, pptParms.DriverIO)
 
         hmiPackage.Devices.Length > 0  |> Assert.True

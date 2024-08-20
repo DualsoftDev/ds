@@ -36,7 +36,7 @@ module HelloDSRuntimeTestModule =
             } = result
 
             system.TagManager === null
-            let _ = DsCpuExt.GetDsCPU (system) (pptParms.TargetType, pptParms.DriverIO)
+            let _ = DsCpuExt.CreateRuntime (system) (pptParms.TargetType, pptParms.DriverIO)
             system.TagManager.Storages.Count > 0 === true
 
             system

@@ -15,7 +15,7 @@ open System.Reactive.Linq
 open Engine.CodeGenHMI
 
 [<AutoOpen>]
-module RunTime =
+module RunTimeModule =
 
     type DsCPU(css:CommentedStatement seq, mySystem:DsSystem, loadedSystems:DsSystem seq
              , hmiTags:IDictionary<string, TagWeb>) =
@@ -174,24 +174,27 @@ module RunTime =
         member x.TagChangedForIOHub = tagChangedForIOHub
         member x.TagIndexSet = tagIndexSet
 
+    type Runtime = DsCPU*HMIPackage*(PouGen[])
+
+[<Extension>]
+type DsCpuExt  =
+    /// DsSystem 으로부터 Runtime 생성 : DsCPU*HMIPackage*(PouGen[])
     [<Extension>]
-    type DsCpuExt  =
-        [<Extension>]
-        static member GetDsCPU (dsSys:DsSystem) (target:HwTarget) : DsCPU*HMIPackage*(PouGen seq) =
-            let loadedSystems = dsSys.GetRecursiveLoadedSystems()
+    static member CreateRuntime (dsSys:DsSystem) (target:HwTarget) : Runtime =
+        let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
-            // Initialize storages and load CPU statements
-            let storages = Storages()
-            let pous = dsSys.GeneratePOUs(storages, target) |> Seq.toList
+        // Initialize storages and load CPU statements
+        let storages = Storages()
+        let pous = dsSys.GeneratePOUs(storages, target) |> toArray
 
-            // Create a list to hold commented statements
-            let mutable css = []
+        // Create a list to hold commented statements
+        let mutable css = []
 
-            // Add commented statements from each CPU
-            for cpu in pous do
-                css <- css @ cpu.CommentedStatements() |> List.ofSeq
-            let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)
-            let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)
-            // Create and return a DsCPU object
-            new DsCPU(css, dsSys, loadedSystems, hmiPackageTags), hmiPackage, pous
+        // Add commented statements from each CPU
+        for cpu in pous do
+            css <- css @ cpu.CommentedStatements() |> List.ofSeq
+        let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)
+        let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)
+        // Create and return a DsCPU object
+        new DsCPU(css, dsSys, loadedSystems, hmiPackageTags), hmiPackage, pous
 

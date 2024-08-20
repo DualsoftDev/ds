@@ -504,10 +504,12 @@ module XgiExportModule =
                 match prjParam.TargetType, prjParam.ExistingLSISprj with
                 | XGK, Some existing ->
                     let doc = DualXmlDocument.loadFromFile existing
+                    let scanProgramName = doc.GetXmlNode("//Configurations/Configuration/Tasks/Task").InnerText
                     let counters = collectCounterAddressesXgk doc
                     let timers = collectTimerAddressesXgk doc
                     let newPrjParam = {
                         prjParam with
+                            ScanProgramName = scanProgramName
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
                             TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
                     }
@@ -544,23 +546,25 @@ module XgiExportModule =
 
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
 
-            let existingTaskPous =
-                [
-                    for p in programs do
-                        let taskName = p.GetAttribute("Task")
-                        let pouName = p.FirstChild.OuterXml
-                        taskName, pouName
-                ]
+            let existingPouNames = programs.ToEnumerables().Map(_.FirstChild.OuterXml)
+            //let existingTaskPous =
+            //    [
+            //        for p in programs do
+            //            let taskName = p.GetAttribute("Task")
+            //            let pouName = p.FirstChild.OuterXml
+            //            taskName, pouName
+            //    ]
 
 
             (* validation : POU 중복 이름 체크 *)
             do
-                let newTaskPous = [ for p in pous -> p.TaskName, p.POUName ]
+                let newPouNames = pous.Select(_.POUName) //[ for p in pous -> p.TaskName, p.POUName ]
 
                 let duplicated =
-                    existingTaskPous @ newTaskPous
-                    |> List.groupBy id
-                    |> List.filter (fun (_, v) -> v.Length > 1)
+                    existingPouNames @ newPouNames
+                    |> toArray
+                    |> groupBy id
+                    |> filter (fun (_, v) -> v.Length > 1)
 
                 if duplicated.Length > 0 then
                     failwithf "ERROR: Duplicated POU name : %A" duplicated
@@ -678,7 +682,7 @@ module XgiExportModule =
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
 
                 // [optimization] todo : 최적화 optimization : pous 별 (Active / Device) 병렬 처리.  Address alloc 루틴 lock 필요?
-                for pou in pous do //i = 0 은 메인 스캔 프로그램
+                for pou in pous do
                     // POU 단위로 xml rung 생성
                     // [optimize] : 1.5초 정도 소요
                     let programXml =

@@ -36,7 +36,6 @@ type IQMapperTest(xgx:PlatformTarget) =
 
             let statements = parseCodeForTarget globalStorages codes xgx|> map withNoComment
             {
-                TaskName = "Scan Program"
                 POUName = "POU1"
                 Comment = "POU1"
                 LocalStorages = Storages()

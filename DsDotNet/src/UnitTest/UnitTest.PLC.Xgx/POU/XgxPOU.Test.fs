@@ -29,7 +29,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows localStorages code |> map withNoComment
         {
-            TaskName = "Scan Program"
             POUName = "POU1"
             Comment = "POU1"
             LocalStorages = localStorages
@@ -46,7 +45,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {
-            TaskName = "Scan Program"
             POUName = "POU2"
             Comment = "POU2"
             LocalStorages = storages
@@ -64,7 +62,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {
-            TaskName = "Scan Program"
             POUName = "ZZ Program"
             Comment = "POU1"
             LocalStorages = storages
@@ -239,7 +236,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let collidingPou = {
             pou11.Value with
-                TaskName = "스캔 프로그램"
                 POUName = "DsLogic"
         }
         let projectParams = {

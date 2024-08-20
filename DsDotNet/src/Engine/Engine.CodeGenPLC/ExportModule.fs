@@ -23,12 +23,10 @@ module ExportModule =
       : string =
         let projName = system.Name
 
-        let getXgxPOUParamsFromCss (pouName: string) (taskName: string) (css: CommentedStatement seq) =
+        let getXgxPOUParamsFromCss (pouName: string) (css: CommentedStatement seq) =
             let pouParams: XgxPOUParams = {
                 // POU name.  "DsLogic"
                 POUName = pouName
-                // POU container task name
-                TaskName = taskName
                 // POU ladder 최상단의 comment
                 Comment = "DsLogic Automatically generate"
                 LocalStorages = localStorages
@@ -37,9 +35,9 @@ module ExportModule =
             }
             pouParams
 
-        let getXgxPOUParams (pouName: string) (taskName: string) (pouGens: PouGen seq) =
+        let getXgxPOUParams (pouName: string) (pouGens: PouGen seq) =
             let css = pouGens.Collect(fun p -> p.CommentedStatements())
-            getXgxPOUParamsFromCss pouName taskName css
+            getXgxPOUParamsFromCss pouName css
 
         let usedByteIndices =
             let getBytes addr =
@@ -132,17 +130,17 @@ module ExportModule =
                         | Some _ ->
                             for (n, a) in activeCss |> Seq.indexed do
                                 let name = $"Active{n}"
-                                yield getXgxPOUParamsFromCss name name a
+                                yield getXgxPOUParamsFromCss name a
                             for (n, d) in deviceCss |> Seq.indexed do
                                 let name = $"Devices{n}"
-                                yield getXgxPOUParamsFromCss name name d
+                                yield getXgxPOUParamsFromCss name d
                         | None ->
                             (* No split *)
-                            yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active" "Active"
-                            yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices" "Devices"
+                            yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active"
+                            yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices"
 
                         for p in pous.Where(fun f -> f.IsExternal) do
-                            yield getXgxPOUParams (p.ToSystem().Name) (p.TaskName()) [ p ]
+                            yield getXgxPOUParams (p.ToSystem().Name) [ p ]
                     ]
             }
 

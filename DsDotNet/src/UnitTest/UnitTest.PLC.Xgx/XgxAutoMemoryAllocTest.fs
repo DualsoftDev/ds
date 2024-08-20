@@ -38,7 +38,6 @@ type AutoMemoryAllocTest(xgx:PlatformTarget) =
                 t.Address <- TextAddrEmpty
 
             {
-                TaskName = "Scan Program"
                 POUName = "POU1"
                 Comment = "POU1"
                 LocalStorages = Storages()

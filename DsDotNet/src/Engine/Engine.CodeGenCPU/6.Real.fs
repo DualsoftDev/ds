@@ -162,7 +162,7 @@ type RealVertexTagManager with
         let fn = getFuncName()
         [|
             if v.Real.Motion.IsSome then
-                yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,  v.ET.Expr) ==| (v.MotionRelay, fn)
+                yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,   v.F.Expr) ==| (v.MotionRelay, fn)
                 yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, fn)
 
                 if RuntimeDS.Package.IsPackageSIM() then

@@ -15,9 +15,9 @@ open Command
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
     /// Program 부분 Xml string 반환: <Program Task="taskName" ..>pouName
-    let createXmlStringProgram pouName =
+    let createXmlStringProgram (scanProgramName:string) (pouName:string) =
         $"""
-		<Program Task="Scan Program" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">{pouName}
+		<Program Task="{scanProgramName}" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">{pouName}
             <Body>
 				<LDRoutine>
 					<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
@@ -453,7 +453,7 @@ module XgiExportModule =
             let rungsXml = generateRungs prjParam prologComment newCommentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate = createXmlStringProgram pouName |> DualXmlNode.ofString
+            let programTemplate = createXmlStringProgram prjParam.ScanProgramName pouName |> DualXmlNode.ofString
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
@@ -499,27 +499,64 @@ module XgiExportModule =
         member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
 
         member x.GenerateXmlDocument() : XmlDocument =
-            let xdoc, prjParam =
-                let prjParam = x
+            let prjParam, xdoc =
+                match x.ExistingLSISprj with
+                | Some existing ->
+                    let doc = DualXmlDocument.loadFromFile existing
+                    let scanProgramName =
+                        doc.GetXmlNodes("//Configurations/Configuration/Tasks/Task")
+                            .Where(fun t ->
+                                t.TryGetAttribute("Version") = Some "257" && t.TryGetAttribute("Attribute") = Some "2"
+                                    && ( let kind = t.TryGetAttribute("Kind") in kind.IsNone || kind = Some "0") )
+                            .TryExactlyOne()
+                            .Map(_.InnerText)
+                            |? "Scan Program"
+                    let pp = { x with ScanProgramName = scanProgramName }
+                    pp, doc
+                | None ->
+                    let doc = getTemplateXgxXmlDoc x.TargetType
+                    x, doc
+            let prjParam =
                 match prjParam.TargetType, prjParam.ExistingLSISprj with
                 | XGK, Some existing ->
-                    let doc = DualXmlDocument.loadFromFile existing
-                    let scanProgramName = doc.GetXmlNode("//Configurations/Configuration/Tasks/Task").InnerText
-                    let counters = collectCounterAddressesXgk doc
-                    let timers = collectTimerAddressesXgk doc
+                    let counters = collectCounterAddressesXgk xdoc
+                    let timers = collectTimerAddressesXgk xdoc
                     let newPrjParam = {
                         prjParam with
-                            ScanProgramName = scanProgramName
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
                             TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
                     }
-                    doc, newPrjParam
-                | _, None ->
-                    let doc = getTemplateXgxXmlDoc prjParam.TargetType
-                    doc, prjParam
-                | _, Some existing ->
-                    let doc = DualXmlDocument.loadFromFile existing
-                    doc, prjParam
+                    newPrjParam
+                | _ -> prjParam
+
+
+
+            //let xdoc, prjParam =
+            //    match prjParam.TargetType, prjParam.ExistingLSISprj with
+            //    | XGK, Some existing ->
+            //        let doc = DualXmlDocument.loadFromFile existing
+
+            //        let scanProgramName =
+            //            doc.GetXmlNodes("//Configurations/Configuration/Tasks/Task")
+            //                .Where(fun t -> t.GetAttribute("Version") = "257" && t.GetAttribute("Attribute") = "2")
+            //                .TryExactlyOne()
+            //                .Map(_.InnerText)
+
+            //        let counters = collectCounterAddressesXgk doc
+            //        let timers = collectTimerAddressesXgk doc
+            //        let newPrjParam = {
+            //            prjParam with
+            //                ScanProgramName = scanProgramName |? "Scan Program"
+            //                CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
+            //                TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
+            //        }
+            //        doc, newPrjParam
+            //    | _, None ->
+            //        let doc = getTemplateXgxXmlDoc prjParam.TargetType
+            //        doc, prjParam
+            //    | _, Some existing ->
+            //        let doc = DualXmlDocument.loadFromFile existing
+            //        doc, prjParam
 
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
             prjParam.SanityCheck()

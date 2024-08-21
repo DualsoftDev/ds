@@ -16,10 +16,10 @@ module ExportModule =
     /// UnitTest 용은 generateXmlForTest 참고
     let private generateXmlXGX
         (plcType:PlatformTarget) (system: DsSystem)
-        (globalStorages:Storages) (localStorages:Storages)
-        (pous: PouGen seq) (existingLSISprj:string option)
-        (startMemory:int) (startTimer:int) (startCounter:int)
-        (enableXmlComment:bool) (maxPouSplit:int option)
+        (globalStorages:Storages, localStorages:Storages)
+        (pous: PouGen seq, maxPouSplit:int option, existingLSISprj:string option)
+        (startMemory:int, startTimer:int, startCounter:int)
+        (enableXmlComment:bool)
       : string =
         let projName = system.Name
 
@@ -109,6 +109,7 @@ module ExportModule =
             // } Split POU's
 
             let defaultProjectParams = if plcType = XGI then defaultXGIProjectParams else defaultXGKProjectParams
+
             {
                 defaultProjectParams with
                     TargetType = plcType
@@ -179,7 +180,7 @@ module ExportModule =
                 )
 
             let xml, millisecond = duration (fun () ->
-                generateXmlXGX target system globalStorage localStorage pous existingLSISprj startMemory  startTimer startCounter enableXmlComment maxPouSplit)
+                generateXmlXGX target system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (startMemory, startTimer, startCounter) enableXmlComment )
 
             forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 

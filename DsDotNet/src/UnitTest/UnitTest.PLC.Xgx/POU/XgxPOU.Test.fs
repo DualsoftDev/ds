@@ -158,6 +158,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
+                ScanProgramName = "스캔 프로그램"    // hard coding..
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         let xml = projectParams.GenerateXmlString()

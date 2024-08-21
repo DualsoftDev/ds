@@ -11,7 +11,7 @@ open Engine.Core
 open Engine.CodeGenCPU
 
 module HMIPackageTEST =
-    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
     [<Fact>]
     let ``HMIPackage Create Test`` () =
         let pptParms:PptParams = defaultPptParams()

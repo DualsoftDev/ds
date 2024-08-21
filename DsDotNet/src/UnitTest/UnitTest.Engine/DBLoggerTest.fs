@@ -10,7 +10,7 @@ open System
 module DBLoggerTestModule =
     type DBLoggerTest() =
         inherit EngineTestBaseClass()
-        let dllPath = @$"{__SOURCE_DIRECTORY__}/../Engine.Custom.Sample/bin/Debug/net7.0/Engine.Custom.Sample.dll"
+        let dllPath = @$"{__SOURCE_DIRECTORY__}/../Engine.Custom.Sample/bin/Debug/net8.0/Engine.Custom.Sample.dll"
         let nullToken = Nullable<int64>()
 
         let createStorage =

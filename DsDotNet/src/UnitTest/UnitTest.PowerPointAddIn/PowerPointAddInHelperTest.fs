@@ -12,7 +12,7 @@ open Engine.Core
 
 module MSG_TEST =
 
-    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/HelloDS.pptx";
+    let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
     RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
     let setXGK() = 
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();

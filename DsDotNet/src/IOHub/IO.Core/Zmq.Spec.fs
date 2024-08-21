@@ -45,7 +45,7 @@ module rec ZmqSpec =
     {
       "Name": "LsXGI",
       "Location": "/tmp/iomaps",
-      "Dll": "Z:\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net7.0\\ThirdParty.AddressInfo.Provider.dll",
+      "Dll": "Z:\\ds\\DsDotNet\\src\\IOHub\\ThirdParty.AddressInfo.Provider\\bin\\Debug\\net8.0\\ThirdParty.AddressInfo.Provider.dll",
       "ClassName": "ThirdParty.AddressInfo.Provider.AddressInfoProviderLsXGI",
       "Files": [
         {

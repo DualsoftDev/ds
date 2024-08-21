@@ -1,6 +1,6 @@
 server:
 	dotnet build
-	ln -s bin/Debug/net7.0/ZeroMQ.exe
+	ln -s bin/Debug/net8.0/ZeroMQ.exe
 
 # apt-get update
 # apt-get install build-essential gdb

@@ -54,7 +54,7 @@ module ImportUtilForDev =
             if Path.Exists (Path.Combine(runDir, "dsLib")) then
                 runDir
             else
-                @$"{__SOURCE_DIRECTORY__}../../../../bin/net7.0-windows/"
+                @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/"
 
         let curDir = currentFileName |> Path.GetDirectoryName
 

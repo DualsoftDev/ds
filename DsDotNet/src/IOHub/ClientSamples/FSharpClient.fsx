@@ -1,7 +1,7 @@
 #r "nuget: Newtonsoft.Json"
 #r "nuget: NetMQ"
 #r "nuget: Dualsoft-Common-Core-FS"
-#r "../IO.Core/bin/Debug/net7.0/IO.Core.dll"
+#r "../IO.Core/bin/Debug/net8.0/IO.Core.dll"
 
 open System
 open IO.Core

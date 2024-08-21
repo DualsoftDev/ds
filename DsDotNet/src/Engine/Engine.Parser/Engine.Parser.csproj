@@ -16,7 +16,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <!--<OutputType>Library</OutputType>-->
-        <TargetFrameworks>net7.0</TargetFrameworks>
+        <TargetFrameworks>net8.0</TargetFrameworks>
         <RootNamespace>Engine.Parser</RootNamespace>
         <LangVersion>11.0</LangVersion>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>

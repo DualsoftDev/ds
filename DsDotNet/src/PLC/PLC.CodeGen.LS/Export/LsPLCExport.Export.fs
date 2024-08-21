@@ -15,23 +15,22 @@ open Command
 [<AutoOpen>]
 module XgxXmlGeneratorModule =
     /// Program 부분 Xml string 반환: <Program Task="taskName" ..>pouName
-    let createXmlStringProgram taskName pouName (mainScan:string option) =
-        sprintf
-            """
-			<Program Task="%s" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">%s
-                <Body>
-					<LDRoutine>
-						<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
+    let createXmlStringProgram (scanProgramName:string) (pouName:string) =
+        $"""
+		<Program Task="{scanProgramName}" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">{pouName}
+            <Body>
+				<LDRoutine>
+					<OnlineUploadData Compressed="1" dt:dt="bin.base64" xmlns:dt="urn:schemas-microsoft-com:datatypes">QlpoOTFBWSZTWY5iHkIAAA3eAOAQQAEwAAYEEQAAAaAAMQAACvKMj1MnqSRSSVXekyB44y38
 XckU4UJCOYh5CA==</OnlineUploadData>
-					</LDRoutine>
-				</Body>
-				<RungTable></RungTable>
-			</Program>"""
-            (if mainScan.IsSome then mainScan.Value else taskName)
-            pouName
+				</LDRoutine>
+			</Body>
+			<RungTable></RungTable>
+		</Program>"""
+
 
     /// Task 부분 Xml string 반환: <Task Version=..>taskNameName
-    let createXmlStringTask taskName kind priority index device=
+    [<Obsolete("Unused: Scan Program 이 아닌, Task 영역에 생성하기 위한 parameter")>]
+    let private createXmlStringTask taskName kind priority index device=
         $"""<Task Version="257" Type="0" Attribute="2" Kind="{kind}" Priority="{priority}" TaskIndex="{index}"
                 Device="{device}" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">{taskName}</Task>"""
 
@@ -358,7 +357,7 @@ module XgiExportModule =
 
     type XgxPOUParams with
 
-        member x.GenerateXmlString(prjParam: XgxProjectParams, scanName:string option) = x.GenerateXmlNode(prjParam, scanName).OuterXml
+        member x.GenerateXmlString(prjParam: XgxProjectParams) = x.GenerateXmlNode(prjParam).OuterXml
 
         member private x.GroupStatementsByUdtDeclaration() =
             x.CommentedStatements
@@ -395,8 +394,8 @@ module XgiExportModule =
             | None -> []
 
         /// POU 단위로 xml rung 생성
-        member x.GenerateXmlNode(prjParam: XgxProjectParams, scanName:string option) : XmlNode =
-            let {   TaskName = taskName
+        member x.GenerateXmlNode(prjParam: XgxProjectParams) : XmlNode =
+            let {
                     POUName = pouName
                     Comment = prologComment
                     GlobalStorages = globalStorages
@@ -454,7 +453,7 @@ module XgiExportModule =
             let rungsXml = generateRungs prjParam prologComment newCommentedXgiStatements
 
             /// POU/Programs/Program
-            let programTemplate = createXmlStringProgram taskName pouName scanName |> DualXmlNode.ofString
+            let programTemplate = createXmlStringProgram prjParam.ScanProgramName pouName |> DualXmlNode.ofString
 
             //let programTemplate = DsXml.adoptChild programs programTemplate
 
@@ -500,25 +499,64 @@ module XgiExportModule =
         member x.GenerateXmlString() = x.GenerateXmlDocument().OuterXml
 
         member x.GenerateXmlDocument() : XmlDocument =
-            let xdoc, prjParam =
-                let prjParam = x
+            let prjParam, xdoc =
+                match x.ExistingLSISprj with
+                | Some existing ->
+                    let doc = DualXmlDocument.loadFromFile existing
+                    let scanProgramName =
+                        doc.GetXmlNodes("//Configurations/Configuration/Tasks/Task")
+                            .Where(fun t ->
+                                t.TryGetAttribute("Version") = Some "257" && t.TryGetAttribute("Attribute") = Some "2"
+                                    && ( let kind = t.TryGetAttribute("Kind") in kind.IsNone || kind = Some "0") )
+                            .TryExactlyOne()
+                            .Map(_.InnerText)
+                            |? "Scan Program"
+                    let pp = { x with ScanProgramName = scanProgramName }
+                    pp, doc
+                | None ->
+                    let doc = getTemplateXgxXmlDoc x.TargetType
+                    x, doc
+            let prjParam =
                 match prjParam.TargetType, prjParam.ExistingLSISprj with
                 | XGK, Some existing ->
-                    let doc = DualXmlDocument.loadFromFile existing
-                    let counters = collectCounterAddressesXgk doc
-                    let timers = collectTimerAddressesXgk doc
+                    let counters = collectCounterAddressesXgk xdoc
+                    let timers = collectTimerAddressesXgk xdoc
                     let newPrjParam = {
                         prjParam with
                             CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
                             TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
                     }
-                    doc, newPrjParam
-                | _, None ->
-                    let doc = getTemplateXgxXmlDoc prjParam.TargetType
-                    doc, prjParam
-                | _, Some existing ->
-                    let doc = DualXmlDocument.loadFromFile existing
-                    doc, prjParam
+                    newPrjParam
+                | _ -> prjParam
+
+
+
+            //let xdoc, prjParam =
+            //    match prjParam.TargetType, prjParam.ExistingLSISprj with
+            //    | XGK, Some existing ->
+            //        let doc = DualXmlDocument.loadFromFile existing
+
+            //        let scanProgramName =
+            //            doc.GetXmlNodes("//Configurations/Configuration/Tasks/Task")
+            //                .Where(fun t -> t.GetAttribute("Version") = "257" && t.GetAttribute("Attribute") = "2")
+            //                .TryExactlyOne()
+            //                .Map(_.InnerText)
+
+            //        let counters = collectCounterAddressesXgk doc
+            //        let timers = collectTimerAddressesXgk doc
+            //        let newPrjParam = {
+            //            prjParam with
+            //                ScanProgramName = scanProgramName |? "Scan Program"
+            //                CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
+            //                TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
+            //        }
+            //        doc, newPrjParam
+            //    | _, None ->
+            //        let doc = getTemplateXgxXmlDoc prjParam.TargetType
+            //        doc, prjParam
+            //    | _, Some existing ->
+            //        let doc = DualXmlDocument.loadFromFile existing
+            //        doc, prjParam
 
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
             prjParam.SanityCheck()
@@ -545,23 +583,25 @@ module XgiExportModule =
 
             let programs = xdoc.SelectNodes("//POU/Programs/Program")
 
-            let existingTaskPous =
-                [
-                    for p in programs do
-                        let taskName = p.GetAttribute("Task")
-                        let pouName = p.FirstChild.OuterXml
-                        taskName, pouName
-                ]
+            let existingPouNames = programs.ToEnumerables().Map(_.FirstChild.OuterXml)
+            //let existingTaskPous =
+            //    [
+            //        for p in programs do
+            //            let taskName = p.GetAttribute("Task")
+            //            let pouName = p.FirstChild.OuterXml
+            //            taskName, pouName
+            //    ]
 
 
             (* validation : POU 중복 이름 체크 *)
             do
-                let newTaskPous = [ for p in pous -> p.TaskName, p.POUName ]
+                let newPouNames = pous.Select(_.POUName) //[ for p in pous -> p.TaskName, p.POUName ]
 
                 let duplicated =
-                    existingTaskPous @ newTaskPous
-                    |> List.groupBy id
-                    |> List.filter (fun (_, v) -> v.Length > 1)
+                    existingPouNames @ newPouNames
+                    |> toArray
+                    |> groupBy id
+                    |> filter (fun (_, v) -> v.Length > 1)
 
                 if duplicated.Length > 0 then
                     failwithf "ERROR: Duplicated POU name : %A" duplicated
@@ -576,24 +616,6 @@ module XgiExportModule =
                     xe.SetAttribute("Comment", projComment)
 
             (* xn = Xml Node *)
-
-            (* Tasks/Task 삽입 *)
-            do
-                let xnTasks = xdoc.SelectSingleNode("//Configurations/Configuration/Tasks")
-                let pous = pous |> List.distinctBy (fun pou -> pou.TaskName)
-
-                for i, pou in pous.Indexed() do
-                    let index = max (i - 1) 0
-                    let kind = if i = 0 then 0 else 2 //0:스캔프로그램Task 2:user Task
-                    let priority = kind
-                    let device = if kind =0 then 0 else 10  //정주기 10msec 디바이스항목으로 저장
-                    if kind = 2 then //user task 만 삽입 (스캔프로그램Task는 template에 항상 있음)
-                        createXmlStringTask pou.TaskName kind priority index device
-                        |> DualXmlNode.ofString
-                        |> xnTasks.AdoptChild
-                        |> ignore
-
-
 
             let xPathGlobalVar = getXPathGlobalVariable targetType
 
@@ -695,23 +717,15 @@ module XgiExportModule =
             (* POU program 삽입 *)
             do
                 let xnPrograms = xdoc.SelectSingleNode("//POU/Programs")
-                let mainScanName =
-                    match existingTaskPous with
-                    | [] ->
-                        let task = xdoc.SelectNodes("//Tasks/Task").ToEnumerables().First()
-                        task.FirstChild.OuterXml
-                    | p::_ -> p |> fst
-
 
                 // [optimization] todo : 최적화 optimization : pous 별 (Active / Device) 병렬 처리.  Address alloc 루틴 lock 필요?
-                for i, pou in pous.Indexed() do //i = 0 은 메인 스캔 프로그램
-                    let mainScan =   if i = 0 then Some(mainScanName) else None
+                for pou in pous do
                     // POU 단위로 xml rung 생성
                     // [optimize] : 1.5초 정도 소요
                     let programXml =
                         pou
                             .DuplicateExcludingUdtDeclarations()
-                            .GenerateXmlNode(x, mainScan)
+                            .GenerateXmlNode(x)
 
                     let xnLocalVarSymbols = programXml.GetXmlNode("//LocalVar/Symbols")
                     pou.GetUdtDefs()

@@ -29,7 +29,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows localStorages code |> map withNoComment
         {
-            TaskName = "Scan Program"
             POUName = "POU1"
             Comment = "POU1"
             LocalStorages = localStorages
@@ -46,7 +45,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {
-            TaskName = "Scan Program"
             POUName = "POU2"
             Comment = "POU2"
             LocalStorages = storages
@@ -64,8 +62,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let statements = parseCodeForWindows storages code|> map withNoComment
         {
-            TaskName = "ZZ Program"
-            POUName = "POU1"
+            POUName = "ZZ Program"
             Comment = "POU1"
             LocalStorages = storages
             GlobalStorages = globalStorages
@@ -83,7 +80,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
     //pou만으로는 xg5000에서 열수 없음
     member x.``POU1 test`` () =
         let dummyPrjParams = createProjectParams "dummy"
-        let xml = pou11.Value.GenerateXmlString(dummyPrjParams, None)
+        let xml = pou11.Value.GenerateXmlString(dummyPrjParams)
         x.saveTestResult (getFuncName()) xml
 
     member x.``Project test`` () =
@@ -161,6 +158,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
             createProjectParams(f) with
                 GlobalStorages = globalStorages
                 ExistingLSISprj = Some myTemplate
+                ScanProgramName = "스캔 프로그램"    // hard coding..
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         let xml = projectParams.GenerateXmlString()
@@ -239,7 +237,6 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let myTemplate = $"{__SOURCE_DIRECTORY__}/../../../PLC/PLC.CodeGen.LS/Documents/XmlSamples/multiProgramSample.xml"
         let collidingPou = {
             pou11.Value with
-                TaskName = "스캔 프로그램"
                 POUName = "DsLogic"
         }
         let projectParams = {

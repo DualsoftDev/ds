@@ -121,9 +121,6 @@
                 <Task Version="257" Type="0" Attribute="2" Kind="2" Priority="2" TaskIndex="1" Device="1" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">
                     ExSystems
                 </Task>
-                <Task Version="257" Type="0" Attribute="2" Kind="2" Priority="2" TaskIndex="0" Device="10" DeviceType="0" WordValue="0" WordCondition="0" BitCondition="0">
-                    ZZ Program
-                </Task>
             </Tasks>
             <POU>
                 <Programs>
@@ -439,7 +436,7 @@ XckU4UJCOYh5CA==
                         </LocalVar>
                         <RungTable/>
                     </Program>
-                    <Program Task="Scan Program" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">
+                    <Program Task="스캔 프로그램" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">
                         POU2
                         <Body>
                             <LDRoutine>
@@ -483,8 +480,8 @@ XckU4UJCOYh5CA==
                         </LocalVar>
                         <RungTable/>
                     </Program>
-                    <Program Task="ZZ Program" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">
-                        POU1
+                    <Program Task="스캔 프로그램" Version="256" LocalVariable="1" Kind="0" InstanceName="" Comment="" FindProgram="1" FindVar="1" Encrytption="">
+                        ZZ Program
                         <Body>
                             <LDRoutine>
                                 <Rung BlockMask="0">

@@ -13,8 +13,8 @@ module POUParametersModule =
         {
             /// POU name.  "DsLogic"
             POUName: string
-            /// POU container task name
-            TaskName: string
+            ///// POU container task name
+            //TaskName: string
             /// POU ladder 최상단의 comment
             Comment: string
             LocalStorages: Storages
@@ -51,6 +51,7 @@ module POUParametersModule =
         TargetType         : PlatformTarget
         ProjectName        : string
         ProjectComment     : string
+        ScanProgramName    : string         // "Scan Program" or "스캔 프로그램".  Damn it!
         GlobalStorages     : Storages
         ExistingLSISprj    : string option
         POUs               : XgxPOUParams list
@@ -85,6 +86,7 @@ module POUParametersModule =
             TargetType = targetType
             ProjectName = ""
             ProjectComment = ""
+            ScanProgramName = "Scan Program"
             GlobalStorages = Storages()
             ExistingLSISprj = None
             POUs = []

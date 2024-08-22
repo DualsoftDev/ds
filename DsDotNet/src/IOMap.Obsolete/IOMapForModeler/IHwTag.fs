@@ -8,7 +8,7 @@ type HwIOType =
     | Output
 
 type IHwTag =
-    abstract member IOType : HwIOType 
+    abstract member IOType : HwIOType
     abstract member Name : string
     abstract member Address : string
     abstract member Value : obj with get, set

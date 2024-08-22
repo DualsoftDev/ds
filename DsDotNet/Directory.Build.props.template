@@ -1,0 +1,6 @@
+<Project>
+  <PropertyGroup>
+    <!-- UseNugetProjectReference 속성을 여기에서 정의 -->
+    <UseNugetProjectReference>true</UseNugetProjectReference>
+  </PropertyGroup>
+</Project>

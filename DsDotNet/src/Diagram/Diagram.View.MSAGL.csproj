@@ -15,7 +15,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutomaticGraphLayout.GraphViewerGDI" Version="1.1.12" />
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.1"/>
+        <PackageReference Include="DualSoft-Common-Core" Version="0.3.2"/>
         <PackageReference Include="DualSoft-Common-Winform" Version="0.3.1"/>
     </ItemGroup>
 

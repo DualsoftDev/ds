@@ -7,13 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Compile Include="InterfaceDef.fs"/>
-        <Compile Include="Loader.fs"/>
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="InterfaceDef.fs" />
+        <Compile Include="Loader.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.1"/>
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.2" />
     </ItemGroup>
 
 

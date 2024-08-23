@@ -39,8 +39,8 @@
 
     <ItemGroup>
         <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
-        <PackageReference Include="Antlr4BuildTasks" Version="12.2.0" PrivateAssets="all" />
-        <PackageReference Include="Fody" Version="6.6.4">
+        <PackageReference Include="Antlr4BuildTasks" Version="12.8.0" PrivateAssets="all" />
+        <PackageReference Include="Fody" Version="6.8.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>

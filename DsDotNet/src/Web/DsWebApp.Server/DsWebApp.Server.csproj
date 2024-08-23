@@ -14,16 +14,16 @@
 	  </Content>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.1"/>
-		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="7.0.0" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.1" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Utils" Version="0.3.1"/>
-		<PackageReference Include="DualSoft-Web-Server" Version="0.3.1"/>
+		<PackageReference Include="DualSoft-Common-Utils" Version="0.3.2" />
+		<PackageReference Include="DualSoft-Web-Server" Version="0.3.1" />
 	</ItemGroup>
 
 	<ItemGroup>

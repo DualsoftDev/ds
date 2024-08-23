@@ -5,95 +5,96 @@ open Engine.Core
 open NUnit.Framework
 open System.Text.RegularExpressions
 open System
+open NUnit.Framework.Legacy
 
 [<AutoOpen>]
 module ValueParamTesterModule =
 
     type ValueParamTester() =
-        
+
         [<Test>]
         member this.``Test ValueParam ToText with only value``() =
             let vp = ValueParam(Some(box 5), None, None, false, false)
-            Assert.AreEqual("5", vp.ToText())
+            ClassicAssert.AreEqual("5", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with min and max inclusive``() =
             let vp = ValueParam(None, Some(box 1), Some(box 10), true, true)
-            Assert.AreEqual("1 <= x <= 10", vp.ToText())
+            ClassicAssert.AreEqual("1 <= x <= 10", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with min inclusive and max exclusive``() =
             let vp = ValueParam(None, Some(box 1), Some(box 10), true, false)
-            Assert.AreEqual("1 <= x < 10", vp.ToText())
+            ClassicAssert.AreEqual("1 <= x < 10", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with min exclusive and max inclusive``() =
             let vp = ValueParam(None, Some(box 1), Some(box 10), false, true)
-            Assert.AreEqual("1 < x <= 10", vp.ToText())
+            ClassicAssert.AreEqual("1 < x <= 10", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with min exclusive and max exclusive``() =
             let vp = ValueParam(None, Some(box 1), Some(box 10), false, false)
-            Assert.AreEqual("1 < x < 10", vp.ToText())
+            ClassicAssert.AreEqual("1 < x < 10", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with only min inclusive``() =
             let vp = ValueParam(None, Some(box 1), None, true, false)
-            Assert.AreEqual("1 <= x", vp.ToText())
+            ClassicAssert.AreEqual("1 <= x", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with only min exclusive``() =
             let vp = ValueParam(None, Some(box 1), None, false, false)
-            Assert.AreEqual("1 < x", vp.ToText())
+            ClassicAssert.AreEqual("1 < x", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with only max inclusive``() =
             let vp = ValueParam(None, None, Some(box 10), false, true)
-            Assert.AreEqual("x <= 10", vp.ToText())
+            ClassicAssert.AreEqual("x <= 10", vp.ToText())
 
         [<Test>]
         member this.``Test ValueParam ToText with only max exclusive``() =
             let vp = ValueParam(None, None, Some(box 10), false, false)
-            Assert.AreEqual("x < 10", vp.ToText())
+            ClassicAssert.AreEqual("x < 10", vp.ToText())
 
         [<Test>]
         member this.``Test createValueParam with only value``() =
             let vp = createValueParam("x=5")
             match vp with
-            | Some param -> Assert.AreEqual("5", param.ToText())
+            | Some param -> ClassicAssert.AreEqual("5", param.ToText())
             | None -> Assert.Fail("Failed to create ValueParam")
 
         [<Test>]
         member this.``Test createValueParam with min and max inclusive``() =
             let vp = createValueParam("1<=x<=10")
             match vp with
-            | Some param -> Assert.AreEqual("1 <= x <= 10", param.ToText())
+            | Some param -> ClassicAssert.AreEqual("1 <= x <= 10", param.ToText())
             | None -> Assert.Fail("Failed to create ValueParam")
 
         [<Test>]
         member this.``Test createValueParam with min inclusive and max exclusive``() =
             let vp = createValueParam("1<=x<10")
             match vp with
-            | Some param -> Assert.AreEqual("1 <= x < 10", param.ToText())
+            | Some param -> ClassicAssert.AreEqual("1 <= x < 10", param.ToText())
             | None -> Assert.Fail("Failed to create ValueParam")
 
         [<Test>]
         member this.``Test createValueParam with min exclusive and max inclusive``() =
             let vp = createValueParam("1<x<=10")
             match vp with
-            | Some param -> Assert.AreEqual("1 < x <= 10", param.ToText())
+            | Some param -> ClassicAssert.AreEqual("1 < x <= 10", param.ToText())
             | None -> Assert.Fail("Failed to create ValueParam")
 
         [<Test>]
         member this.``Test createValueParam with only min inclusive``() =
             let vp = createValueParam("1<=x")
             match vp with
-            | Some param -> Assert.AreEqual("1 <= x", param.ToText())
+            | Some param -> ClassicAssert.AreEqual("1 <= x", param.ToText())
             | None -> Assert.Fail("Failed to create ValueParam")
 
         [<Test>]
         member this.``Test createValueParam with only max exclusive``() =
             let vp = createValueParam("x<10")
             match vp with
-            | Some param -> Assert.AreEqual("x < 10", param.ToText())
+            | Some param -> ClassicAssert.AreEqual("x < 10", param.ToText())
             | None -> Assert.Fail("Failed to create ValueParam")

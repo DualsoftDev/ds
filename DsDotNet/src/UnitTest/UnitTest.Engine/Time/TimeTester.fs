@@ -4,6 +4,7 @@ open Dual.UnitTest.Common.FS
 open Engine.Core
 open NUnit.Framework
 open System.Collections.Generic
+open NUnit.Framework.Legacy
 
 [<AutoOpen>]
 module TimeTestModule =
@@ -64,7 +65,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v1)
 
             // Verify the result
-            Assert.AreEqual(Some 1.0, duration) // Expected duration: V0 -> V1 = 0 + 1
+            ClassicAssert.AreEqual(Some 1.0, duration) // Expected duration: V0 -> V1 = 0 + 1
 
         [<Test>]
         member _.``Single Source Single Target Test Group 2`` () =
@@ -74,7 +75,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v7, v12)
 
             // Verify the result
-            Assert.AreEqual(Some 34.0, duration) // Expected duration: V7 -> V8 -> V9 -> V10 -> V11 -> V12 = 7 + 8 + 9 + 10 + 0 + 0
+            ClassicAssert.AreEqual(Some 34.0, duration) // Expected duration: V7 -> V8 -> V9 -> V10 -> V11 -> V12 = 7 + 8 + 9 + 10 + 0 + 0
 
         [<Test>]
         member _.``Multiple Paths Test Group 1`` () =
@@ -84,7 +85,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v5)
 
             // Verify the result
-            Assert.AreEqual(Some 13.0, duration) // Expected duration: V0 -> V1 -> V4 -> V3 -> V5 = 0 + 1 + 4 + 3 + 5
+            ClassicAssert.AreEqual(Some 13.0, duration) // Expected duration: V0 -> V1 -> V4 -> V3 -> V5 = 0 + 1 + 4 + 3 + 5
 
         [<Test>]
         member _.``Disconnected Path Test Group 1`` () =
@@ -94,7 +95,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v7)
 
             // Verify the result
-            Assert.AreEqual(None, duration) // Expected duration: None (no path from v0 to v7)
+            ClassicAssert.AreEqual(None, duration) // Expected duration: None (no path from v0 to v7)
 
         [<Test>]
         member _.``Complex Path Test Group 1`` () =
@@ -104,7 +105,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v3, v4)
 
             // Verify the result
-            Assert.AreEqual(None, duration)
+            ClassicAssert.AreEqual(None, duration)
 
         [<Test>]
         member _.``Complex Path Test Group 2`` () =
@@ -114,7 +115,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v6, v11)
 
             // Verify the result
-            Assert.AreEqual(None, duration)
+            ClassicAssert.AreEqual(None, duration)
 
         [<Test>]
         member _.``Longer Path Test Group 1`` () =
@@ -124,7 +125,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v12)
 
             // Verify the result
-            Assert.AreEqual(None, duration)
+            ClassicAssert.AreEqual(None, duration)
 
         [<Test>]
         member _.``Test with No Path`` () =
@@ -134,7 +135,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v6)
 
             // Verify the result
-            Assert.AreEqual(None, duration) // Expected duration: None (no path from v0 to v6)
+            ClassicAssert.AreEqual(None, duration) // Expected duration: None (no path from v0 to v6)
 
         [<Test>]
         member _.``Test with Self Loop`` () =
@@ -144,7 +145,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v0)
 
             // Verify the result
-            Assert.AreEqual(Some 0.0, duration) // Expected duration: Self loop, duration 0
+            ClassicAssert.AreEqual(Some 0.0, duration) // Expected duration: Self loop, duration 0
 
         [<Test>]
         member _.``Complex Path with All Nodes`` () =
@@ -154,7 +155,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v4)
 
             // Verify the result
-            Assert.AreEqual(Some 5.0, duration) // Expected duration: V0 ->  V1 -> V4 = 0 + 1 + 4
+            ClassicAssert.AreEqual(Some 5.0, duration) // Expected duration: V0 ->  V1 -> V4 = 0 + 1 + 4
 
         [<Test>]
         member _.``Complex Path with Partial Nodes`` () =
@@ -164,7 +165,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v0, v9)
 
             // Verify the result
-            Assert.AreEqual(None, duration) // Expected duration: None (no path from v0 to v9)
+            ClassicAssert.AreEqual(None, duration) // Expected duration: None (no path from v0 to v9)
 
         [<Test>]
         member _.``Single Source Single Target Test Group 3`` () =
@@ -174,7 +175,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, v11, v12)
 
             // Verify the result
-            Assert.AreEqual(Some 0.0, duration) // Expected duration: V11 -> V12 = 0 + 0
+            ClassicAssert.AreEqual(Some 0.0, duration) // Expected duration: V11 -> V12 = 0 + 0
 
 
         [<Test>]
@@ -185,7 +186,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, [v0; v7], [v5; v12])
 
             // Verify the result
-            Assert.AreEqual(Some 34.0, duration) // Expected duration: Longest path from any source to any target
+            ClassicAssert.AreEqual(Some 34.0, duration) // Expected duration: Longest path from any source to any target
 
         [<Test>]
         member _.``Multiple Sources Multiple Targets Test 2`` () =
@@ -195,7 +196,7 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, [v1; v7], [v3; v12])
 
             // Verify the result
-            Assert.AreEqual(Some 34.0, duration) // Expected duration: Longest path from any source to any target
+            ClassicAssert.AreEqual(Some 34.0, duration) // Expected duration: Longest path from any source to any target
 
         [<Test>]
         member _.``Multiple Sources Multiple Targets Test 3`` () =
@@ -205,4 +206,4 @@ module TimeTestModule =
             let duration = TimeExt.GetDuration(flow.Graph, [v0; v1], [v4; v5])
 
             // Verify the result
-            Assert.AreEqual(Some 13.0, duration) // Expected duration: Longest path from any source to any target, satisfying all targets
+            ClassicAssert.AreEqual(Some 13.0, duration) // Expected duration: Longest path from any source to any target, satisfying all targets

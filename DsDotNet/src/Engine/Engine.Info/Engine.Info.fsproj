@@ -34,10 +34,10 @@
     </ItemGroup>
 
     <ItemGroup>
-	    <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.1"/>
-		<PackageReference Include="DualSoft-Common-Db" Version="0.3.1"/>
+	    <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.2" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.3.2" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
-        <PackageReference Include="Dapper" Version="2.0.143" />
+        <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>
 
 </Project>

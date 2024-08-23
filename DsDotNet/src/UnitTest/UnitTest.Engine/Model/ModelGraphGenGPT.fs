@@ -4,6 +4,7 @@ namespace T
 open Engine.Core
 open Dual.Common.Core.FS
 open NUnit.Framework
+open NUnit.Framework.Legacy
 
 
 // 테스트용 더미 클래스 정의
@@ -29,8 +30,8 @@ module ModelGraphGenGPT =
             let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 그래프에 정상적으로 정점과 간선이 추가되었는지 확인
-            Assert.AreEqual(3, graph.Vertices.Count)
-            Assert.AreEqual(2, graph.Edges.Count)
+            ClassicAssert.AreEqual(3, graph.Vertices.Count)
+            ClassicAssert.AreEqual(2, graph.Edges.Count)
 
         [<Test>]
         member x.``Add and Remove Vertices Test`` () =
@@ -39,11 +40,11 @@ module ModelGraphGenGPT =
 
             // 정점 추가 후 확인
             graph.AddVertex(DummyVertex("D")) |> ignore
-            Assert.AreEqual(4, graph.Vertices.Count)
+            ClassicAssert.AreEqual(4, graph.Vertices.Count)
 
             // 정점 제거 후 확인
             graph.RemoveVertex(vertices.[0]) |> ignore
-            Assert.AreEqual(3, graph.Vertices.Count)
+            ClassicAssert.AreEqual(3, graph.Vertices.Count)
 
         [<Test>]
         member x.``Add and Remove Edges Test`` () =
@@ -54,11 +55,11 @@ module ModelGraphGenGPT =
             // 간선 추가 후 확인
             let newEdge = DummyEdge(vertices.[0], vertices.[2])
             graph.AddEdge(newEdge) |> ignore
-            Assert.AreEqual(3, graph.Edges.Count)
+            ClassicAssert.AreEqual(3, graph.Edges.Count)
 
             // 간선 제거 후 확인
             graph.RemoveEdge(edges.[0]) |> ignore
-            Assert.AreEqual(2, graph.Edges.Count)
+            ClassicAssert.AreEqual(2, graph.Edges.Count)
 
         [<Test>]
         member x.``Add and Remove Vertices Test 2`` () =
@@ -68,11 +69,11 @@ module ModelGraphGenGPT =
             // 정점 추가 후 확인
             graph.AddVertex(DummyVertex("D")) |> ignore
             graph.AddVertex(DummyVertex("E")) |> ignore
-            Assert.AreEqual(5, graph.Vertices.Count)
+            ClassicAssert.AreEqual(5, graph.Vertices.Count)
 
             // 정점 제거 후 확인
             graph.RemoveVertex(vertices.[0]) |> ignore
-            Assert.AreEqual(4, graph.Vertices.Count)
+            ClassicAssert.AreEqual(4, graph.Vertices.Count)
 
         [<Test>]
         member x.``Add and Remove Edges Test 2`` () =
@@ -84,11 +85,11 @@ module ModelGraphGenGPT =
             let newEdge1 = DummyEdge(vertices.[0], vertices.[2])
             let newEdge2 = DummyEdge(vertices.[2], vertices.[0])
             graph.AddEdges([newEdge1; newEdge2]) |> ignore
-            Assert.AreEqual(4, graph.Edges.Count)
+            ClassicAssert.AreEqual(4, graph.Edges.Count)
 
             // 간선 제거 후 확인
             graph.RemoveEdges([edges.[0]; edges.[1]]) |> ignore
-            Assert.AreEqual(2, graph.Edges.Count)
+            ClassicAssert.AreEqual(2, graph.Edges.Count)
 
         [<Test>]
         member x.``Find Vertex Test`` () =
@@ -97,12 +98,12 @@ module ModelGraphGenGPT =
 
             // 정점 찾기 테스트
             let foundVertex = graph.TryFindVertex("B")
-            Assert.IsTrue(foundVertex.IsSome)
-            Assert.AreEqual("B", foundVertex.Value.Name)
+            ClassicAssert.IsTrue(foundVertex.IsSome)
+            ClassicAssert.AreEqual("B", foundVertex.Value.Name)
 
             // 존재하지 않는 정점 찾기 테스트
             let notFoundVertex = graph.TryFindVertex("X")
-            Assert.IsTrue(notFoundVertex.IsNone)
+            ClassicAssert.IsTrue(notFoundVertex.IsNone)
 
         [<Test>]
         member x.``Find Edges Test`` () =
@@ -112,11 +113,11 @@ module ModelGraphGenGPT =
 
             // 간선 찾기 테스트
             let foundEdges = graph.FindEdges("A", "B")
-            Assert.AreEqual(1, foundEdges.length())
+            ClassicAssert.AreEqual(1, foundEdges.length())
 
             // 존재하지 않는 간선 찾기 테스트
             let notFoundEdges = graph.FindEdges("A", "C")
-            Assert.AreEqual(0, notFoundEdges.length())
+            ClassicAssert.AreEqual(0, notFoundEdges.length())
 
         [<Test>]
         member x.``Connected Vertices Test`` () =
@@ -126,7 +127,7 @@ module ModelGraphGenGPT =
 
             // 연결된 정점 확인
             let connectedVertices = graph.Edges
-            Assert.AreEqual(2, connectedVertices.length())
+            ClassicAssert.AreEqual(2, connectedVertices.length())
 
         [<Test>]
         member x.``Islands Test`` () =
@@ -136,7 +137,7 @@ module ModelGraphGenGPT =
 
             // 고립된 정점 확인
             let islands = graph.Islands
-            Assert.AreEqual(1, islands.length())
+            ClassicAssert.AreEqual(1, islands.length())
 
         [<Test>]
         member x.``Get Incoming Edges Test`` () =
@@ -146,7 +147,7 @@ module ModelGraphGenGPT =
 
             // 들어오는 간선 확인
             let incomingEdges = graph.GetIncomingEdges(vertices.[1])
-            Assert.AreEqual(1, incomingEdges.length())
+            ClassicAssert.AreEqual(1, incomingEdges.length())
 
         [<Test>]
         member x.``Get Outgoing Edges Test`` () =
@@ -156,7 +157,7 @@ module ModelGraphGenGPT =
 
             // 나가는 간선 확인
             let outgoingEdges = graph.GetOutgoingEdges(vertices.[1])
-            Assert.AreEqual(1, outgoingEdges.length())
+            ClassicAssert.AreEqual(1, outgoingEdges.length())
 
         [<Test>]
         member x.``Get Edges Test`` () =
@@ -166,7 +167,7 @@ module ModelGraphGenGPT =
 
             // 간선 확인
             let allEdges = graph.GetEdges(vertices.[1])
-            Assert.AreEqual(2, allEdges.length())
+            ClassicAssert.AreEqual(2, allEdges.length())
 
         [<Test>]
         member x.``Get Incoming Vertices Test`` () =
@@ -176,7 +177,7 @@ module ModelGraphGenGPT =
 
             // 들어오는 정점 확인
             let incomingVertices = graph.GetIncomingVertices(vertices.[1])
-            Assert.AreEqual(1, incomingVertices.length())
+            ClassicAssert.AreEqual(1, incomingVertices.length())
 
         [<Test>]
         member x.``Get Outgoing Vertices Test`` () =
@@ -186,7 +187,7 @@ module ModelGraphGenGPT =
 
             // 나가는 정점 확인
             let outgoingVertices = graph.GetOutgoingVertices(vertices.[1])
-            Assert.AreEqual(1, outgoingVertices.length())
+            ClassicAssert.AreEqual(1, outgoingVertices.length())
 
         [<Test>]
         member x.``Inits Test`` () =
@@ -196,7 +197,7 @@ module ModelGraphGenGPT =
 
             // Inits 확인
             let inits = graph.Inits
-            Assert.AreEqual(1, inits.length())
+            ClassicAssert.AreEqual(1, inits.length())
 
         [<Test>]
         member x.``Lasts Test`` () =
@@ -206,7 +207,7 @@ module ModelGraphGenGPT =
 
             // Lasts 확인
             let lasts = graph.Lasts
-            Assert.AreEqual(1, lasts.length())
+            ClassicAssert.AreEqual(1, lasts.length())
 
 
 
@@ -219,11 +220,11 @@ module ModelGraphGenGPT =
             // 정점 추가 후 확인
             let newVertices = [for i in 101..105 -> DummyVertex(sprintf "Vertex%d" i)]
             graph.AddVertices(newVertices) |> ignore
-            Assert.AreEqual(105, graph.Vertices.Count)
+            ClassicAssert.AreEqual(105, graph.Vertices.Count)
 
             // 정점 제거 후 확인
             graph.RemoveVertices(newVertices) |> ignore
-            Assert.AreEqual(100, graph.Vertices.Count)
+            ClassicAssert.AreEqual(100, graph.Vertices.Count)
 
         [<Test>]
         member x.``Add and Remove Multiple Edges Test`` () =
@@ -234,11 +235,11 @@ module ModelGraphGenGPT =
             // 간선 추가 후 확인
             let newEdges = [for i in 1..4 -> DummyEdge(vertices.[i], vertices.[i+5])]
             graph.AddEdges(newEdges) |> ignore
-            Assert.AreEqual(13, graph.Edges.Count)
+            ClassicAssert.AreEqual(13, graph.Edges.Count)
 
             // 간선 제거 후 확인
             graph.RemoveEdges(newEdges) |> ignore
-            Assert.AreEqual(9, graph.Edges.Count)
+            ClassicAssert.AreEqual(9, graph.Edges.Count)
 
         [<Test>]
         member x.``Add and Remove Multiple Vertices and Edges Test`` () =
@@ -251,14 +252,14 @@ module ModelGraphGenGPT =
             let newEdges = [for i in 1..5 -> DummyEdge(vertices.[i-1], newVertices.[i-1])]
             graph.AddVertices(newVertices) |> ignore
             graph.AddEdges(newEdges) |> ignore
-            Assert.AreEqual(15, graph.Vertices.Count)
-            Assert.AreEqual(14, graph.Edges.Count)
+            ClassicAssert.AreEqual(15, graph.Vertices.Count)
+            ClassicAssert.AreEqual(14, graph.Edges.Count)
 
             // 정점과 간선 제거 후 확인
             graph.RemoveEdges(newEdges) |> ignore
             graph.RemoveVertices(newVertices) |> ignore
-            Assert.AreEqual(10, graph.Vertices.Count)
-            Assert.AreEqual(9, graph.Edges.Count)
+            ClassicAssert.AreEqual(10, graph.Vertices.Count)
+            ClassicAssert.AreEqual(9, graph.Edges.Count)
 
         [<Test>]
         member x.``TryFindVertex with Type Filter Test`` () =
@@ -267,12 +268,12 @@ module ModelGraphGenGPT =
 
             // 특정 타입의 정점 찾기 테스트
             let foundVertex = graph.TryFindVertex<Named>("B")
-            Assert.IsTrue(foundVertex.IsSome)
-            Assert.AreEqual("B", foundVertex.Value.Name)
+            ClassicAssert.IsTrue(foundVertex.IsSome)
+            ClassicAssert.AreEqual("B", foundVertex.Value.Name)
 
             // 다른 타입의 정점 찾기 테스트
             let notFoundVertex = graph.TryFindVertex<EdgeBase<DummyVertex>>("C")
-            Assert.IsTrue(notFoundVertex.IsNone)
+            ClassicAssert.IsTrue(notFoundVertex.IsNone)
 
         [<Test>]
         member x.``Find Edges with Source and Target Test`` () =
@@ -282,13 +283,13 @@ module ModelGraphGenGPT =
 
             // Source와 Target로 간선 찾기 테스트
             let foundEdges = graph.FindEdges(vertices.[0], vertices.[1])
-            Assert.AreEqual(1, foundEdges.length())
+            ClassicAssert.AreEqual(1, foundEdges.length())
 
             // 존재하지 않는 Source와 Target로 간선 찾기 테스트
             let notFoundEdges = graph.FindEdges(vertices.[0], vertices.[2])
-            Assert.AreEqual(0, notFoundEdges.length())
+            ClassicAssert.AreEqual(0, notFoundEdges.length())
 
-    
+
 
         [<Test>]
         member x.``Get Incoming and Outgoing Edges Test`` () =
@@ -298,11 +299,11 @@ module ModelGraphGenGPT =
 
             // 들어오는 간선 확인
             let incomingEdges = graph.GetIncomingEdges(vertices.[1])
-            Assert.AreEqual(1, incomingEdges.length())
+            ClassicAssert.AreEqual(1, incomingEdges.length())
 
             // 나가는 간선 확인
             let outgoingEdges = graph.GetOutgoingEdges(vertices.[1])
-            Assert.AreEqual(1, outgoingEdges.length())
+            ClassicAssert.AreEqual(1, outgoingEdges.length())
 
         [<Test>]
         member x.``Get Incoming and Outgoing Vertices Test`` () =
@@ -312,8 +313,8 @@ module ModelGraphGenGPT =
 
             // 들어오는 정점 확인
             let incomingVertices = graph.GetIncomingVertices(vertices.[1])
-            Assert.AreEqual(1, incomingVertices.length())
+            ClassicAssert.AreEqual(1, incomingVertices.length())
 
             // 나가는 정점 확인
             let outgoingVertices = graph.GetOutgoingVertices(vertices.[1])
-            Assert.AreEqual(1, outgoingVertices.length())
+            ClassicAssert.AreEqual(1, outgoingVertices.length())

@@ -13,32 +13,32 @@
         <Content Include="zmqsettings.json">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </Content>
-        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs"/>
-        <Compile Include="Zmq.Spec.fs"/>
-        <Compile Include="Zmq.Server.StreamManager.fs"/>
-        <Compile Include="Zmq.Server.Response.fs"/>
-        <Compile Include="Zmq.Server.Impl.fs"/>
-        <Compile Include="Zmq.Server.fs"/>
-        <Compile Include="Zmq.Server.DirectClient.fs"/>
-        <Compile Include="Zmq.Client.fs"/>
-        <Compile Include="Zmq.Client.CSharp.fs"/>
-        <Compile Include="Zmq.Module.fs"/>
-        <Compile Include="Zmq.TestMain.fs"/>
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="Zmq.Spec.fs" />
+        <Compile Include="Zmq.Server.StreamManager.fs" />
+        <Compile Include="Zmq.Server.Response.fs" />
+        <Compile Include="Zmq.Server.Impl.fs" />
+        <Compile Include="Zmq.Server.fs" />
+        <Compile Include="Zmq.Server.DirectClient.fs" />
+        <Compile Include="Zmq.Client.fs" />
+        <Compile Include="Zmq.Client.CSharp.fs" />
+        <Compile Include="Zmq.Module.fs" />
+        <Compile Include="Zmq.TestMain.fs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="log4net" Version="2.0.17"/>
-        <PackageReference Include="NetMQ" Version="4.0.1.13"/>
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3"/>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.1"/>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.2"/>
-        <PackageReference Include="DualSoft-Common-Db" Version="0.3.1"/>
-        <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8"/>
-        <PackageReference Include="Dapper" Version="2.0.143"/>
+        <PackageReference Include="log4net" Version="2.0.17" />
+        <PackageReference Include="NetMQ" Version="4.0.1.13" />
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.2" />
+        <PackageReference Include="DualSoft-Common-Core" Version="0.3.2" />
+        <PackageReference Include="DualSoft-Common-Db" Version="0.3.2" />
+        <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
+        <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\IO.Spec\IO.Spec.csproj"/>
+        <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
     </ItemGroup>
 
 </Project>

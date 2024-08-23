@@ -3,7 +3,6 @@ namespace Engine.Info
 open System
 open System.Data
 open Dapper
-open System.Data.SqlClient
 
 [<AutoOpen>]
 module DBCommon =

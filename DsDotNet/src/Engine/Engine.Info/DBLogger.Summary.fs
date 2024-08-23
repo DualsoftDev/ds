@@ -46,21 +46,17 @@ module DBLoggerORM2 =
     /// StorageKey(-> TagKind*Fqdn) 로 주어진 항목에 대한 조회 기간 전체의 summary (-> Count, Sum)
     /// durations: sec 단위 개별 실행 duration
     type Summary(logSet: LogSet, storageKey: StorageKey, durations:float seq) =
-
+        /// storageKey 에 해당하는 모든 durations.  variance 를 구하기 위해서 모든 instance 필요.
         member val Durations = ResizeArray durations
         /// Number rising
         member x.Count = x.Durations.Count
         member x.Sum = x.Durations |> Seq.sum
-        member x.Average =
-            if x.Count > 0 then
-                x.Durations |> Seq.average
-            else
-                0.0
+        member x.Average = x.Durations.ToOption().Map(Seq.average) |? 0.0
         member x.Variance =
             if x.Count > 1 then
                 let mean = x.Average
                 x.Durations
-                |> Seq.map (fun x -> (x - mean) ** 2.0)
+                |> map (fun x -> (x - mean) ** 2.0)
                 |> Seq.average
             else
                 0.0
@@ -81,7 +77,7 @@ module DBLoggerORM2 =
         member x.Summaries = summaryDic
         member x.ModelId = queryCriteria.ModelId
         member x.ReaderWriterType = readerWriterType
-        member x.GetSummary(summaryKey: StorageKey) = summaryDic[summaryKey]
+        member x.GetSummary(storageKey: StorageKey) = summaryDic[storageKey]
 
         member val Systems = systems |> toArray
         member val QuerySet = queryCriteria with get, set

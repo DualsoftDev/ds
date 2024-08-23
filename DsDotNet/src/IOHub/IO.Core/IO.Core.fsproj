@@ -30,9 +30,9 @@
         <PackageReference Include="log4net" Version="2.0.17" />
         <PackageReference Include="NetMQ" Version="4.0.1.13" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.2" />
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.2" />
-        <PackageReference Include="DualSoft-Common-Db" Version="0.3.2" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.3" />
+        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
+        <PackageReference Include="DualSoft-Common-Db" Version="0.3.3" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
         <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>

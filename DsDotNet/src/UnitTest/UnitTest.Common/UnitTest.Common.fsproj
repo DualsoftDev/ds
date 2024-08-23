@@ -11,11 +11,11 @@
     </PropertyGroup>
 
 	<ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.2" />
+        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.2" />
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.2" />
-        <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.3.2" />
+        <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.3" />
+        <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.3.3" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
         <PackageReference Include="FsUnit" Version="6.0.0" />

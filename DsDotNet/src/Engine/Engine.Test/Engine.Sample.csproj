@@ -9,7 +9,7 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.2"/>
+        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3"/>
     </ItemGroup>
 
     <ItemGroup>

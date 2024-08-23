@@ -80,9 +80,9 @@
 
 
     <ItemGroup>
-		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.3.2" />
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.2" />
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.2" />
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
+        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.3" />
         <PackageReference Include="System.Reactive" Version="6.0.1" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
         <PackageReference Include="Fody" Version="6.8.1">

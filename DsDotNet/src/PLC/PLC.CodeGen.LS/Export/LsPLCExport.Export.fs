@@ -518,7 +518,7 @@ module XgiExportModule =
                     x, doc
             let prjParam =
                 match prjParam.TargetType, prjParam.ExistingLSISprj with
-                | XGK, Some existing ->
+                | XGK, Some _existing ->
                     let counters = collectCounterAddressesXgk xdoc
                     let timers = collectTimerAddressesXgk xdoc
                     let newPrjParam = {

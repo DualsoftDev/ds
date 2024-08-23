@@ -46,6 +46,7 @@ module DBWriterModule =
         //시뮬레이션 초기화 시에만 사용
         member x.ClearToken() = originalToken2TokenIdDic.Clear()
         member x.GetTokenId(originalToken:uint) = originalToken2TokenIdDic[originalToken]
+        /// [Token] table 에 row 를 삽입하고, 해당 row 의 id 값을 반환
         member x.AllocateTokenId(originalToken:uint, at:DateTime) =
             assert(!! originalToken2TokenIdDic.ContainsKey(originalToken))
 

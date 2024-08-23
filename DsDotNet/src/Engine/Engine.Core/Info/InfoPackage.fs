@@ -50,8 +50,8 @@ module InfoPackageModule =
                 && x.ErrorMessages.SequenceEqual(o.ErrorMessages)
                 && x.Efficiency   = o.Efficiency
                 && x.PauseCount   = o.PauseCount
-        
-    type InfoDevice() = 
+
+    type InfoDevice() =
         interface IInfoBase with
             member x.Name with get() = x.Name and set(v) = x.Name <- v
             member x.Fqdn with get() = x.Fqdn and set(v) = x.Fqdn <- v
@@ -79,7 +79,7 @@ module InfoPackageModule =
             let info = new InfoDevice(Name=x.Name, Fqdn = x.QualifiedName, Id=x.Id)
             info
 
-    type InfoCall() = 
+    type InfoCall() =
         inherit InfoBase()
         ///동작 횟수
         member val GoingCount = 0 with get, set
@@ -106,7 +106,7 @@ module InfoPackageModule =
             info.RealName <- x.NameComponents[2]
             info
 
-    type InfoReal() = 
+    type InfoReal() =
         inherit InfoBase()
         ///동작 횟수
         member val GoingCount = 0 with get, set
@@ -126,7 +126,7 @@ module InfoPackageModule =
             info.FlowName <- x.NameComponents[1]
             info
 
-    type InfoFlow() = 
+    type InfoFlow() =
         inherit InfoBase()
         ///제품 1개 플로우 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
@@ -142,7 +142,7 @@ module InfoPackageModule =
             info.SystemName <- x.NameComponents[0]
             info
 
-    type InfoSystem() = 
+    type InfoSystem() =
         inherit InfoBase()
         ///제품 1개 시스템 처리시간 추후 계산 (알고리즘 필요)
         member val LeadTime = 0.0  with get, set
@@ -168,15 +168,15 @@ type InfoExt =
                 if f.Fqdn = fqdn then
                     Some (f :> IInfoBase)
                 else
-                    f.InfoReals |> Seq.tryPick(fun r -> 
+                    f.InfoReals |> Seq.tryPick(fun r ->
                         if r.Fqdn = fqdn then
                             r :> IInfoBase |> Some
                         else
-                            r.InfoCalls |> Seq.tryPick(fun c -> 
+                            r.InfoCalls |> Seq.tryPick(fun c ->
                                 if c.Fqdn = fqdn then
                                     c :> IInfoBase |> Some
                                 else
-                                    c.InfoDevices |> Seq.tryPick(fun d -> 
+                                    c.InfoDevices |> Seq.tryPick(fun d ->
                                         if d.Fqdn = fqdn then
                                             d :> IInfoBase |> Some
                                         else

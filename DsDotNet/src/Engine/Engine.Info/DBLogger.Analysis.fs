@@ -74,7 +74,7 @@ module internal DBLoggerAnalysisModule =
 
         member x.PrintStatistics() =
             let getTimeSpan (logs: ORMVwLog list) =
-                headAndLast logs
+                tryHeadAndLast logs
                 |> map (fun (h, t) -> t.At - h.At)
                 |? (TimeSpan.FromSeconds 0.0)
 

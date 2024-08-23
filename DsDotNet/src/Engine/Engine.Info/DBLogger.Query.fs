@@ -21,6 +21,9 @@ module internal DBLoggerQueryImpl =
     let isOff = isOn >> not
 
     type Summary with
+        /// 과거 쌓인 logs 참조해서 Summary 초기 정보 생성
+        ///
+        /// - On/Off 기준으로 duration instance 를 구함.
         // logs: id 순
         member x.Build(FList(logs: Log list), lastLogs:Dictionary<ORMStorage, Log>) =
             let rec updateSummary (logs: Log list) =
@@ -48,6 +51,7 @@ module internal DBLoggerQueryImpl =
 
             ()
 
+        /// 증분 logs 참조해서 Summary update
         member x.BuildIncremental(FList(newLogs: Log list), lastLogs:Dictionary<ORMStorage, Log>) =
             let helper (current: Log) =
                 match lastLogs.TryFindValue(current.Storage) with

@@ -48,17 +48,17 @@ module DBLoggerORM =
 
     (*
      * [Storage]
-        +---------------------------------------+---------------------------+-----------+-----------+--------
-        | name                                  | fqdn                      | tagKind   | dataType  | modelId
-        +---------------------------------------+---------------------------+-----------+-----------+--------
-        | _ON                                   | SIDE11                    | 0         | Boolean   | 1             // TagKind.[ 0] = SystemTag._ON
-        | _OFF                                  | SIDE11                    | 1         | Boolean   | 1             // TagKind.[ 1] = SystemTag._OFF
-        | SIDE11_auto_btn                       | SIDE11                    | 2         | Boolean   | 1             // TagKind.[ 2] = SystemTag.auto_btn
-        | SIDE11_auto_lamp                      | SIDE11                    | 12        | Boolean   | 1             // TagKind.[12] = SystemTag.auto_lamp
-        | SIDE11_timeout                        | SIDE11                    | 27        | UInt32    | 1             // TagKind.[27] = SystemTag.timeout
-        | SIDE11_MES_idle_mode                  | SIDE11.MES                | 10,100    | Boolean   | 1             // TagKind.[10100] = FlowTag.idle_mode
-        | SIDE11_S200_CARTYPE_MOVE_idle_mode    | SIDE11.S200_CARTYPE_MOVE  | 10,100    | Boolean   | 1             // TagKind.[10100] = FlowTag.idle_mode
-        +---------------------------------------+---------------------------+-----------+-----------+--------
+        +---------------------------------------+---------------------------+-----------+-----------+--------+-------------+-------------
+        | name                                  | fqdn                      | tagKind   | dataType  | modelId| minDuration | maxDuration
+        +---------------------------------------+---------------------------+-----------+-----------+--------+-------------+-------------
+        | _ON                                   | SIDE11                    | 0         | Boolean   | 1      |             |                    // TagKind.[ 0] = SystemTag._ON
+        | _OFF                                  | SIDE11                    | 1         | Boolean   | 1      |             |                    // TagKind.[ 1] = SystemTag._OFF
+        | SIDE11_auto_btn                       | SIDE11                    | 2         | Boolean   | 1      |             |                    // TagKind.[ 2] = SystemTag.auto_btn
+        | SIDE11_auto_lamp                      | SIDE11                    | 12        | Boolean   | 1      |             |                    // TagKind.[12] = SystemTag.auto_lamp
+        | SIDE11_timeout                        | SIDE11                    | 27        | UInt32    | 1      |             |                    // TagKind.[27] = SystemTag.timeout
+        | SIDE11_MES_idle_mode                  | SIDE11.MES                | 10,100    | Boolean   | 1      |             |                    // TagKind.[10100] = FlowTag.idle_mode
+        | SIDE11_S200_CARTYPE_MOVE_idle_mode    | SIDE11.S200_CARTYPE_MOVE  | 10,100    | Boolean   | 1      |             |                    // TagKind.[10100] = FlowTag.idle_mode
+        +---------------------------------------+---------------------------+-----------+-----------+--------+-------------+-------------
     *)
     let sqlCreateSchema =
         $"""
@@ -69,6 +69,8 @@ CREATE TABLE [{Tn.Storage}] (
     , [tagKind]     INTEGER NOT NULL    -- 값 자체가 tagKind table 의 id 이다.
     , [dataType]    NVARCHAR(64) NOT NULL CHECK(LENGTH(dataType) <= 64)
     , [modelId]     INTEGER NOT NULL
+    , [minDuration] INTEGER     -- ms 단위
+    , [maxDuration] INTEGER     -- ms 단위
     , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name, modelId)
     , FOREIGN KEY(tagKind) REFERENCES {Tn.TagKind}(id)
 );
@@ -170,16 +172,29 @@ CREATE VIEW [{Vn.Storage}] AS
 """
 
     type IDBRow = interface end
-    let private nullToken = Nullable<int64>()
+    type TokenType = int64
+    type DurationType = int64
+    type NullableTokenType = Nullable<int64>
+    type NullableDurationType = Nullable<int64>
+    let private nullToken = NullableTokenType()
+    let private nullDuration = NullableDurationType()
     let private nullTokenId = TokenIdType()
 
 
     /// DB storage table 의 row 항목
-    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int) =
-        new() = ORMStorage(-1, null, null, -1, null, -1)
+    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int, minDuration:NullableDurationType, maxDuration:NullableDurationType) =
+        new() = ORMStorage(-1, null, null, -1, null, -1, nullDuration, nullDuration)
+        new(id, name, fqdn, tagKind, dataType) = ORMStorage(id, name, fqdn, tagKind, dataType, -1, nullDuration, nullDuration)
         new(iStorage: IStorage) =
-            if iStorage.Target.IsNone then failwithf $"Storage Target is not exist {iStorage.Name}"
-            ORMStorage(-1, iStorage.Name, iStorage.Target.Value.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, -1)
+            match iStorage.Target with
+            | Some target ->
+                // todo: IStorage level 에서 min/max duration 설정 치를 파악할 수 있어야 한다.
+                let minDuration = nullDuration
+                let maxDuration = nullDuration
+                ORMStorage(-1, iStorage.Name, target.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, -1, minDuration, maxDuration)
+            | None ->
+                failwith $"Storage Target is not exist {iStorage.Name}"
+                ORMStorage()    // just to avoid compiler error
 
         interface IDBRow
         member val Id = id with get, set
@@ -188,13 +203,16 @@ CREATE VIEW [{Vn.Storage}] AS
         member val TagKind = tagKind with get, set
         member val DataType = dataType with get, set
         member val ModelId = modelId with get, set
+        member val MinDuration = minDuration with get, set
+        member val MaxDuration = maxDuration with get, set
+
+    type ORMStorage with
+        member x. TryGetMinDuration() = x.MinDuration.ToOption()
+        member x. TryGetMaxDuration() = x.MaxDuration.ToOption()
+
 
     /// DB log table 의 row 항목
     type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
-        do
-            let x = 1
-            ()
-
         new() = ORMLog(-1, -1, DateTime.MaxValue, null, -1, TokenIdType())
 
         interface IDBRow

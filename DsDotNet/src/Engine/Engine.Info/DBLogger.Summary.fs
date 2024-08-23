@@ -74,6 +74,8 @@ module DBLoggerORM2 =
                 key, Summary(this, key, [||]))
             |> Tuple.toReadOnlyDictionary
 
+        interface ILogSet
+
         member x.Summaries = summaryDic
         member x.ModelId = queryCriteria.ModelId
         member x.ReaderWriterType = readerWriterType
@@ -89,13 +91,6 @@ module DBLoggerORM2 =
         member val TheLastLog: Log option = None with get, set
         //member val Disposables = new CompositeDisposable()
         // } mutables
-
-        interface ILogSet
-        //interface ILogSet with
-        //    override x.Dispose() =
-        //        x.Disposables.Dispose()
-        //        tracefn "------------------ LogSet disposed"
-
 
 
     /// property table 항목 조회

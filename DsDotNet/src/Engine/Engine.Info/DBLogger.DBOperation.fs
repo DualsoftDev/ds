@@ -45,11 +45,10 @@ module internal DBLoggerImpl =
             for (key, group) in groups do
                 // 사용자가 시작 기간을 지정한 경우에는, 최초 log 를 ON 이 되도록 정렬
                 let logsWithStartON =
-                    let userSpecifiedStart = x.QuerySet.TargetStart.IsSome
-
-                    if userSpecifiedStart then
+                    match x.QuerySet.TargetStart with
+                    | Some _userSpecifiedStart ->
                         group |> Seq.skipWhile isOff
-                    else
+                    | None ->
                         group
 
                 x.Summaries[key].Build(logsWithStartON, x.LastLogs)
@@ -81,38 +80,40 @@ module internal DBLoggerImpl =
 
             let! dbStorages = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
 
-            let dbStorages =
+            let dbStorageDic =
                 dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
 
             let existingStorages, newStorages =
                 systemStorages
-                |> Seq.partition (fun s -> dbStorages.ContainsKey(getStorageKey s))
+                |> Seq.partition (fun s -> dbStorageDic.ContainsKey(getStorageKey s))
 
+            // 메모리 상의 ORMStorage 에 대해서 DB 에서 읽어온 id mapping
             for s in existingStorages do
-                s.Id <- dbStorages[getStorageKey s].Id
+                s.Id <- dbStorageDic[getStorageKey s].Id
 
-            if newStorages.any () then
-                if readerWriterType = DBLoggerType.Reader then
-                    failwithlogf $"Database can't be sync'ed for {connStr}"
-                else
-                    for s in newStorages do
-                        let! id =
-                            conn.InsertAndQueryLastRowIdAsync(
-                                tr,
-                                $"""INSERT INTO [{Tn.Storage}]
-                                    (name, fqdn, tagKind, dataType, modelId)
-                                    VALUES (@Name, @Fqdn, @TagKind, @DataType, @ModelId)
-                                    ;
-                                """,
-                                {| Name = s.Name
-                                   Fqdn = s.Fqdn
-                                   TagKind = s.TagKind
-                                   DataType = s.DataType
-                                   ModelId = modelId |}
-                            )
+            if newStorages.any () && readerWriterType = DBLoggerType.Reader then
+                failwithlogf $"Database can't be sync'ed for {connStr}"
 
-                        s.Id <- id
+            for s in newStorages do
+                let! id =
+                    conn.InsertAndQueryLastRowIdAsync(
+                        tr,
+                        $"""INSERT INTO [{Tn.Storage}]
+                            (name, fqdn, tagKind, dataType, modelId)
+                            VALUES (@Name, @Fqdn, @TagKind, @DataType, @ModelId)
+                            ;
+                        """,
+                        {|
+                            Name = s.Name
+                            Fqdn = s.Fqdn
+                            TagKind = s.TagKind
+                            DataType = s.DataType
+                            ModelId = modelId
+                        |}
+                    )
+
+                s.Id <- id
 
             return new LogSet(queryCriteria, systems, existingStorages @ newStorages, readerWriterType)
         }

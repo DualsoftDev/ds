@@ -16,7 +16,7 @@ module DBLoggerTestModule =
         let createStorage =
             let counter = counterGenerator 1
             let helper (fqdn:string) (tagKind:int) =
-                ORMStorage(counter(), fqdn, fqdn, tagKind, "Boolean", -1)
+                ORMStorage(counter(), fqdn, fqdn, tagKind, "Boolean")
             helper
 
         let createLog =

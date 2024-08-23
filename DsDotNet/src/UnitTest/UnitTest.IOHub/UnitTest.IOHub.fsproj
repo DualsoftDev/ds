@@ -23,10 +23,7 @@
           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
           <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="coverlet.collector" Version="6.0.2">
-          <PrivateAssets>all</PrivateAssets>
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-        </PackageReference>
+		<PackageReference Include="coverlet.collector" Version="6.0.2" />
         <PackageReference Include="log4net" Version="2.0.17" />
         <PackageReference Include="NetMQ" Version="4.0.1.13" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

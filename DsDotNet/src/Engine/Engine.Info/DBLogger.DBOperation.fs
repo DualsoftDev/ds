@@ -4,7 +4,9 @@ open Dapper
 open Engine.Core
 open Dual.Common.Core.FS
 open Dual.Common.Db
+open System
 open System.Data
+open System.Linq
 open System.Threading.Tasks
 open DBLoggerORM
 
@@ -66,31 +68,52 @@ module internal DBLoggerImpl =
             readerWriterType: DBLoggerType
         ) : Task<LogSet> =
         task {
-            let systemStorages: ORMStorage array =
+            let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
+            let connStr = commonAppSettings.ConnectionString    // only for error message
+
+            let systemStorages =
                 systems
                 |> collect(fun s -> s.GetStorages(true))
                 |> distinct
-                |> map ORMStorage
                 |> toArray
 
-            let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
-            let connStr = commonAppSettings.ConnectionString
             if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
                 failwithlogf $"Database not ready for {connStr}"
 
             let! dbStorages = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
+            let! dbMaintenances = conn.QueryAsync<ORMMaintenance>($"SELECT * FROM [{Tn.Maintenance}] WHERE modelId = {modelId}")
 
-            let dbStorageDic =
-                dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
+            let dbStorageDic      = dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
+            let dbMaintenancesDic = dbMaintenances.ToDictionary(_.StorageId, id)
 
+            let ormStorages: ORMStorage[] =
+                systemStorages
+
+                //|> map (fun s ->
+                //    // todo:
+                //    // IStorage level 에서 min/max duration 설정 치를 파악할 수 있어야 한다.
+                //    //
+                //    // s 로부터 min/max duration 값을 구하고, DB maintenance table 에 이미 값이 존재하면, 그것의 id 를 사용하고,
+                //    // 없으면 새로운 row 를 삽입하고 그 id 를 maintenance id 로 할당...
+                //    conn.QueryFirstOrDefault(
+                //        $"""SELECT * FROM {Tn.Maintenance}
+                //            WHERE modelId = {modelId} AND storageId = {}""")
+                //    let minDuration = nullDuration
+                //    let maxDuration = nullDuration
+                //    let maintenanceId = nullId
+                //    ORMStorage(s, maintenanceId))
+                |> map ORMStorage
 
             let existingStorages, newStorages =
-                systemStorages
-                |> Seq.partition (fun s -> dbStorageDic.ContainsKey(getStorageKey s))
+                ormStorages
+                |> Array.partition (fun s -> dbStorageDic.ContainsKey(getStorageKey s))
 
             // 메모리 상의 ORMStorage 에 대해서 DB 에서 읽어온 id mapping
             for s in existingStorages do
                 s.Id <- dbStorageDic[getStorageKey s].Id
+                match dbMaintenancesDic.TryGetValue(s.Id) with
+                | true, maintenace -> s.MaintenanceId <- maintenace.Id
+                | _ -> ()
 
             if newStorages.any () && readerWriterType = DBLoggerType.Reader then
                 failwithlogf $"Database can't be sync'ed for {connStr}"

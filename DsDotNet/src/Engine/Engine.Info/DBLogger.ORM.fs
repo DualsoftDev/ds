@@ -16,7 +16,6 @@ type DBLoggerType =
     | Reader = 2
 
 type internal NewtonsoftJson = Newtonsoft.Json.JsonConvert
-type TokenIdType = Nullable<int64>
 
 [<AutoOpen>]
 module DBLoggerORM =
@@ -28,6 +27,8 @@ module DBLoggerORM =
         let Token    = "token"
         let Error    = "error"
         let TagKind  = "tagKind"
+        /// 예지 보전
+        let Maintenance     = "maintenance"
         let Property = "property"
         let User     = "user"
     // database view names
@@ -48,17 +49,17 @@ module DBLoggerORM =
 
     (*
      * [Storage]
-        +---------------------------------------+---------------------------+-----------+-----------+--------+-------------+-------------
-        | name                                  | fqdn                      | tagKind   | dataType  | modelId| minDuration | maxDuration
-        +---------------------------------------+---------------------------+-----------+-----------+--------+-------------+-------------
-        | _ON                                   | SIDE11                    | 0         | Boolean   | 1      |             |                    // TagKind.[ 0] = SystemTag._ON
-        | _OFF                                  | SIDE11                    | 1         | Boolean   | 1      |             |                    // TagKind.[ 1] = SystemTag._OFF
-        | SIDE11_auto_btn                       | SIDE11                    | 2         | Boolean   | 1      |             |                    // TagKind.[ 2] = SystemTag.auto_btn
-        | SIDE11_auto_lamp                      | SIDE11                    | 12        | Boolean   | 1      |             |                    // TagKind.[12] = SystemTag.auto_lamp
-        | SIDE11_timeout                        | SIDE11                    | 27        | UInt32    | 1      |             |                    // TagKind.[27] = SystemTag.timeout
-        | SIDE11_MES_idle_mode                  | SIDE11.MES                | 10,100    | Boolean   | 1      |             |                    // TagKind.[10100] = FlowTag.idle_mode
-        | SIDE11_S200_CARTYPE_MOVE_idle_mode    | SIDE11.S200_CARTYPE_MOVE  | 10,100    | Boolean   | 1      |             |                    // TagKind.[10100] = FlowTag.idle_mode
-        +---------------------------------------+---------------------------+-----------+-----------+--------+-------------+-------------
+        +---------------------------------------+---------------------------+-----------+-----------+--------+---------------+
+        | name                                  | fqdn                      | tagKind   | dataType  | modelId| maintenanceId
+        +---------------------------------------+---------------------------+-----------+-----------+--------+---------------+
+        | _ON                                   | SIDE11                    | 0         | Boolean   | 1      |               |       // TagKind.[ 0] = SystemTag._ON
+        | _OFF                                  | SIDE11                    | 1         | Boolean   | 1      |               |       // TagKind.[ 1] = SystemTag._OFF
+        | SIDE11_auto_btn                       | SIDE11                    | 2         | Boolean   | 1      |               |       // TagKind.[ 2] = SystemTag.auto_btn
+        | SIDE11_auto_lamp                      | SIDE11                    | 12        | Boolean   | 1      |               |       // TagKind.[12] = SystemTag.auto_lamp
+        | SIDE11_timeout                        | SIDE11                    | 27        | UInt32    | 1      |               |       // TagKind.[27] = SystemTag.timeout
+        | SIDE11_MES_idle_mode                  | SIDE11.MES                | 10,100    | Boolean   | 1      |               |       // TagKind.[10100] = FlowTag.idle_mode
+        | SIDE11_S200_CARTYPE_MOVE_idle_mode    | SIDE11.S200_CARTYPE_MOVE  | 10,100    | Boolean   | 1      |               |       // TagKind.[10100] = FlowTag.idle_mode
+        +---------------------------------------+---------------------------+-----------+-----------+--------+---------------+
     *)
     let sqlCreateSchema =
         $"""
@@ -69,8 +70,7 @@ CREATE TABLE [{Tn.Storage}] (
     , [tagKind]     INTEGER NOT NULL    -- 값 자체가 tagKind table 의 id 이다.
     , [dataType]    NVARCHAR(64) NOT NULL CHECK(LENGTH(dataType) <= 64)
     , [modelId]     INTEGER NOT NULL
-    , [minDuration] INTEGER     -- ms 단위
-    , [maxDuration] INTEGER     -- ms 단위
+    , [maintenanceId]   INTEGER
     , CONSTRAINT uniq_fqdn UNIQUE (fqdn, tagKind, dataType, name, modelId)
     , FOREIGN KEY(tagKind) REFERENCES {Tn.TagKind}(id)
 );
@@ -107,6 +107,15 @@ CREATE TABLE [{Tn.TagKind}] (
     , [name]        NVARCHAR(64) NOT NULL CHECK(LENGTH(name) <= 64)
     -- , [modelId]     INTEGER NOT NULL
     , CONSTRAINT uniq_row UNIQUE (id, name)     -- , modelId
+);
+
+CREATE TABLE [{Tn.Maintenance}] (
+    [id]            INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL
+    , [minDuration] INTEGER         -- ms 단위
+    , [maxDuration] INTEGER         -- ms 단위
+    , [maxNumOperation] INTEGER     -- 최대 가용 횟수.  부품 교체후 reset 필요
+    , [modelId]     INTEGER NOT NULL    -- 편의상, 중복 허용.  참조키 check 는 제외 함.  코멘트 성격으로 사용
+    , [storageId]   INTEGER NOT NULL    -- 편의상, 중복 허용.
 );
 
 CREATE TABLE [{Tn.Property}] (
@@ -172,26 +181,33 @@ CREATE VIEW [{Vn.Storage}] AS
 """
 
     type IDBRow = interface end
-    type TokenType = int64
-    type DurationType = int64
-    type NullableTokenType = Nullable<int64>
-    type NullableDurationType = Nullable<int64>
-    let private nullToken = NullableTokenType()
-    let private nullDuration = NullableDurationType()
-    let private nullTokenId = TokenIdType()
+    type internal IdType = int64
+    type internal TokenType = int64
+    type internal DurationType = int64
+    type internal CounterType = int64
+    type internal NullableTokenType = Nullable<TokenType>
+    type internal NullableDurationType = Nullable<DurationType>
+    type internal NullableCounterType = Nullable<CounterType>
+    type internal NullableIdType = Nullable<IdType>
+    let internal nullDuration = NullableDurationType()
+    let internal nullId = NullableIdType()
+    let internal nullCounter = NullableCounterType()
+    let internal nullToken = NullableTokenType()
+    //type internal TokenIdType = Nullable<int64>
 
 
     /// DB storage table 의 row 항목
-    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int, minDuration:NullableDurationType, maxDuration:NullableDurationType) =
-        new() = ORMStorage(-1, null, null, -1, null, -1, nullDuration, nullDuration)
-        new(id, name, fqdn, tagKind, dataType) = ORMStorage(id, name, fqdn, tagKind, dataType, -1, nullDuration, nullDuration)
-        new(iStorage: IStorage) =
+    type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int, maintenanceId:NullableIdType, storage:IStorage) =
+        new() = ORMStorage(-1, null, null, -1, null, -1, nullId, getNull<IStorage>())
+        new(id, name, fqdn, tagKind, dataType) = ORMStorage(id, name, fqdn, tagKind, dataType, -1, nullId, getNull<IStorage>())
+        new(iStorage: IStorage) = ORMStorage(iStorage, nullId)
+        new(iStorage: IStorage, maintenanceId:NullableIdType) =
             match iStorage.Target with
             | Some target ->
                 // todo: IStorage level 에서 min/max duration 설정 치를 파악할 수 있어야 한다.
                 let minDuration = nullDuration
                 let maxDuration = nullDuration
-                ORMStorage(-1, iStorage.Name, target.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, -1, minDuration, maxDuration)
+                ORMStorage(-1, iStorage.Name, target.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, -1, maintenanceId, iStorage)
             | None ->
                 failwith $"Storage Target is not exist {iStorage.Name}"
                 ORMStorage()    // just to avoid compiler error
@@ -203,13 +219,24 @@ CREATE VIEW [{Vn.Storage}] AS
         member val TagKind = tagKind with get, set
         member val DataType = dataType with get, set
         member val ModelId = modelId with get, set
+        member val MaintenanceId = maintenanceId with get, set
+
+        // ORM 제외 항목
+        member val Storage:IStorage = storage with get, set
+
+    type ORMMaintenance(id:int, modelId:int, storageId:int, minDuration:NullableDurationType, maxDuration:NullableDurationType, maxNumOperation:NullableCounterType) =
+        new() = ORMMaintenance(-1, -1, -1, nullDuration, nullDuration, nullCounter)
+        interface IDBRow
+        member val Id = id with get, set
+        member val ModelId = modelId with get, set
+        member val StorageId = storageId with get, set
         member val MinDuration = minDuration with get, set
         member val MaxDuration = maxDuration with get, set
+        member val MaxNumOperation = maxNumOperation with get, set
 
-    type ORMStorage with
+    type ORMMaintenance with
         member x. TryGetMinDuration() = x.MinDuration.ToOption()
         member x. TryGetMaxDuration() = x.MaxDuration.ToOption()
-
 
     /// DB log table 의 row 항목
     type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
@@ -247,7 +274,7 @@ CREATE VIEW [{Vn.Storage}] AS
     /// Runtime 생성 log 항목
     type Log(id: int, storage: ORMStorage, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
         inherit ORMLog(id, storage.Id, at, value, modelId, tokenId)
-        new() = Log(-1, getNull<ORMStorage> (), DateTime.MaxValue, null, -1, nullTokenId)
+        new() = Log(-1, getNull<ORMStorage> (), DateTime.MaxValue, null, -1, nullId)
 
         interface IDBRow
         member val Storage = storage with get, set
@@ -256,7 +283,7 @@ CREATE VIEW [{Vn.Storage}] AS
 
     type ORMVwLog(logId: int, storageId: int, name: string, fqdn: string, tagKind: int, tagKindName:string, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =
         inherit ORMLog(logId, storageId, at, value, modelId, tokenId)
-        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1, nullTokenId)
+        new() = ORMVwLog(-1, -1, null, null, -1, null, DateTime.MaxValue, null, -1, nullId)
         member val Name = name with get, set
         member val Fqdn = fqdn with get, set
         member val TagKind = tagKind with get, set

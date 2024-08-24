@@ -80,7 +80,7 @@ module internal DBLoggerImpl =
                 let! maintenanceRows = conn.QueryAsync<ORMMaintenance>($"SELECT * FROM [{Tn.Maintenance}] WHERE modelId = {modelId}")
                 let dbMaintenancesDic = maintenanceRows.ToDictionary(_.StorageId, id)
                 for r in storageRows do
-                    match r.Storage.MaintenanceInfo, r.MaintenanceId.ToOption() with
+                    match r.Storage.MaintenanceInfo.Cast<MaintenanceInfo>(), r.MaintenanceId.ToOption() with
 
                     | Some mi, Some mid ->       // diff & update
                         let maintenanceRow = dbMaintenancesDic[r.Id]

@@ -45,7 +45,6 @@ module TagVariableModule =
         let mutable value = initValue
         let mutable tagChanged = false
         let comment = comment |? ""
-        let mutable maintenanceInfo:IMainenance option = None
 
         member _.Name: string = name
         member val Address = address with get, set
@@ -70,6 +69,9 @@ module TagVariableModule =
         // IStorage 로 casting 해서 IStorage::ToExpression extension method 를 사용하도록 한다.
         member x.ToExpression():IExpression<'T> = x.ToBoxedExpression() :?> IExpression<'T>
 
+        /// 예지 보전 관련 정보
+        member val MaintenanceInfo:IMainenance option = None with get, set
+
         interface IStorage with
             member x.DsSystem = param.System.Value
             member x.Target = param.Target
@@ -84,7 +86,7 @@ module TagVariableModule =
             member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
             member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name)
-            member x.MaintenanceInfo = maintenanceInfo
+            member x.MaintenanceInfo with get() = x.MaintenanceInfo and set(v) = x.MaintenanceInfo <- v
 
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v

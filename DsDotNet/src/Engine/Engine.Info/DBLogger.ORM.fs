@@ -218,11 +218,7 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
     type MaintenanceInfo(minDuration:NullableDurationType, maxDuration:NullableDurationType, maxNumOperation:NullableCounterType) =
-        interface IMainenance with
-            member x.MinDuration     with get() = x.MinDuration     and set v = x.MinDuration     <- v
-            member x.MaxDuration     with get() = x.MaxDuration     and set v = x.MaxDuration     <- v
-            member x.MaxNumOperation with get() = x.MaxNumOperation and set v = x.MaxNumOperation <- v
-
+        interface IMainenance
         member val MinDuration = minDuration with get, set
         member val MaxDuration = maxDuration with get, set
         member val MaxNumOperation = maxNumOperation with get, set

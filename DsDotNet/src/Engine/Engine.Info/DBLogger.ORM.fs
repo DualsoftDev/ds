@@ -193,24 +193,16 @@ CREATE VIEW [{Vn.Storage}] AS
     let internal nullId = NullableIdType()
     let internal nullCounter = NullableCounterType()
     let internal nullToken = NullableTokenType()
-    //type internal TokenIdType = Nullable<int64>
 
 
     /// DB storage table 의 row 항목
     type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int, maintenanceId:NullableIdType, storage:IStorage) =
         new() = ORMStorage(-1, null, null, -1, null, -1, nullId, getNull<IStorage>())
         new(id, name, fqdn, tagKind, dataType) = ORMStorage(id, name, fqdn, tagKind, dataType, -1, nullId, getNull<IStorage>())
-        new(iStorage: IStorage) = ORMStorage(iStorage, nullId)
-        new(iStorage: IStorage, maintenanceId:NullableIdType) =
-            match iStorage.Target with
-            | Some target ->
-                // todo: IStorage level 에서 min/max duration 설정 치를 파악할 수 있어야 한다.
-                let minDuration = nullDuration
-                let maxDuration = nullDuration
-                ORMStorage(-1, iStorage.Name, target.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, -1, maintenanceId, iStorage)
-            | None ->
-                failwith $"Storage Target is not exist {iStorage.Name}"
-                ORMStorage()    // just to avoid compiler error
+        new(iStorage: IStorage) =
+            iStorage.Target.IsSome |> verifyM $"Storage Target is not exist {iStorage.Name}"
+            let mainenanceId, modelId = nullId, -1
+            ORMStorage(-1, iStorage.Name, iStorage.Target.Value.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, modelId, mainenanceId, iStorage)
 
         interface IDBRow
         member val Id = id with get, set
@@ -224,19 +216,30 @@ CREATE VIEW [{Vn.Storage}] AS
         // ORM 제외 항목
         member val Storage:IStorage = storage with get, set
 
+
+    type MaintenanceInfo(minDuration:NullableDurationType, maxDuration:NullableDurationType, maxNumOperation:NullableCounterType) =
+        interface IMainenance with
+            member x.MinDuration     with get() = x.MinDuration     and set v = x.MinDuration     <- v
+            member x.MaxDuration     with get() = x.MaxDuration     and set v = x.MaxDuration     <- v
+            member x.MaxNumOperation with get() = x.MaxNumOperation and set v = x.MaxNumOperation <- v
+
+        member val MinDuration = minDuration with get, set
+        member val MaxDuration = maxDuration with get, set
+        member val MaxNumOperation = maxNumOperation with get, set
+
+    type MaintenanceInfo with
+        member x. TryGetMinDuration() = x.MinDuration.ToOption()
+        member x. TryGetMaxDuration() = x.MaxDuration.ToOption()
+
+
     type ORMMaintenance(id:int, modelId:int, storageId:int, minDuration:NullableDurationType, maxDuration:NullableDurationType, maxNumOperation:NullableCounterType) =
+        inherit MaintenanceInfo(minDuration, maxDuration, maxNumOperation)
         new() = ORMMaintenance(-1, -1, -1, nullDuration, nullDuration, nullCounter)
         interface IDBRow
         member val Id = id with get, set
         member val ModelId = modelId with get, set
         member val StorageId = storageId with get, set
-        member val MinDuration = minDuration with get, set
-        member val MaxDuration = maxDuration with get, set
-        member val MaxNumOperation = maxNumOperation with get, set
 
-    type ORMMaintenance with
-        member x. TryGetMinDuration() = x.MinDuration.ToOption()
-        member x. TryGetMaxDuration() = x.MaxDuration.ToOption()
 
     /// DB log table 의 row 항목
     type ORMLog(id: int, storageId: int, at: DateTime, value: obj, modelId:int, tokenId:TokenIdType) =

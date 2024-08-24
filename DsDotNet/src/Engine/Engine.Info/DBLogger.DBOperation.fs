@@ -1,6 +1,7 @@
 namespace Engine.Info
 
 open Dapper
+open Dapper.Contrib.Extensions
 open Engine.Core
 open Dual.Common.Core.FS
 open Dual.Common.Db
@@ -67,9 +68,64 @@ module internal DBLoggerImpl =
             tr: IDbTransaction,
             readerWriterType: DBLoggerType
         ) : Task<LogSet> =
+
+        let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
+
+        /// ormStorage 의 MaintenanceId 및 이에 해당하는 Maintenance row 를 수정 (add/delete/update)
+        /// - System storage 의 Maintenance 정보가 신규추가 / 삭제 시, Maintenance Id 를 추가/삭제
+        /// - System storage 의 Maintenance 정보가 변경시, Maintenance Id 에 해당하는 table 의 row 를 update
+        let updateMaintenanceOfStorageAsync (storageRows:ORMStorage[])  =
+            //let sysStorage = storageRow.Storage
+            task {
+                let! maintenanceRows = conn.QueryAsync<ORMMaintenance>($"SELECT * FROM [{Tn.Maintenance}] WHERE modelId = {modelId}")
+                let dbMaintenancesDic = maintenanceRows.ToDictionary(_.StorageId, id)
+                for r in storageRows do
+                    match r.Storage.MaintenanceInfo, r.MaintenanceId.ToOption() with
+
+                    | Some mi, Some mid ->       // diff & update
+                        let maintenanceRow = dbMaintenancesDic[r.Id]
+                        assert (int64 maintenanceRow.Id = mid)
+                        maintenanceRow.MinDuration <- mi.MinDuration
+                        maintenanceRow.MaxDuration <- mi.MaxDuration
+                        maintenanceRow.MaxNumOperation <- mi.MaxNumOperation
+                        let! _ = conn.UpdateAsync(maintenanceRow, tr)
+                        ()
+
+                    | None, Some mid ->          // Maintenance row 삭제
+                        r.MaintenanceId <- nullId
+                        let! _ = conn.ExecuteAsync($"DELETE FROM [{Tn.Maintenance}] WHERE id = {mid}")
+                        ()
+
+                    | Some mi, None ->          // Maintenance row 추가하고 id 할당
+                        let! maintenanceId =
+                            conn.InsertAndQueryLastRowIdAsync(
+                                tr,
+                                $"""INSERT INTO [{Tn.Maintenance}]
+                                    (minDuration, maxDuration, maxNumOperation, modelId, storageId)
+                                    VALUES (@MinDuration, @MaxDuration, @MaxNumOperation, @ModelId, @StorageId)
+                                    ;
+                                """,
+                                {|
+                                    MinDuration = mi.MinDuration
+                                    MaxDuration = mi.MaxDuration
+                                    MaxNumOperation = mi.MaxNumOperation
+                                    ModelId = modelId
+                                |}
+                            )
+                        r.MaintenanceId <- maintenanceId
+                        let! _ = conn.UpdateAsync(r, tr)
+                        ()
+
+                    | None, None ->
+                        noop()
+            }
+
+
+        let connStr = commonAppSettings.ConnectionString    // only for error message
+        if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
+            failwithlogf $"Database not ready for {connStr}"
+
         task {
-            let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
-            let connStr = commonAppSettings.ConnectionString    // only for error message
 
             let systemStorages =
                 systems
@@ -77,48 +133,30 @@ module internal DBLoggerImpl =
                 |> distinct
                 |> toArray
 
-            if readerWriterType = DBLoggerType.Reader && not <| conn.IsTableExistsAsync(Tn.Storage).Result then
-                failwithlogf $"Database not ready for {connStr}"
 
-            let! dbStorages = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
-            let! dbMaintenances = conn.QueryAsync<ORMMaintenance>($"SELECT * FROM [{Tn.Maintenance}] WHERE modelId = {modelId}")
+            let! storageRows = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
 
-            let dbStorageDic      = dbStorages |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
-            let dbMaintenancesDic = dbMaintenances.ToDictionary(_.StorageId, id)
+            let dbStorageDic      = storageRows |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
-            let ormStorages: ORMStorage[] =
-                systemStorages
-
-                //|> map (fun s ->
-                //    // todo:
-                //    // IStorage level 에서 min/max duration 설정 치를 파악할 수 있어야 한다.
-                //    //
-                //    // s 로부터 min/max duration 값을 구하고, DB maintenance table 에 이미 값이 존재하면, 그것의 id 를 사용하고,
-                //    // 없으면 새로운 row 를 삽입하고 그 id 를 maintenance id 로 할당...
-                //    conn.QueryFirstOrDefault(
-                //        $"""SELECT * FROM {Tn.Maintenance}
-                //            WHERE modelId = {modelId} AND storageId = {}""")
-                //    let minDuration = nullDuration
-                //    let maxDuration = nullDuration
-                //    let maintenanceId = nullId
-                //    ORMStorage(s, maintenanceId))
-                |> map ORMStorage
-
-            let existingStorages, newStorages =
-                ormStorages
+            let storageRows: ORMStorage[] = systemStorages |> map ORMStorage
+            let existingStorageRows, newStorageRows =
+                storageRows
                 |> Array.partition (fun s -> dbStorageDic.ContainsKey(getStorageKey s))
 
             // 메모리 상의 ORMStorage 에 대해서 DB 에서 읽어온 id mapping
-            for s in existingStorages do
+            for s in existingStorageRows do
                 s.Id <- dbStorageDic[getStorageKey s].Id
-                match dbMaintenancesDic.TryGetValue(s.Id) with
-                | true, maintenace -> s.MaintenanceId <- maintenace.Id
-                | _ -> ()
+                //let xxx = dbMaintenancesDic.TryGetValue(s.Id) |> Parse.tryToOption
+                //match dbMaintenancesDic.TryGetValue(s.Id) with
+                //| true, maintenace ->
+                //    s.MaintenanceId <- maintenace.Id
+                //    // todo: update maintenace on demand.  모델에서 해당 storage 의 min/max 등의 변경 존재하면 db 에 update
+                //| _ -> ()
 
-            if newStorages.any () && readerWriterType = DBLoggerType.Reader then
+            if newStorageRows.any () && readerWriterType = DBLoggerType.Reader then
                 failwithlogf $"Database can't be sync'ed for {connStr}"
 
-            for s in newStorages do
+            for s in newStorageRows do
                 let! id =
                     conn.InsertAndQueryLastRowIdAsync(
                         tr,
@@ -138,7 +176,9 @@ module internal DBLoggerImpl =
 
                 s.Id <- id
 
-            return new LogSet(queryCriteria, systems, existingStorages @ newStorages, readerWriterType)
+            do! updateMaintenanceOfStorageAsync storageRows
+
+            return new LogSet(queryCriteria, systems, storageRows, readerWriterType)
         }
 
 

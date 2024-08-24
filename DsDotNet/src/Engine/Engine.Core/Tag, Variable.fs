@@ -45,6 +45,8 @@ module TagVariableModule =
         let mutable value = initValue
         let mutable tagChanged = false
         let comment = comment |? ""
+        let mutable maintenanceInfo:IMainenance option = None
+
         member _.Name: string = name
         member val Address = address with get, set
         [<Browsable(false)>]
@@ -82,6 +84,7 @@ module TagVariableModule =
             member x.Address with get() = x.Address and set(v) = x.Address <- v
             member x.ToBoxedExpression() = x.ToBoxedExpression()
             member x.CompareTo(other) = String.Compare(x.Name, (other:?>IStorage).Name)
+            member x.MaintenanceInfo = maintenanceInfo
 
         interface IStorage<'T> with
             member x.Value with get() = x.Value and set(v) = x.Value <- v

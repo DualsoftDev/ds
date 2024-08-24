@@ -1,6 +1,7 @@
 namespace Engine.Info
 
 open System
+open Dapper.Contrib.Extensions
 open Engine.Core
 open Dual.Common.Base.FS
 open Dual.Common.Core.FS
@@ -116,6 +117,7 @@ CREATE TABLE [{Tn.Maintenance}] (
     , [maxNumOperation] INTEGER     -- 최대 가용 횟수.  부품 교체후 reset 필요
     , [modelId]     INTEGER NOT NULL    -- 편의상, 중복 허용.  참조키 check 는 제외 함.  코멘트 성격으로 사용
     , [storageId]   INTEGER NOT NULL    -- 편의상, 중복 허용.
+    , CONSTRAINT uniq_row UNIQUE (storageId)
 );
 
 CREATE TABLE [{Tn.Property}] (
@@ -196,12 +198,13 @@ CREATE VIEW [{Vn.Storage}] AS
 
 
     /// DB storage table 의 row 항목
+    [<Table("storage")>]
     type ORMStorage(id:int, name: string, fqdn:string, tagKind:int, dataType:string, modelId:int, maintenanceId:NullableIdType, storage:IStorage) =
         new() = ORMStorage(-1, null, null, -1, null, -1, nullId, getNull<IStorage>())
         new(id, name, fqdn, tagKind, dataType) = ORMStorage(id, name, fqdn, tagKind, dataType, -1, nullId, getNull<IStorage>())
-        new(iStorage: IStorage) =
+        new(iStorage: IStorage, modelId) =
             iStorage.Target.IsSome |> verifyM $"Storage Target is not exist {iStorage.Name}"
-            let mainenanceId, modelId = nullId, -1
+            let mainenanceId = nullId
             ORMStorage(-1, iStorage.Name, iStorage.Target.Value.QualifiedName, iStorage.TagKind, iStorage.DataType.Name, modelId, mainenanceId, iStorage)
 
         interface IDBRow
@@ -214,7 +217,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member val MaintenanceId = maintenanceId with get, set
 
         // ORM 제외 항목
-        member val Storage:IStorage = storage with get, set
+        [<Write(false)>] member val Storage:IStorage = storage with get, set
 
 
     type MaintenanceInfo(minDuration:NullableDurationType, maxDuration:NullableDurationType, maxNumOperation:NullableCounterType) =
@@ -228,6 +231,7 @@ CREATE VIEW [{Vn.Storage}] AS
         member x. TryGetMaxDuration() = x.MaxDuration.ToOption()
 
 
+    [<Table("maintenance")>]
     type ORMMaintenance(id:int, modelId:int, storageId:int, minDuration:NullableDurationType, maxDuration:NullableDurationType, maxNumOperation:NullableCounterType) =
         inherit MaintenanceInfo(minDuration, maxDuration, maxNumOperation)
         new() = ORMMaintenance(-1, -1, -1, nullDuration, nullDuration, nullCounter)

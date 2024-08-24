@@ -80,8 +80,9 @@ module internal DBLoggerImpl =
                 let! maintenanceRows = conn.QueryAsync<ORMMaintenance>($"SELECT * FROM [{Tn.Maintenance}] WHERE modelId = {modelId}")
                 let dbMaintenancesDic = maintenanceRows.ToDictionary(_.StorageId, id)
                 for r in storageRows do
-                    match r.Storage.MaintenanceInfo.Cast<MaintenanceInfo>(), r.MaintenanceId.ToOption() with
+                    let optMi, optId = r.Storage.MaintenanceInfo.Cast<MaintenanceInfo>(), r.MaintenanceId.ToOption()
 
+                    match optMi, optId with
                     | Some mi, Some mid ->       // diff & update
                         let maintenanceRow = dbMaintenancesDic[r.Id]
                         assert (int64 maintenanceRow.Id = mid)
@@ -94,6 +95,7 @@ module internal DBLoggerImpl =
                     | None, Some mid ->          // Maintenance row 삭제
                         r.MaintenanceId <- nullId
                         let! _ = conn.ExecuteAsync($"DELETE FROM [{Tn.Maintenance}] WHERE id = {mid}")
+                        let! _ = conn.UpdateAsync(r, tr)
                         ()
 
                     | Some mi, None ->          // Maintenance row 추가하고 id 할당
@@ -110,6 +112,7 @@ module internal DBLoggerImpl =
                                     MaxDuration = mi.MaxDuration
                                     MaxNumOperation = mi.MaxNumOperation
                                     ModelId = modelId
+                                    StorageId = r.Id
                                 |}
                             )
                         r.MaintenanceId <- maintenanceId
@@ -135,17 +138,19 @@ module internal DBLoggerImpl =
 
 
             let! storageRows = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
-
             let dbStorageDic      = storageRows |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
-            let storageRows: ORMStorage[] = systemStorages |> map ORMStorage
+
+            let storageRows: ORMStorage[] = systemStorages |> map(fun s -> ORMStorage(s, modelId))
             let existingStorageRows, newStorageRows =
                 storageRows
                 |> Array.partition (fun s -> dbStorageDic.ContainsKey(getStorageKey s))
 
             // 메모리 상의 ORMStorage 에 대해서 DB 에서 읽어온 id mapping
-            for s in existingStorageRows do
-                s.Id <- dbStorageDic[getStorageKey s].Id
+            for r in existingStorageRows do
+                let dbRow = dbStorageDic[getStorageKey r]
+                r.Id <- dbRow.Id
+                r.MaintenanceId <- dbRow.MaintenanceId
                 //let xxx = dbMaintenancesDic.TryGetValue(s.Id) |> Parse.tryToOption
                 //match dbMaintenancesDic.TryGetValue(s.Id) with
                 //| true, maintenace ->
@@ -175,6 +180,16 @@ module internal DBLoggerImpl =
                     )
 
                 s.Id <- id
+
+#if DEBUG_RANDOM
+            (* 임의 조작 *)
+            for r in storageRows.Where(fun r -> r.TagKind = int VertexTag.going) do   // 11007
+                if r.Id % 2 = 0 then
+                    r.Storage.MaintenanceInfo <- Some <| MaintenanceInfo(Nullable(1L), Nullable(2L), Nullable(1L))
+            noop()
+#endif
+
+
 
             do! updateMaintenanceOfStorageAsync storageRows
 

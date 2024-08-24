@@ -171,7 +171,7 @@ module internal DBLoggerImpl =
 
                 s.Id <- id
 
-#if DEBUG_RANDOM
+#if DEBUG_HARDCORE
             (* 임의 조작 *)
             for r in storageRows.Where(fun r -> r.TagKind = int VertexTag.going) do   // 11007
                 if r.Id % 2 = 0 then

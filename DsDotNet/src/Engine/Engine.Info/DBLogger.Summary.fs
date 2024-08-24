@@ -51,7 +51,9 @@ module DBLoggerORM2 =
         /// Number rising
         member x.Count = x.Durations.Count
         member x.Sum = x.Durations |> Seq.sum
+        /// 평균
         member x.Average = x.Durations.ToOption().Map(Seq.average) |? 0.0
+        /// 분산
         member x.Variance =
             if x.Count > 1 then
                 let mean = x.Average
@@ -60,10 +62,15 @@ module DBLoggerORM2 =
                 |> Seq.average
             else
                 0.0
+        /// 표준 편차
+        member x.StdDev = sqrt x.Variance
+        /// 표준 편차
+        member x.Sigma  = sqrt x.Variance
 
         /// Container reference
         member x.LogSet = logSet
         member x.StorageKey = storageKey
+
 
     /// DB logging 관련 전체 설정
     and LogSet(queryCriteria: QueryCriteria, systems: DsSystem seq, storages: ORMStorage seq, readerWriterType: DBLoggerType) as this =

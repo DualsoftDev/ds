@@ -35,7 +35,7 @@ module internal DBLoggerQueryImpl =
 
                     match b1, b2 with
                     | true, false ->
-                        let duration = (log2.At - log1.At).TotalSeconds
+                        let duration = (log2.At - log1.At).TotalMilliseconds
                         x.Durations.Add duration
                         updateSummary tails
                     //| _ when b1 = b2 -> failwithlogf $"ERROR.  duplicated consecutive values detected. ({log1.Storage.Name}:{b1}, {log2.Storage.Name}:{b2})"
@@ -60,7 +60,7 @@ module internal DBLoggerQueryImpl =
                         logWarn  $"Warning: Duplicated consecutive values detected for log id = {current.Id}, prev log id = {last.Id}."
 
                     if isOff (current) then
-                        (current.At - last.At).TotalSeconds |> x.Durations.Add
+                        (current.At - last.At).TotalMilliseconds |> x.Durations.Add
                 | None ->
                     if isOff (current) then
                         logWarn $"Warning: Invalid value starts: OFF(false)."

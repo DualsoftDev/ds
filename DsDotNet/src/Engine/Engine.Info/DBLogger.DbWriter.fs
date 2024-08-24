@@ -222,13 +222,14 @@ module DBWriterModule =
                 let! logSet = dbWriter.createLogSetForWriterAsync queryCriteria systems
                 dbWriter.LogSet <- Some logSet
 
-                commonAppSettings.LoggerDBSettings.SyncInterval.Subscribe(fun counter -> dbWriter.writePeriodicAsync(counter).Wait())
-                |> dbWriter.Disposables.Add
+                commonAppSettings.LoggerDBSettings.SyncInterval
+                    .Subscribe(fun counter -> dbWriter.writePeriodicAsync(counter).Wait())
+                    |> dbWriter.Disposables.Add
 
                 let theSystem = systems.First()
                 let rt, mt, st = int VertexTag.realToken, int VertexTag.mergeToken, int VertexTag.sourceToken
-                let now = DateTime.Now
                 TagEventSubject.Subscribe(fun tag ->
+                    let now = DateTime.Now
                     let mutable tokenId = TokenIdType()
                     if tag.GetSystem() = theSystem && tag.IsVertexTokenTag() then
                         let target = tag.GetTarget()

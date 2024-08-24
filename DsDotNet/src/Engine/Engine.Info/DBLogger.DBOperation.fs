@@ -1,14 +1,14 @@
 namespace Engine.Info
 
-open Dapper
-open Dapper.Contrib.Extensions
-open Engine.Core
-open Dual.Common.Core.FS
-open Dual.Common.Db
-open System
 open System.Data
 open System.Linq
 open System.Threading.Tasks
+open Dapper
+open Dapper.Contrib.Extensions
+
+open Engine.Core
+open Dual.Common.Core.FS
+open Dual.Common.Db
 open DBLoggerORM
 
 
@@ -24,9 +24,6 @@ module internal DBLoggerImpl =
             if newTagKindInfos.any () then
                 failwithlogf $"Database sync failed."
         }
-
-
-
 
     let ormLog2Log (logSet: LogSet) (l: ORMLog) =
         let storage = logSet.StoragesById[l.StorageId]
@@ -129,7 +126,6 @@ module internal DBLoggerImpl =
             failwithlogf $"Database not ready for {connStr}"
 
         task {
-
             let systemStorages =
                 systems
                 |> collect(fun s -> s.GetStorages(true))
@@ -138,7 +134,7 @@ module internal DBLoggerImpl =
 
 
             let! storageRows = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
-            let dbStorageDic      = storageRows |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
+            let dbStorageDic = storageRows |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
 
             let storageRows: ORMStorage[] = systemStorages |> map(fun s -> ORMStorage(s, modelId))
@@ -151,12 +147,6 @@ module internal DBLoggerImpl =
                 let dbRow = dbStorageDic[getStorageKey r]
                 r.Id <- dbRow.Id
                 r.MaintenanceId <- dbRow.MaintenanceId
-                //let xxx = dbMaintenancesDic.TryGetValue(s.Id) |> Parse.tryToOption
-                //match dbMaintenancesDic.TryGetValue(s.Id) with
-                //| true, maintenace ->
-                //    s.MaintenanceId <- maintenace.Id
-                //    // todo: update maintenace on demand.  모델에서 해당 storage 의 min/max 등의 변경 존재하면 db 에 update
-                //| _ -> ()
 
             if newStorageRows.any () && readerWriterType = DBLoggerType.Reader then
                 failwithlogf $"Database can't be sync'ed for {connStr}"
@@ -185,30 +175,22 @@ module internal DBLoggerImpl =
             (* 임의 조작 *)
             for r in storageRows.Where(fun r -> r.TagKind = int VertexTag.going) do   // 11007
                 if r.Id % 2 = 0 then
-                    r.Storage.MaintenanceInfo <- Some <| MaintenanceInfo(Nullable(1L), Nullable(2L), Nullable(1L))
+                    r.Storage.MaintenanceInfo <- Some <| MaintenanceInfo(Nullable(1L), Nullable(3L), Nullable(1L))
             noop()
 #endif
-
-
-
             do! updateMaintenanceOfStorageAsync storageRows
 
             return new LogSet(queryCriteria, systems, storageRows, readerWriterType)
         }
 
 
-
-
-
     let count (logSet: LogSet, fqdns: string seq, tagKinds: int seq, value: bool) =
-        let mutable count = 0
-
-        for fqdn in fqdns do
-            for tagKind in tagKinds do
-                let summary = logSet.GetSummary(tagKind, fqdn)
-                count <- count + summary.Count
-
-        count
+        seq {
+            for fqdn in fqdns do
+                for tagKind in tagKinds do
+                    let summary = logSet.GetSummary(tagKind, fqdn)
+                    yield summary.Count
+        } |> Seq.sum
 
     /// 지정된 조건에 따라 마지막 'Value'를 반환
     let getLastValue (logSet: LogSet, fqdn: string, tagKind: int) : bool option =

@@ -174,9 +174,14 @@ CREATE VIEW [{Vn.Storage}] AS
         , tagKind.[name] AS tagKindName
         , stg.[dataType] AS dataType
         , stg.[modelId] AS modelId
+        , maintenance.[minDuration] AS min
+        , maintenance.[maxDuration] AS max
     FROM [{Tn.Storage}] stg
     JOIN [{Tn.TagKind}] tagKind
     ON [stg].[tagKind] = [tagKind].[id]
+    LEFT JOIN [{Tn.Maintenance}] maintenance
+    ON [stg].[id] = [maintenance].[storageId]
+
     ;
 
 

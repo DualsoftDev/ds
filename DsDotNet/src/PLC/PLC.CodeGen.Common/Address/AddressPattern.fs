@@ -144,7 +144,6 @@ module LSEAddressPattern =
 
 
 
-[<Extension>]
 type LSEAddressPatternExt =
     [<Extension>] static member IsXGIAddress (x:string) = isXgiTag x
 ///XGK 검증필요

@@ -57,7 +57,6 @@ module CpuExtensionsModule =
         preAction (sys , false)
 
 
-    [<Extension>]
     type ExpressionExt =
         [<Extension>] static member GetChangedTags (xs:IStorage seq) = xs |> Seq.where(fun w -> w.TagChanged)
 

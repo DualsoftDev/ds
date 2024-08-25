@@ -263,7 +263,6 @@ module ExpressionFunctionModule =
 
     [<AutoOpen>]
     module internal FunctionImpl =
-        [<Extension>] // type SeqExt =
         type SeqExt =
             [<Extension>] static member ExpectGteN(xs:'a seq, n) = expectGteN n xs
             [<Extension>] static member Expect1(xs:'a seq) = expect1 xs

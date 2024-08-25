@@ -122,7 +122,6 @@ module internal GraphHelperModule =
             failwithlogf $"ERROR: Cyclic graph on {msg}"
         true
 
-[<Extension>]
 type GraphHelper =
     [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]

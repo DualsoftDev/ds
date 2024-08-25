@@ -26,6 +26,7 @@ module DBLoggerTestModule =
                 ORMLog(counter(), storage.Id, at, value, modelId, nullToken)
             helper
 
+        // now 부터 1 초 간격의 DateTime 생성
         let nextSecond =
             let now = DateTime.Now
             let counter = counterGenerator 0
@@ -60,15 +61,16 @@ module DBLoggerTestModule =
         member __.``Basic Test`` () =
             let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorTRx)
             let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorTRx)
+            let k = 1000.0
 
             2 === DBLogger.Count(fqdn, kind, logSet)
             false === DBLogger.GetLastValue(fqdn, kind, logSet)
 
             let onsTimeSpans = DBLogger.Sum(fqdn, kind, logSet)
-            onsTimeSpans === 2.0 + 1.0
+            onsTimeSpans === (2.0 + 1.0) * k
 
             let avgONs = DBLogger.Average(fqdn, kind, logSet)
-            avgONs === 1.5
+            avgONs === 1.5 * k
 
 
             // ON log 하나만 추가 된 후, 동일 test : cycle 미 완성
@@ -80,10 +82,10 @@ module DBLoggerTestModule =
             true === DBLogger.GetLastValue(fqdn, kind, logSet)
 
             let onsTimeSpans = DBLogger.Sum(fqdn, kind, logSet)
-            onsTimeSpans === 2.0 + 1.0
+            onsTimeSpans === (2.0 + 1.0) * k
 
             let avgONs = DBLogger.Average(fqdn, kind, logSet)
-            avgONs === 1.5
+            avgONs === 1.5 * k
 
 
             // OFF log 하나 더 추가해서 duration 완성된 후, 동일 test
@@ -95,10 +97,10 @@ module DBLoggerTestModule =
             false === DBLogger.GetLastValue(fqdn, kind, logSet)
 
             let onsTimeSpans = DBLogger.Sum(fqdn, kind, logSet)
-            onsTimeSpans === 2.0 + 1.0 + 1.0
+            onsTimeSpans === (2.0 + 1.0 + 1.0) * k
 
             let avgONs = DBLogger.Average(fqdn, kind, logSet)
-            avgONs === 4.0 / 3.0
+            avgONs === (4.0 / 3.0) * k
 
             ()
 

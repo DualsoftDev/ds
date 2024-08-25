@@ -170,7 +170,6 @@ module DBLoggerORM2 =
             return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
         }
 
-[<Extension>]
 type LoggerDBSettingsExt =
     [<Extension>]
     static member CreateConnection(loggerDBSettings:LoggerDBSettings): SqliteConnection =

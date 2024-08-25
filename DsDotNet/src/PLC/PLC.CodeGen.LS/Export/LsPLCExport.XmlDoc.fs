@@ -17,7 +17,6 @@ module internal XgxXmlExtensionImpl =
         $"//Configurations/Configuration/GlobalVariables/{var}"
     let xPathLocalVar = "//POU/Programs/Program/LocalVar"
 
-[<Extension>]
 type XgxXmlExtension =
     /// XmlNode '//Configurations/Configuration/GlobalVariables/{GlobalVariable, VariableComment}' 반환
     [<Extension>]

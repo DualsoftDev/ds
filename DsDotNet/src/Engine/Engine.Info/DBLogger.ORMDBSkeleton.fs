@@ -63,12 +63,11 @@ module LoggerDB =
                         printfn "Exception: %s" ex.Message
                         do! Async.Sleep(10000) // 예외 발생 시 10초 대기
             }
-        
+
         Async.Start(monitorTask(), cancellationToken)
-        
+
 
 [<AutoOpen>]
-[<Extension>]
 type ORMDBSkeletonDTOExt =
     [<Extension>]
     static member CreateAsync(modelId:int, conn:IDbConnection, tr:IDbTransaction): Task<ORMDBSkeletonDTO> =

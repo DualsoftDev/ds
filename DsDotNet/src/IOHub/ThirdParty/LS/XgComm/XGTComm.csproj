@@ -1,28 +1,36 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-	  <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <COMReference Include="XGCommLib">
-      <WrapperTool>tlbimp</WrapperTool>
-      <VersionMinor>0</VersionMinor>
-      <VersionMajor>1</VersionMajor>
-      <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
-      <Lcid>0</Lcid>
-      <Isolated>false</Isolated>
-      <EmbedInteropTypes>true</EmbedInteropTypes>
-    </COMReference>
-  </ItemGroup>
+	<ItemGroup>
+		<COMReference Include="XGCommLib">
+			<WrapperTool>tlbimp</WrapperTool>
+			<VersionMinor>0</VersionMinor>
+			<VersionMajor>1</VersionMajor>
+			<Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+			<Lcid>0</Lcid>
+			<Isolated>false</Isolated>
+			<EmbedInteropTypes>true</EmbedInteropTypes>
+		</COMReference>
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
 
 	<ItemGroup>
 		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.3.3" />
 	</ItemGroup>
 
 	<ItemGroup>
-    <PackageReference Include="System.Reactive.Linq" Version="6.0.1" />
-  </ItemGroup>
+		<PackageReference Include="System.Reactive.Linq" Version="6.0.1" />
+	</ItemGroup>
 
 </Project>

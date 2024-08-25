@@ -5,13 +5,20 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <Compile Include="..\..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
         <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
         <ProjectReference Include="..\ThirdParty\LS\XgComm\XGTComm.csproj" />
     </ItemGroup>

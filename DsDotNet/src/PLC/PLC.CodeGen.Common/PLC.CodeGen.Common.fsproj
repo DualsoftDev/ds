@@ -9,7 +9,8 @@
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Address\CSVPLCTypeList.fs" />
@@ -58,6 +59,12 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
 
 
 </Project>

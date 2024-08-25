@@ -1,8 +1,9 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OutputType>exe</OutputType>
     </PropertyGroup>
@@ -21,7 +22,14 @@
       </Content>
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+
+	<ItemGroup>
         <ProjectReference Include="..\..\..\IO.Core\IO.Core.fsproj" />
         <ProjectReference Include="..\XgComm\XGTComm.csproj" />
     </ItemGroup>

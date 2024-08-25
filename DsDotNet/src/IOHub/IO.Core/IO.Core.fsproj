@@ -5,9 +5,10 @@
 		<LangVersion>8.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <OutputType>Library</OutputType>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<OutputType>Library</OutputType>
+	</PropertyGroup>
 
     <ItemGroup>
         <Content Include="zmqsettings.json">

@@ -5,7 +5,8 @@
 		<OutputType>Library</OutputType>
 		<LangVersion>8.0</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <None Include="SQL.md" />
@@ -27,7 +28,13 @@
         <Compile Include="AssemblyInfo.fs" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
 		<!-- <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" /> -->
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />

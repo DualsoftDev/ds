@@ -4,9 +4,10 @@
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>Engine.Base</RootNamespace>
 		<LangVersion>8.0</LangVersion>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
-        <OtherFlags>--warnon:1182</OtherFlags>
-    </PropertyGroup>
+		<OtherFlags>--warnon:1182</OtherFlags>
+	</PropertyGroup>
     <ItemGroup>
       <Compile Include="IoEventDS.fs" />
       <Compile Include="AddressInfoProviderDS.fs" />

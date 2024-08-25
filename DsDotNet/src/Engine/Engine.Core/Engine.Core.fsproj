@@ -9,7 +9,9 @@
         <OtherFlags>--warnon:1182</OtherFlags>
         <AssemblyVersion>1.0.18</AssemblyVersion>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<!-- UseNugetProjectReference 속성이 명시적으로 설정되지 않았다면 기본값을 False로 설정 -->
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
 
     <ItemGroup>
@@ -78,8 +80,13 @@
         <!--<Compile Include="Program.fs" />-->
     </ItemGroup>
 
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.3.3" />
 		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
         <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />

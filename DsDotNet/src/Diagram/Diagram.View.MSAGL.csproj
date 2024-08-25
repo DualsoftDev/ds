@@ -6,6 +6,7 @@
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>12.0</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
     </PropertyGroup>
 
@@ -13,6 +14,12 @@
 		<Compile Include="..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+	
     <ItemGroup>
         <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
         <PackageReference Include="DualSoft-Common-Winform" Version="0.3.3" />

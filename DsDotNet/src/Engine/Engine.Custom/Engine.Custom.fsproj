@@ -4,7 +4,8 @@
         <TargetFramework>net8.0</TargetFramework>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
@@ -12,7 +13,13 @@
         <Compile Include="Loader.fs" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
         <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
     </ItemGroup>
 

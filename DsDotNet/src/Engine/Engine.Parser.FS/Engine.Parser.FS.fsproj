@@ -7,7 +7,8 @@
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <None Remove="C:\Users\kwak\.nuget\packages\fsharp.core\6.0.6\contentFiles\any\netstandard2.0\FSharp.Core.xml" />
@@ -49,7 +50,14 @@
         </PackageReference>
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+
+	<ItemGroup>
         <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
     </ItemGroup>
 

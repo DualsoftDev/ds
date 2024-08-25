@@ -24,7 +24,6 @@ module FlatExpressionModule2 =
     let mutable fakeAlwaysOffFlatExpression:IFlatExpression = getNull<IFlatExpression>()
 
 
-[<Extension>]
 type private FlatExpressionExt =
     /// FlatExpression 이 _ON 이나 _OFF 상수인 경우, Some(true), Some(false) 값을 반환하고, 그 이외의 모든 경우에는 None 반환
     [<Extension>]

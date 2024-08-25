@@ -87,7 +87,6 @@ module internal RungXmlInfoModule =
         member x.GetXml():string = mergeXmls x.XmlElements
 
 
-[<Extension>]
 type internal RungXmlExtension =
     [<Extension>]
     static member MergeXmls(xmls:RungXmlInfo seq) : string = mergeXmls xmls

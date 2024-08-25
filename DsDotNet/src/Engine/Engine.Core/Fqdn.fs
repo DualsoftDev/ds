@@ -116,7 +116,6 @@ module FqdnImpl =
         [<Browsable(false)>]
         member val TagManager = getNull<ITagManager>() with get, set
 
-[<Extension>]
 type FqdnExt =
     [<Extension>] static member CreateNameComparer() = nameComparer()
     [<Extension>] static member CreateNameComponentsComparer() = nameComponentsComparer()

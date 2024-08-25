@@ -39,7 +39,6 @@ module UniquePlcTagName =
     let getMemoryActionName name = $"{name}_M"
 
 
-[<Extension>]
 type UniqueNameExt =
     [<Extension>]
     static member TryFindWithName (namedObjects: #INamed seq, name: string) =

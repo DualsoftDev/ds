@@ -40,7 +40,6 @@ open System.Runtime.CompilerServices
         | T -> "T" | C -> "C" | R -> "R" | I -> "I" | Q -> "Q" | A -> "A" | W -> "W" | S -> "S" | ZR -> "ZR"
 
     [<AutoOpen>]
-    [<Extension>]
     type PLCHwModelExt =
         [<Extension>] static member ToText(x:CpuType) = toText x
         [<Extension>] static member IsIEC(x:CpuType) = isIEC x

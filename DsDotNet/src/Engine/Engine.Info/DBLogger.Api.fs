@@ -116,7 +116,6 @@ module DBLoggerApi =
 
 
 
-[<Extension>]
 type InfoPackageModuleExt =
     [<Extension>] static member GetInfo (x:DsSystem): InfoSystem = getInfoSystem x
     [<Extension>] static member GetInfos (xs:Device seq)  : InfoDevice seq = getInfoDevices xs

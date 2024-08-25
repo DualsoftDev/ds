@@ -254,7 +254,6 @@ module internal ModelFindModule =
         member x.TryFindJob (jobName:string)         = tryFindJob  x jobName
         member x.TryFindReal (path:string list)      = tryFindReal x path
 
-[<Extension>]
 type FindExtension =
     // 전체 사용된 시스템을 이름으로 찾기
     [<Extension>] static member TryFindLoadedSystem (system:DsSystem, name) = tryFindLoadedSystem system name

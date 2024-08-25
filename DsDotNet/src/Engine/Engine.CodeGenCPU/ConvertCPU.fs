@@ -72,6 +72,9 @@ module ConvertCPU =
             if IsSpec (v, CallInFlow, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
                 yield  vc.F4_CallEndInFlow()
+
+            if IsSpec (v, CallInFlow, AliasFalse) then
+                let vc = v.TagManager :?> CoinVertexTagManager
                 yield! vc.F5_SourceTokenNumGeneration()
 
             if IsSpec (v, CallInReal , AliasFalse) then

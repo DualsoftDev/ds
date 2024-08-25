@@ -95,8 +95,8 @@ module ExpressionExtension =
 
     /// Create Sub Statement
     let (---)  (sets:Expression<bool>, src1:IExpression, src2:IExpression) (target, comment:string)  =
-        let addExpr = fSub [src1;src2]
-        DuAssign(Some(sets), addExpr,  target)  |> withExpressionComment comment
+        let subExpr = fSub [src1;src2]
+        DuAssign(Some(sets), subExpr,  target)  |> withExpressionComment comment
 
     /// Create Copy Statement
     let (-->) (sets, copyExpr) (target, comment:string) =

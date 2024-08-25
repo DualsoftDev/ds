@@ -32,9 +32,11 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
 using static Engine.Info.DBWriterModule;
 using static Engine.CodeGenCPU.JobManagerModule;
+using System.Runtime.Versioning;
 
 namespace Diagram.View.MSAGL
 {
+[SupportedOSPlatform("windows")]
     public static class ViewUtil
     {
         public static List<UcView> UcViews { get; set; } = new();

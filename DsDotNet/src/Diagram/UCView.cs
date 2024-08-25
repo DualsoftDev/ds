@@ -10,6 +10,7 @@ using System.CodeDom;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 using static Engine.CodeGenCPU.JobManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
@@ -28,10 +29,11 @@ using Vertex = Engine.Core.CoreModule.Vertex;
 
 
 namespace Diagram.View.MSAGL;
+[SupportedOSPlatform("windows")]
 
 public partial class UcView : UserControl
 {
-    private readonly GViewer viewer = new();
+    private GViewer viewer = null;
 
     public Flow Flow { get; set; }
     public ViewNode MasterNode { get; set; }
@@ -40,12 +42,6 @@ public partial class UcView : UserControl
     {
         InitializeComponent();
 
-        viewer.Dock = DockStyle.Fill;
-        viewer.PanButtonPressed = true;
-        viewer.ToolBarIsVisible = false;
-        viewer.MouseDoubleClick += Viewer_MouseDoubleClick;
-
-        Controls.Add(viewer);
     }
 
     private void Viewer_MouseDoubleClick(object sender, MouseEventArgs e)
@@ -87,6 +83,19 @@ public partial class UcView : UserControl
 
     public void SetGraph(ViewNode viewNode, Flow flow)
     {
+        // Initialize GViewer
+        viewer = new GViewer
+        {
+            Dock = DockStyle.Fill,
+            PanButtonPressed = true,
+            ToolBarIsVisible = false
+        };
+
+        viewer.MouseDoubleClick += Viewer_MouseDoubleClick;
+
+        Controls.Add(viewer);
+
+
         Flow = flow;
         MasterNode = viewNode;
         //sub 그래프 불가

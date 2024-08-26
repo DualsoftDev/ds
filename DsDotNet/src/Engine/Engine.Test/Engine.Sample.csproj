@@ -7,12 +7,20 @@
         <SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <PlatformTarget>AnyCPU</PlatformTarget>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
     <ItemGroup>
         <PackageReference Include="DualSoft-Common-Core" Version="0.3.3"/>
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
+	</ItemGroup>
+
+
+	<ItemGroup>
         <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
     </ItemGroup>
 </Project>

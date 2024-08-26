@@ -31,14 +31,24 @@
         <PackageReference Include="log4net" Version="2.0.17" />
         <PackageReference Include="NetMQ" Version="4.0.1.13" />
         <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
-        <PackageReference Include="DualSoft-Common-Db" Version="0.3.3" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
         <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.3.3" />
+	</ItemGroup>
+
+
+	<ItemGroup>
         <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
     </ItemGroup>
 

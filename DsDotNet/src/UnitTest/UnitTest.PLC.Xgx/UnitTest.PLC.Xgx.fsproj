@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
@@ -9,11 +9,11 @@
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
         <NoWarn>NU1702</NoWarn>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
         <PackageReference Include="FsUnit" Version="6.0.0" />
@@ -22,7 +22,15 @@
         <PackageReference Include="xunit" Version="2.9.0" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
+	</ItemGroup>
+
+	<ItemGroup>
         <None Include="formatXml.mjs" />
         <Compile Include="TestFixture.Xgx.fs" />
         <Compile Include="ExpressionVisitor.fs" />
@@ -55,7 +63,6 @@
     </ItemGroup>
 
     <ItemGroup>
-
         <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 
         <ProjectReference Include="..\..\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />

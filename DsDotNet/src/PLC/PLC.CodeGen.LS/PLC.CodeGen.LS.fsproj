@@ -72,7 +72,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
         <PackageReference Include="Fody" Version="6.8.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -84,9 +83,11 @@
     </ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
 	</ItemGroup>
 
 	<ItemGroup>

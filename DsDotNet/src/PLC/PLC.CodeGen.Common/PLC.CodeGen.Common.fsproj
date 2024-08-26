@@ -39,11 +39,16 @@
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 
-	<ItemGroup>
-		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.3.3" />
-    </ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
+	</ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.3.3" />
+	</ItemGroup>
+
+
+	<ItemGroup>
         <Folder Include="QGraph\" />
     </ItemGroup>
 
@@ -59,12 +64,6 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-	</ItemGroup>
 
 
 </Project>

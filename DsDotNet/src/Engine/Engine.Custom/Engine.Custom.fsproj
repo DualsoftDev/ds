@@ -14,14 +14,11 @@
     </ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
 	</ItemGroup>
-
-	<ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
-    </ItemGroup>
-
 
 </Project>

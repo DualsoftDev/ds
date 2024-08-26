@@ -19,13 +19,10 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\..\..\Submodules\nuget\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-	</ItemGroup>
-
-
-	<ItemGroup>
 		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.3.3" />
 	</ItemGroup>
 

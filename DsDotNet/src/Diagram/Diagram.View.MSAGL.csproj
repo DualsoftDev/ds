@@ -15,14 +15,16 @@
     </ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Winform\Dual.Common.Winform.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Winform" Version="0.3.3" />
 	</ItemGroup>
 	
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
-        <PackageReference Include="DualSoft-Common-Winform" Version="0.3.3" />
         <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
     </ItemGroup>
 

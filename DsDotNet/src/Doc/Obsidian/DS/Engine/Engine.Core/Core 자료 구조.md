@@ -7,7 +7,7 @@
 	- command, operation, variable, condition, interface
 	- button, hmi   -> PREDOMICATH
 	- device, external
-	- props             -> STANDFLMS
+	- props             -> STANDFLMS   (SAD:call / TNSFM:real)
 	- versions
 - `[flow]  f = {}`
 	- causals, noncausals, parenting(--> Real), aliases

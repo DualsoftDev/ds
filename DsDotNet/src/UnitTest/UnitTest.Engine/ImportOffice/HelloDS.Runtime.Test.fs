@@ -21,10 +21,6 @@ module HelloDSRuntimeTestModule =
             RuntimeDS.TimeoutCall <- 15000u
 
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
-        let helloDSZipPath = @"Z:\ds\DsDotNet\src\UnitTest\TestData\HelloDS.dsz"
-
-        let runtimeModel = new RuntimeModel(helloDSZipPath, PlatformTarget.WINDOWS)
-
         let getSystem() =
             let pptParms:PptParams = defaultPptParams()
             let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms)
@@ -42,15 +38,15 @@ module HelloDSRuntimeTestModule =
             system
 
 
-        // Z:\ds\DsDotNet\src\UnitTest\TestData\ 폴더에
-        // - 최신 버젼의 HelloDS.dsz 파일 필요
+        // - 항상 최신 버젼의 HelloDS.dsz 파일 만듬
         // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.dsz 으로 시뮬레이션 된 것이거나 삭제 필요
         [<Test>]
         member __.``X HelloDS runtime model test``() =
             let system = getSystem()
-            let runtimeModel = runtimeModel
+            
+            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS, LS_XGK_IO) 
 
-            let json = SystemTextJson.Serialize(runtimeModel.HMIPackage)
+            let json = SystemTextJson.Serialize(hMIPackage)
             let pkg = SystemTextJson.Deserialize<HMIPackage>(json)
             pkg.BuildTagMap()
 

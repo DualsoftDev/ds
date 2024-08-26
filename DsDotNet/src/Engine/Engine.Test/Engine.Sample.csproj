@@ -9,18 +9,17 @@
         <PlatformTarget>AnyCPU</PlatformTarget>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>
-    <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3"/>
-    </ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-	</ItemGroup>
-
-	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
 	</ItemGroup>
 
 
 	<ItemGroup>
-        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj"/>
+        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
     </ItemGroup>
 </Project>

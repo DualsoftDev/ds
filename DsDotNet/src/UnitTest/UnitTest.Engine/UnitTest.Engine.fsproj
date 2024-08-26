@@ -76,11 +76,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+
 		<ProjectReference Include="..\..\Engine\Engine.Custom\Engine.Custom.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
@@ -88,6 +90,9 @@
 		<ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 
+		
+		
+		
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LS\PLC.CodeGen.LS.fsproj" />
 		<ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />

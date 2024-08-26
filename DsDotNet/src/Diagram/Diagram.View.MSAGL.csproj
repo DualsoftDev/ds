@@ -6,6 +6,7 @@
         <UseWindowsForms>true</UseWindowsForms>
         <LangVersion>12.0</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
     </PropertyGroup>
 
@@ -13,9 +14,17 @@
 		<Compile Include="..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Winform\Dual.Common.Winform.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Winform" Version="0.3.3" />
+	</ItemGroup>
+	
     <ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
-        <PackageReference Include="DualSoft-Common-Winform" Version="0.3.3" />
         <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
     </ItemGroup>
 

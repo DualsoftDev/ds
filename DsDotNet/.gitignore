@@ -201,3 +201,5 @@ src/Web/DsWebApp.Server/appsettings.json
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.xml
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.ds
 Apps/CommonAppSettings.json
+Directory.Build.props
+Directory.Packages.props

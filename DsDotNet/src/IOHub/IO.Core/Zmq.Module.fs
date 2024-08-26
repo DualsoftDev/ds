@@ -36,7 +36,7 @@ module Zmq =
         let cts = new CancellationTokenSource()
 
         logInfo $"Starting IO hub service: port={port}"
-        let server = new ServerDirectAccess(ioSpec, cts.Token) |> tee (fun x -> x.Run())
+        let server = new ServerDirectAccess(ioSpec, cts.Token) |> tee (fun x -> x.Run() |> ignore)
 
         let client =
             if withClient then

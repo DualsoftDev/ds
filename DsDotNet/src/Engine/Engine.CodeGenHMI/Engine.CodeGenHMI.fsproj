@@ -8,7 +8,8 @@
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <Compile Include="Core.Extensions.fs" />
@@ -18,7 +19,12 @@
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+	<ItemGroup>
       <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
       <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>

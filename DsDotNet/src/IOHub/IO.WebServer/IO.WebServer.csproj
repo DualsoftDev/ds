@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <!--<Nullable>enable</Nullable>-->
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>cf8adc81-1e4b-417a-b988-0672152d0eb8</UserSecretsId>
@@ -14,16 +15,6 @@
       <Content Include="..\IO.Core\zmqsettings.json" Link="zmqsettings.json" />
     </ItemGroup>
 
-    <ItemGroup>
-		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.3.3" />
-		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
-        <PackageReference Include="DualSoft-Web-Blazor" Version="0.3.3" />
-        <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
-        <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
-    </ItemGroup>
 
     <ItemGroup>
         <Folder Include="Controllers\" />
@@ -36,5 +27,26 @@
     <ItemGroup>
         <ProjectReference Include="..\IO.Core\IO.Core.fsproj" />
     </ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Web\Dual.Web.Blazor\Dual.Web.Blazor.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Web-Blazor" Version="0.3.3" />
+	</ItemGroup>
+
 
 </Project>

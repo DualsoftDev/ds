@@ -22,7 +22,8 @@
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
     <ItemGroup>
         <!--<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />-->
         <!-- <Antlr4 Include="..\..\..\..\Grammar\g4s\ds.g4" Link="g4s\ds.g4"> -->
@@ -52,7 +53,13 @@
         <Compile Include="..\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
       <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 

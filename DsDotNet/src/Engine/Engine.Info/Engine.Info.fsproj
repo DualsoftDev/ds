@@ -5,7 +5,8 @@
 		<OutputType>Library</OutputType>
 		<LangVersion>8.0</LangVersion>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <None Include="SQL.md" />
@@ -27,16 +28,23 @@
         <Compile Include="AssemblyInfo.fs" />
     </ItemGroup>
 
-    <ItemGroup>
-		<!-- <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" /> -->
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.3.3" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     </ItemGroup>
 
     <ItemGroup>
 	    <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-	    <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
-		<PackageReference Include="DualSoft-Common-Db" Version="0.3.3" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />
         <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>

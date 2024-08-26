@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net8.0</TargetFramework>
@@ -8,19 +8,11 @@
 		<RootNamespace>T</RootNamespace>
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Remove="Libraries\**" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
-		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
-		<PackageReference Include="FsUnit" Version="6.0.0" />
-		<PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
-		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
-		<PackageReference Include="xunit" Version="2.9.0" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -84,11 +76,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenPLC\Engine.CodeGenPLC.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />
+
 		<ProjectReference Include="..\..\Engine\Engine.Custom\Engine.Custom.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
@@ -96,6 +90,9 @@
 		<ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Test\Engine.Sample.csproj" />
 
+		
+		
+		
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 		<ProjectReference Include="..\..\PLC\PLC.CodeGen.LS\PLC.CodeGen.LS.fsproj" />
 		<ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />
@@ -105,6 +102,23 @@
 	<ItemGroup>
 	  <PackageReference Update="FSharp.Core" Version="8.0.400" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+		<PackageReference Include="FsUnit" Version="6.0.0" />
+		<PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
+		<PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+		<PackageReference Include="xunit" Version="2.9.0" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.3.3" />
+	</ItemGroup>
+
 
 	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
 		<Exec Command="copy $(SolutionDir)Apps\OfficeAddIn\PowerPointAddInHelper\Utils\DS_Library.pptx $(TargetDir)DS_Library.pptx" />

@@ -30,7 +30,6 @@
         <ProjectReference Include="..\..\..\src\Engine\Engine.Parser\Engine.Parser.csproj" />
         <ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
-        <ProjectReference Include="..\TestProfiler\TestProfiler.fsproj" />
     </ItemGroup>
 
    

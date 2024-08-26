@@ -8,6 +8,7 @@
 		<OtherFlags>--warnon:1182</OtherFlags>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputType>Library</OutputType>
 
 	</PropertyGroup>
@@ -16,6 +17,12 @@
 		<Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="RuntimeModel.fs" />
 		<Compile Include="Program.fs" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
 	</ItemGroup>
 
 	<ItemGroup>

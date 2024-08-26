@@ -4,7 +4,10 @@
 		<LangVersion>12.0</LangVersion>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>
+
+	
 	<ItemGroup>
 	  <Content Include="..\..\..\Apps\CommonAppSettings.json" Link="CommonAppSettings.json">
 	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -14,18 +17,25 @@
 	  </Content>
 	</ItemGroup>
 	<ItemGroup>
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.8" />
 		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.1" />
 	</ItemGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Utils\Dual.Common.Utils.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Web\Dual.Web.Server\Dual.Web.Server.csproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
 		<PackageReference Include="DualSoft-Common-Utils" Version="0.3.3" />
 		<PackageReference Include="DualSoft-Web-Server" Version="0.3.3" />
 	</ItemGroup>
-
+	
+	
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />

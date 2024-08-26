@@ -7,7 +7,8 @@
         <OutputType>Library</OutputType>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    </PropertyGroup>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
     <ItemGroup>
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
@@ -16,7 +17,13 @@
         <Content Include="FodyWeavers.xml" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
         <ProjectReference Include="..\..\PLC\PLC.CodeGen.LS\PLC.CodeGen.LS.fsproj" />
         <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
         <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />

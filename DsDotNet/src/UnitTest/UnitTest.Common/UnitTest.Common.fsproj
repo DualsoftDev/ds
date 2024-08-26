@@ -8,14 +8,12 @@
 		<RootNamespace>UnitTest.Common</RootNamespace>
         <!--<IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>-->
-    </PropertyGroup>
+
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
 
 	<ItemGroup>
-        <PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
-        <PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
-        <PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.3.3" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
         <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
         <PackageReference Include="FsUnit" Version="6.0.0" />
@@ -24,7 +22,22 @@
         <PackageReference Include="xunit" Version="2.9.0" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Others\Dual.UnitTest.Common.FS\Dual.UnitTest.Common.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Core" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.3" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.3.4" />
+		<PackageReference Include="DualSoft-UnitTest-Common-FS" Version="0.3.3" />
+	</ItemGroup>
+
+
+	<ItemGroup>
         <Compile Include="CommonTest\JsonSerializeTest.fs" />
         <Compile Include="CommonTest\DiscriminatedUnionTest.fs" />
         <Compile Include="TestFixture.fs" />

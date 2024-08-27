@@ -174,7 +174,7 @@ module internal rec Command =
             let arity = args.Length
             let namedInputParameters =
                 [
-                    yield "EN", fakeAlwaysOnExpression :> IExpression   //[add-rising]
+                    yield "EN", cond |? (fakeAlwaysOnExpression :> IExpression)   //[add-rising]
                     match name with
                     | "NOT" ->  // Signle input case
                         assert(arity = 1)
@@ -289,6 +289,8 @@ module internal rec Command =
 
             let (x, y) = (rungStartX, rungStartY)
 
+            if y = 904 then
+                noop()
             if (x, y) = (2, 904) then   //[add-rising]
                 noop()
 
@@ -768,6 +770,8 @@ module internal rec Command =
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        if y = 904 then
+            noop()
         /// [rxi]
         let rxiRungImpl (x, y) (expr: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
@@ -794,7 +798,7 @@ module internal rec Command =
                                 | _ -> failwithlog "ERROR"
                         bxiCoil (nx - 1, y) cmdExp coilText
                     | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                        bxiCommand prjParam (nx, y) expr cmdExp
+                        bxiCommand prjParam (x, y) expr cmdExp
 
                 let cmdXmls2 =
                     {   cmdXmls1 with

@@ -774,44 +774,79 @@ module internal rec Command =
             noop()
         /// [rxi]
         let rxiRungImpl (x, y) (expr: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
-            let exprSpanX, exprSpanY, exprXmls =
-                match expr with
-                | Some expr ->
-                    let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
-                    let ex = exprBlockXmlElement
-                    ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
-                | _ -> 0, 0, []
+            let distinct bxi:BlockXmlInfo = { bxi with XmlElements = bxi.XmlElements |> List.distinct }
+            let spanX, spanY, xml =
+                match cmdExp with
+                | CoilCmd _cc ->
+                    let exprSpanX, exprSpanY, exprXmls =
+                        match expr with
+                        | Some expr ->
+                            let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
+                            let ex = exprBlockXmlElement
+                            ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
+                        | _ -> 0, 0, []
 
-            let cmdSpanX, cmdSpanY, cmdXmls =
-                let nx = x + exprSpanX
+                    let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
+                        match prjParam.TargetType, cmdExp.CoilTerminalTag with
+                        | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
+                            stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
+                        | _ ->
+                            match cmdExp.CoilTerminalTag with
+                            | :? IStorage as storage -> getStorageText storage
+                            | _ -> failwithlog "ERROR"
+                    let bxi = bxiCoil (x + exprSpanX - 1, y) cmdExp coilText |> distinct
+                    let spanX = exprSpanX + bxi.TotalSpanX
+                    let spanY = max exprSpanY bxi.TotalSpanY
+                    let xml = (exprXmls @ bxi.XmlElements).MergeXmls()
+                    spanX, spanY, xml
 
-                let cmdXmls1 =
-                    match cmdExp with
-                    | CoilCmd _cc ->
-                        let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
-                            match prjParam.TargetType, cmdExp.CoilTerminalTag with
-                            | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
-                                stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
-                            | _ ->
-                                match cmdExp.CoilTerminalTag with
-                                | :? IStorage as storage -> getStorageText storage
-                                | _ -> failwithlog "ERROR"
-                        bxiCoil (nx - 1, y) cmdExp coilText
-                    | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                        bxiCommand prjParam (x, y) expr cmdExp
+                | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
+                    let bxi = bxiCommand prjParam (x, y) expr cmdExp |> distinct
+                    bxi.TotalSpanX, bxi.TotalSpanY, bxi.XmlElements.MergeXmls()
 
-                let cmdXmls2 =
-                    {   cmdXmls1 with
-                            XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
 
-                let spanX = exprSpanX + cmdXmls2.TotalSpanX
-                let spanY = max exprSpanY cmdXmls2.TotalSpanY
-                spanX, spanY, cmdXmls2
 
-            let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
 
-            let spanX = exprSpanX + cmdSpanX
-            let spanY = max exprSpanY cmdSpanY
+            //let exprSpanX, exprSpanY, exprXmls =
+            //    match expr with
+            //    | Some expr ->
+            //        let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
+            //        let ex = exprBlockXmlElement
+            //        ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
+            //    | _ -> 0, 0, []
+
+            //let cmdSpanX, cmdSpanY, cmdXmls =
+            //    let nx = x + exprSpanX
+
+            //    let cmdXmls =
+            //        let cmdXmls1 =
+            //            match cmdExp with
+            //            | CoilCmd _cc ->
+            //                let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
+            //                    match prjParam.TargetType, cmdExp.CoilTerminalTag with
+            //                    | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
+            //                        stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
+            //                    | _ ->
+            //                        match cmdExp.CoilTerminalTag with
+            //                        | :? IStorage as storage -> getStorageText storage
+            //                        | _ -> failwithlog "ERROR"
+            //                bxiCoil (nx - 1, y) cmdExp coilText
+            //            | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
+            //                bxiCommand prjParam (x, y) expr cmdExp
+
+            //        {   cmdXmls1 with
+            //                XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
+
+            //    let spanX = exprSpanX + cmdXmls.TotalSpanX
+            //    let spanY = max exprSpanY cmdXmls.TotalSpanY
+            //    spanX, spanY, cmdXmls
+
+            //let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
+
+            //let spanX = exprSpanX + cmdSpanX
+            //let spanY = max exprSpanY cmdSpanY
+
+
             let c = coord (x, spanY + y)
 
             {   Xml = xml; Coordinate = c; SpanX = spanX; SpanY = spanY; }

@@ -289,11 +289,6 @@ module internal rec Command =
 
             let (x, y) = (rungStartX, rungStartY)
 
-            if y = 904 then
-                noop()
-            if (x, y) = (2, 904) then   //[add-rising]
-                noop()
-
             /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
             let reservedLiteralInputParam = ResizeArray<int * IExpression>()
             let mutable sy = 0
@@ -770,8 +765,6 @@ module internal rec Command =
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
-        if y = 904 then
-            noop()
         /// [rxi]
         let rxiRungImpl (x, y) (expr: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let distinct bxi:BlockXmlInfo = { bxi with XmlElements = bxi.XmlElements |> List.distinct }

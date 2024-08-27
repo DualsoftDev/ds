@@ -333,8 +333,6 @@ module XgiExportModule =
         let mutable xxx = 0
         for cmtSt in commentedStatements do
             xxx <- xxx + 1
-            if xxx = 279 then
-                noop()
             let xgxCmtStmts:CommentedStatements = cmtSt.ToCommentedStatements(prjParam, newLocalStorages)
 
             let (CommentAndStatements(_comment, xgxStatements)) = xgxCmtStmts

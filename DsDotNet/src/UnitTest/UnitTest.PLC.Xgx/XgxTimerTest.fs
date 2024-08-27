@@ -42,7 +42,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
                 $x7 = ($x0 || $x1) && $x2;
                 """
             | _ -> failwith "Not supported plc type"
-        
+
         let statements = parseCodeForWindows storages code
         //storages.Count === 12
         //statements.Length === 2      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
@@ -252,7 +252,7 @@ type XgxTimerTest(xgx:PlatformTarget) =
                 bool IOP_ClampOperation = createTag("P0000F", false);
 
                 ton TOUT3 = createXgkTON(15000u, $ClampSystem_ClampOperation_Operation_AllClamps_RET_Memo && !(&&($Clamp1_RET_I, $Clamp2_RET_I, $Clamp3_RET_I, $Clamp4_RET_I)) && !($IOP_ClampOperation));
-                """                
+                """
             | _ -> failwith "Not supported plc type"
 
         let statements = parseCodeForWindows storages code
@@ -282,12 +282,12 @@ type XgiTimerTest() =
 type XgkTimerTest() =
     inherit XgxTimerTest(XGK)
     [<Test>] member __.``Timer test`` () = base.``Timer test``()
-    [<Test>] member __.``TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
+    [<Test>] member __.``X TIMER= Many And, OR RungIn Condition test`` () = base.``TIMER= Many And, OR RungIn Condition test``()
+    [<Test>] member __.``X TIMER= Many And, OR RungIn Condition test2`` () = base.``TIMER= Many And, OR RungIn Condition test2``()
     [<Test>] member __.``TIMER= Many1 AND RungIn Condition test`` () = base.``TIMER= Many1 AND RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
+    [<Test>] member __.``X TIMER= Many1 OR RungIn Condition test`` () = base.``TIMER= Many1 OR RungIn Condition test``()
     [<Test>] member __.``TIMER= Many2 AND RungIn Condition test`` () = base.``TIMER= Many2 AND RungIn Condition test``()
-    [<Test>] member __.``TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
+    [<Test>] member __.``X TIMER= Many2 OR RungIn Condition test`` () = base.``TIMER= Many2 OR RungIn Condition test``()
     [<Test>] member __.``TIMER= Not BOOLEAN ENABLE Condition test`` () = base.``TIMER= Not BOOLEAN ENABLE Condition test``()
-    [<Test>] member __.``TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
-    [<Test>] member __.``TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()
+    [<Test>] member __.``X TIMER= Not Condition test`` () = base.``TIMER= Not Condition test``()
+    [<Test>] member __.``X TIMER= Not Condition test 2`` () = base.``TIMER= Not Condition test 2``()

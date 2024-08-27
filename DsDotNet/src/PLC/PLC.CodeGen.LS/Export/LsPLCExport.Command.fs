@@ -401,10 +401,15 @@ module internal rec Command =
         match prjParam.TargetType with
         | XGI ->
             match cmd with
-            | PredicateCmd(pc) -> bxiXgiPredicate prjParam (x, y) pc
+            | PredicateCmd(pc) ->
+                assert(cond.IsNone)
+                bxiXgiPredicate prjParam (x, y) pc
             | FunctionCmd(fc) -> bxiXgiFunction prjParam (x, y) cond fc XGI
-            | ActionCmd(ac) -> bxiXgiAction prjParam (x, y) ac
+            | ActionCmd(ac) ->
+                assert(cond.IsNone)
+                bxiXgiAction prjParam (x, y) ac
             | FunctionBlockCmd(fbc) ->
+                assert(cond.IsNone)
                 match fbc with
                 | TimerMode(timerStatement) -> bxiXgiFunctionBlockTimer prjParam (x, y) timerStatement
                 | CounterMode(counterStatement) -> bxiXgiFunctionBlockCounter prjParam (x, y) counterStatement
@@ -412,20 +417,29 @@ module internal rec Command =
 
         | XGK ->
             match cmd with
-            | FunctionBlockCmd(fbc) -> bxiXgkFBCommand prjParam (x, y) fbc
-            | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam (x, y) (param, width)
+            | FunctionBlockCmd(fbc) ->
+                assert(cond.IsNone)
+                bxiXgkFBCommand prjParam (x, y) fbc
+            | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam (x, y) ((*cond.Value,*) param, width)
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
 
+    let private getExpressionXml (prjParam: XgxProjectParams) (x, y) (expr: IExpression) : int * int * RungXmlInfo list =
+        let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
+        let ex = exprBlockXmlElement
+        ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct    // dirty hack!
+
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
-    let bxiCoil (x, y) (cmdExp: CommandTypes) (coilText:string) : BlockXmlInfo =
-        let spanX = max 0 (coilCellX - x - 1)
+    let bxiCoil (prjParam: XgxProjectParams) (x, y) (expr: IExpression) (cmdExp: CommandTypes) (coilText:string) : BlockXmlInfo =
+        let exprSpanX, exprSpanY, exprBxis = getExpressionXml prjParam (x, y) expr
+
+        let spanX = exprSpanX + max 0 (coilCellX - x - 1)
 
         let xmls =
             [
                 if spanX > 0 then
-                    let c = coord (x + 1, y)
+                    let c = coord (x + exprSpanX, y)
                     let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                     let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
@@ -444,9 +458,9 @@ module internal rec Command =
 
         {   X = x
             Y = y
-            TotalSpanX = coilCellX
-            TotalSpanY = 1
-            XmlElements = xmls }
+            TotalSpanX = exprSpanX + coilCellX
+            TotalSpanY = max exprSpanY 1
+            XmlElements = exprBxis @ xmls }
 
 
     let bxiXgkFBCommandWithParam (x, y) (cmdParam: string, cmdWidth:int) : BlockXmlInfo =
@@ -766,90 +780,41 @@ module internal rec Command =
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
     let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
         /// [rxi]
-        let rxiRungImpl (x, y) (expr: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        let rxiRungImpl (x, y) (expr: IExpression option) (cmd: CommandTypes) : RungXmlInfo =
             let distinct bxi:BlockXmlInfo = { bxi with XmlElements = bxi.XmlElements |> List.distinct }
-
-            let exprSpanX, exprSpanY, exprXmls =
-                match expr with
-                | Some expr ->
-                    let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
-                    let ex = exprBlockXmlElement
-                    ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
-                | _ -> 0, 0, []
-
-            let spanX, spanY, xml =
-                match cmdExp with
-                | CoilCmd _cc ->
-                    let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
-                        match prjParam.TargetType, cmdExp.CoilTerminalTag with
-                        | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
-                            stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
-                        | _ ->
-                            match cmdExp.CoilTerminalTag with
-                            | :? IStorage as storage -> getStorageText storage
-                            | _ -> failwithlog "ERROR"
-                    let bxi = bxiCoil (x + exprSpanX - 1, y) cmdExp coilText |> distinct
-                    let spanX = exprSpanX + bxi.TotalSpanX
-                    let spanY = max exprSpanY bxi.TotalSpanY
-                    let xml = (exprXmls @ bxi.XmlElements).MergeXmls()
-                    spanX, spanY, xml
-
-                | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                    match prjParam.TargetType with
-                    | XGI ->
-                        let bxi = bxiCommand prjParam (x, y) expr cmdExp |> distinct
-                        bxi.TotalSpanX, bxi.TotalSpanY, bxi.XmlElements.MergeXmls()
-                    | XGK ->
-                        let bxi = bxiCommand prjParam (x + exprSpanX, y) expr cmdExp |> distinct
-                        bxi.TotalSpanX, bxi.TotalSpanY, (exprXmls @ bxi.XmlElements).MergeXmls()
-                    | _ -> failwith "Error"
-
-
-
 
             //let exprSpanX, exprSpanY, exprXmls =
             //    match expr with
             //    | Some expr ->
             //        let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
             //        let ex = exprBlockXmlElement
-            //        ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
+            //        ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct    // dirty hack!
             //    | _ -> 0, 0, []
 
-            //let cmdSpanX, cmdSpanY, cmdXmls =
-            //    let nx = x + exprSpanX
+            let bxi =
+                match cmd with
+                | CoilCmd _cc ->
+                    let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
+                        match prjParam.TargetType, cmd.CoilTerminalTag with
+                        | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
+                            stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
+                        | _ ->
+                            match cmd.CoilTerminalTag with
+                            | :? IStorage as storage -> getStorageText storage
+                            | _ -> failwithlog "ERROR"
+                    bxiCoil prjParam (x, y) expr.Value cmd coilText |> distinct
 
-            //    let cmdXmls =
-            //        let cmdXmls1 =
-            //            match cmdExp with
-            //            | CoilCmd _cc ->
-            //                let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
-            //                    match prjParam.TargetType, cmdExp.CoilTerminalTag with
-            //                    | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
-            //                        stg.Address |> tee(fun a -> if (a.IsNullOrEmpty()) then failwith $"{stg.Name} 의 주소가 없습니다.")
-            //                    | _ ->
-            //                        match cmdExp.CoilTerminalTag with
-            //                        | :? IStorage as storage -> getStorageText storage
-            //                        | _ -> failwithlog "ERROR"
-            //                bxiCoil (nx - 1, y) cmdExp coilText
-            //            | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-            //                bxiCommand prjParam (x, y) expr cmdExp
+                | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
+                    bxiCommand prjParam (x, y) expr cmd |> distinct
 
-            //        {   cmdXmls1 with
-            //                XmlElements = cmdXmls1.XmlElements |> List.distinct } // dirty hack!
+            let c = coord (x, bxi.TotalSpanY + y)
 
-            //    let spanX = exprSpanX + cmdXmls.TotalSpanX
-            //    let spanY = max exprSpanY cmdXmls.TotalSpanY
-            //    spanX, spanY, cmdXmls
-
-            //let xml = (exprXmls @ cmdXmls.XmlElements).MergeXmls()
-
-            //let spanX = exprSpanX + cmdSpanX
-            //let spanY = max exprSpanY cmdSpanY
-
-
-            let c = coord (x, spanY + y)
-
-            {   Xml = xml; Coordinate = c; SpanX = spanX; SpanY = spanY; }
+            {
+                Xml = bxi.XmlElements.MergeXmls()
+                Coordinate = c
+                SpanX = bxi.TotalSpanX
+                SpanY = bxi.TotalSpanY
+            }
 
         match prjParam.TargetType, cmdExp with
         | XGK, ActionCmd(Move(condition, source, target)) when source.Terminal.IsSome ->

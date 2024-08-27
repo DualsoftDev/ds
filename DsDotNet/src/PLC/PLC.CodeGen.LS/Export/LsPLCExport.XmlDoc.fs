@@ -102,6 +102,7 @@ type XgxXmlExtension =
                         match elements with
                         | [] -> failwith $"Rung {rungName} has no elements."
                         | e::[] when getCoordinate(e) <= c ->
+                            // [add-rising]
                             failwith $"Rung {rungName} has invalid coordinates : {getCoordinate(e)} <= {c}."
                         | _ ->
                             let coordinates = elements |> map (fun x -> Parse.Int x.Attributes.["Coordinate"].Value |> Option.get) |> toArray

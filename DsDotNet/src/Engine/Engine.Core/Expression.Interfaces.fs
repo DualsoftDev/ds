@@ -43,7 +43,8 @@ module rec ExpressionForwardDeclModule =
 
 
     // Interface for PLC generation module
-    type IFlatExpression = interface end
+    type IFlatExpression =
+        inherit IExpressionBase
 
     /// e.g 가령 Person UDT 에서 "int age", 혹은 Lambda function 의 arg list;
     type TypeDecl = {
@@ -92,9 +93,13 @@ module rec ExpressionForwardDeclModule =
         inherit IExpressionizableTerminal
         abstract StorageName: string
 
+    /// IExpression, IFlatExpression 의 공통 조상
+    type IExpressionBase = interface end
+
     // Interface to access Expression<'T> in a boxed manner
     type IExpression =
         inherit IType
+        inherit IExpressionBase
         abstract BoxedEvaluatedValue : obj
         abstract GetBoxedRawObject: unit -> obj
         abstract ToText : unit -> string

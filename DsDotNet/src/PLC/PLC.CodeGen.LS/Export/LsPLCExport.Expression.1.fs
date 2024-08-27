@@ -239,14 +239,14 @@ module LsPLCExportExpressionModule =
             and visitFunction (expPath:IExpression list) (negated:bool) (expr:IExpression) : IExpression =
                 let args = expr.FunctionArguments
                 let newExpPath = expr::expPath
-                let visitFunction = visitFunction newExpPath
-                let visitArgs = visitArgs newExpPath
+                let vf = visitFunction newExpPath
+                let va = visitArgs newExpPath
                 if negated then
+                    let newArgs = args |> map (va true)
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None ->
                         negate newExpPath expr
                     | None, Some(IsOpC fn) ->
-                        let newArgs = args |> map (visitArgs true)
                         let reverseFn =
                             match fn with
                             | "==" -> "!="
@@ -258,7 +258,6 @@ module LsPLCExportExpressionModule =
                             | _ -> failwith "ERROR"
                         createCustomFunctionExpression reverseFn newArgs
                     | None, Some("&&" | "||" as fn) ->
-                        let newArgs = args |> map (visitArgs true)
                         let reverseFn =
                             match fn with
                             | "&&" -> "||"
@@ -266,15 +265,17 @@ module LsPLCExportExpressionModule =
                             | _ -> failwith "ERROR"
                         createCustomFunctionExpression reverseFn newArgs
                     | None, Some "!" ->
-                        args.ExactlyOne() |> visitFunction false
+                        args.ExactlyOne() |> vf false
+                    | None, Some(FunctionNameRising | FunctionNameFalling as fn) ->
+                        createCustomFunctionExpression fn newArgs
                     | _ -> failwith "Invalid expression"
                 else
                     match expr.Terminal, expr.FunctionName with
                     | Some _terminal, None -> expr
                     | None, Some "!" ->
-                        args.ExactlyOne() |> visitArgs true
+                        args.ExactlyOne() |> va true
                     | None, Some _fn ->
-                        let newArgs = args |> map (visitArgs false)
+                        let newArgs = args |> map (va false)
                         expr.WithNewFunctionArguments newArgs
                     | _ -> failwith "Invalid expression"
 

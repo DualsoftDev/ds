@@ -47,7 +47,7 @@ module XgiExportModule =
     let internal generateRungs (prjParam: XgxProjectParams) (prologComment: string) (commentedStatements: CommentedStatements seq) : XmlOutput =
         let isXgi, isXgk = prjParam.TargetType = XGI, prjParam.TargetType = XGK
 
-        let rgiCommandRung (condition: FlatExpression option) (xgiCommand:CommandTypes) (y:int) : RungGenerationInfo =
+        let rgiCommandRung (condition: IExpression option) (xgiCommand:CommandTypes) (y:int) : RungGenerationInfo =
             let { Coordinate = c; Xml = xml } = rxiRung prjParam (0, y) condition xgiCommand
             let yy = c / 1024
 
@@ -100,9 +100,8 @@ module XgiExportModule =
                         COMResetCoil(rc)
                     | _ -> COMCoil(target :?> INamedExpressionizableTerminal)
 
-                let flatExpr = expr.Flatten() :?> FlatExpression
                 let command = CoilCmd(coil)
-                let rgiSub = rgiCommandRung (Some flatExpr) command rgi.NextRungY
+                let rgiSub = rgiCommandRung (Some expr) command rgi.NextRungY
                 //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <-
                     {   Xmls = rgiSub.Xmls @ rgi.Xmls
@@ -136,17 +135,16 @@ module XgiExportModule =
                         let printBinary (n:byte) = Convert.ToString(int n, 2).PadLeft(8, '0')
                         tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
-                        let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
-
                         let condWithTrue, condWithFalse =
+                            let cond = condition :> IExpression
                             match source with
                             | :? Expression<bool> as DuTerminal(DuLiteral lh) when lh.Value  ->
-                                Some (flatten condition), None
+                                Some cond, None
                             | :? Expression<bool> as DuTerminal(DuLiteral lh) when not lh.Value  ->
-                                None, Some (flatten condition)
+                                None, Some cond
                             | _ ->
-                                let t = fbLogicalAnd([condition; source]) |> flatten
-                                let f = fbLogicalAnd([condition; source.NegateBool() ]) |> flatten
+                                let t = fbLogicalAnd([condition; source])
+                                let f = fbLogicalAnd([condition; source.NegateBool() ])
                                 Some t, Some f
 
                         if condWithTrue.IsSome then
@@ -167,13 +165,15 @@ module XgiExportModule =
                     failwith "ERROR: XGK Tag parsing error"
             else
                 let cmd = ActionCmd(Move(condition, srcTerminal :?> IExpression, destination))
-                let blockXml = rxiRung prjParam (x, y) (Some flatCondition) cmd
+                let blockXml = rxiRung prjParam (x, y) (Some condition) cmd
                 let xml = wrapWithRung blockXml.Xml
                 rgi <- {   Xmls = xml::rgi.Xmls
                            NextRungY = rgi.NextRungY + blockXml.SpanY + 1 }
 
         // Rung 별로 생성
         for CommentAndStatements(cmt, stmts) in commentedStatements do
+            if cmt.Contains("VertexTagManager.F5_SourceTokenNumGeneration") && cmt.Contains("rising") then
+                noop()
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if prjParam.EnableXmlComment && cmt.NonNullAny() then
                 let xml =
@@ -213,19 +213,23 @@ module XgiExportModule =
 
 
                 | DuPLCFunction({
+                        Condition = cond
                         FunctionName = ("&&" | "||") as _op
                         Arguments = args
                         OriginalExpression = originalExpr
                         Output = output }) ->
+                    assert(cond.IsNone) // 추후 수정 필요
                     let expr = originalExpr.WithNewFunctionArguments args
                     simpleRung None expr output
 
                 | DuPLCFunction({
+                        Condition = cond
                         FunctionName = XgiConstants.FunctionNameMove as _op
                         Arguments = [ :? IExpression<bool> as condition; :? IExpression<bool> as source]
                         OriginalExpression = _originalExpr
                         Output = destination }) when isXgk && source.DataType = typeof<bool> ->
 
+                    assert(cond.IsNone || cond.Value = condition) // 추후 수정 필요
                     moveCmdRungXgk condition source destination
                     //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
                     //rgi <-
@@ -249,7 +253,8 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuPLCFunction({ FunctionName = op; Arguments = args; Output = output }) when isOpC op ->
+                | DuPLCFunction({ Condition = cond; FunctionName = op; Arguments = args; Output = output }) when isOpC op ->
+                    assert(cond.IsNone) // 추후 수정 필요
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
@@ -258,20 +263,22 @@ module XgiExportModule =
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
-                | DuPLCFunction({ FunctionName = op; Arguments = args; Output = output }) when isOpAB op ->
+                | DuPLCFunction({ Condition = cond; FunctionName = op; Arguments = args; Output = output }) when isOpAB op ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
-                    let rgiSub = rgiCommandRung None command rgi.NextRungY
+                    let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
 
                     rgi <-
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls
                             NextRungY = 1 + rgiSub.NextRungY }
 
                 | DuPLCFunction({
+                        Condition = cond
                         FunctionName = XgiConstants.FunctionNameMove as _func
                         Arguments = args
                         Output = output }) ->
                     let condition = args[0] :?> IExpression<bool>
+                    assert(cond.IsNone || cond.Value = condition) // 추후 수정 필요
                     let source = args[1]
                     let command = ActionCmd(Move(condition, source, output))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
@@ -323,7 +330,11 @@ module XgiExportModule =
         let newCommentedStatements = ResizeArray<CommentedStatements>()
         let newLocalStorages = XgxStorage(localStorages)
 
+        let mutable xxx = 0
         for cmtSt in commentedStatements do
+            xxx <- xxx + 1
+            if xxx = 279 then
+                noop()
             let xgxCmtStmts:CommentedStatements = cmtSt.ToCommentedStatements(prjParam, newLocalStorages)
 
             let (CommentAndStatements(_comment, xgxStatements)) = xgxCmtStmts

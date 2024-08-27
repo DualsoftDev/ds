@@ -398,7 +398,10 @@ module ExpressionModule =
 
         member x.ToText() =
             match x with
-            | DuAssign (_condition, expr, target) -> $"{target.ToText()} = {expr.ToText()};"    // todo: condition 을 totext 에 포함할지 여부
+            | DuAssign (_condition, expr, target) ->
+                match _condition with
+                | Some cond -> $"copyIf ({cond.ToText()}, {expr.ToText()}, {target.ToText()});"    // todo: condition 을 totext 에 포함할지 여부
+                | None -> $"{target.ToText()} = {expr.ToText()};"
             | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()};"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer

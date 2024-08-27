@@ -167,14 +167,14 @@ module internal rec Command =
 
             bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""
 
-    let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (func: Function) (target:PlatformTarget): BlockXmlInfo =
+    let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (cond:IExpression option) (func: Function) (target:PlatformTarget): BlockXmlInfo =
         match func with
         | Arithmetic(name, output, args) ->
             // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수
             let arity = args.Length
             let namedInputParameters =
                 [
-                    yield "EN", fakeAlwaysOnExpression :> IExpression
+                    yield "EN", fakeAlwaysOnExpression :> IExpression   //[add-rising]
                     match name with
                     | "NOT" ->  // Signle input case
                         assert(arity = 1)
@@ -289,6 +289,9 @@ module internal rec Command =
 
             let (x, y) = (rungStartX, rungStartY)
 
+            if (x, y) = (2, 904) then   //[add-rising]
+                noop()
+
             /// y 위치에 literal parameter 쓸 공간 확보 (x 좌표는 아직 미정)
             let reservedLiteralInputParam = ResizeArray<int * IExpression>()
             let mutable sy = 0
@@ -302,7 +305,7 @@ module internal rec Command =
                             checkType.HasFlag CheckType.BOOL
                             |> verifyM "ERROR: Only BOOL type can be used as compound expression for input."
 
-                            let blockXml = bxiFunctionInputLadderBlock prjParam (x, y + sy) (flatten exp)
+                            let blockXml = bxiFunctionInputLadderBlock prjParam (x, y + sy) exp
                             portOffset, blockXml
                             sy <- sy + blockXml.TotalSpanY ]
 
@@ -397,12 +400,12 @@ module internal rec Command =
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
-    let bxiCommand (prjParam: XgxProjectParams) (x, y) (cmd: CommandTypes) : BlockXmlInfo =
+    let bxiCommand (prjParam: XgxProjectParams) (x, y) (cond:IExpression option) (cmd: CommandTypes) : BlockXmlInfo =
         match prjParam.TargetType with
         | XGI ->
             match cmd with
             | PredicateCmd(pc) -> bxiXgiPredicate prjParam (x, y) pc
-            | FunctionCmd(fc) -> bxiXgiFunction prjParam (x, y) fc XGI
+            | FunctionCmd(fc) -> bxiXgiFunction prjParam (x, y) cond fc XGI
             | ActionCmd(ac) -> bxiXgiAction prjParam (x, y) ac
             | FunctionBlockCmd(fbc) ->
                 match fbc with
@@ -519,7 +522,7 @@ module internal rec Command =
         let inner =
             [
                 let cond = condition |? fakeAlwaysOnExpression
-                let sub = bxiLadderBlock prjParam (x, y) (cond.Flatten() :?> FlatExpression)
+                let sub = bxiLadderBlock prjParam (x, y) cond
                 mergeXmls sub.XmlElements
 
                 let c =
@@ -539,7 +542,7 @@ module internal rec Command =
     /// [rxi] for XGK Function Block
     let rxiXgkFB (prjParam: XgxProjectParams) (x, y) (condition:IExpression) (fbParam: string, fbWidth:int) : RungXmlInfo =
         assert (x = 0)
-        let conditionBlockXml = bxiFunctionInputLadderBlock prjParam (x, y) (condition.Flatten() :?> FlatExpression)
+        let conditionBlockXml = bxiFunctionInputLadderBlock prjParam (x, y) condition
         let cbx = conditionBlockXml
 
         let c = coord (x + cbx.TotalSpanX, y)
@@ -563,10 +566,10 @@ module internal rec Command =
         }
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
-    let bxiFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
+    let bxiFunctionInputLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: IExpression) : BlockXmlInfo =
         let blockXml = bxiLadderBlock prjParam (x, y) expr
 
-        if isFunctionBlockConnectable expr then
+        if expr |> flatten |> isFunctionBlockConnectable  then
             blockXml
         else
             let b = blockXml
@@ -588,11 +591,17 @@ module internal rec Command =
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
     /// - Xml : 좌표 * 결과 xml 문자열
-    let rec internal bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (expr: FlatExpression) : BlockXmlInfo =
+    let rec internal bxiLadderBlock (prjParam: XgxProjectParams) (x, y) (objExpr: IExpressionBase) : BlockXmlInfo =
+        let flatExp =
+            match objExpr with
+            | :? IExpression as exp -> flatten exp
+            | :? FlatExpression as f -> f
+            | _ -> failwith "ERROR"
+
         let c = coord (x, y)
         let isXgk, isXgi = prjParam.TargetType = XGK, prjParam.TargetType = XGI
 
-        match expr with
+        match flatExp with
         | FlatTerminal(terminal, pulse, neg) ->
             let mode =
                 match pulse, neg with
@@ -600,8 +609,8 @@ module internal rec Command =
                 | Some(true),  false -> ElementType.PulseContactMode
                 | Some(false), true  -> ElementType.NPulseClosedContactMode
                 | Some(false), false -> ElementType.NPulseContactMode
-                | None, true         -> ElementType.ClosedContactMode
-                | None, false        -> ElementType.ContactMode
+                | None,        true  -> ElementType.ClosedContactMode
+                | None,        false -> ElementType.ContactMode
                 |> int
 
             // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
@@ -758,9 +767,9 @@ module internal rec Command =
     /// - expr 이 None 이면 그리지 않는다.
     ///
     /// - cmdExp 이 None 이면 command 를 그리지 않는다.
-    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+    let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
         /// [rxi]
-        let rxiRungImpl (x, y) (expr: FlatExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
+        let rxiRungImpl (x, y) (expr: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let exprSpanX, exprSpanY, exprXmls =
                 match expr with
                 | Some expr ->
@@ -785,7 +794,7 @@ module internal rec Command =
                                 | _ -> failwithlog "ERROR"
                         bxiCoil (nx - 1, y) cmdExp coilText
                     | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                        bxiCommand prjParam (nx, y) cmdExp
+                        bxiCommand prjParam (nx, y) expr cmdExp
 
                 let cmdXmls2 =
                     {   cmdXmls1 with
@@ -837,7 +846,8 @@ module internal rec Command =
                     let rungInCondition =
                         match condition with
                         | Some expr -> expr
-                        | _ -> (Expression.True :> IExpression).Flatten() :?> FlatExpression
+                        | _ -> Expression.True :> IExpression
+                        |> flatten
                     let pv = counter.PRE.Value
 
                     let mutable spanY = 1
@@ -864,9 +874,9 @@ module internal rec Command =
                     let exp =
                         match fbc with
                         | CounterMode(counterStatement) ->
-                            counterStatement.GetUpOrDownCondition().Flatten() :?> FlatExpression
+                            counterStatement.GetUpOrDownCondition()
                         | TimerMode(timerStatement) ->
-                            timerStatement.RungInCondition.Value.Flatten() :?> FlatExpression
+                            timerStatement.RungInCondition.Value
                     rxiRungImpl (x, y) (Some exp) cmdExp
             | _ ->
                     rxiRungImpl (x, y) condition cmdExp

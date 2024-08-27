@@ -775,17 +775,18 @@ module internal rec Command =
         /// [rxi]
         let rxiRungImpl (x, y) (expr: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
             let distinct bxi:BlockXmlInfo = { bxi with XmlElements = bxi.XmlElements |> List.distinct }
+
+            let exprSpanX, exprSpanY, exprXmls =
+                match expr with
+                | Some expr ->
+                    let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
+                    let ex = exprBlockXmlElement
+                    ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
+                | _ -> 0, 0, []
+
             let spanX, spanY, xml =
                 match cmdExp with
                 | CoilCmd _cc ->
-                    let exprSpanX, exprSpanY, exprXmls =
-                        match expr with
-                        | Some expr ->
-                            let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
-                            let ex = exprBlockXmlElement
-                            ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct
-                        | _ -> 0, 0, []
-
                     let coilText = // XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
                         match prjParam.TargetType, cmdExp.CoilTerminalTag with
                         | XGK, (:? IStorage as stg) when not <| (stg :? XgkTimerCounterStructResetCoil) ->
@@ -801,8 +802,14 @@ module internal rec Command =
                     spanX, spanY, xml
 
                 | _ ->      // | PredicateCmd _pc | FunctionCmd _ | FunctionBlockCmd _ | ActionCmd _
-                    let bxi = bxiCommand prjParam (x, y) expr cmdExp |> distinct
-                    bxi.TotalSpanX, bxi.TotalSpanY, bxi.XmlElements.MergeXmls()
+                    match prjParam.TargetType with
+                    | XGI ->
+                        let bxi = bxiCommand prjParam (x, y) expr cmdExp |> distinct
+                        bxi.TotalSpanX, bxi.TotalSpanY, bxi.XmlElements.MergeXmls()
+                    | XGK ->
+                        let bxi = bxiCommand prjParam (x + exprSpanX, y) expr cmdExp |> distinct
+                        bxi.TotalSpanX, bxi.TotalSpanY, (exprXmls @ bxi.XmlElements).MergeXmls()
+                    | _ -> failwith "Error"
 
 
 

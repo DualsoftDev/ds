@@ -397,11 +397,13 @@ module internal rec Command =
                     rxiFunctionAt (functionName, functionName) instanceName (x + fsx, y) ]
 
 
-            {   X = x
+            {
+                X = x
                 Y = y
                 TotalSpanX = fsx + 3
                 TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
-                XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate) }
+                XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate)
+            }
 
 
     /// (x, y) 위치에 cmd 를 생성.  cmd 가 차지하는 height 와 xml 목록을 반환
@@ -419,15 +421,13 @@ module internal rec Command =
             | FunctionBlockCmd(fbc) ->
                 assert(cond.IsNone)
                 match fbc with
-                | TimerMode(timerStatement) -> bxiXgiFunctionBlockTimer prjParam (x, y) timerStatement
+                | TimerMode(timerStatement)     -> bxiXgiFunctionBlockTimer prjParam (x, y) timerStatement
                 | CounterMode(counterStatement) -> bxiXgiFunctionBlockCounter prjParam (x, y) counterStatement
             | _ -> failwithlog "Unknown CommandType"
 
         | XGK ->
             match cmd with
-            | FunctionBlockCmd(fbc) ->
-                //assert(cond.IsNone)
-                bxiXgkFBCommand prjParam (x, y) (cond, fbc)
+            | FunctionBlockCmd(fbc)     -> bxiXgkFBCommand prjParam (x, y) (cond, fbc)
             | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam prjParam (x, y) (cond, param, width)
             | _ -> failwithlog "Unknown CommandType"
 
@@ -464,7 +464,8 @@ module internal rec Command =
                     Coordinate = c
                     Xml = xml
                     SpanX = 1
-                    SpanY = 1 } ]
+                    SpanY = 1 }
+            ]
 
         {   X = x
             Y = y

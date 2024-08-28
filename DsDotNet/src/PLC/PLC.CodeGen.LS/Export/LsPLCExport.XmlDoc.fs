@@ -5,6 +5,7 @@ open Engine.Core
 open System.Runtime.CompilerServices
 open System.Xml
 open System.Collections.Generic
+open Dual.Common.Base.CS
 
 [<AutoOpen>]
 module internal XgxXmlExtensionImpl =
@@ -88,6 +89,7 @@ type XgxXmlExtension =
 
         let checkRungs() =
             let pous = xdoc.GetXmlNodes("//LDRoutine")
+            use _ = DcLogger.CreateTraceEnabler()
             for pou in pous do
                 let rungs = pou.GetXmlNodes("Rung")
                 let mutable c = 0
@@ -108,9 +110,10 @@ type XgxXmlExtension =
                             let coordinates = elements |> map (fun x -> Parse.Int x.Attributes.["Coordinate"].Value |> Option.get) |> toArray
 
                             (* C = A || B 래더 생성 시, 좌표 순서가 A, C, B 로 나와야 하지만, 현재는 A, B, C 순서로 나와서 일단 check 보류 *)
-                            //let isOrdered = coordinates |> pairwise |> Seq.forall (fun (a, b) -> a < b)
-                            //if not isOrdered then
-                            //    failwith $"Rung {rungName} has invalid coordinates."
+                            let isOrdered = coordinates |> pairwise |> Seq.forall (fun (a, b) -> a < b)
+                            if not isOrdered then
+                                tracefn $"WARN: Rung {rungName} has invalid coordinates."
+                                //failwith $"Rung {rungName} has invalid coordinates."
 
                             coordinates |> Seq.last
                     c <- maxCoord

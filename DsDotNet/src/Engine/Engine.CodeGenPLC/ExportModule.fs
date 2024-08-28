@@ -9,6 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Engine.CodeGenCPU
 open Dual.Common.Base.FS
+open Dual.Common.Base.CS
 
 [<AutoOpen>]
 module ExportModule =
@@ -155,7 +156,7 @@ module ExportModule =
                 | XGK -> XGK, LS_XGK_IO
                 | _ -> failwith $"Not supported plc {target} type"
 
-            //use _ = logTraceEnabler()
+            //use _ = DcLogger.CreateTraceEnabler()
             let globalStorage = new Storages()
             let localStorage = new Storages()
             let pous = system.GeneratePOUs(globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리

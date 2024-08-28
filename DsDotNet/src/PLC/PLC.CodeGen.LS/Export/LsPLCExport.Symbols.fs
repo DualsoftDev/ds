@@ -45,7 +45,7 @@ module internal XgiSymbolsModule =
             |]
 
         )
-        forceTrace $"Storages to xgx symbol : {storages.Length}, elapsed {millisecond} ms"
+        tracefn $"Storages to xgx symbol : {storages.Length}, elapsed {millisecond} ms"
         symbols
 
     let autoAllocatorAdress (t:IStorage) (prjParam: XgxProjectParams) =

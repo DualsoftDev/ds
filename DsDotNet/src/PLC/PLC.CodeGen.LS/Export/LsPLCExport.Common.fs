@@ -31,9 +31,13 @@ module internal Common =
 
 
     /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
+    [<Literal>]
     let maxNumHorizontalContact = 31
+    /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
+    [<Literal>]
     let coilCellX = maxNumHorizontalContact
     /// 최소기본 FB 위치 : 가로로  9 포인트
+    [<Literal>]
     let minFBCellX = 9
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환

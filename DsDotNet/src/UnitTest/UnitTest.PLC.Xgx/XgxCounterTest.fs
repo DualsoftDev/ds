@@ -257,12 +257,12 @@ type XgkCounterTest() =
     inherit XgxCounterTest(XGK)
 
     [<Test>] member __.``Counter CTD simple test`` () = base.``Counter CTD simple test``()
-    [<Test>] member __.``X Counter CTD with conditional test`` () = base.``Counter CTD with conditional test``()
+    [<Test>] member __.``Counter CTD with conditional test`` () = base.``Counter CTD with conditional test``()
     [<Test>] member __.``Counter CTR simple test`` () = base.``Counter CTR simple test``()
-    [<Test>] member __.``X Counter CTR with conditional test`` () = base.``Counter CTR with conditional test``()
-    [<Test>] member __.``X Counter CTR with conditional test2`` () = base.``Counter CTR with conditional test2``()
+    [<Test>] member __.``Counter CTR with conditional test`` () = base.``Counter CTR with conditional test``()
+    [<Test>] member __.``Counter CTR with conditional test2`` () = base.``Counter CTR with conditional test2``()
     [<Test>] member __.``Counter CTU simple test`` () = base.``Counter CTU simple test``()
-    [<Test>] member __.``X Counter CTU with conditional test`` () = base.``Counter CTU with conditional test``()
+    [<Test>] member __.``Counter CTU with conditional test`` () = base.``Counter CTU with conditional test``()
     [<Test>] member __.``Counter CTUD simple test`` () = base.``Counter CTUD simple test``()
 
     /// TODO: XGK CTUD 에서 cu 나 cd 등의 조건이 단일 변수가 아닌 복합 expression 인 경우의 처리가 필요

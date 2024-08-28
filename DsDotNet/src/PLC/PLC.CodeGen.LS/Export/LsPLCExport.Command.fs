@@ -85,6 +85,14 @@ module internal rec Command =
     let private obe2e (obe: IExpression<bool> option) : IExpression = obe.Value :> IExpression
     let private flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
 
+    let private bxi2rxi (bxi:BlockXmlInfo) : RungXmlInfo =
+        {
+            Coordinate = coord(bxi.X, bxi.Y)
+            Xml = bxi.XmlElements.Distinct().MergeXmls()        // Distinct(): dirty hack
+            SpanX = bxi.TotalSpanX
+            SpanY = bxi.TotalSpanY
+        }
+
     // <timer> for XGI
     let private bxiXgiFunctionBlockTimer (prjParam: XgxProjectParams) (x, y) (timerStatement: TimerStatement) : BlockXmlInfo =
         let ts = timerStatement
@@ -418,67 +426,81 @@ module internal rec Command =
         | XGK ->
             match cmd with
             | FunctionBlockCmd(fbc) ->
-                assert(cond.IsNone)
-                bxiXgkFBCommand prjParam (x, y) fbc
-            | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam (x, y) ((*cond.Value,*) param, width)
+                //assert(cond.IsNone)
+                bxiXgkFBCommand prjParam (x, y) (cond, fbc)
+            | XgkParamCmd(param, width) -> bxiXgkFBCommandWithParam prjParam (x, y) (cond, param, width)
             | _ -> failwithlog "Unknown CommandType"
 
         | _ -> failwithlog $"Unknown Target: {prjParam.TargetType}"
 
-    let private getExpressionXml (prjParam: XgxProjectParams) (x, y) (expr: IExpression) : int * int * RungXmlInfo list =
-        let exprBlockXmlElement = bxiLadderBlock prjParam (x, y) expr
-        let ex = exprBlockXmlElement
-        ex.TotalSpanX, ex.TotalSpanY, ex.XmlElements |> List.distinct    // dirty hack!
-
     /// (x, y) 위치에 coil 생성.  height(=1) 와 xml 목록을 반환
     let bxiCoil (prjParam: XgxProjectParams) (x, y) (expr: IExpression) (cmdExp: CommandTypes) (coilText:string) : BlockXmlInfo =
-        let exprSpanX, exprSpanY, exprBxis = getExpressionXml prjParam (x, y) expr
 
-        let spanX = exprSpanX + max 0 (coilCellX - x - 1)
+        let coilSpanX = coilCellX - x - 1
 
-        let xmls =
+        let rxis:RungXmlInfo list =
             [
-                if spanX > 0 then
-                    let c = coord (x + exprSpanX, y)
-                    let lengthParam = $"Param={dq}{3 * spanX}{dq}"
-                    let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+                assert(coilSpanX > 0)
 
-                    {   Coordinate = c
-                        Xml = xml
-                        SpanX = spanX
-                        SpanY = 1 }
+                let exprBxi = bxiLadderBlock prjParam (x, y) expr
+                yield bxi2rxi exprBxi
+
+
+
+                let c = coord (exprBxi.X + exprBxi.TotalSpanX, y)
+                let lengthParam = $"Param={dq}{3 * coilSpanX}{dq}"
+                let xml = elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
+
+                yield {
+                    Coordinate = c
+                    Xml = xml
+                    SpanX = coilSpanX
+                    SpanY = 1 }
 
                 let c = coord (coilCellX, y)
                 let xml = elementBody (int cmdExp.LDEnum) c coilText        // coilText: XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
 
-                {   Coordinate = c
+                yield {
+                    Coordinate = c
                     Xml = xml
                     SpanX = 1
                     SpanY = 1 } ]
 
         {   X = x
             Y = y
-            TotalSpanX = exprSpanX + coilCellX
-            TotalSpanY = max exprSpanY 1
-            XmlElements = exprBxis @ xmls }
+            TotalSpanX = coilCellX
+            TotalSpanY = rxis.Max(_.SpanY)
+            XmlElements = rxis }
 
 
-    let bxiXgkFBCommandWithParam (x, y) (cmdParam: string, cmdWidth:int) : BlockXmlInfo =
-        let xmls =
-            let spanX = (coilCellX - x - cmdWidth)
+    let bxiXgkFBCommandWithParam (prjParam: XgxProjectParams) (x, y) (cond:IExpression option, cmdParam: string, cmdWidth:int) : BlockXmlInfo =
+        noop()
+        let rxis: RungXmlInfo list =
+            [
+                let mutable sx = x
+                match cond with
+                | Some c ->
+                    let exprBxi = bxiLadderBlock prjParam (x, y) c
+                    yield bxi2rxi exprBxi
+                    sx <- x + exprBxi.TotalSpanX
+                | _ -> ()
 
-            [   let c = coord (x, y)
+
+                let spanX = (coilCellX - x - cmdWidth)
+                let c = coord (sx, y)
                 let xml =
                   let lengthParam = $"Param={dq}{3 * spanX}{dq}"
                   elementFull (int ElementType.MultiHorzLineMode) c lengthParam ""
 
-                {   Coordinate = coord (x, y)
+                yield {
+                    Coordinate = coord (x, y)
                     Xml = xml
                     SpanX = spanX
                     SpanY = 1 }
 
                 let xy = (coilCellX, y)
-                {   Coordinate = coord xy
+                yield {
+                    Coordinate = coord xy
                     Xml = xgkFBAt cmdParam xy
                     SpanX = cmdWidth
                     SpanY = 1 } ]
@@ -486,10 +508,10 @@ module internal rec Command =
         {   X = x
             Y = y
             TotalSpanX = coilCellX
-            TotalSpanY = 1
-            XmlElements = xmls }
+            TotalSpanY = rxis.Max(_.SpanY)
+            XmlElements = rxis }
 
-    let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (fbc: FunctionBlock) : BlockXmlInfo =
+    let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (cond:IExpression option, fbc: FunctionBlock) : BlockXmlInfo =
         let cmdWidth = 3
         let cmdParam =
             match fbc with
@@ -507,7 +529,7 @@ module internal rec Command =
                 let var = c.Name
                 let value = c.PRE.Value
                 $"Param={dq}{typ},{var},{value}{dq}"        // e.g : Param="CTU,C0000,1000"
-        bxiXgkFBCommandWithParam (x, y) (cmdParam, cmdWidth)
+        bxiXgkFBCommandWithParam prjParam (x, y) (cond, cmdParam, cmdWidth)
 
 
     /// 왼쪽에 FB (비교 연산 등) 를 그리고, 오른쪽에 coil 을 그린다.

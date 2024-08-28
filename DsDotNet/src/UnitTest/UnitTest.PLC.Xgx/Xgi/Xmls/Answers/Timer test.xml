@@ -74,12 +74,12 @@
                                     <Element ElementType="6" Coordinate="6148">
                                         x2
                                     </Element>
-                                    <Element ElementType="2" Coordinate="6151" Param="87"/>
-                                    <Element ElementType="14" Coordinate="6238">
-                                        x7
-                                    </Element>
                                     <Element ElementType="6" Coordinate="7169">
                                         x1
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="6151" Param="90"/>
+                                    <Element ElementType="14" Coordinate="6238">
+                                        x7
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

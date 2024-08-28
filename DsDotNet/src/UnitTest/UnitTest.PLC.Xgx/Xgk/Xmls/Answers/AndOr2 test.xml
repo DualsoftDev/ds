@@ -92,10 +92,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="2055" Param="0"/>
                                     <Element ElementType="0" Coordinate="2057"/>
-                                    <Element ElementType="2" Coordinate="2058" Param="84"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        P00007
-                                    </Element>
                                     <Element ElementType="6" Coordinate="3073">
                                         P00001
                                     </Element>
@@ -113,6 +109,10 @@
                                     </Element>
                                     <Element ElementType="6" Coordinate="5127">
                                         P00006
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2058" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        P00007
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -136,10 +136,6 @@
                                         P0000C
                                     </Element>
                                     <Element ElementType="0" Coordinate="7180"/>
-                                    <Element ElementType="2" Coordinate="7181" Param="81"/>
-                                    <Element ElementType="14" Coordinate="7262">
-                                        P0000F
-                                    </Element>
                                     <Element ElementType="6" Coordinate="8193">
                                         P0000A
                                     </Element>
@@ -151,6 +147,10 @@
                                     <Element ElementType="0" Coordinate="8204"/>
                                     <Element ElementType="6" Coordinate="9226">
                                         P0000E
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="7181" Param="90"/>
+                                    <Element ElementType="14" Coordinate="7262">
+                                        P0000F
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

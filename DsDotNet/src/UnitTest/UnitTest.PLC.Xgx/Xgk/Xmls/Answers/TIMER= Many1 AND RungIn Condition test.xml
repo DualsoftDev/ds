@@ -129,7 +129,7 @@
                                     <Element ElementType="6" Coordinate="2091">
                                         P0000E
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2094" Param="39"/>
+                                    <Element ElementType="2" Coordinate="2094" Param="84"/>
                                     <Element ElementType="33" Coordinate="2142" Param="TON,myTon,20"/>
                                 </Rung>
                                 <Rung BlockMask="0">

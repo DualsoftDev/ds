@@ -187,6 +187,7 @@
                                     <Element ElementType="6" Coordinate="2139">
                                         x30
                                     </Element>
+                                    <Element ElementType="2" Coordinate="2142" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         _t1_split
                                     </Element>
@@ -201,7 +202,7 @@
                                     <Element ElementType="6" Coordinate="3079">
                                         x32
                                     </Element>
-                                    <Element ElementType="2" Coordinate="3082" Param="84"/>
+                                    <Element ElementType="2" Coordinate="3082" Param="90"/>
                                     <Element ElementType="14" Coordinate="3166">
                                         _t2_split
                                     </Element>

@@ -78,7 +78,7 @@
                                     <Element ElementType="6" Coordinate="2049">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="75"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="78"/>
                                     <Element ElementType="33" Coordinate="2142" Param="BAND,M00000,254,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -90,7 +90,7 @@
                                     <Element ElementType="6" Coordinate="5121">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5124" Param="75"/>
+                                    <Element ElementType="2" Coordinate="5124" Param="78"/>
                                     <Element ElementType="33" Coordinate="5214" Param="BAND,M00000,253,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -102,7 +102,7 @@
                                     <Element ElementType="6" Coordinate="8193">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="8196" Param="75"/>
+                                    <Element ElementType="2" Coordinate="8196" Param="78"/>
                                     <Element ElementType="33" Coordinate="8286" Param="BAND,M00000,251,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -114,7 +114,7 @@
                                     <Element ElementType="6" Coordinate="11265">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="11268" Param="75"/>
+                                    <Element ElementType="2" Coordinate="11268" Param="78"/>
                                     <Element ElementType="33" Coordinate="11358" Param="BAND,M00000,247,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -126,7 +126,7 @@
                                     <Element ElementType="6" Coordinate="14337">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="14340" Param="75"/>
+                                    <Element ElementType="2" Coordinate="14340" Param="78"/>
                                     <Element ElementType="33" Coordinate="14430" Param="BAND,M00000,239,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -138,7 +138,7 @@
                                     <Element ElementType="6" Coordinate="17409">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="17412" Param="75"/>
+                                    <Element ElementType="2" Coordinate="17412" Param="78"/>
                                     <Element ElementType="33" Coordinate="17502" Param="BAND,M00000,223,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -150,7 +150,7 @@
                                     <Element ElementType="6" Coordinate="20481">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="20484" Param="75"/>
+                                    <Element ElementType="2" Coordinate="20484" Param="78"/>
                                     <Element ElementType="33" Coordinate="20574" Param="BAND,M00000,191,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -166,12 +166,12 @@
                                         M00001
                                     </Element>
                                     <Element ElementType="0" Coordinate="23558"/>
-                                    <Element ElementType="2" Coordinate="23559" Param="78"/>
-                                    <Element ElementType="33" Coordinate="23646" Param="CTR,myCTR,2000"/>
                                     <Element ElementType="6" Coordinate="24577">
                                         M00002
                                     </Element>
                                     <Element ElementType="2" Coordinate="24580" Param="0"/>
+                                    <Element ElementType="2" Coordinate="23559" Param="84"/>
+                                    <Element ElementType="33" Coordinate="23646" Param="CTR,myCTR,2000"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="6" Coordinate="26625">
@@ -181,12 +181,12 @@
                                     <Element ElementType="6" Coordinate="26628">
                                         M00005
                                     </Element>
-                                    <Element ElementType="2" Coordinate="26631" Param="87"/>
-                                    <Element ElementType="17" Coordinate="26718">
-                                        myCTR
-                                    </Element>
                                     <Element ElementType="6" Coordinate="27649">
                                         M00004
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="26631" Param="90"/>
+                                    <Element ElementType="17" Coordinate="26718">
+                                        myCTR
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -205,10 +205,6 @@
                                     <Element ElementType="6" Coordinate="29703">
                                         M00000
                                     </Element>
-                                    <Element ElementType="2" Coordinate="29706" Param="84"/>
-                                    <Element ElementType="14" Coordinate="29790">
-                                        M00006
-                                    </Element>
                                     <Element ElementType="6" Coordinate="30721">
                                         M00002
                                     </Element>
@@ -223,6 +219,10 @@
                                     </Element>
                                     <Element ElementType="6" Coordinate="32769">
                                         M00004
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="29706" Param="90"/>
+                                    <Element ElementType="14" Coordinate="29790">
+                                        M00006
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

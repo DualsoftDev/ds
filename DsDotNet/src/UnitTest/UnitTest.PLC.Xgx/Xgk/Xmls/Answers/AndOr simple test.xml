@@ -78,12 +78,12 @@
                                     <Element ElementType="6" Coordinate="2052">
                                         P00002
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2055" Param="87"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        P00003
-                                    </Element>
                                     <Element ElementType="6" Coordinate="3073">
                                         P00001
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2055" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        P00003
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

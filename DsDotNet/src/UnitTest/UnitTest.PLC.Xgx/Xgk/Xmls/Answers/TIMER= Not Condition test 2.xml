@@ -85,8 +85,6 @@
                                     <Element ElementType="7" Coordinate="2055">
                                         P0000F
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2058" Param="75"/>
-                                    <Element ElementType="33" Coordinate="2142" Param="TON,TOUT3,150"/>
                                     <Element ElementType="0" Coordinate="3075"/>
                                     <Element ElementType="7" Coordinate="3076">
                                         P0000C
@@ -100,6 +98,8 @@
                                     <Element ElementType="7" Coordinate="5124">
                                         P0000E
                                     </Element>
+                                    <Element ElementType="2" Coordinate="2058" Param="84"/>
+                                    <Element ElementType="33" Coordinate="2142" Param="TON,TOUT3,150"/>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="8193" Param="90"/>

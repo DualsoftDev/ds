@@ -70,10 +70,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="9"/>
                                     <Element ElementType="0" Coordinate="2063"/>
-                                    <Element ElementType="2" Coordinate="2064" Param="78"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        result1
-                                    </Element>
                                     <Element ElementType="6" Coordinate="3073">
                                         x10
                                     </Element>
@@ -127,6 +123,10 @@
                                         x01
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="9"/>
+                                    <Element ElementType="2" Coordinate="2064" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        result1
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="8193">
@@ -139,10 +139,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="9220" Param="9"/>
                                     <Element ElementType="0" Coordinate="9231"/>
-                                    <Element ElementType="2" Coordinate="9232" Param="78"/>
-                                    <Element ElementType="14" Coordinate="9310">
-                                        result2
-                                    </Element>
                                     <Element ElementType="6" Coordinate="10241">
                                         x10
                                     </Element>
@@ -196,6 +192,10 @@
                                         x00
                                     </Element>
                                     <Element ElementType="2" Coordinate="14340" Param="9"/>
+                                    <Element ElementType="2" Coordinate="9232" Param="90"/>
+                                    <Element ElementType="14" Coordinate="9310">
+                                        result2
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="15361">
@@ -208,10 +208,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="16388" Param="9"/>
                                     <Element ElementType="0" Coordinate="16399"/>
-                                    <Element ElementType="2" Coordinate="16400" Param="78"/>
-                                    <Element ElementType="14" Coordinate="16478">
-                                        result3
-                                    </Element>
                                     <Element ElementType="6" Coordinate="17409">
                                         x10
                                     </Element>
@@ -265,6 +261,10 @@
                                         x01
                                     </Element>
                                     <Element ElementType="2" Coordinate="21508" Param="9"/>
+                                    <Element ElementType="2" Coordinate="16400" Param="90"/>
+                                    <Element ElementType="14" Coordinate="16478">
+                                        result3
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="22529">
@@ -277,10 +277,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="23556" Param="9"/>
                                     <Element ElementType="0" Coordinate="23567"/>
-                                    <Element ElementType="2" Coordinate="23568" Param="78"/>
-                                    <Element ElementType="14" Coordinate="23646">
-                                        result4
-                                    </Element>
                                     <Element ElementType="6" Coordinate="24577">
                                         x10
                                     </Element>
@@ -334,6 +330,10 @@
                                         x00
                                     </Element>
                                     <Element ElementType="2" Coordinate="28676" Param="9"/>
+                                    <Element ElementType="2" Coordinate="23568" Param="90"/>
+                                    <Element ElementType="14" Coordinate="23646">
+                                        result4
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="30721" Param="90"/>

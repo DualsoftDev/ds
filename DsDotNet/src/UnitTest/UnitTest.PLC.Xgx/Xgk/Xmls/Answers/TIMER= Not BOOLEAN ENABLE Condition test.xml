@@ -77,7 +77,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="33" Coordinate="3073" Param="L&gt;,_t1_ADD,6.25"/>
-                                    <Element ElementType="2" Coordinate="3082" Param="75"/>
+                                    <Element ElementType="2" Coordinate="3082" Param="84"/>
                                     <Element ElementType="33" Coordinate="3166" Param="TON,myTon1,150"/>
                                 </Rung>
                                 <Rung BlockMask="0">

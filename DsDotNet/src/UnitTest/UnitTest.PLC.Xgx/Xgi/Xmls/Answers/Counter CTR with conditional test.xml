@@ -102,10 +102,6 @@
                                     <Element ElementType="6" Coordinate="9223">
                                         cd1
                                     </Element>
-                                    <Element ElementType="2" Coordinate="9226" Param="84"/>
-                                    <Element ElementType="14" Coordinate="9310">
-                                        xx7
-                                    </Element>
                                     <Element ElementType="6" Coordinate="10241">
                                         cd3
                                     </Element>
@@ -120,6 +116,10 @@
                                     </Element>
                                     <Element ElementType="6" Coordinate="12289">
                                         res1
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="9226" Param="90"/>
+                                    <Element ElementType="14" Coordinate="9310">
+                                        xx7
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

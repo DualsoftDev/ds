@@ -26,17 +26,17 @@ module internal RungXmlInfoModule =
     /// [bxi] Rung 구성 요소 조합.  하나의 Rung 내의 block 정보
     type BlockXmlInfo =
         {
-            /// Block 시작 좌상단 x 좌표
-            X: int
-            /// Block 시작 좌상단 y 좌표
-            Y: int
+            /// Block 시작 좌상단 (x, y) 좌표
+            Xy: int * int
             /// Block 이 사용하는 가로 span
             TotalSpanX: int
             /// Block 이 사용하는 세로 span
             TotalSpanY: int
             /// Block 을 구성하는 element 들의 xml 정보
             RungXmlInfos: RungXmlInfo list
-        }
+        } with
+            member rxi.X = rxi.Xy |> fst
+            member rxi.Y = rxi.Xy |> snd
 
     /// [rgi] Rung 을 생성하기 위한 정보
     ///

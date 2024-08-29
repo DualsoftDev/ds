@@ -20,8 +20,7 @@ module internal Common =
         let totalSpanX = maxX - minX
         let totalSpanY = maxY - minY
 
-        {   X = minX
-            Y = minY
+        {   Xy = (minX, minY)
             TotalSpanX = totalSpanX
             TotalSpanY = totalSpanY
             RungXmlInfos = xs }

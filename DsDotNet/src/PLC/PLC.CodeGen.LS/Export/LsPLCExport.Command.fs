@@ -395,8 +395,7 @@ module internal rec Command =
 
 
             {
-                X = x
-                Y = y
+                Xy = (x, y)
                 TotalSpanX = fsx + 3
                 TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
                 RungXmlInfos = allXmls |> List.sortBy (fun x -> x.Coordinate)
@@ -462,8 +461,7 @@ module internal rec Command =
                     SpanXy = (1, 1) }
             ]
 
-        {   X = x
-            Y = y
+        {   Xy = (x, y)
             TotalSpanX = coilCellX
             TotalSpanY = rxis.Max(_.SpanY)
             RungXmlInfos = rxis }
@@ -499,8 +497,7 @@ module internal rec Command =
                     Xml = xgkFBAt cmdParam xy
                     SpanXy = (cmdWidth, 1) } ]
 
-        {   X = x
-            Y = y
+        {   Xy = (x, y)
             TotalSpanX = coilCellX
             TotalSpanY = rxis.Max(_.SpanY)
             RungXmlInfos = rxis }
@@ -661,7 +658,7 @@ module internal rec Command =
             let xml = { Coordinate = c; Xml = str; SpanXy = (1, 1) }
 
             {   RungXmlInfos = [ xml ]
-                X = x; Y = y
+                Xy = (x, y)
                 TotalSpanX = 1; TotalSpanY = 1
             }
 
@@ -679,8 +676,7 @@ module internal rec Command =
             let exprXmls = blockedExprXmls |> List.collect (fun x -> x.RungXmlInfos)
 
             {   RungXmlInfos = exprXmls
-                X = x
-                Y = y
+                Xy = (x, y)
                 TotalSpanX = spanX
                 TotalSpanY = spanY }
 
@@ -732,8 +728,7 @@ module internal rec Command =
             let xmls = xmls |> List.distinct // dirty hacking!
 
             {   RungXmlInfos = xmls
-                X = x
-                Y = y
+                Xy = (x, y)
                 TotalSpanX = spanX
                 TotalSpanY = spanY }
 
@@ -752,7 +747,7 @@ module internal rec Command =
 
             let xml = xgkFBAt fbParam (x, y)
             {   RungXmlInfos = [ { Coordinate = coord (x, y); Xml = xml; SpanXy = (3, 1) } ]
-                X = x; Y = y
+                Xy = (x, y)
                 TotalSpanX = 3; TotalSpanY = 1
             }
 
@@ -778,7 +773,7 @@ module internal rec Command =
             let xml = elementFull mode c "" ""
             {   blockXml with
                     TotalSpanX = blockXml.TotalSpanX + 1
-                    X = x; Y = y;
+                    Xy = (x, y)
                     RungXmlInfos = blockXml.RungXmlInfos +++ { Coordinate = c; Xml = xml; SpanXy = (1, 1) } }
 
         | _ -> failwithlog "Unknown FlatExpression case"
@@ -871,7 +866,7 @@ module internal rec Command =
                     let mutable spanY = 1
                     let xml =
                         [
-                            let { X = _xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; RungXmlInfos = xmls } : BlockXmlInfo =
+                            let { Xy = (_xx, yy); TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; RungXmlInfos = xmls } : BlockXmlInfo =
                                 rungInCondition.BxiLadderBlock(prjParam, (x, y))
                             xmls[0].Xml
 

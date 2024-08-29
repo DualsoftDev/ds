@@ -107,8 +107,7 @@ module internal Common =
     let rxiCommentAtCoordinate (c: EncodedXYCoordinate) (comment: string) =
         { Coordinate = c
           Xml = $"<!-- {comment} -->"
-          SpanX = maxNumHorizontalContact
-          SpanY = 1 }
+          SpanXy = (maxNumHorizontalContact, 1) }
 
     /// [rxi] debugging 용 xml comment 생성
     let rxiCommentAt (x, y) comment =
@@ -134,7 +133,7 @@ module internal Common =
     let rxiVLineAt (x, y) : RungXmlInfo =
         verify (x >= 0)
         let c = coord (x, y) + 2
-        { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
+        { Coordinate = c; Xml = vline c; SpanXy = (0, 1) }
 
     let mutable EnableXmlComment = false
 
@@ -170,8 +169,7 @@ module internal Common =
 
         { Coordinate = c
           Xml = xml
-          SpanX = 3
-          SpanY = getFunctionHeight detailedFunctionName }
+          SpanXy = (3, getFunctionHeight detailedFunctionName) }
 
     /// 함수 파라메터 그리기
     let rxiFBParameter (x, y) tag : RungXmlInfo =
@@ -180,8 +178,7 @@ module internal Common =
 
         { Coordinate = c
           Xml = xml
-          SpanX = 1
-          SpanY = 1 }
+          SpanXy = (1, 1) }
 
 //let drawRising (x, y) =
 //    let cellX = getFBCellX x

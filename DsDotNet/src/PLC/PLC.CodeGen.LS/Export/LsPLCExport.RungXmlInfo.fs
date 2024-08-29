@@ -18,9 +18,10 @@ module internal RungXmlInfoModule =
             Coordinate: EncodedXYCoordinate // int
             /// Xml element 문자열
             Xml: XmlOutput // string
-            SpanX: int
-            SpanY: int
-        }
+            SpanXy: int * int
+        } with
+            member rxi.SpanX = rxi.SpanXy |> fst
+            member rxi.SpanY = rxi.SpanXy |> snd
 
     /// [bxi] Rung 구성 요소 조합.  하나의 Rung 내의 block 정보
     type BlockXmlInfo =
@@ -81,7 +82,7 @@ module internal RungXmlInfoModule =
         let c = coord (bx, by)
         let tx, ty = block.TotalSpanX, block.TotalSpanY
         let xml = block.RungXmlInfos |> mergeXmls
-        { Coordinate = c; Xml = xml; SpanX = tx; SpanY = ty }
+        { Coordinate = c; Xml = xml; SpanXy = (tx, ty) }
 
     type BlockXmlInfo with
         member x.GetXml():string = mergeXmls x.RungXmlInfos

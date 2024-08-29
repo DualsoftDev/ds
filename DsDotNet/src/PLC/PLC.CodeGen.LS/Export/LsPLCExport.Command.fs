@@ -89,8 +89,7 @@ module internal rec Command =
         {
             Coordinate = coord(bxi.X, bxi.Y)
             Xml = bxi.RungXmlInfos.Distinct().MergeXmls()        // Distinct(): dirty hack
-            SpanX = bxi.TotalSpanX
-            SpanY = bxi.TotalSpanY
+            SpanXy = (bxi.TotalSpanX, bxi.TotalSpanY)
         }
 
     // <timer> for XGI
@@ -350,8 +349,7 @@ module internal rec Command =
 
                                     { Coordinate = c
                                       Xml = xml
-                                      SpanX = spanX
-                                      SpanY = 1 })
+                                      SpanXy = (spanX, 1) })
 
                             if i > 0 then
                                 let bexi = bex + i
@@ -369,8 +367,7 @@ module internal rec Command =
                                         let c2 = coord (bexi, yi)
                                         { Coordinate = c2
                                           Xml = xml
-                                          SpanX = spanX
-                                          SpanY = 1 }) ]
+                                          SpanXy = (spanX, 1) }) ]
 
             let allXmls =
                 [
@@ -454,8 +451,7 @@ module internal rec Command =
                 yield {
                     Coordinate = c
                     Xml = xml
-                    SpanX = coilSpanX
-                    SpanY = 1 }
+                    SpanXy = (coilSpanX, 1) }
 
                 let c = coord (coilCellX, y)
                 let xml = elementBody (int cmdExp.LDEnum) c coilText        // coilText: XGK 에서는 직접변수를, XGI 에서는 변수명을 사용
@@ -463,8 +459,7 @@ module internal rec Command =
                 yield {
                     Coordinate = c
                     Xml = xml
-                    SpanX = 1
-                    SpanY = 1 }
+                    SpanXy = (1, 1) }
             ]
 
         {   X = x
@@ -496,15 +491,13 @@ module internal rec Command =
                 yield {
                     Coordinate = coord (x, y)
                     Xml = xml
-                    SpanX = spanX
-                    SpanY = 1 }
+                    SpanXy = (spanX, 1) }
 
                 let xy = (coilCellX, y)
                 yield {
                     Coordinate = coord xy
                     Xml = xgkFBAt cmdParam xy
-                    SpanX = cmdWidth
-                    SpanY = 1 } ]
+                    SpanXy = (cmdWidth, 1) } ]
 
         {   X = x
             Y = y
@@ -591,12 +584,12 @@ module internal rec Command =
             ] |> joinLines
 
         (* 좌측 expression 이 multiline 인 경우, 우측 FB 의 Coordinate 값이 expression 의 coordinate 중간에 삽입되는 형태로 정렬되어야 한다.  *)
-        let xmls = cbx.RungXmlInfos @ [{ Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1}]
+        let xmls = cbx.RungXmlInfos @ [{ Coordinate = c; Xml = xml; SpanXy = (spanX, 1)}]
 
         {
             Coordinate = coord(0, y + cbx.TotalSpanY)
             Xml = mergeXmls xmls
-            SpanX = fbWidth; SpanY = 1
+            SpanXy = (fbWidth, 1)
         }
 
     /// function input 에 해당하는 expr 을 그리되, 맨 마지막을 multi horizontal line 연결 가능한 상태로 만든다.
@@ -615,8 +608,7 @@ module internal rec Command =
 
                 {   Coordinate = c
                     Xml = xml
-                    SpanX = 1
-                    SpanY = 1 }
+                    SpanXy = (1, 1) }
 
             {   blockXml with
                     TotalSpanX = b.TotalSpanX + 1
@@ -666,7 +658,7 @@ module internal rec Command =
 
             let str = elementBody mode c terminalText
 
-            let xml = { Coordinate = c; Xml = str; SpanX = 1; SpanY = 1 }
+            let xml = { Coordinate = c; Xml = str; SpanXy = (1, 1) }
 
             {   RungXmlInfos = [ xml ]
                 X = x; Y = y
@@ -718,7 +710,7 @@ module internal rec Command =
                                   let c = coord (x + ri.TotalSpanX, ri.Y)
                                   let xml = elementFull mode c param ""
 
-                                  { Coordinate = c; Xml = xml; SpanX = span; SpanY = 1 } ]
+                                  { Coordinate = c; Xml = xml; SpanXy = (span, 1) } ]
 
                     yield! auxLineXmls
 
@@ -759,7 +751,7 @@ module internal rec Command =
                 $"Param={dq}{op},{arg0},{arg1}{dq}"        // todo: XGK 에서는 직접변수를 사용
 
             let xml = xgkFBAt fbParam (x, y)
-            {   RungXmlInfos = [ { Coordinate = coord (x, y); Xml = xml; SpanX = 3; SpanY = 1 } ]
+            {   RungXmlInfos = [ { Coordinate = coord (x, y); Xml = xml; SpanXy = (3, 1) } ]
                 X = x; Y = y
                 TotalSpanX = 3; TotalSpanY = 1
             }
@@ -787,7 +779,7 @@ module internal rec Command =
             {   blockXml with
                     TotalSpanX = blockXml.TotalSpanX + 1
                     X = x; Y = y;
-                    RungXmlInfos = blockXml.RungXmlInfos +++ { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } }
+                    RungXmlInfos = blockXml.RungXmlInfos +++ { Coordinate = c; Xml = xml; SpanXy = (1, 1) } }
 
         | _ -> failwithlog "Unknown FlatExpression case"
 
@@ -835,8 +827,7 @@ module internal rec Command =
             {
                 Xml = bxi.RungXmlInfos.MergeXmls()
                 Coordinate = c
-                SpanX = bxi.TotalSpanX
-                SpanY = bxi.TotalSpanY
+                SpanXy = (bxi.TotalSpanX, bxi.TotalSpanY)
             }
 
         match prjParam.TargetType, cmdExp with
@@ -895,7 +886,7 @@ module internal rec Command =
                             xgkFBAt param (coilCellX - 5 - 1, yy)
                         ] |> joinLines
 
-                    { Xml = xml; Coordinate = coord(0, y + spanY); SpanX = coilCellX; SpanY = spanY }
+                    { Xml = xml; Coordinate = coord(0, y + spanY); SpanXy = (coilCellX, spanY) }
 
                 | _ ->
                     let exp =

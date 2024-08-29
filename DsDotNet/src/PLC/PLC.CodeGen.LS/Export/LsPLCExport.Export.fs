@@ -116,10 +116,6 @@ module XgiExportModule =
             let srcTerminal: ITerminal = source.Terminal.Value
             let x, y = 0, rgi.NextRungY
 
-            //xmlRung 활용 필요
-            let flatCondition = condition.Flatten() :?> FlatExpression
-
-
             if destination.DataType = typeof<bool> then
                 match tryParseXGKTag destination.Address with
                 | Some ( {

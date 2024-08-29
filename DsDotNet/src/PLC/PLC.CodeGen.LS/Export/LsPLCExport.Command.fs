@@ -88,7 +88,7 @@ module internal rec Command =
     let private bxi2rxi (bxi:BlockXmlInfo) : RungXmlInfo =
         {
             Coordinate = coord(bxi.X, bxi.Y)
-            Xml = bxi.XmlElements.Distinct().MergeXmls()        // Distinct(): dirty hack
+            Xml = bxi.RungXmlInfos.Distinct().MergeXmls()        // Distinct(): dirty hack
             SpanX = bxi.TotalSpanX
             SpanY = bxi.TotalSpanY
         }
@@ -388,7 +388,7 @@ module internal rec Command =
 
                         rxiFBParameter (x + fsx - 1, ry) literal
 
-                    yield! inputBlockXmls |> bind (fun (_, bx) -> bx.XmlElements)
+                    yield! inputBlockXmls |> bind (fun (_, bx) -> bx.RungXmlInfos)
                     yield! outputCellXmls
                     yield! tentacleXmls
                     let x, y = rungStartX, rungStartY
@@ -402,7 +402,7 @@ module internal rec Command =
                 Y = y
                 TotalSpanX = fsx + 3
                 TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
-                XmlElements = allXmls |> List.sortBy (fun x -> x.Coordinate)
+                RungXmlInfos = allXmls |> List.sortBy (fun x -> x.Coordinate)
             }
 
 
@@ -471,7 +471,7 @@ module internal rec Command =
             Y = y
             TotalSpanX = coilCellX
             TotalSpanY = rxis.Max(_.SpanY)
-            XmlElements = rxis }
+            RungXmlInfos = rxis }
 
 
     let bxiXgkFBCommandWithParam (prjParam: XgxProjectParams) (x, y) (cond:IExpression option, cmdParam: string, cmdWidth:int) : BlockXmlInfo =
@@ -510,7 +510,7 @@ module internal rec Command =
             Y = y
             TotalSpanX = coilCellX
             TotalSpanY = rxis.Max(_.SpanY)
-            XmlElements = rxis }
+            RungXmlInfos = rxis }
 
     let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (cond:IExpression option, fbc: FunctionBlock) : BlockXmlInfo =
         let cmdWidth = 3
@@ -557,7 +557,7 @@ module internal rec Command =
             [
                 let cond = condition |? fakeAlwaysOnExpression
                 let sub = bxiLadderBlock prjParam (x, y) cond
-                mergeXmls sub.XmlElements
+                mergeXmls sub.RungXmlInfos
 
                 let c =
                     let newX = x + sub.TotalSpanX
@@ -591,7 +591,7 @@ module internal rec Command =
             ] |> joinLines
 
         (* 좌측 expression 이 multiline 인 경우, 우측 FB 의 Coordinate 값이 expression 의 coordinate 중간에 삽입되는 형태로 정렬되어야 한다.  *)
-        let xmls = cbx.XmlElements @ [{ Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1}]
+        let xmls = cbx.RungXmlInfos @ [{ Coordinate = c; Xml = xml; SpanX = spanX; SpanY = 1}]
 
         {
             Coordinate = coord(0, y + cbx.TotalSpanY)
@@ -620,7 +620,7 @@ module internal rec Command =
 
             {   blockXml with
                     TotalSpanX = b.TotalSpanX + 1
-                    XmlElements = b.XmlElements +++ lineXml }
+                    RungXmlInfos = b.RungXmlInfos +++ lineXml }
 
     /// x y 위치에서 expression 표현하기 위한 정보 반환
     /// {| Xml=[|c, str|]; NextX=sx; NextY=maxY; VLineUpRightMaxY=maxY |}
@@ -668,7 +668,7 @@ module internal rec Command =
 
             let xml = { Coordinate = c; Xml = str; SpanX = 1; SpanY = 1 }
 
-            {   XmlElements = [ xml ]
+            {   RungXmlInfos = [ xml ]
                 X = x; Y = y
                 TotalSpanX = 1; TotalSpanY = 1
             }
@@ -684,9 +684,9 @@ module internal rec Command =
 
             let spanX = blockedExprXmls.Sum(fun x -> x.TotalSpanX)
             let spanY = blockedExprXmls.Max(fun x -> x.TotalSpanY)
-            let exprXmls = blockedExprXmls |> List.collect (fun x -> x.XmlElements)
+            let exprXmls = blockedExprXmls |> List.collect (fun x -> x.RungXmlInfos)
 
-            {   XmlElements = exprXmls
+            {   RungXmlInfos = exprXmls
                 X = x
                 Y = y
                 TotalSpanX = spanX
@@ -704,7 +704,7 @@ module internal rec Command =
 
             let spanX = blockedExprXmls.Max(fun x -> x.TotalSpanX)
             let spanY = blockedExprXmls.Sum(fun x -> x.TotalSpanY)
-            let exprXmls = blockedExprXmls |> List.collect (fun x -> x.XmlElements)
+            let exprXmls = blockedExprXmls |> List.collect (fun x -> x.RungXmlInfos)
 
             let xmls =
                 [   yield! exprXmls
@@ -739,7 +739,7 @@ module internal rec Command =
 
             let xmls = xmls |> List.distinct // dirty hacking!
 
-            {   XmlElements = xmls
+            {   RungXmlInfos = xmls
                 X = x
                 Y = y
                 TotalSpanX = spanX
@@ -759,7 +759,7 @@ module internal rec Command =
                 $"Param={dq}{op},{arg0},{arg1}{dq}"        // todo: XGK 에서는 직접변수를 사용
 
             let xml = xgkFBAt fbParam (x, y)
-            {   XmlElements = [ { Coordinate = coord (x, y); Xml = xml; SpanX = 3; SpanY = 1 } ]
+            {   RungXmlInfos = [ { Coordinate = coord (x, y); Xml = xml; SpanX = 3; SpanY = 1 } ]
                 X = x; Y = y
                 TotalSpanX = 3; TotalSpanY = 1
             }
@@ -787,7 +787,7 @@ module internal rec Command =
             {   blockXml with
                     TotalSpanX = blockXml.TotalSpanX + 1
                     X = x; Y = y;
-                    XmlElements = blockXml.XmlElements +++ { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } }
+                    RungXmlInfos = blockXml.RungXmlInfos +++ { Coordinate = c; Xml = xml; SpanX = 1; SpanY = 1 } }
 
         | _ -> failwithlog "Unknown FlatExpression case"
 
@@ -804,7 +804,7 @@ module internal rec Command =
     let rxiRung (prjParam: XgxProjectParams) (x, y) (condition: IExpression option) (cmdExp: CommandTypes) : RungXmlInfo =
         /// [rxi]
         let rxiRungImpl (x, y) (expr: IExpression option) (cmd: CommandTypes) : RungXmlInfo =
-            let distinct bxi:BlockXmlInfo = { bxi with XmlElements = bxi.XmlElements |> List.distinct }
+            let distinct bxi:BlockXmlInfo = { bxi with RungXmlInfos = bxi.RungXmlInfos |> List.distinct }
 
             //let exprSpanX, exprSpanY, exprXmls =
             //    match expr with
@@ -833,7 +833,7 @@ module internal rec Command =
             let c = coord (x, bxi.TotalSpanY + y)
 
             {
-                Xml = bxi.XmlElements.MergeXmls()
+                Xml = bxi.RungXmlInfos.MergeXmls()
                 Coordinate = c
                 SpanX = bxi.TotalSpanX
                 SpanY = bxi.TotalSpanY
@@ -880,7 +880,7 @@ module internal rec Command =
                     let mutable spanY = 1
                     let xml =
                         [
-                            let { X = _xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; XmlElements = xmls } : BlockXmlInfo =
+                            let { X = _xx; Y = yy; TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; RungXmlInfos = xmls } : BlockXmlInfo =
                                 rungInCondition.BxiLadderBlock(prjParam, (x, y))
                             xmls[0].Xml
 

@@ -24,7 +24,7 @@ module internal Common =
             Y = minY
             TotalSpanX = totalSpanX
             TotalSpanY = totalSpanY
-            XmlElements = xs }
+            RungXmlInfos = xs }
 
     let dq = "\""
 

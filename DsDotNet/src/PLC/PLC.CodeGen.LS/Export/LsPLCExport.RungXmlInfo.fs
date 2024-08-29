@@ -34,7 +34,7 @@ module internal RungXmlInfoModule =
             /// Block 이 사용하는 세로 span
             TotalSpanY: int
             /// Block 을 구성하는 element 들의 xml 정보
-            XmlElements: RungXmlInfo list
+            RungXmlInfos: RungXmlInfo list
         }
 
     /// [rgi] Rung 을 생성하기 위한 정보
@@ -80,11 +80,11 @@ module internal RungXmlInfoModule =
         let bx, by = block.X, block.Y
         let c = coord (bx, by)
         let tx, ty = block.TotalSpanX, block.TotalSpanY
-        let xml = block.XmlElements |> mergeXmls
+        let xml = block.RungXmlInfos |> mergeXmls
         { Coordinate = c; Xml = xml; SpanX = tx; SpanY = ty }
 
     type BlockXmlInfo with
-        member x.GetXml():string = mergeXmls x.XmlElements
+        member x.GetXml():string = mergeXmls x.RungXmlInfos
 
 
 type internal RungXmlExtension =

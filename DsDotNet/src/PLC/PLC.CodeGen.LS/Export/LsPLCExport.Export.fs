@@ -277,7 +277,10 @@ module XgiExportModule =
                     assert(cond.IsNone || cond.Value = condition) // 추후 수정 필요
                     let source = args[1]
                     let command = ActionCmd(Move(condition, source, output))
+
+                    // [0830]
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
+                    //let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
 
                     rgi <-
                         {   Xmls = rgiSub.Xmls @ rgi.Xmls

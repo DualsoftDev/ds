@@ -405,7 +405,13 @@ module rec ExpressionParserModule =
                 let target = ctx.Descendants<CopyTargetContext>().First().GetText()
                 assert (target.StartsWith("$"))
                 let target = storages[target.Replace("$", "")]
-                Some <| DuAction(DuCopy(condition, source, target))
+
+                // [0830] todo: 아래 방식으로 처리 필요.
+                Some <| DuAction(DuCopy(condition, source, target))     // legacy
+
+                // [0830] todo: 다음 방식으로 변환해서 처리
+                //Some <| DuAssign(Some condition, source, target)
+
 
             | :? CopyStructStatementContext as ctx ->
                 // e.g copyStructIf(true, $hong, $people[0]);

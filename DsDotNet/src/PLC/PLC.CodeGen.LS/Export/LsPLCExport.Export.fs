@@ -56,6 +56,15 @@ module XgiExportModule =
 
         let mutable rgi: RungGenerationInfo = { Xmls = []; NextRungY = 0 }
 
+        /// rgiSub 의 RungGenerationInfo 를 mutable rgi 에 반영
+        ///
+        /// - NextRungY 는 rgiSub.NextRungY 다음 줄의 y 로 설정
+        let updateRgiWith (rgiSub:RungGenerationInfo) : unit =
+            rgi <-
+                {   Xmls = rgiSub.Xmls @ rgi.Xmls
+                    NextRungY = 1 + rgiSub.NextRungY }
+
+
         // Prolog 설명문
         if prologComment.NonNullAny() then
             let xml = getCommentRungXml rgi.NextRungY prologComment
@@ -102,7 +111,6 @@ module XgiExportModule =
 
                 let command = CoilCmd(coil)
                 let rgiSub = rgiCommandRung (Some expr) command rgi.NextRungY
-                //rgi <- {Xmls = rgiSub.Xmls @ rgi.Xmls; Y = rgi.Y + rgiSub.Y}
                 rgi <-
                     {   Xmls = rgiSub.Xmls @ rgi.Xmls
                         NextRungY = rgiSub.NextRungY }
@@ -148,15 +156,14 @@ module XgiExportModule =
                                 let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"         // Byte OR
                                 XgkParamCmd(param, 5)
                             let rgiSub = rgiCommandRung condWithTrue cmd rgi.NextRungY
-                            rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                                        NextRungY = 1 + rgiSub.NextRungY }
+                            updateRgiWith rgiSub
+
                         if condWithFalse.IsSome then
                             let cmd =
                                 let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"      // Byte AND
                                 XgkParamCmd(param, 5)
                             let rgiSub = rgiCommandRung condWithFalse cmd rgi.NextRungY
-                            rgi <- {    Xmls = rgiSub.Xmls @ rgi.Xmls
-                                        NextRungY = 1 + rgiSub.NextRungY }
+                            updateRgiWith rgiSub
                 | _ ->
                     failwith "ERROR: XGK Tag parsing error"
             else
@@ -189,10 +196,8 @@ module XgiExportModule =
                     if isXgi then
                         let command = ActionCmd(Move(cond, expr, target))
                         let rgiSub = rgiCommandRung None command rgi.NextRungY
+                        updateRgiWith rgiSub
 
-                        rgi <-
-                            {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                                NextRungY = 1 + rgiSub.NextRungY }
                     else
                         // bool type 이 아닌 경우 ladder 에 의한 assign 이 불가능하므로, MOV/XGK or MOVE/XGI 를 사용한다.
                         match condition, expr.Terminal with
@@ -227,46 +232,30 @@ module XgiExportModule =
 
                     assert(cond.IsNone || cond.Value = condition) // 추후 수정 필요
                     moveCmdRungXgk condition source destination
-                    //let rgiSub = rgiXgkBoolTypeCopyIfRungs condition source.Terminal.Value destination
-                    //rgi <-
-                    //    { Xmls = rgiSub.Xmls @ rgi.Xmls
-                    //      NextRungY = 1 + rgiSub.NextRungY }
 
                 // <kwak> <timer>
                 | Statement.DuTimer timerStatement ->
                     let command = FunctionBlockCmd(TimerMode(timerStatement))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
-
-                    rgi <-
-                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                            NextRungY = 1 + rgiSub.NextRungY }
+                    updateRgiWith rgiSub
 
                 | Statement.DuCounter counterStatement ->
                     let command = FunctionBlockCmd(CounterMode(counterStatement))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
-
-                    rgi <-
-                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                            NextRungY = 1 + rgiSub.NextRungY }
+                    updateRgiWith rgiSub
 
                 | DuPLCFunction({ Condition = cond; FunctionName = op; Arguments = args; Output = output }) when isOpC op ->
                     assert(cond.IsNone) // 추후 수정 필요
                     let fn = operatorToXgiFunctionName op
                     let command = PredicateCmd(Compare(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
-
-                    rgi <-
-                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                            NextRungY = 1 + rgiSub.NextRungY }
+                    updateRgiWith rgiSub
 
                 | DuPLCFunction({ Condition = cond; FunctionName = op; Arguments = args; Output = output }) when isOpAB op ->
                     let fn = operatorToXgiFunctionName op
                     let command = FunctionCmd(Arithmetic(fn, (output :?> INamedExpressionizableTerminal), args))
                     let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
-
-                    rgi <-
-                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                            NextRungY = 1 + rgiSub.NextRungY }
+                    updateRgiWith rgiSub
 
                 | DuPLCFunction({
                         Condition = cond
@@ -281,10 +270,7 @@ module XgiExportModule =
                     // [0830]
                     let rgiSub = rgiCommandRung None command rgi.NextRungY
                     //let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
-
-                    rgi <-
-                        {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                            NextRungY = 1 + rgiSub.NextRungY }
+                    updateRgiWith rgiSub
 
                 | DuAction (DuCopyUdt {UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) when isXgi ->
                     for m in udtDecl.Members do
@@ -293,10 +279,8 @@ module XgiExportModule =
 
                         let command = ActionCmd(Move(condition, s.ToExpression(), t))
                         let rgiSub = rgiCommandRung None command rgi.NextRungY
+                        updateRgiWith rgiSub
 
-                        rgi <-
-                            {   Xmls = rgiSub.Xmls @ rgi.Xmls
-                                NextRungY = 1 + rgiSub.NextRungY }
                 | DuAction(DuCopyUdt _) when isXgk ->
                     failwith "UDT declaration is not supported in XGK"
 
@@ -475,7 +459,7 @@ module XgiExportModule =
 
             let _, ms = duration(fun() ->
                 (*
-                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  ``ADD 500 items test`` 기준, 112 ms vs 25 ms
+                 * Performance hot spot: 다음 InsertBefore 때문에 시간이 많이 걸린다.  ``ADD 500 items test`` 기준 InsertBefore vs InsertAfter: 112 ms vs 25 ms
                  *)
                 // (* Naive version *)
                 //for r in rungsXml.GetChildrenNodes() do
@@ -537,34 +521,6 @@ module XgiExportModule =
                     newPrjParam
                 | _ -> prjParam
 
-
-
-            //let xdoc, prjParam =
-            //    match prjParam.TargetType, prjParam.ExistingLSISprj with
-            //    | XGK, Some existing ->
-            //        let doc = DualXmlDocument.loadFromFile existing
-
-            //        let scanProgramName =
-            //            doc.GetXmlNodes("//Configurations/Configuration/Tasks/Task")
-            //                .Where(fun t -> t.GetAttribute("Version") = "257" && t.GetAttribute("Attribute") = "2")
-            //                .TryExactlyOne()
-            //                .Map(_.InnerText)
-
-            //        let counters = collectCounterAddressesXgk doc
-            //        let timers = collectTimerAddressesXgk doc
-            //        let newPrjParam = {
-            //            prjParam with
-            //                ScanProgramName = scanProgramName |? "Scan Program"
-            //                CounterCounterGenerator = counterGeneratorOverrideWithExclusionList prjParam.CounterCounterGenerator counters
-            //                TimerCounterGenerator   = counterGeneratorOverrideWithExclusionList prjParam.TimerCounterGenerator timers
-            //        }
-            //        doc, newPrjParam
-            //    | _, None ->
-            //        let doc = getTemplateXgxXmlDoc prjParam.TargetType
-            //        doc, prjParam
-            //    | _, Some existing ->
-            //        let doc = DualXmlDocument.loadFromFile existing
-            //        doc, prjParam
 
             prjParam.Properties.FillPropertiesFromXmlDocument(prjParam, xdoc)
             prjParam.SanityCheck()

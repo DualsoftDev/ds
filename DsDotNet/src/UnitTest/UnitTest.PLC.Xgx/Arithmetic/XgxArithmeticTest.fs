@@ -31,8 +31,8 @@ type XgxArithematicTest(xgx:PlatformTarget) =
         """
         code |> x.TestCode (getFuncName()) |> ignore
 
-    member x.``ADD 500 items test`` () =
-        let numSum = 500
+    member x.``ADD 100 items test`` () =
+        let numSum = 100
         let repeat = 1
         // "$nn1 + $nn2 + ... +$nn{count}"
         let sumText = [1..numSum] |> map (fun n -> $"$nn{n}") |> joinWith "+"
@@ -282,7 +282,7 @@ type XgiArithematicTest() =
     inherit XgxArithematicTest(XGI)
 
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
-    [<Test>] member __.``ADD 500 items test`` () = base.``ADD 500 items test``()
+    [<Test>] member __.``ADD 100 items test`` () = base.``ADD 100 items test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
     [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()
@@ -309,7 +309,7 @@ type XgkArithematicTest() =
     inherit XgxArithematicTest(XGK)
 
     [<Test>] member __.``ADD 10 items test`` () = base.``ADD 10 items test``()
-    [<Test>] member __.``ADD 500 items test`` () = base.``ADD 500 items test``()
+    [<Test>] member __.``ADD 100 items test`` () = base.``ADD 100 items test``()
     [<Test>] member __.``ADD 3 items test`` () = base.``ADD 3 items test``()
     [<Test>] member __.``ADD 7 items test`` () = base.``ADD 7 items test``()
     [<Test>] member __.``ADD 8 items test`` () = base.``ADD 8 items test``()

@@ -21,8 +21,7 @@ module internal Common =
         let totalSpanY = maxY - minY
 
         {   Xy = (minX, minY)
-            TotalSpanX = totalSpanX
-            TotalSpanY = totalSpanY
+            TotalSpanXy = (totalSpanX, totalSpanY)
             RungXmlInfos = xs }
 
     let dq = "\""

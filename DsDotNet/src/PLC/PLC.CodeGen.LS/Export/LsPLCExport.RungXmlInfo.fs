@@ -15,6 +15,7 @@ module internal RungXmlInfoModule =
     type RungXmlInfo =
         {
             /// Xgi 출력시 순서 결정하기 위한 coordinate.
+            // 대부분 X, Y 로 결정되지만, 세로선은 coord(x, y) + 2 의 좌표를 가져서 (X, Y) tuple 로 구성할 수 없음.
             Coordinate: EncodedXYCoordinate // int
             /// Xml element 문자열
             Xml: XmlOutput // string
@@ -28,15 +29,15 @@ module internal RungXmlInfoModule =
         {
             /// Block 시작 좌상단 (x, y) 좌표
             Xy: int * int
-            /// Block 이 사용하는 가로 span
-            TotalSpanX: int
-            /// Block 이 사용하는 세로 span
-            TotalSpanY: int
+            /// Block 이 사용하는 가로, 세로 span
+            TotalSpanXy: int * int
             /// Block 을 구성하는 element 들의 xml 정보
             RungXmlInfos: RungXmlInfo list
         } with
             member rxi.X = rxi.Xy |> fst
             member rxi.Y = rxi.Xy |> snd
+            member rxi.TotalSpanX = rxi.TotalSpanXy |> fst
+            member rxi.TotalSpanY = rxi.TotalSpanXy |> snd
 
     /// [rgi] Rung 을 생성하기 위한 정보
     ///

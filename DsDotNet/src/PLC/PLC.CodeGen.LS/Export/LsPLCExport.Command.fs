@@ -396,8 +396,7 @@ module internal rec Command =
 
             {
                 Xy = (x, y)
-                TotalSpanX = fsx + 3
-                TotalSpanY = max sy (allXmls.Max(fun x -> x.SpanY))
+                TotalSpanXy = (fsx + 3, max sy (allXmls.Max(fun x -> x.SpanY)))
                 RungXmlInfos = allXmls |> List.sortBy (fun x -> x.Coordinate)
             }
 
@@ -462,8 +461,7 @@ module internal rec Command =
             ]
 
         {   Xy = (x, y)
-            TotalSpanX = coilCellX
-            TotalSpanY = rxis.Max(_.SpanY)
+            TotalSpanXy = (coilCellX, rxis.Max(_.SpanY))
             RungXmlInfos = rxis }
 
 
@@ -498,8 +496,7 @@ module internal rec Command =
                     SpanXy = (cmdWidth, 1) } ]
 
         {   Xy = (x, y)
-            TotalSpanX = coilCellX
-            TotalSpanY = rxis.Max(_.SpanY)
+            TotalSpanXy = (coilCellX, rxis.Max(_.SpanY))
             RungXmlInfos = rxis }
 
     let bxiXgkFBCommand (prjParam: XgxProjectParams) (x, y) (cond:IExpression option, fbc: FunctionBlock) : BlockXmlInfo =
@@ -608,7 +605,7 @@ module internal rec Command =
                     SpanXy = (1, 1) }
 
             {   blockXml with
-                    TotalSpanX = b.TotalSpanX + 1
+                    TotalSpanXy = (b.TotalSpanX + 1, b.TotalSpanY)
                     RungXmlInfos = b.RungXmlInfos +++ lineXml }
 
     /// x y 위치에서 expression 표현하기 위한 정보 반환
@@ -659,7 +656,7 @@ module internal rec Command =
 
             {   RungXmlInfos = [ xml ]
                 Xy = (x, y)
-                TotalSpanX = 1; TotalSpanY = 1
+                TotalSpanXy = (1, 1)
             }
 
         | FlatNary(And, exprs) ->
@@ -677,8 +674,7 @@ module internal rec Command =
 
             {   RungXmlInfos = exprXmls
                 Xy = (x, y)
-                TotalSpanX = spanX
-                TotalSpanY = spanY }
+                TotalSpanXy = (spanX, spanY) }
 
 
         | FlatNary(Or, exprs) ->
@@ -729,8 +725,7 @@ module internal rec Command =
 
             {   RungXmlInfos = xmls
                 Xy = (x, y)
-                TotalSpanX = spanX
-                TotalSpanY = spanY }
+                TotalSpanXy = (spanX, spanY) }
 
         | FlatNary(OpArithmetic _, _exprs) when isXgk ->
             failwithlog "ERROR : Should have been processed in early stage." // 사전에 미리 처리 되었어야 한다.  여기 들어오면 안된다. XgiStatement
@@ -748,7 +743,7 @@ module internal rec Command =
             let xml = xgkFBAt fbParam (x, y)
             {   RungXmlInfos = [ { Coordinate = coord (x, y); Xml = xml; SpanXy = (3, 1) } ]
                 Xy = (x, y)
-                TotalSpanX = 3; TotalSpanY = 1
+                TotalSpanXy = (3, 1)
             }
 
         | FlatNary((OpCompare _fn | OpArithmetic _fn), _args) when isXgi ->
@@ -772,8 +767,8 @@ module internal rec Command =
             let c = coord (xx, yy)
             let xml = elementFull mode c "" ""
             {   blockXml with
-                    TotalSpanX = blockXml.TotalSpanX + 1
                     Xy = (x, y)
+                    TotalSpanXy = (blockXml.TotalSpanX + 1, blockXml.TotalSpanY)
                     RungXmlInfos = blockXml.RungXmlInfos +++ { Coordinate = c; Xml = xml; SpanXy = (1, 1) } }
 
         | _ -> failwithlog "Unknown FlatExpression case"
@@ -866,7 +861,7 @@ module internal rec Command =
                     let mutable spanY = 1
                     let xml =
                         [
-                            let { Xy = (_xx, yy); TotalSpanX = totalSpanX; TotalSpanY = totalSpanY; RungXmlInfos = xmls } : BlockXmlInfo =
+                            let { Xy = (_xx, yy); TotalSpanXy = (totalSpanX, totalSpanY); RungXmlInfos = xmls } : BlockXmlInfo =
                                 rungInCondition.BxiLadderBlock(prjParam, (x, y))
                             xmls[0].Xml
 

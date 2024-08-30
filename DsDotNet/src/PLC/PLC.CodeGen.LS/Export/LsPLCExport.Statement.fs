@@ -23,9 +23,9 @@ module StatementExtensionModule =
 
             let statement = pack.Get<Statement>("statement")
             let isXgi = prjParam.TargetType = XGI
-            let isAssignStatement =
+            let isAssignStatementWithNoCondition =  // condition NULL 인 Assign 은 특수 case 로 취급.  function 없이 bit logic 만으로 처리가능.
                 match statement with
-                | DuAssign _ -> true
+                | DuAssign (None, _, _) -> true
                 | _ -> false
 
             match newExp.FunctionName with
@@ -48,7 +48,7 @@ module StatementExtensionModule =
                     newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
                 else
                     newExp
-            | Some (IsOpC _fn) when isXgi && (expPath.Any() || not isAssignStatement) ->
+            | Some (IsOpC _fn) when isXgi && (expPath.Any() || not isAssignStatementWithNoCondition) ->
                 newExp.ToAssignStatement(pack, K.comparisonOperators)
             | _ ->
                 newExp

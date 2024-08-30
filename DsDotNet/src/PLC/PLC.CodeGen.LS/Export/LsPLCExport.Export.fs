@@ -266,10 +266,7 @@ module XgiExportModule =
                     match prjParam.TargetType with
                     | XGI ->
                         let command = ActionCmd(Move(cond.Value, source, output))
-
-                        // [0830]
                         let rgiSub = rgiCommandRung None command rgi.NextRungY
-                        //let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
                         updateRgiWith rgiSub
                     | XGK ->
                         moveCmdRungXgk cond.Value source output

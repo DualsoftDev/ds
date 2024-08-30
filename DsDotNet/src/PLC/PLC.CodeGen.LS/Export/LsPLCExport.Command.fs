@@ -181,7 +181,7 @@ module internal rec Command =
             let arity = args.Length
             let namedInputParameters =
                 [
-                    yield "EN", cond |? (fakeAlwaysOnExpression :> IExpression)   //[add-rising]
+                    yield "EN", cond |? (fakeAlwaysOnExpression :> IExpression)
                     match name with
                     | "NOT" ->  // Signle input case
                         assert(arity = 1)

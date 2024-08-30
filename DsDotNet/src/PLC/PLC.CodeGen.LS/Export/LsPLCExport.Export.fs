@@ -262,15 +262,19 @@ module XgiExportModule =
                         FunctionName = XgiConstants.FunctionNameMove as _func
                         Arguments = args
                         Output = output }) ->
-                    let condition = args[0] :?> IExpression<bool>
-                    assert(cond.IsNone || cond.Value = condition) // 추후 수정 필요
-                    let source = args[1]
-                    let command = ActionCmd(Move(condition, source, output))
+                    let source = args[0]
+                    match prjParam.TargetType with
+                    | XGI ->
+                        let command = ActionCmd(Move(cond.Value, source, output))
 
-                    // [0830]
-                    let rgiSub = rgiCommandRung None command rgi.NextRungY
-                    //let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
-                    updateRgiWith rgiSub
+                        // [0830]
+                        let rgiSub = rgiCommandRung None command rgi.NextRungY
+                        //let rgiSub = rgiCommandRung (cond.Cast<IExpression>()) command rgi.NextRungY
+                        updateRgiWith rgiSub
+                    | XGK ->
+                        moveCmdRungXgk cond.Value source output
+                    | _ -> failwith "ERROR"
+
 
                 | DuAction (DuCopyUdt {UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) when isXgi ->
                     for m in udtDecl.Members do

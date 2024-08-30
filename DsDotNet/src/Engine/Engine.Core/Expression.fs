@@ -238,6 +238,8 @@ module ExpressionModule =
 
         FunctionName:string
         Arguments:Arguments
+        /// IExpression 으로 casting 이 필요한 경우를 위해 IExpression 저장
+        /// - e.g "&&" Fuction 인 경우, Arguments 전체의 IExression 이 필요
         OriginalExpression:IExpression
         /// Function output store target
         Output:IStorage

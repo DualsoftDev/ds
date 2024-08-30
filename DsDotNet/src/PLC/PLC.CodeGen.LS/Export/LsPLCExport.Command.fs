@@ -830,9 +830,13 @@ module internal rec Command =
 
                 let mov =
                     let st, tt = source.DataType, target.DataType
+
                     // move 의 type 이 동일해야 한다.  timer/counter 는 예외.  reset coil 이나 preset 설정 등 허용.
-                    assert (st = tt || tt = typeof<TimerCounterBaseStruct>)
+                    // st 의 type 을 모르는 경우는 포기 (obj)
+                    assert (st = tt || tt = typeof<TimerCounterBaseStruct> || st = typeof<obj>)
+
                     operatorToXgkFunctionName "MOV" st
+
                 $"Param={dq}{mov},{s},{d}{dq}", 3           // Param="MOV,source,destination"
 
 

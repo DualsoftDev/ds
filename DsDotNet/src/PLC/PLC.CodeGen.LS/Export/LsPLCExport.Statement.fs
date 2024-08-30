@@ -82,13 +82,13 @@ module StatementExtensionModule =
                 | _, Some op when not (isOpL op) ->
                     failwith $"ERROR: {op} unexpected."
 
-                | Some cond, None -> // terminal 을 target 으로 assign 하는 경우
+                | Some _cond, None -> // terminal 을 target 으로 assign 하는 경우
                     let newExp = exp.CollectExpandedExpression(pack)
                     let augFunc =
                         DuPLCFunction {
                             Condition = condition
                             FunctionName = XgiConstants.FunctionNameMove
-                            Arguments = [cond; newExp]
+                            Arguments = [newExp]
                             OriginalExpression = exp
                             Output = target }
                     augs.Statements.Add augFunc
@@ -107,8 +107,8 @@ module StatementExtensionModule =
                 DuPLCFunction {
                     Condition = Some condition
                     FunctionName = funcName
-                    Arguments = [ condition; source ]
-                    OriginalExpression = condition
+                    Arguments = [ source ]
+                    OriginalExpression = source
                     Output = target
                 } |> augs.Statements.Add
 

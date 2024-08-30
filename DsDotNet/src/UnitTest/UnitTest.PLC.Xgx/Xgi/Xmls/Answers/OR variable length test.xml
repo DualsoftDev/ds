@@ -70,10 +70,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="2055" Param="0"/>
                                     <Element ElementType="0" Coordinate="2057"/>
-                                    <Element ElementType="2" Coordinate="2058" Param="84"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        x07
-                                    </Element>
                                     <Element ElementType="6" Coordinate="3073">
                                         x01
                                     </Element>
@@ -92,6 +88,10 @@
                                     <Element ElementType="6" Coordinate="5127">
                                         x06
                                     </Element>
+                                    <Element ElementType="2" Coordinate="2058" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        x07
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
@@ -104,10 +104,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="7172" Param="9"/>
                                     <Element ElementType="0" Coordinate="7183"/>
-                                    <Element ElementType="2" Coordinate="7184" Param="78"/>
-                                    <Element ElementType="14" Coordinate="7262">
-                                        x15
-                                    </Element>
                                     <Element ElementType="6" Coordinate="8193">
                                         x10
                                     </Element>
@@ -161,6 +157,10 @@
                                         x00
                                     </Element>
                                     <Element ElementType="2" Coordinate="12292" Param="9"/>
+                                    <Element ElementType="2" Coordinate="7184" Param="90"/>
+                                    <Element ElementType="14" Coordinate="7262">
+                                        x15
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
@@ -173,10 +173,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="14340" Param="9"/>
                                     <Element ElementType="0" Coordinate="14351"/>
-                                    <Element ElementType="2" Coordinate="14352" Param="78"/>
-                                    <Element ElementType="14" Coordinate="14430">
-                                        x15
-                                    </Element>
                                     <Element ElementType="6" Coordinate="15361">
                                         x01
                                     </Element>
@@ -263,6 +259,10 @@
                                         x00
                                     </Element>
                                     <Element ElementType="2" Coordinate="22532" Param="9"/>
+                                    <Element ElementType="2" Coordinate="14352" Param="90"/>
+                                    <Element ElementType="14" Coordinate="14430">
+                                        x15
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="23553">
@@ -286,10 +286,6 @@
                                     <Element ElementType="0" Coordinate="24603"/>
                                     <Element ElementType="2" Coordinate="24604" Param="0"/>
                                     <Element ElementType="0" Coordinate="24606"/>
-                                    <Element ElementType="2" Coordinate="24607" Param="63"/>
-                                    <Element ElementType="14" Coordinate="24670">
-                                        x15
-                                    </Element>
                                     <Element ElementType="6" Coordinate="25601">
                                         x10
                                     </Element>
@@ -432,6 +428,10 @@
                                         x00
                                     </Element>
                                     <Element ElementType="2" Coordinate="32787" Param="9"/>
+                                    <Element ElementType="2" Coordinate="24607" Param="90"/>
+                                    <Element ElementType="14" Coordinate="24670">
+                                        x15
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="34817" Param="90"/>

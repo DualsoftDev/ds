@@ -20,20 +20,22 @@ module internal Common =
         let totalSpanX = maxX - minX
         let totalSpanY = maxY - minY
 
-        {   X = minX
-            Y = minY
-            TotalSpanX = totalSpanX
-            TotalSpanY = totalSpanY
-            XmlElements = xs }
+        {   Xy = (minX, minY)
+            TotalSpanXy = (totalSpanX, totalSpanY)
+            RungXmlInfos = xs }
 
     let dq = "\""
 
 
 
     /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
+    [<Literal>]
     let maxNumHorizontalContact = 31
+    /// 산전 limit : contact 기준 가로로 최대 31개[0..30] + coil 1개[31]
+    [<Literal>]
     let coilCellX = maxNumHorizontalContact
     /// 최소기본 FB 위치 : 가로로  9 포인트
+    [<Literal>]
     let minFBCellX = 9
 
     /// rung 을 구성하는 element (접점)의 XML 표현 문자열 반환
@@ -103,8 +105,7 @@ module internal Common =
     let rxiCommentAtCoordinate (c: EncodedXYCoordinate) (comment: string) =
         { Coordinate = c
           Xml = $"<!-- {comment} -->"
-          SpanX = maxNumHorizontalContact
-          SpanY = 1 }
+          SpanXy = (maxNumHorizontalContact, 1) }
 
     /// [rxi] debugging 용 xml comment 생성
     let rxiCommentAt (x, y) comment =
@@ -130,7 +131,7 @@ module internal Common =
     let rxiVLineAt (x, y) : RungXmlInfo =
         verify (x >= 0)
         let c = coord (x, y) + 2
-        { Coordinate = c; Xml = vline c; SpanX = 0; SpanY = 1 }
+        { Coordinate = c; Xml = vline c; SpanXy = (0, 1) }
 
     let mutable EnableXmlComment = false
 
@@ -166,8 +167,7 @@ module internal Common =
 
         { Coordinate = c
           Xml = xml
-          SpanX = 3
-          SpanY = getFunctionHeight detailedFunctionName }
+          SpanXy = (3, getFunctionHeight detailedFunctionName) }
 
     /// 함수 파라메터 그리기
     let rxiFBParameter (x, y) tag : RungXmlInfo =
@@ -176,8 +176,7 @@ module internal Common =
 
         { Coordinate = c
           Xml = xml
-          SpanX = 1
-          SpanY = 1 }
+          SpanXy = (1, 1) }
 
 //let drawRising (x, y) =
 //    let cellX = getFBCellX x

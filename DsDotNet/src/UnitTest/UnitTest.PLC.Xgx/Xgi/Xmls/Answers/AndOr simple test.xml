@@ -56,12 +56,12 @@
                                     <Element ElementType="6" Coordinate="2052">
                                         x02
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2055" Param="87"/>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        x03
-                                    </Element>
                                     <Element ElementType="6" Coordinate="3073">
                                         x01
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2055" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        x03
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -15,27 +15,29 @@ module internal RungXmlInfoModule =
     type RungXmlInfo =
         {
             /// Xgi 출력시 순서 결정하기 위한 coordinate.
+            // 대부분 X, Y 로 결정되지만, 세로선은 coord(x, y) + 2 의 좌표를 가져서 (X, Y) tuple 로 구성할 수 없음.
             Coordinate: EncodedXYCoordinate // int
             /// Xml element 문자열
             Xml: XmlOutput // string
-            SpanX: int
-            SpanY: int
-        }
+            SpanXy: int * int
+        } with
+            member rxi.SpanX = rxi.SpanXy |> fst
+            member rxi.SpanY = rxi.SpanXy |> snd
 
     /// [bxi] Rung 구성 요소 조합.  하나의 Rung 내의 block 정보
     type BlockXmlInfo =
         {
-            /// Block 시작 좌상단 x 좌표
-            X: int
-            /// Block 시작 좌상단 y 좌표
-            Y: int
-            /// Block 이 사용하는 가로 span
-            TotalSpanX: int
-            /// Block 이 사용하는 세로 span
-            TotalSpanY: int
+            /// Block 시작 좌상단 (x, y) 좌표
+            Xy: int * int
+            /// Block 이 사용하는 가로, 세로 span
+            TotalSpanXy: int * int
             /// Block 을 구성하는 element 들의 xml 정보
-            XmlElements: RungXmlInfo list
-        }
+            RungXmlInfos: RungXmlInfo list
+        } with
+            member rxi.X = rxi.Xy |> fst
+            member rxi.Y = rxi.Xy |> snd
+            member rxi.TotalSpanX = rxi.TotalSpanXy |> fst
+            member rxi.TotalSpanY = rxi.TotalSpanXy |> snd
 
     /// [rgi] Rung 을 생성하기 위한 정보
     ///
@@ -80,11 +82,11 @@ module internal RungXmlInfoModule =
         let bx, by = block.X, block.Y
         let c = coord (bx, by)
         let tx, ty = block.TotalSpanX, block.TotalSpanY
-        let xml = block.XmlElements |> mergeXmls
-        { Coordinate = c; Xml = xml; SpanX = tx; SpanY = ty }
+        let xml = block.RungXmlInfos |> mergeXmls
+        { Coordinate = c; Xml = xml; SpanXy = (tx, ty) }
 
     type BlockXmlInfo with
-        member x.GetXml():string = mergeXmls x.XmlElements
+        member x.GetXml():string = mergeXmls x.RungXmlInfos
 
 
 type internal RungXmlExtension =

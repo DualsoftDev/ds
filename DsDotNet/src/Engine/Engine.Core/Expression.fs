@@ -103,11 +103,19 @@ module ExpressionModule =
             else
                 false
 
+
+
     /// literal 'T 로부터 terminal Expression<'T> 생성
     let literal2expr (x:'T) =
+        if typeof<'T> = typeof<obj> then
+            failwith "ERROR: litera2expr does not support for obj type.  Use any2expr for obj type."
+
+
         let t = x.GetType()
+
         if t.IsValueType || t = typedefof<string> then
-            DuTerminal (DuLiteral ({Value = (x|> unbox)}:LiteralHolder<'T>))
+            //DuTerminal (DuLiteral ({Value = (x|> unbox)}:LiteralHolder<'T>))
+            DuTerminal (DuLiteral ({Value = x}:LiteralHolder<'T>))
         else
             failwithlog "ERROR: Value Type Error.  only allowed for primitive type"
 
@@ -125,6 +133,7 @@ module ExpressionModule =
         | :? uint16 as v -> toExpr v
         | :? uint32 as v -> toExpr v
         | :? uint64 as v -> toExpr v
+        | :? string as v -> toExpr v
         | _ ->
             failwith "ERROR"
 
@@ -228,7 +237,7 @@ module ExpressionModule =
     }
 
     type ActionStatement =
-        | DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
+        //| DuCopy of condition:IExpression<bool> * source:IExpression * target:IStorage
         | DuCopyUdt of CopyUdtStatement
 
 
@@ -238,6 +247,8 @@ module ExpressionModule =
 
         FunctionName:string
         Arguments:Arguments
+        /// IExpression 으로 casting 이 필요한 경우를 위해 IExpression 저장
+        /// - e.g "&&" Fuction 인 경우, Arguments 전체의 IExression 이 필요
         OriginalExpression:IExpression
         /// Function output store target
         Output:IStorage
@@ -299,7 +310,7 @@ module ExpressionModule =
 
         /// PLC function (비교, 사칙연산, Move) 을 호출하는 statement
         ///
-        /// - 주로 XGI 에서 사용.  XGK 에서는 zipAndExpression 와 Statement.ToStatements() 에서 사용.  Statement.ToStatements() 사용은 DuAction(DuCopy...) 부분인데, 대체 가능함.
+        /// - 주로 XGI 에서 사용.  XGK 에서는 zipAndExpression 와 Statement.ToStatements() 에서 사용.
         | DuPLCFunction of FunctionParameters
 
     /// 추가 가능한 Statement container
@@ -316,7 +327,7 @@ module ExpressionModule =
             | DuCounter (c:CounterStatement) -> c.Counter.Name
             | DuAction (a:ActionStatement) ->
                 match a with
-                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
+                //| DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.Name
                 | DuCopyUdt { Target = target } -> target
             | DuPLCFunction { FunctionName = fn } -> fn
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
@@ -331,7 +342,7 @@ module ExpressionModule =
             | DuCounter (c:CounterStatement) -> c.Counter.DN.Value
             | DuAction (a:ActionStatement) ->
                 match a with
-                | DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
+                //| DuCopy (_condition:IExpression<bool>, _source:IExpression,target:IStorage)-> target.BoxedValue
                 | DuCopyUdt _ -> failwith "ERROR: Invalid value reference"
             | DuPLCFunction { OriginalExpression = exp } ->  exp.BoxedEvaluatedValue
             | (DuUdtDecl _ | DuUdtDef _) -> failwith "Unsupported.  Should not be called for these statements"
@@ -379,9 +390,9 @@ module ExpressionModule =
                 for s in counterStatement.Counter.InputEvaluateStatements do
                     s.Do()
 
-            | DuAction (DuCopy (condition, source, target)) ->
-                if condition.EvaluatedValue then
-                    target.BoxedValue <- source.BoxedEvaluatedValue
+            //| DuAction (DuCopy (condition, source, target)) ->
+            //    if condition.EvaluatedValue then
+            //        target.BoxedValue <- source.BoxedEvaluatedValue
 
             | DuAction (DuCopyUdt { Storages=storages; UdtDecl=udtDecl; Condition=condition; Source=source; Target=target}) ->
                 if condition.EvaluatedValue then
@@ -398,7 +409,10 @@ module ExpressionModule =
 
         member x.ToText() =
             match x with
-            | DuAssign (_condition, expr, target) -> $"{target.ToText()} = {expr.ToText()};"    // todo: condition 을 totext 에 포함할지 여부
+            | DuAssign (_condition, expr, target) ->
+                match _condition with
+                | Some cond -> $"copyIf({cond.ToText()}, {expr.ToText()}, {target.ToText()});"    // todo: condition 을 totext 에 포함할지 여부
+                | None -> $"{target.ToText()} = {expr.ToText()};"
             | DuVarDecl (expr, var) -> $"{var.DataType.ToDsDataTypeString()} {var.Name} = {expr.ToText()};"
             | DuTimer timerStatement ->
                 let ts, t = timerStatement, timerStatement.Timer
@@ -428,8 +442,8 @@ module ExpressionModule =
                     ]
                 let args = String.Join(", ", args)
                 $"{typ.ToLower()} {c.Name} = {functionName}({args});"
-            | DuAction (DuCopy (condition, source, target)) ->
-                $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()});"
+            //| DuAction (DuCopy (condition, source, target)) ->
+            //    $"copyIf({condition.ToText()}, {source.ToText()}, {target.ToText()});"
 
             | DuAction (DuCopyUdt { Condition=condition; Source=source; Target=target}) ->
                 $"copyStructIf({condition.ToText()}, {source}, {target})"

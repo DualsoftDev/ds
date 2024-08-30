@@ -179,12 +179,12 @@
                                         _t3_GT
                                     </Element>
                                     <Element ElementType="0" Coordinate="34819"/>
+                                    <Element ElementType="6" Coordinate="35841">
+                                        _t8_GT
+                                    </Element>
                                     <Element ElementType="2" Coordinate="34820" Param="90"/>
                                     <Element ElementType="14" Coordinate="34910">
                                         result
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="35841">
-                                        _t8_GT
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

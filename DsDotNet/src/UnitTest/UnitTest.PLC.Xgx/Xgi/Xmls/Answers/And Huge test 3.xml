@@ -190,9 +190,6 @@
                                     <Element ElementType="6" Coordinate="2139">
                                         x37
                                     </Element>
-                                    <Element ElementType="14" Coordinate="2142">
-                                        _t1_split
-                                    </Element>
                                     <Element ElementType="6" Coordinate="3073">
                                         x01
                                     </Element>
@@ -221,6 +218,10 @@
                                     <Element ElementType="2" Coordinate="4181" Param="0"/>
                                     <Element ElementType="6" Coordinate="5121">
                                         x03
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="2142" Param="90"/>
+                                    <Element ElementType="14" Coordinate="2142">
+                                        _t1_split
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -282,10 +283,6 @@
                                     <Element ElementType="6" Coordinate="6196">
                                         x19
                                     </Element>
-                                    <Element ElementType="2" Coordinate="6199" Param="39"/>
-                                    <Element ElementType="14" Coordinate="6238">
-                                        _t2_split
-                                    </Element>
                                     <Element ElementType="0" Coordinate="7177"/>
                                     <Element ElementType="6" Coordinate="7178">
                                         x01
@@ -304,6 +301,10 @@
                                     <Element ElementType="0" Coordinate="8204"/>
                                     <Element ElementType="6" Coordinate="9226">
                                         x03
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="6199" Param="90"/>
+                                    <Element ElementType="14" Coordinate="6238">
+                                        _t2_split
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -10,7 +10,7 @@ open Dual.Common.Core.FS
 type VariableManager with
 
     member v.V1_ConstMove(sys:DsSystem) =
-         (sys._on.Expr, v.InitValue |> literal2expr) --> (v.VariableTag, getFuncName())
+         (sys._on.Expr, v.InitValue |> any2expr) --> (v.VariableTag, getFuncName())
 
          
 type ActionVariableManager with

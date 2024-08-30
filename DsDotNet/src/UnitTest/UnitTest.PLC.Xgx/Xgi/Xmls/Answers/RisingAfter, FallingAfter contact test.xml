@@ -61,7 +61,7 @@
                                         ix3
                                     </Element>
                                     <Element ElementType="72" Coordinate="2058"/>
-                                    <Element ElementType="2" Coordinate="2061" Param="81"/>
+                                    <Element ElementType="2" Coordinate="2061" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         qx1
                                     </Element>
@@ -77,10 +77,6 @@
                                     </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="3"/>
                                     <Element ElementType="0" Coordinate="4105"/>
-                                    <Element ElementType="2" Coordinate="4106" Param="84"/>
-                                    <Element ElementType="14" Coordinate="4190">
-                                        qx2
-                                    </Element>
                                     <Element ElementType="6" Coordinate="5121">
                                         ix2
                                     </Element>
@@ -88,6 +84,10 @@
                                         ix3
                                     </Element>
                                     <Element ElementType="73" Coordinate="5127"/>
+                                    <Element ElementType="2" Coordinate="4106" Param="90"/>
+                                    <Element ElementType="14" Coordinate="4190">
+                                        qx2
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="6145">
@@ -104,10 +104,6 @@
                                         ix3
                                     </Element>
                                     <Element ElementType="0" Coordinate="7177"/>
-                                    <Element ElementType="2" Coordinate="7178" Param="84"/>
-                                    <Element ElementType="14" Coordinate="7262">
-                                        qx3
-                                    </Element>
                                     <Element ElementType="7" Coordinate="8193">
                                         ix2
                                     </Element>
@@ -117,6 +113,10 @@
                                     </Element>
                                     <Element ElementType="73" Coordinate="9220"/>
                                     <Element ElementType="2" Coordinate="9223" Param="0"/>
+                                    <Element ElementType="2" Coordinate="7178" Param="90"/>
+                                    <Element ElementType="14" Coordinate="7262">
+                                        qx3
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="11265" Param="90"/>

@@ -72,7 +72,7 @@
                                     <Element ElementType="6" Coordinate="2049">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="75"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="78"/>
                                     <Element ElementType="33" Coordinate="2142" Param="BAND,M00000,254,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -84,7 +84,7 @@
                                     <Element ElementType="6" Coordinate="5121">
                                         _1ON
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5124" Param="75"/>
+                                    <Element ElementType="2" Coordinate="5124" Param="78"/>
                                     <Element ElementType="33" Coordinate="5214" Param="BOR,M00000,2,M00000,1"/>
                                 </Rung>
                                 <Rung BlockMask="0">

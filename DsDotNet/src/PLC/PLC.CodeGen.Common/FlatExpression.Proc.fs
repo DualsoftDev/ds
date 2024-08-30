@@ -225,6 +225,6 @@ module FlatExpressionModule3 =
     let rec isFunctionBlockConnectable (expr: FlatExpression) =
         match expr with
         | (FlatTerminal _ | FlatNary(Neg, _)) -> true
-        | FlatNary(And, ands) -> ands |> List.last |> isFunctionBlockConnectable
+        | FlatNary( (And | RisingAfter | FallingAfter), args) ->  args |> List.last |> isFunctionBlockConnectable
         | FlatNary(Or, _) -> false
         | _ -> failwithlog "ERROR"

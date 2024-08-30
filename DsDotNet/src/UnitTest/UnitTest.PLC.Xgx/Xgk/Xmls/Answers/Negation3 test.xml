@@ -79,7 +79,7 @@
                                     <Element ElementType="7" Coordinate="2052">
                                         P00001
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2055" Param="87"/>
+                                    <Element ElementType="2" Coordinate="2055" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         P00002
                                     </Element>
@@ -94,12 +94,12 @@
                                         P00003
                                     </Element>
                                     <Element ElementType="0" Coordinate="4099"/>
+                                    <Element ElementType="6" Coordinate="5121">
+                                        P00004
+                                    </Element>
                                     <Element ElementType="2" Coordinate="4100" Param="90"/>
                                     <Element ElementType="14" Coordinate="4190">
                                         P00005
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="5121">
-                                        P00004
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

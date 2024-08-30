@@ -3,6 +3,14 @@
 dotnet-restore:
 	@dotnet restore Ds.sln
 
+use-nuget-source:
+	@cp Directory.Packages.props.template Directory.Packages.props
+	@cp Directory.Build.props.template Directory.Build.props
+
+use-nuget-package:
+	@rm -f Directory.Packages.props Directory.Build.props
+
+
 # powerpoint addin unittest 실패시 임시 대처
 tmp-link:
 	@cd ./src/UnitTest/UnitTest.PowerPointAddIn/bin/Debug/net7.0-windows

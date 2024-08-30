@@ -55,12 +55,12 @@
                                         qAvante
                                     </Element>
                                     <Element ElementType="0" Coordinate="2051"/>
+                                    <Element ElementType="6" Coordinate="3073">
+                                        qSonata
+                                    </Element>
                                     <Element ElementType="2" Coordinate="2052" Param="90"/>
                                     <Element ElementType="14" Coordinate="2142">
                                         QCar
-                                    </Element>
-                                    <Element ElementType="6" Coordinate="3073">
-                                        qSonata
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

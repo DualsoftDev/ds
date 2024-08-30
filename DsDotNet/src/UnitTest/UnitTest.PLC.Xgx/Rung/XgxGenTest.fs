@@ -102,7 +102,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
     member x.``And Huge test 4`` () =
         let x1_to_x38 = [1..38] |> map (fun i -> sprintf "$x%02d" i) |> String.concat " && "
         let code = generateBitTagVariableDeclarations xgx 0 50 + $"""
-            $x49 = 
+            $x49 =
                 (   (    false
                         || ({x1_to_x38})
                         || $x39
@@ -144,7 +144,7 @@ type XgxGenerationTest(xgx:PlatformTarget) =
         let code = generateBitTagVariableDeclarations xgx 0 4 + """
             $x03 = ($x00 || $x01) && $x02;
 """
-        let statements = parseCodeForTarget storages code XGI 
+        let statements = parseCodeForTarget storages code XGI
         storages.Count === 4
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
@@ -163,6 +163,26 @@ type XgxGenerationTest(xgx:PlatformTarget) =
                         && ($x12 || $x13 || $x14)
                         ;
 """
+        code |> x.TestCode (getFuncName()) |> ignore
+
+    member x.``COPY test min int16`` () =
+        let code =
+            $"""
+            bool cond = true;
+            int16 src = 1s;
+            int16 tgt = 2s;
+            copyIf($cond, $src, $tgt);
+            """
+        code |> x.TestCode (getFuncName()) |> ignore
+
+    member x.``COPY test min bool`` () =
+        let code =
+            $"""
+            bool cond = true;
+            bool src = true;
+            bool tgt = true;
+            copyIf($cond, $src, $tgt);
+            """
         code |> x.TestCode (getFuncName()) |> ignore
 
     member x.``COPY test`` () =
@@ -208,10 +228,22 @@ copyIf(2 > 3, $b1, $b2);
 """
         code |> x.TestCode (getFuncName()) |> ignore
 
+
+    member x.``COPY test3`` () =
+        let code = """
+bool b1 = false;
+bool b2 = false;
+bool b3 = false;
+int nn3 = 0;
+//copyIf( !rising($b1) && $b2, (2 + 3), $nn3);
+copyIf( rising(!$b1) && $b2, (2 + $nn3), $nn3);
+"""
+        code |> x.TestCode (getFuncName()) |> ignore
+
     member x.``OR Block test`` () =
         let code = generateBitTagVariableDeclarations xgx 0 16 + """
             $x15 =
-                $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10))) 
+                $x01 && ($x02 || ($x03 && ($x04 || $x05 || $x06 || $x07) && $x08 && ($x09 || $x10)))
                 ;
 """
         code |> x.TestCode (getFuncName()) |> ignore
@@ -259,7 +291,7 @@ copyIf(2 > 3, $b1, $b2);
         let code = generateBitTagVariableDeclarations xgx 0 3 + """
             $x02 = ($x00 || $x01);
 """
-        let statements = parseCodeForTarget storages code XGI 
+        let statements = parseCodeForTarget storages code XGI
         storages.Count === 3
         statements.Length === 1      // createTag 는 statement 에 포함되지 않는다.   (한번 생성하고 끝나므로 storages 에 tag 만 추가 된다.)
 
@@ -358,8 +390,11 @@ type XgiGenerationTest() =
     [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member x.``COPY test min bool`` () = base.``COPY test min bool`` ()
+    [<Test>] member x.``COPY test min int16`` () = base.``COPY test min int16`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
-    [<Test>] member x.``COPY test2`` () = base.``COPY test2`` ()
+    [<Test>] member x.``X COPY test2`` () = base.``COPY test2`` ()
+    [<Test>] member x.``COPY test3`` () = base.``COPY test3`` ()
     [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
     [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()
@@ -388,8 +423,11 @@ type XgkGenerationTest() =
     [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member x.``COPY test min bool`` () = base.``COPY test min bool`` ()
+    [<Test>] member x.``COPY test min int16`` () = base.``COPY test min int16`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
     [<Test>] member x.``COPY test2`` () = base.``COPY test2`` ()
+    [<Test>] member x.``COPY test3`` () = base.``COPY test3`` ()
     [<Test>] member x.``OR Block test`` () = base.``OR Block test`` ()
     [<Test>] member x.``OR Block test2`` () = base.``OR Block test2`` ()
     [<Test>] member x.``OR Huge test`` () = base.``OR Huge test`` ()

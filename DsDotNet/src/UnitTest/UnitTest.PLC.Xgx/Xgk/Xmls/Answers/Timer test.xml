@@ -76,7 +76,7 @@
                                     <Element ElementType="6" Coordinate="2049">
                                         P0001A
                                     </Element>
-                                    <Element ElementType="2" Coordinate="2052" Param="81"/>
+                                    <Element ElementType="2" Coordinate="2052" Param="84"/>
                                     <Element ElementType="33" Coordinate="2142" Param="TON,myTon,0"/>
                                 </Rung>
                                 <Rung BlockMask="0">
@@ -92,12 +92,12 @@
                                     <Element ElementType="6" Coordinate="5124">
                                         P00003
                                     </Element>
-                                    <Element ElementType="2" Coordinate="5127" Param="87"/>
-                                    <Element ElementType="14" Coordinate="5214">
-                                        P00004
-                                    </Element>
                                     <Element ElementType="6" Coordinate="6145">
                                         P00002
+                                    </Element>
+                                    <Element ElementType="2" Coordinate="5127" Param="90"/>
+                                    <Element ElementType="14" Coordinate="5214">
+                                        P00004
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

@@ -81,3 +81,7 @@ module FlatExpressionModule =
                 let termsNeg = terms |> map (fun t -> t.Negate())
                 FlatNary(opNeg, termsNeg)
 
+(*
+    let flatten (exp: IExpression) = exp.Flatten() :?> FlatExpression
+    fwdFlattenExpression(..)
+*)

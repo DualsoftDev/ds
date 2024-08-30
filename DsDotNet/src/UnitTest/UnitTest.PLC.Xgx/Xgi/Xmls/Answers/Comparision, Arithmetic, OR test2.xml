@@ -183,14 +183,14 @@
                                         _t3_GT
                                     </Element>
                                     <Element ElementType="0" Coordinate="34822"/>
-                                    <Element ElementType="2" Coordinate="34823" Param="87"/>
-                                    <Element ElementType="14" Coordinate="34910">
-                                        result
-                                    </Element>
                                     <Element ElementType="6" Coordinate="35841">
                                         _t8_GT
                                     </Element>
                                     <Element ElementType="2" Coordinate="35844" Param="0"/>
+                                    <Element ElementType="2" Coordinate="34823" Param="90"/>
+                                    <Element ElementType="14" Coordinate="34910">
+                                        result
+                                    </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="2" Coordinate="37889" Param="90"/>

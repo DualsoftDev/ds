@@ -165,6 +165,15 @@ type XgxGenerationTest(xgx:PlatformTarget) =
 """
         code |> x.TestCode (getFuncName()) |> ignore
 
+    member x.``COPY test min`` () =
+        let code =
+            $"""
+            bool cond = true;
+            int16 src = 1s;
+            int16 tgt = 2s;
+            copyIf($cond, $src, $tgt);
+            """
+        code |> x.TestCode (getFuncName()) |> ignore
     member x.``COPY test`` () =
         let code =
             let ands (x:string) = [0..63] |> map (fun i -> sprintf "$%s%02d" x i) |> String.concat " && "
@@ -370,6 +379,7 @@ type XgiGenerationTest() =
     [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member x.``COPY test min`` () = base.``COPY test min`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
     [<Test>] member x.``COPY test2`` () = base.``COPY test2`` ()
     [<Test>] member x.``COPY test3`` () = base.``COPY test3`` ()
@@ -401,6 +411,7 @@ type XgkGenerationTest() =
     [<Test>] member x.``And Many test`` () = base.``And Many test`` ()
     [<Test>] member x.``AndOr simple test`` () = base.``AndOr simple test`` ()
     [<Test>] member x.``AndOr2 test`` () = base.``AndOr2 test`` ()
+    [<Test>] member x.``COPY test min`` () = base.``COPY test min`` ()
     [<Test>] member x.``COPY test`` () = base.``COPY test`` ()
     [<Test>] member x.``COPY test2`` () = base.``COPY test2`` ()
     [<Test>] member x.``X COPY test3`` () = base.``COPY test3`` ()

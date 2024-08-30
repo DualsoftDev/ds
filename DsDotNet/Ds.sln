@@ -175,7 +175,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.FSharpInterop",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NugetProjects", "NugetProjects", "{26C13474-CCE3-4F11-9FAD-437BFD7FC25F}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Dual.PLC.LS.XgCOM.FS", "..\Submodules\nuget\PLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj", "{6AADC991-37D2-4AD3-B695-129117A765B4}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Dual.PLC.XGComm.FS", "..\Submodules\nuget\PLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.XGComm.FS.fsproj", "{6AADC991-37D2-4AD3-B695-129117A765B4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

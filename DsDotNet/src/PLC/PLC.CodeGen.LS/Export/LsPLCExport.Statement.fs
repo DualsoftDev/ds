@@ -23,9 +23,9 @@ module StatementExtensionModule =
 
             let statement = pack.Get<Statement>("statement")
             let isXgi = prjParam.TargetType = XGI
-            let isAssignStatement =
+            let isAssignStatementWithNoCondition =  // condition NULL 인 Assign 은 특수 case 로 취급.  function 없이 bit logic 만으로 처리가능.
                 match statement with
-                | DuAssign _ -> true
+                | DuAssign (None, _, _) -> true
                 | _ -> false
 
             match newExp.FunctionName with
@@ -48,7 +48,7 @@ module StatementExtensionModule =
                     newExp.ToAssignStatement(pack, K.arithmaticOrBitwiseOrComparisionOperators)
                 else
                     newExp
-            | Some (IsOpC _fn) when isXgi && (expPath.Any() || not isAssignStatement) ->
+            | Some (IsOpC _fn) when isXgi && (expPath.Any() || not isAssignStatementWithNoCondition) ->
                 newExp.ToAssignStatement(pack, K.comparisonOperators)
             | _ ->
                 newExp
@@ -82,13 +82,13 @@ module StatementExtensionModule =
                 | _, Some op when not (isOpL op) ->
                     failwith $"ERROR: {op} unexpected."
 
-                | Some cond, None -> // terminal 을 target 으로 assign 하는 경우
+                | Some _cond, None -> // terminal 을 target 으로 assign 하는 경우
                     let newExp = exp.CollectExpandedExpression(pack)
                     let augFunc =
                         DuPLCFunction {
                             Condition = condition
                             FunctionName = XgiConstants.FunctionNameMove
-                            Arguments = [cond; newExp]
+                            Arguments = [newExp]
                             OriginalExpression = exp
                             Output = target }
                     augs.Statements.Add augFunc
@@ -101,17 +101,6 @@ module StatementExtensionModule =
 
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
                 augs.Statements.Add statement
-
-            | DuAction(DuCopy(condition, source, target)) ->
-                let funcName = XgiConstants.FunctionNameMove
-                DuPLCFunction {
-                    Condition = Some condition
-                    FunctionName = funcName
-                    Arguments = [ condition; source ]
-                    OriginalExpression = condition
-                    Output = target
-                } |> augs.Statements.Add
-
 
             | DuAction(DuCopyUdt _) ->
                 statement |> augs.Statements.Add
@@ -148,9 +137,6 @@ module StatementExtensionModule =
                             DownCondition  = tryVisitTop down
                             ResetCondition = tryVisitTop reset
                             LoadCondition  = tryVisitTop load }
-                | DuAction(DuCopy(condition, source, target)) ->
-                    let cond = (visitTop condition) :?> IExpression<bool>
-                    Some <| DuAction(DuCopy(cond, visitTop source, target))
 
                 | DuAction (DuCopyUdt ({ Condition=condition; } as udt)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>

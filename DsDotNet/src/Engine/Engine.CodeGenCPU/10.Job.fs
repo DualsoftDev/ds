@@ -8,13 +8,13 @@ open Dual.Common.Core.FS
 
 
 type Job with
-     
+
     member j.J1_JobActionOuts(call:Call) =
         let _off = j.System._off.Expr
         let fn = getFuncName()
         [|
             for td in j.TaskDefs do
-                if td.ExistOutput then 
+                if td.ExistOutput then
                     let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
                     let sets =
                         if RuntimeDS.Package.IsPackageSIM() then _off
@@ -22,19 +22,19 @@ type Job with
 
                     let outParam = td.GetOutParam(j)
                     let emg = call.Flow.emg_st.Expr
-                  
-                    if outParam.DataType = DuBOOL then 
-                        if j.ActionType = Push then 
+
+                    if outParam.DataType = DuBOOL then
+                        if j.ActionType = Push then
                             yield (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)  //단동 실린더? 멈추면 반대로 움직여서 emg 삽입??
-                        else 
+                        else
                             yield (sets, emg) --| (td.OutTag:?> Tag<bool>, fn)
                     else
-                        let valExpr = outParam.WriteValue|>literal2expr
-                        let valDefalut = outParam.DefaultValue|>literal2expr
+                        let valExpr = outParam.WriteValue |> any2expr
+                        let valDefalut = outParam.DefaultValue |> any2expr
                         if j.ActionType = Push then
                             yield (sets, valExpr) --> (td.OutTag, fn)
-                        else 
-                            let tempRising  = getJSM(j).GetTempBoolTag(td.QualifiedName) 
+                        else
+                            let tempRising  = getJSM(j).GetTempBoolTag(td.QualifiedName)
                             yield! (sets, j.System) --^ (tempRising,  fn)
                             yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
                             yield (emg, valDefalut) --> (td.OutTag, fn)
@@ -53,4 +53,4 @@ type Job with
         match j.ActionOutExpr with
         | Some outExprs ->[(outExprs, _off) --| (jm.OutDetected, getFuncName())]
         | None -> []
-         
+

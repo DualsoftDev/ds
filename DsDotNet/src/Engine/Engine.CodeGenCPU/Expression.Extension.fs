@@ -42,8 +42,8 @@ module ExpressionExtension =
         let targetValue, (min: obj option), (max: obj option), minEQ, maxEQ
             = vp.TargetValue, vp.Min, vp.Max, vp.IsInclusiveMin, vp.IsInclusiveMax
 
-        let minExpr = min |> Option.map literal2expr
-        let maxExpr = max |> Option.map literal2expr
+        let minExpr = min |> Option.map any2expr
+        let maxExpr = max |> Option.map any2expr
 
         let minCondition =
             match minExpr with
@@ -65,7 +65,7 @@ module ExpressionExtension =
         | None, Some maxCond -> maxCond
         | None, None ->
             match targetValue with
-            | Some value -> literal2expr value ==@ targetVariable
+            | Some value -> any2expr value ==@ targetVariable
             | None -> failwith "Both min and max are None, and targetValue is also None."
 
 
@@ -100,7 +100,7 @@ module ExpressionExtension =
 
     /// Create Copy Statement
     let (-->) (sets, copyExpr) (target, comment:string) =
-        DuAction(DuCopy(sets, copyExpr, target))  |> withExpressionComment comment
+        DuAssign(Some(sets), copyExpr,  target)  |> withExpressionComment comment
 
     /// Create One Scan Relay Coils Statement
     let (--^) (sets: Expression<bool>, sys:DsSystem) (rising: TypedValueStorage<bool>, comment:string) =

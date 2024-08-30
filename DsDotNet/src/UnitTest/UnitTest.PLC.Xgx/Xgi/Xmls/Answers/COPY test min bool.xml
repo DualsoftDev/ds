@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Project Attribute="3145730" Version="513" WksNodeCount="16">
-    COPY test3
+    COPY test min bool
     <NetworkConfiguration>
         <NetworkList>
             <Network Type="NETWORK ITEM:UNKNOWN" Name="Undefined Network" NetworkType=""></Network>
@@ -15,12 +15,11 @@
                 </Parameter>
             </Parameters>
             <GlobalVariables>
-                <GlobalVariable Version="Ver 1.0" Count="4">
+                <GlobalVariable Version="Ver 1.0" Count="3">
                     <Symbols>
-                        <Symbol Name="b1" Comment="bool b1 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b2" Comment="bool b2 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="b3" Comment="bool b3 = false;" Device="" Kind="6" Type="BOOL" InitValue="false" Address="" State="0"/>
-                        <Symbol Name="nn3" Comment="int32 nn3 = 0;" Device="" Kind="6" Type="DINT" InitValue="0" Address="" State="0"/>
+                        <Symbol Name="cond" Comment="bool cond = true;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="src" Comment="bool src = true;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
+                        <Symbol Name="tgt" Comment="bool tgt = true;" Device="" Kind="6" Type="BOOL" InitValue="true" Address="" State="0"/>
                     </Symbols>
                     <TempVar></TempVar>
                     <HMIFlags></HMIFlags>
@@ -45,30 +44,24 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] copyIf(rising(!($b1)) &amp;&amp; $b2, 2 + $nn3, $nn3);
+                                        [0] copyIf($cond, $src, $tgt);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="10" Coordinate="2049">
-                                        b1
+                                    <Element ElementType="6" Coordinate="2049">
+                                        cond
                                     </Element>
-                                    <Element ElementType="6" Coordinate="2052">
-                                        b2
+                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
+                                    <Element ElementType="70" Coordinate="3073">
+                                        src
                                     </Element>
-                                    <Element ElementType="102" Coordinate="2055" Param="FNAME: ADD2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1685&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000080, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="3076">
-                                        2
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="3082">
-                                        nn3
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="4100">
-                                        nn3
+                                    <Element ElementType="70" Coordinate="3079">
+                                        tgt
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
-                                    <Element ElementType="33" Coordinate="7262" Param="END">
+                                    <Element ElementType="2" Coordinate="6145" Param="90"/>
+                                    <Element ElementType="33" Coordinate="6238" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -78,12 +71,11 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="4">
+                        <LocalVar Version="Ver 1.0" Count="3">
                             <Symbols>
-                                <Symbol Name="b1" Comment="bool b1 = false;" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b2" Comment="bool b2 = false;" Device="" Kind="8" State="0"/>
-                                <Symbol Name="b3" Comment="bool b3 = false;" Device="" Kind="8" State="0"/>
-                                <Symbol Name="nn3" Comment="int32 nn3 = 0;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="cond" Comment="bool cond = true;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="src" Comment="bool src = true;" Device="" Kind="8" State="0"/>
+                                <Symbol Name="tgt" Comment="bool tgt = true;" Device="" Kind="8" State="0"/>
                             </Symbols>
                             <TempVar Count="0"/>
                         </LocalVar>

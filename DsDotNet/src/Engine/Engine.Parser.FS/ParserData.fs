@@ -61,7 +61,7 @@ module ParserDataModule =
                 | RegexPattern @"^(\w+)(\[\d+\])?\.(\w+)$" [instanceName; _; memberVar] ->
                     let! decl = x.UdtDefs |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne
                     let! matchingDecl = x.UdtDecls.TryFind(fun d -> d.TypeName = decl.TypeName)
-                    return matchingDecl.Members |> Seq.exists (fun m -> m.Name = memberVar)                   
+                    return matchingDecl.Members |> Seq.exists (fun m -> m.Name = memberVar)
                 | _ -> ()
             } |> Option.defaultValue false
 
@@ -91,7 +91,7 @@ module ParserDataModule =
                 | RegexPattern @"^(\w+)(\[\d+\])?(\.\w+)?$" [instanceName; _; _] ->
                     x.UdtDefs |> filter (fun udt -> udt.VarName = instanceName) |> Seq.tryExactlyOne |> Option.map (fun udt -> udt.TypeName)
                 | _ -> None
-            
+
         member x.AddUdtDefs (udtDef:UdtDef) =
             x.UdtDefs.Add(udtDef)
 
@@ -104,6 +104,6 @@ module ParserDataModule =
                 let arrIndex = if arraySize > 1 then $"[{i}]" else ""
                 for m in udtDecl.Members do
                     let name = $"{varName}{arrIndex}.{m.Name}"
-                    let exp = m.Type |> typeDefaultValue |> literal2expr
+                    let exp = m.Type |> typeDefaultValue |> any2expr
                     let v = createMemberVariable name exp None
                     x.Storages[name] <- v

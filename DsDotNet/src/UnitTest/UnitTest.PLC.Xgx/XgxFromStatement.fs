@@ -19,7 +19,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 
     let prjParam = getXgxProjectParams xgx "UnitTestProject"
     let noComment:string = null
-    member x.CreateVar name = 
+    member x.CreateVar name =
         prjParam.CreateTypedAutoVariable(name, false, null)
         |> tee (fun x ->
             x.Address <- name   // 일단 test 용으로 name 을 그대로 address 로 할당.  XGK 에서는 address 가 반드시 필요.
@@ -80,7 +80,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
             let source = literal2expr false
             let target = x.CreateVar varName |> tee (fun t -> t.Address <- "P0000A" )
             let stmt =
-                let stmt = DuAction(DuCopy(c, source, target))
+                let stmt = DuAssign(Some c, source, target)
                 if xgx = XGI then
                     let fParam = {FunctionName = XgiConstants.FunctionNameMove; Condition = Some c; Arguments = [c; source;]; Output = target; OriginalExpression = c}
                     DuPLCFunction(fParam)
@@ -128,7 +128,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
     member x.``DuCopy int add with condition statement test`` () =
         let varName = "XX"
         let condition = literal2expr true
-        let source = 
+        let source =
             createBinaryExpression (literal2expr 3) "+" (literal2expr 5)
         let target =
             prjParam.CreateTypedAutoVariable(varName, 0, null)

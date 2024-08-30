@@ -115,7 +115,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="13313">
-                                        [4] copyIf (rising(!($b1)) &amp;&amp; $b2, 2 + $nn3, $nn3);
+                                        [4] copyIf(rising(!($b1)) &amp;&amp; $b2, 2 + $nn3, $nn3);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

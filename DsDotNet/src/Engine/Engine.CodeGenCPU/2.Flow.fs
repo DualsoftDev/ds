@@ -1,7 +1,6 @@
 [<AutoOpen>]
 module Engine.CodeGenCPU.ConvertFlow
 
-open System
 open System.Linq
 open Engine.CodeGenCPU
 open Engine.Core
@@ -49,9 +48,9 @@ type VertexTagManager with
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr )
             <||>
             ( v.RF.Expr )
-             <||>  
+             <||>
             (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr <&&> !@v.Vertex.VR.OG.Expr)
-              
+
         let rsts = real.V.R.Expr
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이
 
@@ -80,7 +79,7 @@ type VertexTagManager with
             | :? Alias as rf ->
                 match  rf.TargetWrapper with
                 | DuAliasTargetReal _ -> failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
-                | DuAliasTargetCall c ->    getExpr c
+                | DuAliasTargetCall c -> getExpr c
             | _ ->
                 failwithlog $"Error {getFuncName()} : {v.Vertex.QualifiedName}"
 
@@ -96,20 +95,21 @@ type VertexTagManager with
         | Some order ->
             [|
                 let tempInit= v.System.GetTempBoolTag("tempInitCheckTokenSrc")
-                let initExpr = 0u|>literal2expr ==@ vc.SourceTokenData.ToExpression()
+                let initExpr = 0u |> literal2expr ==@ vc.SourceTokenData.ToExpression()
                 yield (initExpr, v._off.Expr) --| (tempInit, fn)
 
-                let totalSrcToken = v.System.GetSourceTokenCount()
+                let order = order |> uint32 |> literal2expr
+                let totalSrcToken = v.System.GetSourceTokenCount() |> uint32 |>literal2expr
 
                 if RuntimeDS.Package.IsPLCorPLCSIM()
                 then
                     //처음에는 자기 순서로 시작
-                    yield (fbRisingAfter[tempInit.Expr <&&> v.ET.Expr]    ,       order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
+                    yield (fbRisingAfter[tempInit.Expr <&&> v.ET.Expr], order) --> (vc.SourceTokenData, fn)
                     //이후부터는 전체 값 만큼 증가
-                    yield (fbRisingAfter[!@tempInit.Expr <&&> v.ET.Expr], totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
-                else 
-                    yield (tempInit.Expr   <&&> v.ET.Expr ,        order|>uint32|>literal2expr) --> (vc.SourceTokenData, fn)
-                    yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken|>uint32|>literal2expr, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                    yield (fbRisingAfter[!@tempInit.Expr <&&> v.ET.Expr], totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                else
+                    yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vc.SourceTokenData, fn)
+                    yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
             |]
         |None -> [||]
 

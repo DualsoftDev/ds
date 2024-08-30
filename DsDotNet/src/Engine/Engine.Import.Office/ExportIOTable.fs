@@ -192,7 +192,7 @@ module ExportIOTable =
                         sprintf "%A" c.ACC.Value ]
                 let args = String.Join(", ", args)
                 $"{functionName}({args})"
-            | DuAction (DuCopy (condition, _, _)) -> $"{condition.ToText()}"
+            //| DuAction (DuCopy (condition, _, _)) -> $"{condition.ToText()}"
             | DuAction (DuCopyUdt {Condition=condition}) -> $"{condition.ToText()}"
             | DuPLCFunction _ ->
                 failwithlog "ERROR"

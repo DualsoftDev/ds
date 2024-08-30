@@ -49,38 +49,26 @@
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="6" Coordinate="2049">
-                                        _ON
-                                    </Element>
-                                    <Element ElementType="102" Coordinate="2052" Param="FNAME: ADD2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1685&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000080, &#xA;"/>
-                                    <Element ElementType="70" Coordinate="3073">
-                                        2
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="3079">
-                                        _t1_ADD
-                                    </Element>
-                                    <Element ElementType="70" Coordinate="4097">
-                                        nn3
-                                    </Element>
-                                </Rung>
-                                <Rung BlockMask="0">
-                                    <Element ElementType="10" Coordinate="6145">
+                                    <Element ElementType="10" Coordinate="2049">
                                         b1
                                     </Element>
-                                    <Element ElementType="6" Coordinate="6148">
+                                    <Element ElementType="6" Coordinate="2052">
                                         b2
                                     </Element>
-                                    <Element ElementType="102" Coordinate="6151" Param="FNAME: MOVE&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 118&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN, 0x02afffff, ARRAY[0..-1] OF ANY, 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x028fffff, ARRAY[0..-1] OF ANY &#xA;"/>
-                                    <Element ElementType="70" Coordinate="7172">
-                                        _t1_ADD
+                                    <Element ElementType="102" Coordinate="2055" Param="FNAME: ADD2_DINT&#xA;TYPE: function&#xA;INSTANCE: ,&#xA;INDEX: 1685&#xA;COL_PROP: 1&#xA;SAFETY: 0&#xA;VAR_IN: EN, 0x00200001, , 0&#xA;VAR_IN: IN1, 0x00200080, , 0&#xA;VAR_IN: IN2, 0x00200080, , 0&#xA;VAR_OUT: ENO, 0x00000001,&#xA;VAR_OUT: OUT, 0x00000080, &#xA;"/>
+                                    <Element ElementType="70" Coordinate="3076">
+                                        2
                                     </Element>
-                                    <Element ElementType="70" Coordinate="7178">
+                                    <Element ElementType="70" Coordinate="3082">
+                                        nn3
+                                    </Element>
+                                    <Element ElementType="70" Coordinate="4100">
                                         nn3
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">
-                                    <Element ElementType="2" Coordinate="10241" Param="90"/>
-                                    <Element ElementType="33" Coordinate="10334" Param="END">
+                                    <Element ElementType="2" Coordinate="7169" Param="90"/>
+                                    <Element ElementType="33" Coordinate="7262" Param="END">
                                         END
                                     </Element>
                                 </Rung>
@@ -90,9 +78,8 @@ XckU4UJCOYh5CA==
                                 </OnlineUploadData>
                             </LDRoutine>
                         </Body>
-                        <LocalVar Version="Ver 1.0" Count="5">
+                        <LocalVar Version="Ver 1.0" Count="4">
                             <Symbols>
-                                <Symbol Name="_t1_ADD" Comment="2 + $nn3" Device="" Kind="1" Type="DINT" InitValue="2" Address="" State="0"/>
                                 <Symbol Name="b1" Comment="bool b1 = false;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b2" Comment="bool b2 = false;" Device="" Kind="8" State="0"/>
                                 <Symbol Name="b3" Comment="bool b3 = false;" Device="" Kind="8" State="0"/>

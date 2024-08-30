@@ -31,10 +31,10 @@ module CollectStoragesModule =
 
         member x.CollectStorages() : IStorage list =
             [   match x with
-                | DuCopy(cond, src, tgt) ->
-                    yield! cond.CollectStorages()
-                    yield! src.CollectStorages()
-                    yield tgt
+                //| DuCopy(cond, src, tgt) ->
+                //    yield! cond.CollectStorages()
+                //    yield! src.CollectStorages()
+                //    yield tgt
                 | DuCopyUdt { Condition=cond } ->
                     yield! cond.CollectStorages() ]
 

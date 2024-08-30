@@ -288,10 +288,6 @@ module XgiExportModule =
                 | DuAction(DuCopyUdt _) when isXgk ->
                     failwith "UDT declaration is not supported in XGK"
 
-                | DuAction(DuCopy(condition, source, target)) when isXgk ->
-                    moveCmdRungXgk condition source target
-
-
                 | _ -> failwithlog "Not yet"
 
         let rungEnd = generateEndXml (rgi.NextRungY + 1)

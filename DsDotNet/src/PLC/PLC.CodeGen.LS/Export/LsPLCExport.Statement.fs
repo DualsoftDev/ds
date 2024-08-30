@@ -102,17 +102,6 @@ module StatementExtensionModule =
             | (DuTimer _ | DuCounter _ | DuPLCFunction _) ->
                 augs.Statements.Add statement
 
-            | DuAction(DuCopy(condition, source, target)) ->
-                let funcName = XgiConstants.FunctionNameMove
-                DuPLCFunction {
-                    Condition = Some condition
-                    FunctionName = funcName
-                    Arguments = [ source ]
-                    OriginalExpression = source
-                    Output = target
-                } |> augs.Statements.Add
-
-
             | DuAction(DuCopyUdt _) ->
                 statement |> augs.Statements.Add
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
@@ -148,9 +137,6 @@ module StatementExtensionModule =
                             DownCondition  = tryVisitTop down
                             ResetCondition = tryVisitTop reset
                             LoadCondition  = tryVisitTop load }
-                | DuAction(DuCopy(condition, source, target)) ->
-                    let cond = (visitTop condition) :?> IExpression<bool>
-                    Some <| DuAction(DuCopy(cond, visitTop source, target))
 
                 | DuAction (DuCopyUdt ({ Condition=condition; } as udt)) ->
                     let cond = (visitTop condition) :?> IExpression<bool>

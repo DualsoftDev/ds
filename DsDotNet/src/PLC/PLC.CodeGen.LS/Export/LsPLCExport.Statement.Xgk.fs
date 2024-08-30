@@ -85,7 +85,7 @@ module XgkTypeConvertorModule =
                     (* XGK CTUD 에서 load : 별도의 statement 롭 분리: ldcondition --- MOV PV C0001  *)
                     match newCtr.LoadCondition with
                     | Some cond ->
-                        DuAction(DuCopy(cond, literal2expr(ctr.Counter.PRE.Value), ctr.Counter.CounterStruct)) |> statements.Add
+                        DuAssign(Some cond, literal2expr(ctr.Counter.PRE.Value), ctr.Counter.CounterStruct) |> statements.Add
                     | _ -> ()
 
                 augs.Statements.AddRange(statements)

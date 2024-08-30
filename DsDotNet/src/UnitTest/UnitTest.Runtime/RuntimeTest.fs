@@ -24,7 +24,7 @@ module RuntimeTest =
     let ``Runtime Running Test`` () =
 
         (*시뮬레이션 구동 테스트*)
-        DsSimulator.Do(runtimeModel.Cpu, 1500) |> Assert.True //값변경있으면서 구동하면 true
+        DsSimulator.Do(runtimeModel.Cpu) |> Assert.True //값변경있으면서 구동하면 true
 
 
         (*DB 로깅 구동 테스트*)

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO.IsolatedStorage;
 using System.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Threading.Tasks;
 using static Engine.CodeGenCPU.SystemManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
@@ -21,7 +22,7 @@ namespace Engine.TestSimulator
 {
     public static class DsSimulator
     {
-        public static bool Do(DsCPU dsCpu, int checkTime = 2000)
+        public static bool Do(DsCPU dsCpu)
         {
             RuntimeDS.Package = RuntimePackage.PCSIM;
 
@@ -33,9 +34,10 @@ namespace Engine.TestSimulator
                 homeBtn.BoxedValue = true;
                 dsCpu.RunInBackground();
                 var org = (dsCpu.MySystem.TagManager as SystemManager).GetSystemTag(Core.TagKindList.SystemTag.originMonitor);
-                if (!await WaitForOriginMonitorAsync(org, checkTime))
+                int waitForOriginMonitorLimit = 10000;
+                if (!await WaitForOriginMonitorAsync(org, waitForOriginMonitorLimit))
                 {
-                    throw new TimeoutException($"OriginMonitor was not set within the timeout period of {checkTime} milliseconds.");
+                    throw new TimeoutException($"OriginMonitor was not set within the timeout period of {waitForOriginMonitorLimit} milliseconds.");
                 }
                 homeBtn.BoxedValue = false;
 
@@ -47,7 +49,7 @@ namespace Engine.TestSimulator
                         ((VertexTagManager)reals.First().TagManager).SF.Value = true;
                 });
 
-                resultMoving = await CheckEventCountAsync(dsCpu, checkTime);
+                resultMoving = await CheckEventCountAsync(dsCpu);
             }).Wait();
 
             return resultMoving;
@@ -72,21 +74,40 @@ namespace Engine.TestSimulator
             return true;
         }
 
-        static async Task<bool> CheckEventCountAsync(DsCPU dsCpu, int checkTime)
+        static async Task<bool> CheckEventCountAsync(DsCPU dsCpu)
         {
             List<string> changedNames = new();
-
+            CancellationTokenSource cts = new();
             var subscription = dsCpu.TagWebChangedFromCpuSubject.Subscribe(s =>
             {
                 Console.WriteLine($"Name:{s.Name}\t Value:{s.Value}");
                 changedNames.Add(s.Name);
-            });
-            await Task.Delay(checkTime);
-            subscription.Dispose();
 
-            var groupedNames = changedNames.GroupBy(name => name);
-            return groupedNames.Any(group => group.Count() > 2);
+                var groupedNames = changedNames.GroupBy(name => name);
+                if (groupedNames.Any(group => group.Count() > 2))
+                {
+                    cts.Cancel();  // Cancel the delay task if the condition is met
+                }
+            });
+
+            try
+            {
+                await Task.Delay(10000, cts.Token);
+            }
+            catch (TaskCanceledException)
+            {
+                // Task was canceled because the condition was met
+                return true;
+            }
+            finally
+            {
+                subscription.Dispose();
+            }
+
+            
+            return false;
         }
+
     }
 }
 

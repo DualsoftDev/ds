@@ -24,7 +24,7 @@ namespace Engine.TestSimulator
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms);
 
             RuntimeModel runModel = new(dsz, PlatformTarget.WINDOWS);
-            _ = DsSimulator.Do(runModel.Cpu, 1000000);
+            _ = DsSimulator.Do(runModel.Cpu);
             Console.ReadKey();
         }
     }

@@ -1,7 +1,7 @@
 namespace T.CPU
 
 open NUnit.Framework
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 open Engine.Parser.FS
 open T

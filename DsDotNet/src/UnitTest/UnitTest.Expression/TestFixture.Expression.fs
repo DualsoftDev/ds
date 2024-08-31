@@ -1,7 +1,7 @@
 namespace T
 
 open System.IO
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Dual.Common.Core.FS
 open Engine.Core
 open Engine.Parser.FS

@@ -2,7 +2,7 @@ namespace T
 
 open Dual.Common.Base.FS
 open Dual.Common.Core.FS
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open NUnit.Framework
 open System
 open Newtonsoft.Json

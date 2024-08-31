@@ -1,6 +1,6 @@
 namespace T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Dual.Common.Base.FS
 open System.IO
 open System.Diagnostics

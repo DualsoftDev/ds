@@ -6,7 +6,7 @@ open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 [<AutoOpen>]
 module UdtTestModule =

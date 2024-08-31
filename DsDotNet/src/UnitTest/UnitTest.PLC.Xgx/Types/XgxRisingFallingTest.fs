@@ -1,7 +1,7 @@
 namespace T.Types
 open T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open NUnit.Framework
 open Engine.Parser.FS
 open Engine.Core

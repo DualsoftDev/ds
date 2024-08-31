@@ -1,5 +1,5 @@
 namespace T.PPT
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 open T
 

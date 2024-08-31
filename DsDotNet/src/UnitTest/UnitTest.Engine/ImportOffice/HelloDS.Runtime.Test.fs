@@ -3,7 +3,7 @@ open T
 
 open NUnit.Framework
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Engine.Core
 open Engine.Import.Office
 open Engine.Cpu

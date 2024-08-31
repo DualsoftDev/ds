@@ -1,7 +1,7 @@
 namespace T.Rung
 open T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open NUnit.Framework
 open Dual.Common.Core.FS
 open PLC.CodeGen.LS

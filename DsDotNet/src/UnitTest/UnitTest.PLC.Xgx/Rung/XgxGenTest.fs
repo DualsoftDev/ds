@@ -1,7 +1,7 @@
 namespace T.Rung
 open T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 open Xunit
 open NUnit.Framework

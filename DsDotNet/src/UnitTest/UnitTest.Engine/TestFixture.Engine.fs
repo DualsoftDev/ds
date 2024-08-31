@@ -1,6 +1,6 @@
 namespace T
 open System.IO
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 [<AutoOpen>]
 module Fixtures =

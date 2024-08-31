@@ -1,5 +1,5 @@
 namespace T.CPU
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 open System.IO
 open NUnit.Framework

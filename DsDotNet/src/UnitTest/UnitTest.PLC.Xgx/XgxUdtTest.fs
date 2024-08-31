@@ -6,7 +6,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
 open Engine.CodeGenPLC
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open System
 
 

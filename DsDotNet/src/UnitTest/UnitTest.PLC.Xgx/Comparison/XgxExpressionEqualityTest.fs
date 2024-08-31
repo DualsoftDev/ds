@@ -1,7 +1,7 @@
 namespace T.Comparison
 open T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 
 open NUnit.Framework

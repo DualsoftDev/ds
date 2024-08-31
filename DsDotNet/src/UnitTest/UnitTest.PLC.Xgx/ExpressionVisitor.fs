@@ -2,7 +2,7 @@ namespace T
 
 open NUnit.Framework
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Dual.Common.Core.FS
 open Engine.Parser.FS
 open Engine.Core

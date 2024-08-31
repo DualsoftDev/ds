@@ -4,7 +4,7 @@ open NUnit.Framework
 
 open Engine.Core
 open Dual.Common.Core.FS
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Engine.Parser.FS
 
 

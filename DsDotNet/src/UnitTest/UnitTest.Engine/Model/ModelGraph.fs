@@ -1,5 +1,5 @@
 namespace T
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 open System.Linq
 open NUnit.Framework

@@ -6,7 +6,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open Engine.Core
 open Engine.Parser.FS
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 
 type XgxLadderElementTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)

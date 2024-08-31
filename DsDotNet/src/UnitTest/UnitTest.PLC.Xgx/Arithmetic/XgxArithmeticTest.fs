@@ -7,7 +7,7 @@ open Engine.Parser.FS
 open Engine.Core
 open Dual.Common.Core.FS
 open Dual.Common.Base.CS
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open type Dual.Common.Base.CS.DcLogger
 
 type XgxArithematicTest(xgx:PlatformTarget) =

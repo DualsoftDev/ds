@@ -1,7 +1,7 @@
 namespace T.Rung
 open T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open System.Linq
 open NUnit.Framework
 open Engine.Core

@@ -1,6 +1,6 @@
 namespace T
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Engine.Core
 open NUnit.Framework
 open System.Collections.Generic

@@ -1,7 +1,7 @@
 namespace T
 open NUnit.Framework
 open Dual.Common.Core.FS
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open Engine.Info
 open System
 open Xunit

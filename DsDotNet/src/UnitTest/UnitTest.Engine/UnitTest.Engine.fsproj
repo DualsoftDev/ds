@@ -68,7 +68,8 @@
 		<Compile Include="Cpu\Error Statement.fs" />
 		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
 		<Compile Include="CustomEngineTest.fs" />
-		<Compile Include="DBLoggerTest.fs" />
+		<Compile Include="Info/DBLoggerTest.fs" />
+		<Compile Include="Info\ConfidenceIntervalTest.fs" />
 		<Compile Include="StoragesTest.fs" />
 		<None Include="ScratchPad.fsx" />
 		<None Include="App.config" />

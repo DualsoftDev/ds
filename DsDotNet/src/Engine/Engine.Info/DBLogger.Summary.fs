@@ -10,7 +10,7 @@ open System.Data
 open Dapper
 open Dual.Common.Db
 open System.Runtime.CompilerServices
-
+open MathNet.Numerics.Distributions
 
 
 
@@ -48,28 +48,79 @@ module DBLoggerORM2 =
     type Summary(logSet: LogSet, storageKey: StorageKey, durations:float seq) =
         /// storageKey 에 해당하는 모든 durations.  variance 를 구하기 위해서 모든 instance 필요.
         member val Durations = ResizeArray durations
+        /// Container reference
+        member x.LogSet = logSet
+        member x.StorageKey = storageKey
+
+    and Summary with
         /// Number rising
         member x.Count = x.Durations.Count
         member x.Sum = x.Durations |> Seq.sum
         /// 평균
         member x.Average = x.Durations.ToOption().Map(Seq.average) |? 0.0
-        /// 분산
+
+        /// 표본 분산
         member x.Variance =
             if x.Count > 1 then
                 let mean = x.Average
                 x.Durations
                 |> map (fun x -> (x - mean) ** 2.0)
-                |> Seq.average
+                |> Seq.sum |> fun sum -> sum / float (x.Count - 1)  // -->
+                // 분산을 계산할 때, Seq.average를 사용하고 있지만, 분산 계산 시 표본 분산을 고려한다면 Seq.sum 후에 Count - 1로 나누는 것이 더 정확
+                // 다음 대신 .. |> Seq.average
             else
                 0.0
         /// 표준 편차
         member x.StdDev = sqrt x.Variance
-        /// 표준 편차
+        /// 표준 편차 (σ)
         member x.Sigma  = sqrt x.Variance
 
-        /// Container reference
-        member x.LogSet = logSet
-        member x.StorageKey = storageKey
+        member x.μ = x.Average
+        member x.σ = x.Sigma
+        member x.S = x.σ ** 2
+        /// 신뢰구간 -> L, U limit 반환.
+        ///
+        /// - zHalfSigma : 정규분포에서 α/2에 해당하는 Z-값.  (예를 들어, 95% 신뢰구간의 경우 Z-값은 약 1.96)
+        member x.CalculateZScoreLimits(zHalfSigma:float) =
+            let limit = zHalfSigma * x.σ
+            let l, u = x.μ - limit, x.μ + limit
+            l, u
+
+        /// L, U -> 신뢰구간 구하기
+        member x.CalculateConfidenceInterval(l:float, u:float) =
+            let zL = (l - x.μ) / x.σ
+            let zU = (u - x.μ) / x.σ
+
+            // 정규 분포의 누적 분포 함수 (CDF) 계산
+            let ΦZu = Normal.CDF(0.0, 1.0, zU)
+            let ΦZl = Normal.CDF(0.0, 1.0, zL)
+
+            ΦZu - ΦZl
+
+        /// 'ci %' 신뢰구간에 해당하는 Z-score 계산
+        ///
+        /// - e.g: 95% 신뢰구간 -> 한쪽 끝 위치: 1 - (1 - 0.95)/2 = 0.975% -> 1.96
+        static member ComputeZScoreFromConfidenceInterval(ci:float) =
+            assert( 0.0 <= ci && ci <= 1.0)
+            let cumulativeProbability  = 1.0 - (1.0 - ci)/2.0
+            Normal(0.0, 1.0).InverseCumulativeDistribution(cumulativeProbability)
+
+        // { CPK
+        /// Cpk ≥ 1.33: 공정이 안정적이고, 제품이 규격 범위 내에서 일관되게 생산됩니다.
+        member x.CalculateCpk (l: float, u: float) =
+            let cpkUpper = (u - x.μ) / (3.0 * x.σ)
+            let cpkLower = (x.μ - l) / (3.0 * x.σ)
+            min cpkUpper cpkLower
+
+        /// Cpk가 주어졌을 때 USL과 LSL 계산
+        ///
+        /// - nSigam : 3 Sigma 보다 6 Sigma 이면 상/하한 범위가 더 커진다.
+        member x.CalculateSpecLimitsUsingCpk(cpk: float, ?nSigma:float) =
+            let nSigma = nSigma |? 3.0
+            let u = x.μ + cpk * nSigma * x.σ
+            let l = x.μ - cpk * nSigma * x.σ
+            l, u
+        // } CPK
 
 
     /// DB logging 관련 전체 설정
@@ -261,7 +312,4 @@ module DBLoggerORM3 =
     type DSCommonAppSettings with
         member x.ConnectionString = $"Data Source={x.LoggerDBSettings.ConnectionPath}"
         member x.CreateConnection(): SqliteConnection = x.LoggerDBSettings.CreateConnection()
-
-
-
 

@@ -2,7 +2,7 @@ namespace T.IOHub
 
 open System
 open System.IO
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open NUnit.Framework
 open IO.Core
 open Xunit

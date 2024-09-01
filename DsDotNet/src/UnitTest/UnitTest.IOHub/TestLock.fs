@@ -1,6 +1,6 @@
 namespace T.IOHub
 
-open Dual.UnitTest.Common.FS
+open Dual.Common.UnitTest.FS
 open NUnit.Framework
 open System
 open System.IO

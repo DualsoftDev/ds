@@ -320,7 +320,8 @@ module internal rec Command =
             let fsx = x + inputBlockXmls.Max(fun (_, bxi) -> bxi.TotalSpanX) + plusHorizontalPadding
 
             let outputCellXmls =
-                [   for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
+                [
+                    for (_portOffset, (_name, yoffset, terminal, _checkType)) in alignedOutputParameters.Indexed() do
                         let terminalText =
                             match terminal with
                             | :? IStorage as storage -> getStorageText storage
@@ -331,7 +332,8 @@ module internal rec Command =
 
             /// 문어발: input parameter end 와 function input adaptor 와의 'S' shape 연결
             let tentacleXmls =
-                [   for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
+                [
+                    for (inputBlockIndex, (portOffset, b)) in inputBlockXmls.Indexed() do
                         let i = inputBlockIndex
                         let bex = x + b.X + b.TotalSpanX // block end X
                         let bey = b.Y
@@ -343,13 +345,12 @@ module internal rec Command =
                             let hEndX = if i = 0 then fsx - 1 else bex + i - 1
 
                             yield!
-                                tryHlineTo (bex, bey) (hEndX)
-                                |> map (fun xml ->
+                                tryHlineTo (bex, bey) (hEndX) >>- fun xml ->
                                     tracefn $"H: ({bex}, {bey}) -> ({hEndX}, {bey})"
 
-                                    { Coordinate = c
-                                      Xml = xml
-                                      SpanXy = (spanX, 1) })
+                                    {   Coordinate = c
+                                        Xml = xml
+                                        SpanXy = (spanX, 1) }
 
                             if i > 0 then
                                 let bexi = bex + i
@@ -360,14 +361,14 @@ module internal rec Command =
 
                                 // 'S' shape 의 상단부 수평선 그리기
                                 yield!
-                                    tryHlineTo (bexi, yi) (fsx - 1)
-                                    |> map (fun xml ->
+                                    tryHlineTo (bexi, yi) (fsx - 1) >>- fun xml ->
                                         tracefn $"H: ({bexi}, {yi}) -> [({bexi}, {fsx - 1})]"
 
                                         let c2 = coord (bexi, yi)
-                                        { Coordinate = c2
-                                          Xml = xml
-                                          SpanXy = (spanX, 1) }) ]
+                                        {   Coordinate = c2
+                                            Xml = xml
+                                            SpanXy = (spanX, 1) }
+                ]
 
             let allXmls =
                 [

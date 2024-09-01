@@ -1,3 +1,5 @@
+- LSTMTS
+
 - Log
 	- at
 	- storageId
@@ -5,6 +7,7 @@
 	- 
 	- tokenId
 	- (modelId)
+	- maintenanceId
 - Storage
 	- name
 	- fqdn
@@ -14,9 +17,12 @@
 - TagKind
 	- id
 	- name
+- Model
 - Token
 	- at
 	- originalToken
 	- mergedTokenId
 	- modelId
+- Maintenance
+	- min, max, budge
 

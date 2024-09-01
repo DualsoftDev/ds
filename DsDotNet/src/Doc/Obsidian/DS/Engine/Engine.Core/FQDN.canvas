@@ -9,7 +9,7 @@
 		{"id":"82420327c7d1cecc","type":"text","text":"ActionVariable","x":-392,"y":137,"width":171,"height":50},
 		{"id":"1e1f6ea9082e8bc0","type":"text","text":"Device","x":-1044,"y":137,"width":114,"height":50},
 		{"id":"2a4cb38b81ed57d1","type":"text","text":"LoadedSystem","x":-967,"y":37,"width":167,"height":50},
-		{"id":"df53d71071c372d5","type":"text","text":"[[DS/Engine/Engine.Core/DsSystem]]","x":-1057,"y":-42,"width":140,"height":50},
+		{"id":"df53d71071c372d5","type":"text","text":"[[DS/Engine/Engine.Core/DsSystem]]","x":-1217,"y":-42,"width":334,"height":50},
 		{"id":"ba853b218e42a2c0","type":"text","text":"ExternalSystem","x":-917,"y":137,"width":175,"height":50},
 		{"id":"e6168c2fd680dcc1","type":"text","text":"ButtonDef","x":-80,"y":90,"width":144,"height":50},
 		{"id":"1eb32198babee23e","type":"text","text":"LampDef","x":5,"y":165,"width":143,"height":50},

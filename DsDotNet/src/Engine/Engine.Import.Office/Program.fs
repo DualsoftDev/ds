@@ -1,14 +1,8 @@
 namespace Engine.Runtime
 
 open Engine.Core
-open Engine.Parser.FS
 
-open System
-open System.Reflection
-open System.IO
 open Engine.Import.Office
-open Engine.Core
-open Engine.CodeGenCPU
 module testMain =
 
     [<EntryPoint>]

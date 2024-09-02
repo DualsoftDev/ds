@@ -2,8 +2,6 @@
 namespace Engine.Import.Office
 
 open System.Linq
-open System.Collections
-open PptConnectionModule
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Dual.Common.Core.FS
@@ -11,10 +9,7 @@ open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
 open System
-open System.IO
 open System.Data
-open LibraryLoaderModule
-open System.Reflection
 open Engine.Parser.FS
 open Engine.Parser.FS.ModelParser
 
@@ -322,7 +317,7 @@ module ImportU =
                             let name = call.DeviceNApi.Combine("_")
                             Alias.Create(
                                 $"{name}_{node.AliasNumber}" ,
-                                DuAliasTargetCall(segOrg :?> Call), 
+                                DuAliasTargetCall(segOrg :?> Call),
                                 DuParentReal(real), false
                             )
                         else
@@ -746,20 +741,23 @@ module ImportU =
             (* Root Call 연결 없음 체크 *)
             let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
 
-            doc.Nodes.Where(fun n -> n.NodeType.IsCall && n.IsRootNode.Value)
-                     .Iter(fun n ->
-                            let call = doc.DicVertex[n.Key]
-                            if not(rootEdgeSrcs.Contains (call))
-                            then
-                                n.Shape.ErrorShape(ErrID._71, n.PageNum)
+            doc.Nodes
+                .Where(fun n -> n.NodeType.IsCall && n.IsRootNode.Value)
+                .Iter(fun n ->
+                    let call = doc.DicVertex[n.Key]
+                    if not(rootEdgeSrcs.Contains (call)) then
+                        n.Shape.ErrorShape(ErrID._71, n.PageNum)
                 )
 
             (* 복수의 작업에서 SEQ 전송 Start Edge 체크*)
             if not(isLib) then
-                doc.Nodes.Where(fun n -> n.NodeType.IsReal)
+                doc.Nodes
+                    .Where(fun n -> n.NodeType.IsReal)
                     .Iter(fun n ->
-                        let xs = doc.Edges.Where(fun e -> e.IsStartEdge && e.EndNode = n)
-                                          .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
+                        let xs =
+                            doc.Edges
+                                .Where(fun e -> e.IsStartEdge && e.EndNode = n)
+                                .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
 
                         let pureReals = xs.GetPureReals()
                         if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then
@@ -797,8 +795,8 @@ module ImportU =
 
             let systemRepo = ShareableSystemRepository()
             doc.Pages
-                |> Seq.filter (fun page -> page.PageNum <> 1)
-                |> Seq.iter (processPage doc mySys systemRepo)
+            |> Seq.filter (fun page -> page.PageNum <> 1)
+            |> Seq.iter (processPage doc mySys systemRepo)
 
         [<Extension>]
         static member MakeAddressBySlideNote(doc: PptDoc, mySys: DsSystem) =
@@ -828,8 +826,8 @@ module ImportU =
 
             let systemRepo = ShareableSystemRepository()
             doc.Pages
-                |> Seq.filter (fun page -> page.PageNum = 1)
-                |> Seq.iter (processPage doc mySys systemRepo)
+            |> Seq.filter (fun page -> page.PageNum = 1)
+            |> Seq.iter (processPage doc mySys systemRepo)
 
 
         [<Extension>]
@@ -840,8 +838,7 @@ module ImportU =
             doc.MakeFlows(sys) |> ignore
 
             //자동생성
-            if isActive && not(isLib) && isCreateBtnLLib
-            then
+            if isActive && not(isLib) && isCreateBtnLLib then
                 sys.CreateGenBtnLamp()
 
             //수동생성

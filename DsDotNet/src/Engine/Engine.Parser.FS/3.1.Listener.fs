@@ -19,7 +19,7 @@ open System.Collections.Generic
 module private DsParserHelperModule =
 
 
-    let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext) =
+    let getAutoGenDevApi(jobNameFqdn:string array, ctx:CallListingContext): DevApiDefinition =
         let (inaddr, inParam), (outaddr, outParm) =
             ctx.TryFindFirstChild<TaskDevParamInOutContext>()
             |> Option.get
@@ -37,7 +37,7 @@ module private DsParserHelperModule =
 
     type DsSystem with
 
-        member x.TryFindParentWrapper(ci: NamedContextInformation) =
+        member x.TryFindParentWrapper(ci: NamedContextInformation): ParentWrapper option =
             option {
                 let! flowName = ci.Flow
 
@@ -57,7 +57,7 @@ module private DsParserHelperModule =
             loadedName: string,
             absoluteFilePath: string,
             relativeFilePath: string
-          ) =
+          ): ExternalSystem =
             let external =
                 let param =
                     {
@@ -181,7 +181,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         createApiResetInfo terms x.TheSystem
 
-    member x.GetValidFile(fileSpecCtx: FileSpecContext) =
+    member x.GetValidFile(fileSpecCtx: FileSpecContext): string =
           fileSpecCtx
             .TryFindFirstChild<FilePathContext>()
             .Value.GetText()
@@ -205,7 +205,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         if File.Exists absoluteFilePath then
             File.Delete absoluteFilePath        //자동생성은 매번 다시만듬
 
-        x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)    |> ignore
+        x.TheSystem.LoadDeviceAs(options.ShareableSystemRepository, loadedName, absoluteFilePath, simpleFilePath)
 
 
     member private x.GetLayoutPath(fileSpecCtx: FileSpecContext) =
@@ -682,7 +682,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                     | None ->
                                                         let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty
                                                         if createDevice then
-                                                            x.CreateLoadedDeivce(device)
+                                                            x.CreateLoadedDeivce(device) |> ignore
                                                         None
 
 
@@ -1006,7 +1006,7 @@ module ParserLoadApiModule =
                 loadedName: string,
                 absoluteFilePath: string,
                 relativeFilePath: string
-            ) =
+            ): Device =
             let device =
                 fwdLoadDevice
                 <| { ContainerSystem = x
@@ -1016,6 +1016,6 @@ module ParserLoadApiModule =
                      ShareableSystemRepository = systemRepo
                      LoadingType = DuDevice }
 
-            x.AddLoadedSystem(device) |> ignore
+            x.AddLoadedSystem(device)
             device
 

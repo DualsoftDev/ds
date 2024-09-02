@@ -21,7 +21,7 @@ module ParserLoader =
                 if loadedName.IsSome then
                     ParserOptions.Create4RuntimeLoadedSystem(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, loadedName.Value)
                 else
-                    ParserOptions.Create4Runtime(systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, false)
+                    ParserOptions.Create4Runtime(            systemRepo, dir, "ActiveCpuName", Some dsFilePath, DuNone, autoGenDevice, false)
 
 
             let system = ModelParser.ParseFromString(text, option)
@@ -59,10 +59,10 @@ module ParserLoader =
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
 
-        RuntimeDS.HwIP <- cfg.HwIP
-        RuntimeDS.TimeoutCall <- cfg.TimeoutCall
+        RuntimeDS.HwIP              <- cfg.HwIP
+        RuntimeDS.TimeoutCall       <- cfg.TimeoutCall
         RuntimeDS.RuntimeMotionMode <- cfg.RuntimeMotionMode
-        RuntimeDS.TimeSimutionMode <- cfg.TimeSimutionMode
+        RuntimeDS.TimeSimutionMode  <- cfg.TimeSimutionMode
 
         let dir = PathManager.getDirectoryName (configPath.ToFile())
         let system, loadings = loadingDS dir  cfg.DsFilePath None false target

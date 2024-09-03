@@ -75,9 +75,12 @@ module DBLoggerORM2 =
         /// 표준 편차 (σ)
         member x.Sigma  = sqrt x.Variance
 
+        /// 평균 (μ)
         member x.μ = x.Average
+        /// 표준 편차 (σ)
         member x.σ = x.Sigma
-        member x.S = x.σ ** 2
+        /// 분산
+        member x.S = x.Variance
         /// 신뢰구간 -> L, U limit 반환.
         ///
         /// - zHalfSigma : 정규분포에서 α/2에 해당하는 Z-값.  (예를 들어, 95% 신뢰구간의 경우 Z-값은 약 1.96)

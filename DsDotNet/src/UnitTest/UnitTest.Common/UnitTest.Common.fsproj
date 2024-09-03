@@ -26,7 +26,7 @@
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Others\Dual.Common.UnitTest.FS\Dual.Common.UnitTest.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.UnitTest.FS\Dual.Common.UnitTest.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">

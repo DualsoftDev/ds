@@ -44,7 +44,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.3.5" />
+		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.3.6" />
 	</ItemGroup>
 
 

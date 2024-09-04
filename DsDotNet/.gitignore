@@ -203,3 +203,4 @@ Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.ds
 Apps/CommonAppSettings.json
 Directory.Build.props
 Directory.Packages.props
+Experimental/

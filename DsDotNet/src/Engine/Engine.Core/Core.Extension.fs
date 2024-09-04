@@ -325,7 +325,7 @@ module CoreExtensionModule =
         member x.TimeDelayExist = x.TimeDelay.IsSome && x.TimeDelay.Value <> 0.0
         member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0
 
-        member x.TimeAvgMsec =
+        member x.TimeSimMsec =
             if x.TimeAvg.IsNone then
                 failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
             else

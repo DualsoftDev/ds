@@ -309,17 +309,18 @@ module PptNodeModule =
 
                 | REALExF -> updateTime()
                 | (LAYOUT | AUTOPRE | DUMMY) -> ()
-
-                if nodeType.IsOneOf(CALL, AUTOPRE) then
+                
+                let callNAutoPreName = nameNFunc(shape, macros, iPage)
+                if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
                     //Dev1[3(3,3)].Api(!300, 200)
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
-                    let names = (nameNFunc(shape, macros, iPage)).Split('.').ToFSharpList()
+                    let names = callNAutoPreName.Split('.').ToFSharpList()
                     let prop =
                         match names with
                         | n1::n2::[] -> n1
                         | n1::n2::n3::[] -> n2
                         | _ ->
-                            failwith $"Error: {nameNFunc(shape, macros, iPage)}"
+                            failwith $"Error: {callNAutoPreName}"
 
                     let jobPram =
                         let lbc = prop |> GetLastBracketContents    // e.g "5(5,1)"

@@ -86,8 +86,10 @@ module PptDocModule =
                             (filterNodes
                                 |> Seq.map (fun f ->
                                     match f.NodeType with
-                                    | CALL -> f.Job.Combine()
-                                    | _ -> f.Name
+                                    | CALL -> if f.IsFunction
+                                                then f.Name 
+                                                else f.Job.Combine()
+                                    | _ -> f.Name 
                                     )
                             )
 

@@ -136,7 +136,7 @@ type RealVertexTagManager with
         let fn = getFuncName()
         [|
             let getTimeStatement() =
-                [|  yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeAvgMsec, fn)
+                [|  yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeSimMsec, fn)
                     yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, fn)     |]
                    
             if v.Real.Time.IsSome then
@@ -144,7 +144,7 @@ type RealVertexTagManager with
                 yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
                 yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
                 
-                if RuntimeDS.Package.IsPackageSIM() then
+                if RuntimeDS.Package.IsPackageSIM() && v.Real.TimeAvgExist  then
                     if RuntimeDS.RuntimeMotionMode = MotionAsync then
                         yield! getTimeStatement() 
                     elif RuntimeDS.RuntimeMotionMode = MotionSync then

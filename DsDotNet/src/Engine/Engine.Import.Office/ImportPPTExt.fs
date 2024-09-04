@@ -252,7 +252,7 @@ module ImportU =
             let createCallNAutoPre () =
                 let libInfos, _ = getLibraryInfos()
                 callNAutoPres
-                    .Filter(fun node -> not(mySys.LoadedSystems.Select(fun d->d.Name).Contains(node.DevName)))
+                    .Filter(fun node -> not(node.IsFunction) && not(mySys.LoadedSystems.Select(fun d->d.Name).Contains(node.DevName)))
                     .GroupBy(fun node -> node.DevName)
                     .Iter(fun kv ->
 

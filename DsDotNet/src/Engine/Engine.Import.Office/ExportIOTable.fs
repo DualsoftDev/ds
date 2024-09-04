@@ -273,29 +273,32 @@ module ExportIOTable =
                   ]
                   )
 
+        if operatorRows.any() || commandRows.any()  || variRows.any()  || variRows.any()
+        then 
+            let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
+            let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
+            let sampleConstRows=  if variRows.any() then [] else  [[TextXlsConst;"-";"";"";"";"-";"-";"-"]]
+            let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"-";"-"]]
+            let dts =
+                getConditionDefListRows (sys.ReadyConditions)
+                @ commandRows
+                @ operatorRows
+                @ variRows
+                @ sampleOperatorRows
+                @ sampleCommandRows
+                @ sampleVariRows
+                @ sampleConstRows
+                |> Seq.chunkBySize(IOchunkBySize)
+                |> Seq.map(fun rows->
+                    let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")
+                    addIOColumn dt
+                    addRows rows dt
+                    dt
+                )
 
-        let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
-        let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
-        let sampleConstRows=  if variRows.any() then [] else  [[TextXlsConst;"-";"";"";"";"-";"-";"-"]]
-        let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"-";"-"]]
-        let dts =
-            getConditionDefListRows (sys.ReadyConditions)
-            @ commandRows
-            @ operatorRows
-            @ variRows
-            @ sampleOperatorRows
-            @ sampleCommandRows
-            @ sampleVariRows
-            @ sampleConstRows
-            |> Seq.chunkBySize(IOchunkBySize)
-            |> Seq.map(fun rows->
-                let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")
-                addIOColumn dt
-                addRows rows dt
-                dt
-            )
-
-        dts
+            dts
+        else 
+            []
 
     let getErrorRows(sys:DsSystem) =
 

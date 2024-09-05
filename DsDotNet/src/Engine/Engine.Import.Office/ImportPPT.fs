@@ -9,6 +9,7 @@ open Engine.Core
 open DocumentFormat.OpenXml.Packaging
 open System
 open Engine.Parser.FS
+open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module ImportPptModule =
@@ -25,9 +26,20 @@ module ImportPptModule =
         AutoIOM: bool
         CreateFromPpt : bool
         CreateBtnLamp : bool
+        StartMemory : int
+        OpMemory: int
     }
 
-    let defaultPptParams() = {TargetType = WINDOWS; DriverIO = LS_XGK_IO; AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true}
+    let defaultPptParams() = 
+        {
+            TargetType = WINDOWS
+            DriverIO = LS_XGK_IO
+            AutoIOM = true
+            CreateFromPpt = false
+            CreateBtnLamp = true
+            StartMemory = 1000
+            OpMemory = 100
+        }
 
     let getHashKeys (skipCnt: int, path: string, loadedParentStack:Stack<DsSystem>) =
         String.Join(
@@ -293,7 +305,8 @@ module ImportPptModule =
                 LayoutImgPaths = layoutImgPaths
             }
 
-        static member GetRuntimeZipFromPpt(fullName: string, pptParams)=
+        static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams)
+            DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory) (pptParams.TargetType, pptParams.DriverIO)
             ModelLoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths), ret.System
 

@@ -8,7 +8,7 @@ module CpusEvent =
 
     // Represents the status parameters for a Vertex.
     type VertexStatusParam =
-        | Event of sys: ISystem * vertex: IVertex * status: Status4
+        | EventCPU of sys: ISystem * vertex: IVertex * status: Status4
 
     // Subjects to broadcast status and value changes.
     let StatusSubject = new Subject<VertexStatusParam>()
@@ -16,7 +16,7 @@ module CpusEvent =
 
     // Notifies subscribers about a status change.
     let onStatusChanged(sys: ISystem, vertex: IVertex, status: Status4) =
-        StatusSubject.OnNext(Event (sys, vertex, status))
+        StatusSubject.OnNext(EventCPU (sys, vertex, status))
 
     // Notifies subscribers about a value change.
     let onValueChanged(sys: ISystem, stg: IStorage, v: obj) =

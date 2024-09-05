@@ -222,7 +222,9 @@ public static class CustomServerExtension
             //var dsFileJson = DBLogger.GetDsFilePath(connectionString);
         }
 
-        ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
+        /* IO hub */
+        if (serverGlobal.ServerSettings.UseIOHub)
+            ServerGlobal.ReStartIoHub(Path.Combine(AppContext.BaseDirectory, "zmqsettings.json"));
 
 
         //

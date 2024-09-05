@@ -15,13 +15,13 @@ module ConvertCpuVertex =
         member r.VR = r.TagManager :?> RealVertexTagManager
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
-        member r.MutualResetCoins = 
+        member r.MutualResetCoins =
             let mutual = r.Parent.GetSystem().S.MutualCalls
             mutual[r]
-    
+
     type VariableData with
-        member v.VM = v.TagManager :?> VariableManager  
-        
+        member v.VM = v.TagManager :?> VariableManager
+
     type ActionVariable  with
         member av.VM = av.TagManager :?> ActionVariableManager
 
@@ -35,19 +35,19 @@ module ConvertCpuVertex =
 
         member c.HasSensor  =
             match c.IsJob with
-            | true -> 
+            | true ->
                 c.TargetJob.TaskDefs
                     .Where(fun d-> d.ExistInput)
                     .any()
             | false -> false
-        
+
         member c.HasAnalogSensor  =
-            if c.HasSensor 
-            then 
+            if c.HasSensor
+            then
                 c.TargetJob.TaskDefs
                     .Where(fun d-> d.ExistInput && d.InTag.DataType <> typedefof<bool>)
                     .any()
-            else 
+            else
                 false
 
         member c.ExistAvgTime    = getAgvTimes(c).any()
@@ -60,27 +60,27 @@ module ConvertCpuVertex =
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
-        member c.EndPlan =  
+        member c.EndPlan =
             if c.IsCommand then
                 (c.TagManager :?> CoinVertexTagManager).CallCommandEnd.Expr
             elif c.IsOperator then
                 (c.TagManager :?> CoinVertexTagManager).CallOperatorValue.Expr
-            else 
+            else
                 c.TargetJob.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
-        member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None           
+        member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None
         member c.End = c.EndAction.DefaultValue(c.EndPlan)
-        
-        member c.EndWithTimer = 
+
+        member c.EndWithTimer =
             if  c.UsingTon then
                 c.VC.TDON.DN.Expr
             else
                 c.End
 
-        member c.IsAnalog = 
+        member c.IsAnalog =
             c.TargetJob.TaskDefs
                 .any(fun td-> td.IsAnalogActuator || td.IsAnalogSensor)
-        
+
 
         member c.GetEndAction() =
             let tds =
@@ -88,17 +88,17 @@ module ConvertCpuVertex =
                     .Where(fun td->td.ExistInput)
                     .Select(fun td->td.GetInExpr(c.TargetJob))
 
-            if tds.any() then 
+            if tds.any() then
                 Some(tds.ToAnd())
-            else 
+            else
                 None
 
         //member c.UpdateChildRealExpr(x:ApiItem) =
-        //    let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x) 
+        //    let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x)
         //    if td.ExistInput
-        //    then 
+        //    then
         //        Some(td.GetInExpr(c.TargetJob))
-        //    else 
+        //    else
         //        None
 
         member c.RealLinkExpr =
@@ -112,39 +112,39 @@ module ConvertCpuVertex =
         //member c.PresetCounter = if c.UsingCtr
         //                         then c.TargetJob.Func.Value.GetRingCount()
         //                         else failwith $"{c.Name} not use counter"
-        
+
         //member c.PSs =
-        //    if c.IsJob 
+        //    if c.IsJob
         //    then c.TargetJob.TaskDefs.Select(fun f->f.PS)
         //    else [c.VC._on]
 
         member c.PEs =
-            if c.IsJob 
+            if c.IsJob
             then c.TargetJob.TaskDefs.Select(fun f->f.GetPlanEnd(c.TargetJob))
             else [c.VC.CallCommandEnd]
 
-        member c.TXs = 
+        member c.TXs =
             if c.IsJob
             then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).TX)
             else []
 
-        member c.RXs = 
+        member c.RXs =
             if c.IsJob
             then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).RX)
             else []
 
-        member c.Errors = 
+        member c.Errors =
             let vmc = getVMCall(c)
             [|
                 vmc.ErrOnTimeOver
-                vmc.ErrOnTimeShortage 
+                vmc.ErrOnTimeShortage
                 vmc.ErrOffTimeOver
-                vmc.ErrOffTimeShortage 
-                vmc.ErrShort 
-                vmc.ErrOpen 
+                vmc.ErrOffTimeShortage
+                vmc.ErrShort
+                vmc.ErrOpen
             |]
-                         
-          
+
+
         member c.SafetyExpr   = c.SafetyConditions.Choose(fun f->f.GetJob().ActionInExpr).ToAndElseOn()
         member c.AutoPreExpr = c.AutoPreConditions.Choose(fun f->f.GetJob().ActionInExpr).ToAndElseOn()
 
@@ -155,14 +155,14 @@ module ConvertCpuVertex =
                 let initOnCalls  = rv.OriginInfo.CallInitials
                                      .Where(fun (_c, ty) -> ty = InitialType.On)// && not(c.IsAnalog))
                                      .Select(fun (c, _)->c)
-               
+
                 if initOnCalls.Contains(c)
-                    then 
-                        (r.VR.OB.Expr <||> r.VR.OA.Expr) 
+                    then
+                        (r.VR.OB.Expr <||> r.VR.OA.Expr)
                         <&&> r.Flow.mop.Expr <&&> !@r.VR.OG.Expr <&&> !@c.End
-    
+
                     else c._off.Expr
-            | _ ->  
+            | _ ->
                 c._off.Expr
 
         member r.SourceToken:uint32 = r.V.GetVertexTag(VertexTag.sourceToken).BoxedValue :?> uint32
@@ -170,7 +170,11 @@ module ConvertCpuVertex =
     type Real with
         member r.V = r.TagManager :?> RealVertexTagManager
 
+        /// 실제 Token >= 1.   Token 없을 경우, 0 return.
+        // 원래 token 없으면 null 을 반환해야 함!!
         member r.RealToken:uint32 = r.V.GetVertexTag(VertexTag.realToken).BoxedValue :?> uint32
+        /// 실제 Token >= 1.   Token 없을 경우, 0 return.
+        // 원래 token 없으면 null 을 반환해야 함!!
         member r.MergeToken:uint32 = r.V.GetVertexTag(VertexTag.mergeToken).BoxedValue :?> uint32
 
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ST)
@@ -180,27 +184,27 @@ module ConvertCpuVertex =
 
         member r.CoinAlloffExpr = !@r.V.CoinAnyOnST.Expr <&&> !@r.V.CoinAnyOnRT.Expr <&&> !@r.V.CoinAnyOnET.Expr
 
-        member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeOver) 
-        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeShortage) 
-        
-        member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeOver) 
-        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeShortage) 
+        member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeOver)
+        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeShortage)
 
-        member r.ErrOpens   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOpen) 
-        member r.ErrShorts   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrShort) 
+        member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeOver)
+        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeShortage)
 
-        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeShortages 
-                            @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages 
+        member r.ErrOpens   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOpen)
+        member r.ErrShorts   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrShort)
+
+        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeShortages
+                            @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages
                             @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
 
 [<Extension>]
 type RealExt =
     [<Extension>]
-    static member GetRealToken(r:Real):uint32 = r.RealToken
+    static member GetRealToken(r:Real):uint32 option = match r.RealToken with | 0u -> None | v -> Some v
     [<Extension>]
-    static member GetMergeToken(r:Real):uint32 = r.MergeToken
+    static member GetMergeToken(r:Real):uint32 option = match r.MergeToken with | 0u -> None | v -> Some v
 
 [<Extension>]
 type CallExt =
     [<Extension>]
-    static member GetSourceToken(c:Call):uint32 = c.SourceToken  
+    static member GetSourceToken(c:Call):uint32 = c.SourceToken

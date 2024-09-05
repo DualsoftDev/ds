@@ -11,7 +11,8 @@ public class ServerSettings
 {
     public string ServiceFolder { get; set; }
     public bool UseHttpsRedirection { get; set; }
-    public bool AutoStartOnSystemPowerUp { get; set; }    
+    public bool UseIOHub { get; set; }
+    public bool AutoStartOnSystemPowerUp { get; set; }
     public ClientEnvironment ClientEnvironment { get; set; }
     public DSCommonAppSettings CommonAppSettings { get; set; }
     public string RuntimeModelDsZipPath {
@@ -75,6 +76,6 @@ public static class ServerSettingsExtensions
         else if (runtimePackage == RuntimePackage.PLCSIM)
             return RuntimePackageCs.PLCSIM;
         else
-            throw new NotImplementedException();        
+            throw new NotImplementedException();
     }
 }

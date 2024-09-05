@@ -27,12 +27,14 @@
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Utils\Dual.Common.Utils.csproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Web\Dual.Web.Server\Dual.Web.Server.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.FSharpInterop\Dual.Common.FSharpInterop.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
 		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.3.5" />
 		<PackageReference Include="DualSoft-Common-Utils" Version="0.3.5" />
 		<PackageReference Include="DualSoft-Web-Server" Version="0.3.5" />
+		<PackageReference Include="DualSoft-Common-FSharpInterop" Version="0.3.5" />
 	</ItemGroup>
 	
 	

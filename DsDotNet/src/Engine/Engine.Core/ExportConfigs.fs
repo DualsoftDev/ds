@@ -19,6 +19,7 @@ module ExportConfigsMoudle =
     type InterfaceConfig = {
         SystemName: string
         HwName: string //LS-XGI-IO, LS-XGK-IO, PC
+        HwIP: string //PlatformIP
         DsPlanInterfaces: DsPlanInterface[]
         DsActionInterfaces: DsActionInterface[]
     }
@@ -28,11 +29,12 @@ module ExportConfigsMoudle =
         Work: string
         WorkInfo: string
 
+        ///storage name, address
         ScriptStartTag: string*string
         ScriptEndTag: string*string
-
-        MotionStartTag: string*string
-        MotionEndTag: string*string
+        ///storage name, address
+        MotionStartTag: string*string  
+        MotionEndTag: string*string     
 
         Station: string
         Device: string
@@ -130,11 +132,12 @@ module ExportConfigsMoudle =
 
         ifs.ToArray()
 
-    let getDsInterfaceConfig (sys: DsSystem, hwName:string) =
+    let getDsInterfaceConfig (sys: DsSystem, hwName:string, hwIP:string) =
         {
             DsPlanInterfaces = getDsPlanInterfaces sys
             DsActionInterfaces = getDsActionInterfaces sys
             HwName  = hwName
+            HwIP = hwIP
             SystemName = sys.Name
         }
 
@@ -142,8 +145,8 @@ module ExportConfigsMoudle =
 type ExportConfigsExt =
 
     [<Extension>]
-    static member ExportDSInterface (sys:DsSystem, exportPath:string, hwName:string) =
-        let interfaceConfig = getDsInterfaceConfig (sys, hwName)
+    static member ExportDSInterface (sys:DsSystem, exportPath:string, hwName:string, hwIP:string) =
+        let interfaceConfig = getDsInterfaceConfig (sys, hwName, hwIP)
         saveInterfaceConfig exportPath interfaceConfig
 
         let dsSimpleInterfaces =
@@ -156,3 +159,5 @@ type ExportConfigsExt =
 
     [<Extension>]
     static member LoadInterfaceConfig (path:string) = loadInterfaceConfig path
+    [<Extension>]
+    static member getSimplePlanInterface (jsonText:string) = JsonConvert.DeserializeObject<DsSimplePlanInterface>(jsonText)

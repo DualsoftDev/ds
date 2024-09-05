@@ -20,7 +20,7 @@ namespace Engine.TestSimulator
         {
             string testFile = Path.Combine(AppContext.BaseDirectory
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/SampleA/exportDS/testA/testMy/my.pptx");
-            PptParams pptParms = new PptParams(PlatformTarget.WINDOWS, HwDriveTarget.LS_XGK_IO, true, false, true);
+            PptParams pptParms = new PptParams(PlatformTarget.WINDOWS, HwDriveTarget.LS_XGK_IO, true, false, true, 1000, 100);
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms);
 
             RuntimeModel runModel = new(dsz, PlatformTarget.WINDOWS);

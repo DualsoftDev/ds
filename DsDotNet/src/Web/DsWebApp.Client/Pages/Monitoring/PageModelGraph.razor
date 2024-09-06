@@ -1,6 +1,6 @@
 @* https://github.com/cytoscape/cytoscape.js/blob/unstable/documentation/demos/compound-nodes/index.html *@
 
-@* 
+@*
 참고 파일
 - js/cyDsGraph.js
 - js/pages/PageModelGraph_razor.js
@@ -12,6 +12,7 @@
 @using static Engine.Info.DBLoggerORM;
 @using Engine.Info
 
+
 <h3>Model Graph</h3>
 
 <button id="center">Center</button>
@@ -19,15 +20,19 @@
 <button id="show">Show</button>
 <DxButton Text="Start MONITOR" Click="@(async () => await startMonitorAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />
 <DxButton Text="Stop MONITOR" Click="@(async () => await stopMonitorAsync())" Visible="@(_graphLoaded && _hubSubscription != null)" />
-<DxButton Text="Clear MONITOR status" Click="@(async () => await resetStatusAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />    
+<DxButton Text="Clear MONITOR status" Click="@(async () => await resetStatusAsync())" Visible="@(_graphLoaded && _hubSubscription == null)" />
 
+@*
+LoadingSpinner 에 의해서 cytoscape 이미지의 layout 이 후 조정되어서 node 의 offset 이 발생하므로,
+여기서 사용할 수 없다!!
 @if (! _graphLoaded)
 {
     <LoadingSpinner Text="Loading model.." />
 }
-
+ *@
 
 <div id="cy"></div>
+
 
 @code {
     bool _graphLoaded;
@@ -219,4 +224,4 @@
         top: 0;
     }
  </style>
- 
+

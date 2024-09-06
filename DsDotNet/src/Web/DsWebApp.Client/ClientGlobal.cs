@@ -35,7 +35,9 @@ public class ClientGlobal : ClientGlobalBase, INotifyPropertyChanged
     public DsClientSettings DsClientSettings => (DsClientSettings)base.ClientSettings;
     public string ModelDsZipPath { get; set; }
     public bool IsCpuRunning { get; set; }
+#pragma warning disable 0067
     public event PropertyChangedEventHandler PropertyChanged;
+#pragma warning restore 0067
     public bool IsDebugVersion => CommonAppSettings.IsDebugVersion;
 
     HttpClient _http;

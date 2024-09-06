@@ -62,8 +62,8 @@ else
             data: chartData,        // C# 에서 만든 data 객체
             options: options
         }
-        var chart = new Chart($('#chartCanvas')[0], config); 
-        
+        var chart = new Chart($('#chartCanvas')[0], config);
+
 
         $('#reset_zoom').click(function(){
             chart.resetZoom();
@@ -86,8 +86,6 @@ else
 
 @code {
     object _backupData;
-    // string _chartCanvasId = "myBackupCanvas" + Guid.NewGuid().ToString();
-    string _chartCanvasId = "chartCanvasId";
 
     protected override async Task OnInitializedAsync()
     {

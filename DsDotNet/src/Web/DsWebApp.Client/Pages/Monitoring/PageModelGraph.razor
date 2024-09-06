@@ -138,6 +138,7 @@ LoadingSpinner 에 의해서 cytoscape 이미지의 layout 이 후 조정되어�
 
     async Task stopMonitorAsync()
     {
+        await Task.Yield();
         _hubSubscription?.Dispose();
         _hubSubscription = null;
     }

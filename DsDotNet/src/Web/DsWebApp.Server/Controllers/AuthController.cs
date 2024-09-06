@@ -4,70 +4,80 @@ using Dual.Web.Server.Auth;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.Mvc;
 
-
-namespace TwmApp.Server.Controllers;
-
-[Route("api/[controller]")]
-[ApiController]
-public class AuthController(IUserAccountService userAccountService, ServerGlobal global) : AuthControllerBase(userAccountService)
+namespace TwmApp.Server.Controllers
 {
-    // api/auth/check
-    [HttpGet("check")]
-    [Authorize(Roles = "Administrator,User")]
-    public bool CheckToken() => true;
-
-
-    [HttpPost]
-    [Route("login")]
-    [AllowAnonymous]
-    public ActionResult<UserSession> Login([FromBody] LoginRequest loginRequest)
+    [Route("api/[controller]")]
+    [ApiController]
+    public class AuthController : AuthControllerBase
     {
-        var jwtAuthenticationManager = new JwtAuthenticationManager(userAccountService);
-        var userSession = jwtAuthenticationManager.GenerateJwtToken(loginRequest.UserName, loginRequest.Password);
-        if (userSession is null)
-            return Unauthorized();
-        else
-            return userSession;
-    }
+        private readonly IUserAccountService _userAccountService;
+        private readonly ServerGlobal _global;
 
-
-    // api/auth/adduser
-    [HttpPost]
-    [Route("adduser")]    
-    [Authorize(Roles = "Administrator")]
-    
-    public ErrorMessage AddUser([FromBody] UserAuthInfo loginRequest)
-    {
-        try
+        // Constructor
+        public AuthController(IUserAccountService userAccountService, ServerGlobal global)
+            : base(userAccountService)
         {
-            var (u, p, a) = (loginRequest.UserName, loginRequest.Password, loginRequest.IsAdmin);
-            var encrypted = p.IsNullOrEmpty() ? null : Dual.Common.Utils.Crypto.Encrypt(p, K.CryptKey);
-
-            using var conn = global.CreateDbConnection();
-
-            var userTable = "user";
-            var existing = conn.QueryFirstOrDefault<UserAuthInfo>($"SELECT [password], [isAdmin] FROM [{userTable}] WHERE [username] = @UserName;", new { UserName = u });
-            var newInfo = new { UserName = u, Password = encrypted, IsAdmin = a };
-            if (existing == null)
-            {
-                conn.Execute(
-                    $"INSERT INTO [{userTable}] (userName, password, isAdmin) VALUES (@UserName, @Password, @IsAdmin);"
-                    , newInfo);
-            }
-            else
-            {
-                conn.Execute(
-                    $@"UPDATE [{userTable}]
-                        SET [password] = @Password, [isAdmin] = @IsAdmin
-                        WHERE [username] = @UserName;"
-                    , newInfo);
-            }
-            return "";
+            _userAccountService = userAccountService;
+            _global = global;
         }
-        catch (Exception ex)
+
+        // api/auth/check
+        [HttpGet("check")]
+        [Authorize(Roles = "Administrator,User")]
+        public bool CheckToken() => true;
+
+        // api/auth/login
+        [HttpPost]
+        [Route("login")]
+        [AllowAnonymous]
+        public ActionResult<UserSession> Login([FromBody] LoginRequest loginRequest)
         {
-            return ex.Message;
+            var jwtAuthenticationManager = new JwtAuthenticationManager(_userAccountService);
+            var userSession = jwtAuthenticationManager.GenerateJwtToken(loginRequest.UserName, loginRequest.Password);
+            if (userSession is null)
+                return Unauthorized();
+            else
+                return userSession;
+        }
+
+        // api/auth/adduser
+        [HttpPost]
+        [Route("adduser")]
+        [Authorize(Roles = "Administrator")]
+        public ErrorMessage AddUser([FromBody] UserAuthInfo loginRequest)
+        {
+            try
+            {
+                var (u, p, a) = (loginRequest.UserName, loginRequest.Password, loginRequest.IsAdmin);
+                var encrypted = p.IsNullOrEmpty() ? null : Dual.Common.Utils.Crypto.Encrypt(p, K.CryptKey);
+
+                using var conn = _global.CreateDbConnection();
+
+                var userTable = "user";
+                var existing = conn.QueryFirstOrDefault<UserAuthInfo>($"SELECT [password], [isAdmin] FROM [{userTable}] WHERE [username] = @UserName;", new { UserName = u });
+                var newInfo = new { UserName = u, Password = encrypted, IsAdmin = a };
+                if (existing == null)
+                {
+                    conn.Execute(
+                        $"INSERT INTO [{userTable}] (userName, password, isAdmin) VALUES (@UserName, @Password, @IsAdmin);"
+                        , newInfo);
+                }
+                else
+                {
+                    conn.Execute(
+                        $@"UPDATE [{userTable}]
+                            SET [password] = @Password, [isAdmin] = @IsAdmin
+                            WHERE [username] = @UserName;"
+                        , newInfo);
+                }
+                return "";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
         }
     }
 }

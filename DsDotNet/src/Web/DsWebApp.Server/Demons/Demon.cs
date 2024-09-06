@@ -16,8 +16,6 @@ using static Engine.CodeGenCPU.ConvertCpuVertex;
 using static Engine.CodeGenCPU.RealExt;
 using static Engine.Info.DBWriterModule;
 
-using Dual.Common.FSharpInterop;
-
 namespace DsWebApp.Server.Demons;
 public partial class Demon : BackgroundService
 {
@@ -89,8 +87,8 @@ public partial class Demon : BackgroundService
                             if (ti != null && ti.Value.IsNeedSaveDBLog())
                             {
                                 uint? token = null;
-                                if (ti.Value is EventVertex ev && ev.Target is Real r && r.GetRealToken().IsSome())
-                                    token = r.GetRealToken().Value;
+                                if (ti.Value is EventVertex ev && ev.Target is Real r)
+                                    token = r.GetRealToken().ToNullable();
                                 _dbWriter.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, token));
                             }
                         }

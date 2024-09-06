@@ -58,7 +58,7 @@ module TagManagerUtil =
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
-    type BridgeType = | Device | Button | Lamp | Condition | DummyTemp
+    type BridgeType = | ActionDevice | Button | Lamp | Condition | DummyTemp
     let createBridgeTag(stg:Storages, (name: string), address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed, duType:DataType): ITag option=
         if address = TextSkip || address = "" then
             None
@@ -67,7 +67,7 @@ module TagManagerUtil =
                 let nameCandidate =
                     match bridgeType with
                     | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
-                    | Device ->
+                    | ActionDevice ->
                         match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
                         | TaskDevTag.actionIn     -> name |> getInActionName
                         | TaskDevTag.actionOut    -> name |> getOutActionName

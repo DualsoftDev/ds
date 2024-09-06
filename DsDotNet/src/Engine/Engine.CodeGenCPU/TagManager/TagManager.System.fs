@@ -118,6 +118,7 @@ module SystemManagerModule =
             member x.Target = sys
             member x.Storages = stg
 
+        member s.Storages = stg
         member s.TargetType = target
         member s.MutualCalls = mutualCalls
         member s.GetTempBoolTag(name:string) : PlanVar<bool>=

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using static Engine.Info.DBLoggerORM;
 using Engine.Nuget.Common;
 using static Engine.Info.DBWriterModule;
+using Dual.Common.Base.CS;
 
 bool isWinService = WindowsServiceHelpers.IsWindowsService();
 

@@ -10,7 +10,7 @@ open System.Threading.Tasks
 open Engine.Cpu
 open Engine.Core
 open Engine.CodeGenCPU
- 
+
 module ScanDSImpl =
     let MAX_ARRAY_BYTE_SIZE = 512 //MAX_ARRAY_BYTE_SIZE
     let pointMax = 64 //MAX_RANDOM_BYTE_POINTS
@@ -19,7 +19,7 @@ module ScanDSImpl =
     type IoEventDS(dsCPU:DsCPU, vendors:VendorSpec seq,  client:Client, _server:Server) =
         let vendorDic = vendors.SelectMany(fun f-> f.Files.Select(fun s->s.GetPath().ToLower(), f.AddressResolver)) |> dict
         let tagSet = dsCPU.TagIndexSet
-        let TaskDevTags = dsCPU.Storages.Where(fun f-> TagKindExt.GetTaskDevTagKind(f.Value).IsSome)
+        let TaskDevTags = dsCPU.Storages.Where(fun f-> TagKindExt.TryGetTaskDevTagKind(f.Value).IsSome)
                             |> Seq.groupBy(fun f->f.Value.Address)
                             |> Seq.map(fun (k, v) -> k, v.Select(fun s->s.Value))
                             |> dict
@@ -30,9 +30,9 @@ module ScanDSImpl =
         //let uint32Tags = tagSet.Where(fun f->f.Value|>fst = typedefof<uint32>).Select(fun s->s.Value|>snd, s.Key) |>dict
         //let uint64Tags = tagSet.Where(fun f->f.Value|>fst = typedefof<uint64>).Select(fun s->s.Value|>snd, s.Key) |>dict
         let vendorDs = vendors.First(fun f->f.Location = "")
-        let errCheckDeviceName() = 
+        let errCheckDeviceName() =
             vendorDs.Files.Select(fun f-> f.Name|>textToDataType).ToArray()|>ignore
-        
+
         let onIOTagChanged (change:TagChangedInfo) =
             match change with
             | :? IOTagChangedInfo as change ->
@@ -46,15 +46,15 @@ module ScanDSImpl =
                     //offsets.Iter(fun i-> storages[boolTags[i]].BoxedValue <- values[i])
                 | 8 -> //성능때문에 bit를  IOHub로 부터 byte로 받음
                     let values = values :?> byte[]
-                    offsets |> Seq.iteri(fun i offset-> 
-                    
+                    offsets |> Seq.iteri(fun i offset->
+
                         for bitIndex in 0 .. 7 do
                             let absoluteBitIndex = offset * 8 + bitIndex
                             let value = (values.[i] &&& (1uy <<< bitIndex))
                             let address = vendorDic[change.Path.ToLower()].GetTagName(change.Path.Split('/').Last(), absoluteBitIndex, 1)
-                            if TaskDevTags.ContainsKey address then 
+                            if TaskDevTags.ContainsKey address then
                                 TaskDevTags.[address].Iter(fun s -> s.BoxedValue <- value)
-                            else 
+                            else
                                 Console.WriteLine($"ds TaskDevTags : {address} not exist");
 
                         )
@@ -79,36 +79,36 @@ module ScanDSImpl =
 
 
         let writeDsData  (changes:Type*(IStorage seq))  =
-            
+
             let dataType, tags = changes
             let indexSet = tags.Select(fun f-> tagSet[f.Name]|>snd).ToArray()
-            
+
             match dataType.Name with
             | BOOL    -> client.WriteBits(dataType.Name.ToLower(), indexSet, tags.Select(fun f->Convert.ToBoolean(f.ObjValue)).ToArray()) |>ignore
             | UINT8   -> client.WriteBytes(dataType.Name.ToLower(), indexSet, tags.Select(fun f->Convert.ToByte(f.ObjValue)).ToArray()) |>ignore
             | UINT16  -> client.WriteUInt16s(dataType.Name.ToLower(), indexSet, tags.Select(fun f->Convert.ToUInt16(f.ObjValue)).ToArray()) |>ignore
             | UINT32  -> client.WriteUInt32s(dataType.Name.ToLower(), indexSet, tags.Select(fun f->Convert.ToUInt32(f.ObjValue)).ToArray()) |>ignore
             | UINT64  -> client.WriteUInt64s(dataType.Name.ToLower(), indexSet, tags.Select(fun f->Convert.ToUInt64(f.ObjValue)).ToArray()) |>ignore
-            | INT8     
-            | INT16   
-            | INT32   
-            | INT64  
-            | FLOAT32   
+            | INT8
+            | INT16
+            | INT32
+            | INT64
+            | FLOAT32
             | FLOAT64
-            | CHAR    
+            | CHAR
             | STRING //client.WriteString 필요
             | _-> failwithf $"{tags.First().Name} : {dataType.Name} not support err"
         let writeVendorData  (tags:IStorage seq) =
-            
+
             let TaskDevTags = tags.Select(fun f-> dsCPU.Storages[f.Name])
-            TaskDevTags.Iter(fun t->  
-                if TagKindExt.GetTaskDevTagKind(t).Value <> TaskDevTag.actionOut 
+            TaskDevTags.Iter(fun t->
+                if TagKindExt.GetTaskDevTagKind(t) <> TaskDevTag.actionOut
                 then failwithf $"writeVendorData error {t} is input tag"
                 else
                     let dev =t.Address.Substring(0,1) //예외확인
                     let prov = vendorDic.First(fun f-> f.Key.Split('/').Last() = dev)
                     match prov.Value.GetAddressInfo(t.Address) with
-                        | true, _memType, _offset, _contentBitLength -> 
+                        | true, _memType, _offset, _contentBitLength ->
                             ()
                             //let sm = vspec.StreamManager :?>  StreamManager
                             //let clients  = server.Clients
@@ -117,15 +117,15 @@ module ScanDSImpl =
                             //vspec.StreamManager
                             //match contentBitLength with
                             //| 1 ->  sm.writeBit(ClientRequestInfo)
-                           
+
                         | _ -> ()
-                
+
                         )
 
-        let onDSTagChanged (changes:IStorage seq) = 
-            let dsMemory     = changes |> Seq.filter(fun f-> TagKindExt.GetTaskDevTagKind(f).IsNone)
-            let vendorMemory = changes |> Seq.filter(fun f-> TagKindExt.GetTaskDevTagKind(f).IsSome)
-       
+        let onDSTagChanged (changes:IStorage seq) =
+            let dsMemory     = changes |> Seq.filter(fun f-> TagKindExt.TryGetTaskDevTagKind(f).IsNone)
+            let vendorMemory = changes |> Seq.filter(fun f-> TagKindExt.TryGetTaskDevTagKind(f).IsSome)
+
             dsMemory
                 |> Seq.groupBy(fun f-> f.DataType)
                 |> Seq.iter(writeDsData) |>ignore
@@ -133,13 +133,13 @@ module ScanDSImpl =
             vendorMemory
                |> writeVendorData
 
-        let updateIOServer (name:string) = 
+        let updateIOServer (name:string) =
             let offsets = [||]
             let dataSet = [||]
 
             client.WriteUInt64s(name, offsets, dataSet) |> ignore
 
-        do  
+        do
             errCheckDeviceName()
             client.TagChangedSubject.Subscribe(onIOTagChanged) |> ignore
             dsCPU.TagChangedForIOHub.Subscribe(onDSTagChanged) |> ignore
@@ -149,7 +149,6 @@ module ScanDSImpl =
                     if reals.Any() then
                         (reals.First().TagManager :?> VertexTagManager).SF.Value <- true;
             )
-         
-      
- 
-       
+
+
+

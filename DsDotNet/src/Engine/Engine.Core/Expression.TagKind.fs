@@ -74,6 +74,7 @@ type TagKindExt =
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.getEnumValue<VariableTag>  (x.TagKind)
     [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.getEnumValue<JobTag>       (x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
+    [<Extension>] static member TryGetTaskDevTagKind  (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>   (x.TagKind)
     [<Extension>] static member TryGetSystemTagKind   (x:IStorage) = DU.tryGetEnumValue<SystemTag>    (x.TagKind)
     [<Extension>] static member TryGetVariableTagKind (x:IStorage) = DU.tryGetEnumValue<VariableTag>  (x.TagKind)
 

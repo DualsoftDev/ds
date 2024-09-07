@@ -137,14 +137,15 @@ module TagModule =
 
 
 
-    let getTargetStorages (x:Statement) = x.GetTargetStorages() |> List.toSeq
-    let getSourceStorages (x:Statement) = x.GetSourceStorages() |> List.toSeq
+    let getTargetStorages (x:Statement) = x.GetTargetStorages()
+    let getSourceStorages (x:Statement) = x.GetSourceStorages()
 
     let getTotalTags(statements:Statement seq) =
-        [ for s in statements do
-            yield! s.GetSourceStorages()
-            yield! s.GetTargetStorages()
-        ].Distinct()
+        [|
+            for s in statements do
+                yield! s.GetSourceStorages()
+                yield! s.GetTargetStorages()
+        |].Distinct()
 
     let getRungMap (statements: Statement seq) =
         let totalTags = getTotalTags statements

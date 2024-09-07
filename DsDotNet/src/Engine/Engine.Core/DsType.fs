@@ -2,9 +2,6 @@
 namespace Engine.Core
 
 open System
-open Dual.Common.Core.FS
-open System.Runtime.CompilerServices
-open System.Text.RegularExpressions
 open System.Collections
 
 [<AutoOpen>]
@@ -71,7 +68,7 @@ module DsType =
         | CCTV = 0
         | IMAGE  = 1
 
-        // 공통 함수: 문자열에서 마지막으로 닫히는 기호를 찾고, 그에 대응하는 여는 기호를 찾음
+    /// 공통 함수: 문자열에서 마지막으로 닫히는 기호를 찾고, 그에 대응하는 여는 기호를 찾음
     let FindEnclosedGroup (name: string, openSymbol: char, closeSymbol: char, searchFromStart: bool) =
         let mutable startIdx = -1
         let mutable endIdx = -1
@@ -111,17 +108,17 @@ module DsType =
         else
             name
 
-    // 첫 번째 대괄호 그룹 제거
+    /// 첫 번째 대괄호 그룹 제거
     let GetHeadBracketRemoveName (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', true)
         getRemoveText name startIdx endIdx
 
-    // 마지막 대괄호 그룹 제거
+    /// 마지막 대괄호 그룹 제거
     let GetLastBracketRelaceName (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)
         getRemoveText name startIdx endIdx
 
-    // 마지막 괄호 그룹을 주어진 문자열로 교체
+    /// 마지막 괄호 그룹을 주어진 문자열로 교체
     let GetLastParenthesesReplaceName (name: string, replaceName: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '(', ')', false)
         if startIdx <> -1 && endIdx <> -1 then
@@ -129,17 +126,17 @@ module DsType =
         else
             name
 
-    // 마지막 괄호 그룹 내용 반환
+    /// 마지막 괄호 그룹 내용 반환
     let GetLastParenthesesContents (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '(', ')', false)
         getFindText name startIdx endIdx
 
-    // 마지막 대괄호 그룹 내용 반환
+    /// 마지막 대괄호 그룹 내용 반환
     let GetLastBracketContents (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)
         getFindText name startIdx endIdx
 
-    // 첫 번째 또는 마지막 대괄호 그룹을 반환
+    /// 첫 번째 또는 마지막 대괄호 그룹을 반환
     let GetSquareBrackets (name: string, bHead: bool): string option =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', bHead)
         let text = getFindText name startIdx endIdx
@@ -148,9 +145,9 @@ module DsType =
         | _ -> Some text
 
 
-    // 특수 대괄호 제거 후 순수 이름 추출
-    // [yy]xx[xxx]Name[1,3] => xx[xxx]Name
-    // 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
+    /// 특수 대괄호 제거 후 순수 이름 추출
+    /// [yy]xx[xxx]Name[1,3] => xx[xxx]Name
+    /// 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
     let GetBracketsRemoveName (name: string) =
         name |> GetLastBracketRelaceName  |> GetHeadBracketRemoveName
 

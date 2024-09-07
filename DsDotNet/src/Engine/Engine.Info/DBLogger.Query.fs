@@ -45,7 +45,7 @@ module internal DBLoggerQueryImpl =
             logs |> updateSummary
 
             logs
-            |> groupBy(fun l -> l.Storage)
+            |> groupBy(_.Storage)
             |> map (fun (key, group) -> group |> last)
             |> iter( fun l -> lastLogs[l.Storage] <- l)
 
@@ -75,11 +75,11 @@ module internal DBLoggerQueryImpl =
             let logs = newLogs
 
             let groups =
-                logs |> Seq.groupBy (fun l -> getStorageKey x.StoragesById[l.StorageId])
+                logs |> groupBy (fun l -> getStorageKey x.StoragesById[l.StorageId])
 
             for (key, group) in groups do
                 x.Summaries[key].BuildIncremental(group, x.LastLogs)
 
-            x.TheLastLog <- logs |> Seq.tryLast
+            x.TheLastLog <- logs |> tryLast
 
             ()

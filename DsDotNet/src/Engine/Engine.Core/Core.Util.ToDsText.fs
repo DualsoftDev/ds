@@ -51,11 +51,12 @@ module internal ToDsTextModule =
         let ess = es |> Seq.fold folder []
 
 
-        let getNames (vs:Vertex seq) = vs.Select(getName).JoinWith(", ")
+        let getNames (vs:Vertex seq) = sbs ", " { vs.Select(getName) }
+
         [
             for es in ess do
                 let comments = ResizeArray<string>()
-                yield [
+                yield sb {
                     yield $"{tab}"
                     for i, e in es.Indexed() do
                         let ss, ts = e.Sources, e.Targets
@@ -66,13 +67,13 @@ module internal ToDsTextModule =
                         yield $"{ssn} {arrow} {tn}"
                         let comment =
                             let getVsAndTypes (vs:Vertex seq) =
-                                [ for v in vs -> $"{getName v}({v.GetType().Name})" ].JoinWith(", ")
+                                sbs ", " { for v in vs -> $"{getName v}({v.GetType().Name})" }
                             let sn2 = if ssn <> "" then $"{getVsAndTypes ss}" else " "
                             $"{sn2}{arrow} {getVsAndTypes ts}"
                         comments.Add($"{comment}")
                     yield ";"
                     if pCooment then yield ("\t\t// " + comments.JoinWith("") + ";")
-                ] |> String.concat ""
+                }
         ]
 
     let rec graphToDs (container:ParentWrapper) (indent:int) =
@@ -90,7 +91,7 @@ module internal ToDsTextModule =
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
             if notMentioned.any() then
                 let comment  = if pCooment then "// island"  else ""
-                let isLandCommas =  notMentioned.Select(fun i -> getName i).JoinWith(", ")
+                let isLandCommas = sbs ", " { notMentioned.Select(fun i -> getName i) }
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
         ]
 
@@ -109,7 +110,7 @@ module internal ToDsTextModule =
                 for a in flow.AliasDefs.Values do
                     let toTextAlias = a.AliasTexts.Select(fun f->f.QuoteOnDemand())
                     if toTextAlias.any() then
-                        let aliasTexts = (toTextAlias |> String.concat "; ") + ";"
+                        let aliasTexts = (sbs "; " { toTextAlias }) + ";"
                         let tab = getTab (indent+2)
                         let aliasKey =
                             match a.AliasTarget with
@@ -417,10 +418,10 @@ module internal ToDsTextModule =
                     if timeReals.Any() then
                         yield $"{tab2}[times] = {lb}"
                         for real in timeReals do
-                            let avg = real.DsTime.AVG |> Option.map (fun v -> $"AVG({v})") |> Option.defaultValue ""
-                            let std = real.DsTime.STD |> Option.map (fun v -> $"STD({v})") |> Option.defaultValue ""
-                            let delay = real.DsTime.TON |> Option.map (fun v -> $"TON({v})") |> Option.defaultValue ""
-                            let paras = [avg; std; delay] |> List.filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
+                            let avg   = real.DsTime.AVG |> map (fun v -> $"AVG({v})") |? ""
+                            let std   = real.DsTime.STD |> map (fun v -> $"STD({v})") |? ""
+                            let delay = real.DsTime.TON |> map (fun v -> $"TON({v})") |? ""
+                            let paras = [avg; std; delay] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
                             yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{String.Join(",", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines

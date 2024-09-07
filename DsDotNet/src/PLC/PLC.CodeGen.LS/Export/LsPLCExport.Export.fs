@@ -292,7 +292,7 @@ module XgiExportModule =
         rgi.Xmls |> List.rev |> String.concat "\r\n"
 
     let internal getGlobalTagSkipSysTag(xs:IStorage seq) =
-                    xs |> filter(fun stg-> not(stg.GetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
+        xs |> filter(fun stg-> not(stg.TryGetSystemTagKind().IsSome && stg.Name.StartsWith("_")))
 
     /// (Commented Statement) To (Commented Statements)
     ///
@@ -310,9 +310,7 @@ module XgiExportModule =
         let newCommentedStatements = ResizeArray<CommentedStatements>()
         let newLocalStorages = XgxStorage(localStorages)
 
-        let mutable xxx = 0
         for cmtSt in commentedStatements do
-            xxx <- xxx + 1
             let xgxCmtStmts:CommentedStatements = cmtSt.ToCommentedStatements(prjParam, newLocalStorages)
 
             let (CommentAndStatements(_comment, xgxStatements)) = xgxCmtStmts

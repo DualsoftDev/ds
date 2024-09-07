@@ -26,5 +26,5 @@
         <ProjectReference Include="..\IO.Core\IO.Core.fsproj" />
     </ItemGroup>
 
-   
+
 </Project>

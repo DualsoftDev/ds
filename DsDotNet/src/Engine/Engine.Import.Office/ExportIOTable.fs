@@ -702,10 +702,10 @@ module ExportIOTable =
             let dataTables =  ToIOListDataTables sys ExcelchunkBySize target
             createSpreadsheet filePath (dataTables) 25.0 true
 
-        [<Extension>]
-        static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
-            let dataTables =  ToIOListDataTables system PDFchunkBySize target
-            convertDataSetToPdf filePath dataTables
+        //[<Extension>] //convertDataSetToPdf 구현 필요 opensource 찾아야함 
+        //static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
+        //    let dataTables =  ToIOListDataTables system PDFchunkBySize target
+        //    convertDataSetToPdf filePath dataTables
 
         [<Extension>]
         static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) target=

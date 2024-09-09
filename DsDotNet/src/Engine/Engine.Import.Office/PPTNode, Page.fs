@@ -309,7 +309,7 @@ module PptNodeModule =
 
                 | REALExF -> updateTime()
                 | (LAYOUT | AUTOPRE | DUMMY) -> ()
-                
+
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
                     //Dev1[3(3,3)].Api(!300, 200)

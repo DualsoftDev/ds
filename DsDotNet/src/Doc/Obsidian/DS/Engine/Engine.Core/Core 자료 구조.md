@@ -53,6 +53,6 @@
 - Alias
 	- Target
 - STANDFLMS
-	- REAL : T, N, F, M, S
+	- REAL : T, N, F, M, S (Time, No-trans, Finished, Motion, Script)
 	- Call : S, A, D (Safety, AutoPre, Disabled)
 	- Device: L (Layout -> Device.ChannelPoints)

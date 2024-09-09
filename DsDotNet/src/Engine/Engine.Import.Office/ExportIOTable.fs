@@ -68,7 +68,7 @@ module ExportIOTable =
                 if containSys then
                     //let inSym =  toTextPptFunc btn.TaskDevParamIO.InParam
                     //let outSym =  toTextPptFunc btn.TaskDevParamIO.OutParam
-                    updateHwAddress (btn) (btn.InAddress, btn.OutAddress) Util.runtimeTarget
+                    updateHwAddress (btn) (btn.InAddress, btn.OutAddress) target
                     let dType = getPptHwDevDataTypeText btn
 
                     dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,"", "")
@@ -79,7 +79,7 @@ module ExportIOTable =
                 if containSys then
                     //let inSym =  toTextPptFunc lamp.TaskDevParamIO.InParam
                     //let outSym =  toTextPptFunc lamp.TaskDevParamIO.OutParam
-                    updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) Util.runtimeTarget
+                    updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) target
                     let dType = getPptHwDevDataTypeText lamp
                     dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,"", "")
                     |> ignore
@@ -107,9 +107,13 @@ module ExportIOTable =
         dt
 
     let splitNameForRow(name:string) =
-        let head = name.Split(TextDeviceSplit)[0];
-        let tail = name[(head.Length+TextDeviceSplit.length())..]
-        head, tail
+        let items = name.Split(TextDeviceSplit) //gpt에서 생성하면  TextDeviceSplit 규격 안따름
+        if items.Length = 1 then
+            "", items.[0]
+        else
+            let head = items[0];
+            let tail = name[(head.Length+TextDeviceSplit.length())..]
+            head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
         let inSym  =  dev.GetInParam(job).SymbolName

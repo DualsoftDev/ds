@@ -229,26 +229,30 @@ module DBWriterModule =
                 let theSystem = systems.First()
                 let rt, mt, st = int VertexTag.realToken, int VertexTag.mergeToken, int VertexTag.sourceToken
                 TagEventSubject.Subscribe(fun tag ->
-                    let now = DateTime.Now
-                    let mutable tokenId = TokenIdType()
-                    if tag.GetSystem() = theSystem && tag.IsVertexTokenTag() then
-                        let target = tag.GetTarget()
-                        let t = tag.TagKind
-                        if t = rt then
-                            let real = target :?> Real
-                            let realToken = real.GetRealToken()
-                            tokenId <- TokenIdType(dbWriter.GetTokenId(realToken));
-                        elif t = mt then
-                            let real = target :?> Real
-                            let branchToken = real.GetRealToken()  //삭제된 자신 토큰번호
-                            let trunkToken  = real.GetMergeToken() //삭제한 메인경로 토큰번호
-                            dbWriter.OnTokenMerged(branchToken, trunkToken) |> ignore
-                        elif t = st then
-                            let call = target :?> Call
-                            let sourceToken = call.GetSourceToken()
-                            dbWriter.AllocateTokenId(sourceToken, now) |> ignore
+                    let _ =
+                        option {
+                            let now = DateTime.Now
+                            let mutable tokenId = TokenIdType()
+                            if tag.GetSystem() = theSystem && tag.IsVertexTokenTag() then
+                                let target = tag.GetTarget()
+                                let t = tag.TagKind
+                                if t = rt then
+                                    let real = target :?> Real
+                                    let! realToken = real.GetRealToken()
+                                    tokenId <- TokenIdType(dbWriter.GetTokenId(realToken));
+                                elif t = mt then
+                                    let real = target :?> Real
+                                    let! branchToken = real.GetRealToken()  //삭제된 자신 토큰번호
+                                    let! trunkToken  = real.GetMergeToken() //삭제한 메인경로 토큰번호
+                                    dbWriter.OnTokenMerged(branchToken, trunkToken) |> ignore
+                                elif t = st then
+                                    let call = target :?> Call
+                                    let sourceToken = call.GetSourceToken()
+                                    dbWriter.AllocateTokenId(sourceToken, now) |> ignore
 
-                    dbWriter.InsertValueLog(now, tag, tokenId) |> ignore
+                            dbWriter.InsertValueLog(now, tag, tokenId) |> ignore
+                        }
+                    ()
 
                 ) |> dbWriter.Disposables.Add
 

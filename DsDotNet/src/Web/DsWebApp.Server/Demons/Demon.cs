@@ -86,8 +86,9 @@ public partial class Demon : BackgroundService
                             var ti = storage.GetTagInfo();
                             if (ti != null && ti.Value.IsNeedSaveDBLog())
                             {
-                                uint? token = (ti.Value is EventVertex ev && ev.Target is Real r) ? r.GetRealToken() : null;
-
+                                uint? token = null;
+                                if (ti.Value is EventVertex ev && ev.Target is Real r)
+                                    token = r.GetRealToken().ToNullable();
                                 _dbWriter.EnqueLog(new DsLogModule.DsLog(DateTime.Now, storage, token));
                             }
                         }
@@ -204,33 +205,38 @@ public partial class Demon : BackgroundService
                     }
                 });
         compositeDisposable.Add(subscription);
-        var xx = _serverGlobal.IoHubServer.MemoryChangedObservable;
-        subscription = _serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
+
+        if (_serverGlobal.ServerSettings.UseIOHub)
         {
-            try
+
+            var xx = _serverGlobal.IoHubServer.MemoryChangedObservable;
+            subscription = _serverGlobal.IoHubServer.MemoryChangedObservable.Subscribe(change =>
             {
-                if (FieldIoHub.ConnectedClients.Any())
+                try
                 {
-                    var simple = change.ToSimple();
-                    switch (simple)
+                    if (FieldIoHub.ConnectedClients.Any())
                     {
-                        case SimpleNumericIOChangeInfo c:
-                            _hubContextFieldIo.Clients.All.SendAsync(K.S2CNNIOChanged, c);
-                            break;
-                        case SimpleSingleStringChangeInfo c:
-                            _hubContextFieldIo.Clients.All.SendAsync(K.S2CNSIOChanged, c);
-                            break;
-                        default:
-                            throw new Exception($"Unknown IoMemoryChanged type: {change.GetType().Name}");
+                        var simple = change.ToSimple();
+                        switch (simple)
+                        {
+                            case SimpleNumericIOChangeInfo c:
+                                _hubContextFieldIo.Clients.All.SendAsync(K.S2CNNIOChanged, c);
+                                break;
+                            case SimpleSingleStringChangeInfo c:
+                                _hubContextFieldIo.Clients.All.SendAsync(K.S2CNSIOChanged, c);
+                                break;
+                            default:
+                                throw new Exception($"Unknown IoMemoryChanged type: {change.GetType().Name}");
+                        }
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"Error on MemoryChanged:\r\n{ex}");
-            }
-        });
-        compositeDisposable.Add(subscription);
+                catch (Exception ex)
+                {
+                    _logger.Error($"Error on MemoryChanged:\r\n{ex}");
+                }
+            });
+            compositeDisposable.Add(subscription);
+        }
     }
 
 

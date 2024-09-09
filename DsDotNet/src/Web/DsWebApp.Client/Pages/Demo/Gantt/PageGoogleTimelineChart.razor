@@ -25,7 +25,6 @@
 
         await JsDual.LoadScript("https://www.gstatic.com/charts/loader.js");
         await JsDual.EvalScript("js/pages/PageGoogleTimelineChart_razor.js");
-        string t(int h, int m, int s, int ms) => DateTime.Today.AddHours(h).AddMinutes(m).AddSeconds(s).AddMilliseconds(ms).ToString("o");
 
         var dataTable = generateData().ToList();
 

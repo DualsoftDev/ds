@@ -120,14 +120,14 @@ module ExpressionFunctionModule =
 
             "==" ; "equal";
             "==" ; "equal";
-            "!="; "<>"; "notEqual"       
+            "!="; "<>"; "notEqual"
             "!="; "<>"; "^^"; "notEqual"
 
-            "<<"; "<<<"; "shiftLeft"     
-            ">>"; ">>>"; "shiftRight"    
+            "<<"; "<<<"; "shiftLeft"
+            ">>"; ">>>"; "shiftRight"
 
-            "&&"; "and"                   
-            "||"; "or"                    
+            "&&"; "and"
+            "||"; "or"
 
             "!" ; "not";
             "&"; "&&&" ;
@@ -289,7 +289,7 @@ module ExpressionFunctionModule =
         let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
 
-        let errorPCRunmode(_args:Args, funName:string) =   
+        let errorPCRunmode(_args:Args, funName:string) =
             if RuntimeDS.Package.IsPCorPCSIM() then
                 failwithlog $"""Error: {funName} is a PLC-only formula. ({String.Join(", ", _args.Map(fun a->a.ToText()))})"""
             else false
@@ -577,7 +577,7 @@ module ExpressionFunctionModule =
         // tryGetLiteralValue helper
         let private tryGetLiteralValueT (expr:Expression<'T>) : obj =
             if isLiteralizable expr then
-                expr.Evaluate() |> box 
+                expr.Evaluate() |> box
             else
                 null
 

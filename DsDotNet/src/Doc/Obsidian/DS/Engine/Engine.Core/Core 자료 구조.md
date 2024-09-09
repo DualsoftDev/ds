@@ -5,9 +5,9 @@
 - `[sys] my = {}`
 	- flow, jobs, 
 	- command, operation, variable, condition, interface
-	- button, hmi   -> PREDOMICATH
+	- button, hmi   -> PREDOMICATH (pause, reset, emg, drive, origin, manual, idle, clear, auto, test, home)
 	- device, external
-	- props             -> STANDFLMS   (SAD:call / TNSFM:real)
+	- props             -> STANDFLMS   (SAD:call / TNSFM:real) : (safety,timer, autopre, no-trans, disabled, finished, layout, motion, scripts)
 	- versions
 - `[flow]  f = {}`
 	- causals, noncausals, parenting(--> Real), aliases
@@ -53,6 +53,6 @@
 - Alias
 	- Target
 - STANDFLMS
-	- REAL : T, N, F, M, S
+	- REAL : T, N, F, M, S (Time, No-trans, Finished, Motion, Script)
 	- Call : S, A, D (Safety, AutoPre, Disabled)
 	- Device: L (Layout -> Device.ChannelPoints)

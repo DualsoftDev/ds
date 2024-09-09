@@ -68,14 +68,14 @@ module DBLoggerApi =
 
             let errInfos =
                 callUseds
-                |> Seq.map (fun c ->
+                |> map (fun c ->
                     let count = DBLogger.Count(c.QualifiedName, int VertexTag.errorTRx)
                     let duration = DBLogger.Average(c.QualifiedName, int VertexTag.errorTRx)
                     (count, duration))
-                |> Seq.toArray
+                |> toArray
 
                 //해당 디바이스가 전체 시스템에서 going된 횟수를 구한다
-            let fqdns = callUseds |> Seq.map (fun call -> call.QualifiedName)
+            let fqdns = callUseds |> map (fun call -> call.QualifiedName)
             info.GoingCount <- DBLogger.Count(fqdns, [| int VertexTag.going |])
             info.ErrorCount <- errInfos |> Seq.sumBy fst
             if info.ErrorCount > 0 then

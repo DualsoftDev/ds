@@ -45,21 +45,22 @@ function handleZoomAndDrag({ zoomMin, zoomMax, enableConsoleLog }) {  // e.g: (z
             svg.call(zoom).on("dblclick.zoom", null);
 
             // Mermaid 클릭 이벤트와 충돌을 피하기 위한 설정
-            svg.on('click', function (event) {
-                var ti = getTaskInfo(event)
-                if (ti && enableConsoleLog)
-                    console.log(`Clicked: ${ti.taskId}, classes=${ti.classes}`);
-            })
-            .on('mouseover', function (event) {
-                var ti = getTaskInfo(event)
-                if (ti && enableConsoleLog)
-                    console.log(`Hovering over task: ${ti.taskId}`);
-            })
-            .on('mouseout', function (event) {
-                var ti = getTaskInfo(event)
-                if (ti && enableConsoleLog)
-                    console.log(`Mouse out from task: ${ti.taskId}`);
-            });
+            svg
+                .on('click', event => {
+                    var ti = getTaskInfo(event)
+                    if (ti && enableConsoleLog)
+                        console.log(`Clicked: ${ti.taskId}, classes=${ti.classes}`);
+                })
+                .on('mouseover', event => {
+                    var ti = getTaskInfo(event)
+                    if (ti && enableConsoleLog)
+                        console.log(`Hovering over task: ${ti.taskId}`);
+                })
+                .on('mouseout', event => {
+                    var ti = getTaskInfo(event)
+                    if (ti && enableConsoleLog)
+                        console.log(`Mouse out from task: ${ti.taskId}`);
+                });
         });
     }, 1000); // SVG가 렌더링될 시간을 기다리기 위해 지연 시간 추가
 }

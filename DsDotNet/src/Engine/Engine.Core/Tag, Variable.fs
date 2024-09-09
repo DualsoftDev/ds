@@ -4,7 +4,6 @@ open System.Diagnostics
 open Dual.Common.Core.FS
 open System
 open System.ComponentModel
-open Dual.Common.Base.FS
 
 [<AutoOpen>]
 module TagVariableModule =

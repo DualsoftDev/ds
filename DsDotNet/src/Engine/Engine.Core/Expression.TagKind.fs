@@ -35,7 +35,7 @@ module TagKindModule =
     type TagKind = int
     type TagKindTuple = TagKind * string        //TagKind, TagKindName
 
-    type EnumEx() =
+    type private EnumEx() =
         static member Extract<'T when 'T: struct>(formatWithType: bool) : TagKindTuple array =
             let typ = typeof<'T>
             let values = Enum.GetValues(typ) :?> 'T[] |> Seq.cast<int> |> Array.ofSeq
@@ -65,15 +65,18 @@ module TagKindModule =
 [<Extension>]
 type TagKindExt =
     [<Extension>] static member OnChanged (tagDS:TagEvent) = TagEventSubject.OnNext(tagDS)
-    [<Extension>] static member GetSystemTagKind    (x:IStorage) = DU.tryGetEnumValue<SystemTag>    (x.TagKind)
-    [<Extension>] static member GetFlowTagKind      (x:IStorage) = DU.tryGetEnumValue<FlowTag>      (x.TagKind)
-    [<Extension>] static member GetVertexTagKind    (x:IStorage) = DU.tryGetEnumValue<VertexTag>    (x.TagKind)
-    [<Extension>] static member GetApiTagKind       (x:IStorage) = DU.tryGetEnumValue<ApiItemTag>   (x.TagKind)
-    [<Extension>] static member GetTaskDevTagKind   (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>   (x.TagKind)
-    [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.tryGetEnumValue<HwSysTag>     (x.TagKind)
-    [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.tryGetEnumValue<VariableTag>  (x.TagKind)
-    [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.tryGetEnumValue<JobTag>       (x.TagKind)
+    [<Extension>] static member GetSystemTagKind    (x:IStorage) = DU.getEnumValue<SystemTag>    (x.TagKind)
+    [<Extension>] static member GetFlowTagKind      (x:IStorage) = DU.getEnumValue<FlowTag>      (x.TagKind)
+    [<Extension>] static member GetVertexTagKind    (x:IStorage) = DU.getEnumValue<VertexTag>    (x.TagKind)
+    [<Extension>] static member GetApiTagKind       (x:IStorage) = DU.getEnumValue<ApiItemTag>   (x.TagKind)
+    [<Extension>] static member GetTaskDevTagKind   (x:IStorage) = DU.getEnumValue<TaskDevTag>   (x.TagKind)
+    [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.getEnumValue<HwSysTag>     (x.TagKind)
+    [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.getEnumValue<VariableTag>  (x.TagKind)
+    [<Extension>] static member GetJobTagKind       (x:IStorage) = DU.getEnumValue<JobTag>       (x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
+    [<Extension>] static member TryGetTaskDevTagKind  (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>   (x.TagKind)
+    [<Extension>] static member TryGetSystemTagKind   (x:IStorage) = DU.tryGetEnumValue<SystemTag>    (x.TagKind)
+    [<Extension>] static member TryGetVariableTagKind (x:IStorage) = DU.tryGetEnumValue<VariableTag>  (x.TagKind)
 
     [<Extension>]
     static member GetTagInfo (x:IStorage) =
@@ -81,17 +84,17 @@ type TagKindExt =
         | Some obj ->
             match obj with
             | :? DsSystem as s ->
-                match x.GetVariableTagKind() with
+                match x.TryGetVariableTagKind() with
                 | Some v -> EventVariable(x, s, v)
-                | None ->   EventSystem  (x, s, x.GetSystemTagKind().Value)
+                | None ->   EventSystem  (x, s, x.GetSystemTagKind())
                 |> Some
 
-            | :? Flow        as f -> Some( EventFlow    (x, f, x.GetFlowTagKind().Value))
-            | :? Vertex      as v -> Some( EventVertex  (x, v, x.GetVertexTagKind().Value))
-            | :? ApiItem     as a -> Some( EventApiItem (x, a, x.GetApiTagKind().Value))
-            | :? TaskDev     as d -> Some( EventTaskDev (x, d, x.GetTaskDevTagKind().Value))
-            | :? HwSystemDef as h -> Some( EventHwSys   (x, h, x.GetHwSysTagKind().Value))
-            | :? Job         as j -> Some( EventJob     (x, j, x.GetJobTagKind().Value))
+            | :? Flow        as f -> Some( EventFlow    (x, f, x.GetFlowTagKind()))
+            | :? Vertex      as v -> Some( EventVertex  (x, v, x.GetVertexTagKind()))
+            | :? ApiItem     as a -> Some( EventApiItem (x, a, x.GetApiTagKind()))
+            | :? TaskDev     as d -> Some( EventTaskDev (x, d, x.GetTaskDevTagKind()))
+            | :? HwSystemDef as h -> Some( EventHwSys   (x, h, x.GetHwSysTagKind()))
+            | :? Job         as j -> Some( EventJob     (x, j, x.GetJobTagKind()))
             | _ -> None
         | None -> None
 

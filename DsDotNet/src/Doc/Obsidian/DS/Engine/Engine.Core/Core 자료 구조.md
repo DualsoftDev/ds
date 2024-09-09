@@ -48,8 +48,18 @@
 	-  _    _   _   _ _
 - Call
 	- Job or Command or Operator, SAD(StAnDflms) @ STANDFLMS 
-- ApiItem
+
+- TaskDev : Device1.ADV 에 해당
+	- ApiParam
+- ApiItem : 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
 	- Tx/Rx (Real), Time
+- ApiParam : Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점
+	- ApiItem, TaskDevParamIO
+- TaskDevParamIO
+	- inParam, outParam (TaskDevParam type)
+- TaskDevParam
+	- SymbolAlias, ValueParam, time
+
 - Alias
 	- Target
 - STANDFLMS

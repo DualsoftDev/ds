@@ -444,6 +444,16 @@ module CoreModule =
             TaskDevParamIO : TaskDevParamIO
         }
 
+    (*
+        apiParam:
+	        ApiItem: ADV
+	        TaskDevParamIO:
+		        InParam:
+		        OutParam:
+        jobName : STN1.Device1.ADV
+        device: STN1__Device1
+        system: HelloDS
+    *)
     type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
         inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
         let dicTaskDevParamIO = Dictionary<string, ApiParam>()

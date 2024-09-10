@@ -53,15 +53,9 @@ module ImportIOTable =
                     None
                 else
                     let funcBodyText =
-                        if funcBodyText.EndsWith(";")
-                        then funcBodyText
-                        else $"{funcBodyText};"
+                        funcBodyText + if funcBodyText.EndsWith(";") then "" else ";"
 
-                    if isCommand
-                    then
-                        handleFunctionCreationOrUpdate sys funcName funcBodyText true
-                    else
-                        handleFunctionCreationOrUpdate sys funcName funcBodyText false
+                    handleFunctionCreationOrUpdate sys funcName funcBodyText isCommand
 
 
             let dicDev =

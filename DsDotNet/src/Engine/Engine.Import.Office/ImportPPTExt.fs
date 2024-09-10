@@ -218,8 +218,8 @@ module ImportU =
 
             let dicChildParent =
                 parents
-                |> Seq.collect (fun parentChildren ->
-                    parentChildren.Value |> Seq.map (fun child -> child, parentChildren.Key))
+                |> Seq.collect (fun (KeyValue(parent, children)) ->
+                    children |> Seq.map (fun child -> child, parent))
                 |> dict
 
             let createReal () =
@@ -273,21 +273,21 @@ module ImportU =
                     try
 
 
-                        if node.NodeType = AUTOPRE
-                        then
-                            if not(dicChildParent.ContainsKey node)
-                            then
+                        if node.NodeType = AUTOPRE then
+                            if not(dicChildParent.ContainsKey node) then
                                 failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
 
-                            createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob) |> ignore
+                            createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob)
                         else
-                            if dicChildParent.ContainsKey(node) then
-                                createCallVertex (mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicVertex)
-                            else
-                                createCallVertex (mySys, node, (dicFlow[node.PageNum])|>DuParentFlow, dicVertex)
+                            let parentWrapper =
+                                if dicChildParent.ContainsKey(node) then
+                                    dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
+                                else
+                                    dicFlow[node.PageNum] |> DuParentFlow
+                            createCallVertex (mySys, node, parentWrapper, dicVertex)
                     with ex ->
                         node.Shape.ErrorName(ex.Message, node.PageNum)
-                        )
+                )
 
             let createAlias () =
                 pptNodes
@@ -520,7 +520,7 @@ module ImportU =
                         node.Shape.ErrorName($"{ErrID._81}(err:{safeName})", node.PageNum)
                         )
 
-                node.AutoPres.Select(fun (j) -> j.Combine())
+                node.AutoPres.Select(fun jobFqdn -> jobFqdn.Combine())
                 |> iter (fun autoPres ->
                     if not (dicJob.ContainsKey autoPres) then
                         node.Shape.ErrorName($"{ErrID._82}(err:{autoPres})", node.PageNum)
@@ -539,10 +539,9 @@ module ImportU =
                             node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum))
 
                 node.AutoPres
-                |> iter (fun (jobFqdn)  ->
+                |> iter (fun jobFqdn  ->
                     let condJob =
-                        if dicJob.ContainsKey (jobFqdn.Combine())
-                        then
+                        if dicJob.ContainsKey (jobFqdn.Combine()) then
                             dicJob[jobFqdn.Combine()]
                         else
                             failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
@@ -564,7 +563,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.NodeType.IsIF)
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                let sys = dicFlow.[node.PageNum].System
+                let sys = flow.System
                 let api = sys.ApiItems.Where(fun w -> w.Name = node.IfName).First()
 
                 let findReal (trxName: string) =

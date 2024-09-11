@@ -21,8 +21,7 @@ module ImportPptModule =
     }
 
     type PptParams = {
-        TargetType: PlatformTarget
-        DriverIO: HwDriveTarget
+        HwTarget: HwTarget
         AutoIOM: bool
         CreateFromPpt : bool
         CreateBtnLamp : bool
@@ -32,14 +31,14 @@ module ImportPptModule =
 
     let defaultPptParams() = 
         {
-            TargetType = WINDOWS
-            DriverIO = LS_XGK_IO
+            HwTarget = getDefaltHwTarget() 
             AutoIOM = true
             CreateFromPpt = false
             CreateBtnLamp = true
             StartMemory = 1000
             OpMemory = 100
         }
+
 
     let getHashKeys (skipCnt: int, path: string, loadedParentStack:Stack<DsSystem>) =
         String.Join(
@@ -92,11 +91,11 @@ module ImportPptModule =
 
             let doc =
                 match dicPptDoc.TryGetValue pathPpt with
-                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.TargetType)
+                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.HwTarget.Platform)
                 | false, _ ->
                     let newDoc = Office.Open(pathPpt)
                     dicPptDoc.Add(pathPpt, newDoc)
-                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.TargetType)
+                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.HwTarget.Platform)
 
 
 
@@ -185,10 +184,10 @@ module ImportPptModule =
             doc.MakeInterfaces(theSys)
 
             if paras.LoadingType = DuNone || paras.LoadingType = DuDevice then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
-                doc.BuildSystem(theSys, isLib, pptParams.CreateBtnLamp)
+                doc.BuildSystem(theSys, pptParams.HwTarget, isLib, pptParams.CreateBtnLamp)
 
             if paras.LoadingType = DuNone then
-                doc.UpdateActionIO(theSys, pptParams.AutoIOM)
+                doc.UpdateActionIO(theSys, pptParams.AutoIOM, pptParams.HwTarget)
                 doc.UpdateLayouts(theSys)
                 layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
 
@@ -244,7 +243,7 @@ module ImportPptModule =
                     .Where(fun dic -> not dic.Value.IsBuilded)
                     .ForEach(fun (KeyValue(dsSystem, pptDoc)) ->
                         pathStack.Push(pptDoc.Path)
-                        pptDoc.BuildSystem(dsSystem, isLib, pptParams.CreateBtnLamp)
+                        pptDoc.BuildSystem(dsSystem, pptParams.HwTarget, isLib, pptParams.CreateBtnLamp)
                         pathStack.Pop() |> ignore)
 
                 {   Config = cfg
@@ -279,7 +278,6 @@ module ImportPptModule =
 
     type ImportPpt =
         static member GetDSFromPptWithLib(fullName: string, isLib:bool, pptParams:PptParams): DSFromPpt =
-            Util.runtimeTarget <- pptParams.TargetType, pptParams.DriverIO
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
@@ -295,7 +293,7 @@ module ImportPptModule =
                         model.System, model.LoadingPaths
                     else
                         model.System.ExportToDS activePath
-                        ParserLoader.LoadFromActivePath activePath (Util.runtimeTarget|>fst) false )
+                        ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.Platform) false )
             forceTrace $"Elapsed time for reading2 {fullName}: {millisecond} ms"
 
             {
@@ -307,6 +305,6 @@ module ImportPptModule =
 
         static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams)
-            DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory) (pptParams.TargetType, pptParams.DriverIO)
+            DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
             ModelLoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths), ret.System
 

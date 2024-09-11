@@ -31,7 +31,7 @@ let main argv =
         let referenceDir = testDir
         let sys = parseText systemRepo referenceDir textDs
         RuntimeDS.System <- Some sys
-        applyTagManager (sys, Storages(), (WINDOWS, LS_XGK_IO))
+        applyTagManager (sys, Storages(), WINDOWS)
         sys
 
     let sampleDirectory = testDir

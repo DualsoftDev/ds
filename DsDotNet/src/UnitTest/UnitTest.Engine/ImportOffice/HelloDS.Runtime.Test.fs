@@ -32,11 +32,10 @@ module HelloDSRuntimeTestModule =
             } = result
 
             system.TagManager === null
-            let _ = DsCpuExt.CreateRuntime (system) (pptParms.TargetType, pptParms.DriverIO)
+            let _ = DsCpuExt.CreateRuntime (system) (pptParms.HwTarget.Platform)
             system.TagManager.Storages.Count > 0 === true
 
             system
-
 
         // - 항상 최신 버젼의 HelloDS.dsz 파일 만듬
         // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.dsz 으로 시뮬레이션 된 것이거나 삭제 필요
@@ -44,7 +43,7 @@ module HelloDSRuntimeTestModule =
         member __.``X HelloDS runtime model test``() =
             let system = getSystem()
             
-            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS, LS_XGK_IO) 
+            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS)
 
             let json = SystemTextJson.Serialize(hMIPackage)
             let pkg = SystemTextJson.Deserialize<HMIPackage>(json)

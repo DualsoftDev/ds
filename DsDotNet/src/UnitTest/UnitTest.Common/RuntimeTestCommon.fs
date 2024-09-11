@@ -21,7 +21,7 @@ module RuntimeTestCommon =
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms)
-        let runtimeModel = new RuntimeModel(zipPath, pptParms.TargetType)
+        let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.Platform)
 
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]

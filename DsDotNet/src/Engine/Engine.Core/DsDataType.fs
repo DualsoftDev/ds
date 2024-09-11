@@ -298,7 +298,10 @@ module DsDataType =
 
     type IOType = | In | Out | Memory | NotUsed
 
-    type SlotDataType = int *IOType * DataType
+    type SlotDataType(slotIndex:int, ioType:IOType, dataType:DataType) =
+        member x.SlotIndex = slotIndex
+        member x.IOType = ioType
+        member x.DataType = dataType
 
     let getBlockType(blockSlottype:string) =
         match blockSlottype.ToLower() with

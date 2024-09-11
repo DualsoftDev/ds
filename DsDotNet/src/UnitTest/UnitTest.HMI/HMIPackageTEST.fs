@@ -16,11 +16,10 @@ module HMIPackageTEST =
     let ``HMIPackage Create Test`` () =
         let pptParms:PptParams = defaultPptParams()
 
-        clearNFullSlotHwSlotDataTypes()
         let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms)
-        assignAutoAddress (dsPpt.System, 0 , 0)  (pptParms.TargetType, pptParms.DriverIO)
+        assignAutoAddress (dsPpt.System, 0 , 0, pptParms.HwTarget)
 
         RuntimeDS.Package <- RuntimePackage.PC
-        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.TargetType, pptParms.DriverIO)
+        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.Platform)
 
         hmiPackage.Devices.Length > 0  |> Assert.True

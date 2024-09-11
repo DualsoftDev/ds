@@ -11,8 +11,8 @@ module ConvertCpuDsSystem =
         if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip then
             failwithf $"{name} 해당 주소가 없습니다."
 
-    let getMemory (tag:IStorage) (target:HwTarget) =
-        getValidAddress(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
+    let getMemory (tag:IStorage) (target:PlatformTarget) =
+        getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
 
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -94,15 +94,15 @@ module ConvertCpuDsSystem =
         member private x.GenerationCallConditionMemory()  =
             for condi in x.HWConditions do
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi (int HwSysTag.HwStopConditionErrLamp) x
-                condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty,DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
+                condi.ErrorCondition.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationButtonEmergencyMemory()  =
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true emg (int HwSysTag.HwStopEmergencyErrLamp) x
-                emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))
+                emg.ErrorEmergency.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationEmulationMemory()  =
-            x._emulation.Address <- getValidAddress(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
+            x._emulation.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
             RuntimeDS.EmulationAddress <- x._emulation.Address
 
 

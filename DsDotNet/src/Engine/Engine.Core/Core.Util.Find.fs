@@ -241,7 +241,7 @@ module internal ModelFindModule =
             td,
                 callAll.Filter(fun v->
                     match tryGetPureCall(v) with
-                    | Some v -> v.TargetJob.TaskDefs.Contains td
+                    | Some v when v.IsJob -> v.TargetJob.TaskDefs.Contains td
                     | _->false)
             )
 

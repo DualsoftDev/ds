@@ -19,7 +19,6 @@ module Util =
     let mutable activeSys:DsSystem option= None
     let mutable activeSysDir = ""
     let mutable currentFileName = ""
-    let mutable runtimeTarget = WINDOWS, LS_XGK_IO
 
     let Copylibrary = HashSet<string>() //Copylibrary 저장
 

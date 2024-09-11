@@ -69,7 +69,8 @@ module ImportUtilVertex =
                     failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
 
-    let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper) =
+        
+    let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget) =
         match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
             |  Some dev ->
                 getCallFromLoadedSys mySys dev node parentWrapper
@@ -82,10 +83,11 @@ module ImportUtilVertex =
                     ApiName = node.ApiPureName
                     TaskDevParamIO = node.TaskDevParam
                     Parent = parentWrapper
+                    PlatformTarget = platformTarget
                     }
                 addNewCall callParams
 
-    let createCallVertex (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, dicSeg: Dictionary<string, Vertex>) =
+    let createCallVertex (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget, dicSeg: Dictionary<string, Vertex>) =
         let call =
             if node.IsFunction then
                 if node.IsRootNode.Value then
@@ -93,12 +95,12 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                createCall (mySys, node, parentWrapper)
+                createCall (mySys, node, parentWrapper, platformTarget)
 
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)
 
-    let createAutoPre(mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, dicAutoPreJob: Dictionary<string, Job>) =
+    let createAutoPre(mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget, dicAutoPreJob: Dictionary<string, Job>) =
         let param = {
                     MySys = mySys
                     Node = node
@@ -107,6 +109,7 @@ module ImportUtilVertex =
                     ApiName = node.ApiPureName
                     TaskDevParamIO = node.TaskDevParam
                     Parent = parentWrapper
+                    PlatformTarget = platformTarget
                     }
         let tasks = HashSet<TaskDev>()
         handleActionJob tasks param

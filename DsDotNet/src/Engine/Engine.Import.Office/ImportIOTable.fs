@@ -11,7 +11,7 @@ open Engine.CodeGenCPU
 module ImportIOTable =
 
 
-    let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq) =
+    let ApplyIO (sys: DsSystem, dts: (int * Data.DataTable) seq, hwTarget:HwTarget) =
 
         try
 
@@ -126,8 +126,8 @@ module ImportIOTable =
                     let outAdd =   outAddress|>emptyToSkipAddress
                     let checkInType, checkOutType = getInOutDataType dataType
 
-                    dev.InAddress <-  getValidAddress(inAdd, checkInType,   dev.QualifiedName, false, IOType.In,  Util.runtimeTarget)
-                    dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, Util.runtimeTarget)
+                    dev.InAddress <-  getValidAddress(inAdd, checkInType,   dev.QualifiedName, false, IOType.In, hwTarget)
+                    dev.OutAddress <-  getValidAddress(outAdd,checkOutType,  dev.QualifiedName, false, IOType.Out, hwTarget)
 
 
                     updatePptTaskDevParam dev  (inSym,checkInType) (outSym, checkOutType)
@@ -186,7 +186,7 @@ module ImportIOTable =
 
                 match sys.HWButtons.Where(fun w -> w.ButtonType = btntype).TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some btn ->
-                    updateHwAddress (btn) (inAddress, outAddress) Util.runtimeTarget
+                    updateHwAddress (btn) (inAddress, outAddress) hwTarget
                     let checkInType, checkOutType = getInOutDataType dataType
                     updatePptHwParam btn (inSym,checkInType) (outSym, checkOutType)
 
@@ -199,7 +199,7 @@ module ImportIOTable =
 
                 match lamps.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some lamp ->
-                    updateHwAddress (lamp) (inAddress, outAddress) Util.runtimeTarget
+                    updateHwAddress (lamp) (inAddress, outAddress) hwTarget
                     let checkInType, checkOutType = getInOutDataType dataType
                     updatePptHwParam lamp (inSym,checkInType) (outSym, checkOutType)
 
@@ -212,7 +212,7 @@ module ImportIOTable =
 
                 match conds.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
                 | Some cond ->
-                    updateHwAddress (cond) (inAddress, outAddress) Util.runtimeTarget
+                    updateHwAddress (cond) (inAddress, outAddress) hwTarget
                     let checkInType, checkOutType = getInOutDataType dataType
                     updatePptHwParam cond (inSym,checkInType) (outSym, checkOutType)
 

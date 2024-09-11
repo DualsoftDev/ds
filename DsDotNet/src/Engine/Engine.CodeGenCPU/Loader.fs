@@ -64,7 +64,7 @@ module CpuLoader =
 
 
 
-    let applyTagManager(activeSys:DsSystem, storages:Storages, target:HwTarget) =
+    let applyTagManager(activeSys:DsSystem, storages:Storages, target:PlatformTarget) =
         let createTagM  (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 
@@ -95,9 +95,10 @@ module CpuLoader =
 
     type DsSystem with
         /// DsSystem 으로부터 PouGen seq 생성
-        member system.GeneratePOUs (storages:Storages, targetType) : PouGen seq =
+        member system.GeneratePOUs (storages:Storages, target:PlatformTarget) : PouGen seq =
             UniqueName.resetAll()
-            applyTagManager (system, storages, targetType)
+
+            applyTagManager (system, storages, target)
 
             let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환

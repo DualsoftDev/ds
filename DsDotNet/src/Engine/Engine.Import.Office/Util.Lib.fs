@@ -16,15 +16,16 @@ module ImportUtilForLib =
         ApiName: string
         TaskDevParamIO: TaskDevParamIO
         Parent: ParentWrapper
+        PlatformTarget:PlatformTarget
     }
     with
         member x.WithDevName(newDevName: string) =
             { x with DevName = newDevName }
 
-    let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) =
+    let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) (platformTarget:PlatformTarget) =
         match mySys.LoadedSystems.TryFind(fun f -> f.Name = name) with
         | Some f -> f.ReferenceSystem
-        | None -> ParserLoader.LoadFromDevicePath libFilePath name (Util.runtimeTarget|>fst) |>fst
+        | None -> (ParserLoader.LoadFromDevicePath libFilePath name platformTarget) |>fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (taskDevParamIO: DeviceLoadParameters) =
         let task = getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParamIO param.Node (param.Node.Job.Combine())
@@ -50,7 +51,7 @@ module ImportUtilForLib =
         (libFilePath, autoGenSys, getProperty)
 
     let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getProperty: string -> DeviceLoadParameters) =
-        let devOrg = getDeviceOrganization param.MySys libFilePath loadedName
+        let devOrg = getDeviceOrganization param.MySys libFilePath loadedName (param.PlatformTarget)
         let TaskDevParams = getProperty loadedName
 
         let task = getTaskDev autoGenSys loadedName (param.Node.Job.Combine()) param.ApiName  param.TaskDevParamIO

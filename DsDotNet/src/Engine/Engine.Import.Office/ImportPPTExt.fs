@@ -208,7 +208,7 @@ module ImportU =
 
         //real call alias  만들기
         [<Extension>]
-        static member MakeSegment(doc: PptDoc, mySys: DsSystem) =
+        static member MakeSegment(doc: PptDoc, mySys: DsSystem, target:HwTarget) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
             let dicAutoPreJob = doc.DicAutoPreJob
@@ -266,7 +266,7 @@ module ImportU =
                             let libFilePath  =libInfos[libApis.First()]
                             failWithLog $"{kv.Key} ({libFilePath}) 디바이스에\r\n{errApis} 인터페이스가 없습니다."
                      )
-
+                let platformTarget = target.Platform
                 callNAutoPres
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
@@ -277,14 +277,14 @@ module ImportU =
                             if not(dicChildParent.ContainsKey node) then
                                 failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
 
-                            createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, dicAutoPreJob)
+                            createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, platformTarget, dicAutoPreJob)
                         else
                             let parentWrapper =
                                 if dicChildParent.ContainsKey(node) then
                                     dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
                                 else
                                     dicFlow[node.PageNum] |> DuParentFlow
-                            createCallVertex (mySys, node, parentWrapper, dicVertex)
+                            createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
                     with ex ->
                         node.Shape.ErrorName(ex.Message, node.PageNum)
                 )
@@ -603,7 +603,7 @@ module ImportU =
                 api.RX <- rx
                 )
         [<Extension>]
-        static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool) =
+        static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool, hwTarget:HwTarget) =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
             if not(autoIO)
                 && activeSys.IsSome && activeSys.Value = sys
@@ -628,7 +628,7 @@ module ImportU =
                     // Handle the exception for duplicate names here
                     failwithf "Duplicate name: %s" name)
 
-            ApplyIO(sys, pageTables)
+            ApplyIO(sys, pageTables, hwTarget)
 
         [<Extension>]
         static member UpdateLayouts(doc: PptDoc, sys: DsSystem) =
@@ -830,7 +830,7 @@ module ImportU =
 
 
         [<Extension>]
-        static member BuildSystem(doc: PptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
+        static member BuildSystem(doc: PptDoc, sys: DsSystem, hwTarget:HwTarget, isLib:bool, isCreateBtnLLib:bool) =
             let isActive = activeSys.IsSome && activeSys.Value = sys
             doc.PreCheckPptSystem(sys)
 
@@ -846,7 +846,7 @@ module ImportU =
 
             doc.MakeConditions(sys)
             //segment 리스트 만들기
-            doc.MakeSegment(sys)
+            doc.MakeSegment(sys, hwTarget)
             //Edge  만들기
             doc.MakeEdges(sys)
             //Safety AutoPre 만들기

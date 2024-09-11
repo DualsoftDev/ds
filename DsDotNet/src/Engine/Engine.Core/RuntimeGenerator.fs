@@ -24,8 +24,12 @@ module RuntimeGeneratorModule =
         | MELSEC_IO
         | SIEMENS_IO
         | PAIX_IO
-    //HW CPU,  Driver IO  조합
-    type HwTarget = PlatformTarget*HwDriveTarget
+
+    //HW CPU,  Driver IO, Slot 정보 조합
+    type HwTarget(platformTarget:PlatformTarget, hwDriveTarget:HwDriveTarget, slots:SlotDataType[]) =
+        member x.Platform = platformTarget
+        member x.HwDrive = hwDriveTarget
+        member x.Slots = slots
 
     type RuntimeMotionMode =
         | MotionAsync
@@ -89,10 +93,10 @@ module RuntimeGeneratorModule =
 
 
     let getExternalTempMemory (target:HwTarget, index:int) =
-        match target with
-        | XGI, _ -> ExternalTempIECMemory+index.ToString()
-        | XGK, _ -> ExternalTempNoIECMemory+index.ToString("00000")
-        | WINDOWS, _-> ExternalTempMemory+($"{index/8}.{index%8}")
+        match target.Platform with
+        | XGI-> ExternalTempIECMemory+index.ToString()
+        | XGK-> ExternalTempNoIECMemory+index.ToString("00000")
+        | WINDOWS-> ExternalTempMemory+($"{index/8}.{index%8}")
         | _ -> failwithlog $"{target} not support"
 
     type RuntimeDS() =
@@ -104,7 +108,6 @@ module RuntimeGeneratorModule =
         static let mutable callTimeout = 15000u
         static let mutable emulationAddress = ""
 
-        static member val HwSlotDataTypes  =  ResizeArray<SlotDataType>() with get, set
         static member val HwIP = "192.168.9.100" with get, set
         static member val HwDriver = HwDriveTarget.LS_XGK_IO with get, set //PC 제어시 Hw maker 별 이름 (지금은 LS 태그타입 구분용)
 
@@ -121,26 +124,20 @@ module RuntimeGeneratorModule =
 
         static member PackageChangedSubject = packageChangedSubject
 
-        //static member System
-        //    with get() = dsSystem.Value
-        //    and set v = dsSystem <- Some v
-
         static member val System = dsSystem with get, set
 
 
-    let clearNFullSlotHwSlotDataTypes() =
+    let getFullSlotHwSlotDataTypes() =
         let hw =
-            [0 .. 11]
-            |> List.map (fun i ->
+            [|0 .. 11|]
+            |> Array.map (fun i ->
                 if i % 2 = 0 then
-                    (i, IOType.In, DataType.DuUINT64)
+                    SlotDataType(i, IOType.In, DataType.DuUINT64)
                 else
-                    (i, IOType.Out, DataType.DuUINT64))
+                    SlotDataType(i, IOType.Out, DataType.DuUINT64))
+        hw
 
-        // 기존의 리스트를 지우고 새로운 데이터로 대체합니다.
-        RuntimeDS.HwSlotDataTypes.Clear()
-        RuntimeDS.HwSlotDataTypes.AddRange(hw)
-
+    let getDefaltHwTarget() = HwTarget(WINDOWS, PAIX_IO, getFullSlotHwSlotDataTypes())
 
 module PlatformTargetExtensions =
         let fromString s =

@@ -35,38 +35,38 @@ module DsAddressModule =
             | 64 -> $"{device}L{offset/64}.{offset % 64}"
             | _ -> failwithf $"Invalid size :{bitSize}"
 
-    let getStartPointXGK(index:int) =
-        RuntimeDS.HwSlotDataTypes
-            |> Seq.filter(fun (i, _, _) -> i < index)
-            |> Seq.map(fun (_, dtype, dSzie) ->
+    let getStartPointXGK(index:int, hwSlotDataTypes:SlotDataType[]) =
+        hwSlotDataTypes
+            |> Seq.filter(fun (s) -> s.SlotIndex < index)
+            |> Seq.map(fun (s) ->
 
-                match dtype with
+                match s.IOType with
                 | NotUsed  ->  16 //기본 더미 Size
                 | In | Out ->
-                    match dSzie with
+                    match s.DataType with
                     | DuUINT8 | DuUINT16  -> 16 //기본 더미 Size
                     | DuUINT32  -> 32
                     | DuUINT64  -> 64
-                    | _   -> failwithf $"{dSzie} not support"
-                | _   -> failwithf $"{dtype} not support"
+                    | _   -> failwithf $"{s.DataType} not support"
+                | _   -> failwithf $"{s.IOType} not support"
             ) |>  Seq.sum
 
-    let getUsedPointXGK(index:int, usedType:IOType) =
-        RuntimeDS.HwSlotDataTypes
-            |> Seq.filter(fun (i, dtype, _) -> i < index && usedType = dtype)
-            |> Seq.map(fun (_, _, dSzie) ->
-                    match dSzie with
+    let getUsedPointXGK(index:int, usedType:IOType, hwSlotDataTypes:SlotDataType[]) =
+        hwSlotDataTypes
+            |> Seq.filter(fun (s) -> s.SlotIndex < index && usedType = s.IOType)
+            |> Seq.map(fun (s) ->
+                    match s.DataType with
                     | DuUINT8 | DuUINT16  -> 16 //기본 더미 Size
                     | DuUINT32  -> 32
                     | DuUINT64  -> 64
-                    | _   -> failwithf $"{dSzie} not support"
+                    | _   -> failwithf $"{s.DataType} not support"
             ) |>  Seq.sum
 
 
 
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
-
+        let cpu, driver, hwSlotDataTypes = target.Platform, target.HwDrive, target.Slots
         let addr =
             if addr.IsNullOrEmpty() then
                 failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"
@@ -89,7 +89,6 @@ module DsAddressModule =
             else
                 curr + bitSize - (curr%bitSize) + bitSize
 
-        let cpu, driver = target
         let sizeBit =
             if cpu = PlatformTarget.XGI then
                 dataType.ToBitSize()
@@ -139,25 +138,25 @@ module DsAddressModule =
 
                 let getSlotInfoNonIEC(settingType: IOType, newCnt: int) =
                     let filterSlotsByType =
-                        RuntimeDS.HwSlotDataTypes
-                        |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
+                        hwSlotDataTypes
+                        |> Seq.filter(fun (s) -> s.IOType = settingType)
 
                     let calculateAssignedUpToIndex currIndex =
                         filterSlotsByType
-                        |> Seq.filter(fun (i, _, _) -> i <= currIndex)
-                        |> Seq.fold (fun acc (_, _, data) -> acc + fst (data.ToBlockSizeNText())) 0
+                        |> Seq.filter(fun (s) -> s.SlotIndex <= currIndex)
+                        |> Seq.fold (fun acc (s) -> acc + fst (s.DataType.ToBlockSizeNText())) 0
 
                     let findAvailableSlots =
                         filterSlotsByType
-                        |> Seq.tryFind(fun (i, _, _) -> newCnt < calculateAssignedUpToIndex i)
+                        |> Seq.tryFind(fun (s) -> s.SlotIndex < calculateAssignedUpToIndex s.SlotIndex)
 
                     match findAvailableSlots with
-                    | Some (i, _, _) ->
-                        let startPoint = getStartPointXGK (i)
-                        if i = 0 then
+                    | Some (s) ->
+                        let startPoint = getStartPointXGK (s.SlotIndex, hwSlotDataTypes)
+                        if s.SlotIndex = 0 then
                             newCnt
                         else
-                            let usedPoint = getUsedPointXGK (i, settingType)
+                            let usedPoint = getUsedPointXGK (s.SlotIndex, settingType, hwSlotDataTypes)
                             startPoint + (newCnt - usedPoint)
                     | None -> failwithf "%AType 슬롯이 부족합니다." settingType
 
@@ -171,25 +170,25 @@ module DsAddressModule =
                         | NotUsed -> failwithf $"{settingType} not supported"
 
                     let assigned(currIndex: int) =
-                        let sameTypeSlots = RuntimeDS.HwSlotDataTypes
-                                            |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
-                                            |> Seq.filter(fun (i, _, _) -> i <= currIndex)
+                        let sameTypeSlots = hwSlotDataTypes
+                                            |> Seq.filter(fun (s) -> s.IOType = settingType)
+                                            |> Seq.filter(fun (s) -> s.SlotIndex <= currIndex)
 
                         if sameTypeSlots.IsEmpty then 0
                         else
                             sameTypeSlots
-                            |> Seq.sumBy(fun (_, _, data) -> (data.ToBlockSizeNText() |> fst))
+                            |> Seq.sumBy(fun (s) -> (s.DataType.ToBlockSizeNText() |> fst))
 
-                    let slotSpares = RuntimeDS.HwSlotDataTypes
-                                        |> Seq.filter(fun (_, ioType, _) -> ioType = settingType)
-                                        |> Seq.filter(fun (i, _, _) -> curr < assigned i)
+                    let slotSpares = hwSlotDataTypes
+                                        |> Seq.filter(fun (s) -> s.IOType = settingType)
+                                        |> Seq.filter(fun (s) -> curr < assigned s.SlotIndex)
 
                     match Seq.tryHead slotSpares with
-                    | Some (i, _, _) -> (i, assigned (i - 1))
+                    | Some (s) -> (s.SlotIndex, assigned (s.SlotIndex - 1))
                     | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
 
-                match target with
-                | WINDOWS, PAIX_IO ->
+                match driver with
+                | PAIX_IO ->
                     let getPCIOM(head:string, offsetBit) =
                         match sizeBit with
                         |  1 -> $"{head}B{offsetBit /  8}.{offsetBit % 8}"
@@ -205,8 +204,7 @@ module DsAddressModule =
                     | Memory  ->  if sizeBit = 1 then getPCIOM ("M", cnt) else getPCIOM ("M", cnt*8)
                     | NotUsed -> failwithf $"{ioType} not support {name}"
 
-                | (WINDOWS, LS_XGK_IO | WINDOWS, LS_XGI_IO)
-                | (XGK, _ | XGI, _) ->
+                | LS_XGK_IO |  LS_XGI_IO ->
                     match ioType with
                     | (In | Out) ->
                         let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
@@ -278,6 +276,16 @@ module DsAddressModule =
         newAddr
 
 
+    let getValidAddressUsingPlatform (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, platformTarget:PlatformTarget) =
+        let hwTarget =
+            let slot = getFullSlotHwSlotDataTypes()
+            match platformTarget with
+            | WINDOWS -> HwTarget(WINDOWS, PAIX_IO, slot)
+            | XGI -> HwTarget(XGI, LS_XGI_IO, slot)
+            | XGK -> HwTarget(XGK, LS_XGK_IO, slot)
+            | _ -> failwithf $"Error ToPlatformTarget: {platformTarget}"
+
+        getValidAddress(addr, dataType, name, isSkip, ioType, hwTarget)
 
 
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) (target:HwTarget)=
@@ -299,8 +307,7 @@ module DsAddressModule =
         hwItem.InAddress <- inA
         hwItem.OutAddress <- outA
 
-    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn: int) (target:HwTarget)=
-
+    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn:int, target:HwTarget) =
         setMemoryIndex(startMemory);
 
         for b in sys.HWButtons do

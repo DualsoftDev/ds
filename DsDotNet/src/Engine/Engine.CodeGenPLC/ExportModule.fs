@@ -148,18 +148,12 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (target:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool, maxPouSplit:int option) =
+    let exportXMLforLSPLC (platformTarget:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool, maxPouSplit:int option) =
         let _, millisecond = duration (fun () ->
-            let targetNDriver =
-                match target with
-                | XGI -> XGI, LS_XGI_IO
-                | XGK -> XGK, LS_XGK_IO
-                | _ -> failwith $"Not supported plc {target} type"
-
             //use _ = DcLogger.CreateTraceEnabler()
             let globalStorage = new Storages()
             let localStorage = new Storages()
-            let pous = system.GeneratePOUs(globalStorage, targetNDriver).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
+            let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
             let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
 
@@ -181,7 +175,7 @@ module ExportModule =
                 )
 
             let xml, millisecond = duration (fun () ->
-                generateXmlXGX target system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (startMemory, startTimer, startCounter) enableXmlComment )
+                generateXmlXGX platformTarget system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (startMemory, startTimer, startCounter) enableXmlComment )
 
             forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 

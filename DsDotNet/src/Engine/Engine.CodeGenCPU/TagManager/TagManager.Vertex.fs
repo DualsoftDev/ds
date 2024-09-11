@@ -216,7 +216,7 @@ module TagManagerModule =
                                     else off
 
         ///Timer time avg
-        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType |> fst)
+        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
 
         member x.IsFinished = x.Real.Finished
         member x.NoTransData = x.Real.NoTransData
@@ -249,11 +249,11 @@ module TagManagerModule =
         member val SourceTokenData = sourceTokenData
 
         ///Ring Counter
-        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType|>fst)
+        member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)
         ///Timer on delay
-        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType|>fst)
+        member val TDON = timer  s ($"{v.QualifiedName}_TON"|>validStorageName) sys (sysManager.TargetType)
         ///Timer time
-        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType|>fst)
+        member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
 
 
         member val MM   = createTag  false VertexTag.callMemo

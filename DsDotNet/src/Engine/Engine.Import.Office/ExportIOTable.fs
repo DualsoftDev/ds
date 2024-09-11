@@ -204,12 +204,12 @@ module ExportIOTable =
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
                 failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
-    let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target: DataTable seq =
+    let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) hwTarget: DataTable seq =
 
         let getConditionDefListRows (conds: ConditionDef seq) =
             conds |> Seq.map(fun cond ->
 
-                updateHwAddress (cond) (cond.InAddress, cond.OutAddress) Util.runtimeTarget
+                updateHwAddress (cond) (cond.InAddress, cond.OutAddress) hwTarget
                 [
                     ExcelCase.XlsConditionReady.ToText()
                     ""
@@ -644,7 +644,7 @@ module ExportIOTable =
         dt
 
 
-    let ToIOListDataTables (system: DsSystem) rowSize target =
+    let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system system.Flows true target
         let tabletableFuncVariExternal = ToFuncVariTables system system.Flows true target

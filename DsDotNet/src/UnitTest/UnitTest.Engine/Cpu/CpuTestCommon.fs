@@ -16,7 +16,6 @@ open System.Linq
 module CpuTestUtil =
 
     type CpuTestSample(target:PlatformTarget) =
-        let targetNDrvier =  (target, PAIX_IO)
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
@@ -24,7 +23,7 @@ module CpuTestUtil =
             RuntimeDS.System <- Some sys
             RuntimeDS.Package <- RuntimePackage.PC
 
-            applyTagManager (sys, Storages(), targetNDrvier)
+            applyTagManager (sys, Storages(), target)
             checkCausalModel sys
             sys
 
@@ -45,8 +44,7 @@ module CpuTestUtil =
         let vertexAll         = vertices
         do
 
-            RuntimeGeneratorModule.clearNFullSlotHwSlotDataTypes()
-            DsAddressModule.assignAutoAddress(sys, 0, 100000) targetNDrvier
+            DsAddressModule.assignAutoAddress(sys, 0, 100000, getDefaltHwTarget()) 
 
             sys.GenerationIO()
             sys.GenerationOrigins()

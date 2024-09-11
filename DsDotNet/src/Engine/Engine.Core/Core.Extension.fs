@@ -153,8 +153,9 @@ module CoreExtensionModule =
         member x.OriginHWLamps        = getLamps(x, DuOriginStateLamp)
         member x.ErrorHWLamps         = getLamps(x, DuErrorStateLamp)
 
-        member x.ReadyConditions     = getConditions(x, DuReadyState)
-        member x.DriveConditions     = getConditions(x, DuDriveState)
+        member x.ReadyConditions        = getConditions(x, DuReadyState)
+        member x.DriveConditions        = getConditions(x, DuDriveState)
+        member x.EmergencyConditions    = getConditions(x, DuEmergencyState)
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =
@@ -431,17 +432,4 @@ type SystemExt =
         x.TagManager.Storages.Values
         |> filter (fun s -> not skipInternal || s.TagKind <> skipValueChangedForTagKind) // 내부변수
         |> distinct
-
-
-    //[<Extension>]
-    //static member ToTextForTaskDevPara(x:TaskDev, jobName:string) = toTextInOutDev (x.GetInParam(jobName)) (x.GetOutParam(jobName))
-
-    //[<Extension>]
-    //static member ToTextForTaskDevPara(x:HwSystemDef) = toTextInOutDev x.InParam x.OutParam
-
-    //[<Extension>]
-    //static member IsSensorNot(x:TaskDevParam) =
-    //            match x.DevValueNType with
-    //            |Some(v, ty) when ty = DuBOOL -> not (Convert.ToBoolean(v))  //RX 기본은 True
-    //            |_ -> false
 

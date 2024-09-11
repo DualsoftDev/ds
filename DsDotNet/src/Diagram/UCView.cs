@@ -469,6 +469,11 @@ public partial class UcView : UserControl
                     {
                         nNode.Attr.FillColor = Color.DarkSlateBlue;
                     }
+
+                    if (viewNode.ConditionType.Value == ConditionType.DuEmergencyState)
+                    {
+                        nNode.Attr.FillColor = Color.DarkOrange;
+                    }
                 }
             }
 

@@ -216,8 +216,6 @@ module ImportIOTable =
                     let checkInType, checkOutType = getInOutDataType dataType
                     updatePptHwParam cond (inSym,checkInType) (outSym, checkOutType)
 
-
-
                 | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
 
             dts
@@ -258,6 +256,8 @@ module ImportIOTable =
                         | XlsOperator -> updateOperator (row, tableIO, page)
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
+                        | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState, tableIO, page)
+                        | XlsConditionEmg   -> updateCondition (row, ConditionType.DuEmergencyState, tableIO, page)
 
             )
 

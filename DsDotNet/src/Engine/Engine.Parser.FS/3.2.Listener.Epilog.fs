@@ -142,6 +142,7 @@ module EtcListenerModule =
                         match first with
                         | :? DriveBlockContext -> DuDriveState
                         | :? ReadyBlockContext -> DuReadyState
+                        | :? ErrorOrEmgBlockContext -> DuEmergencyState
                         | _ -> failwith $"condition type error {fstType}"
 
                     let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()

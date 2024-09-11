@@ -85,8 +85,9 @@ module Util =
 
     let getConditionType (key: string) =
         match key.Trim().ToUpper() with
-        | "R" -> ConditionType.DuReadyState
+        | "R" -> ConditionType.DuReadyState 
         | "D" -> ConditionType.DuDriveState
+        | "E" -> ConditionType.DuEmergencyState
         | _ -> failwith $"{key} is Error Type"
 
 

@@ -160,7 +160,7 @@ module ImportU =
                 try
 
                     let flow = dicFlow.[node.PageNum]
-                    node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}_{c.Key}", "", "", flow))
+                    node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}{TextDeviceSplit}{c.Key}", "", "", flow))
                 with _ ->
                     Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
                     )

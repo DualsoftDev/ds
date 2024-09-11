@@ -299,7 +299,12 @@ module DsAddressModule =
 
         let inA, outA =
             match hwItem with
-            | :? ConditionDef as c -> getValidHwItem c  false true  target
+            | :? ConditionDef as c -> 
+                        if c.ConditionType = ConditionType.DuEmergencyState then
+                            getValidHwItem c  true false target
+                        else
+                            getValidHwItem c  false true  target
+
             | :? ButtonDef as b    -> getValidHwItem b  false false target
             | :? LampDef as l      -> getValidHwItem l  true  false target
             | _ -> failWithLog $"Error {hwItem.Name} not support"
@@ -320,10 +325,15 @@ module DsAddressModule =
             let outA = if l.OutAddress = "" then TextAddrEmpty else l.OutAddress
             updateHwAddress l (inA, outA)  target
 
-        for c in sys.HWConditions do
+        for c in sys.ReadyConditions@sys.DriveConditions do
             let inA = if c.InAddress = "" then TextAddrEmpty else c.InAddress
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
+
+        for ce in sys.EmergencyConditions do
+            let inA = TextSkip
+            let outA = if ce.OutAddress = "" then TextAddrEmpty else ce.OutAddress
+            updateHwAddress ce (inA, outA)  target
 
         let devsJob =  sys.GetTaskDevsSkipEmptyAddress()
         let mutable extCnt = 0

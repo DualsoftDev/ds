@@ -306,15 +306,12 @@ module internal ToDsTextModule =
 
                 yield $"{tab}{rb}"
 
-            let cnds = system.HWConditions
-            if cnds.Any() then
-                let getTargetCnds (target:ConditionType) =
-                    cnds |> Seq.filter(fun c -> c.ConditionType = target)
-                let driveCnds = getTargetCnds DuDriveState
-                let readyCnds = getTargetCnds DuReadyState
+    
+            if system.HWConditions.Any() then
                 yield $"{tab}[conditions] = {lb}"
-                yield HwSystemToDs("d", driveCnds.Cast<HwSystemDef>())
-                yield HwSystemToDs("r", readyCnds.Cast<HwSystemDef>())
+                yield HwSystemToDs("r",  system.ReadyConditions.Cast<HwSystemDef>())
+                yield HwSystemToDs("d",  system.DriveConditions.Cast<HwSystemDef>())
+                yield HwSystemToDs("e",  system.EmergencyConditions.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
 
             (* prop

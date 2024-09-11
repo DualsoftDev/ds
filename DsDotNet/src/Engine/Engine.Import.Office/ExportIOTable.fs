@@ -204,23 +204,8 @@ module ExportIOTable =
             | (DuLambdaDecl _ | DuProcDecl _ | DuProcCall _) ->
                 failwith "ERROR: Not yet implemented"       // 추후 subroutine 사용시, 필요에 따라 세부 구현
 
-    let ToFuncVariTables  (sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) hwTarget: DataTable seq =
+    let ToFuncVariTables  (sys: DsSystem)  hwTarget: DataTable seq =
 
-        let getConditionDefListRows (conds: ConditionDef seq) =
-            conds |> Seq.map(fun cond ->
-
-                updateHwAddress (cond) (cond.InAddress, cond.OutAddress) hwTarget
-                [
-                    ExcelCase.XlsConditionReady.ToText()
-                    ""
-                    cond.Name
-                    getPptHwDevDataTypeText cond
-                    cond.InAddress
-                    cond.OutAddress
-                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.SymbolName else ""
-                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.SymbolName else ""
-                ]
-            )
 
         let funcText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToText()))
         let funcOperatorText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToConditionText()))
@@ -266,7 +251,7 @@ module ExportIOTable =
 
         let variRows = sys.Variables.Map(fun vari->
                 [
-                  TextXlsVariable
+                  if vari.VariableType = Mutable then  TextXlsVariable else TextXlsConst
                   TextXlsAllFlow
                   vari.Name
                   vari.Type.ToText()
@@ -276,22 +261,49 @@ module ExportIOTable =
                   TextSkip
                   ]
                   )
+                  
+        let condiRows =
+            let getXlsLabel (conditionType:ConditionType) = 
+                match conditionType with
+                | DuReadyState  -> TextXlsConditionReady
+                | DuDriveState  -> TextXlsConditionDrive
+                | DuEmergencyState  -> TextXlsConditionEmg
 
-        if operatorRows.any() || commandRows.any()  || variRows.any()  || variRows.any()
+            let getFlowName (cond:ConditionDef) = 
+                if cond.SettingFlows.length() = sys.Flows.length() 
+                then TextXlsAllFlow
+                elif cond.SettingFlows.length() = 1
+                then 
+                    cond.SettingFlows.Head().Name
+                else 
+                    failWithLog $"{cond.Name} ConditionDef  ERROR"
+
+            sys.ReadyConditions
+            @sys.DriveConditions 
+            @sys.EmergencyConditions 
+            |> Seq.sortBy(fun cond -> cond.Name)
+            |> Seq.map(fun cond ->
+                let _, name = splitNameForRow cond.Name
+                updateHwAddress (cond) (cond.InAddress, cond.OutAddress) hwTarget
+                [
+                    getXlsLabel cond.ConditionType
+                    getFlowName cond
+                    name
+                    getPptHwDevDataTypeText cond
+                    cond.InAddress
+                    cond.OutAddress
+                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.SymbolName else ""
+                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.SymbolName else ""
+                ]
+            )
+
+        if operatorRows.any() || commandRows.any()  || variRows.any()  || condiRows.any()
         then 
-            let sampleOperatorRows =  if operatorRows.any() then [] else  [[TextXlsOperator;"-";"";"-";"";"-";"-";"-"]]
-            let sampleCommandRows =  if commandRows.any() then [] else  [[TextXlsCommand;"-";"";"-";"-";"";"-";"-"]]
-            let sampleConstRows=  if variRows.any() then [] else  [[TextXlsConst;"-";"";"";"";"-";"-";"-"]]
-            let sampleVariRows  =  if variRows.any() then [] else  [[TextXlsVariable;"-";"";"";"-";"-";"-";"-"]]
             let dts =
-                getConditionDefListRows (sys.ReadyConditions)
+                condiRows
                 @ commandRows
                 @ operatorRows
                 @ variRows
-                @ sampleOperatorRows
-                @ sampleCommandRows
-                @ sampleVariRows
-                @ sampleConstRows
                 |> Seq.chunkBySize(IOchunkBySize)
                 |> Seq.map(fun rows->
                     let dt = new System.Data.DataTable($"{sys.Name} 외부신호 IO LIST")
@@ -647,7 +659,7 @@ module ExportIOTable =
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system system.Flows true target
-        let tabletableFuncVariExternal = ToFuncVariTables system system.Flows true target
+        let tabletableFuncVariExternal = ToFuncVariTables system  target
 
         let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
 

@@ -64,6 +64,8 @@ module DsTextExport =
     let [<Literal>] TextXlsIdleLamp          = "대기모드램프"
     let [<Literal>] TextXlsHomingLamp        = "원위치중램프"
     let [<Literal>] TextXlsConditionReady    = "준비조건"
+    let [<Literal>] TextXlsConditionDrive    = "운전조건"
+    let [<Literal>] TextXlsConditionEmg      = "비상출력"
 
     let [<Literal>] TextXlsAllFlow =  "ALL"
 [<AutoOpen>]

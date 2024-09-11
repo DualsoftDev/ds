@@ -77,7 +77,9 @@ module InterfaceClass =
         | XlsIdleLamp //대기 램프
         | XlsHomingLamp //원위치중 램프
         | XlsTestLamp //시운전 램프
-        | XlsConditionReady //준비 램프
+        | XlsConditionReady //준비조건 상태
+        | XlsConditionDrive //운전조건 상태
+        | XlsConditionEmg  //비상 상태시 출력
 
         member x.ToText() =
             match x with
@@ -104,7 +106,9 @@ module InterfaceClass =
             | XlsIdleLamp -> TextXlsIdleLamp
             | XlsHomingLamp -> TextXlsHomingLamp
             | XlsConditionReady -> TextXlsConditionReady
-
+            | XlsConditionDrive -> TextXlsConditionDrive
+            | XlsConditionEmg -> TextXlsConditionEmg
+            
     let TextToXlsType (txt: string) =
         match txt.ToLower() with
         | TextXlsAddress -> XlsAddress
@@ -131,6 +135,8 @@ module InterfaceClass =
         | TextXlsHomingLamp -> XlsHomingLamp
         
         | TextXlsConditionReady -> XlsConditionReady
-
+        | TextXlsConditionDrive -> XlsConditionDrive
+        | TextXlsConditionEmg -> XlsConditionEmg
+        
 
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

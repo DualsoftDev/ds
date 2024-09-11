@@ -16,8 +16,12 @@ module ConvertCpuVertex =
         member r._on  = r.Parent.GetSystem()._on
         member r._off = r.Parent.GetSystem()._off
         member r.MutualResetCoins =
-            let mutual = r.Parent.GetSystem().S.MutualCalls
-            mutual[r]
+            let mts = r.Parent.GetSystem().S.MutualCalls
+            match r with
+            | :? Call as c 
+                -> if c.IsJob then mts[r]
+                              else []
+            | _ -> mts[r]
 
     type VariableData with
         member v.VM = v.TagManager :?> VariableManager

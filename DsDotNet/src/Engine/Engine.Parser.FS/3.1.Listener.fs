@@ -668,7 +668,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         [
                             for ad in apiDefs do
                                 let apiFqnd = ad.ApiFqnd |> Seq.toList
-                                let devApiName = apiFqnd.Head
+                                let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
+                                let devName = apiFqnd.Head
                                 let addr, TaskDevParamIO = Addresses(ad.InAddress, ad.OutAddress), ad.TaskDevParamIO
                                 let task =
                                     match apiFqnd with
@@ -686,7 +687,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                         None
 
 
-                                                return createTaskDev  apiPoint  devApiName TaskDevParamIO addr jobName
+                                                return createTaskDev  apiPoint  devName TaskDevParamIO addr jobName
                                             }
 
                                         match taskFromLoaded with
@@ -694,7 +695,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                         | _ ->
                                             match tryFindLoadedSystem system device with
                                             | Some dev->
-                                                let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
                                                 match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with
                                                 | Some apiItem ->
                                                     createTaskDev apiItem device TaskDevParamIO addr jobName
@@ -707,9 +707,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     | _ ->
                                         let errText = String.Join(", ", apiFqnd)
                                         failwithlog $"loading type error ({errText})device"
-
-                                let plcName_I = getPlcTagAbleName (apiFqnd.Combine()|>getInActionName)  options.Storages
-                                let plcName_O = getPlcTagAbleName (apiFqnd.Combine()|>getOutActionName) options.Storages
+                                
+                                let devApiName = $"{devName}_{apiPure}"
+                                let plcName_I = getPlcTagAbleName (getInActionName(devApiName))  options.Storages
+                                let plcName_O = getPlcTagAbleName (getOutActionName(devApiName)) options.Storages
                                 createDeviceVariable system TaskDevParamIO.InParam  plcName_I task.InAddress
                                 createDeviceVariable system TaskDevParamIO.OutParam plcName_O task.OutAddress
 

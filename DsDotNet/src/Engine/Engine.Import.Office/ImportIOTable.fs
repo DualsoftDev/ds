@@ -111,7 +111,7 @@ module ImportIOTable =
                     if $"{TextXlsAllFlow}" = flow
                     then name
 
-                    else $"{flow}.{name}"
+                    else $"{flow}{TextDeviceSplit}{name}"
 
                 (name, inOutDataType, getSymbol inSymbol, getSymbol outSymbol, inAddress, outAddress)
 

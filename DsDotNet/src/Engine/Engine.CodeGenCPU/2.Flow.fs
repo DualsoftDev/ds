@@ -104,9 +104,9 @@ type VertexTagManager with
                 if RuntimeDS.Package.IsPLCorPLCSIM()
                 then
                     //처음에는 자기 순서로 시작
-                    yield (fbRisingAfter[tempInit.Expr <&&> v.ET.Expr], order) --> (vc.SourceTokenData, fn)
+                    yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vc.SourceTokenData, fn)
                     //이후부터는 전체 값 만큼 증가
-                    yield (fbRisingAfter[!@tempInit.Expr <&&> v.ET.Expr], totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
+                    yield (!@tempInit.Expr <&&> fbRising[v.ET.Expr], totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
                 else
                     yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vc.SourceTokenData, fn)
                     yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)

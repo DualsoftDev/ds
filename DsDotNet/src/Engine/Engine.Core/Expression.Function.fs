@@ -211,8 +211,8 @@ module ExpressionFunctionModule =
         | FunctionNameFalling -> fbFalling args
 
 
-        | FunctionNameRisingAfter  -> fbRisingAfter  args
-        | FunctionNameFallingAfter -> fbFallingAfter args
+        //| FunctionNameRisingAfter  -> fbRisingAfter  args
+        //| FunctionNameFallingAfter -> fbFallingAfter args
 
         //| "neg"     -> fNegate  args
         //| "set"     -> fSet     args
@@ -541,9 +541,9 @@ module ExpressionFunctionModule =
         (* FB: Functions that returns Expression<Bool> *)
         let fbRising        args: Expression<bool> = cf _rising          FunctionNameRising args
         let fbFalling       args: Expression<bool> = cf _falling         FunctionNameFalling args
-
-        let fbRisingAfter   args: Expression<bool> = cf _risingAfter     FunctionNameRisingAfter args
-        let fbFallingAfter  args: Expression<bool> = cf _fallingAfter    FunctionNameFallingAfter args
+                   
+        //let fbRisingAfter   _args: Expression<bool> =  failwith "fbRisingAfter not support expression using fbRising"//cf _risingAfter     FunctionNameRisingAfter args
+        //let fbFallingAfter  _args: Expression<bool> =  failwith "fbFallingAfter not support expression  using fbFalling"//cf _fallingAfter    FunctionNameFallingAfter args
 
         let fSin            args = cf _sin            "sin"    args
         let fCos            args = cf _cos            "cos"    args

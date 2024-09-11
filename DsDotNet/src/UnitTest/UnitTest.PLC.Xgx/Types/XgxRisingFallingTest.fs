@@ -107,14 +107,14 @@ type XgiRisingFallingTest() =
     inherit XgxRisingFallingTest(XGI)
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
-    [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
+    //[<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
     [<Test>] member x.``XEquality test1`` () = base.``Equality test1`` ()
 
 type XgkRisingFallingTest() =
     inherit XgxRisingFallingTest(XGK)
     [<Test>] member x.``Negation, Rising, Falling contact test`` () = base.``Negation, Rising, Falling contact test`` ()
     [<Test>] member x.``Normal, Rising, Falling contact test`` () = base.``Normal, Rising, Falling contact test`` ()
-    [<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
+    //[<Test>] member x.``RisingAfter, FallingAfter contact test`` () = base.``RisingAfter, FallingAfter contact test`` ()
     [<Test>] member x.``XEquality test1`` () = base.``Equality test1`` ()
 
      

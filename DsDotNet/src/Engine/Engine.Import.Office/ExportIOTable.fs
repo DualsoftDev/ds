@@ -10,6 +10,9 @@ open System.Text
 open System.Data
 open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
+open System.Text.Json
+open System.Text.Json.Serialization
+open System.Collections.Generic
 
 
 [<AutoOpen>]
@@ -666,43 +669,39 @@ module ExportIOTable =
         tables
 
 
-    let toDataTablesToCSV (dataTables: seq<DataTable>) (fileName:string) =
-        let csvContent = new StringBuilder()
+ 
 
-        // 각 DataTable을 순회
-        for dataTable in dataTables do
-            // 컬럼 헤더 추가
-            let columnNames =
-                dataTable.Columns
-                |> Seq.cast<DataColumn>
-                |> Seq.map (fun col -> "\""+col.ColumnName+"\"")
-                |> Seq.toArray
-                |> (fun array -> String.Join("\t", array))
-
-            csvContent.AppendLine(columnNames) |> ignore
-
-            // 각 행의 데이터 추가
+    let toDataTablesToJSON (dataTables: seq<DataTable>) (fileName: string) =
+        // Helper function to convert DataTable to a list of dictionaries
+        let dataTableToJson (dataTable: DataTable) : Dictionary<string, string> list =
             dataTable.Rows
-            |> Seq.cast<DataRow>
-            |> Seq.iter (fun row ->
-                let fieldValues =
-                    row.ItemArray
-                    |> Seq.map (fun obj ->
-                        let field = obj.ToString()
-                        //field.Replace("\t", "\\t") // 탭 문자 처리
-                        "\""+field.Replace("\t", "\\t")+"\"" // 탭 문자 처리
-                    )
-                    |> Seq.toArray
-                    |> (fun array -> String.Join("\t", array))
+                |> Seq.cast<DataRow>
+                |> Seq.map (fun (row: DataRow) ->
+                    dataTable.Columns
+                    |> Seq.cast<DataColumn>
+                    |> Seq.fold (fun (dict: Dictionary<string, string>) (col: DataColumn) ->
+                        let field = row.[col] |> string
+                        dict.Add(col.ColumnName, field)
+                        dict
+                    ) (Dictionary<string, string>())
+                )
+                |> Seq.toList
 
-                csvContent.AppendLine(fieldValues) |> ignore)
+        // Convert each DataTable into a named entry with rows as JSON
+        let jsonContent =
+            dataTables
+            |> Seq.mapi (fun i dataTable ->
+                let data = dataTableToJson dataTable
+                // Create an entry per DataTable with its index as the key
+                let tableName = sprintf "Table%d" (i + 1)
+                (tableName, data)
+            )
+            |> dict
+            |> JsonSerializer.Serialize
 
-            // DataTable 간 구분을 위해 빈 줄 추가 (필요한 경우)
-            csvContent.AppendLine() |> ignore
-
-        // 지정된 파일 이름으로 CSV 내용을 파일에 씀
-        let filePath = Path.Combine(Path.GetTempPath(), fileName + ".csv")
-        File.WriteAllText(filePath, csvContent.ToString(), Encoding.UTF8)
+        // Specify the file path and write the JSON content to a file
+        let filePath = Path.Combine(Path.GetTempPath(), fileName + ".json")
+        File.WriteAllText(filePath, jsonContent, System.Text.Encoding.UTF8)
 
         filePath
 
@@ -741,11 +740,11 @@ module ExportIOTable =
             createSpreadsheet filePath dataTables 25.0 false
 
         [<Extension>]
-        static member ToDataCSVFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
+        static member ToDataJsonFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
             let dataTables = ToIOListDataTables system IOchunkBySize target
-            toDataTablesToCSV dataTables "IOTABLE"
+            toDataTablesToJSON dataTables "IOTABLE"
 
         [<Extension>]
-        static member ToDataCSVLayouts (xs: Flow seq) =
+        static member ToDataJsonLayouts (xs: Flow seq) =
             let dataTable = ToLayoutTable xs
-            toDataTablesToCSV [dataTable] "LAYOUT"
+            toDataTablesToJSON [dataTable] "LAYOUT"

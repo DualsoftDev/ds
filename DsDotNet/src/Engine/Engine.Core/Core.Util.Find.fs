@@ -145,7 +145,7 @@ module internal ModelFindModule =
         let devNames =
             getVerticesOfFlow(flow)
                 .OfType<Call>()
-                .SelectMany(fun c->c.TargetJob.TaskDefs.Select(fun d->d.DeviceName))
+                .SelectMany(fun c->c.TaskDefs.Select(fun d->d.DeviceName))
 
         flow.System.Devices.Where(fun d -> devNames.Contains d.Name)
 
@@ -156,7 +156,7 @@ module internal ModelFindModule =
 
     let getDistinctApis(x:DsSystem) =
         getVerticesOfJobCalls(x)
-            .SelectMany(fun c-> c.TargetJob.ApiDefs)
+            .SelectMany(fun c-> c.ApiDefs)
             .Distinct()
 
     let getVertexSharedReal(real:Real) =
@@ -212,7 +212,7 @@ module internal ModelFindModule =
     let updateDeviceSkipAddress (x: DsSystem) =
         let calls = x|>getVerticesHasJob
         calls
-            |> collect(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c.TargetJob))
+            |> collect(fun c-> c.TaskDefs.Select(fun dev-> dev, c.TargetJob))
             |> iter(fun (dev, job) ->
                 let inSkip, outSkip = getSkipInfo(dev, job)
                 if inSkip then
@@ -225,7 +225,7 @@ module internal ModelFindModule =
         let tds = calls
                     .Where(fun c-> not(onlyCoin) || not(c.IsFlowCall))
                     .DistinctBy(fun v-> v.TargetJob)
-                    .SelectMany(fun c-> c.TargetJob.TaskDefs.Select(fun dev-> dev, c))
+                    .SelectMany(fun c-> c.TaskDefs.Select(fun dev-> dev, c))
         tds
         |> Seq.sortBy (fun (td, c) ->
             (td.DeviceName, td.GetApiItem(c.TargetJob).Name))
@@ -241,7 +241,7 @@ module internal ModelFindModule =
             td,
                 callAll.Filter(fun v->
                     match tryGetPureCall(v) with
-                    | Some v when v.IsJob -> v.TargetJob.TaskDefs.Contains td
+                    | Some v when v.IsJob -> v.TaskDefs.Contains td
                     | _->false)
             )
 
@@ -375,7 +375,7 @@ type FindExtension =
             x.GetTaskDevsCoin()
                 .DistinctBy(fun (td, _c) -> td)
                 .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
-                .Where(fun (dev,c) -> c.TargetJob.TaskDefs.First() = dev)
+                .Where(fun (dev,c) -> c.TaskDefs.First() = dev)
             //normal //test ahn
             //x.GetTaskDevsCoin()
             //    .Where(fun (dev, _) -> not(dev.IsOutAddressSkipOrEmpty))

@@ -63,7 +63,7 @@ type CoinVertexTagManager with
         let call = v.Vertex :?> Call
 
         let inOps = 
-            call.TargetJob.TaskDefs
+            call.TaskDefs
                 .Select(fun d->
                     if d.InAddress.IsOneOf(TextAddrEmpty, TextSkip) then //주소가 없으면 Plan 으로 처리
                         d.GetPlanEnd(call.TargetJob).Expr

@@ -41,7 +41,7 @@ module ConvertHMI =
         getWebTag tm pushKind, lampTags.Select(fun f-> TagWebExt.GetWebTag(f, kindDescriptions))
 
     let getDeiveHMIs(call:Call) =
-        call.TargetJob.TaskDefs.Select(fun td->
+        call.TaskDefs.Select(fun td->
         {
             Name =  td.DeviceName
             ActionIN  = if td.InTag.IsNonNull()  then Some (getLamp (td.TagManager) (TaskDevTag.actionIn |> int)) else None
@@ -69,7 +69,7 @@ module ConvertHMI =
     type LoadedSystem with
         member private x.GetHMIs() : HMIDevice seq =
             let containerCalls = x.ContainerSystem.GetVerticesOfJobCalls()
-            containerCalls.Where(fun c->c.TargetJob.TaskDefs
+            containerCalls.Where(fun c->c.TaskDefs
                                          .any(fun d->d.ApiItems.Select(fun a->a.ApiSystem).Contains(x.ReferenceSystem)))
                           .SelectMany(getDeiveHMIs)
 

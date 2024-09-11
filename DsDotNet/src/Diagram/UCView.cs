@@ -583,7 +583,7 @@ public partial class UcView : UserControl
 
                     bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)
                     {
-                        return call.TargetJob.TaskDefs.Select(t => (TaskDevManager)t.TagManager).All(predicate);
+                        return call.TaskDefs.Select(t => (TaskDevManager)t.TagManager).All(predicate);
                     }
                 }
             }

@@ -33,7 +33,7 @@ module ConvertErrorCheck =
 
     let internal checkErrApi(sys:DsSystem) =
         for coin in sys.GetVerticesOfJobCalls() do
-            for td in coin.TargetJob.TaskDefs do
+            for td in coin.TaskDefs do
                 for api in td.ApiItems do
                     if api.RX.IsNull() then
                         failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"

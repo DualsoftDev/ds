@@ -362,6 +362,9 @@ module CoreModule =
             | JobType job -> job
             | _ -> failwithlog $"{x.QualifiedName} is not JobType."
 
+        member x.TaskDefs = if x.IsJob then x.TargetJob.TaskDefs else Seq.empty
+        member x.ApiDefs  = if x.IsJob then x.TargetJob.ApiDefs  else Seq.empty
+
         member x.TargetFunc =
             match jobOrFunc with
             | CommadFuncType func -> func :> DsFunc |> Some
@@ -500,6 +503,7 @@ module CoreModule =
 
         member x.System = system
         member x.TaskDefs = tasks
+        member x.ApiDefs = tasks |> Seq.collect(fun t->t.ApiItems)
         member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
 
 

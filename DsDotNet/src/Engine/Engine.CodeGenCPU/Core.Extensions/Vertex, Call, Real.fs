@@ -26,25 +26,18 @@ module ConvertCpuVertex =
         member av.VM = av.TagManager :?> ActionVariableManager
 
 
-    let getAgvTimes(c:Call) = c.TargetJob.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeAvgExist))
-    let getDelayTimes(c:Call) = c.TargetJob.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeDelayExist))
+    let getAgvTimes(c:Call) = c.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeAvgExist))
+    let getDelayTimes(c:Call) = c.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeDelayExist))
 
     type Call with
         member c._on     = c.System._on
         member c._off    = c.System._off
 
-        member c.HasSensor  =
-            match c.IsJob with
-            | true ->
-                c.TargetJob.TaskDefs
-                    .Where(fun d-> d.ExistInput)
-                    .any()
-            | false -> false
-
+        member c.HasSensor  = c.TaskDefs.Where(fun d-> d.ExistInput).any()
         member c.HasAnalogSensor  =
             if c.HasSensor
             then
-                c.TargetJob.TaskDefs
+                c.TaskDefs
                     .Where(fun d-> d.ExistInput && d.InTag.DataType <> typedefof<bool>)
                     .any()
             else
@@ -66,7 +59,7 @@ module ConvertCpuVertex =
             elif c.IsOperator then
                 (c.TagManager :?> CoinVertexTagManager).CallOperatorValue.Expr
             else
-                c.TargetJob.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
+                c.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
         member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None
         member c.End = c.EndAction.DefaultValue(c.EndPlan)
@@ -78,13 +71,13 @@ module ConvertCpuVertex =
                 c.End
 
         member c.IsAnalog =
-            c.TargetJob.TaskDefs
+            c.TaskDefs
                 .any(fun td-> td.IsAnalogActuator || td.IsAnalogSensor)
 
 
         member c.GetEndAction() =
             let tds =
-                c.TargetJob.TaskDefs
+                c.TaskDefs
                     .Where(fun td->td.ExistInput)
                     .Select(fun td->td.GetInExpr(c.TargetJob))
 
@@ -94,7 +87,7 @@ module ConvertCpuVertex =
                 None
 
         //member c.UpdateChildRealExpr(x:ApiItem) =
-        //    let td = c.TargetJob.TaskDefs.First(fun d->d.ApiItem = x)
+        //    let td = c.TaskDefs.First(fun d->d.ApiItem = x)
         //    if td.ExistInput
         //    then
         //        Some(td.GetInExpr(c.TargetJob))
@@ -115,22 +108,22 @@ module ConvertCpuVertex =
 
         //member c.PSs =
         //    if c.IsJob
-        //    then c.TargetJob.TaskDefs.Select(fun f->f.PS)
+        //    then c.TaskDefs.Select(fun f->f.PS)
         //    else [c.VC._on]
 
         member c.PEs =
             if c.IsJob
-            then c.TargetJob.TaskDefs.Select(fun f->f.GetPlanEnd(c.TargetJob))
+            then c.TaskDefs.Select(fun f->f.GetPlanEnd(c.TargetJob))
             else [c.VC.CallCommandEnd]
 
         member c.TXs =
             if c.IsJob
-            then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).TX)
+            then c.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).TX)
             else []
 
         member c.RXs =
             if c.IsJob
-            then c.TargetJob.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).RX)
+            then c.TaskDefs |>Seq.map(fun td -> td.GetApiItem(c.TargetJob).RX)
             else []
 
         member c.Errors =

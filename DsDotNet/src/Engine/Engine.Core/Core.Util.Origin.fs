@@ -30,7 +30,7 @@ module OriginModule =
             |> Seq.choose (fun x ->
                 match x.GetPure() with
                 | :? Call as c  ->
-                    let devs = c.TargetJob.TaskDefs
+                    let devs = c.TaskDefs
                     Some (x, devs.First().ApiItems.First())
                 |_ -> None)
             |> dict
@@ -108,5 +108,5 @@ type OriginHelper =
         |> fun info ->
             info.CallInitials
                 .SelectMany(fun (c, t) ->
-                    c.TargetJob.TaskDefs |> Seq.map (fun d-> d.QualifiedName, t) )
+                    c.TaskDefs |> Seq.map (fun d-> d.QualifiedName, t) )
 

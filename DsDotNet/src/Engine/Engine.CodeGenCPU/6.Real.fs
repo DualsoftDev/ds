@@ -60,7 +60,7 @@ type RealVertexTagManager with
             real.Graph.Vertices
                 .OfType<Call>()
                 .Where(fun call -> call.IsJob)
-                .SelectMany(fun call -> call.TargetJob.ApiDefs)
+                .SelectMany(fun call -> call.ApiDefs)
                 .Select(fun api-> api.SL2).ToAndElseOn()
 
         let rst = v._off.Expr

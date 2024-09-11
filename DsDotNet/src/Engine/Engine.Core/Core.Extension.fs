@@ -269,7 +269,6 @@ module CoreExtensionModule =
 
     type Job with
 
-        member x.ApiDefs = x.TaskDefs |> Seq.collect(fun t->t.ApiItems)
         //member x.OnDelayTime =  //test ahn
         //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.DequotedQualifiedName].Time)
         //    if times.GroupBy(fun t->t).Count() > 1
@@ -363,7 +362,7 @@ module CoreExtensionModule =
         member x.IsFlowCall = x.Parent.GetCore() :? Flow
         member x.Flow = x.Parent.GetFlow()
         member x.NameForGraph = getCallName x
-
+       
         member x.System = x.Parent.GetSystem()
         member x.ErrorSensorOn        = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)       |> snd
         member x.ErrorSensorOff       = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)      |> snd

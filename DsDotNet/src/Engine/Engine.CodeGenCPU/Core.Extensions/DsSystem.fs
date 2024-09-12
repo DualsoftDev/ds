@@ -90,6 +90,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))
         member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))
+        member private x.GenerationAction()     = x.HWActions.Iter(fun f-> createHwApiBridgeTag(f, x))
 
         member private x.GenerationCallConditionMemory()  =
             for condi in x.HWConditions do
@@ -208,6 +209,7 @@ module ConvertCpuDsSystem =
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
+            x.GenerationAction()
 
         member private x.GenerationCallManualMemory()  =
             let devCalls = x.GetDevicesForHMI()

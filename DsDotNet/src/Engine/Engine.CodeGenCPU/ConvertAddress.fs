@@ -63,3 +63,7 @@ module ConvertAddressModule =
         for c in sys.HWConditions do
             if c.InAddress.IsNullOrEmpty() then   c.InAddress <-TextAddrEmpty
             if c.OutAddress.IsNullOrEmpty() then  c.OutAddress <- TextAddrEmpty
+
+        for a in sys.HWActions do
+            if a.InAddress.IsNullOrEmpty() then   a.InAddress <-TextAddrEmpty
+            if a.OutAddress.IsNullOrEmpty() then  a.OutAddress <- TextAddrEmpty

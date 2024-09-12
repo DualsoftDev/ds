@@ -43,6 +43,9 @@ module ModelParser =
         for ctx in sysctx.Descendants<ConditionBlockContext>() do
             listener.ProcessConditionBlock(ctx)
 
+        for ctx in sysctx.Descendants<ActionBlockContext>() do
+            listener.ProcessActionBlock(ctx)
+
         for ctx in sysctx.Descendants<SafetyBlockContext>() do
             listener.ProcessSafetyBlock(ctx)
 

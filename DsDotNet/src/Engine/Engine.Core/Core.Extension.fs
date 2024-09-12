@@ -21,7 +21,7 @@ module CoreExtensionModule =
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
     let getConditions (sys:DsSystem, cType:ConditionType) = sys.HwSystemDefs.OfType<ConditionDef>().Where(fun f->f.ConditionType = cType)
-
+    let getActions (sys:DsSystem, aType:ActionType) = sys.HwSystemDefs.OfType<ActionDef>().Where(fun f->f.ActionType = aType)
 
     let getRecursiveLoadeds (system:DsSystem) =
         let loadeds = Dictionary<LoadedSystem, DsSystem>()
@@ -69,6 +69,7 @@ module CoreExtensionModule =
     type DsSystem with
         member x.HWButtons    = x.HwSystemDefs.OfType<ButtonDef>()
         member x.HWConditions = x.HwSystemDefs.OfType<ConditionDef>()
+        member x.HWActions    = x.HwSystemDefs.OfType<ActionDef>()
         member x.HWLamps      = x.HwSystemDefs.OfType<LampDef>()
         member x.LayoutInfos =
             x.LoadedSystems
@@ -122,18 +123,37 @@ module CoreExtensionModule =
         member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
             x.AddLamp(lmpType, lmpName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress),  flow)
 
+        member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow, isCondition: bool) =
+            checkSystem(x, flow, defName)
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow) =
-            checkSystem(x, flow, condiName)
+            let typeText = if isCondition then "Condition" else "Action"
+            if defName.Contains('.') then
+                failwithf $"[{(if isCondition then condiType.Value.ToString() else actionType.Value.ToString())}]{defName} Error: 이름 '.' 포함되서는 안됩니다."
+            
+            if isCondition 
+            then
+                    match x.HWConditions.TryFind(fun f -> f.Name = defName) with
+                    | Some def -> 
+                        def.SettingFlows.Add(flow) |> verifyM $"중복 {typeText} [flow:{flow.Name} name:{defName}]"
+                    | _ -> 
+                        x.HwSystemDefs.Add(ConditionDef(defName, x, condiType.Value, taskDevParamIO, addr, HashSet[|flow|]))
+                        |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{defName}]"
+            else
+                    match x.HWActions.TryFind(fun f -> f.Name = defName) with
+                    | Some def -> 
+                        def.SettingFlows.Add(flow) |> verifyM $"중복 {typeText} [flow:{flow.Name} name:{defName}]"
+                    | _ -> 
+                        x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, taskDevParamIO, addr, HashSet[|flow|]))
+                        |> verifyM $"중복 ActionDef [flow:{flow.Name} name:{defName}]"
 
-            if condiName.Contains('.') then
-                failwithf $"[{condiType}]{condiName} Error: 이름 '.' 포함되서는 안됩니다."
+        // Method for adding conditions, passing the ConditionType and setting isCondition = true
+        member x.AddCondition(condiType: ConditionType, condiName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow) =
+            x.AddDefinition(Some(condiType), None, condiName, taskDevParamIO, addr, flow, true)
 
-            match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
-            | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
-            | None ->
-                x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, taskDevParamIO,  addr, HashSet[|flow|]))
-                |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
+        // Method for adding actions, passing the ActionType and setting isCondition = false
+        member x.AddAction(actionType: ActionType, actionName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow) =
+            x.AddDefinition(None, Some(actionType), actionName, taskDevParamIO, addr, flow, false)
+
 
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
@@ -161,7 +181,7 @@ module CoreExtensionModule =
 
         member x.ReadyConditions        = getConditions(x, DuReadyState)
         member x.DriveConditions        = getConditions(x, DuDriveState)
-        member x.EmergencyConditions    = getConditions(x, DuEmergencyState)
+        member x.EmergencyActions    = getActions(x, DuEmergencyAction)
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =

@@ -25,7 +25,7 @@ module InterfaceClass =
         | BUTTON //버튼 emg,start, ...
         | LAYOUT //위치 디바이스 기준
         | LAMP //램프 runmode,stopmode, ...
-        | CONDITION //READY조건
+        | CONDITIONorAction //READY조건, Drive 조건, EmergencyAction, ...
 
         member x.IsReal = x = REAL || x = REALExF
         member x.IsCall = x = CALL 
@@ -52,6 +52,7 @@ module InterfaceClass =
         | VBUTTON
         | VLAMP
         | VCONDITION
+        | VACTION
 
     ///인터페이스 Tag 기본 형식
     type ExcelCase =
@@ -79,7 +80,7 @@ module InterfaceClass =
         | XlsTestLamp //시운전 램프
         | XlsConditionReady //준비조건 상태
         | XlsConditionDrive //운전조건 상태
-        | XlsConditionEmg  //비상 상태시 출력
+        | XlsActionEmg  //비상 상태시 출력
 
         member x.ToText() =
             match x with
@@ -107,7 +108,7 @@ module InterfaceClass =
             | XlsHomingLamp -> TextXlsHomingLamp
             | XlsConditionReady -> TextXlsConditionReady
             | XlsConditionDrive -> TextXlsConditionDrive
-            | XlsConditionEmg -> TextXlsConditionEmg
+            | XlsActionEmg -> TextXlsActionEmg
             
     let TextToXlsType (txt: string) =
         match txt.ToLower() with
@@ -136,7 +137,7 @@ module InterfaceClass =
         
         | TextXlsConditionReady -> XlsConditionReady
         | TextXlsConditionDrive -> XlsConditionDrive
-        | TextXlsConditionEmg -> XlsConditionEmg
+        | TextXlsActionEmg -> XlsActionEmg
         
 
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

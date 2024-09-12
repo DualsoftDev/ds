@@ -119,7 +119,7 @@ module PptNodeUtilModule =
                 if s.IsDashShape() then AUTOPRE else CALL
             | s when s.IsBevelShapePlate() -> LAMP
             | s when s.IsBevelShapeRound() -> BUTTON
-            | s when s.IsBevelShapeMaxRound() -> CONDITION
+            | s when s.IsBevelShapeMaxRound() -> CONDITIONorAction
             | s when s.IsLayout() -> shape.ErrorName(ErrID._62, iPage)
 
             | _ ->

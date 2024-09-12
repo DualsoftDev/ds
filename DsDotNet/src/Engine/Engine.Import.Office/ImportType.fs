@@ -188,6 +188,6 @@ module ImportType =
         | IF_DEVICE
         | DUMMY
         | BUTTON
-        | CONDITION
+        | CONDITIONorAction
         | LAYOUT
         | LAMP -> checkDotErr()

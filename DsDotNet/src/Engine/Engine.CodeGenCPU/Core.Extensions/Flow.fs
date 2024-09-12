@@ -12,7 +12,6 @@ module ConvertCpuFlow =
         let tags =
             btns
                 .Where(fun b -> b.SettingFlows.Contains(flow))
-                .Where(fun b ->b.InTag.IsNonNull())
                 .Select(fun b ->b.ActionINFunc)
         if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
 
@@ -20,8 +19,7 @@ module ConvertCpuFlow =
         let tags =
             condis
                 .Where(fun c -> c.SettingFlows.Contains(flow))
-                .Where(fun c ->c.InTag.IsNonNull())
-                .Select(fun c -> !@c.ActionINFunc)
+                .Select(fun c -> c.ActionINFunc)
         tags.ToAndElseOn()
 
     type Flow with        
@@ -85,8 +83,11 @@ module ConvertCpuFlow =
         member private f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member private f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )  
 
-        member f.HWReadyConditionsToAndElseOn = getConditionsToAndElseOn(f, f.System.HWConditions.Where(fun f->f.ConditionType = DuReadyState))
-        member f.HWDriveConditionsToAndElseOn = getConditionsToAndElseOn(f, f.System.HWConditions.Where(fun f->f.ConditionType = DuDriveState))
+        member f.HWDriveConditions =  f.System.HWConditions.Where(fun f->f.ConditionType = DuDriveState)
+        member f.HWReadyConditions =  f.System.HWConditions.Where(fun f->f.ConditionType = DuReadyState)
+
+        member f.HWReadyConditionsToAndElseOn = getConditionsToAndElseOn(f, f.HWReadyConditions)
+        member f.HWDriveConditionsToAndElseOn = getConditionsToAndElseOn(f, f.HWDriveConditions)
            
 
         member f.AutoSelectExpr   =  f.auto_btn.Expr   <||> f.System._auto_btn.Expr     <||> f.HwAutoExpr

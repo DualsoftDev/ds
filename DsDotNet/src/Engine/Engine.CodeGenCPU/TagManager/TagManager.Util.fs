@@ -58,7 +58,7 @@ module TagManagerUtil =
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
-    type BridgeType = | ActionDevice | Button | Lamp | Condition | DummyTemp
+    type BridgeType = | TaskDevice | Button | Lamp | Condition | Action | DummyTemp
     let createBridgeTag(stg:Storages, (name: string), address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed, duType:DataType): ITag option=
         if address = TextSkip || address = "" then
             None
@@ -67,18 +67,19 @@ module TagManagerUtil =
                 let nameCandidate =
                     match bridgeType with
                     | DummyTemp -> name  //plc b접 처리를 위한 임시 물리주소 변수
-                    | ActionDevice ->
+                    | TaskDevice ->
                         match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
                         | TaskDevTag.actionIn     -> name |> getInActionName
                         | TaskDevTag.actionOut    -> name |> getOutActionName
                         | TaskDevTag.actionMemory -> name |> getMemoryActionName
                         | _ -> failwithlog "error: TaskDevTag create "
 
-                    | (Button | Lamp | Condition) ->
+                    | (Button | Lamp | Condition | Action) ->
                         match DU.tryGetEnumValue<HwSysTag>(tagKind).Value with
                         | HwSysTag.HwSysIn      -> name |> getInActionName
                         | HwSysTag.HwSysOut     -> name |> getOutActionName
                         | _ -> failwithlog "error: HwSysTag create "
+
                 getPlcTagAbleName nameCandidate stg
 
             if stg.ContainsKey validTagName then

@@ -31,6 +31,7 @@ module ConvertCoreExtUtils =
             | :? ButtonDef -> BridgeType.Button
             | :? LampDef -> BridgeType.Lamp
             | :? ConditionDef -> BridgeType.Condition
+            | :? ActionDef -> BridgeType.Action
             | _ ->
                 failwithf "bridgeType err"
 

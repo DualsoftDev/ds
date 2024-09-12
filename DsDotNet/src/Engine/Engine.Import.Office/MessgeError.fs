@@ -109,7 +109,7 @@ module ErrID =
     let [<Literal>] _1005 = "시스템 램프 or 버튼 or 조건은 Not($n) 함수만 사용가능합니다."
     let [<Literal>] _1006 = "Device가 해당 시스템에 없습니다."
     let [<Literal>] _1007 = "시스템에 Condition 이름이 없습니다."
-    let [<Literal>] _1008 = "Function 적용은 1개만 가능합니다."
+    let [<Literal>] _1008 = "시스템에 Action 이름이 없습니다."
     let [<Literal>] _1009 = "그룹 Action Function 적용은 처음 Device 1개에만 적용해서 그룹에 전체 반영됩니다."
     let [<Literal>] _1010 = "함수에 대한 내용이 없습니다. \r\n ex) $D100 = 55;"
 

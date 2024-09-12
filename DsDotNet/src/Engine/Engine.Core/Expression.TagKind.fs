@@ -244,6 +244,17 @@ type TagKindExt =
                 )
         | _ -> false
 
+
+    [<Extension>]
+    static member IsSystemConditionErrTag(x:TagEvent) =
+        match x with
+        | EventHwSys (_, _, kind) ->
+            kind.IsOneOf(
+                   HwSysTag.HwDriveConditionErr
+                 , HwSysTag.HwReadyConditionErr
+                )
+        | _ -> false
+
     [<Extension>]
     static member IsStatusTag(x:IStorage) =
         x.TagKind.IsOneOf(

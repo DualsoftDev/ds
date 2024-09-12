@@ -23,10 +23,17 @@ type Flow with
     member f.F3_FlowReadyCondition() =
         let set = f.HWReadyConditionsToAndElseOn
         let rst = f._off.Expr
-        (set, rst) --| (f.readyCondition, getFuncName())
+        [
+            yield (set, rst) --| (f.readyCondition, getFuncName())
+            for ready in f.HWReadyConditions do
+                yield (f.ManuExpr <&&> !@ready.ActionINFunc , f.ClearExpr) --| (ready.ErrorCondition, getFuncName())
+        ]
 
     member f.F4_FlowDriveCondition() =
         let set = f.HWDriveConditionsToAndElseOn
         let rst = f._off.Expr
-        (set, rst) --| (f.driveCondition, getFuncName())
-
+        [
+            yield (set, rst) --| (f.driveCondition, getFuncName())
+            for drive in f.HWDriveConditions do
+                yield (f.AutoExpr <&&> !@drive.ActionINFunc , f.ClearExpr) --| (drive.ErrorCondition, getFuncName())
+        ]

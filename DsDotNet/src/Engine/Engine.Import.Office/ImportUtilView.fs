@@ -171,8 +171,8 @@ module ImportViewModule =
         system.DriveConditions.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveState)) |> ignore)
 
-        system.EmergencyConditions.Where(fun w -> w.SettingFlows.Contains(flow))
-        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyState)) |> ignore)
+        system.EmergencyActions.Where(fun w -> w.SettingFlows.Contains(flow))
+        |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyAction)) |> ignore)
 
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore

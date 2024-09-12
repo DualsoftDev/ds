@@ -309,9 +309,12 @@ module internal ToDsTextModule =
                 yield $"{tab}[conditions] = {lb}"
                 yield HwSystemToDs("r",  system.ReadyConditions.Cast<HwSystemDef>())
                 yield HwSystemToDs("d",  system.DriveConditions.Cast<HwSystemDef>())
-                yield HwSystemToDs("e",  system.EmergencyConditions.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
-
+                    
+            if system.HWActions.Any() then
+                yield $"{tab}[actions] = {lb}"
+                yield HwSystemToDs("e",  system.EmergencyActions.Cast<HwSystemDef>())
+                yield $"{tab}{rb}"
             (* prop
                     safety
                     layouts *)

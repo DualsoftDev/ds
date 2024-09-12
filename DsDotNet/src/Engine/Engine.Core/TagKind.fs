@@ -218,9 +218,10 @@ module TagKindList =
     type HwSysTag    =
     | HwSysIn                     = 15000
     | HwSysOut                    = 15001
-    | HwStopConditionErrLamp      = 15010
     | HwStopEmergencyErrLamp      = 15011
-
+    | HwReadyConditionErr         = 15012
+    | HwDriveConditionErr         = 15013
+    
     /// 16000 ~ 16999
     [<Flags>]
     type VariableTag    =

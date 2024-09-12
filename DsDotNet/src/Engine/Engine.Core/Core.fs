@@ -542,6 +542,9 @@ module CoreModule =
         member x.ConditionType = conditionType
         member val ErrorCondition = getNull<IStorage>() with get, set
 
+    and ActionDef (name:string, system:DsSystem, actionType: ActionType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows: HashSet<Flow>) =
+        inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) // outAddress condition check bit
+        member x.ActionType = actionType
 
     (* Abbreviations *)
 

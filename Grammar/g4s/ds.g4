@@ -203,7 +203,7 @@ comment: BLOCK_COMMENT | LINE_COMMENT;
 system: '[' SYS ']' systemName '=' (sysBlock) EOF;    // [sys] Seg = {..}
     sysBlock:
           '{' (       flowBlock | jobBlock
-                    | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock
+                    | commandBlock | operatorBlock | variableBlock | interfaceBlock | conditionBlock | actionBlock
                     | loadDeviceBlock | loadExternalSystemBlock
                     | buttonBlock | lampBlock
                     | propsBlock | versionsBlock)*
@@ -427,6 +427,7 @@ categoryBlocks: autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock |
 buttonBlock: '[' 'buttons' ']' '=' '{' (categoryBlocks)* '}';
 lampBlock: '[' 'lamps' ']' '=' '{' (categoryBlocks)* '}';
 conditionBlock: '[' 'conditions' ']' '=' '{' (categoryBlocks)* '}';
+actionBlock: '[' 'actions' ']' '=' '{' (categoryBlocks)* '}';
 
 // B.F1 > Set1F > T.A21;
 causal: causalPhrase SEMICOLON;

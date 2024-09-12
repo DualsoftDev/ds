@@ -138,11 +138,11 @@ module internal ToDsTextModule =
                 yield $"{tab}[variables] = {lb}{rb}"
         ] |> combineLines
 
-    let getInOutTypeText name (inDataType:DataType) (outDataType:DataType) =
-        match inDataType, outDataType with
-        | DuBOOL, DuBOOL -> $"{name}"
-        | i, o when i = o -> $"{name}(type:{inDataType.ToText()})"
-        | _ ->  $"{name}(type:{inDataType.ToText()}, {outDataType.ToText()})"
+    let getHwSystemDefText (hw:HwSystemDef) (addresses:Addresses)=
+        if hw.TaskDevParamIO.IsDefaultParam then
+            $"{hw.Name.QuoteOnDemand()}({addresses.In}, {addresses.Out})"
+        else 
+            $"{hw.Name.QuoteOnDemand()}({hw.TaskDevParamIO.ToDsText(addresses)})"
 
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
@@ -266,14 +266,12 @@ module internal ToDsTextModule =
                     | 0-> ()
                     | 1->
                         let itemText, inAddr, outAddr = getHwInfo (hws.Head())
-                        yield $"{tab2}[{category}] = {lb} {hws.Head().Name.QuoteOnDemand()}({inAddr}, {outAddr}) = {lb} {itemText} {rb} {rb}"
+                        yield $"{tab2}[{category}] = {lb} {getHwSystemDefText (hws.Head()) (Addresses(inAddr, outAddr))} = {lb} {itemText} {rb} {rb}"
                     | _->
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
                             let itemText, inAddr, outAddr = getHwInfo hw
-                            let inType, outType = hw.InDataType, hw.OutDataType
-
-                            yield $"{tab3}{getInOutTypeText (hw.Name.QuoteOnDemand()) inType outType}({inAddr}, {outAddr}) = {lb} {itemText} {rb}"
+                            yield $"{tab3}{getHwSystemDefText hw (Addresses(inAddr, outAddr))} = {lb} {itemText} {rb}"
 
                         yield $"{tab2}{rb}"
                 ] |> combineLines

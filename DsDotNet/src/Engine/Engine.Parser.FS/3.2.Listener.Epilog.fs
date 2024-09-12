@@ -167,10 +167,10 @@ module EtcListenerModule =
                                 } ]
 
                     for fci in flowConditionInfo |> List.choose id do
-                        let targetCndType, cndName, _, _,  flows, inAddr, outAddr = fci
+                        let targetCndType, cndName, inp, outp,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
-                            system.AddCondtion(targetCndType, cndName, inAddr, outAddr,  flow)
+                            system.AddCondtion(targetCndType, cndName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr),  flow)
 
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =

@@ -94,7 +94,8 @@ module LSEAddressPattern =
         if bitSize = 1
         then $"%%{device}X{offset}"
         else
-            if offset%8 = 0 then getXgkWordText(device, offset/8)
+            if offset%8 = 0 
+            then getXgiIOTextBySize (device, offset, bitSize, 0, 0)
             else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
 
 

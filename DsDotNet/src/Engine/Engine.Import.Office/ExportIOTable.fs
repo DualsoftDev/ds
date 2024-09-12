@@ -273,17 +273,18 @@ module ExportIOTable =
                 | DuEmergencyState  -> TextXlsConditionEmg
 
             let getFlowName (cond:ConditionDef) = 
-                if cond.SettingFlows.length() = 1
-                then 
-                    let flow, name = splitNameForRow cond.Name
+                match cond.SettingFlows.length()  with
+                | 0 -> failWithLog $"ConditionDef {cond.Name} SettingFlows ERROR"
+                | 1 -> 
+                    let flow, _ = splitNameForRow cond.Name
                     if cond.SettingFlows.Head().Name = flow
                     then 
                         flow
                     else 
                         TextXlsAllFlow
-                else 
-                    TextXlsAllFlow
-
+                        
+                | _ -> TextXlsAllFlow
+              
             sys.ReadyConditions
             @sys.DriveConditions 
             @sys.EmergencyConditions 

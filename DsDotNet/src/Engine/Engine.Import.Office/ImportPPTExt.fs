@@ -110,7 +110,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}.{b.Key}", "", "", flow)))
+                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}{TextDeviceSplit}{b.Key}", "", "", flow)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -144,7 +144,7 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}.{l.Key}", "", "", Some flow)))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}{TextDeviceSplit}{l.Key}", "", "", Some flow)))
 
             headPageLamps
             |> Seq.iter (fun node ->
@@ -154,13 +154,37 @@ module ImportU =
         [<Extension>]
         static member MakeConditions(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
+
+            let addCondition(fullName, conditionType:ConditionType, flowName:string option, settingflow:Flow) = 
+                let emptyAddr = Addresses("", "")
+                let condiName = GetLastParenthesesReplaceName(fullName, "")
+                let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
+                let name = 
+                    match flowName with
+                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}" 
+                    | None -> condiName
+
+                let hasTaskDevParam = condiName <> fullName
+                let devParamIO =
+                    if hasTaskDevParam
+                    then
+                        let devParam = getTaskDevParam funcName
+                        match conditionType with
+                        | DuReadyState | DuDriveState
+                            -> TaskDevParamIO(Some devParam, None)
+                        | DuEmergencyState 
+                            -> TaskDevParamIO(None, Some devParam)
+                    else 
+                        defaultTaskDevParamIO()
+
+                mySys.AddCondtion(conditionType, name, devParamIO, emptyAddr, settingflow)
+
             doc.Nodes
             |> Seq.filter (fun node -> node.CondiDefs.any())
             |> Seq.iter (fun node ->
                 try
-
                     let flow = dicFlow.[node.PageNum]
-                    node.CondiDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, $"{flow.Name}{TextDeviceSplit}{c.Key}", "", "", flow))
+                    node.CondiDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, Some flow.Name, flow))
                 with _ ->
                     Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
                     )
@@ -172,7 +196,8 @@ module ImportU =
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
                 else
                     dicFlow.Iter(fun flow ->
-                        node.CondiHeadPageDefs.ForEach(fun c -> mySys.AddCondtion(c.Value, c.Key, "", "", flow.Value)))
+                        node.CondiHeadPageDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, None, flow.Value))
+                            )
                 )
 
         [<Extension>]

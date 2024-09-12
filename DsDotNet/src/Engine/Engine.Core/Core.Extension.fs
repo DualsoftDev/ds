@@ -93,6 +93,8 @@ module CoreExtensionModule =
 
             if existBtns.Any(fun w->w.Name = btnName) then
                 failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
+            if btnName.Contains('.') then
+                failwithf $"[{btnType}]{btnName} Error: 이름 '.' 포함되서는 안됩니다."
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
@@ -106,6 +108,9 @@ module CoreExtensionModule =
         member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
+
+            if lmpName.Contains('.') then
+                failwithf $"[{lmpType}]{lmpName} Error: 이름 '.' 포함되서는 안됩니다."
 
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
@@ -121,14 +126,15 @@ module CoreExtensionModule =
         member x.AddCondtion(condiType:ConditionType, condiName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow) =
             checkSystem(x, flow, condiName)
 
+            if condiName.Contains('.') then
+                failwithf $"[{condiType}]{condiName} Error: 이름 '.' 포함되서는 안됩니다."
+
             match x.HWConditions.TryFind(fun f -> f.Name = condiName) with
             | Some condi -> condi.SettingFlows.Add(flow) |> verifyM $"중복 Condtion [flow:{flow.Name} name:{condiName}]"
             | None ->
                 x.HwSystemDefs.Add(ConditionDef(condiName,x, condiType, taskDevParamIO,  addr, HashSet[|flow|]))
                 |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{condiName}]"
 
-        member x.AddCondtion(condiType:ConditionType, condiName: string, inAddress:string, outAddress:string, flow:Flow) =
-                x.AddCondtion(condiType, condiName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct

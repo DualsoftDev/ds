@@ -92,6 +92,7 @@ module Util =
     let tryGetActionType (key: string) =
         match key.Trim().ToUpper() with
         | "E" ->Some ActionType.DuEmergencyAction
+        | "P" ->Some ActionType.DuPauseAction
         | _ -> None
 
 

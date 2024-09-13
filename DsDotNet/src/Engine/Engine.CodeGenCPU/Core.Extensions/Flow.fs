@@ -83,12 +83,19 @@ module ConvertCpuFlow =
         member private f.HWBtnClearExpr = getButtonExpr(f, f.System.ClearHWButtons    )
         member private f.HWBtnHomeExpr  = getButtonExpr(f, f.System.HomeHWButtons     )  
 
-        member f.HWDriveConditions =  f.System.HWConditions.Where(fun f->f.ConditionType = DuDriveState)
-        member f.HWReadyConditions =  f.System.HWConditions.Where(fun f->f.ConditionType = DuReadyState)
-
-        member f.HWReadyConditionsToAndElseOn = getConditionsToAndElseOn(f, f.HWReadyConditions)
+        member f.HWDriveConditions  =  f.System.HWConditions.Where(fun f->f.ConditionType = DuDriveState)
         member f.HWDriveConditionsToAndElseOn = getConditionsToAndElseOn(f, f.HWDriveConditions)
-           
+
+        member f.HWReadyConditions  =  f.System.HWConditions.Where(fun f->f.ConditionType = DuReadyState)
+        member f.HWReadyConditionsToAndElseOn = getConditionsToAndElseOn(f, f.HWReadyConditions)
+        
+        member f.HWEmergencyActions =  f.System.HWActions.Where(fun f->f.ActionType = DuEmergencyAction)
+        member f.HWEmergencyAnalogActions =  f.HWEmergencyActions.Where(fun f->f.OutTag.DataType <> typeof<bool>)
+        member f.HWEmergencyDigitalActions =  f.HWEmergencyActions.Where(fun f->f.OutTag.DataType = typeof<bool>)
+
+        member f.HWPauseActions =  f.System.HWActions.Where(fun f->f.ActionType = DuPauseAction)
+        member f.HWPauseAnalogActions =   f.HWPauseActions.Where(fun f->f.OutTag.DataType <> typeof<bool>)
+        member f.HWPauseDigitalActions =  f.HWPauseActions.Where(fun f->f.OutTag.DataType = typeof<bool>)
 
         member f.AutoSelectExpr   =  f.auto_btn.Expr   <||> f.System._auto_btn.Expr     <||> f.HwAutoExpr
         member f.ManuSelectExpr   =  f.manual_btn.Expr <||> f.System._manual_btn.Expr   <||> f.HwManuExpr

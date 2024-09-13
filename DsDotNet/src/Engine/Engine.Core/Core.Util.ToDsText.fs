@@ -314,6 +314,7 @@ module internal ToDsTextModule =
             if system.HWActions.Any() then
                 yield $"{tab}[actions] = {lb}"
                 yield HwSystemToDs("e",  system.EmergencyActions.Cast<HwSystemDef>())
+                yield HwSystemToDs("p",  system.PauseActions.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
             (* prop
                     safety

@@ -13,26 +13,43 @@ type Job with
         let fn = getFuncName()
         let _off = j.System._off.Expr
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
-        let emg = call.Flow.emg_st.Expr
+        let flowEmg = call.Flow.emg_st.Expr
+        let flowPause = call.Flow.emg_st.Expr
+        let emgActions = call.Flow.HWEmergencyDigitalActions
+        let pauseActions = call.Flow.HWPauseDigitalActions
 
-        let getStatementTypeDigital(sets, td:TaskDev) =
-            if j.ActionType = Push then
-                (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)  //단동 실린더? 멈추면 반대로 움직여서 emg 삽입??
-            else
-                (sets, emg) --| (td.OutTag:?> Tag<bool>, fn)
+        let getStatementTypeDigital(set, td:TaskDev) =
+            let getStatement(actionSet:IExpression option, actionRst:IExpression option) =
+                let sets = if actionSet.IsSome then actionSet.Value<||>set else set
+                let rsts = if actionRst.IsSome then actionRst.Value else _off
+                if j.ActionType = Push then
+                    (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)  //단동 실린더? 멈추면 반대로 움직여서 emg 삽입??
+                else
+                    (sets, rsts) --| (td.OutTag:?> Tag<bool>, fn)
+
+            match emgActions.TryFind(fun a->a.OutAddress = td.OutAddress)
+                , pauseActions.TryFind(fun a->a.OutAddress = td.OutAddress) with
+            | Some emg, Some pause ->
+                match emg.DigitalOutputTarget.Value, pause.DigitalOutputTarget.Value with
+                | true, true -> getStatement (Some (flowEmg<||>flowPause), None)
+                | true, false -> getStatement (Some flowEmg, Some flowPause)
+                | false, true -> getStatement (Some flowPause, Some flowEmg)
+                | false, false -> getStatement (None, Some (flowEmg<||>flowPause))
+            | _ ->
+                getStatement (None, None)
 
         let getStatementTypeAnalog(sets, td:TaskDev) =
             [
                 let outParam = td.GetOutParam(j)
                 let valExpr = outParam.WriteValue |> any2expr
-                let valDefalut = outParam.DefaultValue |> any2expr
-                if j.ActionType = Push then
-                    yield (sets, valExpr) --> (td.OutTag, fn)
-                else
-                    let tempRising  = getJSM(j).GetTempBoolTag(td.QualifiedName)
-                    yield! (sets, j.System) --^ (tempRising,  fn)
-                    yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
-                    yield (emg, valDefalut) --> (td.OutTag, fn)
+                //let valDefalut = outParam.DefaultValue |> any2expr
+                //if j.ActionType = Push then
+                yield (sets, valExpr) --> (td.OutTag, fn)  //test ahn Analog pulse 출력 안함 테스트중
+                //else
+                //    let tempRising  = getJSM(j).GetTempBoolTag(td.QualifiedName)
+                //    yield! (sets, j.System) --^ (tempRising,  fn)
+                //    yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
+                    //yield (emg, valDefalut) --> (td.OutTag, fn)
             ]
 
         [|

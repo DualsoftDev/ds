@@ -185,6 +185,7 @@ module EtcListenerModule =
 
                         match first with
                         | :? ErrorOrEmgBlockContext -> DuEmergencyAction
+                        | :? PauseBlockContext -> DuPauseAction
                         | _ -> failwith $"action type error {fstType}"
 
                     let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()

@@ -487,6 +487,10 @@ public partial class UcView : UserControl
                     {
                         nNode.Attr.FillColor = Color.DarkOrange;
                     }
+                    if (viewNode.ActionType.Value == ActionType.DuPauseAction)
+                    {
+                        nNode.Attr.FillColor = Color.DarkGoldenrod;
+                    }
                 }
             }
 

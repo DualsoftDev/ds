@@ -99,7 +99,7 @@ module rec ViewModule =
         new(name, btnType: BtnType) = ViewNode(name, VBUTTON, None, Some(btnType), None, None, None)
         new(name, lampType: LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None, None)
         new(name, cType: ConditionType) = ViewNode(name, VCONDITION, None, None, None, Some(cType), None)
-        new(name, aType: ActionType) = ViewNode(name, VCONDITION, None, None, None, None, Some(aType))
+        new(name, aType: ActionType) = ViewNode(name, VACTION, None, None, None, None, Some(aType))
 
 
         [<Browsable(false)>]

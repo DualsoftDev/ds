@@ -284,8 +284,7 @@ module ExportIOTable =
                 | DuDriveState  -> TextXlsConditionDrive
           
               
-            sys.ReadyConditions
-            @sys.DriveConditions 
+            sys.HWConditions 
             |> Seq.sortBy(fun cond -> cond.Name)
             |> Seq.map(fun cond ->
                 let _, name = splitNameForRow cond.Name
@@ -305,8 +304,9 @@ module ExportIOTable =
             let getXlsActionLabel (actionType:ActionType) = 
                 match actionType with
                 | DuEmergencyAction  -> TextXlsActionEmg
+                | DuPauseAction      -> TextXlsActionPause
 
-            sys.EmergencyActions 
+            sys.HWActions 
             |> Seq.sortBy(fun action -> action.Name)
             |> Seq.map(fun action ->
                 let _, name = splitNameForRow action.Name

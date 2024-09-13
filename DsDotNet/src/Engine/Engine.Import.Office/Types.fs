@@ -81,6 +81,7 @@ module InterfaceClass =
         | XlsConditionReady //준비조건 상태
         | XlsConditionDrive //운전조건 상태
         | XlsActionEmg  //비상 상태시 출력
+        | XlsActionPause //정지 상태시 출력
 
         member x.ToText() =
             match x with
@@ -109,6 +110,7 @@ module InterfaceClass =
             | XlsConditionReady -> TextXlsConditionReady
             | XlsConditionDrive -> TextXlsConditionDrive
             | XlsActionEmg -> TextXlsActionEmg
+            | XlsActionPause -> TextXlsActionPause
             
     let TextToXlsType (txt: string) =
         match txt.ToLower() with
@@ -138,6 +140,7 @@ module InterfaceClass =
         | TextXlsConditionReady -> XlsConditionReady
         | TextXlsConditionDrive -> XlsConditionDrive
         | TextXlsActionEmg -> XlsActionEmg
+        | TextXlsActionPause -> XlsActionPause
         
 
         | _ -> failwithf $"'{txt}' TextXlsType Error check type"

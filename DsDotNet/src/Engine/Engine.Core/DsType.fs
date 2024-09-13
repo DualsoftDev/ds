@@ -50,6 +50,7 @@ module DsType =
 
     type ActionType =
         | DuEmergencyAction
+        | DuPauseAction
 
     type ExternalTag =
         | ErrorSensorOn

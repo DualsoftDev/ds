@@ -267,7 +267,8 @@ module ImportIOTable =
 
                         | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, page)
                         | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState, page)
-                        | XlsActionEmg   -> updateAction (row, ActionType.DuEmergencyAction, page)
+                        | XlsActionEmg      -> updateAction (row, ActionType.DuEmergencyAction, page)
+                        | XlsActionPause    -> updateAction (row, ActionType.DuPauseAction, page)
 
             )
 

@@ -37,3 +37,17 @@ type Flow with
             for drive in f.HWDriveConditions do
                 yield (f.AutoExpr <&&> !@drive.ActionINFunc , f.ClearExpr) --| (drive.ErrorCondition, getFuncName())
         ]
+
+    member f.F5_FlowPauseAnalogAction() =
+        [
+            for pause in f.HWPauseAnalogActions do
+                let valExpr = pause.TaskDevParamIO.OutParam.Value.WriteValue |> any2expr
+                yield (f.p_st.Expr, valExpr) --> (pause.OutTag, getFuncName())
+        ]
+
+    member f.F6_FlowEmergencyAnalogAction() =
+        [
+            for emg in f.HWEmergencyAnalogActions do
+                let valExpr = emg.TaskDevParamIO.OutParam.Value.WriteValue |> any2expr
+                yield (f.emg_st.Expr, valExpr) --> (emg.OutTag, getFuncName())
+        ]

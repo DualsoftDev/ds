@@ -179,9 +179,10 @@ module CoreExtensionModule =
         member x.OriginHWLamps        = getLamps(x, DuOriginStateLamp)
         member x.ErrorHWLamps         = getLamps(x, DuErrorStateLamp)
 
-        member x.ReadyConditions        = getConditions(x, DuReadyState)
-        member x.DriveConditions        = getConditions(x, DuDriveState)
-        member x.EmergencyActions    = getActions(x, DuEmergencyAction)
+        member x.ReadyConditions      = getConditions(x, DuReadyState)
+        member x.DriveConditions      = getConditions(x, DuDriveState)
+        member x.EmergencyActions     = getActions(x, DuEmergencyAction)
+        member x.PauseActions         = getActions(x, DuPauseAction)
 
         member x.GetMutualResetApis(src:ApiItem) =
             let getMutual(apiInfo:ApiResetInfo) =

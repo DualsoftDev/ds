@@ -66,7 +66,8 @@ module DsTextExport =
     let [<Literal>] TextXlsConditionReady    = "준비조건"
     let [<Literal>] TextXlsConditionDrive    = "운전조건"
     let [<Literal>] TextXlsActionEmg         = "비상출력"
-
+    let [<Literal>] TextXlsActionPause       = "정지출력"
+    
     let [<Literal>] TextXlsAllFlow =  "ALL"
 [<AutoOpen>]
 module DsTextProperty =

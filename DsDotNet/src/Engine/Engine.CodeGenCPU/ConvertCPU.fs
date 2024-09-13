@@ -128,6 +128,9 @@ module ConvertCPU =
             yield f.F2_FlowPause()
             yield! f.F3_FlowReadyCondition()
             yield! f.F4_FlowDriveCondition()
+            yield! f.F5_FlowPauseAnalogAction()
+            yield! f.F6_FlowEmergencyAnalogAction()
+            
         ]
 
     let getTryMasterCall(calls : Vertex seq) =

@@ -192,7 +192,7 @@ module ImportU =
                     then
                         let devParam = getTaskDevParam funcName
                         match aType with
-                        | DuEmergencyAction 
+                        | DuEmergencyAction | DuPauseAction 
                             -> TaskDevParamIO(None, Some devParam)
                     else 
                         defaultTaskDevParamIO()

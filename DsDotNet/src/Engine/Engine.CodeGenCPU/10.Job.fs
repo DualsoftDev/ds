@@ -31,11 +31,19 @@ type Job with
                 , pauseActions.TryFind(fun a->a.OutAddress = td.OutAddress) with
             | Some emg, Some pause ->
                 match emg.DigitalOutputTarget.Value, pause.DigitalOutputTarget.Value with
-                | true, true -> getStatement (Some (flowEmg<||>flowPause), None)
-                | true, false -> getStatement (Some flowEmg, Some flowPause)
-                | false, true -> getStatement (Some flowPause, Some flowEmg)
+                | true, true   -> getStatement (Some (flowEmg<||>flowPause), None)
+                | true, false  -> getStatement (Some flowEmg, Some flowPause)
+                | false, true  -> getStatement (Some flowPause, Some flowEmg)
                 | false, false -> getStatement (None, Some (flowEmg<||>flowPause))
-            | _ ->
+            | Some emg, None ->
+                match emg.DigitalOutputTarget.Value with
+                | true  -> getStatement (Some flowEmg, None)
+                | false -> getStatement (None, Some flowEmg)
+            | None, Some pause  ->
+                match pause.DigitalOutputTarget.Value with
+                | true  -> getStatement (Some flowPause, None)
+                | false -> getStatement (None, Some flowPause)
+            | None, None  ->
                 getStatement (None, None)
 
         let getStatementTypeAnalog(sets, td:TaskDev) =

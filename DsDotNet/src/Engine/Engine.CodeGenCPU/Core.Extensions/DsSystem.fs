@@ -80,6 +80,7 @@ module ConvertCpuDsSystem =
 
         member s.S = s |> getSM
         member s.Storages = s.TagManager.Storages
+        member s.OutputJobAddress = s.Jobs.SelectMany(fun j->j.TaskDefs.Select(fun d->d.OutAddress))
 
 
         member s.GetTempTimer(x:HwSystemDef) =

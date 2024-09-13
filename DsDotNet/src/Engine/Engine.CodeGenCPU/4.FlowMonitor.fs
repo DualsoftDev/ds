@@ -26,7 +26,7 @@ type Flow with
         [
             yield (set, rst) --| (f.readyCondition, getFuncName())
             for ready in f.HWReadyConditions do
-                yield (f.ManuExpr <&&> !@ready.ActionINFunc , f.ClearExpr) --| (ready.ErrorCondition, getFuncName())
+                yield ((f.ManuExpr <||> f.AutoExpr) <&&> !@ready.ActionINFunc , f.ClearExpr) --| (ready.ErrorCondition, getFuncName())
         ]
 
     member f.F4_FlowDriveCondition() =
@@ -45,9 +45,34 @@ type Flow with
                 yield (f.p_st.Expr, valExpr) --> (pause.OutTag, getFuncName())
         ]
 
-    member f.F6_FlowEmergencyAnalogAction() =
+    member f.F6_FlowPauseDigitalAction() =
+        let addrOuts = f.System.OutputJobAddress
+        [
+            for pause in f.HWPauseDigitalActions do
+                if not (addrOuts.Contains(pause.OutAddress)) then //job에 존재하면  J1_JobActionOuts 여기서 처리
+                    let set = if pause.DigitalOutputTarget.Value then
+                                    f.p_st.Expr
+                              else
+                                    !@f.p_st.Expr
+                    yield (set, f._off.Expr) --| (pause.OutTag, getFuncName())
+        ]
+
+
+    member f.F7_FlowEmergencyAnalogAction() =
         [
             for emg in f.HWEmergencyAnalogActions do
                 let valExpr = emg.TaskDevParamIO.OutParam.Value.WriteValue |> any2expr
                 yield (f.emg_st.Expr, valExpr) --> (emg.OutTag, getFuncName())
+        ]
+
+    member f.F8_FlowEmergencyDigitalAction() =
+        let addrOuts = f.System.OutputJobAddress
+        [
+            for emg in f.HWEmergencyDigitalActions do
+                if not (addrOuts.Contains(emg.OutAddress)) then //job에 존재하면  J1_JobActionOuts 여기서 처리
+                    let set = if emg.DigitalOutputTarget.Value then
+                                    f.emg_st.Expr
+                              else
+                                    !@f.emg_st.Expr
+                    yield (set, f._off.Expr) --| (emg.OutTag, getFuncName())
         ]

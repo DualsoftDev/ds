@@ -69,7 +69,7 @@ public partial class UcView : UserControl
 
     int node_attr_linewidthH = 2;
     int node_attr_linewidthL = 1;
-    int edge_attr_linewidthWeek = 1;
+    int edge_attr_linewidthWeek = 2;
     int edge_attr_HeadSize = 7;
     int nnode_label_fontsize = 6;
     int nnode_label_fontsize_call = 4;
@@ -667,12 +667,12 @@ public partial class UcView : UserControl
         if (newStatus == Status4.Ready)
         {
             node.Attr.FillColor = Color.DarkGreen;
-            node.InEdges.ForEach(f => f.Attr.Color = Color.Green);
+            node.InEdges.ForEach(f => f.Attr.Color = Color.GreenYellow);
         }
         else if (newStatus == Status4.Going)
         {
             node.Attr.FillColor = Color.DarkGoldenrod;
-            node.InEdges.ForEach(f => f.Attr.Color = Color.RoyalBlue);
+            node.InEdges.ForEach(f => f.Attr.Color = Color.LightGray);
         }
         else if (newStatus == Status4.Finish)
         {

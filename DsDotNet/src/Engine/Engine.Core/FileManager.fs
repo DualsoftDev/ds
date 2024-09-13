@@ -110,11 +110,9 @@ module FileManager =
 
 
     //모델 최상단 폴더에 Zip형태로 생성
-    let saveZip(filePaths: string seq, extention:string) =
+    let saveZip(filePaths: string seq, zipFilePath:string) =
 
-        //let filePaths = filePaths.Select(convertValidFile)
         let topLevel = getTopLevelDirectory (filePaths |> Seq.toList)
-        let zipFilePath = getValidZipFileName (topLevel, extention )
          // Create a ZIP archive
         use fileStream = new FileStream(zipFilePath, FileMode.Create)
         use zip = new ZipArchive(fileStream, ZipArchiveMode.Create, true)
@@ -201,11 +199,7 @@ module FileManager =
 
 [<Extension>]
 type FileHelper =
-    [<Extension>] static member ToDsZip(filePaths: string seq)  =
-                        saveZip (filePaths, ".dsz")|> fst
-    [<Extension>] static member ToZipPpt(filePaths: string seq)  =
-                        saveZip (filePaths, ".7z")|> fst  //".Zip" 형태지만 구분위해 확장자 다르게
-    [<Extension>] static member ToZipStream(filePaths: string seq)  =
-                        saveZip (filePaths, ".Zip") |> fun (_, memoryStram) -> memoryStram.ToArray()
+    [<Extension>] static member ToDsZip(filePaths: string seq, exportPath:string)  =
+                        saveZip (filePaths, exportPath)|> fst
     [<Extension>] static member ToUnZip(zipDsPath:string)  =
                         unZip zipDsPath

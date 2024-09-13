@@ -27,7 +27,7 @@ module rec ViewModule =
         let dicUsedVertex = new Dictionary<Vertex, ViewNode>()
         let edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         let singles = HashSet<ViewNode>()
-        let mutable goingCont = 0
+        let mutable goingCont = 0u
 
 
         let usedViewNodes () =
@@ -164,13 +164,14 @@ module rec ViewModule =
         member x.IsChildExist = edges.Count > 0 || singles.Count > 0
 
         member x.Name = name
-        member x.UpdateGoingCnt() = goingCont <- goingCont+1
+        member x.UpdateGoingCnt() = goingCont <- goingCont+1u
         member x.GoingCnt = 
             if coreVertex.IsNull()
             then 0u
             else 
                 match coreVertex.Value.GetPure() with
                 | :? Real as r -> r.RealToken
+                | :? Call as c -> goingCont
                 |_-> 0u
      
         member x.DisplayName =   

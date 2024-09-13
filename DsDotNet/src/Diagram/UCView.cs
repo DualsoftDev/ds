@@ -667,10 +667,12 @@ public partial class UcView : UserControl
         if (newStatus == Status4.Ready)
         {
             node.Attr.FillColor = Color.DarkGreen;
+            node.InEdges.ForEach(f => f.Attr.Color = Color.Green);
         }
         else if (newStatus == Status4.Going)
         {
             node.Attr.FillColor = Color.DarkGoldenrod;
+            node.InEdges.ForEach(f => f.Attr.Color = Color.RoyalBlue);
         }
         else if (newStatus == Status4.Finish)
         {

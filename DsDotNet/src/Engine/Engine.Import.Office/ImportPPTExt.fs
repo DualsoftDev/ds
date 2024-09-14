@@ -152,7 +152,7 @@ module ImportU =
 
         //MakeReadyConditions 리스트 만들기
         [<Extension>]
-        static member MakeConditions(doc: PptDoc, mySys: DsSystem) =
+        static member MakeConditionNActions(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
 
             let addCondition(fullName, conditionType:ConditionType, flowName:string option, settingflow:Flow) = 
@@ -172,31 +172,52 @@ module ImportU =
                         match conditionType with
                         | DuReadyState | DuDriveState
                             -> TaskDevParamIO(Some devParam, None)
-                        | DuEmergencyState 
+                    else 
+                        defaultTaskDevParamIO()
+
+                mySys.AddCondition(conditionType, name, devParamIO, emptyAddr, settingflow)
+
+            let addActiontion(fullName, aType:ActionType, flowName:string option, settingflow:Flow) = 
+                let emptyAddr = Addresses("", "")
+                let condiName = GetLastParenthesesReplaceName(fullName, "")
+                let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
+                let name = 
+                    match flowName with
+                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}" 
+                    | None -> condiName
+
+                let hasTaskDevParam = condiName <> fullName
+                let devParamIO =
+                    if hasTaskDevParam
+                    then
+                        let devParam = getTaskDevParam funcName
+                        match aType with
+                        | DuEmergencyAction | DuPauseAction 
                             -> TaskDevParamIO(None, Some devParam)
                     else 
                         defaultTaskDevParamIO()
 
-                mySys.AddCondtion(conditionType, name, devParamIO, emptyAddr, settingflow)
+                mySys.AddAction(aType, name, devParamIO, emptyAddr, settingflow)
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.CondiDefs.any())
+            |> Seq.filter (fun node -> node.CondiDefs.any() || node.ActionDefs.any())
             |> Seq.iter (fun node ->
                 try
                     let flow = dicFlow.[node.PageNum]
                     node.CondiDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, Some flow.Name, flow))
+                    node.ActionDefs.ForEach(fun a ->  addActiontion (a.Key, a.Value, Some flow.Name, flow))
                 with _ ->
                     Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
                     )
 
             doc.NodesHeadPage
-            |> Seq.filter (fun node -> node.CondiHeadPageDefs.any())
+            |> Seq.filter (fun node -> node.CondiHeadPageDefs.any() || node.ActionHeadPageDefs.any())
             |> Seq.iter (fun node ->
-
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
                 else
                     dicFlow.Iter(fun flow ->
                         node.CondiHeadPageDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, None, flow.Value))
+                        node.ActionHeadPageDefs.ForEach(fun c ->  addActiontion (c.Key, c.Value, None, flow.Value))
                             )
                 )
 
@@ -869,7 +890,7 @@ module ImportU =
             doc.MakeButtons(sys)
             doc.MakeLamps(sys)
 
-            doc.MakeConditions(sys)
+            doc.MakeConditionNActions(sys)
             //segment 리스트 만들기
             doc.MakeSegment(sys, hwTarget)
             //Edge  만들기

@@ -30,16 +30,19 @@ module PptNodeModule =
 
     type PptNode private(
         shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq
-        , copySystems       : Dictionary<string, string> //copyName, orgiName
-        , safeties          : HashSet<string>
-        , autoPres          : HashSet<string[]>  //jobFqdn
-        , jobInfos          : Dictionary<string, HashSet<string>> // jobBase, api SystemNames
-        , btnHeadPageDefs   : Dictionary<string, BtnType>
-        , btnDefs           : Dictionary<string, BtnType>
-        , lampHeadPageDefs  : Dictionary<string, LampType>
-        , lampDefs          : Dictionary<string, LampType>
-        , condiHeadPageDefs : Dictionary<string, ConditionType>
-        , condiDefs         : Dictionary<string, ConditionType>
+        , copySystems        : Dictionary<string, string> //copyName, orgiName
+        , safeties           : HashSet<string>
+        , autoPres           : HashSet<string[]>  //jobFqdn
+        , jobInfos           : Dictionary<string, HashSet<string>> // jobBase, api SystemNames
+        , btnHeadPageDefs    : Dictionary<string, BtnType>
+        , btnDefs            : Dictionary<string, BtnType>
+        , lampHeadPageDefs   : Dictionary<string, LampType>
+        , lampDefs           : Dictionary<string, LampType>
+        , condiHeadPageDefs  : Dictionary<string, ConditionType>
+        , condiDefs          : Dictionary<string, ConditionType>
+        , actionHeadPageDefs : Dictionary<string, ActionType>
+        , actionDefs         : Dictionary<string, ActionType>
+        
         , nodeType          : NodeType
 
         , ifName            : string
@@ -180,12 +183,14 @@ module PptNodeModule =
         member val Key = Objkey(iPage, shape.GetId())
         member val Name = name with get, set
         member val AliasNumber: int = 0 with get, set
-        member val ButtonHeadPageDefs = btnHeadPageDefs
-        member val ButtonDefs         = btnDefs
-        member val LampHeadPageDefs   = lampHeadPageDefs
-        member val LampDefs           = lampDefs
-        member val CondiHeadPageDefs  = condiHeadPageDefs
-        member val CondiDefs          = condiDefs
+        member val ButtonHeadPageDefs  = btnHeadPageDefs
+        member val ButtonDefs          = btnDefs
+        member val LampHeadPageDefs    = lampHeadPageDefs
+        member val LampDefs            = lampDefs
+        member val CondiHeadPageDefs   = condiHeadPageDefs
+        member val CondiDefs           = condiDefs
+        member val ActionHeadPageDefs  = actionHeadPageDefs
+        member val ActionDefs          = actionDefs
         member x.GetRectangle(slideSize: int * int) = shape.GetPosition(slideSize)
 
 
@@ -195,13 +200,15 @@ module PptNodeModule =
             let safeties          = HashSet<string>()
             let autoPres          = HashSet<string[]>()  //jobFqdn
 
-            let jobInfos          = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
-            let btnHeadPageDefs   = Dictionary<string, BtnType>()
-            let btnDefs           = Dictionary<string, BtnType>()
-            let lampHeadPageDefs  = Dictionary<string, LampType>()
-            let lampDefs          = Dictionary<string, LampType>()
-            let condiHeadPageDefs = Dictionary<string, ConditionType>()
-            let condiDefs         = Dictionary<string, ConditionType>()
+            let jobInfos           = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
+            let btnHeadPageDefs    = Dictionary<string, BtnType>()
+            let btnDefs            = Dictionary<string, BtnType>()
+            let lampHeadPageDefs   = Dictionary<string, LampType>()
+            let lampDefs           = Dictionary<string, LampType>()
+            let condiHeadPageDefs  = Dictionary<string, ConditionType>()
+            let condiDefs          = Dictionary<string, ConditionType>()
+            let actionHeadPageDefs = Dictionary<string, ActionType>()
+            let actionDefs         = Dictionary<string, ActionType>()
 
             let mutable ifName = ""
             let mutable rootNode: bool option = None
@@ -302,10 +309,15 @@ module PptNodeModule =
                     let addDic = if isHeadPage then lampHeadPageDefs else lampDefs
                     getBracketItems(shape.InnerText)
                         .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getLampType))
-                | CONDITION ->
-                    let addDic = if isHeadPage then condiHeadPageDefs else condiDefs
+                | CONDITIONorAction ->
+                    let addCondiDic = if isHeadPage then condiHeadPageDefs else condiDefs
+                    let addActionDic = if isHeadPage then actionHeadPageDefs else actionDefs
                     getBracketItems(shape.InnerText)
-                        .ForEach(fun (n, t) -> addDic.Add(n |> TrimSpace, t |> getConditionType))
+                        .ForEach(fun (n, t) -> 
+                            match tryGetConditionType t, tryGetActionType t with
+                            | Some c, _ -> addCondiDic.Add(n |> TrimSpace, c)
+                            | _, Some a -> addActionDic.Add(n |> TrimSpace, a)
+                            | _ -> failWithLog $"{t} is Error Type")
 
                 | REALExF -> updateTime()
                 | (LAYOUT | AUTOPRE | DUMMY) -> ()
@@ -356,6 +368,8 @@ module PptNodeModule =
                     , lampDefs
                     , condiHeadPageDefs
                     , condiDefs
+                    , actionHeadPageDefs
+                    , actionDefs
                     , nodeType
                     , ifName
                     , rootNode

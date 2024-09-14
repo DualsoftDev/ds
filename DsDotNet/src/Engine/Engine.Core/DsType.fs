@@ -47,7 +47,10 @@ module DsType =
     type ConditionType =
         | DuReadyState
         | DuDriveState
-        | DuEmergencyState
+
+    type ActionType =
+        | DuEmergencyAction
+        | DuPauseAction
 
     type ExternalTag =
         | ErrorSensorOn

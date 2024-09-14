@@ -80,6 +80,7 @@ module ConvertCpuDsSystem =
 
         member s.S = s |> getSM
         member s.Storages = s.TagManager.Storages
+        member s.OutputJobAddress = s.Jobs.SelectMany(fun j->j.TaskDefs.Select(fun d->d.OutAddress))
 
 
         member s.GetTempTimer(x:HwSystemDef) =
@@ -90,11 +91,17 @@ module ConvertCpuDsSystem =
         member private x.GenerationButtonIO()   = x.HWButtons.Iter(fun f-> createHwApiBridgeTag(f, x))
         member private x.GenerationLampIO()     = x.HWLamps.Iter(fun f-> createHwApiBridgeTag(f, x))
         member private x.GenerationCondition()  = x.HWConditions.Iter(fun f-> createHwApiBridgeTag(f, x))
+        member private x.GenerationAction()     = x.HWActions.Iter(fun f-> createHwApiBridgeTag(f, x))
 
         member private x.GenerationCallConditionMemory()  =
             for condi in x.HWConditions do
-                condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi (int HwSysTag.HwStopConditionErrLamp) x
-                condi.ErrorCondition.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
+                let tagKind =
+                    match condi.ConditionType with
+                    | DuReadyState -> (int HwSysTag.HwReadyConditionErr)
+                    | DuDriveState -> (int HwSysTag.HwDriveConditionErr)
+                    
+                condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true condi tagKind x
+                condi.ErrorCondition.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
 
         member private x.GenerationButtonEmergencyMemory()  =
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
@@ -194,13 +201,13 @@ module ConvertCpuDsSystem =
             for dev, job in jobDevices do
                 let apiStgName = dev.GetApiStgName(job)
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.ActionDevice, Some x, dev, dev.GetInParam(job).DataType).Value
+                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.TaskDevice, Some x, dev, dev.GetInParam(job).DataType).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootOnlyDevice) then
                     if dev.OutAddress <> TextSkip then
-                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.ActionDevice, Some x , dev, dev.GetOutParam(job).DataType).Value
+                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.TaskDevice, Some x , dev, dev.GetOutParam(job).DataType).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
         member x.GenerationIO() =
@@ -208,6 +215,7 @@ module ConvertCpuDsSystem =
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()
+            x.GenerationAction()
 
         member private x.GenerationCallManualMemory()  =
             let devCalls = x.GetDevicesForHMI()

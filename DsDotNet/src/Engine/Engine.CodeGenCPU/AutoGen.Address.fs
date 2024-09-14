@@ -299,12 +299,8 @@ module DsAddressModule =
 
         let inA, outA =
             match hwItem with
-            | :? ConditionDef as c -> 
-                        if c.ConditionType = ConditionType.DuEmergencyState then
-                            getValidHwItem c  true false target
-                        else
-                            getValidHwItem c  false true  target
-
+            | :? ConditionDef as c -> getValidHwItem c  false true  target
+            | :? ActionDef as a    -> getValidHwItem a  true false  target
             | :? ButtonDef as b    -> getValidHwItem b  false false target
             | :? LampDef as l      -> getValidHwItem l  true  false target
             | _ -> failWithLog $"Error {hwItem.Name} not support"
@@ -330,7 +326,7 @@ module DsAddressModule =
             let outA = TextSkip
             updateHwAddress c (inA, outA)  target
 
-        for ce in sys.EmergencyConditions do
+        for ce in sys.EmergencyActions do
             let inA = TextSkip
             let outA = if ce.OutAddress = "" then TextAddrEmpty else ce.OutAddress
             updateHwAddress ce (inA, outA)  target

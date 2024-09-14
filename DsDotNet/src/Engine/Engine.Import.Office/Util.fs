@@ -83,11 +83,16 @@ module Util =
                         \n[O]OriginLamp
                         \n[I]IdleLamp"
 
-    let getConditionType (key: string) =
+    let tryGetConditionType (key: string) =
         match key.Trim().ToUpper() with
-        | "R" -> ConditionType.DuReadyState 
-        | "D" -> ConditionType.DuDriveState
-        | "E" -> ConditionType.DuEmergencyState
-        | _ -> failwith $"{key} is Error Type"
+        | "R" -> Some ConditionType.DuReadyState 
+        | "D" -> Some ConditionType.DuDriveState
+        | _ -> None
+
+    let tryGetActionType (key: string) =
+        match key.Trim().ToUpper() with
+        | "E" ->Some ActionType.DuEmergencyAction
+        | "P" ->Some ActionType.DuPauseAction
+        | _ -> None
 
 

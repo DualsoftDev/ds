@@ -264,37 +264,34 @@ module ExportIOTable =
                   TextSkip
                   ]
                   )
-                  
-        let condiRows =
-            let getXlsLabel (conditionType:ConditionType) = 
-                match conditionType with
-                | DuReadyState  -> TextXlsConditionReady
-                | DuDriveState  -> TextXlsConditionDrive
-                | DuEmergencyState  -> TextXlsConditionEmg
 
-            let getFlowName (cond:ConditionDef) = 
-                match cond.SettingFlows.length()  with
-                | 0 -> failWithLog $"ConditionDef {cond.Name} SettingFlows ERROR"
+        let getFlowName (name, flows:Flow seq) = 
+                match flows.length()  with
+                | 0 -> failWithLog $"ConditionDef {name} SettingFlows ERROR"
                 | 1 -> 
-                    let flow, _ = splitNameForRow cond.Name
-                    if cond.SettingFlows.Head().Name = flow
+                    let flow, _ = splitNameForRow name
+                    if flows.Head().Name = flow
                     then 
                         flow
                     else 
                         TextXlsAllFlow
-                        
                 | _ -> TextXlsAllFlow
+
+        let condiRows =
+            let getXlsConditionLabel (conditionType:ConditionType) = 
+                match conditionType with
+                | DuReadyState  -> TextXlsConditionReady
+                | DuDriveState  -> TextXlsConditionDrive
+          
               
-            sys.ReadyConditions
-            @sys.DriveConditions 
-            @sys.EmergencyConditions 
+            sys.HWConditions 
             |> Seq.sortBy(fun cond -> cond.Name)
             |> Seq.map(fun cond ->
                 let _, name = splitNameForRow cond.Name
                 updateHwAddress (cond) (cond.InAddress, cond.OutAddress) hwTarget
                 [
-                    getXlsLabel cond.ConditionType
-                    getFlowName cond
+                    getXlsConditionLabel cond.ConditionType
+                    getFlowName (cond.Name, cond.SettingFlows)
                     name
                     getPptHwDevDataTypeText cond
                     cond.InAddress
@@ -303,11 +300,34 @@ module ExportIOTable =
                     if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.SymbolName else ""
                 ]
             )
+        let actionRows =
+            let getXlsActionLabel (actionType:ActionType) = 
+                match actionType with
+                | DuEmergencyAction  -> TextXlsActionEmg
+                | DuPauseAction      -> TextXlsActionPause
 
-        if operatorRows.any() || commandRows.any()  || variRows.any()  || condiRows.any()
+            sys.HWActions 
+            |> Seq.sortBy(fun action -> action.Name)
+            |> Seq.map(fun action ->
+                let _, name = splitNameForRow action.Name
+                updateHwAddress (action) (action.InAddress, action.OutAddress) hwTarget
+                [
+                    getXlsActionLabel action.ActionType
+                    getFlowName (action.Name, action.SettingFlows)
+                    name
+                    getPptHwDevDataTypeText action
+                    action.InAddress
+                    action.OutAddress
+                    if action.TaskDevParamIO.InParam.IsSome then action.TaskDevParamIO.InParam.Value.SymbolName else ""
+                    if action.TaskDevParamIO.OutParam.IsSome then action.TaskDevParamIO.OutParam.Value.SymbolName else ""
+                ]
+            )
+
+        if operatorRows.any() || commandRows.any()  || variRows.any()  || condiRows.any() || actionRows.any()
         then 
             let dts =
                 condiRows
+                @ actionRows
                 @ commandRows
                 @ operatorRows
                 @ variRows

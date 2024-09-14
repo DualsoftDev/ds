@@ -193,7 +193,7 @@ module rec DsTaskDevType =
             | Some v -> v
             | _ -> true
 
-        ///기본값은 true
+        ///기본값은 false, 0 , "", ' ', 0.0, ...
         member x.DefaultValue = 
             match valueParam.TargetValue with
             | Some v -> v.GetType() |> typeDefaultValue

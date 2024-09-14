@@ -206,7 +206,7 @@ module ImportIOTable =
 
                 | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1002, $"{name}", page, 0u)
 
-            let updateCondition (row: Data.DataRow, cType: ConditionType, tableIO: Data.DataTable, page) =
+            let updateCondition (row: Data.DataRow, cType: ConditionType, page) =
                 let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
                 let conds = sys.HWConditions.Where(fun w -> w.ConditionType = cType)
 
@@ -215,8 +215,18 @@ module ImportIOTable =
                     updateHwAddress (cond) (inAddress, outAddress) hwTarget
                     let checkInType, checkOutType = getInOutDataType dataType
                     updatePptHwParam cond (inSym,checkInType) (outSym, checkOutType)
-
                 | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1007, $"{name}", page, 0u)
+
+            let updateAction (row: Data.DataRow, aType: ActionType, page) =
+                let name, dataType, inSym, outSym, inAddress, outAddress = extractHardwareData row
+                let actions = sys.HWActions.Where(fun w -> w.ActionType = aType)
+
+                match actions.TryFind(fun f -> f.Name = name.DeQuoteOnDemand()) with
+                | Some action ->
+                    updateHwAddress (action) (inAddress, outAddress) hwTarget
+                    let checkInType, checkOutType = getInOutDataType dataType
+                    updatePptHwParam action (inSym,checkInType) (outSym, checkOutType)
+                | None -> Office.ErrorPpt(ErrorCase.Name, ErrID._1008, $"{name}", page, 0u)
 
             dts
             |> Seq.iter (fun (page, dt) ->
@@ -255,9 +265,10 @@ module ImportIOTable =
                         | XlsCommand -> updateCommand (row, tableIO, page)
                         | XlsOperator -> updateOperator (row, tableIO, page)
 
-                        | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, tableIO, page)
-                        | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState, tableIO, page)
-                        | XlsConditionEmg   -> updateCondition (row, ConditionType.DuEmergencyState, tableIO, page)
+                        | XlsConditionReady -> updateCondition (row, ConditionType.DuReadyState, page)
+                        | XlsConditionDrive -> updateCondition (row, ConditionType.DuDriveState, page)
+                        | XlsActionEmg      -> updateAction (row, ActionType.DuEmergencyAction, page)
+                        | XlsActionPause    -> updateAction (row, ActionType.DuPauseAction, page)
 
             )
 

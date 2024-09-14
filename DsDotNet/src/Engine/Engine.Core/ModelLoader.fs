@@ -88,19 +88,20 @@ type ModelLoaderExt =
     [<Extension>]
     static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq) =
         let targetPaths = (loadingPaths @ [activeFilePath])
-        let zipPathDS  = targetPaths.ToDsZip()
+        let zipPathDS  = targetPaths.ToDsZip(changeExtension (activeFilePath|> DsFile)  ".dsz")
 
         let zipPathPpt = targetPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
                               .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
-                              .ToZipPpt()
+                              .ToDsZip(changeExtension (activeFilePath|> DsFile)  ".7z")
 
         let zipDir    = PathManager.getDirectoryName (zipPathDS|>DsFile)
-        let zipFile   = PathManager.getFileNameWithoutExtension (zipPathDS|>DsFile)
+
+        let topLevel = getTopLevelDirectory (loadingPaths@[|activeFilePath|] |> Seq.toList)
 
         let jsFilePath = $"{zipDir}{TextDSJson}" |> getValidFile
 
 
-        let baseTempFilePath = $"{zipDir}{zipFile}/base.ext"  //상대 경로 구하기 위한 임시경로
+        let baseTempFilePath = $"{topLevel}base.ext"  //상대 경로 구하기 위한 임시경로
         let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
 
         let config = SaveConfigWithPath jsFilePath activeRelaPath

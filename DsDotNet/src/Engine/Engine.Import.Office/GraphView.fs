@@ -21,12 +21,13 @@ module rec ViewModule =
             coreVertex: Vertex option,
             btnType: BtnType option,
             lampType: LampType option,
-            cType: ConditionType option
+            cType: ConditionType option,
+            aType: ActionType option
         ) =
         let dicUsedVertex = new Dictionary<Vertex, ViewNode>()
         let edges = HashSet<ModelingEdgeInfo<ViewNode>>()
         let singles = HashSet<ViewNode>()
-        let mutable goingCont = 0
+        let mutable goingCont = 0u
 
 
         let usedViewNodes () =
@@ -80,7 +81,7 @@ module rec ViewModule =
             $"{safeName}{autoPresName}"
 
 
-        new(name, viewType) = ViewNode(name, viewType, None, None, None, None)
+        new(name, viewType) = ViewNode(name, viewType, None, None, None, None, None)
 
         new(coreVertex: Vertex) =
             let name, vType =
@@ -93,11 +94,12 @@ module rec ViewModule =
                 | :? Real as c -> c.Name, VREAL
                 | _ -> coreVertex.Name, VFLOW
 
-            ViewNode(name, vType, Some(coreVertex), None, None, None)
+            ViewNode(name, vType, Some(coreVertex), None, None, None, None)
 
-        new(name, btnType: BtnType) = ViewNode(name, VBUTTON, None, Some(btnType), None, None)
-        new(name, lampType: LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None)
-        new(name, cType: ConditionType) = ViewNode(name, VCONDITION, None, None, None, Some(cType))
+        new(name, btnType: BtnType) = ViewNode(name, VBUTTON, None, Some(btnType), None, None, None)
+        new(name, lampType: LampType) = ViewNode(name, VLAMP, None, None, Some(lampType), None, None)
+        new(name, cType: ConditionType) = ViewNode(name, VCONDITION, None, None, None, Some(cType), None)
+        new(name, aType: ActionType) = ViewNode(name, VACTION, None, None, None, None, Some(aType))
 
 
         [<Browsable(false)>]
@@ -155,18 +157,21 @@ module rec ViewModule =
 
         [<Browsable(false)>]
         member x.ConditionType = cType
+        [<Browsable(false)>]
+        member x.ActionType = aType
 
         [<Browsable(false)>]
         member x.IsChildExist = edges.Count > 0 || singles.Count > 0
 
         member x.Name = name
-        member x.UpdateGoingCnt() = goingCont <- goingCont+1
+        member x.UpdateGoingCnt() = goingCont <- goingCont+1u
         member x.GoingCnt = 
             if coreVertex.IsNull()
             then 0u
             else 
                 match coreVertex.Value.GetPure() with
                 | :? Real as r -> r.RealToken
+                | :? Call as c -> goingCont
                 |_-> 0u
      
         member x.DisplayName =   

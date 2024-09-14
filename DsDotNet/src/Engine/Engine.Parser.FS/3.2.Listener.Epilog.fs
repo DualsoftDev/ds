@@ -130,6 +130,27 @@ module EtcListenerModule =
 
                     flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
 
+
+        member private x.ExtractFlowConditionActionInfo(conditionDefs: HwSysItemDefContext[], system: DsSystem) =
+            [
+                for cd in conditionDefs do
+                    option {
+                        let cndName, inParam, outParam, inAddr, outAddr = getHwSysItem cd
+                        let flows =
+                            cd
+                                .Descendants<FlowNameContext>()
+                                .Select(fun flowCtx -> flowCtx.GetText())
+                                .Tap(fun flowName ->
+                                    verifyM
+                                        $"Flow [{flowName}] not exists!"
+                                        (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
+                                .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
+                                .ToHashSet()
+
+                        return cndName, inParam, outParam, flows, inAddr, outAddr
+                    }
+            ]
+
         member x.ProcessConditionBlock(ctx: ConditionBlockContext) =
             for ctxChild in ctx.children do
                 if ctxChild :? ParserRuleContext then
@@ -142,36 +163,40 @@ module EtcListenerModule =
                         match first with
                         | :? DriveBlockContext -> DuDriveState
                         | :? ReadyBlockContext -> DuReadyState
-                        | :? ErrorOrEmgBlockContext -> DuEmergencyState
                         | _ -> failwith $"condition type error {fstType}"
 
                     let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()
-
-                    let flowConditionInfo =
-                        [
-                            for cd in conditionDefs do
-                                option {
-                                    let cndName, inParam, outParam, inAddr, outAddr = getHwSysItem cd
-                                    let flows =
-                                        cd
-                                            .Descendants<FlowNameContext>()
-                                            .Select(fun flowCtx -> flowCtx.GetText())
-                                            .Tap(fun flowName ->
-                                                verifyM
-                                                    $"Flow [{flowName}] not exists!"
-                                                    (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
-                                            .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
-                                            .ToHashSet()
-
-                                    return targetCndType, cndName, inParam, outParam, flows, inAddr, outAddr
-                                } ]
+                    let flowConditionInfo = x.ExtractFlowConditionActionInfo(conditionDefs, system)
 
                     for fci in flowConditionInfo |> List.choose id do
-                        let targetCndType, cndName, inp, outp,  flows, inAddr, outAddr = fci
+                        let cndName, inp, outp,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
-                            system.AddCondtion(targetCndType, cndName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr),  flow)
+                            system.AddCondition(targetCndType, cndName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr),  flow)
+        
+        member x.ProcessActionBlock(ctx: ActionBlockContext) =
+            for ctxChild in ctx.children do
+                if ctxChild :? ParserRuleContext then
+                    let first = ctxChild.TryFindFirstChild<ParserRuleContext>().Value
+                    let system = x.TheSystem
 
+                    let targetActionType =
+                        let fstType = first.GetType()
+
+                        match first with
+                        | :? ErrorOrEmgBlockContext -> DuEmergencyAction
+                        | :? PauseBlockContext -> DuPauseAction
+                        | _ -> failwith $"action type error {fstType}"
+
+                    let conditionDefs = first.Descendants<HwSysItemDefContext>().ToArray()
+                    let flowActionInfo = x.ExtractFlowConditionActionInfo(conditionDefs, system)
+
+                    for fci in flowActionInfo |> List.choose id do
+                        let actionName, inp, outp,  flows, inAddr, outAddr = fci
+
+                        for flow in flows do
+                            system.AddAction(targetActionType, actionName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr),  flow)
+        
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
             let safetyDefs = ctx.Descendants<SafetyAutoPreDefContext>()

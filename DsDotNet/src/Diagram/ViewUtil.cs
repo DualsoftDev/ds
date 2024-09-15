@@ -33,6 +33,7 @@ using DocumentFormat.OpenXml.VariantTypes;
 using static Engine.Info.DBWriterModule;
 using static Engine.CodeGenCPU.JobManagerModule;
 using System.Runtime.Versioning;
+using Dual.Common.Base.CS;
 
 namespace Diagram.View.MSAGL
 {

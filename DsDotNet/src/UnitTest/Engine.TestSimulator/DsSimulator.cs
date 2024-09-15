@@ -1,4 +1,6 @@
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
+
+using Dual.Common.Base.CS;
 using Dual.Common.Core;
 using Engine.Core;
 using Engine.Cpu;

@@ -9,6 +9,8 @@ global using Dual.Web.Blazor.Client.Canvas2d;
 global using Dual.Web.Blazor.Client.Canvas2d.Model;
 global using Dual.Web.Blazor.Client.Components;
 global using Dual.Web.Blazor.Client.Components.Chart;
+global using Dual.Common.Base.CS;
+global using Dual.Common.Core;
 
 global using static Engine.Core.TagWebModule;
 

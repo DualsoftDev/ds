@@ -39,7 +39,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Core" Version="0.4.1" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.4.2" />
 		<PackageReference Include="DualSoft-Web-Blazor" Version="0.4.1" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.4.1" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client-Canvas2d" Version="0.4.1" />

@@ -10,6 +10,7 @@ global using log4net;
 
 global using DsWebApp.Shared;
 global using DsWebApp.Server.Common;
+global using Dual.Common.Base.CS;
 global using Dual.Common.Core;
 global using Dual.Common.Db;
 global using Dual.Web.Server;

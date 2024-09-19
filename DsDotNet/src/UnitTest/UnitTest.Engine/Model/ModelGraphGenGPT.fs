@@ -13,7 +13,7 @@ type DummyVertex(name:string) =
     inherit Named(name)
 
 type DummyEdge(source, target) =
-    inherit EdgeBase<DummyVertex>(source, target, EdgeType.Start)
+    inherit DsEdgeBase<DummyVertex>(source, target, EdgeType.Start)
 
 module ModelGraphGenGPT =
 
@@ -273,7 +273,7 @@ module ModelGraphGenGPT =
             ClassicAssert.AreEqual("B", foundVertex.Value.Name)
 
             // 다른 타입의 정점 찾기 테스트
-            let notFoundVertex = graph.TryFindVertex<EdgeBase<DummyVertex>>("C")
+            let notFoundVertex = graph.TryFindVertex<DsEdgeBase<DummyVertex>>("C")
             ClassicAssert.IsTrue(notFoundVertex.IsNone)
 
         [<Test>]

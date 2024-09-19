@@ -296,7 +296,7 @@ module rec CoreModule =
 
 
         type Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
-            inherit EdgeBase<Vertex>(source, target, edgeType)
+            inherit DsEdgeBase<Vertex>(source, target, edgeType)
 
             static member Create(graph:TDsGraph<_,_>, source, target, edgeType:EdgeType) =
                 let edge = Edge(source, target, edgeType)

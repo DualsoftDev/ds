@@ -13,7 +13,7 @@ module GraphPairwiseOrderTest =
     type V(name:string) =
         inherit Named(name)
     type E(source, target) =
-        inherit EdgeBase<V>(source, target, EdgeType.Start)
+        inherit DsEdgeBase<V>(source, target, EdgeType.Start)
 
     type TopologicalSortTest() =
         inherit EngineTestBaseClass()

@@ -82,15 +82,15 @@ module EdgeModule =
             failwith $"Vertex {invalidEdge.First().Name} children type error"
 
 
-    let toText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (e:'E) =
+    let toText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (e:'E) =
         $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
 
 
-    let ofResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+    let ofResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) =
         edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
 
 
-    let ofNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) =
+    let ofNotResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) =
         edges.Except(ofResetEdge edges)
 
 
@@ -116,7 +116,7 @@ module EdgeModule =
         let originalGraph = graph
         let es =
             originalGraph.Edges
-                .OfType<EdgeBase<'V>>()
+                .OfType<DsEdgeBase<'V>>()
                 .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
                 .ToArray()
 
@@ -280,10 +280,10 @@ module EdgeModule =
 
 [<Extension>]
 type EdgeExt =
-    [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> EdgeBase<'V>> (edge:'E) = toText edge
+    [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (edge:'E) = toText edge
 
-    [<Extension>] static member OfResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
-    [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
+    [<Extension>] static member OfResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
+    [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
 
 
     [<Extension>] static member GetPathReals(inits:Real seq, g:TDsGraph<Vertex,Edge>) : Real seq = getPathReals g (inits.OfType<Vertex>())

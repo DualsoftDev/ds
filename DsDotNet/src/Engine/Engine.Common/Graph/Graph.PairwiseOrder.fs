@@ -24,10 +24,10 @@ module internal GraphPairwiseOrderImpl =
     //            Some false
     //        else
     //            None
-    
+
     //    graph.Inits |> iter (fun v -> traverse v [])
 
-    //    curried    
+    //    curried
 
     let isAncestorDescendant (graph:TDsGraph<'V, 'E>, edgeType:EdgeType)=
         let vs = graph.Vertices |> indexed |> map (fun (n, v) -> (v, n)) |> dict
@@ -36,7 +36,7 @@ module internal GraphPairwiseOrderImpl =
         let table: bool option array2d = Array2D.create<bool option> n n None
 
         let visited = HashSet<'V>()
- 
+
         let rec traverse (v:'V) (ancestors:'V list) =
             ancestors |> iter (fun a -> table[vs[a], vs[v]] <- Some true )
             if visited.Contains(v) then
@@ -49,10 +49,10 @@ module internal GraphPairwiseOrderImpl =
             else
                 visited.Add(v) |> ignore
                 let ancestors = v::ancestors
- 
-                graph.GetOutgoingVerticesWithEdgeType (v, edgeType)
+
+                graph.GetOutgoingVerticesWithEdgeType (v, fun e -> e.EdgeType = edgeType)
                 |> iter (fun a -> traverse a ancestors)
- 
+
 
         let curried (v1:'V) (v2:'V): bool option =
             let n1, n2 = vs[v1], vs[v2]
@@ -63,7 +63,7 @@ module internal GraphPairwiseOrderImpl =
                 Some false
             else
                 None
-    
+
         graph.Inits |> iter (fun v -> traverse v [])
 
-        curried    
+        curried

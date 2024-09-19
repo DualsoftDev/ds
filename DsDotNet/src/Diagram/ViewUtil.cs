@@ -34,6 +34,9 @@ using static Engine.Info.DBWriterModule;
 using static Engine.CodeGenCPU.JobManagerModule;
 using System.Runtime.Versioning;
 using Dual.Common.Base.CS;
+using static Engine.Core.CoreModule.DeviceAndSystemModule;
+using static Engine.Core.CoreModule.GraphItemsModule;
+using static Engine.Core.CoreModule.ApiItemsModule;
 
 namespace Diagram.View.MSAGL
 {

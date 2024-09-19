@@ -5,6 +5,7 @@ using Engine.Parser.FS;
 using Microsoft.FSharp.Core;
 
 using static Engine.Core.CoreModule;
+using static Engine.Core.CoreModule.DeviceAndSystemModule;
 using static Engine.Parser.FS.ParserOptionModule;
 
 namespace Engine.Sample;

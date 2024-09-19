@@ -18,6 +18,7 @@ using static Engine.CodeGenCPU.JobManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.CodeGenCPU.TaskDevManagerModule;
 using static Engine.Core.CoreModule;
+using static Engine.Core.CoreModule.GraphItemsModule;
 using static Engine.Core.DsConstants;
 using static Engine.Core.DsText;
 using static Engine.Core.DsType;
@@ -27,7 +28,7 @@ using static Engine.Import.Office.ViewModule;
 using Color = Microsoft.Msagl.Drawing.Color;
 using Edge = Microsoft.Msagl.Drawing.Edge;
 using Style = Microsoft.Msagl.Drawing.Style;
-using Vertex = Engine.Core.CoreModule.Vertex;
+using Vertex = Engine.Core.CoreModule.GraphItemsModule.Vertex;
 
 
 namespace Diagram.View.MSAGL;
@@ -471,7 +472,7 @@ public partial class UcView : UserControl
                     {
                         nNode.Attr.FillColor = Color.DarkSlateBlue;
                     }
-               
+
                 }
             }
 
@@ -572,7 +573,7 @@ public partial class UcView : UserControl
 
     public void UpdateInValue(ViewNode viewNode, bool isOn, bool vRefresh)
     {
-        Node node = findNode(viewNode); 
+        Node node = findNode(viewNode);
         if (node == null) return;
         UpdateFillColor(isOn, node, Color.DarkBlue);
         if (vRefresh) RefreshGraph();

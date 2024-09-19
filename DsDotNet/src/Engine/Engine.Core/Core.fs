@@ -16,7 +16,7 @@ open Engine.Common
 
 [<AutoOpen>]
 module rec CoreModule =
-    type Version with
+    type System.Version with
         member x.Duplicate() = new Version(x.Major, x.Minor, x.Build, x.Revision)
         member this.IsCompatible(that:Version) = this.Major <= that.Major
         member this.CheckCompatible(that:Version, versionCategory:string) =
@@ -200,6 +200,12 @@ module rec CoreModule =
             member x.CallTarget() =
                 match x with | DuAliasTargetCall c -> Some c |_ -> None
 
+        type AliasTargetWrapper with
+            member x.GetTarget() : Vertex =
+                match x with
+                | DuAliasTargetReal real -> real
+                | DuAliasTargetCall call -> call
+
 
         // Subclasses = {Call}
         type ISafetyAutoPreRequisiteHolder =
@@ -254,25 +260,24 @@ module rec CoreModule =
             member val AliasTarget = target with get, set
             member val AliasTexts = aliasTexts |> ResizeArray
 
-    type Flow private (name: string, system: DsSystem) =
-        inherit FqdnObject(name, system)
-
-        do
-            checkFlowName  name
-
-        member val Graph = DsGraph(system.VertexAddRemoveHandlers)
-        member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-        member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
-        member x.System = system
-
-        static member Create(name: string, system: DsSystem) =
-            let flow = Flow(name, system)
-            system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{name}]"
-            flow
-
 
     [<AutoOpen>]
     module GraphItemsModule =
+        type Flow private (name: string, system: DsSystem) =
+            inherit FqdnObject(name, system)
+
+            do
+                checkFlowName  name
+
+            member val Graph = DsGraph(system.VertexAddRemoveHandlers)
+            member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
+            member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
+            member x.System = system
+
+            static member Create(name: string, system: DsSystem) =
+                let flow = Flow(name, system)
+                system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{name}]"
+                flow
 
         /// leaf or stem(parenting)
         /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
@@ -311,7 +316,7 @@ module rec CoreModule =
 
         /// Segment (DS Basic Unit)
         [<DebuggerDisplay("{QualifiedName}")>]
-        type Real internal (name:string, flow:Flow) =
+        type Real private (name:string, flow:Flow) =
             inherit Vertex([|name|], DuParentFlow flow)
             let mutable motion:string option = None
             let mutable script:string option = None
@@ -344,6 +349,22 @@ module rec CoreModule =
 
             member val Finished:bool = false with get, set
             member val NoTransData:bool = false with get, set
+
+        type Real with
+            static member Create(name: string, flow) =
+                if (name.Contains ".")  then
+                    logWarn $"Suspicious segment name [{name}]. Check it."
+
+                let real = Real(name, flow)
+                flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
+                real
+
+            member x.GetAliasTargetToDs(aliasFlow:Flow) =
+                [|
+                    if x.Flow <> aliasFlow then
+                        yield x.Flow.Name // other flow
+                    yield x.Name  // my flow
+                |]
 
 
         type CallType =
@@ -419,13 +440,6 @@ module rec CoreModule =
                 member val SafetyConditions = HashSet<SafetyAutoPreCondition>()
                 member val AutoPreConditions = HashSet<SafetyAutoPreCondition>()
 
-        type Alias private (name:string , target:AliasTargetWrapper, parent, isExFlowReal:bool) = // target : Real or Call or OtherFlowReal
-            inherit Indirect([|name|], parent)
-            member _.TargetWrapper = target
-            member _.IsExFlowReal = isExFlowReal
-            member _.IsSameFlow = target.GetTarget()
-                                  |> fun v -> v.Parent.GetFlow() = parent.GetFlow()
-
         type Call with
             static member private addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
             static member Create(target:Job, parent:ParentWrapper) =
@@ -466,21 +480,14 @@ module rec CoreModule =
             member x.SafetyConditions  = (x :> ISafetyAutoPreRequisiteHolder).SafetyConditions
             member x.AutoPreConditions = (x :> ISafetyAutoPreRequisiteHolder).AutoPreConditions
 
-        type Real with
-            static member Create(name: string, flow) =
-                if (name.Contains ".")  then
-                    logWarn $"Suspicious segment name [{name}]. Check it."
 
-                let real = Real(name, flow)
-                flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
-                real
+        type Alias private (name:string , target:AliasTargetWrapper, parent, isExFlowReal:bool) = // target : Real or Call or OtherFlowReal
+            inherit Indirect([|name|], parent)
+            member _.TargetWrapper = target
+            member _.IsExFlowReal = isExFlowReal
+            member _.IsSameFlow = target.GetTarget()
+                                  |> fun v -> v.Parent.GetFlow() = parent.GetFlow()
 
-            member x.GetAliasTargetToDs(aliasFlow:Flow) =
-                [|
-                    if x.Flow <> aliasFlow then
-                        yield x.Flow.Name // other flow
-                    yield x.Name  // my flow
-                |]
 
 
 
@@ -514,13 +521,14 @@ module rec CoreModule =
 
 
 
+
     type InOutDataType = DataType*DataType
 
     [<AutoOpen>]
     module ApiItemsModule =
 
         /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
-        type ApiItem internal (name:string, dsSystem:DsSystem) =
+        type ApiItem private (name:string, dsSystem:DsSystem) =
             (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
             inherit FqdnObject(name, createFqdnObject([|dsSystem.Name|]))
             interface INamedVertex
@@ -534,6 +542,19 @@ module rec CoreModule =
             member val RX = getNull<Real>() with get, set
             override x.ToText() =
                 $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
+
+        type ApiItem with
+            static member Create(name, system) =
+                let cp = ApiItem(name, system)
+                system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
+                cp
+            static member Create(name, system, tx, rx) =
+                let ai4e = ApiItem.Create(name, system)
+                ai4e.TX <- tx
+                ai4e.RX <- rx
+                ai4e
+
+
 
         /// API 의 reset 정보:  "+" <||> "-";
         and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
@@ -662,39 +683,24 @@ module rec CoreModule =
 
 
 
-    type AliasTargetWrapper with
-        member x.GetTarget() : Vertex =
-            match x with
-            | DuAliasTargetReal real -> real
-            | DuAliasTargetCall call -> call
+        type OperatorFunction with
+            static member Create(name:string,  excuteCode:string) =
+                let op = OperatorFunction(name)
+                updateOperator op excuteCode
+                op
 
-    type OperatorFunction with
-        static member Create(name:string,  excuteCode:string) =
-            let op = OperatorFunction(name)
-            updateOperator op excuteCode
-            op
-
-    type CommandFunction with
-        static member Create(name:string, excuteCode:string) =
-            let cmd = CommandFunction(name)
-            cmd.CommandType <- if excuteCode = "" then DuCMDUnDefined else DuCMDCode
-            cmd.CommandCode <- excuteCode
-            cmd
+        type CommandFunction with
+            static member Create(name:string, excuteCode:string) =
+                let cmd = CommandFunction(name)
+                cmd.CommandType <- if excuteCode = "" then DuCMDUnDefined else DuCMDCode
+                cmd.CommandCode <- excuteCode
+                cmd
 
 
 
-
-    type ApiItem with
-        static member Create(name, system) =
-            let cp = ApiItem(name, system)
-            system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
-            cp
-        static member Create(name, system, tx, rx) =
-            let ai4e = ApiItem.Create(name, system)
-            ai4e.TX <- tx
-            ai4e.RX <- rx
-            ai4e
 
     type DsSystem = DeviceAndSystemModule.DsSystem
     type DsGraph = Graph<Vertex, Edge>
-    and Direct = Real
+    type Direct = Real
+
+type DsSystem = DeviceAndSystemModule.DsSystem

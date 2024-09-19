@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using static Engine.CodeGenCPU.SystemManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.Core.CoreModule;
+using static Engine.Core.CoreModule.GraphItemsModule;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.Interface;
 using static Engine.Core.RuntimeGeneratorModule;

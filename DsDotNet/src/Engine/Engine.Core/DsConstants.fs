@@ -21,14 +21,6 @@ module DsConstants =
         | RevStartReset      (*  "<="   *)
         | RevSelfReset       (*  "<|="  *)
 
-    /// Runtime Edge Types
-    [<Flags>]
-    type EdgeType =
-        | None                       = 0b00000000    // Invalid state
-        | Start                      = 0b00000001    // Start, Weak
-        | Reset                      = 0b00000010    // else start
-        | Strong                     = 0b00000100    // else weak
-        | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
     type internal MET = ModelingEdgeType
     type internal RET = EdgeType

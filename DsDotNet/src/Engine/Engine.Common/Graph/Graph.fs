@@ -5,12 +5,36 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System.Linq
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module GraphModule =
+    // Basic interfaces
+    [<AllowNullLiteral>]
+    type IVertex = interface end
+
+    type INamed  =
+        abstract Name: string with get, set
+
+    // Extended interfaces
+    type IQualifiedNamed =
+        inherit INamed
+        abstract QualifiedName: string with get
+        abstract DequotedQualifiedName: string with get
+        abstract NameComponents: string[] with get
+
     type INamedVertex =
         inherit IVertex
         inherit INamed
+
+    /// Runtime Edge Types
+    [<Flags>]
+    type EdgeType =
+        | None                       = 0b00000000    // Invalid state
+        | Start                      = 0b00000001    // Start, Weak
+        | Reset                      = 0b00000010    // else start
+        | Strong                     = 0b00000100    // else weak
+        | AugmentedTransitiveClosure = 0b00001000    // 강한 상호 reset 관계 확장 edge
 
     type IEdge<'V> =
         abstract Source :'V    //방향을 고려안한 위치상 왼쪽   Vertex
@@ -119,12 +143,12 @@ module GraphModule =
         member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex)
         member x.GetEdges(vertex:'V) = x.GetIncomingEdges(vertex).Concat(x.GetOutgoingEdges(vertex))
         member x.GetIncomingVertices(vertex:'V) = x.GetIncomingEdges(vertex).Select(fun e -> e.Source)
-        member x.GetIncomingVerticesWithEdgeType(vertex:'V, edgeType:EdgeType) = 
+        member x.GetIncomingVerticesWithEdgeType(vertex:'V, edgeType:EdgeType) =
                                     x.GetIncomingEdges(vertex).Where(fun e -> e.EdgeType.HasFlag edgeType)
                                      .Select(fun e -> e.Source)
 
         member x.GetOutgoingVertices(vertex:'V) = x.GetOutgoingEdges(vertex).Select(fun e -> e.Target)
-        member x.GetOutgoingVerticesWithEdgeType(vertex:'V, edgeType:EdgeType) = 
+        member x.GetOutgoingVerticesWithEdgeType(vertex:'V, edgeType:EdgeType) =
                                     x.GetOutgoingEdges(vertex).Where(fun e -> e.EdgeType.HasFlag edgeType)
                                      .Select(fun e -> e.Target)
         member x.Inits =

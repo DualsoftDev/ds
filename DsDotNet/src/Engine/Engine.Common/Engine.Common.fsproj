@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+        <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+		<Compile Include="Graph/Graph.fs" />
+		<Compile Include="Graph\Graph.PairwiseOrder.fs" />
+		<Compile Include="Graph\Graph.Util.fs" />
+		<Compile Include="Graph\Graph.Sort.Topological.fs" />
+		<Compile Include="Graph/GraphHelper.fs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+	</ItemGroup>
+
+</Project>

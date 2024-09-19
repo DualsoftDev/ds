@@ -32,11 +32,6 @@
         <Compile Include="Text.fs" />
         <Compile Include="Fqdn.fs" />
         <Compile Include="UniqueName.fs" />
-        <Compile Include="Graph/Graph.fs" />
-        <Compile Include="Graph\Graph.PairwiseOrder.fs" />
-        <Compile Include="Graph\Graph.Util.fs" />
-        <Compile Include="Graph\Graph.Sort.Topological.fs" />
-        <Compile Include="Graph/GraphHelper.fs" />
         <Compile Include="RuntimeGenerator.fs" />
         <Compile Include="TypeConversion.fs" />
         <Compile Include="Expression.Interfaces.fs" />
@@ -103,6 +98,10 @@
             <PrivateAssets>all</PrivateAssets>
         </PackageReference>
     </ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Engine.Common\Engine.Common.fsproj" />
+	</ItemGroup>
 
 
 </Project>

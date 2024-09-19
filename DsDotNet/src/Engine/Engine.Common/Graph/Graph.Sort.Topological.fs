@@ -7,7 +7,7 @@ open GraphUtilImpl
 
 module internal GraphSortImpl =
     
-    let topologicalSort(x:Graph<_, _>) =
+    let topologicalSort(x:TDsGraph<_, _>) =
         let inDegree = new Dictionary<'V, int>(x.Vertices.Count)
         let queue = new Queue<'V>()
 
@@ -40,7 +40,7 @@ module internal GraphSortImpl =
             [||]
 
     
-    let topologicalGroupSort (graph:Graph<_, _>) =
+    let topologicalGroupSort (graph:TDsGraph<_, _>) =
         let vertices = topologicalSort graph
 
         let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant (graph, EdgeType.Start)

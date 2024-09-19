@@ -98,7 +98,7 @@ module EdgeModule =
 
 
     /// 상호 reset 정보(Mutual Reset Info) 확장
-    let internal createMRIEdgesTransitiveClosure4Graph(graph:Graph<'V, 'E>, edgeCreator:'V*'V*EdgeType -> IEdge<'V>) =
+    let internal createMRIEdgesTransitiveClosure4Graph(graph:TDsGraph<'V, 'E>, edgeCreator:'V*'V*EdgeType -> IEdge<'V>) =
         // https://www.tutorialspoint.com/Transitive-closure-of-a-Graph
         (*
             Begin
@@ -120,7 +120,7 @@ module EdgeModule =
                 .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Strong ||| EdgeType.Reset))
                 .ToArray()
 
-        let gr = Graph(Seq.empty, es, None)
+        let gr = TDsGraph(Seq.empty, es, None)
         let vs = gr.Vertices.ToArray()
         let dic = Dictionary<'V*'V, bool>()     // v1 -> v2 : reachable?
         for i in vs do
@@ -155,9 +155,9 @@ module EdgeModule =
     let isStartEdge (edge: Edge) = edge.EdgeType.HasFlag(EdgeType.Start)
 
 
-    let mergeGraphs (graphs:  Graph<Vertex, Edge> seq) : Graph<Vertex, Edge>  =
+    let mergeGraphs (graphs:  TDsGraph<Vertex, Edge> seq) : TDsGraph<Vertex, Edge>  =
 
-        let g = Graph<Vertex, Edge>(None)
+        let g = TDsGraph<Vertex, Edge>(None)
 
         for graph in graphs do
             for vertex in graph.Islands do
@@ -168,9 +168,9 @@ module EdgeModule =
         g
 
 
-    let changeRealGraph (graph: Graph<Vertex, Edge>) : Graph<Vertex, Edge>  =
+    let changeRealGraph (graph: TDsGraph<Vertex, Edge>) : TDsGraph<Vertex, Edge>  =
 
-        let g = Graph<Vertex, Edge>(None)
+        let g = TDsGraph<Vertex, Edge>(None)
 
         for vertex in graph.Islands do
             if vertex.TryGetPureCall().IsNone then  //flow에서 조건으로 Call은 제외
@@ -190,7 +190,7 @@ module EdgeModule =
 
 
     // Recursive function to find all Real objects connected via Start edges
-    let getPathReals (graph: Graph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
+    let getPathReals (graph: TDsGraph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
         let graphOrder = graph.BuildPairwiseComparer()
 
         let getStartReals (src: Vertex, visited: HashSet<Real>) : Real seq =
@@ -216,7 +216,7 @@ module EdgeModule =
         srcs |> Seq.collect (fun f-> getStartReals(f, allVisited))
 
     /// srcs로 인해서 시작가능한 reals 구하고 구해진 reals에 리셋으로 연결된 target reals 구한다
-    let private appendInterfaceReset (graph: Graph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
+    let private appendInterfaceReset (graph: TDsGraph<Vertex,Edge>) (srcs: Vertex seq) : Real seq =
         // Find all Real objects connected by Start edges to the source Reals
         let startLinkReals =
             (srcs @ (getPathReals graph srcs).OfType<Vertex>())
@@ -286,4 +286,4 @@ type EdgeExt =
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> EdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
 
 
-    [<Extension>] static member GetPathReals(inits:Real seq, g:Graph<Vertex,Edge>) : Real seq = getPathReals g (inits.OfType<Vertex>())
+    [<Extension>] static member GetPathReals(inits:Real seq, g:TDsGraph<Vertex,Edge>) : Real seq = getPathReals g (inits.OfType<Vertex>())

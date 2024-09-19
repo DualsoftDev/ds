@@ -298,7 +298,7 @@ module rec CoreModule =
         type Edge private (source:Vertex, target:Vertex, edgeType:EdgeType) =
             inherit EdgeBase<Vertex>(source, target, edgeType)
 
-            static member Create(graph:Graph<_,_>, source, target, edgeType:EdgeType) =
+            static member Create(graph:TDsGraph<_,_>, source, target, edgeType:EdgeType) =
                 let edge = Edge(source, target, edgeType)
                 graph.AddEdge(edge) |> verifyM $"중복 edge [{source.Name}{edgeType.ToText()}{target.Name}]"
                 edge
@@ -700,7 +700,7 @@ module rec CoreModule =
 
 
     type DsSystem = DeviceAndSystemModule.DsSystem
-    type DsGraph = Graph<Vertex, Edge>
+    type DsGraph = TDsGraph<Vertex, Edge>
     type Direct = Real
 
 type DsSystem = DeviceAndSystemModule.DsSystem

@@ -28,7 +28,7 @@ module ModelGraphGenGPT =
         member x.``Create Graph and Add Vertices Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 그래프에 정상적으로 정점과 간선이 추가되었는지 확인
             ClassicAssert.AreEqual(3, graph.Vertices.Count)
@@ -37,7 +37,7 @@ module ModelGraphGenGPT =
         [<Test>]
         member x.``Add and Remove Vertices Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, [])
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, [])
 
             // 정점 추가 후 확인
             graph.AddVertex(DummyVertex("D")) |> ignore
@@ -51,7 +51,7 @@ module ModelGraphGenGPT =
         member x.``Add and Remove Edges Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 간선 추가 후 확인
             let newEdge = DummyEdge(vertices.[0], vertices.[2])
@@ -65,7 +65,7 @@ module ModelGraphGenGPT =
         [<Test>]
         member x.``Add and Remove Vertices Test 2`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, [])
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, [])
 
             // 정점 추가 후 확인
             graph.AddVertex(DummyVertex("D")) |> ignore
@@ -80,7 +80,7 @@ module ModelGraphGenGPT =
         member x.``Add and Remove Edges Test 2`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 간선 추가 후 확인
             let newEdge1 = DummyEdge(vertices.[0], vertices.[2])
@@ -95,7 +95,7 @@ module ModelGraphGenGPT =
         [<Test>]
         member x.``Find Vertex Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C"); DummyVertex("D")]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, [])
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, [])
 
             // 정점 찾기 테스트
             let foundVertex = graph.TryFindVertex("B")
@@ -110,7 +110,7 @@ module ModelGraphGenGPT =
         member x.``Find Edges Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 간선 찾기 테스트
             let foundEdges = graph.FindEdges("A", "B")
@@ -124,7 +124,7 @@ module ModelGraphGenGPT =
         member x.``Connected Vertices Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C"); DummyVertex("D")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 연결된 정점 확인
             let connectedVertices = graph.Edges
@@ -134,7 +134,7 @@ module ModelGraphGenGPT =
         member x.``Islands Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C"); DummyVertex("D")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 고립된 정점 확인
             let islands = graph.Islands
@@ -144,7 +144,7 @@ module ModelGraphGenGPT =
         member x.``Get Incoming Edges Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 들어오는 간선 확인
             let incomingEdges = graph.GetIncomingEdges(vertices.[1])
@@ -154,7 +154,7 @@ module ModelGraphGenGPT =
         member x.``Get Outgoing Edges Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 나가는 간선 확인
             let outgoingEdges = graph.GetOutgoingEdges(vertices.[1])
@@ -164,7 +164,7 @@ module ModelGraphGenGPT =
         member x.``Get Edges Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 간선 확인
             let allEdges = graph.GetEdges(vertices.[1])
@@ -174,7 +174,7 @@ module ModelGraphGenGPT =
         member x.``Get Incoming Vertices Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 들어오는 정점 확인
             let incomingVertices = graph.GetIncomingVertices(vertices.[1])
@@ -184,7 +184,7 @@ module ModelGraphGenGPT =
         member x.``Get Outgoing Vertices Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 나가는 정점 확인
             let outgoingVertices = graph.GetOutgoingVertices(vertices.[1])
@@ -194,7 +194,7 @@ module ModelGraphGenGPT =
         member x.``Inits Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // Inits 확인
             let inits = graph.Inits
@@ -204,7 +204,7 @@ module ModelGraphGenGPT =
         member x.``Lasts Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // Lasts 확인
             let lasts = graph.Lasts
@@ -216,7 +216,7 @@ module ModelGraphGenGPT =
         [<Test>]
         member x.``Add and Remove Multiple Vertices Test`` () =
             let vertices = [for i in 1..100 -> DummyVertex(sprintf "Vertex%d" i)]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, [])
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, [])
 
             // 정점 추가 후 확인
             let newVertices = [for i in 101..105 -> DummyVertex(sprintf "Vertex%d" i)]
@@ -231,7 +231,7 @@ module ModelGraphGenGPT =
         member x.``Add and Remove Multiple Edges Test`` () =
             let vertices = [for i in 1..10 -> DummyVertex(sprintf "Vertex%d" i)]
             let edges = [for i in 1..9 -> DummyEdge(vertices.[i-1], vertices.[i])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 간선 추가 후 확인
             let newEdges = [for i in 1..4 -> DummyEdge(vertices.[i], vertices.[i+5])]
@@ -246,7 +246,7 @@ module ModelGraphGenGPT =
         member x.``Add and Remove Multiple Vertices and Edges Test`` () =
             let vertices = [for i in 1..10 -> DummyVertex(sprintf "Vertex%d" i)]
             let edges = [for i in 1..9 -> DummyEdge(vertices.[i-1], vertices.[i])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 정점과 간선 추가 후 확인
             let newVertices = [for i in 11..15 -> DummyVertex(sprintf "Vertex%d" i)]
@@ -265,7 +265,7 @@ module ModelGraphGenGPT =
         [<Test>]
         member x.``TryFindVertex with Type Filter Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C"); DummyVertex("D")]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, [])
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, [])
 
             // 특정 타입의 정점 찾기 테스트
             let foundVertex = graph.TryFindVertex<Named>("B")
@@ -280,7 +280,7 @@ module ModelGraphGenGPT =
         member x.``Find Edges with Source and Target Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // Source와 Target로 간선 찾기 테스트
             let foundEdges = graph.FindEdges(vertices.[0], vertices.[1])
@@ -296,7 +296,7 @@ module ModelGraphGenGPT =
         member x.``Get Incoming and Outgoing Edges Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 들어오는 간선 확인
             let incomingEdges = graph.GetIncomingEdges(vertices.[1])
@@ -310,7 +310,7 @@ module ModelGraphGenGPT =
         member x.``Get Incoming and Outgoing Vertices Test`` () =
             let vertices = [DummyVertex("A"); DummyVertex("B"); DummyVertex("C")]
             let edges = [DummyEdge(vertices.[0], vertices.[1]); DummyEdge(vertices.[1], vertices.[2])]
-            let graph = Graph<DummyVertex, DummyEdge>(vertices, edges)
+            let graph = TDsGraph<DummyVertex, DummyEdge>(vertices, edges)
 
             // 들어오는 정점 확인
             let incomingVertices = graph.GetIncomingVertices(vertices.[1])

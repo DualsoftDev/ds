@@ -9,7 +9,7 @@ open Engine.Common
 [<AutoOpen>]
 module TimeModule =
 
-    let rec dfs (graph: Graph<Vertex, Edge>, current: Vertex, target: Vertex, visited: HashSet<Vertex>, timeAcc: float, maxTime: float ref) =
+    let rec dfs (graph: TDsGraph<Vertex, Edge>, current: Vertex, target: Vertex, visited: HashSet<Vertex>, timeAcc: float, maxTime: float ref) =
         if current = target then
             maxTime.Value <- max maxTime.Value timeAcc
         else
@@ -19,8 +19,8 @@ module TimeModule =
                     dfs(graph, edge.Target, target, visited, timeAcc + edge.Target.GetPureReal().Time.Value, maxTime)
             visited.Remove(current) |> ignore
 
-    let find_max_path_time (graph: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
-        let find_time (graph: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<float> =
+    let find_max_path_time (graph: TDsGraph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
+        let find_time (graph: TDsGraph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<float> =
             if src.GetPureReal().Time.IsNone || tgt.GetPureReal().Time.IsNone then
                 None
             elif src = tgt then
@@ -61,11 +61,11 @@ module TimeModule =
     [<Extension>]
     type TimeExt() =
         [<Extension>]
-        static member GetDuration(g: Graph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<float> =
+        static member GetDuration(g: TDsGraph<Vertex, Edge>, src: Vertex, tgt: Vertex) : option<float> =
             find_max_path_time(g, [src], [tgt])
 
         [<Extension>]
-        static member GetDuration(g: Graph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
+        static member GetDuration(g: TDsGraph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
             find_max_path_time (g, srcs, tgts)
 
         [<Extension>]

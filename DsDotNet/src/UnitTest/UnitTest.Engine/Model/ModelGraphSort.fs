@@ -35,7 +35,7 @@ module GrapSortTests =
 
                 E(vs["B"], vs["C"])
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["A"]; vs["G"]; vs["B"]; vs["D"]; vs["C"]; vs["F"]; vs["E"] ]
             ()
@@ -55,7 +55,7 @@ module GrapSortTests =
                 E(vs["E"], vs["F"])
 
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["D"]; vs["E"]; vs["B"]; vs["C"]; vs["A"]; vs["F"]; ]
             ()
@@ -75,7 +75,7 @@ module GrapSortTests =
                 E(vs["4"], vs["6"])
                 E(vs["4"], vs["2"])
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["1"]; vs["4"]; vs["5"]; vs["2"]; vs["6"]; vs["3"]; ]
 
@@ -89,7 +89,7 @@ module GrapSortTests =
                 E(vs["B"], vs["C"])
                 E(vs["C"], vs["A"])
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq []
             ()

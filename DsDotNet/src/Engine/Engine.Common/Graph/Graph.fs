@@ -58,7 +58,8 @@ module GraphModule =
         member _.OnVertexAdded: INamed -> bool = onVertexAdded
         member _.OnVertexRemoved: INamed -> bool = onVertexRemoved
 
-    type Graph<'V, 'E
+    /// Template class for DS Graph<'V, 'E>
+    type TDsGraph<'V, 'E
             when 'V :> INamed and 'V : equality
             and 'E :> IEdge<'V> and 'E: equality> (
             vertices_:'V seq,
@@ -106,9 +107,9 @@ module GraphModule =
                 | None -> true
                 | Some handlers -> handlers.OnVertexRemoved (vertex :> INamed)
 
-        new () = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>, None)
-        new (vs, es) = Graph<'V, 'E>(vs, es, None)
-        new (vertexHandlers:GraphVertexAddRemoveHandlers option) = Graph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>, vertexHandlers)
+        new () = TDsGraph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>, None)
+        new (vs, es) = TDsGraph<'V, 'E>(vs, es, None)
+        new (vertexHandlers:GraphVertexAddRemoveHandlers option) = TDsGraph<'V, 'E>(Seq.empty<'V>, Seq.empty<'E>, vertexHandlers)
 
         member _.Vertices = vs
         member _.Edges = es

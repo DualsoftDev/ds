@@ -54,7 +54,7 @@ module ModelGrapTests =
                 E(vs[1], vs[2])
                 E(vs[2], vs[3])
             ]
-            let g = Graph<V, E>(vs, es0)
+            let g = TDsGraph<V, E>(vs, es0)
             validateCylce(g, false) === true
 
             // 0>1>2>3; 1>5>6; 1>6
@@ -63,14 +63,14 @@ module ModelGrapTests =
                     E(vs[1], vs[6])
                     E(vs[5], vs[6])
                 ]@es0
-            let g = Graph<V, E>(vs, es)
+            let g = TDsGraph<V, E>(vs, es)
             validateCylce(g, false) === true
 
             // 0 > 0 : Self-replexive cycle
-            let g = Graph<V, E>(vs, [E(vs[0], vs[0])] )
+            let g = TDsGraph<V, E>(vs, [E(vs[0], vs[0])] )
             (fun () -> validateCylce(g, false) |> ignore )  |> ShouldFailWithSubstringT "Cyclic"
 
             // 0>1>2>3; 2>0
             let es = E(vs[2], vs[0])::es0
-            let g = Graph<V, E>(vs, es)
+            let g = TDsGraph<V, E>(vs, es)
             (fun () -> validateCylce(g, false) |> ignore )  |> ShouldFailWithSubstringT "Cyclic"

@@ -9,12 +9,12 @@ open System
 
 [<AutoOpen>]
 module GraphModule =
-    // Basic interfaces
-    [<AllowNullLiteral>]
-    type IVertex = interface end
+    //// Basic interfaces
+    //[<AllowNullLiteral>]
+    //type IVertex = interface end
 
-    type INamed  =
-        abstract Name: string with get, set
+    //type INamed  =
+    //    abstract Name: string with get, set
 
     // Extended interfaces
     type IQualifiedNamed =

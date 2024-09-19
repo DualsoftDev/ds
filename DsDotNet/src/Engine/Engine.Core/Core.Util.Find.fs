@@ -1,4 +1,4 @@
-namespace Engine.Core
+namespace rec Engine.Core
 
 open System.Linq
 open System.Runtime.CompilerServices
@@ -295,7 +295,7 @@ type FindExtension =
     [<Extension>] static member GetFlowEdges(x:DsSystem) = x.Flows.Collect(fun f-> f.Graph.Edges)
 
 
-    [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> e.GetVertices())
+    [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> [e.Source; e.Target])
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetRealVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Real>()
     [<Extension>] static member GetCallVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Call>()

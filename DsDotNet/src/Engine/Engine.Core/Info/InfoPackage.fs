@@ -5,6 +5,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 
 open Engine.Common
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module InfoPackageModule =

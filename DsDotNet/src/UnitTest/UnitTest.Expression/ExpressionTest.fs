@@ -4,8 +4,8 @@ open System
 open NUnit.Framework
 
 open Engine.Core
+open Engine.Common
 open Engine.CodeGenCPU
-open Engine.Parser.FS
 open Dual.Common.Core.FS
 open T
 

@@ -1,5 +1,5 @@
 // Copyright (c) Dualsoft  All Rights Reserved.
-namespace Engine.Core
+namespace Engine.Common
 
 open System.Runtime.CompilerServices
 open System.Collections.Generic

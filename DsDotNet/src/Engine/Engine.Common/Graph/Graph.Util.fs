@@ -1,4 +1,4 @@
-namespace Engine.Core
+namespace Engine.Common
 
 open System.Collections.Generic
 open Dual.Common.Core.FS

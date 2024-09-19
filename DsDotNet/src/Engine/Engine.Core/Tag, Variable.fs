@@ -1,9 +1,12 @@
 namespace Engine.Core
 
-open System.Diagnostics
-open Dual.Common.Core.FS
 open System
+open System.Diagnostics
 open System.ComponentModel
+
+open Dual.Common.Core.FS
+open Engine.Common
+
 
 [<AutoOpen>]
 module TagVariableModule =

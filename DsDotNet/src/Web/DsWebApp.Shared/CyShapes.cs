@@ -6,7 +6,7 @@ using Dual.Common.Core;
 using Engine.Core;
 using static Engine.Core.DsConstants;
 using static Engine.Core.CoreModule;
-using static Engine.Core.GraphModule;
+using static Engine.Common.GraphModule;
 using static DsWebApp.Shared.CyGraphEx;
 using Dual.Common.Base.CS;
 

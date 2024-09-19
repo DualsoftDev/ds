@@ -4,6 +4,8 @@ namespace Engine.Core
 open System
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+open Engine.Common
+
 
 [<AutoOpen>]
 module DsConstants =

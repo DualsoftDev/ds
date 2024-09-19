@@ -1,11 +1,10 @@
 namespace T
-open Dual.Common.UnitTest.FS
 
-
-open Engine.Core
-open Dual.Common.Core.FS
 open NUnit.Framework
 open Dual.Common.Core.FS
+open Dual.Common.UnitTest.FS
+open Engine.Common
+open Engine.Core
 
 
 [<AutoOpen>]
@@ -60,8 +59,8 @@ module GrapSortTests =
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["D"]; vs["E"]; vs["B"]; vs["C"]; vs["A"]; vs["F"]; ]
             ()
-        
-        
+
+
         //https://assets.leetcode.com/users/images/63bd7ad6-403c-42f1-b8bb-2ea41e42af9a_1613794080.8115625.png
         [<Test>]
         member __.``TopSortTest3`` () =
@@ -94,4 +93,4 @@ module GrapSortTests =
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq []
             ()
-        
+

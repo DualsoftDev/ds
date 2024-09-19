@@ -1,10 +1,10 @@
 namespace SystemCloneTests
 
 open Xunit
-open Engine.Core
-open System.Collections.Generic
 open System.Linq
 open FsUnit.Xunit
+open Engine.Core
+open Engine.Common
 
 type DsSystemCloneTests() =
 

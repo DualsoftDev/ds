@@ -1,10 +1,11 @@
 namespace T
 
-
-open Engine.Core
-open Dual.Common.Core.FS
 open NUnit.Framework
 open NUnit.Framework.Legacy
+
+open Dual.Common.Core.FS
+open Engine.Core
+open Engine.Common
 
 
 // 테스트용 더미 클래스 정의

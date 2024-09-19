@@ -1,7 +1,8 @@
 namespace Engine.CodeGenCPU
 
-open Engine.Core
 open Dual.Common.Core.FS
+open Engine.Core
+open Engine.Common
 
 [<AutoOpen>]
 module TagManagerUtil =

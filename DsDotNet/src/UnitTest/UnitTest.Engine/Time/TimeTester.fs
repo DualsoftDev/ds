@@ -1,10 +1,10 @@
 namespace T
 
-open Dual.Common.UnitTest.FS
-open Engine.Core
 open NUnit.Framework
-open System.Collections.Generic
 open NUnit.Framework.Legacy
+
+open Engine.Core
+open Engine.Common
 
 [<AutoOpen>]
 module TimeTestModule =
@@ -15,7 +15,7 @@ module TimeTestModule =
         let flow = Flow.Create("F", system)
 
         let createVertex name time =
-            let r = Real.Create(name, flow) 
+            let r = Real.Create(name, flow)
             r.Time <- Some time
             r :> Vertex
 
@@ -53,7 +53,7 @@ module TimeTestModule =
             createEdge v8 v9
             createEdge v9 v10
             createEdge v10 v11
-            createEdge v11 v12 
+            createEdge v11 v12
 
             v0, v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12
 

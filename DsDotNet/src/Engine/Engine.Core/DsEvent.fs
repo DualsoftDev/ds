@@ -2,6 +2,7 @@
 namespace Engine.Core
 
 open System.Reactive.Subjects
+open Engine.Common
 
 [<AutoOpen>]
 module CpusEvent =

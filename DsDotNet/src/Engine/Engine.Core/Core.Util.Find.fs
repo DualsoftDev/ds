@@ -1,8 +1,10 @@
 namespace Engine.Core
 
 open System.Linq
-open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+
+open Dual.Common.Core.FS
+open Engine.Common
 
 [<AutoOpen>]
 module internal ModelFindModule =

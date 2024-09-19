@@ -82,9 +82,9 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.4.2" />
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.4.3" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.3" />
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.4.3" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.4.4" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.4" />
 	</ItemGroup>
 
 	<ItemGroup>

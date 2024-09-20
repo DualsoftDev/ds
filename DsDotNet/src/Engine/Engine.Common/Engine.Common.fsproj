@@ -3,6 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net48;net8.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>
 	<ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
@@ -13,8 +14,14 @@
 		<Compile Include="Graph\Graph.Sort.Topological.fs" />
 		<Compile Include="Graph/GraphHelper.fs" />
 	</ItemGroup>
-	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.4" />
+	</ItemGroup>
+
 
 </Project>

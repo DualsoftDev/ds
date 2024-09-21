@@ -32,6 +32,8 @@
 	</ItemGroup>
 	
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Web\Dual.Web.Blazor.Client.Canvas2d\Dual.Web.Blazor.Client.Canvas2d.csproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Web\Dual.Web.Blazor.Client\Dual.Web.Blazor.Client.csproj" />
@@ -39,6 +41,8 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.4.3" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.4.4" />
 		<PackageReference Include="DualSoft-Common-Core" Version="0.4.2" />
 		<PackageReference Include="DualSoft-Web-Blazor" Version="0.4.1" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.4.1" />

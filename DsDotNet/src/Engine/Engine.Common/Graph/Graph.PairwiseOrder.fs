@@ -29,6 +29,7 @@ module internal GraphPairwiseOrderImpl =
 
     //    curried
 
+    /// DAG graph 상의 임의의 두 vertex 가 ancestor-descendant 관계인지 검사하는 함수를 반환.  관계가 없으면 None 값으로
     let isAncestorDescendant (graph:TDsGraph<'V, 'E>, edgeType:EdgeType)=
         let vs = graph.Vertices |> indexed |> map (fun (n, v) -> (v, n)) |> dict
         let n = vs.length()

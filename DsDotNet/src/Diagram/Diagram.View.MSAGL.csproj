@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Core" Version="0.4.2" />
+		<PackageReference Include="DualSoft-Common-Core" Version="0.4.3" />
 		<PackageReference Include="DualSoft-Common-Winform" Version="0.4.2" />
 	</ItemGroup>
 	

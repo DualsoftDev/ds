@@ -21,7 +21,7 @@ type Flow with
         (set, rst) ==| (f.p_st, getFuncName())
 
     member f.F3_FlowReadyCondition() =
-        let set = f.HWReadyConditionsToAndElseOn
+        let set = f.HWReadyConditionsToAndElseOn <||> f._sim.Expr
         let rst = f._off.Expr
         [
             yield (set, rst) --| (f.readyCondition, getFuncName())
@@ -30,7 +30,7 @@ type Flow with
         ]
 
     member f.F4_FlowDriveCondition() =
-        let set = f.HWDriveConditionsToAndElseOn
+        let set = f.HWDriveConditionsToAndElseOn <||> f._sim.Expr
         let rst = f._off.Expr
         [
             yield (set, rst) --| (f.driveCondition, getFuncName())

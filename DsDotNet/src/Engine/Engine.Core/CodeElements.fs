@@ -1,6 +1,7 @@
 namespace Engine.Core
 
 open Dual.Common.Core.FS
+open Engine.Common
 
 [<AutoOpen>]
 module rec CodeElements =

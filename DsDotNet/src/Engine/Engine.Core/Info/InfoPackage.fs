@@ -1,9 +1,10 @@
 namespace Engine.Core
 
 open System.Collections.Generic
-open System
 open System.Linq
 open System.Runtime.CompilerServices
+
+open Engine.Common
 open Dual.Common.Core.FS
 
 [<AutoOpen>]

@@ -1,11 +1,10 @@
 namespace T
-open Dual.Common.UnitTest.FS
 
-
-open Engine.Core
-open Dual.Common.Core.FS
 open NUnit.Framework
 open Dual.Common.Core.FS
+open Dual.Common.UnitTest.FS
+open Engine.Common
+open Engine.Core
 
 
 [<AutoOpen>]
@@ -13,7 +12,7 @@ module GrapSortTests =
     type V(name:string) =
         inherit Named(name)
     type E(source, target) =
-        inherit EdgeBase<V>(source, target, EdgeType.Start)
+        inherit DsEdgeBase<V>(source, target, EdgeType.Start)
 
     type TopologicalSortTest() =
         inherit EngineTestBaseClass()
@@ -36,7 +35,7 @@ module GrapSortTests =
 
                 E(vs["B"], vs["C"])
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["A"]; vs["G"]; vs["B"]; vs["D"]; vs["C"]; vs["F"]; vs["E"] ]
             ()
@@ -56,12 +55,12 @@ module GrapSortTests =
                 E(vs["E"], vs["F"])
 
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["D"]; vs["E"]; vs["B"]; vs["C"]; vs["A"]; vs["F"]; ]
             ()
-        
-        
+
+
         //https://assets.leetcode.com/users/images/63bd7ad6-403c-42f1-b8bb-2ea41e42af9a_1613794080.8115625.png
         [<Test>]
         member __.``TopSortTest3`` () =
@@ -76,7 +75,7 @@ module GrapSortTests =
                 E(vs["4"], vs["6"])
                 E(vs["4"], vs["2"])
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq [vs["1"]; vs["4"]; vs["5"]; vs["2"]; vs["6"]; vs["3"]; ]
 
@@ -90,8 +89,8 @@ module GrapSortTests =
                 E(vs["B"], vs["C"])
                 E(vs["C"], vs["A"])
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let sorted = GraphSortImpl.topologicalSort g
             sorted |> SeqEq []
             ()
-        
+

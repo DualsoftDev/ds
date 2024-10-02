@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Engine.Core.CoreModule;
+using static Engine.Core.CoreModule.ApiItemsModule;
+using static Engine.Core.CoreModule.GraphItemsModule;
 using static Engine.Core.DsType;
 using static Engine.Import.Office.ViewModule;
 

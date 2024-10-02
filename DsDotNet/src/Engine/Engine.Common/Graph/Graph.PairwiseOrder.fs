@@ -1,4 +1,4 @@
-namespace Engine.Core
+namespace Engine.Common
 
 open System.Collections.Generic
 open Dual.Common.Core.FS
@@ -24,19 +24,20 @@ module internal GraphPairwiseOrderImpl =
     //            Some false
     //        else
     //            None
-    
+
     //    graph.Inits |> iter (fun v -> traverse v [])
 
-    //    curried    
+    //    curried
 
-    let isAncestorDescendant (graph:Graph<'V, 'E>, edgeType:EdgeType)=
+    /// DAG graph 상의 임의의 두 vertex 가 ancestor-descendant 관계인지 검사하는 함수를 반환.  관계가 없으면 None 값으로
+    let isAncestorDescendant (graph:TDsGraph<'V, 'E>, edgeType:EdgeType)=
         let vs = graph.Vertices |> indexed |> map (fun (n, v) -> (v, n)) |> dict
         let n = vs.length()
         // ancestor, descendant 관계에 있는 모든 node 쌍들에 대해서 hash 값으로 저정
         let table: bool option array2d = Array2D.create<bool option> n n None
 
         let visited = HashSet<'V>()
- 
+
         let rec traverse (v:'V) (ancestors:'V list) =
             ancestors |> iter (fun a -> table[vs[a], vs[v]] <- Some true )
             if visited.Contains(v) then
@@ -49,10 +50,10 @@ module internal GraphPairwiseOrderImpl =
             else
                 visited.Add(v) |> ignore
                 let ancestors = v::ancestors
- 
-                graph.GetOutgoingVerticesWithEdgeType (v, edgeType)
+
+                graph.GetOutgoingVerticesWithEdgeType (v, fun e -> e.EdgeType = edgeType)
                 |> iter (fun a -> traverse a ancestors)
- 
+
 
         let curried (v1:'V) (v2:'V): bool option =
             let n1, n2 = vs[v1], vs[v2]
@@ -63,7 +64,7 @@ module internal GraphPairwiseOrderImpl =
                 Some false
             else
                 None
-    
+
         graph.Inits |> iter (fun v -> traverse v [])
 
-        curried    
+        curried

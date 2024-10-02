@@ -1,5 +1,5 @@
 // Copyright (c) Dualsoft  All Rights Reserved.
-namespace Engine.Core
+namespace Engine.Common
 
 open System.Runtime.CompilerServices
 open System.Collections.Generic
@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module internal GraphHelperModule =
-    let dumpGraph(graph:Graph<_, _>) =
+    let dumpGraph(graph:TDsGraph<_, _>) =
         let g = graph
         let text =
             [   for e in g.Edges do
@@ -64,7 +64,7 @@ module internal GraphHelperModule =
 
     (* https://blog.naver.com/ndb796/221236952158 *)
     /// function that returns strongly connected components from given edge lists of graph
-    let findStronglyConnectedComponents(graph:Graph<'V, 'E>) (edges:'E seq) =
+    let findStronglyConnectedComponents(graph:TDsGraph<'V, 'E>) (edges:'E seq) =
         let g = graph
         let sccs =
             let sccs:ResizeArray<'V[]> = ResizeArray()
@@ -108,7 +108,7 @@ module internal GraphHelperModule =
         sccs
 
 
-    let validateCylce (graph:Graph<'V, 'E>, allowCyclicGraph:bool) =
+    let validateCylce (graph:TDsGraph<'V, 'E>, allowCyclicGraph:bool) =
         let edges =
             graph.Edges
                 .Where(fun e -> not <| e.EdgeType.HasFlag(EdgeType.Reset))
@@ -123,10 +123,10 @@ module internal GraphHelperModule =
         true
 
 type GraphHelper =
-    [<Extension>] static member Dump(graph:Graph<_, _>) = dumpGraph(graph)
+    [<Extension>] static member Dump(graph:TDsGraph<_, _>) = dumpGraph(graph)
     [<Extension>] static member GetVertices(edge:IEdge<'V>) = [edge.Source; edge.Target]
-    [<Extension>] static member ValidateCylce(graph:Graph<'V, 'E>, allowCyclicGraph:bool) = validateCylce(graph, allowCyclicGraph)
-    [<Extension>] static member TopologicalSort(graph:Graph<_, _>) = GraphSortImpl.topologicalSort graph
-    [<Extension>] static member TopologicalGroupSort(graph:Graph<_, _>) = GraphSortImpl.topologicalGroupSort graph
-    /// DAG graph 상의 임의의 두 vertex 가 ancestor-descendant 관계인지 검사하는 함수를 반환
-    [<Extension>] static member BuildPairwiseComparer(graph:Graph<_, _>) = GraphPairwiseOrderImpl.isAncestorDescendant (graph, EdgeType.Start)
+    [<Extension>] static member ValidateCylce(graph:TDsGraph<'V, 'E>, allowCyclicGraph:bool) = validateCylce(graph, allowCyclicGraph)
+    [<Extension>] static member TopologicalSort(graph:TDsGraph<_, _>) = GraphSortImpl.topologicalSort graph
+    [<Extension>] static member TopologicalGroupSort(graph:TDsGraph<_, _>) = GraphSortImpl.topologicalGroupSort graph
+    /// DAG graph 상의 임의의 두 vertex 가 ancestor-descendant 관계인지 검사하는 함수를 반환.  관계가 없으면 None 값으로
+    [<Extension>] static member BuildPairwiseComparer(graph:TDsGraph<_, _>) = GraphPairwiseOrderImpl.isAncestorDescendant (graph, EdgeType.Start)

@@ -1,17 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0</TargetFrameworks>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>
-
-    <ItemGroup>
+	<ItemGroup>
+        <Compile Include="AssemblyInfo.fs" />
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-        <Compile Include="InterfaceDef.fs" />
-        <Compile Include="Loader.fs" />
-    </ItemGroup>
+		<Compile Include="Graph/Graph.fs" />
+		<Compile Include="Graph\Graph.PairwiseOrder.fs" />
+		<Compile Include="Graph\Graph.Util.fs" />
+		<Compile Include="Graph\Graph.Sort.Topological.fs" />
+		<Compile Include="Graph/GraphHelper.fs" />
+	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
@@ -20,5 +22,6 @@
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.5" />
 	</ItemGroup>
+
 
 </Project>

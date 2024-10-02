@@ -10,6 +10,8 @@ global using log4net;
 
 global using DsWebApp.Shared;
 global using DsWebApp.Server.Common;
+global using Dual.Common.Base.CS;
+global using Dual.Common.Base.FS;
 global using Dual.Common.Core;
 global using Dual.Common.Db;
 global using Dual.Web.Server;
@@ -23,3 +25,11 @@ global using Dual.Web.Blazor.Shared;
 global using ErrorMessage = string;
 global using NewtonsoftJson = Newtonsoft.Json.JsonConvert;
 global using SystemTextJson = System.Text.Json.JsonSerializer;
+
+global using static Engine.Core.TagKindModule.TagEvent;
+global using static Engine.Core.CoreModule;
+global using static Engine.Core.CoreModule.DeviceAndSystemModule;
+global using static Engine.Core.CoreModule.GraphItemsModule;
+global using static Engine.Core.InfoPackageModule;
+global using static Engine.CodeGenCPU.ConvertCpuVertex;
+global using static Engine.CodeGenCPU.RealExt;

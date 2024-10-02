@@ -4,6 +4,8 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 using Dual.Web.Blazor.Shared;
+using static Engine.Common.GraphModule;
+using static Dual.Common.Core.FS.GraphModule;
 
 namespace DsWebApp.Server.Controllers;
 

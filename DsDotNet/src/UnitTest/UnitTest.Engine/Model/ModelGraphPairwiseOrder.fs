@@ -1,11 +1,11 @@
 namespace T
-open Dual.Common.UnitTest.FS
 
-
-open Engine.Core
-open Dual.Common.Core.FS
 open NUnit.Framework
+
+open Dual.Common.UnitTest.FS
 open Dual.Common.Core.FS
+open Engine.Core
+open Engine.Common
 
 
 [<AutoOpen>]
@@ -13,7 +13,7 @@ module GraphPairwiseOrderTest =
     type V(name:string) =
         inherit Named(name)
     type E(source, target) =
-        inherit EdgeBase<V>(source, target, EdgeType.Start)
+        inherit DsEdgeBase<V>(source, target, EdgeType.Start)
 
     type TopologicalSortTest() =
         inherit EngineTestBaseClass()
@@ -28,7 +28,7 @@ module GraphPairwiseOrderTest =
                 E(vs["B"], vs["C"])
                 E(vs["C"], vs["D"])
             ]
-            let g = Graph(vs.Values, es)
+            let g = TDsGraph(vs.Values, es)
             let isAncestor = g.BuildPairwiseComparer()
 
             // 관계 검사
@@ -60,7 +60,7 @@ module GraphPairwiseOrderTest =
                 E(vs["E"], vs["F"])
 
             ]
-            let g = Graph<V, E>(vs.Values, es0)
+            let g = TDsGraph<V, E>(vs.Values, es0)
             let isAncestor = g.BuildPairwiseComparer()
 
             // 순방향 direct edge 검사
@@ -102,7 +102,7 @@ module GraphPairwiseOrderTest =
                                 yield E(v1, v2)
                 |]
 
-            let g = Graph<V, E>(vs.Values, es)
+            let g = TDsGraph<V, E>(vs.Values, es)
             let isAncestor = g.BuildPairwiseComparer()
 
             // 순방향 direct edge 검사

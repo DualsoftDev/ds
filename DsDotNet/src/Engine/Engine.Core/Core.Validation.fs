@@ -1,9 +1,9 @@
 namespace Engine.Core
 
 open System.Linq
-open System.Runtime.CompilerServices
-open Dual.Common.Core.FS
 
+open Dual.Common.Core.FS
+open Engine.Common
 
 [<AutoOpen>]
 module ValidateMoudle =
@@ -19,7 +19,7 @@ module ValidateMoudle =
         if invalidEdge.any() then
             failwith $"Vertex {invalidEdge.First().Name} children type error"
 
-    let private validateEdge(graph:Graph<Vertex, Edge>, bRoot:bool) =
+    let private validateEdge(graph:TDsGraph<Vertex, Edge>, bRoot:bool) =
         graph.Edges
             .Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
             .Iter(fun edge ->

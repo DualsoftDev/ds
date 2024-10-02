@@ -2,7 +2,8 @@ namespace Engine.Core
 open System.Runtime.CompilerServices
 open System.Linq
 open Dual.Common.Core.FS
-open GraphUtilImpl
+open Engine.Common
+
 [<AutoOpen>]
 module OriginModule =
     // 초기화 유형을 정의합니다.

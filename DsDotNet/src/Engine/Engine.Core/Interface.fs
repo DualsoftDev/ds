@@ -4,17 +4,11 @@ namespace Engine.Core
 open System.Collections.Generic
 open System
 open System.Linq
+open Engine.Common
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module Interface =
-
-    // Basic interfaces
-    [<AllowNullLiteral>]
-    type IVertex = interface end
-
-    type INamed  =
-        abstract Name: string with get, set
-
     type IText  =
         abstract ToText: unit -> string
 
@@ -24,13 +18,6 @@ module Interface =
 
     type IValue =
         abstract ObjValue: obj with get  // Renamed from 'BoxedValue' to avoid confusion
-
-    // Extended interfaces
-    type IQualifiedNamed =
-        inherit INamed
-        abstract QualifiedName: string with get
-        abstract DequotedQualifiedName: string with get
-        abstract NameComponents: string[] with get
 
     /// 예지 보전 관련 정보.
     type IMainenance = interface end

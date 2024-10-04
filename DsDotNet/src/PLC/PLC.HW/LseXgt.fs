@@ -61,7 +61,7 @@ module rec XGT =
 
     /// PLC IO slot 하나.
     type IoSlot(isEmpty:bool, isInput:bool, isDigital:bool, length:int) =
-        new() = IoSlot(true, true, true, 4)
+        new() = IoSlot(true, true, true, 16)
         member val IsEmpty = isEmpty with get, set
         member val IsInput = isInput with get, set
         member val IsDigital = isDigital with get, set

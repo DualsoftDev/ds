@@ -2,34 +2,36 @@ namespace PLC.HW
 
 open Newtonsoft.Json
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.Runtime.CompilerServices
 
+type PLCType =
+    | Xgi
+    | Xgk
 
-/// 상위 어디엔가로 옮겨야 할 module
+type Platform =
+    | PLC of PLCType
+    | PC
+    static member ofString(str:string) =
+        match str with
+        | "PC" -> PC
+        | "XGI" -> PLC Xgi
+        | "XGK" -> PLC Xgk
+        | _ -> failwith "ERROR"
+    member x.Stringify() =
+        match x with
+        | PC -> "PC"
+        | PLC Xgi -> "XGI"
+        | PLC Xgk -> "XGK"
+    member x.TryGetPlcType() =
+        match x with
+        | PLC Xgi -> Some Xgi
+        | PLC Xgk -> Some Xgk
+        | _ -> None
+
+/// LSE XGT 기종
 [<AutoOpen>]
-module rec DsCommonApiModule =
-    type PLCType =
-        | Xgi
-        | Xgk
-    type Platform =
-        | PLC of PLCType
-        | PC
-        static member ofString(str:string) =
-            match str with
-            | "PC" -> PC
-            | "XGI" -> PLC Xgi
-            | "XGK" -> PLC Xgk
-            | _ -> failwith "ERROR"
-        member x.Stringify() =
-            match x with
-            | PC -> "PC"
-            | PLC Xgi -> "XGI"
-            | PLC Xgk -> "XGK"
-        member x.TryGetPlcType() =
-            match x with
-            | PLC Xgi -> Some Xgi
-            | PLC Xgk -> Some Xgk
-            | _ -> None
+module rec XGT =
 
 
     let [<Literal>] MaxNumberSlots = 12
@@ -57,74 +59,89 @@ module rec DsCommonApiModule =
 
     type internal SlotIndex = int
 
-    /// PLC IO slot 하나.  UI 표출 시에는 ToEnumString() 를 통해 문자열로 변환하고, C# 에서 문자열을 Enum.Parse 를 통해 Ppt.AddIn.DevXUI.UiPlcIoSlotTypeE 로 변환
-    type PlcIoSlot =
-        | Input of PlcIoSlotCapacity
-        | Output of PlcIoSlotCapacity
-        member x.BitCapacity =
-            match x with
-            | Input cap -> cap.ToInt()
-            | Output cap -> cap.ToInt()
+    /// PLC IO slot 하나.
+    type IoSlot(isEmpty:bool, isInput:bool, isDigital:bool, length:int) =
+        new() = IoSlot(true, true, true, 4)
+        member val IsEmpty = isEmpty with get, set
+        member val IsInput = isInput with get, set
+        member val IsDigital = isDigital with get, set
+        /// Digital 접점 수
+        member val Length = length with get, set
+        member x.GetCapacity(isFixedSlotAllocation:bool) =
+            if isFixedSlotAllocation then
+                64
+            elif x.IsEmpty || not x.IsDigital then // 가변식: 비어 있거나, 아날로그이거나
+                16
+            else
+                max 16 x.Length
 
-    /// 문자열로 encoding된 PlcIoSlot 정보를 decoding
-    /// - 반대: PlcIoSlot.ToEnumString()
-    let tryStr2PlcIoSlot (str:string) : PlcIoSlot option =
-        match str with  // e.g Unused, {IN,OUT}{8,16,32,64}
-        | "Unused" -> None
-        | RegexPattern "^(IN|OUT)(\d+)?$" [io; Int32Pattern n] ->
-            match io, n with
-            | "IN",  8  -> Some <| Input  Point8
-            | "IN",  16 -> Some <| Input  Point16
-            | "IN",  32 -> Some <| Input  Point32
-            | "IN",  64 -> Some <| Input  Point64
-            | "OUT", 8  -> Some <| Output Point8
-            | "OUT", 16 -> Some <| Output Point16
-            | "OUT", 32 -> Some <| Output Point32
-            | "OUT", 64 -> Some <| Output Point64
-            | unused, _ ->
-                assert(unused = "Unused")
-                None
-        | _ -> failwith "ERROR"
+    type Base(slots: IoSlot seq) =
+        let slots = ResizeArray(slots)
+        do
+            assert(slots.Count <= MaxNumberSlots)
+        //new() = Base(repeatWith (fun () -> IoSlot()) |> take MaxNumberSlots |> toArray)
+        new() = Base([])
+        member val Slots = slots with get, set     // get, set for newtonsoft
+        static member Create(isFixedSlotAllocation) =
+            Base([ for i in 0..MaxNumberSlots-1 -> IoSlot() ])
+
+        [<JsonIgnore>]
+        member x.NumSlot
+            with get() = x.Slots.Count
+            and set(n) = x.Slots.Resize(n)
+        member x.GetCapacity(isFixedSlotAllocation:bool) =
+            if isFixedSlotAllocation then
+                64 * 16
+            else
+                slots |> sumBy(_.GetCapacity(isFixedSlotAllocation))
+
+
 
     /// PLC HW 구성.  Slots (+ CPU + Network ...)
-    type PlcHw(plcType:PLCType, ioSlots:PlcIoSlot option []) =
-        do
-            assert(ioSlots.Length = MaxNumberSlots) // 해당 slot 이 비었으면 None 으로라도 채워져서 전체 갯수가 맞아야 한다.
+    type PlcHw(plcType:PLCType, isFixedSlotAllocation:bool) =
+        let mutable isFixedSlotAllocation = isFixedSlotAllocation
 
-        new(plcType) = PlcHw(plcType, repeat Option<PlcIoSlot>.None |> take MaxNumberSlots |> toArray)
-        new() = PlcHw(Xgi)
+        new() = PlcHw(Xgi, true)
         member val PLCType: PLCType = plcType with get, set
-        member val OptIoSlots = ioSlots with get, set
+        member val Bases:Base[] = [||] with get, set
+        member x.IsFixedSlotAllocation
+            with get() = isFixedSlotAllocation
+            and set(v) =
+                if not v && x.PLCType = Xgi then
+                    failwith "ERROR: XGI 에서는 가변 slot 을 사용할 수 없습니다."
+                isFixedSlotAllocation <- v
+
+        /// PLC HW 생성: Serialization 이외의 방법으로 생성하는 유일한 생성자
+        static member Create(plcType, isFixedSlotAllocation) =
+            PlcHw(plcType, isFixedSlotAllocation)
+            |> tee(fun plc ->
+                plc.Bases <- [| for i in 0..8 -> Base.Create(isFixedSlotAllocation) |]
+            )
 
     /// PLC IO slot 구성에 따라서 가용한 io bit 번호를 뱉는 함수.  더 이상 가용 bit 가 없으면 None 반환
     type IOAllocatorFunction = unit -> int option
 
     type PlcHw with
-        [<JsonIgnore>]
-        member x.FilledIoSlots:(SlotIndex * PlcIoSlot) [] =
-            x.OptIoSlots                            // (PlcIoSlot option) []
-            |> indexed
-            |> filter (snd >> Option.isSome)        // (SlotIndex * PlcIoSlot option) []
-            |> Array.map2nd Option.get              // (SlotIndex * PlcIoSlot) []
-
         member x.CreateIOHaystacks(): int[] * int[] =
             let xss, yss =
-                chooseSeq {
+                seq {
+
+                    let mutable baseStart = 0
                     // 이번 slot 의 시작 bit 주소
-                    let mutable start = 0
-                    for (i, optSlot) in x.OptIoSlots.Indexed() do
-                        let! slot = optSlot
+                    for bbase in x.Bases do
+                        let mutable slotStart = baseStart
+                        for (i, slot) in bbase.Slots.Indexed() do
+                            if not slot.IsEmpty then
+                                let cap= slot.Length
 
-                        let cap= slot.BitCapacity
+                                if slot.IsInput then
+                                    yield [| slotStart .. slotStart+cap|], [||]
+                                else
+                                    yield [||], [| slotStart .. slotStart+cap |]
 
-                        match slot with
-                        | Input _ ->
-                            [| start .. start+cap|], [||]
-                        | Output _ ->
-                            [||], [| start .. start+cap |]
-                        match x.PLCType with
-                        | Xgi -> start <- start + 64
-                        | Xgk -> start <- start + max 16 (cap + 1)
+                            slotStart <- slotStart + slot.GetCapacity(x.IsFixedSlotAllocation)
+
+                        baseStart <- baseStart + bbase.GetCapacity(x.IsFixedSlotAllocation)
                 } |> toArray
                 |> Array.unzip
             let xs = xss |> Array.concat
@@ -140,17 +157,4 @@ module rec DsCommonApiModule =
             let inputAllocator:IOAllocatorFunction  = Seq.tryEnumerate availableXs
             let outputAllocator:IOAllocatorFunction = Seq.tryEnumerate availableYs
             inputAllocator, outputAllocator
-
-
-type PlcIoSlotExtension =
-    /// C# 의 UiPlcIoSlotTypeE 와 match 되게 print 해야 함.
-    [<Extension>]
-    static member ToEnumString(optSlot:PlcIoSlot option) =
-        match optSlot with
-        | None -> "Unused"
-        | Some (Input c) -> $"IN{c.Stringify()}"
-        | Some (Output c) -> $"OUT{c.Stringify()}"
-
-
-
 

@@ -7,9 +7,12 @@
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>
+        <None Include="Doc\Base,Slot.md" />
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="LseXgt.fs" />
@@ -27,5 +30,7 @@
 		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.4.5" />
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.5" />
 	</ItemGroup>
+
+	<ItemGroup />
 
 </Project>

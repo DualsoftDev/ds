@@ -75,6 +75,8 @@ module rec XGT =
         member val Addresses: string[] = [||] with get, set
         member x.StartAddress = x.Addresses.TryHead() |? null
         member x.EndAddress = x.Addresses.TryLast() |? null
+        [<JsonIgnore>]
+        member val SlotNumber = -1 with get, set
         // } UI 표출, debugging 용
 
 
@@ -104,6 +106,12 @@ module rec XGT =
         [<JsonIgnore>]
         [<DisplayName("사용 슬롯수")>]
         member x.NumUsedSlot = x.Slots |> Seq.filter(fun s -> not s.IsEmpty) |> Seq.length
+
+        // { UI 표출, debugging 용
+        [<JsonIgnore>]
+        member val BaseNumber = -1 with get, set
+        // } UI 표출, debugging 용
+
         member x.GetCapacity(isFixedSlotAllocation:bool) =
             if isFixedSlotAllocation then
                 64 * 16
@@ -151,8 +159,10 @@ module rec XGT =
                     let mutable baseStart = 0
                     // 이번 slot 의 시작 bit 주소
                     for b, bbase in x.Bases.Indexed() do
+                        bbase.BaseNumber <- b
                         let mutable slotStart = baseStart
                         for s, slot in bbase.Slots.Indexed() do
+                            slot.SlotNumber <- s
                             if slot.IsEmpty || not slot.IsDigital then
                                 slot.Addresses <- [||]
                             else

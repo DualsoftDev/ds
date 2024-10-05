@@ -182,6 +182,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PptAddInVer2", "PptAddInVer2", "{38805256-453C-419E-8D46-446F61631212}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NoPackagings", "NoPackagings", "{B7C268B0-2960-4510-9BF5-9801CEF60945}"
+	ProjectSection(SolutionItems) = preProject
+		..\Submodules\nuget\Windows\Readme.txt = ..\Submodules\nuget\Windows\Readme.txt
+	EndProjectSection
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Common", "src\Engine\Engine.Common\Engine.Common.fsproj", "{A0247A09-6CF9-489E-901C-9761FD9E30B5}"
 EndProject

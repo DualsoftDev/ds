@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0</TargetFrameworks>
+		<LangVersion>8.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+        <None Include="Doc\Base,Slot.md" />
+        <Compile Include="AssemblyInfo.fs" />
+        <Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+		<Compile Include="LseXgt.fs" />
+	</ItemGroup>
+
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.4.5" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.4.6" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.6" />
+	</ItemGroup>
+
+	<ItemGroup />
+
+</Project>

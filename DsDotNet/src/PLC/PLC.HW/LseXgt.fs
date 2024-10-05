@@ -60,13 +60,24 @@ module rec XGT =
     type internal SlotIndex = int
 
     /// PLC IO slot 하나.
-    type IoSlot(isEmpty:bool, isInput:bool, isDigital:bool, length:int) =
-        new() = IoSlot(true, true, true, 16)
+    type Slot(isEmpty:bool, isInput:bool, isDigital:bool, length:int) =
+        new() = Slot(true, true, true, 16)
         member val IsEmpty = isEmpty with get, set
         member val IsInput = isInput with get, set
         member val IsDigital = isDigital with get, set
         /// Digital 접점 수
         member val Length = length with get, set
+
+        // { UI 표출, debugging 용
+        /// Slot 에 할당된 address 들.  UI 및 debugging 표시 용.   PlcHw.CreateIOHaystacks() 수행 중에 값 채움.
+        [<Browsable(false)>]
+        [<JsonIgnore>]
+        member val Addresses: string[] = [||] with get, set
+        member x.StartAddress = x.Addresses.TryHead() |? null
+        member x.EndAddress = x.Addresses.TryLast() |? null
+        // } UI 표출, debugging 용
+
+
         member x.GetCapacity(isFixedSlotAllocation:bool) =
             if isFixedSlotAllocation then
                 64
@@ -75,7 +86,7 @@ module rec XGT =
             else
                 max 16 x.Length
 
-    type Base(slots: IoSlot seq) =
+    type Base(slots: Slot seq) =
         let slots = ResizeArray(slots)
         do
             assert(slots.Count <= MaxNumberSlots)
@@ -83,7 +94,7 @@ module rec XGT =
         new() = Base([])
         member val Slots = slots with get, set     // get, set for newtonsoft
         static member Create() =
-            Base([ for i in 0..MaxNumberSlots-1 -> IoSlot() ])
+            Base([ for i in 0..MaxNumberSlots-1 -> Slot() ])
 
         [<JsonIgnore>]
         [<DisplayName("총 슬롯수")>]
@@ -136,16 +147,19 @@ module rec XGT =
                     let b = totalSlotOffset % 16
                     sprintf "P%04d%X" w b
             let xss, yss =
-                seq {
-
+                [|
                     let mutable baseStart = 0
                     // 이번 slot 의 시작 bit 주소
                     for b, bbase in x.Bases.Indexed() do
                         let mutable slotStart = baseStart
                         for s, slot in bbase.Slots.Indexed() do
-                            if not slot.IsEmpty then
+                            if slot.IsEmpty || not slot.IsDigital then
+                                slot.Addresses <- [||]
+                            else
                                 let cap= slot.Length
                                 let addresses = [| for i in 0..cap-1 -> createAddress(slot.IsInput, b, s, i, i+slotStart)|]
+                                slot.Addresses <- addresses
+
                                 if slot.IsInput then
                                     yield addresses, [||]
                                 else
@@ -154,8 +168,7 @@ module rec XGT =
                             slotStart <- slotStart + slot.GetCapacity(x.IsFixedSlotAllocation)
 
                         baseStart <- baseStart + bbase.GetCapacity(x.IsFixedSlotAllocation)
-                } |> toArray
-                |> Array.unzip
+                |] |> Array.unzip
             let xs = xss |> Array.concat
             let ys = yss |> Array.concat
             xs, ys
@@ -171,7 +184,7 @@ module rec XGT =
             inputAllocator, outputAllocator
 
 type XGTDupExtensionForCSharp =
-    [<Extension>] static member Duplicate(slot:IoSlot) = IoSlot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.Length)
+    [<Extension>] static member Duplicate(slot:Slot) = Slot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.Length)
     [<Extension>] static member Duplicate(ioBase:Base) = Base(ioBase.Slots.Map(_.Duplicate()))
     [<Extension>]
     static member Duplicate(plcHw:PlcHw) =

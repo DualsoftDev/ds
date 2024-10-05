@@ -93,7 +93,7 @@ module rec XGT =
         do
             assert(slots.Count <= MaxNumberSlots)
 
-        new() = Base([])
+        new() = Base([])    // Serialize 를 위해서 default constructor 꼭 필요
         member val Slots = slots with get, set     // get, set for newtonsoft
         static member Create() =
             Base([ for i in 0..MaxNumberSlots-1 -> Slot() ])
@@ -124,9 +124,11 @@ module rec XGT =
     type PlcHw(plcType:PLCType, isFixedSlotAllocation:bool) =
         let mutable isFixedSlotAllocation = isFixedSlotAllocation
 
-        new() = PlcHw(Xgi, true)
+        new() = PlcHw(Xgi, true)    // Serialize 를 위해서 default constructor 꼭 필요
         member val PLCType: PLCType = plcType with get, set
         member val Bases:Base[] = [||] with get, set
+
+        /// Slot 고정 할당 여부 (I/O 슬롯 고정 점수 할당(64점))
         member x.IsFixedSlotAllocation
             with get() = isFixedSlotAllocation
             and set(v) =
@@ -145,6 +147,7 @@ module rec XGT =
     type IOAllocatorFunction = unit -> string option
 
     type PlcHw with
+        /// 현재의 HW 구성에서 사용가능한 입/출력 접점의 주소를 문자열로 각각 반환
         member x.CreateIOHaystacks(): string[] * string[] =
             let createAddress(isInput:bool, bse:int, slot:int, bitOffset:int, totalSlotOffset:int) =
                 match x.PLCType, isInput with
@@ -184,6 +187,8 @@ module rec XGT =
             xs, ys
 
 
+        /// 미리 할당된 주소 영역(입력: forbiddenXs, 출력:forbiddenYs) 를 제외하고,
+        /// 입력 및 출력을 순차적으로 spit 하는 함수 두개를 반환
         member x.CreateIOAllocator(forbiddenXs:string seq, forbiddenYs:string seq) =
             let xs, ys = x.CreateIOHaystacks()
 
@@ -193,6 +198,8 @@ module rec XGT =
             let outputAllocator:IOAllocatorFunction = Seq.tryEnumerate availableYs
             inputAllocator, outputAllocator
 
+
+// UI 조작의 OK, Cancel 에 대응하기 위해서 원래의 자료에 대한 사본에 대해서 작업하고 Cancel 시 사본 삭제하기 위함.
 type XGTDupExtensionForCSharp =
     [<Extension>] static member Duplicate(slot:Slot) = Slot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.Length)
     [<Extension>] static member Duplicate(ioBase:Base) = Base(ioBase.Slots.Map(_.Duplicate()))

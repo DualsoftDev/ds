@@ -198,6 +198,20 @@ module rec XGT =
             let outputAllocator:IOAllocatorFunction = Seq.tryEnumerate availableYs
             inputAllocator, outputAllocator
 
+        // todo:
+        //
+        ///// Memory allocators @ PLC.CodeGen.Common.fsproj
+        //member x.CreateMAllocators() =
+        //    let {
+        //        BitAllocator  = x
+        //        ByteAllocator = b
+        //        WordAllocator = w
+        //        DWordAllocator= d
+        //        LWordAllocator= l
+        //    } = MemoryAllocator.createMemoryAllocator "M" (0, 100) [] xgx
+
+        //    ()
+
 
 // UI 조작의 OK, Cancel 에 대응하기 위해서 원래의 자료에 대한 사본에 대해서 작업하고 Cancel 시 사본 삭제하기 위함.
 type XGTDupExtensionForCSharp =

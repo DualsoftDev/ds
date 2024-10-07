@@ -11,6 +11,7 @@ open System
 open System.Linq
 open Antlr4.Runtime
 open System.Collections.Generic
+open Dual.Common.Base.FS
 
 
 module ModelParser =
@@ -168,7 +169,7 @@ module ModelParser =
             //경로 또는 시스템dsLib에 파일이 없으면 자동생성
             let sysDsLibPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory.TrimEnd('\\'), param.RelativeFilePath)
 
-            match Path.Exists(dsFilePath), Path.Exists(sysDsLibPath) with
+            match Net48Path.Exists(dsFilePath), Net48Path.Exists(sysDsLibPath) with
             | true, _ -> ParseFromString(File.ReadAllText(dsFilePath), option), false
             | false, true -> ParseFromString(File.ReadAllText(sysDsLibPath), option), false
             | false, false -> createDsSystem(loadedName), true

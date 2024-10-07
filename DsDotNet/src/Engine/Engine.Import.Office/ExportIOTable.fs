@@ -10,8 +10,7 @@ open System.Text
 open System.Data
 open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
-open System.Text.Json
-open System.Text.Json.Serialization
+open Newtonsoft.Json
 open System.Collections.Generic
 
 
@@ -265,26 +264,26 @@ module ExportIOTable =
                   ]
                   )
 
-        let getFlowName (name, flows:Flow seq) = 
+        let getFlowName (name, flows:Flow seq) =
                 match flows.length()  with
                 | 0 -> failWithLog $"ConditionDef {name} SettingFlows ERROR"
-                | 1 -> 
+                | 1 ->
                     let flow, _ = splitNameForRow name
                     if flows.Head().Name = flow
-                    then 
+                    then
                         flow
-                    else 
+                    else
                         TextXlsAllFlow
                 | _ -> TextXlsAllFlow
 
         let condiRows =
-            let getXlsConditionLabel (conditionType:ConditionType) = 
+            let getXlsConditionLabel (conditionType:ConditionType) =
                 match conditionType with
                 | DuReadyState  -> TextXlsConditionReady
                 | DuDriveState  -> TextXlsConditionDrive
-          
-              
-            sys.HWConditions 
+
+
+            sys.HWConditions
             |> Seq.sortBy(fun cond -> cond.Name)
             |> Seq.map(fun cond ->
                 let _, name = splitNameForRow cond.Name
@@ -301,12 +300,12 @@ module ExportIOTable =
                 ]
             )
         let actionRows =
-            let getXlsActionLabel (actionType:ActionType) = 
+            let getXlsActionLabel (actionType:ActionType) =
                 match actionType with
                 | DuEmergencyAction  -> TextXlsActionEmg
                 | DuPauseAction      -> TextXlsActionPause
 
-            sys.HWActions 
+            sys.HWActions
             |> Seq.sortBy(fun action -> action.Name)
             |> Seq.map(fun action ->
                 let _, name = splitNameForRow action.Name
@@ -324,7 +323,7 @@ module ExportIOTable =
             )
 
         if operatorRows.any() || commandRows.any()  || variRows.any()  || condiRows.any() || actionRows.any()
-        then 
+        then
             let dts =
                 condiRows
                 @ actionRows
@@ -340,7 +339,7 @@ module ExportIOTable =
                 )
 
             dts
-        else 
+        else
             []
 
     let getErrorRows(sys:DsSystem) =
@@ -693,7 +692,7 @@ module ExportIOTable =
         tables
 
 
- 
+
 
     let toDataTablesToJSON (dataTables: seq<DataTable>) (fileName: string) =
         // Helper function to convert DataTable to a list of dictionaries
@@ -721,7 +720,7 @@ module ExportIOTable =
                 (tableName, data)
             )
             |> dict
-            |> JsonSerializer.Serialize
+            |> JsonConvert.SerializeObject
 
         // Specify the file path and write the JSON content to a file
         let filePath = Path.Combine(Path.GetTempPath(), fileName + ".json")
@@ -737,7 +736,7 @@ module ExportIOTable =
             let dataTables =  ToIOListDataTables sys ExcelchunkBySize target
             createSpreadsheet filePath (dataTables) 25.0 true
 
-        //[<Extension>] //convertDataSetToPdf 구현 필요 opensource 찾아야함 
+        //[<Extension>] //convertDataSetToPdf 구현 필요 opensource 찾아야함
         //static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
         //    let dataTables =  ToIOListDataTables system PDFchunkBySize target
         //    convertDataSetToPdf filePath dataTables

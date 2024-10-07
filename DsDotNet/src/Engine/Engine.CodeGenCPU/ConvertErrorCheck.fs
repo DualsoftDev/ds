@@ -2,6 +2,7 @@ namespace Engine.CodeGenCPU
 
 open Engine.Core
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.Linq
 open System
 

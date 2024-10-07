@@ -3,6 +3,7 @@ namespace Engine.CodeGenHMI
 open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.Runtime.CompilerServices
 open System
 open System.Collections.Generic

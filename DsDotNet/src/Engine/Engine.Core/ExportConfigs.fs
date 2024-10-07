@@ -6,6 +6,7 @@ open Newtonsoft.Json
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 
 
 [<AutoOpen>]
@@ -33,8 +34,8 @@ module ExportConfigsMoudle =
         ScriptStartTag: string*string
         ScriptEndTag: string*string
         ///storage name, address
-        MotionStartTag: string*string  
-        MotionEndTag: string*string     
+        MotionStartTag: string*string
+        MotionEndTag: string*string
 
         Station: string
         Device: string
@@ -74,7 +75,7 @@ module ExportConfigsMoudle =
     let getDsPlanInterfaces (sys: DsSystem) =
         let ifs = HashSet<DsPlanInterface>()
 
-        sys.GetTaskDevsCall().DistinctBy(fun (td, _c) -> td)
+        sys.GetTaskDevsCall() |> distinctBy (fun (td, _c) -> td)
         |> Seq.filter(fun (dev,_)-> dev.FirstApi.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
         |> Seq.iter(fun (dev,v) ->
             let real = dev.FirstApi.RX

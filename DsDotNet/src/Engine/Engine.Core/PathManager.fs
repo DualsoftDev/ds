@@ -5,6 +5,7 @@ open System.IO
 open System.Linq
 open System.Runtime.CompilerServices
 open System.IO.Compression
+open Dual.Common.Base.FS
 
 [<AutoOpen>]
 module PathManager =
@@ -16,10 +17,11 @@ module PathManager =
     let isRuntimeLinux = Path.DirectorySeparatorChar = '/'
     // Check if a DsPath is rooted (represents an absolute path)
     let isPathRooted (dsPath: string): bool =
+
         if isRuntimeLinux then
             dsPath.StartsWith("/")
         else
-            Path.IsPathFullyQualified(dsPath.ToString())
+            Net48Path.IsPathFullyQualified(dsPath.ToString())
 
     type DsPath =
         | DsFile  of string      // Represents a file path (must include file extension)
@@ -54,7 +56,7 @@ module PathManager =
                         raise (new ArgumentException($"Invalid FileName in {filePath}"))
 
                     let filePath =
-                        if isPathRooted filePath && filePath.Contains("../")
+                        if isPathRooted filePath && (filePath.Contains("../") ||filePath.Contains("..\\"))
                         then Path.GetFullPath filePath
                         else filePath
 
@@ -76,7 +78,7 @@ module PathManager =
                         else directoryPath
 
                     let directoryPath = directoryPath.Replace("\\", directorySeparatorDS.ToString())
-                    if directoryPath.EndsWith('/')
+                    if directoryPath.EndsWith("/")
                     then  directoryPath
                     else  directoryPath + "/"
 
@@ -143,6 +145,8 @@ module PathManager =
         let re = relativeToFilePath
         let my = myFilePath
 
+
+
         if re.ToValidPath() = my.ToValidPath() then
             raise (new ArgumentException($"Invalid GetRelativePath same path \n{re}\n{my}"))
 
@@ -152,21 +156,26 @@ module PathManager =
         if getPathRoot(re.ToString()) <> getPathRoot(my.ToString()) then
             raise (new ArgumentException($"Invalid GetRelativePath not same root \n{re}\n{my}"))
 
-        let relativePath = Path.GetRelativePath(re.ToString(), my.ToString()) |> DsFile
+        let relativePath = Net48Path.GetRelativePath(re.ToString(), my.ToString()).Replace("\\", "/") |> DsFile
         if isPathRooted (relativePath.ToString()) then
             raise (new ArgumentException($"Invalid GetRelativePath between \n{re}\n{my}"))
         else
+            // todo: 체크 필요
+            // !!!!!!!!!!!!!!!!!!!!!!!!!!!! AHN
             let validPath = relativePath.ToValidPath().[3..]  //의미 없는 ../ 항상 붙어서 제거
-            if validPath.StartsWith("../") then
+            if validPath.StartsWith("../") || validPath.StartsWith("..\\") then
                 validPath //상위 폴더면 그대로
-            else
+            elif not <| validPath.StartsWith(".") then
                 $"./{validPath}" // 현재 폴더면 ./ 자동삽입
+            else
+                $"./{relativePath}" // 현재 폴더면 ./ 자동삽입
 
 
     // Get the full path from a relativeFilePath relative to an absoluteDirectory
     let getFullPath (relativeFilePath: DsPath) (absoluteDirectory: DsPath): string =
         let rel = relativeFilePath
         let abs = absoluteDirectory
+
 
         match rel with
         |DsFile _ -> ()
@@ -176,12 +185,12 @@ module PathManager =
         |DsDirectory _ -> ()
 
 
-        if not (hasExtension rel) ||  rel.ToString().StartsWith('/') then
+        if not (hasExtension rel) ||  rel.ToString().StartsWith("/") then
             raise (new ArgumentException($"relativeFilePath error in {rel}"))
         if not (isPathRooted (abs.ToString())) then
             raise (new ArgumentException($"absoluteDirectory error in {abs}"))
 
-        Path.GetFullPath(rel.ToString(), abs.ToString()) |> getValidFile
+        Net48Path.GetFullPath(rel.ToString(), abs.ToString()) |> getValidFile
 
     let convertValidFile1 (absoluteFilePath:string) : string =
         absoluteFilePath.ToString() |> Path.GetFullPath  |> getValidFile

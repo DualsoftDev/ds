@@ -12,6 +12,7 @@ open Dual.Common.Db
 open DBLoggerORM
 open Engine.Core
 open Engine.CodeGenCPU
+open Microsoft.Data.Sqlite
 
 [<AutoOpen>]
 module DBWriterModule =
@@ -95,7 +96,7 @@ module DBWriterModule =
                 if newLogs.any () then
                     logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
                     use conn = x.CommonAppSettings.CreateConnection()
-                    use! tr = conn.BeginTransactionAsync()
+                    use tr = conn.BeginTransaction()      // use! tr = conn.BeginTransactionAsync() : net48 지원 안됨
 
                     if (x.LogSet.Value.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log x.LogSet.Value) |> toList
@@ -128,7 +129,7 @@ module DBWriterModule =
                             )
                         ()
 
-                    do! tr.CommitAsync()
+                    do tr.Commit()        // do! tr.CommitAsync() : net48 지원 안됨
             }
 
         member x.writePeriodicAsync = x.dequeAndWriteDBAsync
@@ -142,7 +143,7 @@ module DBWriterModule =
                 ORMDBSkeleton4Debug <- dbSckeleton
 
                 use conn = commonAppSettings.CreateConnection()
-                use! tr = conn.BeginTransactionAsync()
+                use tr = conn.BeginTransaction()
                 let readerWriterType = DBLoggerType.Writer ||| DBLoggerType.Reader
                 do! queryCriteria.SetQueryRangeAsync(queryCriteria.ModelId, conn, tr)
 
@@ -158,7 +159,7 @@ module DBWriterModule =
                         )
                     logSet.InitializeForReader(existingLogs)
 
-                do! tr.CommitAsync()
+                do tr.Commit()
 
                 return logSet
             }

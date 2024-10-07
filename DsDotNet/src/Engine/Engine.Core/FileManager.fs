@@ -59,7 +59,7 @@ module FileManager =
         match userEnv with
         | null -> []
         | envVar ->
-            envVar.Split(';', StringSplitOptions.RemoveEmptyEntries)
+            envVar.Split([|';'|], StringSplitOptions.RemoveEmptyEntries)
             |> Array.map(fun path -> path.Trim())
             |> List.ofArray
 
@@ -106,7 +106,7 @@ module FileManager =
             else
                 let topLevelDirSplit =
                     commonPrefix.Split(directorySeparatorDS) |> Array.rev |> Array.skip 1 |> Array.rev
-                String.Join(directorySeparatorDS, topLevelDirSplit)
+                String.Join(directorySeparatorDS.ToString(), topLevelDirSplit)
 
 
     //모델 최상단 폴더에 Zip형태로 생성

@@ -129,20 +129,20 @@ module CoreExtensionModule =
             let typeText = if isCondition then "Condition" else "Action"
             if defName.Contains('.') then
                 failwithf $"[{(if isCondition then condiType.Value.ToString() else actionType.Value.ToString())}]{defName} Error: 이름 '.' 포함되서는 안됩니다."
-            
-            if isCondition 
+
+            if isCondition
             then
                     match x.HWConditions.TryFind(fun f -> f.Name = defName) with
-                    | Some def -> 
+                    | Some def ->
                         def.SettingFlows.Add(flow) |> verifyM $"중복 {typeText} [flow:{flow.Name} name:{defName}]"
-                    | _ -> 
+                    | _ ->
                         x.HwSystemDefs.Add(ConditionDef(defName, x, condiType.Value, taskDevParamIO, addr, HashSet[|flow|]))
                         |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{defName}]"
             else
                     match x.HWActions.TryFind(fun f -> f.Name = defName) with
-                    | Some def -> 
+                    | Some def ->
                         def.SettingFlows.Add(flow) |> verifyM $"중복 {typeText} [flow:{flow.Name} name:{defName}]"
-                    | _ -> 
+                    | _ ->
                         x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, taskDevParamIO, addr, HashSet[|flow|]))
                         |> verifyM $"중복 ActionDef [flow:{flow.Name} name:{defName}]"
 
@@ -213,7 +213,8 @@ module CoreExtensionModule =
         let types = xs.Map(fun f -> f.DataType).Distinct().ToArray()
         if types.Any() then
             if types.Length > 1 then
-                failwithlog $"dataType miss matching error {String.Join(',', types.Select(fun f -> f.ToText()))}"
+                let msg = "dataType miss matching error " + String.Join(",", types.Select(fun f -> f.ToText()))
+                failwithlog msg
             else
                 types.First()
         else
@@ -223,7 +224,7 @@ module CoreExtensionModule =
     type TaskDev with
 
         member x.FirstApi = x.ApiItems.First()
-  
+
         member x.GetInParam(jobFqdn:string) =
             match x.DicTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
             | Some v -> v
@@ -390,7 +391,7 @@ module CoreExtensionModule =
         member x.IsFlowCall = x.Parent.GetCore() :? Flow
         member x.Flow = x.Parent.GetFlow()
         member x.NameForGraph = getCallName x
-       
+
         member x.System = x.Parent.GetSystem()
         member x.ErrorSensorOn        = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)       |> snd
         member x.ErrorSensorOff       = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)      |> snd
@@ -442,9 +443,9 @@ type SystemExt =
         let inValidTaskDevTags = inValidTaskDevTags(x);
         let inValidHwSystemTag = inValidHwSystemTag(x);
         if inValidTaskDevTags.Any() then
-            failwithf $"Add I/O Table을 수행하세요 \n\n{String.Join('\n', inValidTaskDevTags)}"
+            failwith <| "Add I/O Table을 수행하세요\n\n" + String.Join("\n", inValidTaskDevTags)
         if inValidHwSystemTag.Any() then
-            failwithf $"HW 조작 IO Table을 작성하세요 \n\n{String.Join('\n', inValidHwSystemTag)}"
+            failwith <| "HW 조작 IO Table을 작성하세요\n\n" + String.Join("\n", inValidHwSystemTag)
 
 
 

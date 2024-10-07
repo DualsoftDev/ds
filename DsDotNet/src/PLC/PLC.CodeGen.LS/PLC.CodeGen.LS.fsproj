@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>PLC.CodeGen.LS</RootNamespace>
         <LangVersion>8.0</LangVersion>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>

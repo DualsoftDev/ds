@@ -3,6 +3,7 @@ namespace Engine.Import.Office
 
 open System.Collections.Generic
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.IO
 open System.Runtime.CompilerServices
 open System.Reflection
@@ -25,7 +26,7 @@ type LibraryPptLoaderExt =
                 if not (file.Contains("~$")) then //pptx 사용중 임시파일 무시 ~$HelloDS.pptx
 
                     let sys = ImportPpt.GetDSFromPptWithLib(file, true, pptParms).System
-                    let relPath = Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
+                    let relPath = Net48Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
                     let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
                     for item in sys.ApiItems do
                         if infos.ContainsKey item.Name

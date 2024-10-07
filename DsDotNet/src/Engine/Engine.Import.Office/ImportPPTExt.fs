@@ -5,6 +5,7 @@ open System.Linq
 open System.Collections.Generic
 open Microsoft.FSharp.Collections
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open Engine.Import.Office
 open Engine.Core
 open System.Runtime.CompilerServices
@@ -155,13 +156,13 @@ module ImportU =
         static member MakeConditionNActions(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
 
-            let addCondition(fullName, conditionType:ConditionType, flowName:string option, settingflow:Flow) = 
+            let addCondition(fullName, conditionType:ConditionType, flowName:string option, settingflow:Flow) =
                 let emptyAddr = Addresses("", "")
                 let condiName = GetLastParenthesesReplaceName(fullName, "")
                 let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
-                let name = 
+                let name =
                     match flowName with
-                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}" 
+                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}"
                     | None -> condiName
 
                 let hasTaskDevParam = condiName <> fullName
@@ -172,18 +173,18 @@ module ImportU =
                         match conditionType with
                         | DuReadyState | DuDriveState
                             -> TaskDevParamIO(Some devParam, None)
-                    else 
+                    else
                         defaultTaskDevParamIO()
 
                 mySys.AddCondition(conditionType, name, devParamIO, emptyAddr, settingflow)
 
-            let addActiontion(fullName, aType:ActionType, flowName:string option, settingflow:Flow) = 
+            let addActiontion(fullName, aType:ActionType, flowName:string option, settingflow:Flow) =
                 let emptyAddr = Addresses("", "")
                 let condiName = GetLastParenthesesReplaceName(fullName, "")
                 let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
-                let name = 
+                let name =
                     match flowName with
-                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}" 
+                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}"
                     | None -> condiName
 
                 let hasTaskDevParam = condiName <> fullName
@@ -192,9 +193,9 @@ module ImportU =
                     then
                         let devParam = getTaskDevParam funcName
                         match aType with
-                        | DuEmergencyAction | DuPauseAction 
+                        | DuEmergencyAction | DuPauseAction
                             -> TaskDevParamIO(None, Some devParam)
-                    else 
+                    else
                         defaultTaskDevParamIO()
 
                 mySys.AddAction(aType, name, devParamIO, emptyAddr, settingflow)

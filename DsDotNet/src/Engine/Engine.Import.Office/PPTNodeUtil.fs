@@ -4,6 +4,7 @@ open System.Linq
 open Engine.Core
 open Microsoft.FSharp.Core
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.Text.RegularExpressions
 
 [<AutoOpen>]

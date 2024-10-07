@@ -258,7 +258,7 @@ module DsDataType =
             Some (x.[1].ToString(), DuCHAR)
         | _ when x.EndsWith("f") && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.' || c = 'f') ->
             Some (x.TrimEnd('f'), DuFLOAT32)
-        | _ when x.Contains('.') && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.') ->
+        | _ when x.Contains(".") && x |> Seq.forall (fun c -> Char.IsDigit(c) || c = '.') ->
             Some (x, DuFLOAT64)
         | _ when x.EndsWith("uy") && Byte.TryParse(x.TrimEnd([|'u';'y'|]))|> fst  ->
             Some (x.TrimEnd([|'u';'y'|]), DuUINT8)

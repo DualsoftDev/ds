@@ -42,7 +42,7 @@ module PptNodeModule =
         , condiDefs          : Dictionary<string, ConditionType>
         , actionHeadPageDefs : Dictionary<string, ActionType>
         , actionDefs         : Dictionary<string, ActionType>
-        
+
         , nodeType          : NodeType
 
         , ifName            : string
@@ -281,7 +281,7 @@ module PptNodeModule =
 
             let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
             let name =
-                let nameTrim  = String.Join('.', namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
+                let nameTrim  = String.Join(".", namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
                 GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
 
             //do
@@ -313,7 +313,7 @@ module PptNodeModule =
                     let addCondiDic = if isHeadPage then condiHeadPageDefs else condiDefs
                     let addActionDic = if isHeadPage then actionHeadPageDefs else actionDefs
                     getBracketItems(shape.InnerText)
-                        .ForEach(fun (n, t) -> 
+                        .ForEach(fun (n, t) ->
                             match tryGetConditionType t, tryGetActionType t with
                             | Some c, _ -> addCondiDic.Add(n |> TrimSpace, c)
                             | _, Some a -> addActionDic.Add(n |> TrimSpace, a)

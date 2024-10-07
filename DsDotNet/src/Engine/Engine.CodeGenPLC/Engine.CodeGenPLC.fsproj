@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>Engine.CodeGenPLC</RootNamespace>
         <LangVersion>8.0</LangVersion>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>

@@ -5,6 +5,7 @@ open Engine.Core
 open System.IO
 open System.Linq
 open Dual.Common.Core.FS
+open Dual.Common.Base.FS
 open System.Reflection
 open LibraryLoaderModule
 
@@ -51,7 +52,7 @@ module ImportUtilForDev =
     let getLibraryInfos()=
         let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
         let runDir =
-            if Path.Exists (Path.Combine(runDir, "dsLib")) then
+            if Net48Path.Exists (Path.Combine(runDir, "dsLib")) then
                 runDir
             else
                 @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/"
@@ -61,7 +62,7 @@ module ImportUtilForDev =
         let libConfigPath = Path.Combine(runDir, "dsLib", "Library.config")
 
         let libPath =
-            if not <| Path.Exists libConfigPath then
+            if not <| Net48Path.Exists libConfigPath then
                 failWithLog $"{libConfigPath}Library.config file not found"
 
             libConfigPath

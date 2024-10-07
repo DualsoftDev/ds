@@ -204,3 +204,4 @@ Apps/CommonAppSettings.json
 Directory.Build.props
 Directory.Packages.props
 Experimental/
+src/UnitTest/dualsoft.json

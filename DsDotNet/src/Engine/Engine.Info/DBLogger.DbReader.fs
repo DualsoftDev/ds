@@ -17,7 +17,7 @@ module DBReaderModule =
         static let createLogSetForReaderAsync (queryCriteria: QueryCriteria, commonAppSettings: DSCommonAppSettings, systems: DsSystem seq) : Task<LogSet> =
             task {
                 use conn = queryCriteria.CommonAppSettings.CreateConnection()
-                use! tr = conn.BeginTransactionAsync()
+                use tr = conn.BeginTransaction()
 
                 let modelId = queryCriteria.ModelId
                 let! dsConfigJson = queryPropertyAsync (modelId, PropName.ConfigPath, conn, tr)
@@ -36,7 +36,7 @@ module DBReaderModule =
 
                 do! checkDbForReaderAsync (conn, tr)
 
-                do! tr.CommitAsync()
+                do tr.Commit()
 
                 logSet.InitializeForReader(existingLogs)
                 return logSet

@@ -160,9 +160,7 @@ module PathManager =
         if isPathRooted (relativePath.ToString()) then
             raise (new ArgumentException($"Invalid GetRelativePath between \n{re}\n{my}"))
         else
-            // todo: 체크 필요
-            // !!!!!!!!!!!!!!!!!!!!!!!!!!!! AHN
-            let validPath = relativePath.ToValidPath().[3..]  //의미 없는 ../ 항상 붙어서 제거
+            let validPath = relativePath.ToValidPath() //Net48Path 사용시 ../ 제거 안해도 됨 (NET8.0 Path.GetRelativePath 사용시에는 ../제거 필요)
             if validPath.StartsWith("../") || validPath.StartsWith("..\\") then
                 validPath //상위 폴더면 그대로
             elif not <| validPath.StartsWith(".") then

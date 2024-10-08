@@ -97,7 +97,7 @@ rs p/s: read all strings in p/s file
                 // e.g "rs p/s hello"
                 | (StartsWith "rs" | StartsWith "ws") ->
                     let tokens =
-                        key.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        key.Split([|' '|], StringSplitOptions.RemoveEmptyEntries)
                         |> map (fun s -> s.ToLower())
                         |> Array.ofSeq
 
@@ -141,7 +141,7 @@ rs p/s: read all strings in p/s file
 
             if key <> null then
                 let getArgs () =
-                    let tokens = key.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+                    let tokens = key.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
                     tokens[1..] |> map (fun s -> s.ToLower())
 
                 match key with

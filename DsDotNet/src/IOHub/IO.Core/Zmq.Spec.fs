@@ -53,7 +53,7 @@ module rec ZmqSpec =
           "Length": 65535
         },
         ...
-    
+
     *)
 
     [<AllowNullLiteral>]
@@ -123,7 +123,7 @@ module rec ZmqSpec =
             v.Location <- regulateDir v.Location
             v.Dll <- regulateDir v.Dll
             v.AddressResolver <-
-                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll) 
+                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll)
                 let oh: ObjectHandle = Activator.CreateInstanceFrom(dllPath, v.ClassName)
                 let obj: obj = oh.Unwrap()
                 obj :?> IAddressInfoProvider
@@ -177,7 +177,7 @@ module rec ZmqSpec =
 
         /// NetMQFrame 의 Buffer 로부터 int 값을 읽어서 반환
         member x.GetInt32(reverse: bool) =
-            x.Buffer |> reverseBytesOnDemand reverse |> BitConverter.ToInt32
+            (x.Buffer |> reverseBytesOnDemand reverse, 0) |> BitConverter.ToInt32
 
         /// NetMQFrame 의 Buffer 로부터 type 'T 의 값들을 읽어서 array 로 반환
         member x.GetArray<'T>(reverse: bool) =

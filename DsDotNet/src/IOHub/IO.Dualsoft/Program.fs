@@ -12,18 +12,18 @@ open ZmqStartDs
 
 
 module ZmqTestClient =
-  
+
     [<EntryPoint>]
-    let main _ = 
+    let main _ =
         let stoppingToken = CancellationToken()
         let zmqPath = Path.Combine(AppContext.BaseDirectory, "zmqsettings.json")
-        let specTxt = File.ReadAllTextAsync(zmqPath, stoppingToken).Result
+        let specTxt = File.ReadAllText(zmqPath)
         let ioSpec = JsonConvert.DeserializeObject<IOSpec>(specTxt)
         let server = new Server(ioSpec, stoppingToken)
 
 
         let zmqHWInfo = IOSpecHW.FromJsonFile "zmqhw.json"
-      
+
 
         let testFile = Path.Combine(AppContext.BaseDirectory   , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.dsz");
         let jsonPath = unZip testFile
@@ -36,8 +36,8 @@ module ZmqTestClient =
         let iospec = client.GetMeta()
         iospec|>regulate
         zmqStartDs(dsCPU, server, client)
-       
+
         Console.ReadKey() |> ignore
-        0  
+        0
 
 

@@ -11,7 +11,6 @@ open System.Collections.Concurrent
 open System.Threading
 open System.Reactive.Subjects
 open System.Threading.Tasks
-open System.Text.Json.Serialization
 open Newtonsoft.Json
 
 [<AutoOpen>]

@@ -75,7 +75,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
 
         for v in ioSpec.Vendors do
             v.AddressResolver <-
-                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll) 
+                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll)
                 let oh: ObjectHandle = Activator.CreateInstanceFrom(dllPath, v.ClassName)
                 let obj: obj = oh.Unwrap()
                 obj :?> IAddressInfoProvider
@@ -119,7 +119,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
 
             let command = mms[MultiMessageFromClient.Command].ConvertToString() |> removeTrailingNullChar
 
-            let reqId = mms[MultiMessageFromClient.RequestId].Buffer |> BitConverter.ToInt32
+            let reqId = (mms[MultiMessageFromClient.RequestId].Buffer, 0) |> BitConverter.ToInt32
             /// Client Request Info : clientId, requestId
             let cri = ClientRequestInfo(clientId, reqId)
 
@@ -127,7 +127,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
 
             let getArgs () =
                 let tokens =
-                    command.Split(' ', StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
+                    command.Split([|' '|], StringSplitOptions.RemoveEmptyEntries) |> Array.ofSeq
 
                 tokens[1..] |> map (fun s -> s.ToLower())
 

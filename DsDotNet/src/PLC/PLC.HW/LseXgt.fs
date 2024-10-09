@@ -7,30 +7,31 @@ open System.Runtime.CompilerServices
 open System.ComponentModel
 open Dual.Common.Base.CS
 open PLC.CodeGen.Common
+open Engine.Core
 
-type PLCType =
-    | Xgi
-    | Xgk
+//type PLCType =
+//    | Xgi
+//    | Xgk
 
-type Platform =
-    | PLC of PLCType
-    | PC
-    static member ofString(str:string) =
-        match str with
-        | "PC" -> PC
-        | "XGI" -> PLC Xgi
-        | "XGK" -> PLC Xgk
-        | _ -> failwith "ERROR"
-    member x.Stringify() =
-        match x with
-        | PC -> "PC"
-        | PLC Xgi -> "XGI"
-        | PLC Xgk -> "XGK"
-    member x.TryGetPlcType() =
-        match x with
-        | PLC Xgi -> Some Xgi
-        | PLC Xgk -> Some Xgk
-        | _ -> None
+//type Platform =
+//    | PLC of PLCType
+//    | PC
+//    static member ofString(str:string) =
+//        match str with
+//        | "PC" -> PC
+//        | "XGI" -> PLC Xgi
+//        | "XGK" -> PLC Xgk
+//        | _ -> failwith "ERROR"
+//    member x.Stringify() =
+//        match x with
+//        | PC -> "PC"
+//        | PLC Xgi -> "XGI"
+//        | PLC Xgk -> "XGK"
+//    member x.TryGetPlcType() =
+//        match x with
+//        | PLC Xgi -> Some Xgi
+//        | PLC Xgk -> Some Xgk
+//        | _ -> None
 
 /// LSE XGT 기종
 [<AutoOpen>]
@@ -123,18 +124,18 @@ module rec XGT =
 
 
     /// PLC HW 구성.  Slots (+ CPU + Network ...)
-    type PlcHw(plcType:PLCType, isFixedSlotAllocation:bool) =
+    type PlcHw(plcType:PlatformTarget, isFixedSlotAllocation:bool) =
         let mutable isFixedSlotAllocation = isFixedSlotAllocation
 
-        new() = PlcHw(Xgi, true)    // Serialize 를 위해서 default constructor 꼭 필요
-        member val PLCType: PLCType = plcType with get, set
+        new() = PlcHw(XGI, true)    // Serialize 를 위해서 default constructor 꼭 필요
+        member val PLCType: PlatformTarget = plcType with get, set
         member val Bases:Base[] = [||] with get, set
 
         /// Slot 고정 할당 여부 (I/O 슬롯 고정 점수 할당(64점))
         member x.IsFixedSlotAllocation
             with get() = isFixedSlotAllocation
             and set(v) =
-                if not v && x.PLCType = Xgi then
+                if not v && x.PLCType = XGI then
                     failwith "ERROR: XGI 에서는 가변 slot 을 사용할 수 없습니다."
                 isFixedSlotAllocation <- v
 
@@ -153,12 +154,13 @@ module rec XGT =
         member x.CreateIOHaystacks(): string[] * string[] =
             let createAddress(isInput:bool, bse:int, slot:int, bitOffset:int, totalSlotOffset:int) =
                 match x.PLCType, isInput with
-                | Xgi, true -> $"%%IX{bse}.{slot}.{bitOffset}"
-                | Xgi, false -> $"%%QX{bse}.{slot}.{bitOffset}"
-                | Xgk, _ ->
+                | XGI, true -> $"%%IX{bse}.{slot}.{bitOffset}"
+                | XGI, false -> $"%%QX{bse}.{slot}.{bitOffset}"
+                | XGK, _ ->
                     let w = totalSlotOffset / 16
                     let b = totalSlotOffset % 16
                     sprintf "P%04d%X" w b
+                | _ -> failwith "ERROR"
             let xss, yss =
                 [|
                     let mutable baseStart = 0

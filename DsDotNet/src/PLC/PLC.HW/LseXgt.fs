@@ -131,6 +131,9 @@ module rec XGT =
         member val PLCType: PlatformTarget = plcType with get, set
         member val Bases:Base[] = [||] with get, set
 
+        member val StartFreeMWord = 1000 with get, set
+        member val FreeMWordSize = 1000 with get, set
+
         /// Slot 고정 할당 여부 (I/O 슬롯 고정 점수 할당(64점))
         member x.IsFixedSlotAllocation
             with get() = isFixedSlotAllocation
@@ -202,16 +205,19 @@ module rec XGT =
             let outputAllocator:IOAllocatorFunction = Seq.tryEnumerate availableYs
             inputAllocator, outputAllocator
 
-        //[<Todo("메모리 allocator 구현")>]
-        //member x.CreateMAllocators() =
-        //    let {
-        //        BitAllocator  = x
-        //        ByteAllocator = b
-        //        WordAllocator = w
-        //        DWordAllocator= d
-        //        LWordAllocator= l
-        //    } = MemoryAllocator.createMemoryAllocator "M" (0, 100) [] xgx
-        //    x, b, w, d, l
+        [<Todo("메모리 allocator 구현")>]
+        member x.CreateMAllocators() =
+            let startByte, endByte =
+                let startWord, endWord = x.FreeMWordSize, x.FreeMWordSize + x.StartFreeMWord
+                startWord * 2, endWord * 2
+            let {
+                BitAllocator  = x
+                ByteAllocator = b
+                WordAllocator = w
+                DWordAllocator= d
+                LWordAllocator= l
+            } = MemoryAllocator.createMemoryAllocator "M" (startByte, endByte) [] x.PLCType
+            x, b, w, d, l
 
 
 

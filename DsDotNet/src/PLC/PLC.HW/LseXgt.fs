@@ -5,6 +5,8 @@ open Dual.Common.Core.FS
 open Dual.Common.Base.FS
 open System.Runtime.CompilerServices
 open System.ComponentModel
+open Dual.Common.Base.CS
+open PLC.CodeGen.Common
 
 type PLCType =
     | Xgi
@@ -198,9 +200,7 @@ module rec XGT =
             let outputAllocator:IOAllocatorFunction = Seq.tryEnumerate availableYs
             inputAllocator, outputAllocator
 
-        // todo:
-        //
-        ///// Memory allocators @ PLC.CodeGen.Common.fsproj
+        //[<Todo("메모리 allocator 구현")>]
         //member x.CreateMAllocators() =
         //    let {
         //        BitAllocator  = x
@@ -209,8 +209,8 @@ module rec XGT =
         //        DWordAllocator= d
         //        LWordAllocator= l
         //    } = MemoryAllocator.createMemoryAllocator "M" (0, 100) [] xgx
+        //    x, b, w, d, l
 
-        //    ()
 
 
 // UI 조작의 OK, Cancel 에 대응하기 위해서 원래의 자료에 대한 사본에 대해서 작업하고 Cancel 시 사본 삭제하기 위함.

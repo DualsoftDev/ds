@@ -9,12 +9,16 @@ open System.Reflection
 open System.IO
 open PowerPointAddInForDualsoft
 open Engine.Core
+open Newtonsoft.Json
 
 module MSG_TEST =
 
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
     RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
+    RegistryPptDS.HWSlotInfos <- JsonConvert.SerializeObject(getFullSlotHwSlotDataTypes());
+    
     let setXGK() = 
+        
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();
         RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGK_IO.ToString();
     let setXGI() = 

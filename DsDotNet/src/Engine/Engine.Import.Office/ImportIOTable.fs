@@ -140,20 +140,20 @@ module ImportIOTable =
                 if name <> ""
                 then
                     let dataType = ($"{row.[(int) IOColumn.DataType]}").Trim()
-                    if dataType = TextSkip || dataType = ""
-                    then
-                        failwithlog $"변수 {name} datatype 입력이 필요합니다."
-
                     let value  = ($"{row.[(int) IOColumn.Input]}").Trim()
-                    let constVari = value <> "" && value <> TextSkip
 
-                    if isConst && isConst <> constVari
-                    then
+                    match isConst with
+                    | _ when dataType = "" -> 
+                        failwithlog $"상수 {name} datatype 입력이 필요합니다."
+                    | true when value = "" || value = TextSkip -> 
                         failwithlog $"상수 {name} Input 영역에 상수 값 입력이 필요합니다."
+                    | false when value <> TextSkip -> 
+                        failwithlog $"변수 {name} Input 영역에 값 입력이 없어야 합니다. ('-' 입력)"
+                    | _ -> ()
 
-                    let variableData = VariableData(name, dataType|> textToDataType, if constVari then Immutable else Mutable )
+                    let variableData = VariableData(name, dataType|> textToDataType, if isConst then Immutable else Mutable )
 
-                    if constVari
+                    if isConst
                     then
                         variableData.InitValue <- value
 

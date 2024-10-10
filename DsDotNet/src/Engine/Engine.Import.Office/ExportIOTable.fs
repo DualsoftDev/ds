@@ -46,44 +46,31 @@ module ExportIOTable =
         dt.Columns[dt.Columns.Count-1].ColumnName <- "Symbol\nOut"
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
+    let getFlowExportName(hw:HwSystemDef)  =
+        if hw.IsGlobalSystemHw 
+            then "ALL" 
+            else String.Join(";", hw.SettingFlows.Select(fun f->f.Name))
 
-
-
-    //test ahn btn lamp 처리
-    //let toTextPptFunc (x:TaskDevParam option) =
-    //    if x.IsSome then
-    //        let x = x |> Option.get
-    //        match x.ValueParam.Value.TargetValue, x.DevTime with
-    //        | Some(v), Some(t) -> $"{v}:{t}ms"
-    //        | Some(v), None    -> $"{v}"
-    //        | None, Some(v)    -> $"{v}ms"
-    //        | None, None       -> $""
-    //    else ""
-
-    let ToPanelIOTable(sys: DsSystem) (selectFlows:Flow seq) (containSys:bool) target : DataTable =
+    let ToPanelIOTable(sys: DsSystem) (containSys:bool) target : DataTable =
 
         let dt = new System.Data.DataTable($"{sys.Name} Panel IO LIST")
+        
         addIOColumn dt
 
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
             for btn in btns do
                 if containSys then
-                    //let inSym =  toTextPptFunc btn.TaskDevParamIO.InParam
-                    //let outSym =  toTextPptFunc btn.TaskDevParamIO.OutParam
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) target
                     let dType = getPptHwDevDataTypeText btn
-
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", btn.Name, dType,  btn.InAddress, btn.OutAddress ,"", "")
+                    dt.Rows.Add(xlsCase.ToText(), getFlowExportName(btn), btn.Name, dType,  btn.InAddress, btn.OutAddress ,"", "")
                     |> ignore
 
         let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
             for lamp in lamps do
                 if containSys then
-                    //let inSym =  toTextPptFunc lamp.TaskDevParamIO.InParam
-                    //let outSym =  toTextPptFunc lamp.TaskDevParamIO.OutParam
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) target
                     let dType = getPptHwDevDataTypeText lamp
-                    dt.Rows.Add(xlsCase.ToText(), "ALL", lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,"", "")
+                    dt.Rows.Add(xlsCase.ToText(), getFlowExportName(lamp), lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,"", "")
                     |> ignore
 
 
@@ -264,17 +251,7 @@ module ExportIOTable =
                   ]
                   )
 
-        let getFlowName (name, flows:Flow seq) =
-                match flows.length()  with
-                | 0 -> failWithLog $"ConditionDef {name} SettingFlows ERROR"
-                | 1 ->
-                    let flow, _ = splitNameForRow name
-                    if flows.Head().Name = flow
-                    then
-                        flow
-                    else
-                        TextXlsAllFlow
-                | _ -> TextXlsAllFlow
+      
 
         let condiRows =
             let getXlsConditionLabel (conditionType:ConditionType) =
@@ -290,7 +267,7 @@ module ExportIOTable =
                 updateHwAddress (cond) (cond.InAddress, cond.OutAddress) hwTarget
                 [
                     getXlsConditionLabel cond.ConditionType
-                    getFlowName (cond.Name, cond.SettingFlows)
+                    getFlowExportName (cond)
                     name
                     getPptHwDevDataTypeText cond
                     cond.InAddress
@@ -312,7 +289,7 @@ module ExportIOTable =
                 updateHwAddress (action) (action.InAddress, action.OutAddress) hwTarget
                 [
                     getXlsActionLabel action.ActionType
-                    getFlowName (action.Name, action.SettingFlows)
+                    getFlowExportName (action)
                     name
                     getPptHwDevDataTypeText action
                     action.InAddress
@@ -684,7 +661,7 @@ module ExportIOTable =
 
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
-        let tablePanelIO = ToPanelIOTable system system.Flows true target
+        let tablePanelIO = ToPanelIOTable system  true target
         let tabletableFuncVariExternal = ToFuncVariTables system  target
 
         let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal

@@ -90,11 +90,12 @@ module rec DsTaskDevType =
 
 
     let createValueParam(text: string) =
+        let opPatterns = ["="; "<"; ">"]
         let pattern = @"\s*(?<min>[\d.]+)?\s*(?<minOp><=|<)?\s*(?i:x)(?-i)\s*(?<maxOp><=|<)?\s*(?<max>[\d.]+)?\s*"
         let regex = Regex(pattern)  // No need for RegexOptions.IgnoreCase since inline case insensitivity is used
         let m = regex.Match(text)
 
-        if m.Success then
+        if m.Success && opPatterns |> List.exists (fun op -> text.Contains(op)) then
             let min = 
                 if m.Groups.["min"].Success then 
                     Some(box (toValue m.Groups.["min"].Value))

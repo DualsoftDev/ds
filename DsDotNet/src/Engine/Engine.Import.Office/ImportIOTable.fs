@@ -107,12 +107,9 @@ module ImportIOTable =
                 let outSymbol = $"{row.[(int) IOColumn.OutSymbol]}".Trim()
                 let inAddress = $"{row.[(int) IOColumn.Input]}".Trim()
                 let outAddress = $"{row.[(int) IOColumn.Output]}".Trim()
-                let name =
-                    if $"{TextXlsAllFlow}" = flow
-                    then name
 
-                    else $"{flow}{TextDeviceSplit}{name}"
-
+                if inSymbol.Contains(":") || outSymbol.Contains(":")
+                then failWithLog $"Symbol에 ':' 사용 불가능 {name} {inSymbol} {outSymbol}"
                 (name, inOutDataType, getSymbol inSymbol, getSymbol outSymbol, inAddress, outAddress)
 
             let updateDev (row: Data.DataRow, tableIO: Data.DataTable, page) =

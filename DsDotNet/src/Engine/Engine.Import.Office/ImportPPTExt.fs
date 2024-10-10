@@ -111,7 +111,7 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{flow.Name}{TextDeviceSplit}{b.Key}", "", "", flow)))
+                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{b.Key}", "", "", flow)))
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -145,7 +145,7 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{flow.Name}{TextDeviceSplit}{l.Key}", "", "", Some flow)))
+                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{l.Key}", "", "", Some flow)))
 
             headPageLamps
             |> Seq.iter (fun node ->
@@ -160,10 +160,6 @@ module ImportU =
                 let emptyAddr = Addresses("", "")
                 let condiName = GetLastParenthesesReplaceName(fullName, "")
                 let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
-                let name =
-                    match flowName with
-                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}"
-                    | None -> condiName
 
                 let hasTaskDevParam = condiName <> fullName
                 let devParamIO =
@@ -176,16 +172,13 @@ module ImportU =
                     else
                         defaultTaskDevParamIO()
 
-                mySys.AddCondition(conditionType, name, devParamIO, emptyAddr, settingflow)
+                mySys.AddCondition(conditionType, condiName, devParamIO, emptyAddr, settingflow)
 
-            let addActiontion(fullName, aType:ActionType, flowName:string option, settingflow:Flow) =
+            let addActiontion(fullName, aType:ActionType, settingflow:Flow) =
                 let emptyAddr = Addresses("", "")
                 let condiName = GetLastParenthesesReplaceName(fullName, "")
                 let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
-                let name =
-                    match flowName with
-                    | Some fName -> $"{fName}{TextDeviceSplit}{condiName}"
-                    | None -> condiName
+          
 
                 let hasTaskDevParam = condiName <> fullName
                 let devParamIO =
@@ -198,7 +191,7 @@ module ImportU =
                     else
                         defaultTaskDevParamIO()
 
-                mySys.AddAction(aType, name, devParamIO, emptyAddr, settingflow)
+                mySys.AddAction(aType, condiName, devParamIO, emptyAddr, settingflow)
 
             doc.Nodes
             |> Seq.filter (fun node -> node.CondiDefs.any() || node.ActionDefs.any())
@@ -206,7 +199,7 @@ module ImportU =
                 try
                     let flow = dicFlow.[node.PageNum]
                     node.CondiDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, Some flow.Name, flow))
-                    node.ActionDefs.ForEach(fun a ->  addActiontion (a.Key, a.Value, Some flow.Name, flow))
+                    node.ActionDefs.ForEach(fun a ->  addActiontion (a.Key, a.Value, flow))
                 with _ ->
                     Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
                     )
@@ -218,7 +211,7 @@ module ImportU =
                 else
                     dicFlow.Iter(fun flow ->
                         node.CondiHeadPageDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, None, flow.Value))
-                        node.ActionHeadPageDefs.ForEach(fun c ->  addActiontion (c.Key, c.Value, None, flow.Value))
+                        node.ActionHeadPageDefs.ForEach(fun c ->  addActiontion (c.Key, c.Value,  flow.Value))
                             )
                 )
 

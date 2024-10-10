@@ -85,7 +85,13 @@ module CoreExtensionModule =
                                             else ScreenType.CCTV
                         { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh }))
 
-        member x.AddButton(btnType:BtnType, btnName:string, taskDevParamIO:TaskDevParamIO,  addr:Addresses, flow:Flow) =
+
+        member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
+            x.AddButtonDef(btnType, btnName,  defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)
+        member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
+            x.AddLampDef(lmpType, lmpName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)
+
+        member x.AddButtonDef(btnType:BtnType, btnName:string, taskDevParamIO:TaskDevParamIO,  addr:Addresses, flow:Flow) =
             checkSystem(x, flow, btnName)
 
             let existBtns =
@@ -95,7 +101,7 @@ module CoreExtensionModule =
             if existBtns.Any(fun w->w.Name = btnName) then
                 failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
             if btnName.Contains('.') then
-                failwithf $"[{btnType}]{btnName} Error: 이름 '.' 포함되서는 안됩니다."
+                failwithf $"[{btnType}]{btnName} Error: \r\n이름 '.' 포함되서는 안됩니다."
 
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
@@ -103,15 +109,17 @@ module CoreExtensionModule =
                 x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParamIO, addr, HashSet[|flow|]))
                 |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
-        member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButton(btnType, btnName,  defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)
+ 
+        member x.AddLampDef(lmpType:LampType, lmpName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
+            if not (taskDevParamIO.IsDefaultParam )
+            then 
+                failwithf $"LampDef [{lmpName}] Error: \r\nLamp는 타겟 Value 속성을 지정할 수 없습니다. 기본(true)"
 
-        member x.AddLamp(lmpType:LampType, lmpName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkSystem(x, flow.Value, lmpName)
 
             if lmpName.Contains('.') then
-                failwithf $"[{lmpType}]{lmpName} Error: 이름 '.' 포함되서는 안됩니다."
+                failwithf $"[{lmpType}]{lmpName} Error: \r\n이름 '.' 포함되서는 안됩니다."
 
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
@@ -120,9 +128,7 @@ module CoreExtensionModule =
                 x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParamIO, addr, flows))
                 |> verifyM $"중복 LampDef [name:{lmpName}]"
 
-        member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
-            x.AddLamp(lmpType, lmpName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress),  flow)
-
+     
         member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow, isCondition: bool) =
             checkSystem(x, flow, defName)
 

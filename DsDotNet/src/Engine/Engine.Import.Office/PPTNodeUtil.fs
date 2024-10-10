@@ -65,7 +65,7 @@ module PptNodeUtilModule =
 
 
         let getNodeTaskDevParam (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
-            let error()  = $"{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
+            let error(msg)  = $"{msg} \r\n{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let getParam x =
                         if x = TextSkip then
@@ -92,13 +92,18 @@ module PptNodeUtilModule =
                         func.Split(",").Last() |> trimSpaceNewLine
                     TaskDevParamIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
                 else
+                    let param = getParam func
                     if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
                     then
-                        TaskDevParamIO((getParam func)|>Some, (defaultTaskDevParam())|>Some)
+                        TaskDevParamIO(param|>Some, (defaultTaskDevParam())|>Some)
                     else
-                        TaskDevParamIO((defaultTaskDevParam())|>Some, (getParam func)|>Some)
-            with _ ->
-                shape.ErrorName((error()), iPage)
+                        if param.ValueParam.IsRangeValue
+                        then 
+                            failwithlog $"RangeValue은 입력규격만 가능합니다."    
+
+                        TaskDevParamIO((defaultTaskDevParam())|>Some, param|>Some)
+            with ex ->
+                shape.ErrorName(error(ex.Message), iPage)
 
         let getTrimName(shape:Shape, nameTrim:string) =
             match GetSquareBrackets(nameTrim, false) with
@@ -186,4 +191,20 @@ module PptNodeUtilModule =
                     | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
 
 
+        let getPureNFunction (fullName: string, isInput:bool) =
+            let pureName = GetLastParenthesesReplaceName(fullName, "")
+            let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
 
+            let devParamIO =
+                if funcName <> ""
+                then
+                    let devParam = getTaskDevParam (funcName)
+                    if isInput 
+                    then
+                        TaskDevParamIO(Some devParam, None)
+                    else 
+                        TaskDevParamIO(None, Some devParam)
+                else
+                    defaultTaskDevParamIO()
+
+            pureName, devParamIO

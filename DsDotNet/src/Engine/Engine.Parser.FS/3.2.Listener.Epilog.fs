@@ -85,10 +85,10 @@ module EtcListenerModule =
                         ]
 
                     for fbi in flowBtnInfo |> List.choose id do
-                        let targetBtnType, btnName, _, _, flows, inAddr, outAddr = fbi
+                        let targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr = fbi
 
                         for flow in flows do
-                            system.AddButton(targetBtnType, btnName, inAddr, outAddr, flow)
+                            system.AddButtonDef(targetBtnType, btnName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), flow)
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
             for ctxChild in ctx.children do
@@ -117,19 +117,19 @@ module EtcListenerModule =
                             for ld in lampDefs do
                                 option {
                                     let flowNameCtxs = ld.Descendants<FlowNameContext>() |> toList
-                                    let lmpName, _, _, inAddr, outAddr = getHwSysItem ld
+                                    let lmpName, inParam, outParam, inAddr, outAddr = getHwSysItem ld
                                     match flowNameCtxs with
-                                    | [] -> return targetLmpType, lmpName , inAddr, outAddr, None
+                                    | [] -> return targetLmpType, lmpName ,TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), None
                                     | h::[] ->
                                         let! flow = h.GetText() |> system.TryFindFlow
-                                        return targetLmpType, lmpName,  inAddr, outAddr, Some flow
+                                        return targetLmpType, lmpName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), Some flow
                                     | _ ->
                                         let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
                                         failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
                                 }
                         ]
 
-                    flowLampInfo |> List.choose id |> List.iter (system.AddLamp)
+                    flowLampInfo |> List.choose id |> List.iter (system.AddLampDef)
 
 
         member private x.ExtractFlowConditionActionInfo(conditionDefs: HwSysItemDefContext[], system: DsSystem) =

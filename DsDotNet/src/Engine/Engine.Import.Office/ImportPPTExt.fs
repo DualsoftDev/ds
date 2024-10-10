@@ -111,7 +111,12 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.ButtonDefs.ForEach(fun b -> mySys.AddButton(b.Value, $"{b.Key}", "", "", flow)))
+                
+                node.ButtonDefs.ForEach(fun b ->
+                    let fullName = b.Key    
+                    let pureName, devParamIO = getPureNFunction(fullName, true)
+                    mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), flow))
+                    )
 
             doc.NodesHeadPage
             |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
@@ -120,7 +125,11 @@ module ImportU =
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
                 else
                     dicFlow.Iter(fun flow ->
-                        node.ButtonHeadPageDefs.ForEach(fun b -> mySys.AddButton(b.Value, b.Key, "", "", flow.Value)))
+                        node.ButtonHeadPageDefs.ForEach(fun b -> 
+                            let fullName = b.Key    
+                            let pureName, devParamIO = getPureNFunction(fullName, true)
+                            
+                            mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), flow.Value)))
                 )
 
         //MakeLamps 리스트 만들기
@@ -145,11 +154,17 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> mySys.AddLamp(l.Value, $"{l.Key}", "", "", Some flow)))
+                node.LampDefs.Iter(fun l -> 
+                    let fullName = l.Key    
+                    let pureName, devParamIO = getPureNFunction(fullName, false)
+                    mySys.AddLampDef(l.Value, pureName, devParamIO, Addresses("", ""), Some flow)))
 
             headPageLamps
             |> Seq.iter (fun node ->
-                node.LampHeadPageDefs.Iter(fun l -> mySys.AddLamp(l.Value, l.Key, "", "", None)))
+                node.LampHeadPageDefs.Iter(fun l ->
+                    let fullName = l.Key    
+                    let pureName, devParamIO = getPureNFunction(fullName, false)
+                    mySys.AddLampDef(l.Value, pureName, devParamIO, Addresses("", ""), None)))
 
         //MakeReadyConditions 리스트 만들기
         [<Extension>]
@@ -158,40 +173,14 @@ module ImportU =
 
             let addCondition(fullName, conditionType:ConditionType, flowName:string option, settingflow:Flow) =
                 let emptyAddr = Addresses("", "")
-                let condiName = GetLastParenthesesReplaceName(fullName, "")
-                let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
-
-                let hasTaskDevParam = condiName <> fullName
-                let devParamIO =
-                    if hasTaskDevParam
-                    then
-                        let devParam = getTaskDevParam funcName
-                        match conditionType with
-                        | DuReadyState | DuDriveState
-                            -> TaskDevParamIO(Some devParam, None)
-                    else
-                        defaultTaskDevParamIO()
-
-                mySys.AddCondition(conditionType, condiName, devParamIO, emptyAddr, settingflow)
+                let pureName, devParamIO = getPureNFunction(fullName, true)
+                mySys.AddCondition(conditionType, pureName, devParamIO, emptyAddr, settingflow)
 
             let addActiontion(fullName, aType:ActionType, settingflow:Flow) =
                 let emptyAddr = Addresses("", "")
-                let condiName = GetLastParenthesesReplaceName(fullName, "")
-                let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
-          
+                let pureName, devParamIO = getPureNFunction(fullName, false)
 
-                let hasTaskDevParam = condiName <> fullName
-                let devParamIO =
-                    if hasTaskDevParam
-                    then
-                        let devParam = getTaskDevParam funcName
-                        match aType with
-                        | DuEmergencyAction | DuPauseAction
-                            -> TaskDevParamIO(None, Some devParam)
-                    else
-                        defaultTaskDevParamIO()
-
-                mySys.AddAction(aType, condiName, devParamIO, emptyAddr, settingflow)
+                mySys.AddAction(aType, pureName, devParamIO, emptyAddr, settingflow)
 
             doc.Nodes
             |> Seq.filter (fun node -> node.CondiDefs.any() || node.ActionDefs.any())
@@ -827,7 +816,7 @@ module ImportU =
                        note.StartsWith ("[motions]")
                     || note.StartsWith ("[scripts]") ->
 
-                    let dsText = $"[sys] temp = {{ [prop] = {{ {note} }}}}"
+                    let dsText = $"[sys] temp = {{ [prop] = {{ {note} }}}}".Replace("”", "\"").Replace("“", "\"")
                     let dsProperties = WalkProperty(dsText, ParserOptions.Create4Simulation(systemRepo, "", "ActiveCpuName", None, DuNone))
                     dsProperties |> Seq.iter (processProperty mySys)
                 | _ -> ()

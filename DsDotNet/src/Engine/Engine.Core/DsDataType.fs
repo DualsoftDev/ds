@@ -161,23 +161,6 @@ module DsDataType =
             | DuUINT8   -> "BYTE"
 
 
-         member x.ToStringValue (value: obj) =
-            match x, value with
-            | DuBOOL     , _ -> value.ToString()
-            | DuCHAR     , _ -> sprintf "'%c'" (Convert.ToChar(value))
-            | DuFLOAT32  , (:? float32 as v) -> sprintf "%gf" v
-            | DuFLOAT64  , (:? float   as v) -> sprintf "%g" v
-            | DuINT16    , (:? int16   as v) -> sprintf "%ds" v
-            | DuINT32    , (:? int     as v) -> sprintf "%d" v
-            | DuINT64    , (:? int64   as v) -> sprintf "%dL" v
-            | DuINT8     , (:? sbyte   as v) -> sprintf "%dy" v
-            | DuSTRING   , (:? string  as v) -> sprintf "\"%s\"" v
-            | DuUINT16   , (:? uint16  as v) -> sprintf "%dus" v
-            | DuUINT32   , (:? uint32  as v) -> sprintf "%du" v
-            | DuUINT64   , (:? uint64  as v) -> sprintf "%dUL" v
-            | DuUINT8    , (:? byte    as v) -> sprintf "%duy" v
-            | _  -> failwithf "ERROR: Unsupported type %s for value %O" (x.ToText()) value
-
 
         member x.ToTextLower() = x.ToText().ToLower()
         member x.ToBlockSizeNText() =
@@ -232,6 +215,7 @@ module DsDataType =
 
         member x.DefaultValue() = typeDefaultValue (x.ToType())
 
+
     let getDataType (typ:System.Type) =
         match typ.Name with
         | BOOL      -> DuBOOL
@@ -249,6 +233,23 @@ module DsDataType =
         | UINT8     -> DuUINT8
         | _  -> failwithlog "ERROR"
 
+                
+    let ToStringValue (value: obj) =
+        match getDataType(value.GetType()), value  with
+        | DuBOOL     , _ -> value.ToString()
+        | DuCHAR     , _ -> sprintf "'%c'" (Convert.ToChar(value))
+        | DuFLOAT32  , (:? float32 as v) -> sprintf "%gf" v
+        | DuFLOAT64  , (:? float   as v) -> sprintf "%g" v
+        | DuINT16    , (:? int16   as v) -> sprintf "%ds" v
+        | DuINT32    , (:? int     as v) -> sprintf "%d" v
+        | DuINT64    , (:? int64   as v) -> sprintf "%dL" v
+        | DuINT8     , (:? sbyte   as v) -> sprintf "%dy" v
+        | DuSTRING   , (:? string  as v) -> sprintf "\"%s\"" v
+        | DuUINT16   , (:? uint16  as v) -> sprintf "%dus" v
+        | DuUINT32   , (:? uint32  as v) -> sprintf "%du" v
+        | DuUINT64   , (:? uint64  as v) -> sprintf "%dUL" v
+        | DuUINT8    , (:? byte    as v) -> sprintf "%duy" v
+        | _  -> failwithf $"ERROR: Unsupported type {value.GetType()} for value {value}"
 
     let getTextValueNType (x: string) =
         match x with

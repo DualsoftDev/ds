@@ -41,7 +41,9 @@ module rec DsTaskDevType =
             if valTarget.IsSome && (valMin.IsSome || valMax.IsSome)
             then 
                 failWithLog $"valTarget({valTarget.Value}) cannot be used with valMin({valMin}) or valMax({valMax})"
-
+            if datatype = DuSTRING && valTarget.IsNone // STRING 은 TARGET만 지원 RANGE 지원 안함 
+            then
+                failWithLog $"STRING type cannot be used with valMin or valMax"
             
         member x.TargetValue = valTarget
         member x.DataType = datatype
@@ -49,6 +51,7 @@ module rec DsTaskDevType =
         member x.Max = valMax
         member x.IsInclusiveMin = isInclusiveMin  // True if the min comparison is >=, False if >
         member x.IsInclusiveMax = isInclusiveMax  // True if the max comparison is <=, False if <
+        member x.IsRangeValue = valTarget.IsNone
         member x.IsDefaultValue = 
                     match valTarget, valMin, valMax with
                     | None, None, None -> true
@@ -58,73 +61,64 @@ module rec DsTaskDevType =
                         false
     
         member x.ToText() =
+            let minText = if x.Min.IsSome then ToStringValue x.Min.Value else ""
+            let maxText = if x.Max.IsSome then ToStringValue x.Max.Value else ""
+            let targetText = if x.TargetValue.IsSome then ToStringValue x.TargetValue.Value else ""
+           
             match x.Min, x.TargetValue, x.Max with
             | None, Some value, None  ->
                 if x.DataType <> DuBOOL then
-                    $"{x.DataType.ToStringValue(value)}"
+                    targetText
                 elif not(Convert.ToBoolean(value))
                 then
                     "False"
                 else
                     ""
-            | Some min, None, Some max when isInclusiveMin && isInclusiveMax ->
-                $"{min} <= x <= {max}"
-            | Some min, None, Some max when isInclusiveMin && not isInclusiveMax ->
-                $"{min} <= x < {max}"
-            | Some min, None, Some max when not isInclusiveMin && isInclusiveMax ->
-                $"{min} < x <= {max}"
-            | Some min, None, Some max ->
-                $"{min} < x < {max}"
-            | Some min, None, None when isInclusiveMin ->
-                $"{min} <= x"
-            | Some min, None, None ->
-                $"{min} < x"
-            | None, None, Some max when isInclusiveMax ->
-                $"x <= {max}"
-            | None, None, Some max ->
-                $"x < {max}"
+            | Some _min, None, Some _max when isInclusiveMin && isInclusiveMax ->
+                $"{minText} <= x <= {maxText}"
+            | Some _min, None, Some _max when isInclusiveMin && not isInclusiveMax ->
+                $"{minText} <= x < {maxText}"
+            | Some _min, None, Some _max when not isInclusiveMin && isInclusiveMax ->
+                $"{minText} < x <= {maxText}"
+            | Some _min, None, Some _max ->
+                $"{minText} < x < {maxText}"
+            | Some _min, None, None when isInclusiveMin ->
+                $"{minText} <= x"
+            | Some _min, None, None ->
+                $"{minText} < x"
+            | None, None, Some _max when isInclusiveMax ->
+                $"x <= {maxText}"
+            | None, None, Some _max ->
+                $"x < {maxText}"
             | _ ->
                 "" //공란으로 처리
 
         member x.ToDataTypeText() = x.DataType.ToText()
 
+    let createValueParam (input: string) : ValueParam option =
+        let xPattern = "(?i:x)(?-i)"  //x, X 대소문자 구분안함
+        //string 타입도 대응 x="AAAA" or x=1234 or x=1
+        let singleValuePattern = $"{xPattern}\s*=(.+)$" 
+        //int 외 타입도 대응 123.0f<x<= 123.1f
+        let rangePattern = $"(?:(.+)(<=|<)\s*)?{xPattern}\s*(?:(<=|<)(.+))?$"
 
-    let createValueParam(text: string) =
-        let opPatterns = ["="; "<"; ">"]
-        let pattern = @"\s*(?<min>[\d.]+)?\s*(?<minOp><=|<)?\s*(?i:x)(?-i)\s*(?<maxOp><=|<)?\s*(?<max>[\d.]+)?\s*"
-        let regex = Regex(pattern)  // No need for RegexOptions.IgnoreCase since inline case insensitivity is used
-        let m = regex.Match(text)
-
-        if m.Success && opPatterns |> List.exists (fun op -> text.Contains(op)) then
-            let min = 
-                if m.Groups.["min"].Success then 
-                    Some(box (toValue m.Groups.["min"].Value))
+        match Regex.Match(input, singleValuePattern) with
+        | m when m.Success ->
+            Some (ValueParam(Some(toValue(m.Groups.[1].Value.Trim())), None, None, false, false))
+        | _ ->
+            match Regex.Match(input, rangePattern) with
+            | m when m.Success ->
+                let minValue = if m.Groups.[1].Success then Some(toValue (m.Groups.[1].Value.Trim())) else None
+                let maxValue = if m.Groups.[4].Success then Some(toValue (m.Groups.[4].Value.Trim())) else None
+                let inclusiveMin = m.Groups.[2].Value.Trim() = "<="
+                let inclusiveMax = m.Groups.[3].Value.Trim() = "<="
+                Some (ValueParam(None, minValue, maxValue, inclusiveMin, inclusiveMax))
+            | _ -> 
+                if getTextValueNType(input).IsSome
+                then 
+                    Some (ValueParam(Some(toValue input), None, None, false, false))
                 else 
                     None
-            let max = 
-                if m.Groups.["max"].Success then 
-                    Some(box (toValue m.Groups.["max"].Value))
-                else 
-                    None
-            let minOp = m.Groups.["minOp"].Value
-            let maxOp = m.Groups.["maxOp"].Value
-
-            let isInclusiveMin = minOp = "<="
-            let isInclusiveMax = maxOp = "<="
-
-            match min, max with
-            | None, None ->
-                if text.Contains("=") then
-                    let value = text.Split('=') |> Array.last |> fun v -> Some(box (toValue v))
-                    ValueParam(value, None, None, false, false) |> Some
-                else
-                    ValueParam(Some(toValue text), None, None, false, false) |> Some
-            | _ ->
-                ValueParam(None, min, max, isInclusiveMin, isInclusiveMax) |> Some
-        else
-            match getTextValueNType text with
-            | Some _ -> ValueParam(Some(toValue text), None, None, false, false) |> Some
-            | None -> None
 
     type TaskDevParam(symbolAlias: SymbolAlias option, valueParam: ValueParam, devTime: int option) =
         let mutable symbol = symbolAlias  //symbol name

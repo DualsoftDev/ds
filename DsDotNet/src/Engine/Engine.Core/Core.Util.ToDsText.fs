@@ -411,7 +411,8 @@ module internal ToDsTextModule =
             let noTransDataReals =  reals.Filter(fun f->f.NoTransData)
             let motionReals = reals.Where(fun f->f.Motion.IsSome)
             let scriptReals = reals.Where(fun f->f.Script.IsSome)
-            let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome || f.DsTime.TON.IsSome)
+            let repeatReals = reals.Where(fun f -> f.RepeatCount.IsSome)
+            let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome)
             let times =
                 [
                     if timeReals.Any() then
@@ -419,8 +420,7 @@ module internal ToDsTextModule =
                         for real in timeReals do
                             let avg   = real.DsTime.AVG |> map (fun v -> $"AVG({v})") |? ""
                             let std   = real.DsTime.STD |> map (fun v -> $"STD({v})") |? ""
-                            let delay = real.DsTime.TON |> map (fun v -> $"TON({v})") |? ""
-                            let paras = [avg; std; delay] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
+                            let paras = [avg; std] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
                             yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{String.Join(",", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines
@@ -440,6 +440,17 @@ module internal ToDsTextModule =
                         yield $"{tab2}[scripts] = {lb}"
                         for real in scriptReals do
                             yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{real.Script.Value}{rb};"
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
+
+
+            let repeats =
+                [
+                    if repeatReals.Any() then
+                        yield $"{tab2}[repeats] = {lb}"
+                        for real in repeatReals do
+                            let cnt = real.RepeatCount.Value
+                            yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{cnt}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -485,7 +496,7 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
             let props =
-                [| safeties; autoPres; layouts; motions; scripts; times; finished; disabled; noTransData |]
+                [| safeties; autoPres; layouts; motions; scripts; times; repeats; finished; disabled; noTransData |]
                 |> filter(fun p -> p.NonNullAny())
 
             if props.Any() then

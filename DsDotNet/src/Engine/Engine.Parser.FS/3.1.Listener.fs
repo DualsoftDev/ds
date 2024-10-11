@@ -884,7 +884,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 t.Average.Iter( fun x -> real.DsTime.AVG <- Some (float x))
                 t.Std.Iter(     fun x -> real.DsTime.STD <- Some (float x))
-                t.OnDelay.Iter( fun x -> real.DsTime.TON <- Some (float x))
+        
+        let fillRepeats (system: DsSystem) (listRepeatCtx: List<dsParser.RepeatsBlockContext> ) =
+            let fqdnRepeats = getRepeats listRepeatCtx
+            for fqdn, t in fqdnRepeats do
+                let real = (tryFindSystemInner system fqdn).Value :?> Real
+                match UInt32.TryParse t with
+                | true, count -> real.RepeatCount <- Some (int count)
+                | _ -> failWithLog $"Repeat count must be a positive integer. {t} is not valid."
 
 
         let fillActions (system: DsSystem) (listMotionCtx: List<dsParser.MotionBlockContext> ) =
@@ -913,8 +920,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             //Real에 scripts 채우기
             ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts  theSystem
             //Real에 times 채우기
-            ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem
-
+            ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem  
+            //Real에 Repeats 채우기
+            ctx.Descendants<RepeatsBlockContext>() .ToList() |> fillRepeats  theSystem
 
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem

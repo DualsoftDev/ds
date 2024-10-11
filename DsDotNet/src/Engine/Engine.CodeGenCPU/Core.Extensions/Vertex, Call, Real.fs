@@ -31,7 +31,6 @@ module ConvertCpuVertex =
 
 
     let getAgvTimes(c:Call) = c.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeAvgExist))
-    let getDelayTimes(c:Call) = c.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeDelayExist))
 
     type Call with
         member c._on     = c.System._on
@@ -48,10 +47,14 @@ module ConvertCpuVertex =
                 false
 
         member c.ExistAvgTime    = getAgvTimes(c).any()
-        member c.ExistDelayTime  = getDelayTimes(c).any()
+
+
+        member c.ExistDelayTime  = false //test ahn
+        member c.MaxDelayTime  = getAgvTimes(c).Max()//getDelayTimes(c).Max() test ahn
+
+
 
         member c.MaxAvgTime    = getAgvTimes(c).Max()
-        member c.MaxDelayTime  = getDelayTimes(c).Max()
 
         member c.UsingTon  = c.IsJob && c.ExistDelayTime
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn

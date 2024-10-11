@@ -639,7 +639,7 @@ module Program =
         [times] = {
             "14 Work 설정시간".Work1 = {AVG(0.1)};
             "14 Work 설정시간".Work2 = {AVG(1)};
-            "14 Work 설정시간".Work3 = {AVG(0.1),TON(1)};
+            "14 Work 설정시간".Work3 = {AVG(0.1)};
         }
         [finish] = {
             "5 Work 초기조건".Work1;

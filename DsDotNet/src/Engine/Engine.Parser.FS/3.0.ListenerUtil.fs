@@ -132,7 +132,16 @@ module ListnerCommonFunctionGeneratorUtil =
                     yield fqdn, timeDef
         }
 
-
+    let getRepeats  (listRepeatCtx: List<dsParser.RepeatsBlockContext>) =
+                seq {
+                    for ctx in listRepeatCtx do
+                    let list = ctx.Descendants<RepeatDefContext>().ToList()
+                    for defs in list do
+                        let v = defs.TryFindFirstChild<RepeatKeyContext>() |> Option.get
+                        let fqdn = collectNameComponents v |> List.ofArray
+                        let path = defs.TryFindFirstChild<RepeatParamsContext>() |> Option.get
+                        yield fqdn, path.GetText()
+                }
     let getMotions  (listMotionCtx: List<dsParser.MotionBlockContext>) =
                 seq {
                     for ctx in listMotionCtx do

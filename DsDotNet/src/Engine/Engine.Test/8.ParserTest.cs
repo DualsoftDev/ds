@@ -653,5 +653,68 @@ namespace Engine
 ";
 
 
+        public static string Times = @"
+    [sys] Control = {
+    [flow] F = {
+        Work1 > Work2 > Work3;
+    }
+
+    [prop] = {
+        [times] = {
+                F.Work1 = {AVG(2)};
+                F.Work2 = {AVG(1)};
+                F.Work3 = {AVG(0.1),STD(1)};
+                   }
+        }
+    }
+";
+
+        public static string Motions = @"
+    [sys] Control = {
+    [flow] F = {
+        Work1 > Work2 > Work3;
+    }
+
+    [prop] = {
+        [motions] = {
+            F.Work1 = {./Assets/Cylinder/DoubleType.obj:RET};
+            F.Work2 = {./Assets/Cylinder/DoubleType.obj:ADV};
+            }
+        }
+    }
+
+";
+
+        public static string Scripts = @"
+    [sys] Control = {
+    [flow] F = {
+        Work1 > Work2 > Work3;
+    }
+
+    [prop] = {
+        [scripts] = {
+            F.Work1 = {scripsPath1};
+            F.Work2 = {scripsPath2.sc};
+            F.Work3 = {scripsDir/scripsPath3.sc};
+            }
+        }
+    }
+
+";
+
+        public static string Repeats = @"
+    [sys] Control = {
+    [flow] F = {
+        Work1 > Work2 > Work3;
+    }
+    [prop] = {
+        [repeats] = {
+                F.Work1 = {2};
+                F.Work3 = {3};
+            }
+        }
+    }
+";
+
     }
 }

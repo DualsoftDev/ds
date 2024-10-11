@@ -349,6 +349,7 @@ module rec CoreModule =
 
             member val Finished:bool = false with get, set
             member val NoTransData:bool = false with get, set
+            member val RepeatCount:int option= None with get, set
 
         type Real with
             static member Create(name: string, flow) =
@@ -612,6 +613,9 @@ module rec CoreModule =
             member val InAddress      = TextAddrEmpty with get, set
             member val OutAddress     = TextAddrEmpty with get, set
             member val MaunualAddress = TextAddrEmpty with get, set
+
+            member val ApiTime = ApiTime() with get, set
+            //member val ApiCount = ApiCount() with get, set //반복동작 정의 추후 필요
 
             //CPU 생성시 할당됨 InTag
             member val InTag = getNull<ITag>() with get, set

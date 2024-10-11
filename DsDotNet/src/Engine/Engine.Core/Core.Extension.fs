@@ -353,10 +353,8 @@ module CoreExtensionModule =
 
     type Real with
 
-        member x.TimeDelay = getTime (x.DsTime.TON, x.QualifiedName)
         member x.TimeAvg = getTime (x.DsTime.AVG, x.QualifiedName)
 
-        member x.TimeDelayExist = x.TimeDelay.IsSome && x.TimeDelay.Value <> 0.0
         member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0
 
         member x.TimeSimMsec =

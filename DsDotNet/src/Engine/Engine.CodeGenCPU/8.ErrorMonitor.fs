@@ -44,17 +44,11 @@ type VertexTagManager with
 
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
-            //if RuntimeDS.Package.IsPLCorPLCSIM() then
-            //    yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, fn)
-            //    yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  fn)
 
-            //elif RuntimeDS.Package.IsPCorPCSIM() then 
             let errShortRising = v.System.GetTempBoolTag($"{call.QualifiedName}errShortRising")
             let errOpenRising = v.System.GetTempBoolTag($"{call.QualifiedName}errOpenRising")
             yield! (input, v.System) --^ (errShortRising, fn)
             yield! (!@input, v.System) --^ (errOpenRising,  fn)
-            //else    
-            //    failWithLog $"Not supported {RuntimeDS.Package} package"
             
             (* short error *)
             yield (checkCondi <&&>  rxReadyExpr <&&> errShortRising.Expr,  rst)  ==| (v.ErrShort, fn)

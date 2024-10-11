@@ -52,7 +52,7 @@ module PptNodeModule =
         , ifTX              : string
         , ifRX              : string
         , realGoingTime     : float option
-        , realDelayTime     : float option
+        , realRepeatCnt     : int option
         , name              : string
     ) =
 
@@ -72,7 +72,7 @@ module PptNodeModule =
         member x.AutoPres = autoPres
 
         member x.RealGoingTime = realGoingTime
-        member x.RealDelayTime = realDelayTime
+        member x.RealRepeatCnt = realRepeatCnt
         member x.IfName = ifName
         member x.IfTX = ifTX
         member x.IfRX = ifRX
@@ -92,17 +92,21 @@ module PptNodeModule =
         member x.TaskDevParaOut = taskDevParam.OutParam
 
         member x.UpdateRealProperty(real: Real) =
-            let checkAndUpdateTime (newTime: float option) getField setField =
-                match newTime with
-                | Some newValue ->
-                    match getField() with
-                    | Some currentValue when currentValue <> newValue ->
-                        shape.ErrorName(ErrID._76, iPage)
-                    | _ -> setField(Some newValue)
-                | None -> ()
+            match realGoingTime with
+            | Some newValue ->
+                match real.DsTime.AVG with
+                | Some currentValue when currentValue <> newValue ->
+                    shape.ErrorName(ErrID._76, iPage)
+                | _ -> real.DsTime.AVG <-(Some newValue)
+            | None -> ()
 
-            checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
-            checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
+            match realRepeatCnt with
+            | Some newValue ->
+                match real.RepeatCount with
+                | Some currentValue when currentValue <> newValue ->
+                    shape.ErrorName(ErrID._84, iPage)
+                | _ -> real.RepeatCount <-(Some newValue)
+            | None -> ()
 
             if real.Finished = true && x.RealFinished = false then  //이미 설정을 true 하고 다른데서 변경
                 shape.ErrorName(ErrID._77, iPage)
@@ -219,7 +223,7 @@ module PptNodeModule =
             let mutable ifTX = ""
             let mutable ifRX = ""
             let mutable realGoingTime:float option = None
-            let mutable realDelayTime:float option = None
+            let mutable realRepeatCnt:int option = None
 
             let updateSafety (barckets: string) =
                 barckets.Split(';')
@@ -275,9 +279,8 @@ module PptNodeModule =
                     failWithLog $"{ErrID._53} {shape.InnerText}"
 
             let updateTime() =
-                let goingT, delayT = updateRealTime shape.InnerText
-                realGoingTime <- goingT
-                realDelayTime <- delayT
+                realGoingTime <- updateRealTime shape.InnerText
+                realRepeatCnt <- updateRepeatCount shape.InnerText
 
             let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
             let name =
@@ -378,7 +381,7 @@ module PptNodeModule =
                     , ifTX
                     , ifRX
                     , realGoingTime
-                    , realDelayTime
+                    , realRepeatCnt
                     , name
 
             )

@@ -50,14 +50,7 @@ type Job with
             [
                 let outParam = td.GetOutParam(j)
                 let valExpr = outParam.WriteValue |> any2expr
-                //let valDefalut = outParam.DefaultValue |> any2expr
-                //if j.ActionType = Push then
                 yield (sets, valExpr) --> (td.OutTag, fn)  //test ahn Analog pulse 출력 안함 테스트중
-                //else
-                //    let tempRising  = getJSM(j).GetTempBoolTag(td.QualifiedName)
-                //    yield! (sets, j.System) --^ (tempRising,  fn)
-                //    yield (tempRising.Expr, valExpr) --> (td.OutTag, fn)
-                    //yield (emg, valDefalut) --> (td.OutTag, fn)
             ]
 
         [|

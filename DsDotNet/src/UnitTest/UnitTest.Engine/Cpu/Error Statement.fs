@@ -17,9 +17,14 @@ type Spec15_ErrorStatement() =
 
    
     [<Test>]
-    member __.``E2 Call Error TX Monitor`` () =
+    member __.``E1 Call Error TX  Over Monitor`` () =
          for coin in t.Coins do
-            coin.E2_CallErrorTXMonitor() |> doChecks
+            coin.E1_CallErrTimeOver() |> doChecks
+
+    [<Test>]
+    member __.``E2 Call Error TX Shortage  Monitor`` () =
+         for coin in t.Coins do
+            coin.E2_CallErrTimeShortage() |> doChecks
 
     [<Test>]
     member __.``E3 Call Error RX Monitor`` () =

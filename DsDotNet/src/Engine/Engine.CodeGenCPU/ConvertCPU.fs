@@ -79,7 +79,8 @@ module ConvertCPU =
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield! vc.E2_CallErrorTXMonitor()
+                yield! vc.E1_CallErrTimeOver()
+                yield! vc.E2_CallErrTimeShortage()
                 yield! vc.E3_CallErrorRXMonitor()
                 yield  vc.E5_CallErrorTotalMonitor()
 

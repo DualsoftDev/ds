@@ -9,8 +9,8 @@ open Dual.Common.Core.FS
 
 type VertexTagManager with
 
-
-    member v.E2_CallErrorTXMonitor() =
+        //test ahn 구현 필요  onTimeOver ,  offTimeOver 2구현 필요 Job.JobTime.MAX 이용
+    member v.E1_CallErrTimeOver() =
         let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         let vOff = v._off.Expr
@@ -26,6 +26,24 @@ type VertexTagManager with
                 yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
             else 
                 yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , fn)
+        |]
+        //test ahn 구현 필요  onTimeShortagem,  offTimeShortage 2구현 필요 Job.JobTime.MAX 이용
+    member v.E2_CallErrTimeShortage() =
+        //let v= v :?> CoinVertexTagManager
+        //let call= v.Vertex.GetPure() :?> Call
+        //let vOff = v._off.Expr
+
+        //let iop = call.V.Flow.iop.Expr
+        //let rst = v.Flow.ClearExpr
+        //let fn = getFuncName()
+
+        [|
+            //let running = v.MM.Expr <&&> !@call.End <&&> !@iop
+            //yield running --@ (v.TOUT, v.System._tout.Value, fn)
+            //if RuntimePackage.PCSIM = RuntimeDS.Package then
+            //    yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
+            //else 
+            //    yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOffTimeShortage , fn)
         |]
 
     member v.E3_CallErrorRXMonitor() =
@@ -59,7 +77,6 @@ type VertexTagManager with
                 yield (checkCondi <&&> rxFinishExpr                      <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         |]
         
-
 
 
     member v.E4_RealErrorTotalMonitor() =

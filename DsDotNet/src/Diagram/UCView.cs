@@ -575,7 +575,7 @@ public partial class UcView : UserControl
     {
         Node node = findNode(viewNode);
         if (node == null) return;
-        UpdateFillColor(isOn, node, Color.DarkBlue);
+        UpdateFillColor(isOn, node, Color.DeepSkyBlue);
         if (vRefresh) RefreshGraph();
     }
     public void UpdateOutValue(ViewNode viewNode, bool isOn, bool vRefresh)

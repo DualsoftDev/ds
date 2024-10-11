@@ -26,7 +26,7 @@ module PptNodeModule =
             .Where(fun m->m.Page = iPage)
             .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}"))
 
-        macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
+        macroUpdateName|> GetHeadBracketRemoveName |> GetLastBracketRelaceName |> trimSpaceNewLine //ppt “ ” 입력 호환
 
     type PptNode private(
         shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq
@@ -134,7 +134,7 @@ module PptNodeModule =
 
                     else
                         if isRoot then
-                            let inPara = createTaskDevParam  None None None |> Some
+                            let inPara = createTaskDevParam  None None  |> Some
                             taskDevParam <-TaskDevParamIO(inPara, None)
 
                         elif nodeType = AUTOPRE then
@@ -224,6 +224,7 @@ module PptNodeModule =
             let mutable ifRX = ""
             let mutable realGoingTime:float option = None
             let mutable realRepeatCnt:int option = None
+            let mutable apiTime:ApiTime option = None
 
             let updateSafety (barckets: string) =
                 barckets.Split(';')
@@ -279,9 +280,15 @@ module PptNodeModule =
                     failWithLog $"{ErrID._53} {shape.InnerText}"
 
             let updateTime() =
-                realGoingTime <- updateRealTime shape.InnerText
-                realRepeatCnt <- updateRepeatCount shape.InnerText
+                realGoingTime <- getRealTime shape.InnerText
+                realRepeatCnt <- getRepeatCount shape.InnerText
 
+                
+            let updateApiTime() =
+                match GetSquareBrackets(shape.InnerText, false) with
+                | Some text -> apiTime <- getApiTime text
+                | None -> ()
+                
             let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
             let name =
                 let nameTrim  = String.Join(".", namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
@@ -296,7 +303,12 @@ module PptNodeModule =
                     match GetSquareBrackets(shape.InnerText, true) with
                     | Some text -> updateSafety text
                     | None -> ()
-                    if nodeType = REAL then updateTime()
+
+                    if nodeType = REAL 
+                    then updateTime()
+                    elif nodeType = CALL
+                    then updateApiTime()
+
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
 
                 | ( OPEN_EXSYS_CALL | OPEN_EXSYS_LINK | COPY_DEV ) ->
@@ -327,7 +339,7 @@ module PptNodeModule =
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
-                    //Dev1[3(3,3)].Api(!300, 200)
+                    //Dev1[3(3,3)].Api(!300, 200)[MAX(1.2), MIN(0,01), CHK(0.5)]
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
                     let names = callNAutoPreName.Split('.').ToFSharpList()
                     let prop =

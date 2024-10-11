@@ -24,14 +24,8 @@ module PptNodeUtilModule =
                 if param.IsDefaultParam then ""
                 else 
                     if param.ValueParam.IsDefaultValue 
-                    then
-                        match param.DevTime with
-                        | Some t -> $"{prefix}{t}ms"
-                        | None -> $""
-                    else 
-                        match param.DevTime with
-                        | Some t -> $"{prefix}{param.ValueParam.ToText()}{t}ms"
-                        | None -> $"{prefix}{param.ValueParam.ToText()}"
+                    then ""
+                    else $"{prefix}{param.ValueParam.ToText()}"
                         
 
         let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
@@ -132,7 +126,7 @@ module PptNodeUtilModule =
             | _ ->
                 failWithLog ErrID._1
 
-        let updateRepeatCount (contents: string) =
+        let getRepeatCount (contents: string) =
             let parseCount (txt: string) =
                 match UInt32.TryParse txt with
                 | true, count when count > 0u -> Some (int count)
@@ -149,7 +143,7 @@ module PptNodeUtilModule =
             | _ -> failWithLog "Only one repeat count entry is allowed"
 
     
-        let updateRealTime (contents: string) =
+        let getRealTime (contents: string) =
             let parseSeconds (timeStr: string) : float option =
                 let timeStr = timeStr.ToLower().Trim()
                 let msPattern = @"(\d+(\.\d+)?)ms"
@@ -185,6 +179,31 @@ module PptNodeUtilModule =
             match goingSec with
             | Some t when (t*1000.0) % 10.0 <> 0.0 -> failWithLog $"{contents} Invalid time format: must be in increments of 10ms"
             | _ -> goingSec
+
+        let getApiTime (contents: string) : ApiTime option =
+            let parseFloat (txt: string) =
+                match Double.TryParse(txt.Trim()) with
+                | true, value -> Some value
+                | _ -> None
+
+            let parseValue pattern =
+                let m = Regex.Match(contents, pattern)
+                if m.Success then parseFloat m.Groups.[1].Value else None
+
+            // 각 값을 추출하는 정규식 패턴 설정
+            let maxPattern = @"MAX\((\d+(\.\d+)?)\)"
+            let minPattern = @"MIN\((\d+(\.\d+)?)\)"
+            let chkPattern = @"CHK\((\d+(\.\d+)?)\)"
+
+            // ApiTime 객체 생성 및 값 설정
+            let apiTime = ApiTime()
+            apiTime.MAX <- parseValue maxPattern
+            apiTime.MIN <- parseValue minPattern
+            apiTime.CHK <- parseValue chkPattern
+
+            // 모든 값이 None이면 None 반환, 아니면 ApiTime 객체 반환
+            if apiTime.MAX.IsNone && apiTime.MIN.IsNone && apiTime.CHK.IsNone then None
+            else Some apiTime
 
         let getBracketItems (name: string) =
                 name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")

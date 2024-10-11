@@ -596,8 +596,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        F.mv1.up = { A.""+""(%I300:symbol1:UInt16:0us:12ms, %Q300:ABC:Boolean); }
-        F.mv1.dn = { A.""-""(%I301:1ms, %Q301:0f); }
+        F.mv1.up = { A.""+""(%I300:symbol1:UInt16, %Q300:ABC:Boolean); }
+        F.mv1.dn = { A.""-""(%I301, %Q301:0f); }
     }
     [variables] = {}
     [operators] = {

@@ -51,8 +51,8 @@ module PptNodeUtilModule =
             newJob
 
 
-        let getJobNameWithJobParam(jobFqdn:string seq, jobParam:JobParam) =
-            let jobParamText =  jobParam.ToText()
+        let getJobNameWithJobParam(jobFqdn:string seq, jobDevParam:JobDevParam) =
+            let jobParamText =  jobDevParam.ToText()
             match jobParamText with
             | "" -> jobFqdn
             |_   ->
@@ -83,7 +83,7 @@ module PptNodeUtilModule =
                 if func.Contains(",") then
 
                     let inFunc, outFunc =
-                        func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
+                        func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobDevParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
                     TaskDevParamIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
                 else
@@ -180,7 +180,7 @@ module PptNodeUtilModule =
             | Some t when (t*1000.0) % 10.0 <> 0.0 -> failWithLog $"{contents} Invalid time format: must be in increments of 10ms"
             | _ -> goingSec
 
-        let getApiTime (contents: string) : ApiTime option =
+        let getJobTime (contents: string) : JobTime option =
             let parseFloat (txt: string) =
                 match Double.TryParse(txt.Trim()) with
                 | true, value -> Some value
@@ -195,15 +195,15 @@ module PptNodeUtilModule =
             let minPattern = @"MIN\((\d+(\.\d+)?)\)"
             let chkPattern = @"CHK\((\d+(\.\d+)?)\)"
 
-            // ApiTime 객체 생성 및 값 설정
-            let apiTime = ApiTime()
-            apiTime.MAX <- parseValue maxPattern
-            apiTime.MIN <- parseValue minPattern
-            apiTime.CHK <- parseValue chkPattern
+            // JobTime 객체 생성 및 값 설정
+            let jobTime = JobTime()
+            jobTime.MAX <- parseValue maxPattern
+            jobTime.MIN <- parseValue minPattern
+            jobTime.CHK <- parseValue chkPattern
 
-            // 모든 값이 None이면 None 반환, 아니면 ApiTime 객체 반환
-            if apiTime.MAX.IsNone && apiTime.MIN.IsNone && apiTime.CHK.IsNone then None
-            else Some apiTime
+            // 모든 값이 None이면 None 반환, 아니면 JobTime 객체 반환
+            if jobTime.MAX.IsNone && jobTime.MIN.IsNone && jobTime.CHK.IsNone then None
+            else Some jobTime
 
         let getBracketItems (name: string) =
                 name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")

@@ -48,7 +48,8 @@ module PptNodeModule =
         , ifName            : string
         , rootNode          : bool option
         , taskDevParam      : TaskDevParamIO
-        , jobParam          : JobParam
+        , jobDevParam       : JobDevParam
+        , jobTime           : JobTime option
         , ifTX              : string
         , ifRX              : string
         , realGoingTime     : float option
@@ -87,7 +88,7 @@ module PptNodeModule =
         member x.IsRootNode     = rootNode
         member x.IsFunction     = x.IsCall && not(name.Contains("."))
         member x.TaskDevParam   = taskDevParam
-        member x.JobParam       = jobParam
+        member x.JobParam       = jobDevParam
         member x.TaskDevParaIn  = taskDevParam.InParam
         member x.TaskDevParaOut = taskDevParam.OutParam
 
@@ -120,7 +121,7 @@ module PptNodeModule =
             getJobNameWithTaskDevParaIO(x.JobPure, taskDevParam).ToArray()
 
         member x.JobWithJobPara =
-            getJobNameWithJobParam(x.Job, jobParam).ToArray()
+            getJobNameWithJobParam(x.Job, jobDevParam).ToArray()
 
         member x.UpdateNodeRoot(isRoot: bool) =
             rootNode <- Some isRoot
@@ -145,6 +146,8 @@ module PptNodeModule =
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
+            call.TargetJob.JobTime <- jobTime
+
 
 
         member x.JobPure : string seq =
@@ -217,14 +220,14 @@ module PptNodeModule =
             let mutable ifName = ""
             let mutable rootNode: bool option = None
             let mutable taskDevParam: TaskDevParamIO = defaultTaskDevParamIO()  // Input/Output param
-            let mutable jobParam: JobParam = defaultJobParam()     // jobParam  param
+            let mutable jobDevParam: JobDevParam = defaultJobParam()     // jobDevParam  param
 
 
             let mutable ifTX = ""
             let mutable ifRX = ""
             let mutable realGoingTime:float option = None
             let mutable realRepeatCnt:int option = None
-            let mutable apiTime:ApiTime option = None
+            let mutable jobTime:JobTime option = None
 
             let updateSafety (barckets: string) =
                 barckets.Split(';')
@@ -284,9 +287,9 @@ module PptNodeModule =
                 realRepeatCnt <- getRepeatCount shape.InnerText
 
                 
-            let updateApiTime() =
+            let updateJobTime() =
                 match GetSquareBrackets(shape.InnerText, false) with
-                | Some text -> apiTime <- getApiTime text
+                | Some text -> jobTime <- getJobTime text
                 | None -> ()
                 
             let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
@@ -307,7 +310,7 @@ module PptNodeModule =
                     if nodeType = REAL 
                     then updateTime()
                     elif nodeType = CALL
-                    then updateApiTime()
+                    then updateJobTime()
 
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
 
@@ -367,7 +370,7 @@ module PptNodeModule =
                         else
                             defaultJobParam()
 
-                    jobParam <- jobPram
+                    jobDevParam <- jobPram
             with ex ->
                 shape.ErrorShape(ex.Message, iPage)
 
@@ -389,7 +392,8 @@ module PptNodeModule =
                     , ifName
                     , rootNode
                     , taskDevParam
-                    , jobParam
+                    , jobDevParam
+                    , jobTime
                     , ifTX
                     , ifRX
                     , realGoingTime

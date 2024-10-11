@@ -614,9 +614,6 @@ module rec CoreModule =
             member val OutAddress     = TextAddrEmpty with get, set
             member val MaunualAddress = TextAddrEmpty with get, set
 
-            member val ApiTime = ApiTime() with get, set
-            //member val ApiCount = ApiCount() with get, set //반복동작 정의 추후 필요
-
             //CPU 생성시 할당됨 InTag
             member val InTag = getNull<ITag>() with get, set
             //CPU 생성시 할당됨 OutTag
@@ -632,6 +629,7 @@ module rec CoreModule =
         type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
             inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
             member val JobParam = defaultJobParam() with get, set
+            member val JobTime:JobTime option = None with get, set
 
             member x.ActionType      = x.JobParam.JobAction
             member x.JobTaskDevInfo  = x.JobParam.JobTaskDevInfo

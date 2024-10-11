@@ -663,7 +663,7 @@ namespace Engine
         [times] = {
                 F.Work1 = {AVG(2)};
                 F.Work2 = {AVG(1)};
-                F.Work3 = {AVG(0.1),STD(1)};
+                F.Work3 = {AVG(0.1), STD(1)};
                    }
         }
     }
@@ -713,6 +713,30 @@ namespace Engine
                 F.Work3 = {3};
             }
         }
+    }
+"; public static string Errors = @"
+    [sys] HelloDS = {
+        [flow] STN1 = {
+            Work2 => Work1;
+            Work1 = {
+                Device1.ADV > Device2.ADV;
+            }
+        }
+        [jobs] = {
+            STN1.Device1.ADV = { STN1_Device1.ADV(IB0.0, OB0.0); }
+            STN1.Device2.ADV = { STN1_Device2.ADV(IB0.1, OB0.1); }
+        }
+        [prop] = {
+        
+            [errors] = {
+                STN1.Device1.ADV = {MIN(0.01), MAX(1.2), CHK(0.5)};
+                STN1.Device2.ADV = {CHK(0.5)};
+            }
+        }
+        [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]
+            STN1_외부시작,
+            STN1_Device1,
+            STN1_Device2;
     }
 ";
 

@@ -5,6 +5,17 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module DsJobType =
 
+    /// 인터페이스 에러체크용 시간(사용자 입력 or Api.Tx~Rx AVG, STD 이용하여 CPK로 계산)
+    type JobTime() = // 최소 입력단위 0.01초(10msec)
+        member val MAX: float option = None with get, set // 동작시간 에러초과 sec
+        member val MIN: float option = None with get, set // 동작시간 에러미달 sec
+        member val CHK: float option = None with get, set // 센서고장체크 딜레이 sec
+
+        member x.TimeOver = x.MAX |> Option.defaultValue 15.0 // 입력없으면 15초
+        member x.TimeUnder = x.MIN |> Option.defaultValue 0.0 // 입력없으면 0.0초는 TimeUnder 체크안함
+        member x.TimeSensorCheckDelay = x.CHK |> Option.defaultValue 0.0 // 입력없으면 0.0초는 센서 즉시 체크
+
+
     type JobTypeAction =
         | ActionNormal
         | Push
@@ -37,7 +48,8 @@ module DsJobType =
                     // e.g "N3(1, 2)"
                     $"{TextJobMulti}{x.TaskDevCount}({x.AddressInCount}, {x.AddressOutCount})"
 
-    type JobParam(action: JobTypeAction, jobTypeSensing: JobTypeSensing, jobTypeTaskDevInfo: JobTypeTaskDevInfo) =
+   
+    type JobDevParam(action: JobTypeAction, jobTypeSensing: JobTypeSensing, jobTypeTaskDevInfo: JobTypeTaskDevInfo) =
         member _.JobAction = action
         member _.JobSensing = jobTypeSensing
         member _.JobTaskDevInfo = jobTypeTaskDevInfo
@@ -97,7 +109,7 @@ module DsJobType =
         }
 
     let defaultJobTypeTaskDevInfo() =  { TaskDevCount = 1; InCount = Some 1; OutCount = Some 1 }
-    let defaultJobParam() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+    let defaultJobParam() = JobDevParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
     let getParserJobType (param: string) =
         let param = param.TrimStart('[').TrimEnd(']')
@@ -123,5 +135,5 @@ module DsJobType =
                 | true -> JobTypeSensing.SensingNegative
                 | false -> JobTypeSensing.SensingNormal
 
-        JobParam(jobTypeAction, jobTypeSensing, jobTypeTaskDevInfo)
+        JobDevParam(jobTypeAction, jobTypeSensing, jobTypeTaskDevInfo)
 

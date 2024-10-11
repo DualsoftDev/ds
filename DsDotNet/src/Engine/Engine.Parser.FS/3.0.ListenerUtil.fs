@@ -89,13 +89,12 @@ module ListnerCommonFunctionGeneratorUtil =
     type TimeDefinition = {
         Average: float option
         Std: float option
-        OnDelay: float option
     }
 
     type TimeParam =
             | AVG of float
             | STD of float
-            | TON of float
+
 
     let getTimes (listTimeCtx: List<dsParser.TimesBlockContext>) : seq<string list * TimeDefinition> =
         let parseTimeParams (name, timeParams: string) : TimeDefinition =
@@ -103,23 +102,22 @@ module ListnerCommonFunctionGeneratorUtil =
 
             let matches = regex.Matches(timeParams)
 
-            let extractParam (avg, std, delay) (paramType, value) =
+            let extractParam (avg, std) (paramType, value) =
                 validateDecimalPlaces name value
                 match paramType with
-                | "AVG" -> Some value, std, delay
-                | "STD" -> avg, Some value, delay
-                | "TON" -> avg, std, Some value
-                | _ -> avg, std, delay
+                | "AVG" -> Some value, std
+                | "STD" -> avg, Some value
+                | _ -> avg, std
 
-            let initial = (None, None, None)
+            let initial = (None, None)
 
-            let (average, std, onDelay) =
+            let (average, std) =
                 matches
                 |> Seq.cast<Match>
                 |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value |> float))
                 |> Seq.fold extractParam initial
 
-            { Average = average; Std = std; OnDelay = onDelay }
+            { Average = average; Std = std;}
 
         seq {
             for ctx in listTimeCtx do
@@ -131,6 +129,53 @@ module ListnerCommonFunctionGeneratorUtil =
                     let timeDef = parseTimeParams (fqdn.CombineQuoteOnDemand(), path.GetText())
                     yield fqdn, timeDef
         }
+
+    type ErrorDefinition = {
+        MinTime: float option
+        MaxTime: float option
+        CheckDelayTime: float option
+    }
+    type ErrorParam =
+            | MIN of float
+            | MAX of float
+            | CHK of float
+
+    let getErrors (listErrorCtx: List<dsParser.ErrorsBlockContext>) : seq<string list * ErrorDefinition> =
+        let parseErrorParams (name, errorParams: string) : ErrorDefinition =
+            let regex = new Regex(@"(MIN|MAX|CHK)\((\d+(\.\d+)?)\)")
+
+            let matches = regex.Matches(errorParams)
+
+            let extractParam (minT, maxT, chkT) (paramType, value) =
+                validateDecimalPlaces name value
+                match paramType with
+                | "MIN" -> Some value, maxT, chkT
+                | "MAX" -> minT, Some value, chkT
+                | "CHK" -> minT, maxT, Some value
+                | _ -> minT, maxT, chkT
+
+            let initial = (None, None, None)
+
+            let (minT, maxT, chkT) =
+                matches
+                |> Seq.cast<Match>
+                |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value |> float))
+                |> Seq.fold extractParam initial
+
+            { MinTime = minT; MaxTime = maxT; CheckDelayTime = chkT }
+
+        seq {
+            for ctx in listErrorCtx do
+                let list = ctx.Descendants<ErrorsDefContext>().ToList()
+                for defs in list do
+                    let v = defs.TryFindFirstChild<ErrorsKeyContext>() |> Option.get
+                    let fqdn = collectNameComponents v |> List.ofArray
+                    let path = defs.TryFindFirstChild<ErrorsParamsContext>() |> Option.get
+                    let ErrorDef = parseErrorParams (fqdn.CombineQuoteOnDemand(), path.GetText())
+                    yield fqdn, ErrorDef
+        }
+
+        
 
     let getRepeats  (listRepeatCtx: List<dsParser.RepeatsBlockContext>) =
                 seq {
@@ -207,15 +252,15 @@ module ListnerCommonFunctionGeneratorUtil =
                 let item = callListingCtx.TryFindFirstChild<JobNameContext>().Value.GetText()
 
                 let jobFqdn = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()
-                let jobParam =
+                let jobDevParam =
                     match callListingCtx.TryFindFirstChild<JobTypeOptionContext>() with
                     | Some ctx ->
                             getParserJobType ($"[{ctx.GetText().DeQuoteOnDemand()}]")
                     | None ->
-                            JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+                            JobDevParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
                 let apiDefCtxs = callListingCtx.Descendants<CallApiDefContext>().ToArray()
-                yield jobFqdn, jobParam, apiDefCtxs, callListingCtx
+                yield jobFqdn, jobDevParam, apiDefCtxs, callListingCtx
         ]
     let createApiResetInfo (terms:string array) (sys:DsSystem) =
         if terms.Contains("|>") || terms.Contains("<|") then

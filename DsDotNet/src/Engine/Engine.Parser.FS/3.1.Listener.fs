@@ -643,7 +643,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             failWithLog msg
                 updatedTaskDev
 
-            for jobNameFqdn, jobParam, apiDefCtxs, callListingCtx in callListings do
+            for jobNameFqdn, jobDevParam, apiDefCtxs, callListingCtx in callListings do
                 let jobName = jobNameFqdn.CombineDequoteOnDemand()
 
                 let apiDefs =
@@ -724,7 +724,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 let job = Job(jobNameFqdn, system, taskList)
-                job.JobParam <- jobParam
+                job.JobParam <- jobDevParam
 
                 job |> system.Jobs.Add
 
@@ -884,6 +884,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 t.Average.Iter( fun x -> real.DsTime.AVG <- Some (float x))
                 t.Std.Iter(     fun x -> real.DsTime.STD <- Some (float x))
+
+
+        let fillErrors (system: DsSystem) (listErrorsCtx: List<dsParser.ErrorsBlockContext> ) =
+            let fqdnErrors = getErrors listErrorsCtx
+            for fqdn, t in fqdnErrors do
+                match system.Jobs.TryFind(fun f->f.DequotedQualifiedName = fqdn.Combine()) with
+                | Some job ->
+                    job.JobTime <- JobTime()|>Some 
+                    job.JobTime.Value.MIN <- t.MinTime
+                    job.JobTime.Value.MAX <- t.MaxTime
+                    job.JobTime.Value.CHK <- t.CheckDelayTime
+                | None -> failWithLog $"Couldn't find target job object name {fqdn.Combine()}"
         
         let fillRepeats (system: DsSystem) (listRepeatCtx: List<dsParser.RepeatsBlockContext> ) =
             let fqdnRepeats = getRepeats listRepeatCtx
@@ -923,6 +935,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem  
             //Real에 Repeats 채우기
             ctx.Descendants<RepeatsBlockContext>() .ToList() |> fillRepeats  theSystem
+            //Job에 errors (JobTime)채우기
+            ctx.Descendants<ErrorsBlockContext>() .ToList() |> fillErrors theSystem
 
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem

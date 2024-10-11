@@ -158,6 +158,9 @@ module ModelTests1 =
         [<Test>]
         member __.``Model component [Repeats] test`` () =
             compareExact ParserTest.Repeats
+        [<Test>]
+        member __.``Model component [Errors] test`` () =
+            compareExact ParserTest.Errors
 
         [<Test>]
         member __.``Model ERROR duplication test`` () =

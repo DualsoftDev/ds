@@ -729,8 +729,8 @@ namespace Engine
         [prop] = {
         
             [errors] = {
-                STN1.Device1.ADV = {MIN(0.01), MAX(1.2), CHK(0.5)};
-                STN1.Device2.ADV = {CHK(0.5)};
+                STN1.Device1.ADV = {CHK(0.5)};
+                STN1.Device2.ADV = {MAX(0.7), CHK(0.5)};
             }
         }
         [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]

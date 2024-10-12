@@ -56,9 +56,9 @@ module DsType =
         | ErrorSensorOn
         | ErrorSensorOff
         | ErrorOnTimeOver
-        | ErrorOnTimeShortage
+        | ErrorOnTimeUnder
         | ErrorOffTimeOver
-        | ErrorOffTimeShortage
+        | ErrorOffTimeUnder
         | ErrGoingOrigin
         | MotionStart
         | MotionEnd

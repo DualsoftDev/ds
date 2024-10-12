@@ -57,9 +57,9 @@ module ConvertHMI =
             let tm = x.TagManager :?> CoinVertexTagManager
             {
                 Name = x.Name
-                TimeOnShortageErrorLamp  = getLamp  tm (i VertexTag.txErrOnTimeShortage)
+                TimeOnShortageErrorLamp  = getLamp  tm (i VertexTag.txErrOnTimeUnder)
                 TimeOnOverErrorLamp      = getLamp  tm (i VertexTag.txErrOnTimeOver)
-                TimeOffShortageErrorLamp = getLamp  tm (i VertexTag.txErrOffTimeShortage)
+                TimeOffShortageErrorLamp = getLamp  tm (i VertexTag.txErrOffTimeUnder)
                 TimeOffOverErrorLamp     = getLamp  tm (i VertexTag.txErrOffTimeOver)
 
                 ShortErrorLamp           = getLamp  tm (i VertexTag.rxErrShort)

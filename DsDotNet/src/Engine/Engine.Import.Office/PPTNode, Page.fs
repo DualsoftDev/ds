@@ -146,8 +146,8 @@ module PptNodeModule =
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
-            call.TargetJob.JobTime <- jobTime
-
+            if jobTime.IsSome then
+                call.TargetJob.JobTime <- jobTime.Value
 
 
         member x.JobPure : string seq =
@@ -289,7 +289,11 @@ module PptNodeModule =
                 
             let updateJobTime() =
                 match GetSquareBrackets(shape.InnerText, false) with
-                | Some text -> jobTime <- getJobTime text
+                | Some text -> 
+                    let jobT = getJobTime text
+                    if not(jobT.IsDefault)
+                    then
+                        jobTime <- Some jobT
                 | None -> ()
                 
             let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
@@ -342,7 +346,7 @@ module PptNodeModule =
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
-                    //Dev1[3(3,3)].Api(!300, 200)[MAX(1.2), MIN(0,01), CHK(0.5)]
+                    //Dev1[3(3,3)].Api(!300, 200)[Max(1.2), CHK(0.5)]
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
                     let names = callNAutoPreName.Split('.').ToFSharpList()
                     let prop =

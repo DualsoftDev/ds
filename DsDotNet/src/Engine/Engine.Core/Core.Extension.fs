@@ -400,9 +400,9 @@ module CoreExtensionModule =
         member x.ErrorSensorOn        = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)       |> snd
         member x.ErrorSensorOff       = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)      |> snd
         member x.ErrorOnTimeOver      = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeOver)     |> snd
-        member x.ErrorOnTimeShortage  = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeShortage) |> snd
+        member x.ErrorOnTimeUnder     = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeUnder) |> snd
         member x.ErrorOffTimeOver     = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeOver)    |> snd
-        member x.ErrorOffTimeShortage = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeShortage)|> snd
+        member x.ErrorOffTimeUnder    = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeUnder)|> snd
 
     let inValidTaskDevTags (x:DsSystem) =
         x.Jobs

@@ -21,12 +21,7 @@ type VertexTagManager with
             )
             <&&> call.SafetyExpr
 
-        let rst =
-            if call.UsingTon then
-                (v.TDON.DN.Expr <&&> dop) <||> (call.End <&&> mop)
-            else
-                call.End
-
+        let rst =  call.End
         let parentReal = call.Parent.GetCore() :?> Vertex
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
 
@@ -51,7 +46,8 @@ type VertexTagManager with
                 let call = coin.Vertex.TryGetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
-                let sets = v.RR.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
+                let start = !@real.V.ErrTRX.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
+                let sets = v.RR.Expr  <&&> start
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, f)
         |]
@@ -59,14 +55,14 @@ type VertexTagManager with
     member v.D2_DAGTailStart() =
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Except(real.Graph.Inits).Select(getVMCall).ToArray()
-
         [|
             let f = getFuncName()
             for coin in coins do
                 let call = coin.Vertex.TryGetPureCall().Value
                 let safety = call.SafetyExpr
                 let autoPreExpr = call.AutoPreExpr
-                let sets = coin.Vertex.GetStartDAGAndCausals()  <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
+                let start = !@real.V.ErrTRX.Expr <&&>  v.G.Expr <&&> safety <&&> autoPreExpr
+                let sets = coin.Vertex.GetStartDAGAndCausals() <&&> start
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, f)
         |]
@@ -84,7 +80,7 @@ type VertexTagManager with
                 else 
 
                     let setStart = coin.ST.Expr <&&> real.V.G.Expr
-                    let setEnd =  call.End
+                    let setEnd =  call.End <&&> !@real.V.ErrTRX.Expr 
 
                      //아날로그 전용 job 은 기다리지 않고 값 성립하면 Coin 뒤집기
                     if call.IsAnalog then

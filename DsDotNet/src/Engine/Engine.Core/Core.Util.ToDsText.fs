@@ -455,16 +455,15 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
 
-            let errorJobs = system.Jobs.Where(fun f -> f.JobTime.IsSome)
+            let errorJobs = system.Jobs.Where(fun f -> not(f.JobTime.IsDefault))
             let errors =
                 [
                     if errorJobs.Any() then
                         yield $"{tab2}[errors] = {lb}"
                         for job in errorJobs do
-                            let min   = job.JobTime.Value.MIN |> map (fun v -> $"MIN({v})") |? ""
-                            let max   = job.JobTime.Value.MAX |> map (fun v -> $"MAX({v})") |? ""
-                            let chk   = job.JobTime.Value.CHK |> map (fun v -> $"CHK({v})") |? ""
-                            let paras = [min; max; chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
+                            let max = job.JobTime.Max  |> map (fun v -> $"MAX({v})") |? ""
+                            let chk = job.JobTime.Check  |> map (fun v -> $"CHK({v})") |? ""
+                            let paras = [max;chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
                             yield $"""{tab3}{job.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines

@@ -37,7 +37,7 @@ module ConvertCPU =
             if IsSpec (v, RealInFlow, AliasFalse) then
                 let vr = v.TagManager :?> RealVertexTagManager
                 yield vr.M1_OriginMonitor()
-                yield vr.E4_RealErrorTotalMonitor()
+                yield vr.E4_RealErrTotalMonitor()
 
                 yield  vr.R1_RealInitialStart()
                 yield! vr.R2_RealJobComplete()
@@ -79,10 +79,10 @@ module ConvertCPU =
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield! vc.E1_CallErrTimeOver()
-                yield! vc.E2_CallErrTimeShortage()
-                yield! vc.E3_CallErrorRXMonitor()
-                yield  vc.E5_CallErrorTotalMonitor()
+                if (v:?>Call).IsJob then
+                    yield! vc.E1_CallErrTimeOver()
+                    yield! vc.E2_CallErrRXMonitor()
+                    yield  vc.E3_CallErrTotalMonitor()
 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager

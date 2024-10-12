@@ -48,9 +48,9 @@ module DBLoggerApi =
                 let errOpen            = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.rxErrOpen)
                 let errShort           = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.rxErrShort)
                 let errOnTimeOver      = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeOver)
-                let errOnTimeShortage  = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeShortage)
+                let errOnTimeUnder     = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeUnder)
                 let errOffTimeOver     = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
-                let errOffTimeShortage = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeShortage)
+                let errOffTimeUnder    = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeUnder)
                 let isTrue(opt:bool Option) = opt.IsSome && opt.Value
 
                 let errs =
@@ -58,9 +58,9 @@ module DBLoggerApi =
                         if isTrue(errOpen)            then yield $"{call.Name} 센서오프이상"
                         if isTrue(errShort)           then yield $"{call.Name} 센서감지이상"
                         if isTrue(errOnTimeOver)      then yield $"{call.Name} 감지시간초과 이상"
-                        if isTrue(errOnTimeShortage)  then yield $"{call.Name} 감지시간부족 이상"
+                        if isTrue(errOnTimeUnder)     then yield $"{call.Name} 감지시간부족 이상"
                         if isTrue(errOffTimeOver)     then yield $"{call.Name} 해지시간초과 이상"
-                        if isTrue(errOffTimeShortage) then yield $"{call.Name} 해지시간부족 이상"
+                        if isTrue(errOffTimeUnder)    then yield $"{call.Name} 해지시간부족 이상"
                     |]
 
                 info.ErrorMessages.AddRange errs

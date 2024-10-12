@@ -131,38 +131,41 @@ module ListnerCommonFunctionGeneratorUtil =
         }
 
     type ErrorDefinition = {
-        MinTime: float option
-        MaxTime: float option
+        MinOnTime: float option
+        MinOffTime: float option
+        MaxOnTime: float option
+        MaxOffTime: float option
         CheckDelayTime: float option
     }
-    type ErrorParam =
-            | MIN of float
-            | MAX of float
-            | CHK of float
 
     let getErrors (listErrorCtx: List<dsParser.ErrorsBlockContext>) : seq<string list * ErrorDefinition> =
         let parseErrorParams (name, errorParams: string) : ErrorDefinition =
-            let regex = new Regex(@"(MIN|MAX|CHK)\((\d+(\.\d+)?)\)")
-
+            let regex = new Regex(@"(MINON|MINOFF|MAXON|MAXOFF|CHK)\((\d+(\.\d+)?)\)")
             let matches = regex.Matches(errorParams)
 
-            let extractParam (minT, maxT, chkT) (paramType, value) =
+            // 변경 가능한 사전(Dictionary) 생성하여 초기화
+            let parameters = Dictionary<string, float option>()
+
+            // 전체 매칭 개수가 입력된 파라미터 개수와 동일하지 않으면 예외 발생
+            let expectedMatches = errorParams.Split([| ')' |], StringSplitOptions.RemoveEmptyEntries).Length
+            if matches.Count <> expectedMatches then
+                failWithLog $"Invalid error parameters found in input: {errorParams}"
+
+            // 매칭된 값을 Dictionary에 저장
+            for m in matches do
+                let paramType = m.Groups.[1].Value
+                let value = m.Groups.[2].Value |> float
                 validateDecimalPlaces name value
-                match paramType with
-                | "MIN" -> Some value, maxT, chkT
-                | "MAX" -> minT, Some value, chkT
-                | "CHK" -> minT, maxT, Some value
-                | _ -> minT, maxT, chkT
+                parameters[paramType] <- Some value
 
-            let initial = (None, None, None)
-
-            let (minT, maxT, chkT) =
-                matches
-                |> Seq.cast<Match>
-                |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value |> float))
-                |> Seq.fold extractParam initial
-
-            { MinTime = minT; MaxTime = maxT; CheckDelayTime = chkT }
+            // ErrorDefinition 생성하여 반환
+            {
+                MinOnTime      = if parameters.ContainsKey("MINON") then   parameters["MINON"]    else None
+                MinOffTime     = if parameters.ContainsKey("MINOFF") then  parameters["MINOFF"]   else None
+                MaxOnTime      = if parameters.ContainsKey("MAXON") then   parameters["MAXON"]    else None
+                MaxOffTime     = if parameters.ContainsKey("MAXOFF") then  parameters["MAXOFF"]   else None
+                CheckDelayTime = if parameters.ContainsKey("CHK") then     parameters["CHK"]      else None
+            }
 
         seq {
             for ctx in listErrorCtx do

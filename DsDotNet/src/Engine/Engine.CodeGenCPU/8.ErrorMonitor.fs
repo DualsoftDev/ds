@@ -9,44 +9,57 @@ open Dual.Common.Core.FS
 
 type VertexTagManager with
 
-        //test ahn 구현 필요  onTimeOver ,  offTimeOver 2구현 필요 Job.JobTime.MAX 이용
     member v.E1_CallErrTimeOver() =
         let v= v :?> CoinVertexTagManager
+        let fn = getFuncName()
         let call= v.Vertex.GetPure() :?> Call
-        let vOff = v._off.Expr
-
+        let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
+                                .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
+        
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
-        let fn = getFuncName()
+        let runningMaxOn  = v.MM.Expr <&&> !@iop
+        let runningMaxOff = v.MM.Expr <&&> !@iop <&&> !@callMutualOns 
 
         [|
-            let running = v.MM.Expr <&&> !@call.End <&&> !@iop
-            yield running --@ (v.TOUT, v.System._tout.Value, fn)
-            if RuntimePackage.PCSIM = RuntimeDS.Package then
-                yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
-            else 
-                yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , fn)
-        |]
-        //test ahn 구현 필요  onTimeShortagem,  offTimeShortage 2구현 필요 Job.JobTime.MAX 이용
-    member v.E2_CallErrTimeShortage() =
-        //let v= v :?> CoinVertexTagManager
-        //let call= v.Vertex.GetPure() :?> Call
-        //let vOff = v._off.Expr
+            (*TimeMaxOn*)
+            yield runningMaxOn --@ (v.TimeMaxOn, call.TimeMaxOnMSec, fn)
+            yield (v.TimeMaxOn.DN.Expr, rst) ==| (v.ErrOnTimeOver ,fn)
 
-        //let iop = call.V.Flow.iop.Expr
-        //let rst = v.Flow.ClearExpr
-        //let fn = getFuncName()
+            (*TimeMaxOff*)
+            yield runningMaxOff --@ (v.TimeMaxOff, call.TimeMaxOffMSec, fn)
+            yield (v.TimeMaxOff.DN.Expr, rst) ==| (v.ErrOffTimeOver , fn)
+        |]
+
+
+
+    member v.E2_CallErrTimeUnder() =
+        let v= v :?> CoinVertexTagManager
+        let call= v.Vertex.GetPure() :?> Call
+        let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
+                                .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
+        
+        let iop = call.V.Flow.iop.Expr
+        let rst = v.Flow.ClearExpr
+        let running = (v.MM.Expr <||> call.End) <&&> !@iop
 
         [|
-            //let running = v.MM.Expr <&&> !@call.End <&&> !@iop
-            //yield running --@ (v.TOUT, v.System._tout.Value, fn)
-            //if RuntimePackage.PCSIM = RuntimeDS.Package then
-            //    yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
-            //else 
-            //    yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOffTimeShortage , fn)
+            (*TimeMinOnMSec*)
+            if call.TimeMinOnMSec <> 0u 
+            then
+                yield running --@ (v.TimeMinOn, call.TimeMinOnMSec, getFuncName())
+                yield (!@v.TimeMinOn.DN.Expr <&&> v.G.Expr <&&> v.ET.Expr, rst) ==| (v.ErrOnTimeUnder ,getFuncName())
+
+            (*TimeMinOffMSec*)
+            if call.TimeMinOffMSec <> 0u 
+            then
+                yield running --@ (v.TimeMinOff, call.TimeMinOffMSec, getFuncName())
+                yield (!@v.TimeMinOff.DN.Expr <&&> v.G.Expr <&&> !@callMutualOns , rst) ==| (v.ErrOffTimeUnder ,getFuncName())
         |]
 
-    member v.E3_CallErrorRXMonitor() =
+
+
+    member v.E3_CallErrRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         let v = v:?> CoinVertexTagManager
@@ -79,14 +92,14 @@ type VertexTagManager with
         
 
 
-    member v.E4_RealErrorTotalMonitor() =
+    member v.E4_RealErrTotalMonitor() =
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
          
         (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
 
    
-    member v.E5_CallErrorTotalMonitor() =
+    member v.E5_CallErrTotalMonitor() =
         let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())

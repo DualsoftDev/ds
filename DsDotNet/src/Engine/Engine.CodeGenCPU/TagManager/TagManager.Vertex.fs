@@ -119,9 +119,9 @@ module TagManagerModule =
             | VertexTag.errorTRx   -> x.ErrTRX :> IStorage
             | VertexTag.pause      -> x.PA     :> IStorage
 
-            | VertexTag.txErrOnTimeShortage  -> callM().ErrOnTimeShortage  :> IStorage
+            | VertexTag.txErrOnTimeUnder  -> callM().ErrOnTimeUnder  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
-            | VertexTag.txErrOffTimeShortage -> callM().ErrOffTimeShortage :> IStorage
+            | VertexTag.txErrOffTimeUnder -> callM().ErrOffTimeUnder :> IStorage
             | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver     :> IStorage
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
@@ -255,13 +255,19 @@ module TagManagerModule =
         ///Timer time
         member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
 
+        ///Timer time
+        member val TimeMinOn  = timer  s ($"{v.QualifiedName}_TimeMinOn"|>validStorageName) sys (sysManager.TargetType)
+        member val TimeMaxOn  = timer  s ($"{v.QualifiedName}_TimeMaxOn"|>validStorageName) sys (sysManager.TargetType)
+        member val TimeMinOff = timer  s ($"{v.QualifiedName}_TimeMinOff"|>validStorageName) sys (sysManager.TargetType)
+        member val TimeMaxOff = timer  s ($"{v.QualifiedName}_TimeMaxOff"|>validStorageName) sys (sysManager.TargetType)
+        member val TimeCheck  = timer  s ($"{v.QualifiedName}_TimeCheck"|>validStorageName) sys (sysManager.TargetType)
 
         member val MM   = createTag  false VertexTag.callMemo
 
 
-        member val ErrOnTimeShortage  = createTag true VertexTag.txErrOnTimeShortage
+        member val ErrOnTimeUnder     = createTag true VertexTag.txErrOnTimeUnder
         member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver
-        member val ErrOffTimeShortage = createTag true VertexTag.txErrOffTimeShortage
+        member val ErrOffTimeUnder    = createTag true VertexTag.txErrOffTimeUnder
         member val ErrOffTimeOver     = createTag true VertexTag.txErrOffTimeOver
 
         member val ErrShort           = createTag true VertexTag.rxErrShort
@@ -279,9 +285,9 @@ module TagManagerModule =
 
         member x.ErrorList =
             [|
-                if x.ErrOnTimeShortage.Value  then yield "감지시간부족"
+                if x.ErrOnTimeUnder.Value  then yield "감지시간부족"
                 if x.ErrOnTimeOver.Value      then yield "감지시간초과"
-                if x.ErrOffTimeShortage.Value then yield "해지시간부족"
+                if x.ErrOffTimeUnder.Value then yield "해지시간부족"
                 if x.ErrOffTimeOver.Value     then yield "해지시간초과"
                 if x.ErrShort.Value           then yield "센서감지"
                 if x.ErrOpen.Value            then yield "센서오프"

@@ -227,9 +227,9 @@ type TagKindExt =
                 , VertexTag.workErrOriginGoing
 
                 , VertexTag.txErrOnTimeOver
-                , VertexTag.txErrOnTimeShortage
+                , VertexTag.txErrOnTimeUnder
                 , VertexTag.txErrOffTimeOver
-                , VertexTag.txErrOffTimeShortage
+                , VertexTag.txErrOffTimeUnder
                 )
         | _ -> false
 

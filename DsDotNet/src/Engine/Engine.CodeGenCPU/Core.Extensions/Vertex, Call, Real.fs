@@ -68,6 +68,12 @@ module ConvertCpuVertex =
             else
                 c.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
+        member c.TimeMinOnMSec   = c.TargetJob.JobTime.TimeMinOnMSec
+        member c.TimeMinOffMSec  = c.TargetJob.JobTime.TimeMinOffMSec
+        member c.TimeMaxOnMSec   = c.TargetJob.JobTime.TimeMaxOnMSec
+        member c.TimeMaxOffMSec  = c.TargetJob.JobTime.TimeMaxOffMSec
+        member c.TimeCheckMSec = c.TargetJob.JobTime.TimeCheckMSec
+
         member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None
         member c.End = c.EndAction.DefaultValue(c.EndPlan)
 
@@ -137,9 +143,9 @@ module ConvertCpuVertex =
             let vmc = getVMCall(c)
             [|
                 vmc.ErrOnTimeOver
-                vmc.ErrOnTimeShortage
+                vmc.ErrOnTimeUnder
                 vmc.ErrOffTimeOver
-                vmc.ErrOffTimeShortage
+                vmc.ErrOffTimeUnder
                 vmc.ErrShort
                 vmc.ErrOpen
             |]
@@ -185,16 +191,16 @@ module ConvertCpuVertex =
         member r.CoinAlloffExpr = !@r.V.CoinAnyOnST.Expr <&&> !@r.V.CoinAnyOnRT.Expr <&&> !@r.V.CoinAnyOnET.Expr
 
         member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeOver)
-        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeShortage)
+        member r.ErrOnTimeUnders   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeUnder)
 
         member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeOver)
-        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeShortage)
+        member r.ErrOffTimeUnders   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeUnder)
 
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOpen)
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrShort)
 
-        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeShortages
-                            @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages
+        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeUnders
+                            @ r.ErrOffTimeOvers @ r.ErrOffTimeUnders
                             @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
 
 [<Extension>]

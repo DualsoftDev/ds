@@ -24,20 +24,20 @@ type Spec15_ErrorStatement() =
     [<Test>]
     member __.``E2 Call Error TX Shortage  Monitor`` () =
          for coin in t.Coins do
-            coin.E2_CallErrTimeShortage() |> doChecks
+            coin.E2_CallErrTimeUnder() |> doChecks
 
     [<Test>]
     member __.``E3 Call Error RX Monitor`` () =
         for coin in t.InRealCalls do
-            coin.V.E3_CallErrorRXMonitor() |> doChecks
+            coin.V.E3_CallErrRXMonitor() |> doChecks
 
     [<Test>]
     member __.``E4_Real Error Total Monitor`` () =
          for real in t.Reals do
-            real.E4_RealErrorTotalMonitor() |> doCheck
+            real.E4_RealErrTotalMonitor() |> doCheck
 
     [<Test>]
     member __.``E5_Call Error Total Monitor`` () =
         for call in t.Coins do
-            call.E5_CallErrorTotalMonitor() |> doCheck
+            call.E5_CallErrTotalMonitor() |> doCheck
 

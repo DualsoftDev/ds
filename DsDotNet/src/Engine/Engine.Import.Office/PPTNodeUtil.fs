@@ -180,7 +180,7 @@ module PptNodeUtilModule =
             | Some t when (t*1000.0) % 10.0 <> 0.0 -> failWithLog $"{contents} Invalid time format: must be in increments of 10ms"
             | _ -> goingSec
 
-        let getJobTime (contents: string) : JobTime option =
+        let getJobTime (contents: string) : JobTime  =
             let parseFloat (txt: string) =
                 match Double.TryParse(txt.Trim()) with
                 | true, value -> Some value
@@ -191,19 +191,21 @@ module PptNodeUtilModule =
                 if m.Success then parseFloat m.Groups.[1].Value else None
 
             // 각 값을 추출하는 정규식 패턴 설정
-            let maxPattern = @"MAX\((\d+(\.\d+)?)\)"
-            let minPattern = @"MIN\((\d+(\.\d+)?)\)"
+            let maxOnPattern = @"MAXON\((\d+(\.\d+)?)\)"
+            let maxOffPattern = @"MAXOFF\((\d+(\.\d+)?)\)"
+            let minOnPattern = @"MINON\((\d+(\.\d+)?)\)"
+            let minOffPattern = @"MINOFF\((\d+(\.\d+)?)\)"
             let chkPattern = @"CHK\((\d+(\.\d+)?)\)"
 
             // JobTime 객체 생성 및 값 설정
             let jobTime = JobTime()
-            jobTime.MAX <- parseValue maxPattern
-            jobTime.MIN <- parseValue minPattern
-            jobTime.CHK <- parseValue chkPattern
+            jobTime.MaxOn  <- parseValue maxOnPattern
+            jobTime.MaxOff <- parseValue maxOffPattern
+            jobTime.MinOn  <- parseValue minOnPattern
+            jobTime.MinOff <- parseValue minOffPattern
+            jobTime.Check  <- parseValue chkPattern
 
-            // 모든 값이 None이면 None 반환, 아니면 JobTime 객체 반환
-            if jobTime.MAX.IsNone && jobTime.MIN.IsNone && jobTime.CHK.IsNone then None
-            else Some jobTime
+            jobTime
 
         let getBracketItems (name: string) =
                 name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")

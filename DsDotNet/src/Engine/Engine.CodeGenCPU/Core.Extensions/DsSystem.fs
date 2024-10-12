@@ -122,17 +122,17 @@ module ConvertCpuDsSystem =
                 cv.ErrShort.Address             <- getMemory  cv.ErrShort target
                 cv.ErrOpen.Address              <- getMemory  cv.ErrOpen  target
                 cv.ErrOnTimeOver.Address        <- getMemory  cv.ErrOnTimeOver  target
-                cv.ErrOnTimeShortage.Address    <- getMemory  cv.ErrOnTimeShortage target
+                cv.ErrOnTimeUnder.Address    <- getMemory  cv.ErrOnTimeUnder target
                 cv.ErrOffTimeOver.Address       <- getMemory  cv.ErrOffTimeOver target
-                cv.ErrOffTimeShortage.Address   <- getMemory  cv.ErrOffTimeShortage target
+                cv.ErrOffTimeUnder.Address   <- getMemory  cv.ErrOffTimeUnder target
 
                 [|
                     ErrorSensorOn,        (cv.ErrShort           :> IStorage)
                     ErrorSensorOff,       (cv.ErrOpen            :> IStorage)
                     ErrorOnTimeOver,      (cv.ErrOnTimeOver      :> IStorage)
-                    ErrorOnTimeShortage,  (cv.ErrOnTimeShortage  :> IStorage)
+                    ErrorOnTimeUnder,  (cv.ErrOnTimeUnder  :> IStorage)
                     ErrorOffTimeOver,     (cv.ErrOffTimeOver     :> IStorage)
-                    ErrorOffTimeShortage, (cv.ErrOffTimeShortage :> IStorage)
+                    ErrorOffTimeUnder, (cv.ErrOffTimeUnder :> IStorage)
                 |]
                 |> call.ExternalTags.AddRange
                 |> x.VerifyAdded

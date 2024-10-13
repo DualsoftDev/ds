@@ -4,6 +4,8 @@
 		<TargetFrameworks>net48;net8.0</TargetFrameworks>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
         <Compile Include="AssemblyInfo.fs" />

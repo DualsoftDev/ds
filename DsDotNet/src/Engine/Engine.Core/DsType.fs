@@ -118,7 +118,7 @@ module DsType =
         getRemoveText name startIdx endIdx
 
     /// 마지막 대괄호 그룹 제거
-    let GetLastBracketRelaceName (name: string) =
+    let GetLastBracketRemoveName (name: string) =
         let startIdx, endIdx = FindEnclosedGroup(name, '[', ']', false)
         getRemoveText name startIdx endIdx
 
@@ -153,7 +153,7 @@ module DsType =
     /// [yy]xx[xxx]Name[1,3] => xx[xxx]Name
     /// 앞뒤가 아닌 대괄호는 사용자 이름 뒷단에서 "xx[xxx]Name" 처리
     let GetBracketsRemoveName (name: string) =
-        name |> GetLastBracketRelaceName  |> GetHeadBracketRemoveName
+        name |> GetLastBracketRemoveName  |> GetHeadBracketRemoveName
 
     let GetLastParenthesesRemoveName (name: string) =
         GetLastParenthesesReplaceName (name ,  "" )

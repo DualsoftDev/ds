@@ -26,7 +26,7 @@ module PptNodeModule =
             .Where(fun m->m.Page = iPage)
             .Iter(fun m-> macroUpdateName <- macroUpdateName.Replace($"{m.Macro}", $"{m.MacroRelace}"))
 
-        macroUpdateName|> GetHeadBracketRemoveName |> GetLastBracketRelaceName |> trimSpaceNewLine //ppt “ ” 입력 호환
+        macroUpdateName|> GetHeadBracketRemoveName |> trimSpaceNewLine //ppt “ ” 입력 호환
 
     type PptNode private(
         shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq
@@ -286,17 +286,9 @@ module PptNodeModule =
                 realGoingTime <- getRealTime shape.InnerText
                 realRepeatCnt <- getRepeatCount shape.InnerText
 
+      
                 
-            let updateJobTime() =
-                match GetSquareBrackets(shape.InnerText, false) with
-                | Some text -> 
-                    let jobT = getJobTime text
-                    if not(jobT.IsDefault)
-                    then
-                        jobTime <- Some jobT
-                | None -> ()
-                
-            let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
+            let namePure(shape:Shape) = GetLastBracketRemoveName(GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "")) |> trimSpaceNewLine
             let name =
                 let nameTrim  = String.Join(".", namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
                 GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
@@ -313,8 +305,7 @@ module PptNodeModule =
 
                     if nodeType = REAL 
                     then updateTime()
-                    elif nodeType = CALL
-                    then updateJobTime()
+                 
 
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
 
@@ -346,21 +337,25 @@ module PptNodeModule =
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
-                    //Dev1[3(3,3)].Api(!300, 200)[Max(1.2), CHK(0.5)]
+                    //Dev1[3(3,3)].Api(!300, 200)[PUSH, Max(1.2), CHK(0.5)]
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
-                    let names = callNAutoPreName.Split('.').ToFSharpList()
-                    let prop =
+                    let names = GetLastBracketRemoveName(callNAutoPreName).Split('.').ToFSharpList()
+                    let devProp, apiProp =
                         match names with
-                        | n1::n2::[] -> n1
-                        | n1::n2::n3::[] -> n2
+                        | n1::n2::[] -> n1, n2
+                        | n1::n2::n3::[] -> n2, n3
                         | _ ->
                             failwith $"Error: {callNAutoPreName}"
 
                     let jobPram =
-                        let lbc = prop |> GetLastBracketContents    // e.g "5(5,1)"
-                        if lbc <> "" then
-                            let cntPara =    lbc |> GetLastParenthesesRemoveName    // e.g "5"
-                            let cntOptPara = lbc |> GetLastParenthesesContents      // e.g "5,1"
+                        let devP = devProp |> GetLastBracketContents    // e.g "[5(5,1)]"
+                        let apiP = apiProp |> GetLastParenthesesContents    // e.g "(!200, 300)"
+                        let jobP = callNAutoPreName|>GetLastBracketContents   // e.g "[PUSH, Max(1.2), CHK(0.5)]"
+                        if devP = "" && apiP = "" && jobP = "" then
+                            defaultJobParam()
+                        else
+                            let cntPara =    devP |> GetLastParenthesesRemoveName    // e.g "5"
+                            let cntOptPara = devP |> GetLastParenthesesContents      // e.g "5,1"
                             let paraText =  // e.g "N5(5,1)"
                                 match  cntPara,  cntOptPara with
                                 | "", "" -> ""
@@ -368,11 +363,16 @@ module PptNodeModule =
                                 | _ , "" -> $"{TextJobMulti}{cntPara}"
                                 | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
 
-                            let jobNegative = if cntOptPara.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
-                            getParserJobType(paraText + jobNegative)
+                            let jobNegative = if apiP.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
+                            let jobPush     = if jobP.Contains(TextJobPush) then $";{TextJobPush}" else ""
+                            
+                            let jobT = getJobTime jobP
+                            if not(jobT.IsDefault)
+                            then
+                                jobTime <- Some jobT
 
-                        else
-                            defaultJobParam()
+                            getParserJobType(paraText + jobNegative + jobPush)
+
 
                     jobDevParam <- jobPram
             with ex ->

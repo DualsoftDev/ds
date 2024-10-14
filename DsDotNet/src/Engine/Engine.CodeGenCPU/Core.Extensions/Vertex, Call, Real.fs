@@ -68,7 +68,7 @@ module ConvertCpuVertex =
 
         member c.TimeOutMaxMSec     = c.TargetJob.JobTime.TimeOutMaxMSec
         member c.TimeDelayCheckMSec = c.TargetJob.JobTime.TimeDelayCheckMSec
-        member c.UsingTimeDelayCheck     = c.TargetJob.JobTime.TimeDelayCheckMSec > 0u
+        member c.UsingTimeDelayCheck  = c.IsJob && c.TargetJob.JobTime.TimeDelayCheckMSec > 0u
 
         member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None
         member c.EndWithoutTimer = c.EndAction.DefaultValue(c.EndPlan)

@@ -29,7 +29,7 @@ module DsText =
     let [<Literal>] TextSelfResetRev      = "<|="
 
 
-    let [<Literal>] TextJobPush = "P"
+    let [<Literal>] TextJobPush = "PUSH"
     let [<Literal>] TextJobNegative= "!"
     let [<Literal>] TextJobMulti = "N"
 

@@ -18,7 +18,7 @@ module ModelAnswers =
 }
 """
     let answerEveryScenarioText = """
-[sys] DS_Units_V9 = {
+[sys] DS_Units_V10 = {
     [flow] "시스템 모델링" = {
         "System B", "System A"; // island
     }
@@ -266,10 +266,10 @@ module ModelAnswers =
     }
     [flow] "9 Action 출력 옵션" = {
         Work1 = {
-            System1."Api1[-]"; // island
+            System1.Api1; // island
         }
         Work2 = {
-            System1."Api1[P]"; // island
+            System2.ADV, System2.RET; // island
         }
     }
     [flow] "10 Action 설정 값" = {
@@ -303,11 +303,11 @@ module ModelAnswers =
             Action."1", Action."2"; // island
         }
         Work2 = {
-            Action."1"; // island
+            Action."1", Action."2"; // island
         }
     }
     [flow] "14 Work 설정시간" = {
-        Work1, Work2, Work3; // island
+        Work1; // island
     }
     [flow] "15 Work 데이터전송" = {
         Work1_1 > Work31 => Work4_1;		// Work1_1(Alias)> Work31(Real) => Work4_1(Alias);
@@ -360,77 +360,106 @@ module ModelAnswers =
     [flow] "7 외부호출" = {
         Script1, Script2, MotionRET, MotionADV; // island
     }
+    [flow] "8 Error 설정시간" = {
+        Work1 = {
+            DEV1.ADV; // island
+        }
+        Work2 = {
+            DEV2.ADV; // island
+        }
+        Work3 = {
+            DEV3.ADV; // island
+        }
+        Work4 = {
+            DEV4.ADV, DEV4.RET; // island
+        }
+    }
+    [flow] "9 Negative 입력 옵션" = {
+        Work1 = {
+            System1."Api1(IN300_OUT400)"; // island
+        }
+        Work2 = {
+            System1."Api1(IN300_OUT400)"; // island
+        }
+    }
     [jobs] = {
-        "1 작업 및 행위".RBT.투입 = (%IX0.0.7, %QX0.1.7);
-        "1 작업 및 행위".RBT.홈 = (%IX0.0.8, %QX0.1.8);
-        "1 작업 및 행위 유닛".Device.Action1 = (%IX0.0.4, -);
-        "1 작업 및 행위 유닛".RBT.투입 = (%IX0.0.5, %QX0.1.5);
-        "1 작업 및 행위 유닛".RBT.홈 = (%IX0.0.6, %QX0.1.6);
-        "2 행위 (Action) 배치".RBT.투입 = (%IX0.0.21, %QX0.1.21);
-        "2 행위 (Action) 배치".RBT.홈 = (%IX0.0.22, %QX0.1.22);
-        "2 행위 (Action) 배치 유닛".Device.Action1 = (%IX0.0.17, %QX0.1.17);
-        "2 행위 (Action) 배치 유닛".Device.Action2 = (%IX0.0.18, %QX0.1.18);
-        "2 행위 (Action) 배치 유닛".RBT.투입 = (%IX0.0.19, %QX0.1.19);
-        "2 행위 (Action) 배치 유닛".RBT.홈 = (%IX0.0.20, %QX0.1.20);
-        "3 작업 (Work) 타입".RBT.투입 = (%IX0.0.29, %QX0.1.29);
-        "3 작업 (Work) 타입".RBT.홈 = (%IX0.0.30, %QX0.1.30);
-        "3 작업 (Work) 타입 유닛".RBT.투입 = (%IX0.0.27, %QX0.1.27);
-        "3 작업 (Work) 타입 유닛".RBT.홈 = (%IX0.0.28, %QX0.1.28);
-        "4 행위 (Action) 타입".RBT.투입 = (%IX0.0.38, %QX0.1.38);
-        "4 행위 (Action) 타입".RBT.홈 = (%IX0.0.39, %QX0.1.39);
-        "4 행위 (Action) 타입 유닛".System1.Api1 = (%IX0.0.37, %QX0.1.37);
-        "4 행위 (Action) 타입 유닛".RBT.투입 = (%IX0.0.35, %QX0.1.35);
-        "4 행위 (Action) 타입 유닛".RBT.홈 = (%IX0.0.36, %QX0.1.36);
-        "5 시스템 인터페이스".드릴장치.드릴링A위치 = (%IX0.0.49, %QX0.1.49);
-        "5 시스템 인터페이스".드릴장치.드릴링B위치 = (%IX0.0.50, %QX0.1.50);
-        "5 시스템 인터페이스 유닛".드릴장치.드릴링A위치 = (%IX0.0.46, %QX0.1.46);
-        "5 시스템 인터페이스 유닛".드릴장치.드릴링B위치 = (%IX0.0.47, %QX0.1.47);
-        "5 시스템 인터페이스 유닛".Device1.Api1 = (%IX0.0.48, -);
-        "1 기본 연결 Unit".드릴장치.드릴링A위치 = (%IX0.0.0, %QX0.1.0);
-        "1 기본 연결 Unit".드릴장치.드릴링B위치 = (%IX0.0.1, %QX0.1.1);
-        "1 기본 연결 Unit".RBT.투입 = (%IX0.0.2, %QX0.1.2);
-        "1 기본 연결 Unit".RBT.홈 = (%IX0.0.3, %QX0.1.3);
-        "2 StartReset 연결 Unit".드릴장치.드릴링A위치 = (%IX0.0.23, %QX0.1.23);
-        "2 StartReset 연결 Unit".드릴장치.드릴링B위치 = (%IX0.0.24, %QX0.1.24);
-        "2 StartReset 연결 Unit".RBT.투입 = (%IX0.0.25, %QX0.1.25);
-        "2 StartReset 연결 Unit".RBT.홈 = (%IX0.0.26, %QX0.1.26);
-        "3 Interlock 연결 Unit".드릴장치.드릴링A위치 = (%IX0.0.31, %QX0.1.31);
-        "3 Interlock 연결 Unit".드릴장치.드릴링B위치 = (%IX0.0.32, %QX0.1.32);
-        "3 Interlock 연결 Unit".RBT.투입 = (%IX0.0.33, %QX0.1.33);
-        "3 Interlock 연결 Unit".RBT.홈 = (%IX0.0.34, %QX0.1.34);
-        "4 SelfReset 연결 Unit".드릴장치.드릴링A위치 = (%IX0.0.42, %QX0.1.42);
-        "4 SelfReset 연결 Unit".드릴장치.드릴링B위치 = (%IX0.0.43, %QX0.1.43);
-        "4 SelfReset 연결 Unit".RBT.투입 = (%IX0.0.44, %QX0.1.44);
-        "4 SelfReset 연결 Unit".RBT.홈 = (%IX0.0.45, %QX0.1.45);
-        "5 Group 연결 Unit".드릴장치.드릴링A위치 = (%IX0.0.51, %QX0.1.51);
-        "5 Group 연결 Unit".드릴장치.드릴링B위치 = (%IX0.0.52, %QX0.1.52);
-        "5 Group 연결 Unit".RBT.투입 = (%IX0.0.53, %QX0.1.53);
-        "5 Group 연결 Unit".RBT.홈 = (%IX0.0.54, %QX0.1.54);
-        "4 Safety 조건".System1.Api1 = (%IX0.0.40, %QX0.1.40);
-        "4 Safety 조건".System1.Api2 = (%IX0.0.41, %QX0.1.41);
-        "6 멀티 Action".System1.Api1 = (%IX0.0.59, %QX0.1.59);
-        "6 멀티 Action".System.Api[N4(4, 4)] = { "6 멀티 Action__System_01".Api(%IX0.0.55, %QX0.1.55); "6 멀티 Action__System_02".Api(%IX0.0.56, %QX0.1.56); "6 멀티 Action__System_03".Api(%IX0.0.57, %QX0.1.57); "6 멀티 Action__System_04".Api(%IX0.0.58, %QX0.1.58); }
-        "7 멀티 Action Skip IO".SystemA.Api[N4(4, 4)] = { "7 멀티 Action Skip IO__SystemA_01".Api(%IX0.0.60, %QX0.1.60); "7 멀티 Action Skip IO__SystemA_02".Api(%IX0.0.61, %QX0.1.61); "7 멀티 Action Skip IO__SystemA_03".Api(%IX0.0.62, %QX0.1.62); "7 멀티 Action Skip IO__SystemA_04".Api(%IX0.0.63, %QX0.1.63); }
-        "7 멀티 Action Skip IO".SystemB."Api2(IN230 < x < 3214_OUT500)" = (%ID1025:230 < x < 3214, %QD1025:500);
-        "8 Action 인터페이스 옵션".System1.Api1[N1(1, 0)] = { "8 Action 인터페이스 옵션__System1".Api1(%IX0.2.0, -); }
-        "8 Action 인터페이스 옵션".System1.Api2[N1(0, 1)] = { "8 Action 인터페이스 옵션__System1".Api2(-, %QX0.3.0); }
+        "1 작업 및 행위".RBT.투입 = (P00007, P00047);
+        "1 작업 및 행위".RBT.홈 = (P00008, P00048);
+        "1 작업 및 행위 유닛".Device.Action1 = (P00004, -);
+        "1 작업 및 행위 유닛".RBT.투입 = (P00005, P00045);
+        "1 작업 및 행위 유닛".RBT.홈 = (P00006, P00046);
+        "2 행위 (Action) 배치".RBT.투입 = (P00015, P00055);
+        "2 행위 (Action) 배치".RBT.홈 = (P00016, P00056);
+        "2 행위 (Action) 배치 유닛".Device.Action1 = (P00011, P00051);
+        "2 행위 (Action) 배치 유닛".Device.Action2 = (P00012, P00052);
+        "2 행위 (Action) 배치 유닛".RBT.투입 = (P00013, P00053);
+        "2 행위 (Action) 배치 유닛".RBT.홈 = (P00014, P00054);
+        "3 작업 (Work) 타입".RBT.투입 = (P0001D, P0005D);
+        "3 작업 (Work) 타입".RBT.홈 = (P0001E, P0005E);
+        "3 작업 (Work) 타입 유닛".RBT.투입 = (P0001B, P0005B);
+        "3 작업 (Work) 타입 유닛".RBT.홈 = (P0001C, P0005C);
+        "4 행위 (Action) 타입".RBT.투입 = (P00026, P00066);
+        "4 행위 (Action) 타입".RBT.홈 = (P00027, P00067);
+        "4 행위 (Action) 타입 유닛".System1.Api1 = (P00025, P00065);
+        "4 행위 (Action) 타입 유닛".RBT.투입 = (P00023, P00063);
+        "4 행위 (Action) 타입 유닛".RBT.홈 = (P00024, P00064);
+        "5 시스템 인터페이스".드릴장치.드릴링A위치 = (P00031, P00071);
+        "5 시스템 인터페이스".드릴장치.드릴링B위치 = (P00032, P00072);
+        "5 시스템 인터페이스 유닛".드릴장치.드릴링A위치 = (P0002E, P0006E);
+        "5 시스템 인터페이스 유닛".드릴장치.드릴링B위치 = (P0002F, P0006F);
+        "5 시스템 인터페이스 유닛".Device1.Api1 = (P00030, -);
+        "1 기본 연결 Unit".드릴장치.드릴링A위치 = (P00000, P00040);
+        "1 기본 연결 Unit".드릴장치.드릴링B위치 = (P00001, P00041);
+        "1 기본 연결 Unit".RBT.투입 = (P00002, P00042);
+        "1 기본 연결 Unit".RBT.홈 = (P00003, P00043);
+        "2 StartReset 연결 Unit".드릴장치.드릴링A위치 = (P00017, P00057);
+        "2 StartReset 연결 Unit".드릴장치.드릴링B위치 = (P00018, P00058);
+        "2 StartReset 연결 Unit".RBT.투입 = (P00019, P00059);
+        "2 StartReset 연결 Unit".RBT.홈 = (P0001A, P0005A);
+        "3 Interlock 연결 Unit".드릴장치.드릴링A위치 = (P0001F, P0005F);
+        "3 Interlock 연결 Unit".드릴장치.드릴링B위치 = (P00020, P00060);
+        "3 Interlock 연결 Unit".RBT.투입 = (P00021, P00061);
+        "3 Interlock 연결 Unit".RBT.홈 = (P00022, P00062);
+        "4 SelfReset 연결 Unit".드릴장치.드릴링A위치 = (P0002A, P0006A);
+        "4 SelfReset 연결 Unit".드릴장치.드릴링B위치 = (P0002B, P0006B);
+        "4 SelfReset 연결 Unit".RBT.투입 = (P0002C, P0006C);
+        "4 SelfReset 연결 Unit".RBT.홈 = (P0002D, P0006D);
+        "5 Group 연결 Unit".드릴장치.드릴링A위치 = (P00033, P00073);
+        "5 Group 연결 Unit".드릴장치.드릴링B위치 = (P00034, P00074);
+        "5 Group 연결 Unit".RBT.투입 = (P00035, P00075);
+        "5 Group 연결 Unit".RBT.홈 = (P00036, P00076);
+        "4 Safety 조건".System1.Api1 = (P00028, P00068);
+        "4 Safety 조건".System1.Api2 = (P00029, P00069);
+        "6 멀티 Action".System1.Api1 = (P0003B, P0007B);
+        "6 멀티 Action".System.Api[N4(4, 4)] = { "6 멀티 Action__System_01".Api(P00037, P00077); "6 멀티 Action__System_02".Api(P00038, P00078); "6 멀티 Action__System_03".Api(P00039, P00079); "6 멀티 Action__System_04".Api(P0003A, P0007A); }
+        "7 멀티 Action Skip IO".SystemA.Api[N4(4, 4)] = { "7 멀티 Action Skip IO__SystemA_01".Api(P0003C, P0007C); "7 멀티 Action Skip IO__SystemA_02".Api(P0003D, P0007D); "7 멀티 Action Skip IO__SystemA_03".Api(P0003E, P0007E); "7 멀티 Action Skip IO__SystemA_04".Api(P0003F, P0007F); }
+        "7 멀티 Action Skip IO".SystemB."Api2(IN230 < x < 3214_OUT500)" = (P0066:230 < x < 3214, P0130:500);
+        "8 Action 인터페이스 옵션".System1.Api1[N1(1, 0)] = { "8 Action 인터페이스 옵션__System1".Api1(P00040, -); }
+        "8 Action 인터페이스 옵션".System1.Api2[N1(0, 1)] = { "8 Action 인터페이스 옵션__System1".Api2(-, P00080); }
         "8 Action 인터페이스 옵션".System1.Api3[N1(0, 0)] = { "8 Action 인터페이스 옵션__System1".Api3(-, -); }
         "8 Action 인터페이스 옵션".System1.Api4[N1(0, 0)] = { "8 Action 인터페이스 옵션__System1".Api4(-, -); }
-        "9 Action 출력 옵션".System1."Api1[-]" = (%IX0.2.1, %QX0.3.1);
-        "9 Action 출력 옵션".System1."Api1[P]" = (%IX0.2.2, %QX0.3.2);
-        "10 Action 설정 값".System1.Api1 = (%IX0.0.9, %QX0.1.9);
-        "10 Action 설정 값".System1."Api2(IN100_OUT500)" = (%ID1024:100, %QD1024:500);
-        "11 외부 행위 (Action) 배치".System1.Api1 = (%IX0.0.10, %QX0.1.10);
-        "11 외부 행위 (Action) 배치".System1.Api2 = (%IX0.0.11, %QX0.1.11);
-        "11 외부 행위 (Action) 배치".System1.Api3 = (%IX0.0.12, -);
-        "13 행위 사용 안함".Action."1" = (%IX0.0.13, %QX0.1.13);
-        "13 행위 사용 안함".Action."2" = (%IX0.0.14, %QX0.1.14);
-        "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)".System1.Api1 = (%IX0.0.15, %QX0.1.15);
-        "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)".System1.Api2 = (%IX0.0.16, %QX0.1.16);
+        "9 Action 출력 옵션".System1.Api1 = (P00048, P00088);
+        "9 Action 출력 옵션".System2.ADV[PUSH] = { "9 Action 출력 옵션__System2".ADV(P00049, P00089); }
+        "9 Action 출력 옵션".System2.RET = (P0004A, P0008A);
+        "10 Action 설정 값".System1.Api1 = (P00009, P00049);
+        "10 Action 설정 값".System1."Api2(IN100_OUT500)" = (P0064:100, P0128:500);
+        "11 외부 행위 (Action) 배치".System1.Api1 = (P0000A, P0004A);
+        "11 외부 행위 (Action) 배치".System1.Api2 = (P0000B, P0004B);
+        "11 외부 행위 (Action) 배치".System1.Api3 = (P0000C, -);
+        "13 행위 사용 안함".Action."1" = (P0000D, P0004D);
+        "13 행위 사용 안함".Action."2" = (P0000E, P0004E);
+        "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)".System1.Api1 = (P0000F, P0004F);
+        "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)".System1.Api2 = (P00010, P00050);
         "1 외부 주소".Device1.ADV = (P00000, P00040);
         "1 외부 주소".Device1.RET = (P00001, P00041);
         "6 심볼 정의".Device1.ADV = (P00000:Dev1ADV_I:Boolean, P00040:Dev1ADV_O:Boolean);
         "6 심볼 정의".Device1."RET(OUT300)" = (P00001:Dev1RET_I:Boolean, P00041:Dev1RET_O:Int32:300);
+        "8 Error 설정시간".DEV1.ADV = (P00041, P00081);
+        "8 Error 설정시간".DEV3.ADV = (P00043, P00083);
+        "8 Error 설정시간".DEV4.ADV[PUSH; N2(2, 2)] = { "8 Error 설정시간__DEV4_01".ADV(P00044, P00084); "8 Error 설정시간__DEV4_02".ADV(P00046, P00086); }
+        "8 Error 설정시간".DEV2.ADV = (P00042, P00082);
+        "8 Error 설정시간".DEV4.RET[N2(2, 2)] = { "8 Error 설정시간__DEV4_01".RET(P00045, P00085); "8 Error 설정시간__DEV4_02".RET(P00047, P00087); }
+        "9 Negative 입력 옵션".System1."Api1(IN300_OUT400)" = (P0068:300, P0132:400);
     }
     [variables] = {
         Int32 VARIABLE1;
@@ -483,78 +512,78 @@ module ModelAnswers =
     }
     [buttons] = {
         [a] = {
-            AutoSelect(%MX1000, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; }
-            AutoBTN1(%MX1001, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
+            AutoSelect(M62500, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; "8 Error 설정시간"; "9 Negative 입력 옵션"; }
+            AutoBTN1(M62501, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
             AutoBTN2(M00628, -) = { "4 버튼 IO"; }
         }
         [m] = {
-            ManualSelect(%MX1002, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; }
-            ManualBTN1(%MX1003, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
+            ManualSelect(M62502, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; "8 Error 설정시간"; "9 Negative 입력 옵션"; }
+            ManualBTN1(M62503, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
             ManualBTN2(M00629, -) = { "4 버튼 IO"; }
         }
         [d] = {
-            DrivePushBtn(%MX1004, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; }
-            DriveBTN1(%MX1005, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
+            DrivePushBtn(M62504, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; "8 Error 설정시간"; "9 Negative 입력 옵션"; }
+            DriveBTN1(M62505, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
             DriveBTN2(M0062A, -) = { "4 버튼 IO"; }
         }
         [e] = {
-            EmergencyBtn(%MX1006, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; }
-            EmergencyBTN1(%MX1007, -) = { "2 시스템 버튼 램프 유닛"; }
-            "EmergencyBTN1 "(%MX1008:False, -) = { "3 시스템 버튼 램프 확장"; }
+            EmergencyBtn(M62506, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; "8 Error 설정시간"; "9 Negative 입력 옵션"; }
+            EmergencyBTN1(M62507, -) = { "2 시스템 버튼 램프 유닛"; }
+            "EmergencyBTN1 "(M62508:False, -) = { "3 시스템 버튼 램프 확장"; }
             EmergencyBTN2(M0062D, -) = { "4 버튼 IO"; }
         }
         [t] = {
-            TestBTN1(%MX1009, -) = { "2 시스템 버튼 램프 유닛"; }
-            "TestBTN1 "(%MD2048:777, -) = { "3 시스템 버튼 램프 확장"; }
+            TestBTN1(M62509, -) = { "2 시스템 버튼 램프 유닛"; }
+            "TestBTN1 "(M50016:777, -) = { "3 시스템 버튼 램프 확장"; }
             TestBTN2(M0062C, -) = { "4 버튼 IO"; }
         }
         [r] = {
-            ReadyBTN1(%MX1056, -) = { "2 시스템 버튼 램프 유닛"; }
-            "ReadyBTN1 "(%MD2112:10 < x < 333, -) = { "3 시스템 버튼 램프 확장"; }
+            ReadyBTN1(M62540, -) = { "2 시스템 버튼 램프 유닛"; }
+            "ReadyBTN1 "(M50048:10 < x < 333, -) = { "3 시스템 버튼 램프 확장"; }
             ReadyBTN2(M0062C, -) = { "4 버튼 IO"; }
         }
         [p] = {
-            PausePushBtn(%MX1120, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; }
-            PauseBTN1(%MX1121, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
+            PausePushBtn(M62580, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; "8 Error 설정시간"; "9 Negative 입력 옵션"; }
+            PauseBTN1(M62581, -) = { "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; }
             PauseBTN2(M0062B, -) = { "4 버튼 IO"; }
         }
         [c] = {
-            ClearPushBtn(%MX1122, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; }
-            ClearBTN1(%MX1123, -) = { "2 시스템 버튼 램프 유닛"; }
-            "ClearBTN1 "(%MX1124:False, -) = { "3 시스템 버튼 램프 확장"; }
+            ClearPushBtn(M62582, -) = { "시스템 모델링"; "모델링 기본 구성"; "모델링 확장 구성1"; "모델링 확장 구성2"; "모델링 구조 Unit"; "기본 도형 Unit"; "1 작업 및 행위"; "1 작업 및 행위 유닛"; "2 행위 (Action) 배치"; "2 행위 (Action) 배치 유닛"; "3 작업 (Work) 타입"; "3 작업 (Work) 타입 유닛"; "4 행위 (Action) 타입"; "4 행위 (Action) 타입 유닛"; "5 시스템 인터페이스"; "5 시스템 인터페이스 유닛"; "기본 연결 Unit"; "1 기본 연결 Unit"; "2 StartReset 연결 Unit"; "3 Interlock 연결 Unit"; "4 SelfReset 연결 Unit"; "5 Group 연결 Unit"; "확장 도형 Unit"; "1 외부 시스템 로딩"; "2 시스템 버튼 램프"; "2 시스템 버튼 램프 유닛"; "3 시스템 버튼 램프 확장"; "4 시스템 외부조건"; "4 시스템 외부조건 유닛"; "5 시스템 외부액션 유닛"; "7 시스템 외부액션 타겟 Value"; "4 Safety 조건"; "5 Work 초기조건"; "6 멀티 Action"; "7 멀티 Action Skip IO"; "8 Action 인터페이스 옵션"; "9 Action 출력 옵션"; "10 Action 설정 값"; "11 외부 행위 (Action) 배치"; "12 내부 행위 (Action) 배치"; "13 행위 사용 안함"; "14 Work 설정시간"; "15 Work 데이터전송"; "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)"; "IO Table"; "1 외부 주소"; "2 내부 변수_상수"; "3 내부 연산_명령"; "4 버튼 IO"; "5 램프 IO"; "6 심볼 정의"; "7 외부호출"; "8 Error 설정시간"; "9 Negative 입력 옵션"; }
+            ClearBTN1(M62583, -) = { "2 시스템 버튼 램프 유닛"; }
+            "ClearBTN1 "(M62584:False, -) = { "3 시스템 버튼 램프 확장"; }
             ClearBTN2(M0062C, -) = { "4 버튼 IO"; }
         }
         [h] = {
-            HomeBTN1(%MX1125, -) = { "2 시스템 버튼 램프 유닛"; }
-            "HomeBTN1 "(%MX1126, -) = { "3 시스템 버튼 램프 확장"; }
+            HomeBTN1(M62585, -) = { "2 시스템 버튼 램프 유닛"; }
+            "HomeBTN1 "(M62586, -) = { "3 시스템 버튼 램프 확장"; }
             HomeBTN2(M0062C, -) = { "4 버튼 IO"; }
         }
     }
     [lamps] = {
-        [a] = { AutoModeLamp(-, %MX1127) = {  } }
-        [m] = { ManualModeLamp(-, %MX1128) = {  } }
-        [d] = { DriveLamp(-, %MX1129) = {  } }
-        [e] = { ErrorLamp(-, %MX1130) = {  } }
-        [r] = { ReadyStateLamp(-, %MX1131) = {  } }
-        [i] = { IdleModeLamp(-, %MX1132) = {  } }
-        [o] = { OriginStateLamp(-, %MX1133) = {  } }
+        [a] = { AutoModeLamp(-, M62587) = {  } }
+        [m] = { ManualModeLamp(-, M62588) = {  } }
+        [d] = { DriveLamp(-, M62589) = {  } }
+        [e] = { ErrorLamp(-, M6258A) = {  } }
+        [r] = { ReadyStateLamp(-, M6258B) = {  } }
+        [i] = { IdleModeLamp(-, M6258C) = {  } }
+        [o] = { OriginStateLamp(-, M6258D) = {  } }
     }
     [conditions] = {
         [r] = {
-            Condition1(%MX1134, -) = { "4 시스템 외부조건 유닛"; }
-            Condition2(%MX1135, -) = { "4 시스템 외부조건 유닛"; }
+            Condition1(M6258E, -) = { "4 시스템 외부조건 유닛"; }
+            Condition2(M6258F, -) = { "4 시스템 외부조건 유닛"; }
         }
         [d] = {
-            Condition3(%MX1136, -) = { "4 시스템 외부조건 유닛"; }
-            Condition4(%MX1137, -) = { "4 시스템 외부조건 유닛"; }
+            Condition3(M62590, -) = { "4 시스템 외부조건 유닛"; }
+            Condition4(M62591, -) = { "4 시스템 외부조건 유닛"; }
         }
     }
     [actions] = {
         [e] = {
-            EmgAction1(-, %MX1138) = { "5 시스템 외부액션 유닛"; }
-            EmgAction2(-, %MX1139) = { "5 시스템 외부액션 유닛"; }
-            EmgAction3(-, %MX1140:False) = { "7 시스템 외부액션 타겟 Value"; }
-            EmgAction4(-, %MD2176:3000) = { "7 시스템 외부액션 타겟 Value"; }
+            EmgAction1(-, M62592) = { "5 시스템 외부액션 유닛"; }
+            EmgAction2(-, M62593) = { "5 시스템 외부액션 유닛"; }
+            EmgAction3(-, M62594:False) = { "7 시스템 외부액션 타겟 Value"; }
+            EmgAction4(-, M50080:3000) = { "7 시스템 외부액션 타겟 Value"; }
         }
         [p] = {
             PauseAction1(_, _) = { "5 시스템 외부액션 유닛"; }
@@ -609,13 +638,20 @@ module ModelAnswers =
             "7 멀티 Action Skip IO__SystemA_04" = (257, 540, 563, 244);
             "7 멀티 Action Skip IO__SystemB" = (1099, 540, 563, 244);
             "8 Action 인터페이스 옵션__System1" = (1100, 785, 563, 192);
-            "9 Action 출력 옵션__System1" = (1099, 556, 563, 192);
+            "9 Action 출력 옵션__System1" = (257, 556, 563, 192);
+            "9 Action 출력 옵션__System2" = (1172, 816, 563, 162);
+            "1 외부 주소__Device1" = (306, 773, 436, 108);
+            "6 심볼 정의__Device1" = (1483, 294, 246, 64);
+            "8 Error 설정시간__DEV1" = (412, 601, 281, 96);
+            "8 Error 설정시간__DEV3" = (412, 866, 281, 108);
+            "8 Error 설정시간__DEV4_01" = (1577, 820, 330, 98);
+            "8 Error 설정시간__DEV4_02" = (1577, 820, 330, 98);
+            "8 Error 설정시간__DEV2" = (1255, 601, 281, 96);
             "10 Action 설정 값__System1" = (1115, 650, 563, 244);
             "11 외부 행위 (Action) 배치__System1" = (962, 607, 307, 130);
             "13 행위 사용 안함__Action" = (1105, 730, 209, 93);
             "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)__System1" = (127, 640, 439, 94);
-            "1 외부 주소__Device1" = (306, 773, 436, 108);
-            "6 심볼 정의__Device1" = (1483, 294, 246, 64);
+            "9 Negative 입력 옵션__System1" = (1099, 556, 563, 192);
         }
         [motions] = {
             "7 외부호출".MotionRET = {./Assets/Cylinder/DoubleType.obj:RET};
@@ -627,11 +663,18 @@ module ModelAnswers =
         }
         [times] = {
             "14 Work 설정시간".Work1 = {AVG(0.1)};
-            "14 Work 설정시간".Work2 = {AVG(1)};
-            "14 Work 설정시간".Work3 = {AVG(0.1)};
+        }
+        [errors] = {
+            "8 Error 설정시간".DEV1.ADV = {MAX(10)};
+            "8 Error 설정시간".DEV3.ADV = {MAX(10), CHK(0.5)};
+            "8 Error 설정시간".DEV4.ADV = {MAX(10), CHK(0.5)};
+            "8 Error 설정시간".DEV2.ADV = {CHK(0.5)};
         }
         [finish] = {
             "5 Work 초기조건".Work1;
+        }
+        [disable] = {
+            "13 행위 사용 안함".Work2."Action.2";
         }
         [notrans] = {
             "5 Group 연결 Unit".Work2;
@@ -677,13 +720,20 @@ module ModelAnswers =
     [device file="./dsLib/AutoGen/7 멀티 Action Skip IO__SystemB.ds"] "7 멀티 Action Skip IO__SystemB"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/7 멀티 Action Skip IO__SystemB.ds
     [device file="./dsLib/AutoGen/8 Action 인터페이스 옵션__System1.ds"] "8 Action 인터페이스 옵션__System1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/8 Action 인터페이스 옵션__System1.ds
     [device file="./dsLib/AutoGen/9 Action 출력 옵션__System1.ds"] "9 Action 출력 옵션__System1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/9 Action 출력 옵션__System1.ds
+    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
+        "9 Action 출력 옵션__System2",
+        "1 외부 주소__Device1",
+        "6 심볼 정의__Device1",
+        "8 Error 설정시간__DEV1",
+        "8 Error 설정시간__DEV3",
+        "8 Error 설정시간__DEV4_01",
+        "8 Error 설정시간__DEV4_02",
+        "8 Error 설정시간__DEV2"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
     [device file="./dsLib/AutoGen/10 Action 설정 값__System1.ds"] "10 Action 설정 값__System1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/10 Action 설정 값__System1.ds
     [device file="./dsLib/AutoGen/11 외부 행위 (Action) 배치__System1.ds"] "11 외부 행위 (Action) 배치__System1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/11 외부 행위 (Action) 배치__System1.ds
     [device file="./dsLib/AutoGen/13 행위 사용 안함__Action.ds"] "13 행위 사용 안함__Action"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/13 행위 사용 안함__Action.ds
     [device file="./dsLib/AutoGen/16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)__System1.ds"] "16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)__System1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/16 Auto Pre 조건(자동운전시 전제조건 수동조작가능)__System1.ds
-    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
-        "1 외부 주소__Device1",
-        "6 심볼 정의__Device1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
+    [device file="./dsLib/AutoGen/9 Negative 입력 옵션__System1.ds"] "9 Negative 입력 옵션__System1"; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/AutoGen/9 Negative 입력 옵션__System1.ds
 }
 //DS Library Date = [Library Release Date 24.3.26]
 """

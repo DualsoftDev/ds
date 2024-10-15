@@ -349,7 +349,7 @@ module rec CoreModule =
 
             member val Finished:bool = false with get, set
             member val NoTransData:bool = false with get, set
-            member val RepeatCount:int option= None with get, set
+            member val RepeatCount:UInt32 option= None with get, set
 
         type Real with
             static member Create(name: string, flow) =

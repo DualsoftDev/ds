@@ -661,9 +661,9 @@ namespace Engine
 
     [prop] = {
         [times] = {
-                F.Work1 = {AVG(2)};
-                F.Work2 = {AVG(1)};
-                F.Work3 = {AVG(0.1), STD(1)};
+                F.Work1 = {AVG(2000ms)};
+                F.Work2 = {AVG(1000ms)};
+                F.Work3 = {AVG(100ms), STD(10ms)};
                    }
         }
     }
@@ -729,8 +729,8 @@ namespace Engine
         [prop] = {
         
             [errors] = {
-                STN1.Device1.ADV = {CHK(0.5)};
-                STN1.Device2.ADV = {MAX(0.7), CHK(0.5)};
+                STN1.Device1.ADV = {CHK(500ms)};
+                STN1.Device2.ADV = {MAX(700ms), CHK(500ms)};
             }
         }
         [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]

@@ -52,8 +52,8 @@ module PptNodeModule =
         , jobTime           : JobTime option
         , ifTX              : string
         , ifRX              : string
-        , realGoingTime     : float option
-        , realRepeatCnt     : int option
+        , realGoingTime     : CountUnitType option
+        , realRepeatCnt     : CountUnitType option
         , name              : string
     ) =
 
@@ -225,8 +225,8 @@ module PptNodeModule =
 
             let mutable ifTX = ""
             let mutable ifRX = ""
-            let mutable realGoingTime:float option = None
-            let mutable realRepeatCnt:int option = None
+            let mutable realGoingTime:CountUnitType option = None
+            let mutable realRepeatCnt:CountUnitType option = None
             let mutable jobTime:JobTime option = None
 
             let updateSafety (barckets: string) =
@@ -282,10 +282,10 @@ module PptNodeModule =
                 | None ->
                     failWithLog $"{ErrID._53} {shape.InnerText}"
 
-            let updateTime() =
-                realGoingTime <- getRealTime shape.InnerText
-                realRepeatCnt <- getRepeatCount shape.InnerText
-
+            let updateTimeNCounter() =
+                let contents = GetLastBracketContents (shape.InnerText)
+                realGoingTime <- parseUIntMSec contents TextTIME
+                realRepeatCnt <- parseUIntMSec contents TextCOUNT
       
                 
             let namePure(shape:Shape) = GetLastBracketRemoveName(GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "")) |> trimSpaceNewLine
@@ -304,7 +304,7 @@ module PptNodeModule =
                     | None -> ()
 
                     if nodeType = REAL 
-                    then updateTime()
+                    then updateTimeNCounter()
                  
 
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
@@ -332,12 +332,12 @@ module PptNodeModule =
                             | _, Some a -> addActionDic.Add(n |> TrimSpace, a)
                             | _ -> failWithLog $"{t} is Error Type")
 
-                | REALExF -> updateTime()
+                | REALExF -> updateTimeNCounter()
                 | (LAYOUT | AUTOPRE | DUMMY) -> ()
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
-                    //Dev1[3(3,3)].Api(!300, 200)[PUSH, Max(1.2), CHK(0.5)]
+                    //Dev1[3(3,3)].Api(!300, 200)[PUSH, MAX(1200ms), CHK(500ms)]
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
                     let names = GetLastBracketRemoveName(callNAutoPreName).Split('.').ToFSharpList()
                     let devProp, apiProp =
@@ -350,7 +350,7 @@ module PptNodeModule =
                     let jobPram =
                         let devP = devProp |> GetLastBracketContents    // e.g "[5(5,1)]"
                         let apiP = apiProp |> GetLastParenthesesContents    // e.g "(!200, 300)"
-                        let jobP = callNAutoPreName|>GetLastBracketContents   // e.g "[PUSH, Max(1.2), CHK(0.5)]"
+                        let jobP = callNAutoPreName|>GetLastBracketContents   // e.g "[PUSH, MAX(1200ms), CHK(500ms)]]"
                         if devP = "" && apiP = "" && jobP = "" then
                             defaultJobParam()
                         else

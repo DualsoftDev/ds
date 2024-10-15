@@ -27,13 +27,13 @@ type LibraryPptLoaderExt =
 
                     let sys = ImportPpt.GetDSFromPptWithLib(file, true, pptParms).System
                     let relPath = Net48Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
-                    let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
+                    //let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
                     for item in sys.ApiItems do
                         if infos.ContainsKey item.Name
                         then
                             failwithf $"{sys.Name}에 해당하는 [{item.Name}] 인터페이스 이름은 중복({infos[item.Name]}) 됩니다."
                         else
-                            infos.Add(item.Name, PathManager.getValidFile relPathAddLibDirPath)
+                            infos.Add(item.Name, PathManager.getValidFile relPath)
 
             { Version = informationalLib; LibraryInfos = infos }
             |> SaveLibraryConfig configPath

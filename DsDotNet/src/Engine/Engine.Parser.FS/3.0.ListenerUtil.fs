@@ -87,37 +87,21 @@ module ListnerCommonFunctionGeneratorUtil =
         }
 
     type TimeDefinition = {
-        Average: float option
-        Std: float option
+        Average: CountUnitType option
+        Std: CountUnitType option
     }
-
-    type TimeParam =
-            | AVG of float
-            | STD of float
-
 
     let getTimes (listTimeCtx: List<dsParser.TimesBlockContext>) : seq<string list * TimeDefinition> =
         let parseTimeParams (name, timeParams: string) : TimeDefinition =
-            let regex = new Regex(@"(AVG|STD|TON)\((\d+(\.\d+)?)\)")
+            try
+                let TimeDefinition = {
+                    Average       = parseUIntMSec timeParams TextAVG
+                    Std           = parseUIntMSec timeParams TextSTD
+                }
+                TimeDefinition
+            with ex 
+                -> failWithLog $"{name} {timeParams} {ex.Message}"
 
-            let matches = regex.Matches(timeParams)
-
-            let extractParam (avg, std) (paramType, value) =
-                validateDecimalPlaces name value
-                match paramType with
-                | "AVG" -> Some value, std
-                | "STD" -> avg, Some value
-                | _ -> avg, std
-
-            let initial = (None, None)
-
-            let (average, std) =
-                matches
-                |> Seq.cast<Match>
-                |> Seq.map (fun m -> (m.Groups.[1].Value, m.Groups.[2].Value |> float))
-                |> Seq.fold extractParam initial
-
-            { Average = average; Std = std;}
 
         seq {
             for ctx in listTimeCtx do
@@ -131,35 +115,21 @@ module ListnerCommonFunctionGeneratorUtil =
         }
 
     type ErrorDefinition = {
-        MaxTime: float option
-        CheckDelayTime: float option
+        MaxTime: CountUnitType option
+        CheckDelayTime: CountUnitType option
     }
 
     let getErrors (listErrorCtx: List<dsParser.ErrorsBlockContext>) : seq<string list * ErrorDefinition> =
         let parseErrorParams (name, errorParams: string) : ErrorDefinition =
-            let regex = new Regex(@"(MAX|CHK)\((\d+(\.\d+)?)\)")
-            let matches = regex.Matches(errorParams)
-
-            // 변경 가능한 사전(Dictionary) 생성하여 초기화
-            let parameters = Dictionary<string, float option>()
-
-            // 전체 매칭 개수가 입력된 파라미터 개수와 동일하지 않으면 예외 발생
-            let expectedMatches = errorParams.Split([| ')' |], StringSplitOptions.RemoveEmptyEntries).Length
-            if matches.Count <> expectedMatches then
-                failWithLog $"Invalid error parameters found in input: {errorParams}"
-
-            // 매칭된 값을 Dictionary에 저장
-            for m in matches do
-                let paramType = m.Groups.[1].Value
-                let value = m.Groups.[2].Value |> float
-                validateDecimalPlaces name value
-                parameters[paramType] <- Some value
-
             // ErrorDefinition 생성하여 반환
-            {
-                MaxTime       = if parameters.ContainsKey("MAX") then   parameters["MAX"]    else None
-                CheckDelayTime = if parameters.ContainsKey("CHK") then    parameters["CHK"]      else None
-            }
+            try
+                let errorDefinition = {
+                    MaxTime       = parseUIntMSec errorParams TextMAX
+                    CheckDelayTime = parseUIntMSec errorParams TextCHK
+                }
+                errorDefinition
+            with ex 
+                -> failWithLog $"{name} {errorParams} {ex.Message}"
 
         seq {
             for ctx in listErrorCtx do

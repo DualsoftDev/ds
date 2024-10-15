@@ -24,13 +24,13 @@ module TimeTestModule =
 
         let initializeGraph() =
             // DAG Group 1
-            let v0 = createVertex "V0" 0.0
-            let v1 = createVertex "V1" 1.0
-            let v2 = createVertex "V2" 2.0
-            let v3 = createVertex "V3" 3.0
-            let v4 = createVertex "V4" 4.0
-            let v5 = createVertex "V5" 5.0
-            let v6 = createVertex "V6" 6.0
+            let v0 = createVertex "V0" 0u
+            let v1 = createVertex "V1" 1u
+            let v2 = createVertex "V2" 2u
+            let v3 = createVertex "V3" 3u
+            let v4 = createVertex "V4" 4u
+            let v5 = createVertex "V5" 5u
+            let v6 = createVertex "V6" 6u
 
             createEdge v0 v1
             createEdge v1 v2
@@ -42,12 +42,12 @@ module TimeTestModule =
             createEdge v4 v5
 
             // DAG Group 2
-            let v7 = createVertex "V7" 7.0
-            let v8 = createVertex "V8" 8.0
-            let v9 = createVertex "V9" 9.0
-            let v10 = createVertex "V10" 10.0
-            let v11 = createVertex "V11" 0.0
-            let v12 = createVertex "V12" 0.0
+            let v7 = createVertex "V7" 7u
+            let v8 = createVertex "V8" 8u
+            let v9 = createVertex "V9" 9u
+            let v10 = createVertex "V10" 10u
+            let v11 = createVertex "V11" 0u
+            let v12 = createVertex "V12" 0u
 
             createEdge v7 v8
             createEdge v8 v9

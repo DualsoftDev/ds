@@ -142,65 +142,12 @@ module PptNodeUtilModule =
             | [| |] -> None
             | _ -> failWithLog "Only one repeat count entry is allowed"
 
-    
-        let getRealTime (contents: string) =
-            let parseSeconds (timeStr: string) : float option =
-                let timeStr = timeStr.ToLower().Trim()
-                let msPattern = @"(\d+(\.\d+)?)ms"
-                let secPattern = @"(\d+(\.\d+)?)sec"
-                let minPattern = @"(\d+(\.\d+)?)min"
-
-                let matchRegex pattern =
-                    let m = Regex.Match(timeStr, pattern)
-                    if m.Success then Some (m.Groups.[1].Value |> float) else None
-
-                match matchRegex msPattern with
-                | Some ms when ms < 10.0 -> failWithLog $"{timeStr} Invalid time format: must be 10ms or greater"
-                | Some ms -> Some (ms / 1000.0)
-                | None ->
-                    match matchRegex secPattern with
-                    | Some sec -> Some sec
-                    | None ->
-                        match matchRegex minPattern with
-                        | Some min -> Some (min * 60.0)
-                        | None -> None
-                           
-            let parts = (GetLastParenthesesContents contents).Split(',') |> Seq.choose parseSeconds
-    
-            // Check for invalid multiple time entries
-            if parts.length() > 1 then failWithLog "Only one time entry is allowed"
-
-            // Parse the single time entry if available
-            let goingSec =
-                if parts.IsEmpty then None
-                else parts.Head() |> Some
-    
-            // Ensure parsed time is in 1ms increments
-            match goingSec with
-            | Some t when (t*1000.0) % 10.0 <> 0.0 -> failWithLog $"{contents} Invalid time format: must be in increments of 10ms"
-            | _ -> goingSec
 
         let getJobTime (contents: string) : JobTime  =
-            let parseFloat (txt: string) =
-                match Double.TryParse(txt.Trim()) with
-                | true, value -> Some value
-                | _ -> None
-
-            let parseValue pattern =
-                let m = Regex.Match(contents, pattern)
-                if m.Success then parseFloat m.Groups.[1].Value else None
-
-            // 각 값을 추출하는 정규식 패턴 설정
-            let maxPattern = @"MAX\((\d+(\.\d+)?)\)"
-            let maxOffPattern = @"MAXOFF\((\d+(\.\d+)?)\)"
-            let minOnPattern = @"MINON\((\d+(\.\d+)?)\)"
-            let minOffPattern = @"MINOFF\((\d+(\.\d+)?)\)"
-            let chkPattern = @"CHK\((\d+(\.\d+)?)\)"
-
             // JobTime 객체 생성 및 값 설정
             let jobTime = JobTime()
-            jobTime.Max  <- parseValue maxPattern
-            jobTime.Check  <- parseValue chkPattern
+            jobTime.Max  <- parseUIntMSec contents TextMAX
+            jobTime.Check  <- parseUIntMSec contents TextCHK
 
             jobTime
 

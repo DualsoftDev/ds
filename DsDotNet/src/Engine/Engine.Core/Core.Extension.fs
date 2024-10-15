@@ -327,27 +327,28 @@ module CoreExtensionModule =
             )
             |> Seq.choose id
 
-    let getTime  (time:float option, nameFqdn:string)=
-        let maxShortSpeedSec = (float TimerModule.MinTickInterval) / 1000.0
+    let getTime  (time:uint32 option, nameFqdn:string)=
+        let maxShortSpeedMSec =TimerModule.MinTickInterval|>float
         let v =
             time |> bind(fun t ->
                 if RuntimeDS.Package.IsPackageSIM() then
                     match RuntimeDS.TimeSimutionMode  with
                     | TimeSimutionMode.TimeNone -> None
-                    | TimeSimutionMode.TimeX1 ->   Some (t * 1.0/1.0 )
-                    | TimeSimutionMode.TimeX2 ->   Some (t * 1.0/2.0 )
-                    | TimeSimutionMode.TimeX4 ->   Some (t * 1.0/4.0 )
-                    | TimeSimutionMode.TimeX8 ->   Some (t * 1.0/8.0 )
-                    | TimeSimutionMode.TimeX16 ->  Some (t * 1.0/16.0 )
-                    | TimeSimutionMode.TimeX100 -> Some (t * 1.0/100.0 )
-                    | TimeSimutionMode.TimeX0_1 -> Some (t * 1.0/0.1 )
-                    | TimeSimutionMode.TimeX0_5 -> Some (t * 1.0/0.5 )
+                    | TimeSimutionMode.TimeX1 ->   Some ((t|>float)* 1.0/1.0 )
+                    | TimeSimutionMode.TimeX2 ->   Some ((t|>float)* 1.0/2.0 )
+                    | TimeSimutionMode.TimeX4 ->   Some ((t|>float)* 1.0/4.0 )
+                    | TimeSimutionMode.TimeX8 ->   Some ((t|>float)* 1.0/8.0 )
+                    | TimeSimutionMode.TimeX16 ->  Some ((t|>float)* 1.0/16.0 )
+                    | TimeSimutionMode.TimeX100 -> Some ((t|>float)* 1.0/100.0 )
+                    | TimeSimutionMode.TimeX0_1 -> Some ((t|>float)* 1.0/0.1 )
+                    | TimeSimutionMode.TimeX0_5 -> Some ((t|>float)* 1.0/0.5 )
                 else
-                    Some t)
+                    Some (t|>float)
+                    )
 
-        if v.IsSome && v.Value < maxShortSpeedSec then
+        if v.IsSome && v.Value < maxShortSpeedMSec then
             failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {nameFqdn}
-                        \r\n[최소동작시간 : {maxShortSpeedSec}, 배속반영 동작 시간 : {v.Value}]"
+                        \r\n[최소동작시간 : {maxShortSpeedMSec}, 배속반영 동작 시간 : {v.Value}]"
         else
             v
 
@@ -361,7 +362,7 @@ module CoreExtensionModule =
             if x.TimeAvg.IsNone then
                 failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
             else
-                Convert.ToUInt32( x.TimeAvg.Value *1000.0 )
+                x.TimeAvg.Value|>uint32
 
         member x.TimeStd = x.DsTime.STD
 

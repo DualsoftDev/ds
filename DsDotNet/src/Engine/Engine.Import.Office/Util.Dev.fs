@@ -78,10 +78,10 @@ module ImportUtilForDev =
     //  > handleActionJob > getLibraryPathsAndParams > getNewDevice
     let getNewDevice (mySys:DsSystem) loadedName apiName =
         let curDir = currentFileName  |> Path.GetDirectoryName
-        let LibraryInfos, runDir = getLibraryInfos()
+        let libraryInfos, runDir = getLibraryInfos()
 
-        if LibraryInfos.ContainsKey(apiName) then
-            let libPath =  LibraryInfos.[apiName]
+        if libraryInfos.ContainsKey(apiName) then
+            let libPath =  libraryInfos.[apiName]
 
             let libAbsolutePath = Path.Combine(curDir, libPath)
             let curLibDir = Path.GetDirectoryName libAbsolutePath

@@ -882,8 +882,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for fqdn, t in fqdnTimes do
                 let real = (tryFindSystemInner system fqdn).Value :?> Real
 
-                t.Average.Iter( fun x -> real.DsTime.AVG <- Some (float x))
-                t.Std.Iter(     fun x -> real.DsTime.STD <- Some (float x))
+                t.Average.Iter( fun x -> real.DsTime.AVG <- Some (x))
+                t.Std.Iter(     fun x -> real.DsTime.STD <- Some (x))
 
 
         let fillErrors (system: DsSystem) (listErrorsCtx: List<dsParser.ErrorsBlockContext> ) =
@@ -900,7 +900,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for fqdn, t in fqdnRepeats do
                 let real = (tryFindSystemInner system fqdn).Value :?> Real
                 match UInt32.TryParse t with
-                | true, count -> real.RepeatCount <- Some (int count)
+                | true, count -> real.RepeatCount <- Some (count)
                 | _ -> failWithLog $"Repeat count must be a positive integer. {t} is not valid."
 
 

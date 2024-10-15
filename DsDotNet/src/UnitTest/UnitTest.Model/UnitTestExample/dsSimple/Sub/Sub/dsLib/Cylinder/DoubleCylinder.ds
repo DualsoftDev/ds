@@ -13,14 +13,16 @@
             FLOW.ADVANCE = {./Assets/Cylinder/DoubleType.obj:ADV};
         }
         [times] = {
-            FLOW.RETURN = {AVG(0.5)};
-            FLOW.ADVANCE = {AVG(0.5)};
+            FLOW.RETURN = {AVG(500ms)};
+            FLOW.ADVANCE = {AVG(500ms)};
         }
         [finish] = {
             FLOW.RETURN;
         }
     }
+    [versions] = {
+        DS-Langugage-Version = 1.0.0.1;
+        DS-Engine-Version = 0.9.9.9;
+    }
 }
-//DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.9.1]

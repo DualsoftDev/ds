@@ -415,8 +415,8 @@ module internal ToDsTextModule =
                     if timeReals.Any() then
                         yield $"{tab2}[times] = {lb}"
                         for real in timeReals do
-                            let avg   = real.DsTime.AVG |> map (fun v -> $"AVG({v})") |? ""
-                            let std   = real.DsTime.STD |> map (fun v -> $"STD({v})") |? ""
+                            let avg   = real.DsTime.AVG |> map (fun v -> $"{TextAVG}({v}ms)") |? ""
+                            let std   = real.DsTime.STD |> map (fun v -> $"{TextSTD}({v}ms)") |? ""
                             let paras = [avg; std] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
                             yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"
@@ -461,8 +461,8 @@ module internal ToDsTextModule =
                     if errorJobs.Any() then
                         yield $"{tab2}[errors] = {lb}"
                         for job in errorJobs do
-                            let max = job.JobTime.Max  |> map (fun v -> $"MAX({v})") |? ""
-                            let chk = job.JobTime.Check  |> map (fun v -> $"CHK({v})") |? ""
+                            let max = job.JobTime.Max    |> map (fun v -> $"{TextMAX}({v}ms)") |? ""
+                            let chk = job.JobTime.Check  |> map (fun v -> $"{TextCHK}({v}ms)") |? ""
                             let paras = [max;chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
                             yield $"""{tab3}{job.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"

@@ -33,7 +33,12 @@ module DsText =
     let [<Literal>] TextJobNegative= "!"
     let [<Literal>] TextJobMulti = "N"
 
-
+    let [<Literal>] TextMAX = "MAX" 
+    let [<Literal>] TextCHK = "CHK" 
+    let [<Literal>] TextAVG = "AVG" 
+    let [<Literal>] TextSTD = "STD" 
+    let [<Literal>] TextTIME = "T" 
+    let [<Literal>] TextCOUNT= "C" 
 
 
 [<AutoOpen>]

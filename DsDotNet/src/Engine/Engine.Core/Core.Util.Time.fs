@@ -16,7 +16,7 @@ module TimeModule =
             visited.Add(current) |> ignore
             for edge in graph.GetOutgoingEdges(current) do
                 if not (visited.Contains(edge.Target)) && edge.Target.GetPureReal().Time.IsSome then
-                    dfs(graph, edge.Target, target, visited, timeAcc + edge.Target.GetPureReal().Time.Value, maxTime)
+                    dfs(graph, edge.Target, target, visited, timeAcc + (edge.Target.GetPureReal().Time.Value|>float), maxTime)
             visited.Remove(current) |> ignore
 
     let find_max_path_time (graph: TDsGraph<Vertex, Edge>, srcs: Vertex seq, tgts: Vertex seq) : option<float> =
@@ -24,18 +24,18 @@ module TimeModule =
             if src.GetPureReal().Time.IsNone || tgt.GetPureReal().Time.IsNone then
                 None
             elif src = tgt then
-                Some (src.GetPureReal().Time.Value)
+                Some (src.GetPureReal().Time.Value|>float)
             else
                 let maxTime = ref -1.0
                 let visited = HashSet<Vertex>()
 
-                dfs(graph, src, tgt, visited, src.GetPureReal().Time.Value, maxTime)
+                dfs(graph, src, tgt, visited, (src.GetPureReal().Time.Value|>float), maxTime)
 
                 if maxTime.Value > -1.0 then Some maxTime.Value else None
 
         let getDummyTarget (vertex:Vertex) =
             let real = Real.Create(Guid.NewGuid().ToString(), vertex.Parent.GetFlow())
-            real.Time <- Some 0.0
+            real.Time <- Some 0u
             real
 
         let dummySrc = getDummyTarget (srcs.First())

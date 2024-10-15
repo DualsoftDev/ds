@@ -674,13 +674,13 @@ module Program =
             "7 외부호출".Script2 = {ThirdParty.AddressInfo.Provider.testFunc2()};
         }
         [times] = {
-            "14 Work 설정시간".Work1 = {AVG(0.1)};
+            "14 Work 설정시간".Work1 = {AVG(100ms)};
         }
         [errors] = {
-            "8 Error 설정시간".DEV1.ADV = {MAX(10)};
-            "8 Error 설정시간".DEV3.ADV = {MAX(10), CHK(0.5)};
-            "8 Error 설정시간".DEV4.ADV = {MAX(10), CHK(0.5)};
-            "8 Error 설정시간".DEV2.ADV = {CHK(0.5)};
+            "8 Error 설정시간".DEV1.ADV = {MAX(10000ms)};
+            "8 Error 설정시간".DEV3.ADV = {MAX(10000ms), CHK(500ms)};
+            "8 Error 설정시간".DEV4.ADV = {MAX(10000ms), CHK(500ms)};
+            "8 Error 설정시간".DEV2.ADV = {CHK(500ms)};
         }
         [finish] = {
             "5 Work 초기조건".Work1;

@@ -5,6 +5,24 @@ open Dual.Common.Core.FS
 [<AutoOpen>]
 module DsJobType =
 
+    /// 인터페이스 에러체크용 시간(사용자 입력 or Api.Tx~Rx AVG, STD 이용하여 CPK로 계산)
+    type JobTime() = 
+        // 기본값 상수 sec
+        static let DefaultMax = 15.0
+        static let DefaultChk = 0.0
+
+        member val Max: float option = None with get, set //ON 동작시간 에러초과 sec
+        member val Check: float option = None with get, set // 센서고장체크 딜레이 sec
+
+        // 초 단위를 밀리초로 변환하는 내부 함수
+        member private x.toMilliseconds (value: float option) defaultVal = 
+            (value |> Option.defaultValue defaultVal) * 1000.0 |> uint32
+
+        member x.IsDefault = x.Max.IsNone  && x.Check.IsNone 
+
+        member x.TimeOutMaxMSec  = x.toMilliseconds x.Max DefaultMax
+        member x.TimeDelayCheckMSec = x.toMilliseconds x.Check DefaultChk
+
     type JobTypeAction =
         | ActionNormal
         | Push
@@ -37,7 +55,8 @@ module DsJobType =
                     // e.g "N3(1, 2)"
                     $"{TextJobMulti}{x.TaskDevCount}({x.AddressInCount}, {x.AddressOutCount})"
 
-    type JobParam(action: JobTypeAction, jobTypeSensing: JobTypeSensing, jobTypeTaskDevInfo: JobTypeTaskDevInfo) =
+   
+    type JobDevParam(action: JobTypeAction, jobTypeSensing: JobTypeSensing, jobTypeTaskDevInfo: JobTypeTaskDevInfo) =
         member _.JobAction = action
         member _.JobSensing = jobTypeSensing
         member _.JobTaskDevInfo = jobTypeTaskDevInfo
@@ -97,7 +116,7 @@ module DsJobType =
         }
 
     let defaultJobTypeTaskDevInfo() =  { TaskDevCount = 1; InCount = Some 1; OutCount = Some 1 }
-    let defaultJobParam() = JobParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+    let defaultJobParam() = JobDevParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
 
     let getParserJobType (param: string) =
         let param = param.TrimStart('[').TrimEnd(']')
@@ -123,5 +142,5 @@ module DsJobType =
                 | true -> JobTypeSensing.SensingNegative
                 | false -> JobTypeSensing.SensingNormal
 
-        JobParam(jobTypeAction, jobTypeSensing, jobTypeTaskDevInfo)
+        JobDevParam(jobTypeAction, jobTypeSensing, jobTypeTaskDevInfo)
 

@@ -31,7 +31,6 @@ module ConvertCpuVertex =
 
 
     let getAgvTimes(c:Call) = c.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeAvgExist))
-    let getDelayTimes(c:Call) = c.TaskDefs.SelectMany(fun td->td.ApiItems.Where(fun f->f.TX.TimeDelayExist))
 
     type Call with
         member c._on     = c.System._on
@@ -48,12 +47,14 @@ module ConvertCpuVertex =
                 false
 
         member c.ExistAvgTime    = getAgvTimes(c).any()
-        member c.ExistDelayTime  = getDelayTimes(c).any()
+
+
+        member c.MaxDelayTime  = getAgvTimes(c).Max()//getDelayTimes(c).Max() test ahn
+
+
 
         member c.MaxAvgTime    = getAgvTimes(c).Max()
-        member c.MaxDelayTime  = getDelayTimes(c).Max()
 
-        member c.UsingTon  = c.IsJob && c.ExistDelayTime
         member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
         member c.UsingMove  = c.CallCommandType = DuCMDCode
 
@@ -65,14 +66,18 @@ module ConvertCpuVertex =
             else
                 c.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
-        member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None
-        member c.End = c.EndAction.DefaultValue(c.EndPlan)
+        member c.TimeOutMaxMSec     = c.TargetJob.JobTime.TimeOutMaxMSec
+        member c.TimeDelayCheckMSec = c.TargetJob.JobTime.TimeDelayCheckMSec
+        member c.UsingTimeDelayCheck  = c.IsJob && c.TargetJob.JobTime.TimeDelayCheckMSec > 0u
 
-        member c.EndWithTimer =
-            if  c.UsingTon then
-                c.VC.TDON.DN.Expr
-            else
-                c.End
+        member c.EndAction = if c.IsJob then c.TargetJob.ActionInExpr else None
+        member c.EndWithoutTimer = c.EndAction.DefaultValue(c.EndPlan)
+        member c.End = 
+                if c.UsingTimeDelayCheck then
+                    (c.TagManager :?> CoinVertexTagManager).TimeCheck.DN.Expr
+                else
+                    c.EndWithoutTimer
+
 
         member c.IsAnalog =
             c.TaskDefs
@@ -102,10 +107,7 @@ module ConvertCpuVertex =
                  let rv = c.Parent.GetCore().TagManager :?>  RealVertexTagManager
                  !@rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
 
-        member c.PresetTime =   if c.UsingTon
-                                then c.MaxDelayTime.ToString() |> CountUnitType.Parse
-                                else failwith $"{c.Name} not use timer"
-
+       
         //member c.PresetCounter = if c.UsingCtr
         //                         then c.TargetJob.Func.Value.GetRingCount()
         //                         else failwith $"{c.Name} not use counter"
@@ -134,9 +136,9 @@ module ConvertCpuVertex =
             let vmc = getVMCall(c)
             [|
                 vmc.ErrOnTimeOver
-                vmc.ErrOnTimeShortage
+                vmc.ErrOnTimeUnder
                 vmc.ErrOffTimeOver
-                vmc.ErrOffTimeShortage
+                vmc.ErrOffTimeUnder
                 vmc.ErrShort
                 vmc.ErrOpen
             |]
@@ -182,16 +184,16 @@ module ConvertCpuVertex =
         member r.CoinAlloffExpr = !@r.V.CoinAnyOnST.Expr <&&> !@r.V.CoinAnyOnRT.Expr <&&> !@r.V.CoinAnyOnET.Expr
 
         member r.ErrOnTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeOver)
-        member r.ErrOnTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeShortage)
+        member r.ErrOnTimeUnders   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOnTimeUnder)
 
         member r.ErrOffTimeOvers   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeOver)
-        member r.ErrOffTimeShortages   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeShortage)
+        member r.ErrOffTimeUnders   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOffTimeUnder)
 
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOpen)
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrShort)
 
-        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeShortages
-                            @ r.ErrOffTimeOvers @ r.ErrOffTimeShortages
+        member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeUnders
+                            @ r.ErrOffTimeOvers @ r.ErrOffTimeUnders
                             @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
 
 [<Extension>]

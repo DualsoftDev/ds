@@ -5,10 +5,13 @@ open System
 [<AutoOpen>]
 module TimeElements =
 
+    ///Real Going Time (시뮬레이션 및 CPK 계산용)    
     type DsTime() = //최소 입력단위 0.01초(10msec)
         member val AVG: float option = None with get, set //  Average  sec
         member val STD: float option = None with get, set //  Standard Deviation  sec
-        member val TON: float option = None with get, set //  On Delay sec (default 0)
+            //TON은  JobTime()  CHK으로 이동
+        //member val TON: float option = None with get, set //  On Delay sec (default 0)
+
 
     type TimeParam = {
         Average: float

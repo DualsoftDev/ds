@@ -9,26 +9,46 @@ open Dual.Common.Core.FS
 
 type VertexTagManager with
 
-
-    member v.E2_CallErrorTXMonitor() =
+    member v.E1_CallErrTimeOver() =
         let v= v :?> CoinVertexTagManager
+        let fn = getFuncName()
         let call= v.Vertex.GetPure() :?> Call
-        let vOff = v._off.Expr
-
+        let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
+                                .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
+        
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
-        let fn = getFuncName()
+        let running = (v.MM.Expr <||> call.End) <&&> !@iop
 
         [|
-            let running = v.MM.Expr <&&> !@call.End <&&> !@iop
-            yield running --@ (v.TOUT, v.System._tout.Value, fn)
-            if RuntimePackage.PCSIM = RuntimeDS.Package then
-                yield (vOff, rst) ==| (v.ErrOnTimeOver , fn)
-            else 
-                yield (v.TOUT.DN.Expr, rst) ==| (v.ErrOnTimeOver , fn)
+            yield running --@ (v.TimeMax, call.TimeOutMaxMSec, fn)
+
+            (*TimeMax*)
+            yield (v.TimeMax.DN.Expr <&&> !@call.End, rst) ==| (v.ErrOnTimeOver ,fn)
+            (*TimeMaxOff*)
+            yield (v.TimeMax.DN.Expr <&&> callMutualOns, rst) ==| (v.ErrOffTimeOver , fn)
         |]
 
-    member v.E3_CallErrorRXMonitor() =
+    //member v.E2_CallErrTimeUnder() = //  시간 미달 DS Operator 정의로 해결
+        //let v= v :?> CoinVertexTagManager
+        //let call= v.Vertex.GetPure() :?> Call
+        //let iop = call.V.Flow.iop.Expr
+        //let rst = v.Flow.ClearExpr
+        //let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
+        //                        .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
+        
+        //let running = (v.MM.Expr <||> call.End) <&&> !@iop
+        //[|
+            (*TimeMinOnMSec*)
+            //if call.TimeMinOnMSec <> 0u 
+            //then
+            //    yield running --@ (v.TimeMinOn, call.TimeMinOnMSec, getFuncName())
+            //    yield (!@v.TimeMinOn.DN.Expr <&&> v.G.Expr <&&> v.ET.Expr, rst) ==| (v.ErrOnTimeUnder ,getFuncName())
+        //|]
+
+
+
+    member v.E2_CallErrRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
         let real  = call.Parent.GetCore() :?> Real
         let v = v:?> CoinVertexTagManager
@@ -39,45 +59,34 @@ type VertexTagManager with
 
         [|
             let using      = if call.HasSensor && not(call.HasAnalogSensor) then v._on.Expr else  v._off.Expr 
-            let input      = call.End
+            let input      = call.EndWithoutTimer
             let checkCondi = using <&&> dop <&&> real.V.G.Expr 
 
             let rxReadyExpr  =  call.RXs.Select(fun f -> f.V.R).ToAndElseOff()
             let rxFinishExpr =  call.RXs.Select(fun f -> f.V.F).ToAndElseOff()
-            //if RuntimeDS.Package.IsPLCorPLCSIM() then
-            //    yield (fbRisingAfter [input] :> IExpression<bool> , v._off.Expr) --| (v.ErrShortRising, fn)
-            //    yield (fbFallingAfter[input] :> IExpression<bool> , v._off.Expr) --| (v.ErrOpenRising,  fn)
 
-            //elif RuntimeDS.Package.IsPCorPCSIM() then 
             let errShortRising = v.System.GetTempBoolTag($"{call.QualifiedName}errShortRising")
             let errOpenRising = v.System.GetTempBoolTag($"{call.QualifiedName}errOpenRising")
             yield! (input, v.System) --^ (errShortRising, fn)
-            yield! (!@input, v.System) --^ (errOpenRising,  fn)
-            //else    
-            //    failWithLog $"Not supported {RuntimeDS.Package} package"
+            yield! (!@input, v.System) --^ (errOpenRising, fn)
             
             (* short error *)
-            yield (checkCondi <&&>  rxReadyExpr <&&> errShortRising.Expr,  rst)  ==| (v.ErrShort, fn)
+            yield (checkCondi <&&> rxReadyExpr <&&> errShortRising.Expr,  rst)  ==| (v.ErrShort, fn)
             (* open  error *)
-            if call.UsingTon then
+            if call.UsingTimeDelayCheck then
                 yield (checkCondi <&&> rxFinishExpr <&&> !@call.V.G.Expr <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
             else
                 yield (checkCondi <&&> rxFinishExpr                      <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         |]
         
 
-
-
-    member v.E4_RealErrorTotalMonitor() =
-        let real = v.Vertex :?> Real
-        let rst = v._off.Expr
-         
-        (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
-
-   
-    member v.E5_CallErrorTotalMonitor() =
+    member v.E3_CallErrTotalMonitor() =
         let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
 
-
+    member v.E4_RealErrTotalMonitor() =
+        let real = v.Vertex :?> Real
+        let rst = v._off.Expr
+         
+        (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())

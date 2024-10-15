@@ -89,5 +89,5 @@ module ImportUtilForLib =
                 job
 
         let call = Call.Create(jobForCall, param.Parent)
-        call.Name <- param.Node.Job.Combine()
+        call.Name <- param.Node.Name
         call

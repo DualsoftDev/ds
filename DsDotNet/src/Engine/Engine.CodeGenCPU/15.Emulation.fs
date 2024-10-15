@@ -15,17 +15,17 @@ type TaskDev with
 
         let inParam = d.GetInParam(job)
         [|
-        if inParam.DataType = DuBOOL then
-            let set = coins.GetPureCalls()
-                           .Select(fun c-> d.GetPlanEnd(c.TargetJob)).ToOr()
+            if inParam.DataType = DuBOOL then
+                let set = coins.GetPureCalls()
+                               .Select(fun c-> d.GetPlanEnd(c.TargetJob)).ToOr()
 
-            let positiveBool = inParam.ReadSimValue |> Convert.ToBoolean
-            yield ((if positiveBool then set else !@set), rst) --| (d.InTag, getFuncName())
-        else
-            for c in coins.GetPureCalls() do
-                let setData = d.GetInParam(c.TargetJob).ReadSimValue |> any2expr
-                let set = d.GetPlanEnd(c.TargetJob).Expr
-                yield (set, setData) --> (d.InTag, getFuncName())
+                let positiveBool = inParam.ReadSimValue |> Convert.ToBoolean
+                yield ((if positiveBool then set else !@set), rst) --| (d.InTag, getFuncName())
+            else
+                for c in coins.GetPureCalls() do
+                    let setData = d.GetInParam(c.TargetJob).ReadSimValue |> any2expr
+                    let set = d.GetPlanEnd(c.TargetJob).Expr
+                    yield (set, setData) --> (d.InTag, getFuncName())
         |]
 
 type DsSystem with

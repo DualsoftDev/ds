@@ -349,6 +349,7 @@ module rec CoreModule =
 
             member val Finished:bool = false with get, set
             member val NoTransData:bool = false with get, set
+            member val RepeatCount:int option= None with get, set
 
         type Real with
             static member Create(name: string, flow) =
@@ -628,7 +629,7 @@ module rec CoreModule =
         type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
             inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
             member val JobParam = defaultJobParam() with get, set
-
+            member val JobTime = JobTime() with get, set
             member x.ActionType      = x.JobParam.JobAction
             member x.JobTaskDevInfo  = x.JobParam.JobTaskDevInfo
             member x.AddressInCount  = x.JobTaskDevInfo.AddressInCount

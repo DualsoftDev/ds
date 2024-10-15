@@ -409,9 +409,7 @@ module internal ToDsTextModule =
             let reals = system.GetRealVertices()
             let finishedReals = reals.Filter(fun f->f.Finished)
             let noTransDataReals =  reals.Filter(fun f->f.NoTransData)
-            let motionReals = reals.Where(fun f->f.Motion.IsSome)
-            let scriptReals = reals.Where(fun f->f.Script.IsSome)
-            let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome || f.DsTime.TON.IsSome)
+            let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome)
             let times =
                 [
                     if timeReals.Any() then
@@ -419,12 +417,12 @@ module internal ToDsTextModule =
                         for real in timeReals do
                             let avg   = real.DsTime.AVG |> map (fun v -> $"AVG({v})") |? ""
                             let std   = real.DsTime.STD |> map (fun v -> $"STD({v})") |? ""
-                            let delay = real.DsTime.TON |> map (fun v -> $"TON({v})") |? ""
-                            let paras = [avg; std; delay] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
-                            yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{String.Join(",", paras)}{rb};"""
+                            let paras = [avg; std] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
+                            yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
+            let motionReals = reals.Where(fun f->f.Motion.IsSome)
             let motions =
                 [
                     if motionReals.Any() then
@@ -434,12 +432,39 @@ module internal ToDsTextModule =
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
+            let scriptReals = reals.Where(fun f->f.Script.IsSome)
             let scripts =
                 [
                     if scriptReals.Any() then
                         yield $"{tab2}[scripts] = {lb}"
                         for real in scriptReals do
                             yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{real.Script.Value}{rb};"
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
+
+
+            let repeatReals = reals.Where(fun f -> f.RepeatCount.IsSome)
+            let repeats =
+                [
+                    if repeatReals.Any() then
+                        yield $"{tab2}[repeats] = {lb}"
+                        for real in repeatReals do
+                            let cnt = real.RepeatCount.Value
+                            yield $"""{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()} = {lb}{cnt}{rb};"""
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
+
+
+            let errorJobs = system.Jobs.Where(fun f -> not(f.JobTime.IsDefault))
+            let errors =
+                [
+                    if errorJobs.Any() then
+                        yield $"{tab2}[errors] = {lb}"
+                        for job in errorJobs do
+                            let max = job.JobTime.Max  |> map (fun v -> $"MAX({v})") |? ""
+                            let chk = job.JobTime.Check  |> map (fun v -> $"CHK({v})") |? ""
+                            let paras = [max;chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
+                            yield $"""{tab3}{job.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -485,7 +510,7 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
             let props =
-                [| safeties; autoPres; layouts; motions; scripts; times; finished; disabled; noTransData |]
+                [| safeties; autoPres; layouts; motions; scripts; times; repeats; errors; finished; disabled; noTransData |]
                 |> filter(fun p -> p.NonNullAny())
 
             if props.Any() then

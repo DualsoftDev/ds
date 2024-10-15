@@ -100,6 +100,7 @@ module ErrID =
     let [<Literal>] _81 = "Safety  는 자신을 조건으로 사용불가 입니다."
     let [<Literal>] _82 = "AutoPre 이름이 시스템 내부에 존재하지 않습니다."
     let [<Literal>] _83 = "AutoPre 는 자신을 조건으로 사용불가 입니다."
+    let [<Literal>] _84 = "Work 반복설정이 중복 정의 되었습니다."
 
     // IO Mapping Error (1001 ~ )
     let [<Literal>] _1001 = "시스템에 버튼 이름이 없습니다."

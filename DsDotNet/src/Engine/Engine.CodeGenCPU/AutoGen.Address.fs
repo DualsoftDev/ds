@@ -63,7 +63,14 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-
+    let getDuDataType(plcDataType:PLCHwModel.DataType) =
+        match plcDataType with
+        | PLCHwModel.DataType.Bit -> DuBOOL
+        | PLCHwModel.DataType.Byte -> DuUINT8
+        | PLCHwModel.DataType.Word -> DuUINT16
+        | PLCHwModel.DataType.DWord ->DuUINT32
+        | PLCHwModel.DataType.LWord ->DuUINT64
+        | PLCHwModel.DataType.Continuous -> failwithf $"error Continuous tag "
 
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
         let cpu, driver, hwSlotDataTypes = target.Platform, target.HwDrive, target.Slots
@@ -271,7 +278,14 @@ module DsAddressModule =
                     | Some (t) -> t |> getXgKTextByTag
 
                     | _ ->  failwithf $"XGK 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
-                else addr
+                
+                elif cpu = XGI || (cpu = WINDOWS && driver = LS_XGI_IO)
+                then
+                    match tryParseXGITag (addr) with
+                    | Some (t) when (t.DataType|>getDuDataType) = dataType -> addr
+                    | _ ->  failwithf $"XGI 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
+                else 
+                    addr
 
         newAddr
 

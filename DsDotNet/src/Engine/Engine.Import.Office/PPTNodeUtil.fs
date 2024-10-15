@@ -6,6 +6,7 @@ open Microsoft.FSharp.Core
 open Dual.Common.Core.FS
 open Dual.Common.Base.FS
 open System.Text.RegularExpressions
+open System
 
 [<AutoOpen>]
 module PptNodeUtilModule =
@@ -23,14 +24,8 @@ module PptNodeUtilModule =
                 if param.IsDefaultParam then ""
                 else 
                     if param.ValueParam.IsDefaultValue 
-                    then
-                        match param.DevTime with
-                        | Some t -> $"{prefix}{t}ms"
-                        | None -> $""
-                    else 
-                        match param.DevTime with
-                        | Some t -> $"{prefix}{param.ValueParam.ToText()}{t}ms"
-                        | None -> $"{prefix}{param.ValueParam.ToText()}"
+                    then ""
+                    else $"{prefix}{param.ValueParam.ToText()}"
                         
 
         let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
@@ -56,8 +51,8 @@ module PptNodeUtilModule =
             newJob
 
 
-        let getJobNameWithJobParam(jobFqdn:string seq, jobParam:JobParam) =
-            let jobParamText =  jobParam.ToText()
+        let getJobNameWithJobParam(jobFqdn:string seq, jobDevParam:JobDevParam) =
+            let jobParamText =  jobDevParam.ToText()
             match jobParamText with
             | "" -> jobFqdn
             |_   ->
@@ -88,7 +83,7 @@ module PptNodeUtilModule =
                 if func.Contains(",") then
 
                     let inFunc, outFunc =
-                        func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobParam에서 다시 처리
+                        func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobDevParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
                     TaskDevParamIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
                 else
@@ -131,57 +126,83 @@ module PptNodeUtilModule =
             | _ ->
                 failWithLog ErrID._1
 
+        let getRepeatCount (contents: string) =
+            let parseCount (txt: string) =
+                match UInt32.TryParse txt with
+                | true, count when count > 0u -> Some (int count)
+                | _ -> None
 
-        let updateRealTime (contents: string) =
+            let parts = 
+                (GetLastParenthesesContents contents).Split(',')
+                |> Array.choose parseCount
 
+            // Validate and return the repeat count
+            match parts with
+            | [| singleCount |] -> Some singleCount
+            | [| |] -> None
+            | _ -> failWithLog "Only one repeat count entry is allowed"
+
+    
+        let getRealTime (contents: string) =
             let parseSeconds (timeStr: string) : float option =
-                if timeStr = TextSkip
-                then None
-                else
-                    let timeStr =timeStr.ToLower().Trim()
-                    let msPattern = @"(\d+(\.\d+)?)ms"
-                    let secPattern = @"(\d+(\.\d+)?)sec"
-                    let minPattern = @"(\d+(\.\d+)?)min"
-                    let defaultPattern = @"(\d+(\.\d+))"
+                let timeStr = timeStr.ToLower().Trim()
+                let msPattern = @"(\d+(\.\d+)?)ms"
+                let secPattern = @"(\d+(\.\d+)?)sec"
+                let minPattern = @"(\d+(\.\d+)?)min"
 
-                    let matchRegex pattern =
-                        let m = Regex.Match(timeStr, pattern)
-                        if m.Success then
-                            let value = m.Groups.[1].Value |> float
-                            Some value
-                        else None
+                let matchRegex pattern =
+                    let m = Regex.Match(timeStr, pattern)
+                    if m.Success then Some (m.Groups.[1].Value |> float) else None
 
-                    match matchRegex msPattern with
-                    | Some ms -> Some (ms / 1000.0)
+                match matchRegex msPattern with
+                | Some ms when ms < 10.0 -> failWithLog $"{timeStr} Invalid time format: must be 10ms or greater"
+                | Some ms -> Some (ms / 1000.0)
+                | None ->
+                    match matchRegex secPattern with
+                    | Some sec -> Some sec
                     | None ->
-                        match matchRegex secPattern with
-                        | Some sec -> Some sec
-                        | None ->
-                            match matchRegex minPattern with
-                            | Some min -> Some (min * 60.0)
-                            | None ->
-                                // Default to seconds if no unit is specified
-                                match matchRegex defaultPattern with
-                                | Some sec -> Some sec
-                                | None -> failWithLog $"{timeStr} Invalid time format"
+                        match matchRegex minPattern with
+                        | Some min -> Some (min * 60.0)
+                        | None -> None
+                           
+            let parts = (GetLastParenthesesContents contents).Split(',') |> Seq.choose parseSeconds
+    
+            // Check for invalid multiple time entries
+            if parts.length() > 1 then failWithLog "Only one time entry is allowed"
 
-            let parts = (GetLastParenthesesContents contents).Split(',')
+            // Parse the single time entry if available
+            let goingSec =
+                if parts.IsEmpty then None
+                else parts.Head() |> Some
+    
+            // Ensure parsed time is in 1ms increments
+            match goingSec with
+            | Some t when (t*1000.0) % 10.0 <> 0.0 -> failWithLog $"{contents} Invalid time format: must be in increments of 10ms"
+            | _ -> goingSec
 
-            let goingT, delayT =
-                if parts.[0] = "" then None, None
-                else
-                    match parts.Length with
-                    | 1 ->
-                        let firstTime = parts.[0].Trim() |> parseSeconds
-                        (firstTime, None)
-                    | 2 ->
-                        let firstTime = parts.[0].Trim() |> parseSeconds
-                        let secondTime = parts.[1].Trim() |> parseSeconds
-                        (firstTime, secondTime)
-                    | _ -> (None, None)
+        let getJobTime (contents: string) : JobTime  =
+            let parseFloat (txt: string) =
+                match Double.TryParse(txt.Trim()) with
+                | true, value -> Some value
+                | _ -> None
 
-            goingT, delayT
+            let parseValue pattern =
+                let m = Regex.Match(contents, pattern)
+                if m.Success then parseFloat m.Groups.[1].Value else None
 
+            // 각 값을 추출하는 정규식 패턴 설정
+            let maxPattern = @"MAX\((\d+(\.\d+)?)\)"
+            let maxOffPattern = @"MAXOFF\((\d+(\.\d+)?)\)"
+            let minOnPattern = @"MINON\((\d+(\.\d+)?)\)"
+            let minOffPattern = @"MINOFF\((\d+(\.\d+)?)\)"
+            let chkPattern = @"CHK\((\d+(\.\d+)?)\)"
+
+            // JobTime 객체 생성 및 값 설정
+            let jobTime = JobTime()
+            jobTime.Max  <- parseValue maxPattern
+            jobTime.Check  <- parseValue chkPattern
+
+            jobTime
 
         let getBracketItems (name: string) =
                 name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")

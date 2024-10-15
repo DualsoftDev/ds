@@ -146,19 +146,21 @@ module ModelTests1 =
         member __.``Model component [TaskDevParam] test`` () =
             compareExact ParserTest.TaskDevParam
 
-        //[<Test>]
-        //member __.``X Ppt20221213Text test`` () =
-        //    // 현재 test 실패
-        //    compareExact Program.Ppt20221213Text
-
-        //[<Test>]
-        //member __.``Model component test`` () =
-        //    compare ParserTest.Ppt);
-        //    compare ParserTest.ExternalSegmentCall ""
-        //    compare ParserTest.ExternalSegmentCallConfusing ""
-        //    compare ParserTest.MyFlowReference ""
-        //    compare ParserTest.Error ""
-        //    ()
+        [<Test>]
+        member __.``Model component [Times] test`` () =
+            compareExact ParserTest.Times
+        [<Test>]
+        member __.``Model component [Motions] test`` () =
+            compareExact ParserTest.Motions
+        [<Test>]
+        member __.``Model component [Scripts] test`` () =
+            compareExact ParserTest.Scripts
+        [<Test>]
+        member __.``Model component [Repeats] test`` () =
+            compareExact ParserTest.Repeats
+        [<Test>]
+        member __.``Model component [Errors] test`` () =
+            compareExact ParserTest.Errors
 
         [<Test>]
         member __.``Model ERROR duplication test`` () =

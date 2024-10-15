@@ -120,7 +120,7 @@ module rec DsTaskDevType =
                 else 
                     None
 
-    type TaskDevParam(symbolAlias: SymbolAlias option, valueParam: ValueParam, devTime: int option) =
+    type TaskDevParam(symbolAlias: SymbolAlias option, valueParam: ValueParam) =
         let mutable symbol = symbolAlias  //symbol name
         do
             match symbolAlias, valueParam with
@@ -140,7 +140,6 @@ module rec DsTaskDevType =
             | None -> ""
 
         member x.ValueParam = valueParam
-        member x.DevTime = devTime
         
         /// 기본값은 true
         member x.ReadBoolValue = 
@@ -196,11 +195,9 @@ module rec DsTaskDevType =
 
         member x.DataType = valueParam.DataType 
   
-        member x.Time = devTime
 
         member x.IsDefaultParam =
             symbol.IsNone &&
-            devTime.IsNone &&
             x.DataType = DuBOOL &&
             valueParam.IsDefaultValue
 
@@ -210,9 +207,8 @@ module rec DsTaskDevType =
                                 | Some sym -> $"{sym.Name}:{sym.DataType.ToText()}"
                                 | None -> ""
             let valueText = valueParam.ToText()
-            let time = devTime |> Option.map (fun t -> $"{t}ms") |> Option.defaultValue ""
 
-            [address; symNameNType; valueText; time]
+            [address; symNameNType; valueText]
             |> List.filter (fun s -> not (String.IsNullOrEmpty(s)))
             |> String.concat ":"
 
@@ -243,27 +239,27 @@ module rec DsTaskDevType =
             | _ -> failwithlog "TaskDevParamIO is not valid"
 
     let defaultTaskDevParam() =
-        TaskDevParam(None, defaultValueParam(Some(true)), None)
+        TaskDevParam(None, defaultValueParam(Some(true)))
 
     let defaultTaskDevParamIO() = TaskDevParamIO(None, None)
 
     let defaultValueParam(valTarget: obj option) = ValueParam(valTarget, None, None, false, false)
 
-    let createTaskDevParam(symbolAlias: SymbolAlias option)  (valTarget: obj option) (t: int option) =
-        TaskDevParam(symbolAlias, defaultValueParam(valTarget), t)
+    let createTaskDevParam(symbolAlias: SymbolAlias option)  (valTarget: obj option) =
+        TaskDevParam(symbolAlias, defaultValueParam(valTarget))
 
     let createTaskDevParaIOInTrue() =
-        let inParam = createTaskDevParam None (Some(true)) None
+        let inParam = createTaskDevParam None (Some(true)) 
         TaskDevParamIO(Some inParam, None)
 
     let createTaskDevParamWithSymbol(symbolAlias: SymbolAlias) =
-        createTaskDevParam (Some(symbolAlias)) (Some(true)) None
+        createTaskDevParam (Some(symbolAlias)) (Some(true)) 
 
     let changeSymbolTaskDevParam(x: TaskDevParam option) (symbol: SymbolAlias option) =
         match x with
         | None -> defaultTaskDevParam()
         | Some x ->
-            TaskDevParam(symbol, x.ValueParam, x.DevTime)
+            TaskDevParam(symbol, x.ValueParam)
 
     let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevParam>, symbol: SymbolAlias option) =
         let changedTaskDevPara = changeSymbolTaskDevParam(Some(paramDic.[jobName])) symbol
@@ -292,26 +288,23 @@ module rec DsTaskDevType =
 
     let getTaskDevParam (txt: string) =
         let parts = txt.Split(':') |> Seq.toList
-        let parseParts (acc: (string option * DataType option * ValueParam option * int option)) part =
-            let nameOpt, typeOpt, valueOpt, timeOpt = acc
-            match parseTime part, tryTextToDataType part, createValueParam part with
-            | Some time, _, _ ->
-                if timeOpt.IsSome then failwithlog $"Duplicate time part detected: {part}"
-                nameOpt, typeOpt, valueOpt, Some time
-            | _, Some duType, _ ->
+        let parseParts (acc: (string option * DataType option * ValueParam option)) part =
+            let nameOpt, typeOpt, valueOpt = acc
+            match  tryTextToDataType part, createValueParam part with
+            | Some duType, _ ->
                 if typeOpt.IsSome then failwithlog $"Duplicate type part detected: {duType}"
-                nameOpt, Some duType, valueOpt, timeOpt
-            | _, _, Some valueParam ->
+                nameOpt, Some duType, valueOpt
+            | _, Some valueParam ->
                 if valueOpt.IsSome then failwithlog $"Duplicate value part detected: {part}"
-                nameOpt, typeOpt, Some valueParam, timeOpt
+                nameOpt, typeOpt, Some valueParam
             | _ when isValidName part ->
                 if nameOpt.IsSome then failwithlog $"Duplicate name part detected: {part}"
-                Some part, typeOpt, valueOpt, timeOpt
+                Some part, typeOpt, valueOpt
             | _ ->
                 failwithlog $"Unknown format detected: text '{part}'"
 
-        let nameOpt, typeOpt, valueOpt, timeOpt =
-            parts |> List.fold parseParts (None, None, None, None)
+        let nameOpt, typeOpt, valueOpt =
+            parts |> List.fold parseParts (None, None, None)
 
         if nameOpt.IsSome && typeOpt.IsNone 
         then
@@ -319,12 +312,12 @@ module rec DsTaskDevType =
         else 
             let sym = nameOpt |> Option.map (fun n -> SymbolAlias(n, typeOpt.Value))
             match valueOpt with
-            | Some vp -> TaskDevParam(sym, vp, timeOpt)
+            | Some vp -> TaskDevParam(sym, vp)
             | None -> 
                 if sym.IsNone then
-                     TaskDevParam(sym, defaultValueParam(Some(true)), timeOpt)
+                     TaskDevParam(sym, defaultValueParam(Some(true)))
                 else
-                     TaskDevParam(sym, defaultValueParam(None), timeOpt)
+                     TaskDevParam(sym, defaultValueParam(None))
 
 
     let getAddressTaskDevParam (txt: string) =

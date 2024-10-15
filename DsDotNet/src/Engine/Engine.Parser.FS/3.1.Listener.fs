@@ -643,7 +643,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             failWithLog msg
                 updatedTaskDev
 
-            for jobNameFqdn, jobParam, apiDefCtxs, callListingCtx in callListings do
+            for jobNameFqdn, jobDevParam, apiDefCtxs, callListingCtx in callListings do
                 let jobName = jobNameFqdn.CombineDequoteOnDemand()
 
                 let apiDefs =
@@ -724,7 +724,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 let job = Job(jobNameFqdn, system, taskList)
-                job.JobParam <- jobParam
+                job.JobParam <- jobDevParam
 
                 job |> system.Jobs.Add
 
@@ -884,7 +884,24 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                 t.Average.Iter( fun x -> real.DsTime.AVG <- Some (float x))
                 t.Std.Iter(     fun x -> real.DsTime.STD <- Some (float x))
-                t.OnDelay.Iter( fun x -> real.DsTime.TON <- Some (float x))
+
+
+        let fillErrors (system: DsSystem) (listErrorsCtx: List<dsParser.ErrorsBlockContext> ) =
+            let fqdnErrors = getErrors listErrorsCtx
+            for fqdn, t in fqdnErrors do
+                match system.Jobs.TryFind(fun f->f.DequotedQualifiedName = fqdn.Combine()) with
+                | Some job ->
+                    job.JobTime.Max  <- t.MaxTime
+                    job.JobTime.Check  <- t.CheckDelayTime
+                | None -> failWithLog $"Couldn't find target job object name {fqdn.Combine()}"
+        
+        let fillRepeats (system: DsSystem) (listRepeatCtx: List<dsParser.RepeatsBlockContext> ) =
+            let fqdnRepeats = getRepeats listRepeatCtx
+            for fqdn, t in fqdnRepeats do
+                let real = (tryFindSystemInner system fqdn).Value :?> Real
+                match UInt32.TryParse t with
+                | true, count -> real.RepeatCount <- Some (int count)
+                | _ -> failWithLog $"Repeat count must be a positive integer. {t} is not valid."
 
 
         let fillActions (system: DsSystem) (listMotionCtx: List<dsParser.MotionBlockContext> ) =
@@ -913,8 +930,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             //Real에 scripts 채우기
             ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts  theSystem
             //Real에 times 채우기
-            ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem
-
+            ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem  
+            //Real에 Repeats 채우기
+            ctx.Descendants<RepeatsBlockContext>() .ToList() |> fillRepeats  theSystem
+            //Job에 errors (JobTime)채우기
+            ctx.Descendants<ErrorsBlockContext>() .ToList() |> fillErrors theSystem
 
             //Call에 disable 채우기
             ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem

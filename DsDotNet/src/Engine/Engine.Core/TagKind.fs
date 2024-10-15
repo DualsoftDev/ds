@@ -182,9 +182,9 @@ module TagKindList =
     | timeEnd                   = 11052
     | timeRelay                 = 11053
 
-    | txErrOnTimeShortage       = 11060
+    | txErrOnTimeUnder          = 11060
     | txErrOnTimeOver           = 11061
-    | txErrOffTimeShortage      = 11062
+    | txErrOffTimeUnder         = 11062
     | txErrOffTimeOver          = 11063
     | rxErrShort                = 11070
     | rxErrOpen                 = 11074

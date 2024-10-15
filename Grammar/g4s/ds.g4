@@ -255,7 +255,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
 // STANDFLMS
 propsBlock: '[' 'prop' ']' '=' '{' (
           safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
-        | timesBlock | motionBlock | scriptsBlock
+        | timesBlock | motionBlock | scriptsBlock | repeatsBlock | errorsBlock
         | layoutBlock )* '}';
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';
         safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
@@ -297,6 +297,16 @@ propsBlock: '[' 'prop' ']' '=' '{' (
     timeDef: timeKey '=' '{' timeParams '}' SEMICOLON;
     timeKey: identifier23;
     timeParams: content;
+
+    repeatsBlock: '[' 'repeats' ']' '=' '{' (repeatDef)* '}';
+    repeatDef: repeatKey '=' '{' repeatParams '}' SEMICOLON;
+    repeatKey: identifier23;
+    repeatParams: INTEGER;
+    
+    errorsBlock: '[' 'errors' ']' '=' '{' (errorsDef)* '}';
+    errorsDef: errorsKey '=' '{' errorsParams '}' SEMICOLON;
+    errorsKey: identifier3;
+    errorsParams: content;
 
 
 flowBlock

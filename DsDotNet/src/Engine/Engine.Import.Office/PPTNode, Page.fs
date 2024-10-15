@@ -48,11 +48,12 @@ module PptNodeModule =
         , ifName            : string
         , rootNode          : bool option
         , taskDevParam      : TaskDevParamIO
-        , jobParam          : JobParam
+        , jobDevParam       : JobDevParam
+        , jobTime           : JobTime option
         , ifTX              : string
         , ifRX              : string
         , realGoingTime     : float option
-        , realDelayTime     : float option
+        , realRepeatCnt     : int option
         , name              : string
     ) =
 
@@ -72,7 +73,7 @@ module PptNodeModule =
         member x.AutoPres = autoPres
 
         member x.RealGoingTime = realGoingTime
-        member x.RealDelayTime = realDelayTime
+        member x.RealRepeatCnt = realRepeatCnt
         member x.IfName = ifName
         member x.IfTX = ifTX
         member x.IfRX = ifRX
@@ -87,22 +88,26 @@ module PptNodeModule =
         member x.IsRootNode     = rootNode
         member x.IsFunction     = x.IsCall && not(name.Contains("."))
         member x.TaskDevParam   = taskDevParam
-        member x.JobParam       = jobParam
+        member x.JobParam       = jobDevParam
         member x.TaskDevParaIn  = taskDevParam.InParam
         member x.TaskDevParaOut = taskDevParam.OutParam
 
         member x.UpdateRealProperty(real: Real) =
-            let checkAndUpdateTime (newTime: float option) getField setField =
-                match newTime with
-                | Some newValue ->
-                    match getField() with
-                    | Some currentValue when currentValue <> newValue ->
-                        shape.ErrorName(ErrID._76, iPage)
-                    | _ -> setField(Some newValue)
-                | None -> ()
+            match realGoingTime with
+            | Some newValue ->
+                match real.DsTime.AVG with
+                | Some currentValue when currentValue <> newValue ->
+                    shape.ErrorName(ErrID._76, iPage)
+                | _ -> real.DsTime.AVG <-(Some newValue)
+            | None -> ()
 
-            checkAndUpdateTime realGoingTime (fun () -> real.DsTime.AVG) (fun v -> real.DsTime.AVG <- v)
-            checkAndUpdateTime realDelayTime (fun () -> real.DsTime.TON) (fun v -> real.DsTime.TON <- v)
+            match realRepeatCnt with
+            | Some newValue ->
+                match real.RepeatCount with
+                | Some currentValue when currentValue <> newValue ->
+                    shape.ErrorName(ErrID._84, iPage)
+                | _ -> real.RepeatCount <-(Some newValue)
+            | None -> ()
 
             if real.Finished = true && x.RealFinished = false then  //이미 설정을 true 하고 다른데서 변경
                 shape.ErrorName(ErrID._77, iPage)
@@ -116,7 +121,7 @@ module PptNodeModule =
             getJobNameWithTaskDevParaIO(x.JobPure, taskDevParam).ToArray()
 
         member x.JobWithJobPara =
-            getJobNameWithJobParam(x.Job, jobParam).ToArray()
+            getJobNameWithJobParam(x.Job, jobDevParam).ToArray()
 
         member x.UpdateNodeRoot(isRoot: bool) =
             rootNode <- Some isRoot
@@ -130,7 +135,7 @@ module PptNodeModule =
 
                     else
                         if isRoot then
-                            let inPara = createTaskDevParam  None None None |> Some
+                            let inPara = createTaskDevParam  None None  |> Some
                             taskDevParam <-TaskDevParamIO(inPara, None)
 
                         elif nodeType = AUTOPRE then
@@ -141,6 +146,8 @@ module PptNodeModule =
 
         member x.UpdateCallProperty(call: Call) =
             call.Disabled <- x.DisableCall
+            if jobTime.IsSome then
+                call.TargetJob.JobTime <- jobTime.Value
 
 
         member x.JobPure : string seq =
@@ -213,13 +220,14 @@ module PptNodeModule =
             let mutable ifName = ""
             let mutable rootNode: bool option = None
             let mutable taskDevParam: TaskDevParamIO = defaultTaskDevParamIO()  // Input/Output param
-            let mutable jobParam: JobParam = defaultJobParam()     // jobParam  param
+            let mutable jobDevParam: JobDevParam = defaultJobParam()     // jobDevParam  param
 
 
             let mutable ifTX = ""
             let mutable ifRX = ""
             let mutable realGoingTime:float option = None
-            let mutable realDelayTime:float option = None
+            let mutable realRepeatCnt:int option = None
+            let mutable jobTime:JobTime option = None
 
             let updateSafety (barckets: string) =
                 barckets.Split(';')
@@ -275,11 +283,12 @@ module PptNodeModule =
                     failWithLog $"{ErrID._53} {shape.InnerText}"
 
             let updateTime() =
-                let goingT, delayT = updateRealTime shape.InnerText
-                realGoingTime <- goingT
-                realDelayTime <- delayT
+                realGoingTime <- getRealTime shape.InnerText
+                realRepeatCnt <- getRepeatCount shape.InnerText
 
-            let namePure(shape:Shape) = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") |> trimSpaceNewLine
+      
+                
+            let namePure(shape:Shape) = GetLastBracketRemoveName(GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "")) |> trimSpaceNewLine
             let name =
                 let nameTrim  = String.Join(".", namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
                 GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
@@ -293,7 +302,11 @@ module PptNodeModule =
                     match GetSquareBrackets(shape.InnerText, true) with
                     | Some text -> updateSafety text
                     | None -> ()
-                    if nodeType = REAL then updateTime()
+
+                    if nodeType = REAL 
+                    then updateTime()
+                 
+
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
 
                 | ( OPEN_EXSYS_CALL | OPEN_EXSYS_LINK | COPY_DEV ) ->
@@ -324,21 +337,25 @@ module PptNodeModule =
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
-                    //Dev1[3(3,3)].Api(!300, 200)
+                    //Dev1[3(3,3)].Api(!300, 200)[PUSH, Max(1.2), CHK(0.5)]
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
-                    let names = callNAutoPreName.Split('.').ToFSharpList()
-                    let prop =
+                    let names = GetLastBracketRemoveName(callNAutoPreName).Split('.').ToFSharpList()
+                    let devProp, apiProp =
                         match names with
-                        | n1::n2::[] -> n1
-                        | n1::n2::n3::[] -> n2
+                        | n1::n2::[] -> n1, n2
+                        | n1::n2::n3::[] -> n2, n3
                         | _ ->
                             failwith $"Error: {callNAutoPreName}"
 
                     let jobPram =
-                        let lbc = prop |> GetLastBracketContents    // e.g "5(5,1)"
-                        if lbc <> "" then
-                            let cntPara =    lbc |> GetLastParenthesesRemoveName    // e.g "5"
-                            let cntOptPara = lbc |> GetLastParenthesesContents      // e.g "5,1"
+                        let devP = devProp |> GetLastBracketContents    // e.g "[5(5,1)]"
+                        let apiP = apiProp |> GetLastParenthesesContents    // e.g "(!200, 300)"
+                        let jobP = callNAutoPreName|>GetLastBracketContents   // e.g "[PUSH, Max(1.2), CHK(0.5)]"
+                        if devP = "" && apiP = "" && jobP = "" then
+                            defaultJobParam()
+                        else
+                            let cntPara =    devP |> GetLastParenthesesRemoveName    // e.g "5"
+                            let cntOptPara = devP |> GetLastParenthesesContents      // e.g "5,1"
                             let paraText =  // e.g "N5(5,1)"
                                 match  cntPara,  cntOptPara with
                                 | "", "" -> ""
@@ -346,13 +363,18 @@ module PptNodeModule =
                                 | _ , "" -> $"{TextJobMulti}{cntPara}"
                                 | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
 
-                            let jobNegative = if cntOptPara.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
-                            getParserJobType(paraText + jobNegative)
+                            let jobNegative = if apiP.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
+                            let jobPush     = if jobP.Contains(TextJobPush) then $";{TextJobPush}" else ""
+                            
+                            let jobT = getJobTime jobP
+                            if not(jobT.IsDefault)
+                            then
+                                jobTime <- Some jobT
 
-                        else
-                            defaultJobParam()
+                            getParserJobType(paraText + jobNegative + jobPush)
 
-                    jobParam <- jobPram
+
+                    jobDevParam <- jobPram
             with ex ->
                 shape.ErrorShape(ex.Message, iPage)
 
@@ -374,11 +396,12 @@ module PptNodeModule =
                     , ifName
                     , rootNode
                     , taskDevParam
-                    , jobParam
+                    , jobDevParam
+                    , jobTime
                     , ifTX
                     , ifRX
                     , realGoingTime
-                    , realDelayTime
+                    , realRepeatCnt
                     , name
 
             )

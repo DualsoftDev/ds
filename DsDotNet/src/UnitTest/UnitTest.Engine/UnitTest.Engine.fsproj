@@ -66,6 +66,7 @@
 		<Compile Include="Cpu\ButtonLamp Statement.fs" />
 		<Compile Include="Cpu\Extension Statement.fs" />
 		<Compile Include="Cpu\Error Statement.fs" />
+		<Compile Include="Cpu\Hmi Statement.fs" />
 		<Compile Include="HmiCodeGen\HmiCodeGenTester.fs" />
 		<Compile Include="CustomEngineTest.fs" />
 		<Compile Include="Info/DBLoggerTest.fs" />

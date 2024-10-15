@@ -20,9 +20,9 @@ type VertexTagManager with
                 shareds.Select(fun s -> s.Vertex.GetStartRootAndCausals()).ToOrElseOn()
             else
                 v._off.Expr
-
+        let forceStart = v.SFP.Expr <&&> v.Flow.d_st.Expr
         let sets =
-                ((startCausals <||> wsShareds  <||> v.SFP.Expr) <&&> v.Flow.d_st.Expr)
+                ((startCausals <||> wsShareds  <||> forceStart) <&&> v.Flow.d_st.Expr)
                 <||> plans
                 <||> actionLinks
 
@@ -47,7 +47,7 @@ type VertexTagManager with
         let sets =
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr)
             <||>
-            ( v.RFP.Expr )
+            ( v.RFP.Expr <&&> v.Flow.mop.Expr )
              <||>
             (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr <&&> !@v.Vertex.VR.OG.Expr)
 
@@ -67,7 +67,8 @@ type VertexTagManager with
 
     member v.F4_CallEndInFlow() =
         let sets =
-            let callExpr = v.SFP.Expr <&&> !@v.RFP.Expr
+            let forceStart = v.SFP.Expr <&&> v.Flow.d_st.Expr
+            let callExpr = forceStart <&&> !@v.RFP.Expr
             let getExpr(call:Call) =
                 if call.IsOperator then
                     call.VC.CallOperatorValue.Expr  <||> callExpr

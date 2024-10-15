@@ -26,11 +26,11 @@ type RealVertexTagManager with
                     <&&> if v.Real.Time.IsSome   then   v.TimeRelay.Expr   else v._on.Expr
                     <&&> if v.Real.Motion.IsSome then   v.MotionRelay.Expr else v._on.Expr
 
-
+                let forceOn = v.ONP.Expr <&&> v.Flow.mop.Expr
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM()) then
-                    endExpr <||> v.ONP.Expr <||> !@v.Link.Expr
+                    endExpr <||> forceOn <||> !@v.Link.Expr
                 else                          
-                    endExpr <||> v.ONP.Expr 
+                    endExpr <||> forceOn
 
             let rst = 
                 if real.Graph.Vertices.any() then

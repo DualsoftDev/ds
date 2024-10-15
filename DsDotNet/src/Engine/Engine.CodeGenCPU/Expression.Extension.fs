@@ -109,8 +109,8 @@ module ExpressionExtension =
         let risingHold = sm.GetTempBoolTag("tempRisingHold")
         [
         //순서 중요
-            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&>  sets ) |> withExpressionComment comment
             risingHold  <== (sets  <&&> !@(var2expr risingRelay)) |> withExpressionComment comment
+            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&>  sets ) |> withExpressionComment comment
             rising      <== (risingHold.Expr) |> withExpressionComment comment
         ]
 

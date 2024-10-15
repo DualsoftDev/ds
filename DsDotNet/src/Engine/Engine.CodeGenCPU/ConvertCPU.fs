@@ -91,7 +91,8 @@ module ConvertCPU =
             if IsSpec (v, VertexAll, AliasNotCare) then
                 let vm = v.TagManager :?> VertexTagManager
                 yield! vm.S1_RGFH()
-
+                yield! vm.H1_HmiPulse()
+                
         ]
 
     let private applySystemSpec(s:DsSystem) =

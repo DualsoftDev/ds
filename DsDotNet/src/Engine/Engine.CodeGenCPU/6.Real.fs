@@ -28,9 +28,9 @@ type RealVertexTagManager with
 
 
                 if v.IsFinished && (RuntimeDS.Package.IsPackageSIM()) then
-                    endExpr <||> v.ON.Expr <||> !@v.Link.Expr
+                    endExpr <||> v.ONP.Expr <||> !@v.Link.Expr
                 else                          
-                    endExpr <||> v.ON.Expr 
+                    endExpr <||> v.ONP.Expr 
 
             let rst = 
                 if real.Graph.Vertices.any() then
@@ -124,12 +124,7 @@ type RealVertexTagManager with
     member v.R8_RealGoingPulse(): CommentedStatement [] =
         let fn = getFuncName()
         [|
-            if RuntimeDS.Package.IsPLCorPLCSIM() then
-                yield (fbRising[v.G.Expr], v._off.Expr) --| (v.GP, fn)
-            elif RuntimeDS.Package.IsPCorPCSIM() then 
-                yield! (v.G.Expr, v.System)  --^ (v.GP, fn) 
-            else    
-                failWithLog $"Not supported {RuntimeDS.Package} package"
+            yield! (v.G.Expr, v.System)  --^ (v.GP, fn) 
         |]
 
     member v.R10_RealGoingTime(): CommentedStatement [] =

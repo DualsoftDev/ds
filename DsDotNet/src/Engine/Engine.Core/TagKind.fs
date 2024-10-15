@@ -145,9 +145,6 @@ module TagKindList =
     | realOriginButton          = 11017
     | relayReal                 = 11018
 
-    | forceStart                = 11019
-    | forceReset                = 11020 //forceOff 의미
-    | forceOn                   = 11021
 
     | counter                   = 11023
     | timerOnDelay              = 11024
@@ -157,15 +154,23 @@ module TagKindList =
     | callMemo                  = 11028
     | realToken                 = 11029
     | sourceToken               = 11030
-    | mergeToken                 = 11031
+    | mergeToken                = 11031
 
     | dummyCoinSTs              = 11032
     | dummyCoinRTs              = 11033
     | dummyCoinETs              = 11034
 
-    | goingPulse                = 11037
+    | goingPulse                = 11035
 
-    | callCommandPulse          = 11040
+    | forceStart                = 11036
+    | forceStartPulse           = 11037
+    | forceReset                = 11038 //forceOff 의미
+    | forceResetPulse           = 11039 
+    | forceOn                   = 11040
+    | forceOnPulse              = 11041
+
+
+    | callCommandPulse          = 11042
 
     | callCommandEnd            = 11043
     | callOperatorValue         = 11044

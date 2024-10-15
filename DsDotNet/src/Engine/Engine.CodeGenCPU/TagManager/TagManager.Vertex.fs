@@ -75,14 +75,18 @@ module TagManagerModule =
             et
 
 
-        //Force
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member val ON = createTag true VertexTag.forceOn
-
+        ///forceOnBit HMI Pulse, forceOffBit HMI 는 RF 사용
+        member val ONP = createTag true VertexTag.forceOnPulse
         ///forceStartBit HMI
         member val SF = createTag true VertexTag.forceStart
+        ///forceStartBit HMI Pulse
+        member val SFP = createTag true VertexTag.forceStartPulse
         ///forceResetBit HMI
         member val RF = createTag true VertexTag.forceReset
+        ///forceResetBit HMI Pulse
+        member val RFP = createTag true VertexTag.forceResetPulse
 
         //Status
         ///Ready Status
@@ -105,23 +109,26 @@ module TagManagerModule =
             let realM() = v.TagManager:?> RealVertexTagManager
 
             match vt with
-            | VertexTag.startTag   -> x.ST     :> IStorage
-            | VertexTag.resetTag   -> x.RT     :> IStorage
-            | VertexTag.endTag     -> x.ET     :> IStorage
-            | VertexTag.ready      -> x.R      :> IStorage
-            | VertexTag.going      -> x.G      :> IStorage
-            | VertexTag.finish     -> x.F      :> IStorage
-            | VertexTag.homing     -> x.H      :> IStorage
-            | VertexTag.forceStart -> x.SF     :> IStorage
-            | VertexTag.forceReset -> x.RF     :> IStorage
-            | VertexTag.forceOn    -> x.ON     :> IStorage
-            | VertexTag.goingPulse -> x.GP     :> IStorage
-            | VertexTag.errorTRx   -> x.ErrTRX :> IStorage
-            | VertexTag.pause      -> x.PA     :> IStorage
+            | VertexTag.startTag        -> x.ST     :> IStorage
+            | VertexTag.resetTag        -> x.RT     :> IStorage
+            | VertexTag.endTag          -> x.ET     :> IStorage
+            | VertexTag.ready           -> x.R      :> IStorage
+            | VertexTag.going           -> x.G      :> IStorage
+            | VertexTag.finish          -> x.F      :> IStorage
+            | VertexTag.homing          -> x.H      :> IStorage
+            | VertexTag.forceStart      -> x.SF     :> IStorage
+            | VertexTag.forceStartPulse -> x.SFP    :> IStorage
+            | VertexTag.forceReset      -> x.RF     :> IStorage
+            | VertexTag.forceResetPulse -> x.RFP    :> IStorage
+            | VertexTag.forceOn         -> x.ON     :> IStorage
+            | VertexTag.forceOnPulse    -> x.ONP    :> IStorage
+            | VertexTag.goingPulse      -> x.GP     :> IStorage
+            | VertexTag.errorTRx        -> x.ErrTRX :> IStorage
+            | VertexTag.pause           -> x.PA     :> IStorage
 
-            | VertexTag.txErrOnTimeUnder  -> callM().ErrOnTimeUnder  :> IStorage
+            | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
-            | VertexTag.txErrOffTimeUnder -> callM().ErrOffTimeUnder :> IStorage
+            | VertexTag.txErrOffTimeUnder    -> callM().ErrOffTimeUnder :> IStorage
             | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver     :> IStorage
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage

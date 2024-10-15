@@ -16,7 +16,7 @@ type VertexTagManager with
         let sets =
             (
                      (mop <&&> call.StartPointExpr)
-                <||> (mop <&&> v.SF.Expr)
+                <||> (mop <&&> v.SFP.Expr)
                 <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
             )
             <&&> call.SafetyExpr

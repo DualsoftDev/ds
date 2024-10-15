@@ -17,12 +17,12 @@ type DsSystem with
         [|
             for call in calls do
                 if call.UsingTimeDelayCheck then 
-                    let sets = call.V.ST.Expr <||>  call.V.SF.Expr <&&> call.EndWithoutTimer
+                    let sets = call.V.ST.Expr <||>  call.V.SFP.Expr <&&> call.EndWithoutTimer
                     yield (sets) --@ (call.VC.TimeCheck, call.TimeDelayCheckMSec, fn)
 
             for alias in aliasCalls do
                 let call = alias.V.Vertex.TryGetPureCall().Value
                 if call.UsingTimeDelayCheck then 
-                    let sets = alias.V.ST.Expr<||>  alias.V.SF.Expr  <&&> call.EndWithoutTimer
+                    let sets = alias.V.ST.Expr<||>  alias.V.SFP.Expr  <&&> call.EndWithoutTimer
                     yield (sets) --@ (alias.VC.TimeCheck, call.TimeDelayCheckMSec, fn)
         |]

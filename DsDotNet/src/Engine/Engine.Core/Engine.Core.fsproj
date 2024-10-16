@@ -11,6 +11,8 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<!-- UseNugetProjectReference 속성이 명시적으로 설정되지 않았다면 기본값을 False로 설정 -->
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 

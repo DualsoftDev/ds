@@ -18,6 +18,6 @@ using Antlr4.Runtime;
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
 [assembly: Guid("2a959eec-ba9d-4c77-841b-d1dce28137b1")]
-[assembly: InternalsVisibleTo("Engine.Sample")]
-[assembly: InternalsVisibleTo("Engine.Parser.FS")]
+[assembly: InternalsVisibleTo("Engine.Sample, PublicKey=6b5d64113b30ff1b")]
+[assembly: InternalsVisibleTo("Engine.Parser.FS, PublicKey=6b5d64113b30ff1b")]
 [assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof(RuleContext))]

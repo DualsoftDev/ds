@@ -15,6 +15,15 @@ module RuntimeGeneratorModule =
         | XGK
         | AB
         | MELSEC
+        static member ofString(str:string) = DU.fromString<PlatformTarget> str |> Option.defaultWith (fun () -> failwith "ERROR")
+
+        member x.Stringify() = x.ToString()
+        member x.IsPLC = x <> WINDOWS
+        member x.TryGetPlcType() =
+            match x with
+            | WINDOWS -> None
+            | _ -> Some x
+
 
     //제어 Driver IO 기기 타입
     type HwDriveTarget =

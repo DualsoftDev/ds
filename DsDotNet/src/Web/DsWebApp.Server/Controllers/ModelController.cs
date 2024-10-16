@@ -124,7 +124,7 @@ public static class CytoVertexExtension
 {
     static (string, string, string) GetNameAndQualifiedNameAndParentName(IVertex vertex)
     {
-        var n = (vertex as INamed).Name;
+        var n = (vertex as Dual.Common.Core.FS.INamed).Name;
         var q = (vertex as IQualifiedNamed).QualifiedName;
         var p = vertex.GetParentName();
         return (q, n, p);

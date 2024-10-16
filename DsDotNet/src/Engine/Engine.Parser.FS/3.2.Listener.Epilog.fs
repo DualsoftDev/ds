@@ -5,6 +5,7 @@ open System.Linq
 
 open Antlr4.Runtime
 
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open Engine.Common
 open Engine.Core

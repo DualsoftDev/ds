@@ -1,5 +1,6 @@
 using Engine.Runtime;
 using Engine.Core;
+using Dual.Common.Base.FS;
 using static Engine.Core.CoreModule;
 using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
@@ -124,7 +125,7 @@ public static class CytoVertexExtension
 {
     static (string, string, string) GetNameAndQualifiedNameAndParentName(IVertex vertex)
     {
-        var n = (vertex as Dual.Common.Core.FS.INamed).Name;
+        var n = (vertex as INamed).Name;
         var q = (vertex as IQualifiedNamed).QualifiedName;
         var p = vertex.GetParentName();
         return (q, n, p);

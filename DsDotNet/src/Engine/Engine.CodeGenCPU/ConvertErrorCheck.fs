@@ -41,7 +41,7 @@ module ConvertErrorCheck =
                     if api.TX.IsNull() then
                         failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                    if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction = Push then
+                    if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction =JobTypeAction.Push then
                         if coin.MutualResetCoins.isEmpty() then
                             failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
 
@@ -136,7 +136,8 @@ module ConvertErrorCheck =
             for td in j.TaskDefs do
                 if td.ExistOutput then
                     let outParam = td.GetOutParam(j)
-                    if j.ActionType = Push && outParam.DataType = DuBOOL then
+                    if j.ActionType = JobTypeAction.Push && outParam.DataType = DuBOOL then
                             failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다."
                     elif outParam.DataType <> DuBOOL && outParam.ValueParam.IsNull() then
                             failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다."
+                        

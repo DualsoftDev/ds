@@ -17,18 +17,7 @@ module DsType =
     type BtnType =
     | DuAutoBTN | DuManualBTN | DuDriveBTN | DuTestBTN | DuPauseBTN
     | DuEmergencyBTN | DuClearBTN | DuHomeBTN | DuReadyBTN
-        override x.ToString() =
-            match x with
-            | DuAutoBTN      -> "Auto"
-            | DuManualBTN    -> "Manual"
-            | DuDriveBTN     -> "Drive"
-            | DuTestBTN      -> "Test"
-            | DuPauseBTN     -> "Pause"
-            | DuEmergencyBTN -> "Emergency"
-            | DuClearBTN     -> "Clear"
-            | DuHomeBTN      -> "Home"
-            | DuReadyBTN     -> "Ready"
-
+       
 
     /// Represents different mode types
     type LampType =

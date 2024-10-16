@@ -22,12 +22,14 @@ type Job with
             let getStatement(actionSet:IExpression option, actionRst:IExpression option) =
                 let sets = if actionSet.IsSome then actionSet.Value<||>set else set
                 let rsts = if actionRst.IsSome then actionRst.Value else _off
-                if j.ActionType = Push then
+                if j.ActionType = JobTypeAction.Push then
                     if rstMemos.IsEmpty then
                         failWithLog $"{call.Name} MutualResetCoins is empty"
                     (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)  //단동 실린더? 멈추면 반대로 움직여서 emg 삽입??
-                else
+                elif j.ActionType = JobTypeAction.ActionNormal then
                     (sets, rsts) --| (td.OutTag:?> Tag<bool>, fn)
+                else 
+                    failWithLog "Invalid JobTypeAction"
 
             match emgActions.TryFind(fun a->a.OutAddress = td.OutAddress)
                 , pauseActions.TryFind(fun a->a.OutAddress = td.OutAddress) with

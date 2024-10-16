@@ -349,7 +349,8 @@ module rec CoreModule =
 
             member val Finished:bool = false with get, set
             member val NoTransData:bool = false with get, set
-            member val RepeatCount:UInt32 option= None with get, set
+            member val RepeatCount:UInt32 option = None with get, set
+
 
         type Real with
             static member Create(name: string, flow) =
@@ -420,18 +421,7 @@ module rec CoreModule =
             member _.IsCommand = isCommand jobOrFunc
             member _.IsOperator = isOperator jobOrFunc
             member _.JobOrFunc = jobOrFunc
-            member _.CallOperatorType  =
-                match jobOrFunc with
-                | JobType _ -> DuOPUnDefined
-                | CommadFuncType _ -> DuOPUnDefined
-                | OperatorFuncType func -> func.OperatorType
-
-            member _.CallCommandType  =
-                match jobOrFunc with
-                | JobType _ -> DuCMDUnDefined
-                | CommadFuncType func -> func.CommandType
-                | OperatorFuncType _ -> DuCMDUnDefined
-
+   
 
             member val ExternalTags = HashSet<ExternalTagSet>()
             member val Disabled:bool = false with get, set
@@ -537,7 +527,6 @@ module rec CoreModule =
             member _.Name = name
             member _.PureName = name.Split([|'(';')'|]).First()
             member _.ApiSystem = dsSystem
-            member val TimeParam:TimeParam option = None with get, set
 
             member val TX = getNull<Real>() with get, set
             member val RX = getNull<Real>() with get, set
@@ -601,6 +590,7 @@ module rec CoreModule =
             member x.ApiSystemName = apiParam.ApiItem.ApiSystem.Name //needs test animation
 
             member x.DeviceName = deviceName
+            member x.FullName = $"{deviceName}.{x.Name}"
             member x.ParentSystem = parentSys
 
             member x.ApiParams = dicTaskDevParamIO.Values
@@ -651,7 +641,7 @@ module rec CoreModule =
             member val SettingFlows = flows with get, set
             member val TaskDevParamIO = taskDevParamIO with get, set
             //SettingFlows 없으면 전역 시스템 설정
-            member x.IsGlobalSystemHw = flows.IsEmpty || system.Flows |> Seq.forall(fun f ->flows.Contains(f))
+            member x.IsGlobalSystemHw = x.SettingFlows.IsEmpty || (system.Flows |> Seq.forall(fun f ->x.SettingFlows.Contains(f)))
             member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.DataType | None -> DuBOOL
             member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.DataType | None -> DuBOOL
 
@@ -693,7 +683,6 @@ module rec CoreModule =
         type CommandFunction with
             static member Create(name:string, excuteCode:string) =
                 let cmd = CommandFunction(name)
-                cmd.CommandType <- if excuteCode = "" then DuCMDUnDefined else DuCMDCode
                 cmd.CommandCode <- excuteCode
                 cmd
 

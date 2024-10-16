@@ -51,9 +51,7 @@ module LSEAddressPattern =
         | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
 
     let getXgkWordText (device:string, offsetByte: int) : string =
-        if offsetByte % 2 = 1 then
-            failwithf $"XGK 주소는 Word 타입 지원하려면 offsetByte({offsetByte})가 2의 배수야 합니다."
-
+        
         let wordIndex = offsetByte / 2
         match device.ToUpper() with
         | d when Xgk5Digit |> List.contains d ->
@@ -66,7 +64,7 @@ module LSEAddressPattern =
         if isBool
         then getXgkBitText(device, offset)
         else
-            getXgkWordText(device, offset)
+            getXgkWordText(device, offset * 8)
 
 
     let getXgKTextByTag (device:LsTagInfo) : string =

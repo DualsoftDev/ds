@@ -62,7 +62,7 @@ module PptDocModule =
                         else aliasCheckNodes |> Seq.filter (fun f ->
                                                     let keyName =
                                                         match f.NodeType with
-                                                            | CALL -> f.Job.Combine()
+                                                            | CALL  when not(f.IsFunction) -> f.Job.Combine()
                                                             | _ -> f.Name
                                                     keyName = name)
                                                     |> Seq.head

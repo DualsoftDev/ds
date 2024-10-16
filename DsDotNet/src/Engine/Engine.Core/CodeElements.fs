@@ -30,27 +30,11 @@ module rec CodeElements =
         member x.TargetName = targetName
         member x.Type = varType
 
-    type OperatorFunctionTypes =
-        | DuOPUnDefined
-        | DuOPCode
-        | DuOPNot
-        | DuOPTimer
-        member x.ToText() =
-            match x  with
-            | (DuOPUnDefined | DuOPCode) -> ""
-            | DuOPNot -> "$not"
-            | DuOPTimer -> "$time"
-
-
 
     let updateOperator (op:OperatorFunction) (funcBodyText:string) =
         if funcBodyText <> "" then
-            op.OperatorType <- DuOPCode
             op.OperatorCode <- funcBodyText
 
-    type CommandFunctionTypes =
-        | DuCMDUnDefined
-        | DuCMDCode
 
 
     [<AbstractClass>]
@@ -68,7 +52,6 @@ module rec CodeElements =
     ///Comparison, Logical, ... Operators  (비교, 논리 연산자)
     and OperatorFunction(name:string) =
         inherit DsFunc(name)
-        member val OperatorType = DuOPUnDefined with get, set
         member val OperatorCode = "" with get, set
 
         member x.ToDsText() = if x.OperatorCode = "" then TextSkip else x.OperatorCode
@@ -76,7 +59,6 @@ module rec CodeElements =
     ///Copy, Assign, ... Commands (복사, 대입 명령)
     and CommandFunction(name:string) =
         inherit DsFunc(name)
-        member val CommandType = DuCMDUnDefined with get, set
         member val CommandCode = "" with get, set
 
         member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode

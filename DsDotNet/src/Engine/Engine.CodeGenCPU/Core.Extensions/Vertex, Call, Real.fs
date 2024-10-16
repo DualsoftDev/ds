@@ -55,8 +55,6 @@ module ConvertCpuVertex =
 
         member c.MaxAvgTime    = getAgvTimes(c).Max()
 
-        member c.UsingCompare  = c.CallOperatorType = DuOPCode //test ahn
-        member c.UsingMove  = c.CallCommandType = DuCMDCode
 
         member c.EndPlan =
             if c.IsCommand then

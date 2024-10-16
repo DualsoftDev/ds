@@ -22,9 +22,15 @@ module ConvertCpuJob =
                           .Select(fun d-> d.GetInExpr(j))
 
             if inExprs.any() then
-                match j.JobParam.JobSensing with
-                | SensingNormal -> inExprs.ToAnd() |>Some
-                | SensingNegative -> !@inExprs.ToAnd() |>Some
+                let sen = j.JobParam.JobSensing
+                if sen.HasFlag(JobTypeSensing.SensingNormal) 
+                then 
+                    inExprs.ToAnd() |>Some
+                elif  sen.HasFlag(JobTypeSensing.SensingNegative) 
+                then
+                    !@inExprs.ToAnd() |>Some
+                else 
+                    failWithLog "Invalid JobTypeSensing"
             else
                 None
 

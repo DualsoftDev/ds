@@ -115,7 +115,7 @@ module ImportU =
                 node.ButtonDefs.ForEach(fun b ->
                     let fullName = b.Key    
                     let pureName, devParamIO = getPureNFunction(fullName, true)
-                    mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), flow))
+                    mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), Some flow))
                     )
 
             doc.NodesHeadPage
@@ -124,12 +124,11 @@ module ImportU =
 
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
                 else
-                    dicFlow.Iter(fun flow ->
                         node.ButtonHeadPageDefs.ForEach(fun b -> 
                             let fullName = b.Key    
                             let pureName, devParamIO = getPureNFunction(fullName, true)
                             
-                            mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), flow.Value)))
+                            mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), None))
                 )
 
         //MakeLamps 리스트 만들기
@@ -171,12 +170,12 @@ module ImportU =
         static member MakeConditionNActions(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
 
-            let addCondition(fullName, conditionType:ConditionType, flowName:string option, settingflow:Flow) =
+            let addCondition(fullName, conditionType:ConditionType, settingflow:Flow option) =
                 let emptyAddr = Addresses("", "")
                 let pureName, devParamIO = getPureNFunction(fullName, true)
                 mySys.AddCondition(conditionType, pureName, devParamIO, emptyAddr, settingflow)
 
-            let addActiontion(fullName, aType:ActionType, settingflow:Flow) =
+            let addActiontion(fullName, aType:ActionType, settingflow:Flow option) =
                 let emptyAddr = Addresses("", "")
                 let pureName, devParamIO = getPureNFunction(fullName, false)
 
@@ -187,8 +186,8 @@ module ImportU =
             |> Seq.iter (fun node ->
                 try
                     let flow = dicFlow.[node.PageNum]
-                    node.CondiDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, Some flow.Name, flow))
-                    node.ActionDefs.ForEach(fun a ->  addActiontion (a.Key, a.Value, flow))
+                    node.CondiDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, Some flow))
+                    node.ActionDefs.ForEach(fun a ->  addActiontion (a.Key, a.Value, Some flow))
                 with _ ->
                     Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
                     )
@@ -198,10 +197,8 @@ module ImportU =
             |> Seq.iter (fun node ->
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
                 else
-                    dicFlow.Iter(fun flow ->
-                        node.CondiHeadPageDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, None, flow.Value))
-                        node.ActionHeadPageDefs.ForEach(fun c ->  addActiontion (c.Key, c.Value,  flow.Value))
-                            )
+                    node.CondiHeadPageDefs.ForEach(fun c ->  addCondition (c.Key, c.Value,  None))
+                    node.ActionHeadPageDefs.ForEach(fun c ->  addActiontion (c.Key, c.Value, None))
                 )
 
         [<Extension>]
@@ -323,8 +320,8 @@ module ImportU =
                 |> Seq.filter (fun node -> node.IsAlias)
                 |> Seq.iter (fun node ->
 
-                    //if node.IsFunction then
-                    //    node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
+                    if node.IsFunction then
+                        node.Shape.ErrorName($"Alias Function은 지원하지 않습니다.", node.PageNum)
                     let segOrg =    dicVertex.[node.Alias.Value.Key]
 
                     let alias =
@@ -707,23 +704,23 @@ module ImportU =
 
         [<Extension>]
         static member CreateGenBtnLamp(mySys: DsSystem) =
-            let flows = mySys.Flows
-            for flow in flows do
-                mySys.AddButton(BtnType.DuAutoBTN,      "AutoSelect", "", "-", flow)
-                mySys.AddButton(BtnType.DuManualBTN,    "ManualSelect", "", "-", flow)
-                mySys.AddButton(BtnType.DuDriveBTN,     "DrivePushBtn", "", "-", flow)
-                mySys.AddButton(BtnType.DuPauseBTN,     "PausePushBtn", "", "-", flow)
-                mySys.AddButton(BtnType.DuClearBTN,     "ClearPushBtn", "", "-", flow)
-                mySys.AddButton(BtnType.DuEmergencyBTN, "EmergencyBtn", "", "-", flow)
+            let defParm = defaultTaskDevParamIO()
+            let defBtn  = Addresses ("", "-")
+            let defLamp = Addresses ("-", "")
+            mySys.AddButtonDef(BtnType.DuAutoBTN,      "AutoSelect",  defParm, defBtn , None)
+            mySys.AddButtonDef(BtnType.DuManualBTN,    "ManualSelect",defParm, defBtn , None)
+            mySys.AddButtonDef(BtnType.DuDriveBTN,     "DrivePushBtn",defParm, defBtn , None)
+            mySys.AddButtonDef(BtnType.DuPauseBTN,     "PausePushBtn",defParm, defBtn , None)
+            mySys.AddButtonDef(BtnType.DuClearBTN,     "ClearPushBtn",defParm, defBtn , None)
+            mySys.AddButtonDef(BtnType.DuEmergencyBTN, "EmergencyBtn",defParm, defBtn , None)
 
-            mySys.AddLamp(LampType.DuAutoModeLamp   , "AutoModeLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuManualModeLamp , "ManualModeLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuIdleModeLamp   , "IdleModeLamp", "-", "", None)
-
-            mySys.AddLamp(LampType.DuErrorStateLamp,  "ErrorLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuOriginStateLamp, "OriginStateLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuReadyStateLamp,  "ReadyStateLamp", "-", "", None)
-            mySys.AddLamp(LampType.DuDriveStateLamp,  "DriveLamp", "-", "", None)
+            mySys.AddLampDef(LampType.DuAutoModeLamp   , "AutoModeLamp", defParm, defLamp ,  None)
+            mySys.AddLampDef(LampType.DuManualModeLamp , "ManualModeLamp",defParm, defLamp , None)
+            mySys.AddLampDef(LampType.DuIdleModeLamp   , "IdleModeLamp", defParm, defLamp ,  None)
+            mySys.AddLampDef(LampType.DuErrorStateLamp,  "ErrorLamp", defParm, defLamp ,     None)
+            mySys.AddLampDef(LampType.DuOriginStateLamp, "OriginStateLamp",defParm, defLamp ,None)
+            mySys.AddLampDef(LampType.DuReadyStateLamp,  "ReadyStateLamp",defParm, defLamp , None)
+            mySys.AddLampDef(LampType.DuDriveStateLamp,  "DriveLamp", defParm, defLamp ,     None)
 
         [<Extension>]
         static member PreCheckPptSystem(doc: PptDoc, sys: DsSystem) =

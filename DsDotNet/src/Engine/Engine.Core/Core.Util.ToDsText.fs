@@ -193,6 +193,9 @@ module internal ToDsTextModule =
                         for line in codeLines
                             do yield $"{tab3}{line}"
                         yield $"{tab2}{rbCode}"
+                    elif code = TextSkip || code = ""
+                    then 
+                        yield $"{tab2}{funcName};"
                     else
                         yield $"{tab2}{funcName} = {lbCode}{code}{rbCode}"
                 ]
@@ -202,10 +205,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[operators] = {lb}"
                 for op in operators do
                     let name = op.Name.QuoteOnDemand()
-                    if op.OperatorType = DuOPUnDefined then
-                        yield $"{tab2}{name};"
-                    else
-                        yield! funcCodePrint name (op.ToDsText())
+                    yield! funcCodePrint name (op.ToDsText())
 
                 yield $"{tab}{rb}"
 
@@ -214,10 +214,7 @@ module internal ToDsTextModule =
                 yield $"{tab}[commands] = {lb}"
                 for cmd in commands do
                     let name = cmd.Name.QuoteOnDemand()
-                    if cmd.CommandType = DuCMDUnDefined ||  cmd.CommandCode = "" then
-                        yield $"{tab2}{name};"
-                    else
-                        yield! funcCodePrint $"{name}" (cmd.ToDsText())
+                    yield! funcCodePrint $"{name}" (cmd.ToDsText())
 
                 yield $"{tab}{rb}"
 
@@ -461,8 +458,8 @@ module internal ToDsTextModule =
                     if errorJobs.Any() then
                         yield $"{tab2}[errors] = {lb}"
                         for job in errorJobs do
-                            let max = job.JobTime.Max    |> map (fun v -> $"{TextMAX}({v}ms)") |? ""
-                            let chk = job.JobTime.Check  |> map (fun v -> $"{TextCHK}({v}ms)") |? ""
+                            let max = job.JobTime.TimeOut     |> map (fun v -> $"{TextMAX}({v}ms)") |? ""
+                            let chk = job.JobTime.DelayCheck  |> map (fun v -> $"{TextCHK}({v}ms)") |? ""
                             let paras = [max;chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
                             yield $"""{tab3}{job.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"

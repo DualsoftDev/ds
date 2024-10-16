@@ -11,19 +11,27 @@ module ImportUtilVertex =
 
 
     let getOperatorFunc (sys: DsSystem) (node: PptNode) =
-        sys.Functions
-        |> Seq.tryFind (fun f -> f.Name = node.OperatorName)
-        |> Option.defaultWith (fun () ->
-            let newFunc = OperatorFunction(node.OperatorName) :> DsFunc
-            sys.Functions.Add newFunc |> ignore
-            newFunc
-        )
+        if sys.Functions.OfType<CommandFunction>().any(fun f->f.Name = node.OperatorName) 
+        then 
+            failWithLog $"Function name ({node.OperatorName}) is already used as a command name"
+        else 
+            sys.Functions.OfType<OperatorFunction>()
+            |> Seq.tryFind (fun f -> f.Name = node.OperatorName)
+            |> Option.defaultWith (fun () ->
+                let newFunc = OperatorFunction(node.OperatorName) 
+                sys.Functions.Add newFunc |> ignore
+                newFunc
+            )
 
     let getCommandFunc (sys: DsSystem) (node: PptNode) =
-        sys.Functions
+        if sys.Functions.OfType<OperatorFunction>().any(fun f->f.Name = node.CommandName) 
+        then 
+            failWithLog $"Function name ({node.CommandName}) is already used as an operator name"
+        else 
+        sys.Functions.OfType<CommandFunction>()
         |> Seq.tryFind (fun f -> f.Name = node.CommandName)
         |> Option.defaultWith (fun () ->
-            let newFunc = CommandFunction(node.CommandName) :> DsFunc
+            let newFunc = CommandFunction(node.CommandName) 
             sys.Functions.Add newFunc |> ignore
             newFunc
         )

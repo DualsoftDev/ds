@@ -14,10 +14,12 @@ module CoreExtensionModule =
         | tx::rx when rx.Length = 1 -> Some (getAddressTaskDevParam tx,  getAddressTaskDevParam rx.Head)
         | _-> None
 
-    let checkSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
+    let checkHwSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
         if system <> targetFlow.System then
             failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
-
+        if itemName.Contains('.') then
+            failwithf $"[{targetFlow}]{itemName} Error: \r\n이름 '.' 포함되서는 안됩니다."
+           
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
     let getConditions (sys:DsSystem, cType:ConditionType) = sys.HwSystemDefs.OfType<ConditionDef>().Where(fun f->f.ConditionType = cType)
@@ -86,40 +88,26 @@ module CoreExtensionModule =
                         { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh }))
 
 
-        member x.AddButton(btnType:BtnType, btnName:string, inAddress:string, outAddress:string, flow:Flow) =
-            x.AddButtonDef(btnType, btnName,  defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)
-        member x.AddLamp(lmpType:LampType, lmpName:string, inAddress:string, outAddress:string,  flow:Flow option) =
-            x.AddLampDef(lmpType, lmpName, defaultTaskDevParamIO(), Addresses(inAddress ,outAddress), flow)
-
-        member x.AddButtonDef(btnType:BtnType, btnName:string, taskDevParamIO:TaskDevParamIO,  addr:Addresses, flow:Flow) =
-            checkSystem(x, flow, btnName)
-
-            let existBtns =
-                x.HWButtons.Where(fun f->f.ButtonType = btnType)
-                |> Seq.filter(fun b -> b.SettingFlows.Contains(flow))
-
-            if existBtns.Any(fun w->w.Name = btnName) then
-                failwithf $"버튼타입[{btnType}]{btnName}이 중복 정의 되었습니다.  위치:[{flow.Name}]"
-            if btnName.Contains('.') then
-                failwithf $"[{btnType}]{btnName} Error: \r\n이름 '.' 포함되서는 안됩니다."
-
+        member x.AddButtonDef(btnType:BtnType, btnName:string, taskDevParamIO:TaskDevParamIO,  addr:Addresses, flow:Flow option) =
+            if flow.IsSome then
+                checkHwSystem(x, flow.Value, btnName)
+          
+         
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
-            | Some btn -> btn.SettingFlows.Add(flow) |> verifyM $"중복 Button [flow:{flow.Name} name:{btnName}]"
-            | None ->
-                x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParamIO, addr, HashSet[|flow|]))
-                |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
+            | Some btn when flow.IsSome -> btn.SettingFlows.Add(flow.Value) |> verifyM $"중복 Button [flow:{flow.Value.Name} name:{btnName}]"
+            | _ ->
+                let flows = HashSet[match flow with | Some f -> f | None -> ()]
+                x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParamIO, addr, flows))
+                |> verifyM $"중복 ButtonDef [name:{btnName}]"
 
- 
         member x.AddLampDef(lmpType:LampType, lmpName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if not (taskDevParamIO.IsDefaultParam )
             then 
                 failwithf $"LampDef [{lmpName}] Error: \r\nLamp는 타겟 Value 속성을 지정할 수 없습니다. 기본(true)"
 
             if flow.IsSome then
-                checkSystem(x, flow.Value, lmpName)
+                checkHwSystem(x, flow.Value, lmpName)
 
-            if lmpName.Contains('.') then
-                failwithf $"[{lmpType}]{lmpName} Error: \r\n이름 '.' 포함되서는 안됩니다."
 
             match x.HWLamps.TryFind(fun f -> f.Name = lmpName) with
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
@@ -127,40 +115,37 @@ module CoreExtensionModule =
                 let flows = HashSet[match flow with | Some f -> f | None -> ()]
                 x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParamIO, addr, flows))
                 |> verifyM $"중복 LampDef [name:{lmpName}]"
-
-     
-        member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow, isCondition: bool) =
-            checkSystem(x, flow, defName)
+        
+        
+        // Method for adding actions, passing the ActionType and setting isCondition = false
+        member x.AddAction(actionType: ActionType, actionName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow option) =
+                        x.AddDefinition(None, Some(actionType), actionName, taskDevParamIO, addr, flow, false)
+        // Method for adding conditions, passing the ConditionType and setting isCondition = true
+        member x.AddCondition(condiType: ConditionType, condiName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow option) =
+                       x.AddDefinition(Some(condiType), None, condiName, taskDevParamIO, addr, flow, true)
+        member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow option, isCondition: bool) =
+            if flow.IsSome then
+                checkHwSystem(x, flow.Value, defName)
 
             let typeText = if isCondition then "Condition" else "Action"
-            if defName.Contains('.') then
-                failwithf $"[{(if isCondition then condiType.Value.ToString() else actionType.Value.ToString())}]{defName} Error: 이름 '.' 포함되서는 안됩니다."
-
+            
+            let flows = HashSet[match flow with | Some f -> f | None -> ()]
             if isCondition
             then
-                    match x.HWConditions.TryFind(fun f -> f.Name = defName) with
-                    | Some def ->
-                        def.SettingFlows.Add(flow) |> verifyM $"중복 {typeText} [flow:{flow.Name} name:{defName}]"
-                    | _ ->
-                        x.HwSystemDefs.Add(ConditionDef(defName, x, condiType.Value, taskDevParamIO, addr, HashSet[|flow|]))
-                        |> verifyM $"중복 ConditionDef [flow:{flow.Name} name:{defName}]"
+                match x.HWConditions.TryFind(fun f -> f.Name = defName) with
+                | Some def when flow.IsSome ->
+                    def.SettingFlows.Add(flow.Value) |> verifyM $"중복 {typeText} [flow:{flow.Value.Name} name:{defName}]"
+                | _ ->
+                    x.HwSystemDefs.Add(ConditionDef(defName, x, condiType.Value, taskDevParamIO, addr, flows))
+                    |> verifyM $"중복 ConditionDef [flowname:{defName}]"
             else
-                    match x.HWActions.TryFind(fun f -> f.Name = defName) with
-                    | Some def ->
-                        def.SettingFlows.Add(flow) |> verifyM $"중복 {typeText} [flow:{flow.Name} name:{defName}]"
-                    | _ ->
-                        x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, taskDevParamIO, addr, HashSet[|flow|]))
-                        |> verifyM $"중복 ActionDef [flow:{flow.Name} name:{defName}]"
-
-        // Method for adding conditions, passing the ConditionType and setting isCondition = true
-        member x.AddCondition(condiType: ConditionType, condiName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow) =
-            x.AddDefinition(Some(condiType), None, condiName, taskDevParamIO, addr, flow, true)
-
-        // Method for adding actions, passing the ActionType and setting isCondition = false
-        member x.AddAction(actionType: ActionType, actionName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow) =
-            x.AddDefinition(None, Some(actionType), actionName, taskDevParamIO, addr, flow, false)
-
-
+                match x.HWActions.TryFind(fun f -> f.Name = defName) with
+                | Some def when flow.IsSome ->
+                    def.SettingFlows.Add(flow.Value) |> verifyM $"중복 {typeText} [flow:{flow.Value.Name} name:{defName}]"
+                | _ ->
+                    x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, taskDevParamIO, addr, flows))
+                    |> verifyM $"중복 ActionDef [name:{defName}]"
+  
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct

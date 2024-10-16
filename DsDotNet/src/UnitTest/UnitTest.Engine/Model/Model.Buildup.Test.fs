@@ -192,13 +192,14 @@ module ModelBuildupTests1 =
         [<Test>]
         member __.``Model with buttons test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
+            let defParm = defaultTaskDevParamIO()
 
-            system.AddButton(BtnType.DuEmergencyBTN, "STOP", "%I1","%Q1",flow)
-            system.AddButton(BtnType.DuDriveBTN, "START", "%I1","%Q1",flow)
+            system.AddButtonDef(BtnType.DuEmergencyBTN, "STOP",defParm , Addresses( "%I1","%Q1"),Some flow)
+            system.AddButtonDef(BtnType.DuDriveBTN, "START",defParm,  Addresses("%I1","%Q1"),Some flow)
 
             let flow2 = Flow.Create("F2", system)
-            system.AddButton(BtnType.DuEmergencyBTN, "STOP2", "%I1","%Q1",flow2)
-            system.AddButton(BtnType.DuDriveBTN, "START2", "%I1","%Q1",flow2)
+            system.AddButtonDef(BtnType.DuEmergencyBTN, "STOP2",defParm,  Addresses("%I1","%Q1"),Some flow2)
+            system.AddButtonDef(BtnType.DuDriveBTN, "START2",defParm,  Addresses("%I1","%Q1"),Some flow2)
 
             let generated = system.ToDsText(true, false)
             let answer = """

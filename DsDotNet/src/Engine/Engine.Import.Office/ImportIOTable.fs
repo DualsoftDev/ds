@@ -19,16 +19,15 @@ module ImportIOTable =
                 match sys.Functions.TryFind(fun f -> f.Name = funcName) with
                 | Some func ->
                     match func with
-                    | :? OperatorFunction as op when op.OperatorType = DuOPUnDefined ->
+                    | :? OperatorFunction as op  ->
                             updateOperator op funcBodyText
                             Some (op :> DsFunc)
 
-                    | :? CommandFunction as cmd when cmd.CommandType = DuCMDUnDefined ->
+                    | :? CommandFunction as cmd  ->
                         if funcBodyText = ""
                         then
                             failWithLog $"error {funcName} function body is empty"
                         else
-                            cmd.CommandType <- DuCMDCode
                             cmd.CommandCode <- funcBodyText
                             Some (cmd :> DsFunc)
 
@@ -172,7 +171,7 @@ module ImportIOTable =
                 let name = getDevName row
                 let func = $"{row.[(int) IOColumn.Input]}"
                 if func = "" then
-                    Office.ErrorPpt(ErrorCase.Name, ErrID._1010, $"{func}", page, 0u)
+                    Office.ErrorPpt(ErrorCase.Name, ErrID._1010, $"{name}:{func}", page, 0u)
 
                 getFunctionNUpdate (name, name, func,   false,  page) |> ignore
 

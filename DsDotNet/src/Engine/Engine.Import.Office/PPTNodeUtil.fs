@@ -146,8 +146,8 @@ module PptNodeUtilModule =
         let getJobTime (contents: string) : JobTime  =
             // JobTime 객체 생성 및 값 설정
             let jobTime = JobTime()
-            jobTime.Max  <- parseUIntMSec contents TextMAX
-            jobTime.Check  <- parseUIntMSec contents TextCHK
+            jobTime.TimeOut    <- parseUIntMSec contents TextMAX
+            jobTime.DelayCheck <- parseUIntMSec contents TextCHK
 
             jobTime
 
@@ -160,7 +160,7 @@ module PptNodeUtilModule =
 
 
         let getPureNFunction (fullName: string, isInput:bool) =
-            let pureName = GetLastParenthesesReplaceName(fullName, "")
+            let pureName = GetLastParenthesesReplaceName(fullName, "") |> trimSpaceNewLine
             let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
 
             let devParamIO =

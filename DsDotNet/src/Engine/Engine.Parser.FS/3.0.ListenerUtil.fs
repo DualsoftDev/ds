@@ -115,7 +115,7 @@ module ListnerCommonFunctionGeneratorUtil =
         }
 
     type ErrorDefinition = {
-        MaxTime: CountUnitType option
+        TimeOutMaxTime: CountUnitType option
         CheckDelayTime: CountUnitType option
     }
 
@@ -124,7 +124,7 @@ module ListnerCommonFunctionGeneratorUtil =
             // ErrorDefinition 생성하여 반환
             try
                 let errorDefinition = {
-                    MaxTime       = parseUIntMSec errorParams TextMAX
+                    TimeOutMaxTime = parseUIntMSec errorParams TextMAX
                     CheckDelayTime = parseUIntMSec errorParams TextCHK
                 }
                 errorDefinition
@@ -224,7 +224,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     | Some ctx ->
                             getParserJobType ($"[{ctx.GetText().DeQuoteOnDemand()}]")
                     | None ->
-                            JobDevParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+                            JobDevParam(JobTypeAction.ActionNormal, JobTypeSensing.SensingNormal, defaultJobTypeTaskDevInfo())
 
                 let apiDefCtxs = callListingCtx.Descendants<CallApiDefContext>().ToArray()
                 yield jobFqdn, jobDevParam, apiDefCtxs, callListingCtx

@@ -46,11 +46,11 @@ module TagManagerModule =
 
         member val IsOperator =
             match v with
-            | :? Call as c -> c.CallOperatorType = DuOPCode
+            | :? Call as c -> c.IsOperator
             |_-> false
         member val IsCommand =
             match v with
-            | :? Call as c -> c.CallCommandType = DuCMDCode
+            | :? Call as c -> c.IsCommand
             |_-> false
         member _.Flow   = v.Parent.GetFlow()
         member x.System =

@@ -72,6 +72,17 @@ module DsAddressModule =
         | PLCHwModel.DataType.LWord ->DuUINT64
         | PLCHwModel.DataType.Continuous -> failwithf $"error Continuous tag "
 
+
+    let matchPlcDataType(plcDataType:PLCHwModel.DataType, dt:DataType) =
+        match plcDataType with
+        | PLCHwModel.DataType.Bit -> DuBOOL = dt
+        | PLCHwModel.DataType.Byte -> DuUINT8 = dt   || DuINT8 = dt
+        | PLCHwModel.DataType.Word -> DuUINT16 = dt  || DuINT16 = dt
+        | PLCHwModel.DataType.DWord ->DuUINT32 = dt  || DuINT32 = dt
+        | PLCHwModel.DataType.LWord ->DuUINT64 = dt  || DuINT64 = dt
+        | PLCHwModel.DataType.Continuous -> failwithf $"error Continuous tag "
+
+
     let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
         let cpu, driver, hwSlotDataTypes = target.Platform, target.HwDrive, target.Slots
         let addr =
@@ -228,7 +239,7 @@ module DsAddressModule =
 
                         | LS_XGK_IO ->
                             let isBool = dataType = DuBOOL
-                            if sizeBit = 1 then
+                            if isBool then
                                 getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), isBool)
                             else
                                 match ioType with
@@ -282,7 +293,7 @@ module DsAddressModule =
                 elif cpu = XGI || (cpu = WINDOWS && driver = LS_XGI_IO)
                 then
                     match tryParseXGITag (addr) with
-                    | Some (t) when (t.DataType|>getDuDataType) = dataType -> addr
+                    | Some (t) when matchPlcDataType(t.DataType, dataType) ->  addr
                     | _ ->  failwithf $"XGI 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
                 else 
                     addr

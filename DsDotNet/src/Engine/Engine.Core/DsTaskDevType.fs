@@ -134,7 +134,7 @@ module rec DsTaskDevType =
             with get() = symbol
             and set(value) = symbol <- value
 
-        member x.SymbolName = 
+        member x.GetSymbolName() = 
             match symbol with
             | Some sym -> sym.Name
             | None -> ""
@@ -190,8 +190,8 @@ module rec DsTaskDevType =
         ///기본값은 false, 0 , "", ' ', 0.0, ...
         member x.DefaultValue = 
             match valueParam.TargetValue with
-            | Some v -> v.GetType() |> typeDefaultValue
-            | _ -> failWithLog $"DefaultValue {x}is not valid"
+            | Some v -> v.GetType() |> typeDefaultValue |> Some
+            | _ -> None
 
         member x.DataType = valueParam.DataType 
   

@@ -105,8 +105,8 @@ module ExportIOTable =
             head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-        let inSym  =  dev.GetInParam(job).SymbolName
-        let outSym =  dev.GetOutParam(job).SymbolName
+        let inSym  =  dev.GetInParam(job).GetSymbolName()
+        let outSym =  dev.GetOutParam(job).GetSymbolName()
         let inSkip, outSkip = dev.GetSkipInfo(job)
 
         let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.GetApiItem(job).PureName}"
@@ -204,12 +204,12 @@ module ExportIOTable =
             sys.Functions
                 .OfType<OperatorFunction>()
                                     .Map(fun func->
-                                    let flow, name = splitNameForRow func.Name
+                                    let _flow, name = splitNameForRow func.Name
                                     let funcText =    funcOperatorText func.Statements
 
 
                                     [ TextXlsOperator
-                                      flow
+                                      TextXlsAllFlow
                                       name
                                       TextSkip
                                       funcText
@@ -223,12 +223,12 @@ module ExportIOTable =
             sys.Functions
                 .OfType<CommandFunction>()
                                     .Map(fun func->
-                                    let flow, name = splitNameForRow func.Name
+                                    let _flow, name = splitNameForRow func.Name
                                     let funcText =    funcText func.Statements
 
 
                                     [ TextXlsCommand
-                                      flow
+                                      TextXlsAllFlow
                                       name
                                       TextSkip
                                       TextSkip
@@ -272,8 +272,8 @@ module ExportIOTable =
                     getPptHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.SymbolName else ""
-                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.SymbolName else ""
+                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.GetSymbolName() else ""
+                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.GetSymbolName() else ""
                 ]
             )
         let actionRows =
@@ -294,8 +294,8 @@ module ExportIOTable =
                     getPptHwDevDataTypeText action
                     action.InAddress
                     action.OutAddress
-                    if action.TaskDevParamIO.InParam.IsSome then action.TaskDevParamIO.InParam.Value.SymbolName else ""
-                    if action.TaskDevParamIO.OutParam.IsSome then action.TaskDevParamIO.OutParam.Value.SymbolName else ""
+                    if action.TaskDevParamIO.InParam.IsSome then action.TaskDevParamIO.InParam.Value.GetSymbolName() else ""
+                    if action.TaskDevParamIO.OutParam.IsSome then action.TaskDevParamIO.OutParam.Value.GetSymbolName() else ""
                 ]
             )
 

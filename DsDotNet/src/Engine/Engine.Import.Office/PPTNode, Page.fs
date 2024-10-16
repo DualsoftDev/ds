@@ -82,8 +82,8 @@ module PptNodeModule =
 
         member x.PageTitle      = pageTitle
         member x.Position       = shape.GetPosition(slieSize)
-        member x.OperatorName   = pageTitle+"_"+name
-        member x.CommandName    = pageTitle+"_"+name
+        member x.OperatorName   = name
+        member x.CommandName    = name
         member x.IsCall         = nodeType = CALL
         member x.IsRootNode     = rootNode
         member x.IsFunction     = x.IsCall && not(name.Contains("."))

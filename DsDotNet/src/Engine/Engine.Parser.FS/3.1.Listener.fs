@@ -891,8 +891,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for fqdn, t in fqdnErrors do
                 match system.Jobs.TryFind(fun f->f.DequotedQualifiedName = fqdn.Combine()) with
                 | Some job ->
-                    job.JobTime.Max  <- t.MaxTime
-                    job.JobTime.Check  <- t.CheckDelayTime
+                    job.JobTime.TimeOut  <- t.TimeOutMaxTime
+                    job.JobTime.DelayCheck  <- t.CheckDelayTime
                 | None -> failWithLog $"Couldn't find target job object name {fqdn.Combine()}"
         
         let fillRepeats (system: DsSystem) (listRepeatCtx: List<dsParser.RepeatsBlockContext> ) =

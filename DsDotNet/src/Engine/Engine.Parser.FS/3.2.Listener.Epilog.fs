@@ -77,18 +77,16 @@ module EtcListenerModule =
                                             .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
                                             .ToHashSet()
 
-                                    if flows.Count > 0 then
-                                        return targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr
-                                    else
-                                        failwithlog "There are no flows in button"
+                                    return targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr
                                 }
                         ]
 
                     for fbi in flowBtnInfo |> List.choose id do
                         let targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr = fbi
-
+                        if flows.IsEmpty then
+                            system.AddButtonDef(targetBtnType, btnName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), None)
                         for flow in flows do
-                            system.AddButtonDef(targetBtnType, btnName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), flow)
+                            system.AddButtonDef(targetBtnType, btnName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), Some flow)
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
             for ctxChild in ctx.children do
@@ -173,7 +171,7 @@ module EtcListenerModule =
                         let cndName, inp, outp,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
-                            system.AddCondition(targetCndType, cndName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr),  flow)
+                            system.AddCondition(targetCndType, cndName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr), Some flow)
 
         member x.ProcessActionBlock(ctx: ActionBlockContext) =
             for ctxChild in ctx.children do
@@ -196,7 +194,7 @@ module EtcListenerModule =
                         let actionName, inp, outp,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
-                            system.AddAction(targetActionType, actionName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr),  flow)
+                            system.AddAction(targetActionType, actionName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr), Some flow)
 
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =

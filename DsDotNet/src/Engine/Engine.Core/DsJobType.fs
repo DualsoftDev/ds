@@ -13,14 +13,13 @@ module DsJobType =
         static let DefaultMax = 15000u
         static let DefaultChk = 0u
 
-        member val Max: uint option = None with get, set //ON 동작시간 에러초과 msec
-        member val Check: uint option = None with get, set // 센서고장체크 딜레이 msec
+        member val TimeOut: uint option = None with get, set //ON 동작시간 에러초과 msec
+        member val DelayCheck: uint option = None with get, set // 센서고장체크 딜레이 msec
 
-        member x.IsDefault = x.Max.IsNone  && x.Check.IsNone 
+        member x.IsDefault = x.TimeOut.IsNone  && x.DelayCheck.IsNone 
 
-        member x.TimeOutMaxMSec  = x.Max |> Option.defaultValue DefaultMax
-        member x.TimeDelayCheckMSec  = x.Check |> Option.defaultValue DefaultChk
-
+        member x.TimeOutMaxMSec  = x.TimeOut |> Option.defaultValue DefaultMax
+        member x.TimeDelayCheckMSec  = x.DelayCheck |> Option.defaultValue DefaultChk
 
 
     let parseUIntMSec (txt: string) (findKey: string) =
@@ -51,20 +50,31 @@ module DsJobType =
         | _ -> None
 
     type JobTypeAction =
-        | ActionNormal
-        | Push
-        member x.ToText() =
-            match x with
-            | ActionNormal -> ""
-            | Push -> TextJobPush
+        | ActionNormal = 0
+        | Push = 1
 
+    let getJobTypeActionToText (x: JobTypeAction) =
+        if x.HasFlag JobTypeAction.Push then
+            TextJobPush
+        elif x.HasFlag JobTypeAction.ActionNormal then
+            ""
+        else
+            failWithLog $"{x} Unknown JobTypeAction"
+
+
+    [<Flags>]
     type JobTypeSensing =
-        | SensingNormal
-        | SensingNegative
-        member x.ToText() =
-            match x with
-            | SensingNormal -> ""
-            | SensingNegative -> TextJobNegative
+        | SensingNormal = 0 
+        | SensingNegative = 1
+
+    let getJobTypeSensingToText(x:JobTypeSensing) =
+        if x.HasFlag JobTypeSensing.SensingNormal then
+            ""
+        elif x.HasFlag JobTypeSensing.SensingNegative then
+            TextJobNegative
+        else
+            failWithLog $"{x} Unknown JobTypeSensing"
+
 
     type JobTypeTaskDevInfo =
         {
@@ -90,8 +100,8 @@ module DsJobType =
 
         member x.ToText() =
             [|
-                x.JobAction.ToText()
-                x.JobSensing.ToText()
+                x.JobAction |> getJobTypeActionToText
+                x.JobSensing |> getJobTypeSensingToText
                 x.JobTaskDevInfo.ToText()
             |] |> filter (String.any) |> String.concat("; ")
 
@@ -143,7 +153,7 @@ module DsJobType =
         }
 
     let defaultJobTypeTaskDevInfo() =  { TaskDevCount = 1; InCount = Some 1; OutCount = Some 1 }
-    let defaultJobParam() = JobDevParam(ActionNormal, SensingNormal, defaultJobTypeTaskDevInfo())
+    let defaultJobParam() = JobDevParam(JobTypeAction.ActionNormal, JobTypeSensing.SensingNormal, defaultJobTypeTaskDevInfo())
 
     let getParserJobType (param: string) =
         let param = param.TrimStart('[').TrimEnd(']')

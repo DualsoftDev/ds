@@ -196,33 +196,33 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\dskim\\.nuget\\packages\\": {},
+    "C:\\Users\\kwak\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\DevExpress 21.2\\Components\\Offline Packages": {},
     "C:\\Program Files\\DevExpress 23.1\\Components\\Offline Packages": {},
     "C:\\Program Files\\DevExpress 23.2\\Components\\Offline Packages": {},
-    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
+    "C:\\Program Files\\DevExpress 24.1\\Components\\Offline Packages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
+      "projectUniqueName": "F:\\Git\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
       "projectName": "Redis3D",
-      "projectPath": "C:\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
-      "packagesPath": "C:\\Users\\dskim\\.nuget\\packages\\",
-      "outputPath": "C:\\ds\\Lab\\RedisTest\\Redis3D\\obj\\",
+      "projectPath": "F:\\Git\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
+      "packagesPath": "C:\\Users\\kwak\\.nuget\\packages\\",
+      "outputPath": "F:\\Git\\ds\\Lab\\RedisTest\\Redis3D\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\DevExpress 21.2\\Components\\Offline Packages",
         "C:\\Program Files\\DevExpress 23.1\\Components\\Offline Packages",
         "C:\\Program Files\\DevExpress 23.2\\Components\\Offline Packages",
-        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+        "C:\\Program Files\\DevExpress 24.1\\Components\\Offline Packages"
       ],
       "configFilePaths": [
-        "C:\\Users\\dskim\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\kwak\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 21.2.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 23.1.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 23.2.config",
-        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\DevExpress 24.1.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -233,9 +233,11 @@
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "C:\\Program Files\\DevExpress 23.1\\Components\\System\\Components\\Packages": {},
         "C:\\Program Files\\DevExpress 23.2\\Components\\System\\Components\\Packages": {},
-        "C:\\twms\\Submodules\\nuget\\nupkgs": {},
+        "C:\\Program Files\\DevExpress 24.1\\Components\\System\\Components\\Packages": {},
+        "C:\\Program Files\\dotnet\\library-packs": {},
+        "F:\\Git\\ds\\Submodules\\nuget\\nupkgs": {},
         "https://api.nuget.org/v3/index.json": {},
-        "https://nuget.devexpress.com/BdOUvsNXVt4bl2W97d8nTSstfBviZAR3IHZcjOglqI8dgjsJtu/api": {}
+        "https://nuget.devexpress.com/r2tlBVKsA3RuXmBZjk8weT7EeEAjeqvpqaS2R7whny6qfbaAjm/api": {}
       },
       "frameworks": {
         "net7.0": {
@@ -247,6 +249,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -274,7 +281,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.404\\RuntimeIdentifierGraph.json"
       }
     }
   }

@@ -35,7 +35,8 @@ type DsPropertyTreeExt =
 
         and buildVertexTree vertex =
             match vertex with
-            | :? Call as flowCall -> CreateTreeNode(PropertyCall(flowCall), [])
+            | :? Call as call when call.IsJob  -> CreateTreeNode(PropertyCall(call), [])
+            | :? Call as call when call.IsOperator ->   CreateTreeNode(PropertyOperatorFunction(call.TargetFunc.Value :?> OperatorFunction), [])
             | :? Real as real -> 
                 let coins = real.Graph.Vertices |> Seq.map buildCoinTree |> Seq.toList
                 CreateTreeNode(PropertyReal(real), coins)

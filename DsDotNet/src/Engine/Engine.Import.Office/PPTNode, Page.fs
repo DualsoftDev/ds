@@ -363,15 +363,15 @@ module PptNodeModule =
                                 | _ , "" -> $"{TextJobMulti}{cntPara}"
                                 | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
 
-                            let jobNegative = if apiP.StartsWith(TextJobNegative) then $";{TextJobNegative}" else ""
-                            let jobPush     = if jobP.Contains(TextJobPush) then $";{TextJobPush}" else ""
+                            let jobNegative = if apiP.StartsWith(TextJobNegative) then $"{TextJobNegative}" else ""
+                            let jobPush     = if jobP.Contains(TextJobPush) then $"{TextJobPush}" else ""
                             
                             let jobT = getJobTime jobP
                             if not(jobT.IsDefault)
                             then
                                 jobTime <- Some jobT
 
-                            getParserJobType(paraText + jobNegative + jobPush)
+                            getParserJobType(String.Join(";", [paraText; jobNegative; jobPush]))
 
 
                     jobDevParam <- jobPram

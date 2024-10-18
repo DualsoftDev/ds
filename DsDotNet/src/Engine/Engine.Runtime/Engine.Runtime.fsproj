@@ -16,7 +16,7 @@
 	<ItemGroup>
 		<Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="Property\DsPropertyUtils.fs" />
-		<Compile Include="Property\DsPropertySub.fs" />
+		<Compile Include="Property\DsPropertyBase.fs" />
 		<Compile Include="RuntimeModel.fs" />
 		<Compile Include="Property\DsProperty.fs" />
 		<Compile Include="Property\DsPropertyTree.fs" />

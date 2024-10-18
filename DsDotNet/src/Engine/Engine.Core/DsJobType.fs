@@ -54,9 +54,9 @@ module DsJobType =
         | Push = 1
 
     let getJobTypeActionToText (x: JobTypeAction) =
-        if x.HasFlag JobTypeAction.Push then
+        if x = JobTypeAction.Push then
             TextJobPush
-        elif x.HasFlag JobTypeAction.ActionNormal then
+        elif x = JobTypeAction.ActionNormal then
             ""
         else
             failWithLog $"{x} Unknown JobTypeAction"
@@ -68,9 +68,9 @@ module DsJobType =
         | SensingNegative = 1
 
     let getJobTypeSensingToText(x:JobTypeSensing) =
-        if x.HasFlag JobTypeSensing.SensingNormal then
+        if x = JobTypeSensing.SensingNormal then
             ""
-        elif x.HasFlag JobTypeSensing.SensingNegative then
+        elif x = JobTypeSensing.SensingNegative then
             TextJobNegative
         else
             failWithLog $"{x} Unknown JobTypeSensing"

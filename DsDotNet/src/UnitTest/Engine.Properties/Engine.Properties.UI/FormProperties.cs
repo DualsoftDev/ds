@@ -1,12 +1,12 @@
 using System;
 using System.Windows.Forms;
 using System.IO;
+using Dual.Common.Core;
 using Engine.Core;
 using Engine.Runtime;
 using static Engine.Runtime.DsPropertyTreeModule;
 using static Engine.Runtime.DsPropertyTreeExt;
 using static Engine.Core.RuntimeGeneratorModule;
-using Dual.Common.Core;
 using static Engine.Runtime.DsPropertyModule;
 
 namespace DSModeler
@@ -118,6 +118,9 @@ namespace DSModeler
         {
             treeView1.Nodes.Clear();
             treeView1.Nodes.Add(ConvertToTreeViewNode(rootTree));
+            PropertyUtils.PropertyCollectionChanged
+                         .Publish.Subscribe(_ => propertyGrid1.Refresh());
+
             treeView1.ExpandAll();
         }
 

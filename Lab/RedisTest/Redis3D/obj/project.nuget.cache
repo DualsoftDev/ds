@@ -1,12 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "rsrUKMpyIcQ=",
+  "dgSpecHash": "PPtkEtutAmA=",
   "success": true,
   "projectFilePath": "F:\\Git\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\kwak\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
     "C:\\Users\\kwak\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
-    "C:\\Users\\kwak\\.nuget\\packages\\stackexchange.redis\\2.7.33\\stackexchange.redis.2.7.33.nupkg.sha512",
+    "C:\\Users\\kwak\\.nuget\\packages\\stackexchange.redis\\2.8.16\\stackexchange.redis.2.8.16.nupkg.sha512",
     "C:\\Users\\kwak\\.nuget\\packages\\system.io.pipelines\\5.0.1\\system.io.pipelines.5.0.1.nupkg.sha512"
   ],
   "logs": []

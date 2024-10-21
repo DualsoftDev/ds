@@ -230,8 +230,8 @@ module internal ModelFindModule =
                     .DistinctBy(fun v-> v.TargetJob)
                     .SelectMany(fun c-> c.TaskDefs.Select(fun dev-> dev, c))
         tds
-        |> Seq.sortBy (fun (td, c) ->
-            (td.DeviceName, td.GetApiItem(c.TargetJob).Name))
+        |> Seq.sortBy (fun (td, _c) ->
+            (td.DeviceName, td.ApiItem.Name))
 
 
     let getTaskDevCalls(x:DsSystem) =
@@ -362,7 +362,7 @@ type FindExtension =
     [<Extension>]
     static member GetDistinctApisWithDeviceCall(x:DsSystem) =
         getTaskDevCalls(x)
-            .SelectMany(fun (td, calls)-> td.ApiItems.Select(fun api-> api, td, calls))
+            .Select(fun (td, calls)-> (td.ApiItem , td, calls))
             .DistinctBy(fun (api, _td, _c)-> api)
 
     [<Extension>]
@@ -377,7 +377,7 @@ type FindExtension =
             //kia demo //test ahn
             x.GetTaskDevsCoin()
                 .DistinctBy(fun (td, _c) -> td)
-                .Where(fun (dev, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
+                .Where(fun (dev, call) -> call.TargetJob.TaskDevCount > 1 || not(dev.IsOutAddressSkipOrEmpty))
                 .Where(fun (dev,c) -> c.TaskDefs.First() = dev)
             //normal //test ahn
             //x.GetTaskDevsCoin()
@@ -389,8 +389,8 @@ type FindExtension =
             x.Jobs
                 .SelectMany(fun j->j.TaskDefs.Select(fun td->(td, j))).DistinctBy(fun (td, _j) -> td)
                 .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))
-                .OrderBy(fun (td, c) ->
-                        (td.DeviceName, td.GetApiItem(c).Name))
+                .OrderBy(fun (td, _c) ->
+                        (td.DeviceName, td.ApiItem.Name))
 
     [<Extension>]
     static member GetQualifiedName(vertex:IVertex) =

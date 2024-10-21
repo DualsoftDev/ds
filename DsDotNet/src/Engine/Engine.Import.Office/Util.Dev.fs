@@ -115,28 +115,28 @@ module ImportUtilForDev =
 
         loadedSys
 
-    let getAutoGenTaskDev (autoGenSys:LoadedSystem) loadedName jobName apiName (taskDevParamIO:TaskDevParamIO)=
+    let getAutoGenTaskDev (autoGenSys:LoadedSystem) loadedName  apiName =
         let referenceSystem = autoGenSys.ReferenceSystem
-        createTaskDevUsingApiName referenceSystem jobName loadedName apiName  taskDevParamIO
+        createTaskDevUsingApiName referenceSystem  loadedName apiName  
 
     let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:PptNode) jobName =
         let tastDevKey = $"{newloadedName}_{apiPureName}"
-        let taskDevParam = node.TaskDevParam
+        //let taskDevParam = node.TaskDevParam
         let jobFqdn = node.Job.Combine()
 
         let devCalls = mySys.GetTaskDevsCall().DistinctBy(fun (td, c) -> (td, c.TargetJob))
 
-        match devCalls.TryFind(fun (d,c) -> d.GetApiStgName(c.TargetJob) = tastDevKey) with
+        match devCalls.TryFind(fun (d,c) -> d.FullName = tastDevKey) with
         | Some (taskDev, c) ->
             let api = loadedSys.ApiItems.First(fun f -> f.Name = apiPureName)
-            if not (taskDevParam.IsDefaultParam) then
-                taskDev.AddOrUpdateApiTaskDevParam(jobFqdn, api, taskDevParam)
+            //if not (taskDevParam.IsDefaultParam) then
+            //    taskDev.AddOrUpdateApiTaskDevParam(jobFqdn, api, taskDevParam)
             taskDev
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters
             match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
             | Some api ->
-                let apiParam = {TaskDevParamIO =  taskDevParam; ApiItem = api}
-                TaskDev(apiParam, jobName, newloadedName, mySys)
+                //let apiParam = {TaskDevParamIO =  taskDevParam; ApiItem = api}
+                TaskDev(api, newloadedName, mySys)
             | None ->
                 failWithLog $"Api {apiPureName} not found in {newloadedName}"

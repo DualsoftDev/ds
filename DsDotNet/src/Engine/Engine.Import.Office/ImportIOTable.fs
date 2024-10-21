@@ -60,7 +60,7 @@ module ImportIOTable =
             let dicDev =
                 sys.Jobs
                 |> Seq.collect (fun job ->
-                                    job.TaskDefs.Select(fun td->td.DeviceApiPureName(job), td))
+                                    job.TaskDefs.Select(fun td->td.ApiPureName, td))
                 |> dict
 
 

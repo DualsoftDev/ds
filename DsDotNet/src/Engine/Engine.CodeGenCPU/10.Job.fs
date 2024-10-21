@@ -7,29 +7,33 @@ open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 
 
-type Job with
+type TaskDevManager with
 
-    member j.J1_JobActionOuts(call:Call) =
+
+
+
+    member d.J1_JobActionOuts(coins:Vertex seq) =
         let fn = getFuncName()
-        let _off = j.System._off.Expr
-        let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.MM)
-        let flowEmg = call.Flow.emg_st.Expr
-        let flowPause = call.Flow.emg_st.Expr
-        let emgActions = call.Flow.HWEmergencyDigitalActions
-        let pauseActions = call.Flow.HWPauseDigitalActions
+        let _off = coins.First()._off.Expr
+  
+        let rstMemos = coins.SelectMany(fun c-> c.MutualResetCoins.Select(fun c->c.VC.MM)).Distinct()
+        let flowEmg = coins.Select(fun c-> c.Flow.emg_st).ToOr()    
+        let flowPause = coins.Select(fun c-> c.Flow.p_st).ToOr()    
+        let emgActions = coins.SelectMany(fun c-> c.Flow.HWEmergencyDigitalActions)
+        let pauseActions = coins.SelectMany(fun c-> c.Flow.HWPauseDigitalActions)
 
-        let getStatementTypeDigital(set, td:TaskDev) =
+        let getStatementTypeDigital(set, td:TaskDev, callActionType:CallActionType) =
             let getStatement(actionSet:IExpression option, actionRst:IExpression option) =
                 let sets = if actionSet.IsSome then actionSet.Value<||>set else set
                 let rsts = if actionRst.IsSome then actionRst.Value else _off
-                if j.ActionType = JobTypeAction.Push then
+                if callActionType= CallActionType.Push then
                     if rstMemos.IsEmpty then
-                        failWithLog $"{call.Name} MutualResetCoins is empty"
+                        failWithLog $"{td.FullName} MutualResetCoins is empty"
                     (sets, rstMemos.ToOr()) ==| (td.OutTag:?> Tag<bool>, fn)  //단동 실린더? 멈추면 반대로 움직여서 emg 삽입??
-                elif j.ActionType = JobTypeAction.ActionNormal then
+                elif callActionType= CallActionType.ActionNormal then
                     (sets, rsts) --| (td.OutTag:?> Tag<bool>, fn)
                 else 
-                    failWithLog "Invalid JobTypeAction"
+                    failWithLog "Invalid CallTypeAction"
 
             match emgActions.TryFind(fun a->a.OutAddress = td.OutAddress)
                 , pauseActions.TryFind(fun a->a.OutAddress = td.OutAddress) with
@@ -50,36 +54,40 @@ type Job with
             | None, None  ->
                 getStatement (None, None)
 
-        let getStatementTypeAnalog(sets, td:TaskDev) =
+        let getStatementTypeAnalog(sets, td:TaskDev, call:Call) =
             [
-                let outParam = td.GetOutParam(j)
-                let valExpr = outParam.WriteValue |> any2expr
+                let valExpr = call.ValueParamIO.Out.WriteValue |> any2expr
                 yield (sets, valExpr) --> (td.OutTag, fn)  //test ahn Analog pulse 출력 안함 테스트중
             ]
 
+
+
         [|
-            for td in j.TaskDefs.Where(fun t->t.ExistOutput) do
-                let sets =
-                    if RuntimeDS.Package.IsPackageSIM() then _off
-                    else td.GetPlanOutput(j).Expr <||> _off
-         
-                if td.GetOutParam(j).DataType = DuBOOL then
-                    yield getStatementTypeDigital(sets, td) 
+            if d.TaskDev.ExistOutput 
+            then
+                let coinPlanOuts = coins.Select(fun s->s.VC.PO).ToOr()
+                let sets = if RuntimeDS.Package.IsPackageSIM() then _off else coinPlanOuts
+                let callAction = coins.Head().GetPureCall().CallActionType
+                if d.TaskDev.OutDataType = DuBOOL then
+                    yield getStatementTypeDigital(sets, d.TaskDev, callAction) 
                 else
-                    yield! getStatementTypeAnalog(sets, td) 
+                    for coin in coins do
+                        yield! getStatementTypeAnalog(sets, d.TaskDev, coin:?>Call)
         |]
 
-    member j.J2_InputDetected() =
-        let _off = j.System._off.Expr
-        let jm = getJM(j)
-        match j.ActionInExpr with
-        | Some inExprs -> [(inExprs, _off) --| (jm.InDetected, getFuncName())]
-        | None -> []
 
-    member j.J3_OutputDetected() =
-        let _off = j.System._off.Expr
-        let jm = getJM(j)
-        match j.ActionOutExpr with
-        | Some outExprs ->[(outExprs, _off) --| (jm.OutDetected, getFuncName())]
-        | None -> []
+
+    //member j.J2_InputDetected() =
+    //    let _off = j.System._off.Expr
+    //    let jm = getJM(j)
+    //    match j.ActionInExpr with
+    //    | Some inExprs -> [(inExprs, _off) --| (jm.InDetected, getFuncName())]
+    //    | None -> []
+
+    //member j.J3_OutputDetected() =
+    //    let _off = j.System._off.Expr
+    //    let jm = getJM(j)
+    //    match j.ActionOutExpr with
+    //    | Some outExprs ->[(outExprs, _off) --| (jm.OutDetected, getFuncName())]
+    //    | None -> []
 

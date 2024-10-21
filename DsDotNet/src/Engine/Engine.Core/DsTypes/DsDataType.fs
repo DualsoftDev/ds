@@ -286,6 +286,7 @@ module DsDataType =
             Some (x, DuINT32)
         | _ -> None
 
+    let isValidValue(x) = getTextValueNType x |> Option.isSome 
     let getTrimmedValueNType(x)  =
         let trimmedTextValueNDataType = getTextValueNType x
         match trimmedTextValueNDataType with

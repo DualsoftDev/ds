@@ -12,34 +12,34 @@ open System
 
 
 [<AutoOpen>]
-module ConvertCpuJob =
-    let getJSM(j:Job) = j.System.TagManager:?> SystemManager
-    let getJM(j:Job) = j.TagManager:?> JobManager
-    type Job with
-        member j.ActionInExpr =
-            let inExprs =
-                j.TaskDefs.Where(fun d-> d.ExistInput)
-                          .Select(fun d-> d.GetInExpr(j))
+module ConvertCpuJob = ()
+    //let getJSM(j:Job) = j.System.TagManager:?> SystemManager
+    //let getJM(j:Job) = j.TagManager:?> JobManager
+    //type Job with
+    //    member j.ActionInExpr =
+    //        let inExprs =
+    //            j.TaskDefs.Where(fun d-> d.ExistInput)
+    //                      .Select(fun d-> d.GetInExpr(j))
 
-            if inExprs.any() then
-                let sen = j.JobParam.JobSensing
-                if sen.HasFlag(JobTypeSensing.SensingNormal) 
-                then 
-                    inExprs.ToAnd() |>Some
-                elif  sen.HasFlag(JobTypeSensing.SensingNegative) 
-                then
-                    !@inExprs.ToAnd() |>Some
-                else 
-                    failWithLog "Invalid JobTypeSensing"
-            else
-                None
+    //        if inExprs.any() then
+    //            let sen = j.JobParam.JobSensing
+    //            if sen.HasFlag(JobTypeSensing.SensingNormal) 
+    //            then 
+    //                inExprs.ToAnd() |>Some
+    //            elif  sen.HasFlag(JobTypeSensing.SensingNegative) 
+    //            then
+    //                !@inExprs.ToAnd() |>Some
+    //            else 
+    //                failWithLog "Invalid JobTypeSensing"
+    //        else
+    //            None
 
-        member j.ActionOutExpr =
-            let outExprs =
-                j.TaskDefs.Where(fun d-> d.ExistOutput)
-                          .Select(fun d-> d.GetOutExpr(j))
+    //    member j.ActionOutExpr =
+    //        let outExprs =
+    //            j.TaskDefs.Where(fun d-> d.ExistOutput)
+    //                      .Select(fun d-> d.GetOutExpr(j))
 
-            if outExprs.any()
-            then outExprs.ToOr()|>Some
-            else None
+    //        if outExprs.any()
+    //        then outExprs.ToOr()|>Some
+    //        else None
 

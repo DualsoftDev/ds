@@ -47,18 +47,8 @@ module rec DsPropertyModule =
     and PropertyJob() =
         inherit PropertyBase()
         new(x: Job) as this = PropertyJob() then this.UpdateProperty(x)
-
-        member val JobAction = JobTypeAction.ActionNormal with get, set
-        member val JobSensing = JobTypeSensing.SensingNormal with get, set
-        member val TimeOut = Nullable() with get, set
-        member val DelayCheck = Nullable() with get, set
-
         member private x.UpdateProperty(job: Job) =
             x.Name <- job.DequotedQualifiedName
-            x.JobAction <- job.JobParam.JobAction
-            x.JobSensing <- job.JobParam.JobSensing
-            x.TimeOut <- toNullable job.JobTime.TimeOut    
-            x.DelayCheck <- toNullable job.JobTime.DelayCheck
     
     // Custom class to be displayed in PropertyGrid with expandable collections
     and PropertyCall()  =
@@ -69,6 +59,7 @@ module rec DsPropertyModule =
         new(x: Call) as this = PropertyCall() then this.UpdateProperty(x)
         // Properties
         member val Disabled = false with get, set
+        member val ValueParamIO = getNull<ValueParamIO>() with get, set
 
         member x.SafetyConditions = safetyConditions
         member x.AutoPreConditions = autoPreConditions
@@ -77,8 +68,9 @@ module rec DsPropertyModule =
         member private x.UpdateProperty(call: Call) =
             x.Name <- call.Name
             x.Disabled <- call.Disabled
-            call.SafetyConditions.Select(fun f ->  f.GetJob().DequotedQualifiedName ).Iter (x.SafetyConditions.Add)
-            call.AutoPreConditions.Select(fun f -> f.GetJob().DequotedQualifiedName).Iter (x.AutoPreConditions.Add)
+            x.ValueParamIO <- call.ValueParamIO
+            call.SafetyConditions.Select(fun f ->  f.GetCall().DequotedQualifiedName ).Iter (x.SafetyConditions.Add)
+            call.AutoPreConditions.Select(fun f -> f.GetCall().DequotedQualifiedName).Iter (x.AutoPreConditions.Add)
         
 
     and PropertyTaskDev() =
@@ -89,18 +81,32 @@ module rec DsPropertyModule =
         member private x.UpdateProperty(taskDev: TaskDev) =
             x.Name <- taskDev.FullName
 
-    and PropertyApiParam() =
+    and PropertyValueParam() =
         inherit PropertyBase()
-        new(x: ApiParam) as this = PropertyApiParam() then this.UpdateProperty(x)
-        [<TypeConverter(typeof<ExpandableObjectConverter>)>]
-        member val InParam = getNull<PropertyTaskDevParam>() with get, set
-        [<TypeConverter(typeof<ExpandableObjectConverter>)>]
-        member val OutParam = getNull<PropertyTaskDevParam>() with get, set
+        new(x: ValueParam) as this = PropertyValueParam() then this.UpdateProperty(x)
+        member val TargetValue = getNull<string>() with get, set
+        member val Max = getNull<string>() with get, set
+        member val Min = getNull<string>() with get, set
+        member val IsInclusiveMax = Nullable<bool>() with get, set
 
-        member private x.UpdateProperty(apiParam: ApiParam) =
-            x.Name <- apiParam.ApiItem.QualifiedName
-            x.InParam  <-  match apiParam.TaskDevParamIO.InParam  with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
-            x.OutParam <-  match apiParam.TaskDevParamIO.OutParam with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
+        member private x.UpdateProperty(vp: ValueParam) =
+            x.TargetValue <- vp.TargetValueText
+            x.Max <- vp.MaxText
+            x.Min <- vp.MinText
+            x.IsInclusiveMax <- vp.IsInclusiveMax
+
+    //and PropertyApiParam() =
+    //    inherit PropertyBase()
+    //    new(x: ApiParam) as this = PropertyApiParam() then this.UpdateProperty(x)
+    //    [<TypeConverter(typeof<ExpandableObjectConverter>)>]
+    //    member val InParam = getNull<PropertyTaskDevParam>() with get, set
+    //    [<TypeConverter(typeof<ExpandableObjectConverter>)>]
+    //    member val OutParam = getNull<PropertyTaskDevParam>() with get, set
+
+    //    member private x.UpdateProperty(apiParam: ApiParam) =
+    //        x.Name <- apiParam.ApiItem.QualifiedName
+    //        x.InParam  <-  match apiParam.TaskDevParamIO.InParam  with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
+    //        x.OutParam <-  match apiParam.TaskDevParamIO.OutParam with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
 
     and PropertyFlow() =
         inherit PropertyBase()
@@ -168,20 +174,20 @@ module rec DsPropertyModule =
             x.InAddress <- hwDef.InAddress
             x.OutAddress <- hwDef.OutAddress
             x.HwDefType <- hwDef.GetType().Name
-            x.InParam  <-  match hwDef.TaskDevParamIO.InParam  with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
-            x.OutParam <-  match hwDef.TaskDevParamIO.OutParam with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
+            x.InParam  <-  PropertyTaskDevParam(hwDef.TaskDevParamIO.InParam  )
+            x.OutParam <-  PropertyTaskDevParam(hwDef.TaskDevParamIO.OutParam )
        
-    type PropertyTaskDevParam(symbolName: string, dataType: string, valueText: string) =
+    type PropertyTaskDevParam(address: string, dataType: string, symbol: string) =
         inherit PropertyBase()
         new() = PropertyTaskDevParam("", "", "")
         new(x: TaskDevParam) as this = PropertyTaskDevParam() then this.UpdateProperty(x)
         
-        member val SymbolName = symbolName with get, set
+        member val Address = address with get, set
         member val DataType = dataType with get, set
-        member val ValueText = valueText with get, set
+        member val Symbol = symbol with get, set
 
         member x.UpdateProperty(tdp: TaskDevParam) =
+            x.Address <- tdp.Address
             x.DataType <- tdp.DataType.ToText()
-            x.SymbolName <- tdp.GetSymbolName()
-            x.ValueText <- tdp.ValueParam.ToText()
+            x.Symbol <- tdp.Symbol
             

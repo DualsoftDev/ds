@@ -35,15 +35,15 @@ module ConvertErrorCheck =
     let internal checkErrApi(sys:DsSystem) =
         for coin in sys.GetVerticesOfJobCalls() do
             for td in coin.TaskDefs do
-                for api in td.ApiItems do
-                    if api.RX.IsNull() then
-                        failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
-                    if api.TX.IsNull() then
-                        failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
+                let api = td.ApiItem
+                if api.RX.IsNull() then
+                    failwithf $"interface 정의시 관찰 Work가 없습니다. \n(error: {api.Name})"
+                if api.TX.IsNull() then
+                    failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                    if td.OutAddress <> TextSkip && coin.TargetJob.JobParam.JobAction =JobTypeAction.Push then
-                        if coin.MutualResetCoins.isEmpty() then
-                            failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
+                if td.OutAddress <> TextSkip && coin.CallActionType =CallActionType.Push then
+                    if coin.MutualResetCoins.isEmpty() then
+                        failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
 
 
 
@@ -64,14 +64,14 @@ module ConvertErrorCheck =
         let devicesCalls =
             sys.GetTaskDevsCall()
                 .DistinctBy(fun (td, c) -> (td, c.TargetJob))
-                .Where(fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount > 1)
+                .Where(fun (_, call) -> call.TargetJob.TaskDevCount > 1)
 
         let groupDev = devicesCalls  |> Seq.groupBy (fun (dev, _) -> dev.DeviceName)
 
         for (_, calls) in groupDev  do
             let jobMultis =
                 calls
-                |> Seq.map (fun (_, call) -> call.TargetJob.JobTaskDevInfo.TaskDevCount )
+                |> Seq.map (fun (_, call) -> call.TargetJob.TaskDevCount )
                 |> Seq.distinct
             if Seq.length jobMultis > 1 then
                 let callTexts = String.Join("\r\n", calls.Select(fun (_, call) -> call.Name))
@@ -132,12 +132,7 @@ module ConvertErrorCheck =
             failwithf $"램프 주소가 없습니다. \n{errLamps}"
 
     let internal checkJobs(sys:DsSystem) =
-        for j in sys.Jobs do
-            for td in j.TaskDefs do
-                if td.ExistOutput then
-                    let outParam = td.GetOutParam(j)
-                    if j.ActionType = JobTypeAction.Push && outParam.DataType = DuBOOL then
-                            failWithLog $"{td.Name} {j.ActionType} 은 bool 타입만 지원합니다."
-                    elif outParam.DataType <> DuBOOL && outParam.ValueParam.IsNull() then
-                            failWithLog $"{td.Name} {td.OutAddress} 은 value 값을 입력해야 합니다."
-                        
+        for call in sys.GetCallVertices() do
+            if call.CallActionType = CallActionType.Push && call.ValueParamIO.Out.DataType = DuBOOL then
+                    failWithLog $"{call.Name} {call.CallActionType} 은 bool 타입만 지원합니다."
+                  

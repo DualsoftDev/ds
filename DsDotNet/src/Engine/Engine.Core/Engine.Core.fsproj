@@ -20,10 +20,11 @@
         <Compile Include="Interface.fs" />
         <Compile Include="DSText.fs" />
         <Compile Include="DsConstants.fs" />
-        <Compile Include="DsType.fs" />
-        <Compile Include="DsDataType.fs" />
-        <Compile Include="DsJobType.fs" />
-        <Compile Include="DsTaskDevType.fs" />
+        <Compile Include="DsTypes\DsType.fs" />
+        <Compile Include="DsTypes\DsDataType.fs" />
+        <Compile Include="DsTypes\DsTaskDevType.fs" />
+        <Compile Include="DsTypes\DsJobType.fs" />
+        <Compile Include="DsTypes\DsCallType.fs" />
         <Compile Include="DsEvent.fs" />
         <Compile Include="DsLog.fs" />
         <Compile Include="Prolog.fs" />

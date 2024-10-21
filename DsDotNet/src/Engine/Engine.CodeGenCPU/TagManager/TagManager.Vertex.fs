@@ -267,7 +267,9 @@ module TagManagerModule =
         member val TimeCheck  =  timer  s ($"{v.QualifiedName}_TimeCheck"|>validStorageName) sys (sysManager.TargetType)
 
         member val MM   = createTag  false VertexTag.callMemo
-
+        member val PS   = createTag  false VertexTag.planStart
+        member val PE   = createTag  false VertexTag.planEnd
+        member val PO   = createTag  false VertexTag.planOutput
 
         member val ErrOnTimeUnder     = createTag true VertexTag.txErrOnTimeUnder
         member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver

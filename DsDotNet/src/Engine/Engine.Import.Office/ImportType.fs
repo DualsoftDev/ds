@@ -92,23 +92,7 @@ module ImportType =
             failWithLog $"error datatype : {taskDevParamRaw} <> {taskDevParam.DataType}"
 
 
-    let getPptTaskDevParaInOut (inParamRaw:TaskDevParamRawItem) (outParamRaw:TaskDevParamRawItem) =
-        let paramFromText paramRaw =
-            let addr, (dataType:DataType), func = paramRaw
-            if func <> ""
-            then
-                getAddressTaskDevParam $"{addr}:{func}" |> snd
-            else
-                defaultTaskDevParam()
-
-        let inP =  paramFromText inParamRaw
-        let outP = paramFromText outParamRaw
-
-        checkPptDataType  inParamRaw inP
-        checkPptDataType  outParamRaw outP
-
-        inP, outP
-
+   
 
     let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)=
           if taskDevParamDataType <> dataType
@@ -116,8 +100,8 @@ module ImportType =
 
 
     let updatePptTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
-        if inSym.IsSome then  dev.SetInSymbol(SymbolAlias(inSym.Value, inDataType))
-        if outSym.IsSome then  dev.SetOutSymbol(SymbolAlias(outSym.Value, outDataType))
+        if inSym.IsSome then  dev.SetInSymbol(inSym.Value)
+        if outSym.IsSome then  dev.SetOutSymbol(outSym.Value)
 
         checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
         checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
@@ -133,16 +117,10 @@ module ImportType =
     let getPptHwDevDataTypeText (hwDev:HwSystemDef) = getPptDataTypeText hwDev.InDataType hwDev.OutDataType
 
     let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
-        let inParam = 
-            if inSym.IsSome 
-            then Some (changeSymbolTaskDevParam (hwDev.TaskDevParamIO.InParam) (Some(SymbolAlias(inSym.Value, inDataType))))
-            else hwDev.TaskDevParamIO.InParam
-        let outParam = 
-            if outSym.IsSome 
-            then Some (changeSymbolTaskDevParam (hwDev.TaskDevParamIO.OutParam) (Some(SymbolAlias(outSym.Value, outDataType))))
-            else hwDev.TaskDevParamIO.OutParam
-
-        hwDev.TaskDevParamIO <-  TaskDevParamIO(inParam, outParam)
+        if inSym.IsSome 
+        then hwDev.TaskDevParamIO.InParam.Symbol <- inSym.Value
+        if outSym.IsSome 
+        then hwDev.TaskDevParamIO.InParam.Symbol <- outSym.Value
 
         checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
         checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType

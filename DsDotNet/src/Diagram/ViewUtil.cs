@@ -37,6 +37,7 @@ using Dual.Common.Base.CS;
 using static Engine.Core.CoreModule.DeviceAndSystemModule;
 using static Engine.Core.CoreModule.GraphItemsModule;
 using static Engine.Core.CoreModule.ApiItemsModule;
+using Newtonsoft.Json;
 
 namespace Diagram.View.MSAGL
 {
@@ -87,13 +88,15 @@ namespace Diagram.View.MSAGL
                     DicNode[v] = viewVertex;
 
                     if (v.GetPure() is Call call && call.IsJob)
+                    {
                         UpdateDicJobTag(call.TargetJob, viewVertex);
+                        UpdateDicCallPlanTag(call, viewVertex);
+                    }
 
                     viewVertex.TaskDevs.Cast<TaskDev>().Iter(t =>
                     {
                         UpdateDicTaskDevTag(t.InTag, viewVertex);
                         UpdateDicTaskDevTag(t.OutTag, viewVertex);
-                        UpdateDicTaskDevPlanTag(t, viewVertex);
                     });
 
                 }
@@ -144,19 +147,16 @@ namespace Diagram.View.MSAGL
                 }
             }
 
-            void UpdateDicTaskDevPlanTag(TaskDev td, ViewVertex viewVertex)
+            void UpdateDicCallPlanTag(Call c, ViewVertex viewVertex)
             {
                 var dic = DicTaskDevTag;
-                td.DicTaskDevParamIO.Keys.Iter(jobFqdn =>
-                {
-                    var tm = td.TagManager as TaskDevManager;
-                    var ps = tm.PlanStart(jobFqdn);
-                    var pe = tm.PlanEnd(jobFqdn);
-                    var po = tm.PlanOutput(jobFqdn);
-                    if (!dic.ContainsKey(ps)) dic.Add(ps, new List<ViewVertex>() { viewVertex }); else dic[ps].Add(viewVertex);
-                    if (!dic.ContainsKey(pe)) dic.Add(pe, new List<ViewVertex>() { viewVertex }); else dic[pe].Add(viewVertex);
-                    if (!dic.ContainsKey(po)) dic.Add(po, new List<ViewVertex>() { viewVertex }); else dic[po].Add(viewVertex);
-                });
+                var cm = c.TagManager as CoinVertexTagManager;
+                var ps = cm.PS;
+                var pe = cm.PE;
+                var po = cm.PO;
+                if (!dic.ContainsKey(ps)) dic.Add(ps, new List<ViewVertex>() { viewVertex }); else dic[ps].Add(viewVertex);
+                if (!dic.ContainsKey(pe)) dic.Add(pe, new List<ViewVertex>() { viewVertex }); else dic[pe].Add(viewVertex);
+                if (!dic.ContainsKey(po)) dic.Add(po, new List<ViewVertex>() { viewVertex }); else dic[po].Add(viewVertex);
             }
 
             void UpdateDicJobTag(Job job, ViewVertex viewVertex)
@@ -204,6 +204,26 @@ namespace Diagram.View.MSAGL
 
         private static void HandleVertexEvent(EventVertex ev)
         {
+            if (ev.TagKind == VertexTag.planEnd && DicNode.ContainsKey(ev.Target))
+            {
+                bool on = false;
+                if (ev.Target is Call c || ev.Target is Alias s)
+                {
+                    if (ev.Target.TryGetPureCall() != null)
+                    {
+                        var cv = ev.Target.GetPureCall();
+                        on = Convert.ToBoolean((cv.TagManager as CoinVertexTagManager).PE.Value);
+                    }
+                }
+
+                var vv = DicNode[ev.Target];
+                vv.LampPlanEnd = on;
+                vv.Nodes.Iter(node =>
+                {
+                    var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
+                    ucView?.UpdatePlanEndValue(node, on);
+                });
+            }
             if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue && DicNode.ContainsKey(ev.Target))
             {
                 Status4 status = ev.TagKind switch
@@ -281,34 +301,7 @@ namespace Diagram.View.MSAGL
 
                                 break;
                             }
-                        case (int)TaskDevTag.planEnd:
-                            {
-                                bool on = false;
-
-                                bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)
-                                {
-                                    return n.TaskDevs.Select(t => (TaskDevManager)t.TagManager).All(predicate);
-                                }
-
-                                if (n.Vertex is Call c)
-                                {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(c.TargetJob).Value));
-                                }
-                                else if (n.Vertex is Alias a)
-                                {
-                                    on = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(a.TryGetPureCall().Value.TargetJob).Value));
-                                }
-                                else
-                                {
-                                    throw new Exception("TaskDevTag.planEnd not CallType");
-                                }
-
-
-                                n.LampPlanEnd = on;
-                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-                                ucView?.UpdatePlanEndValue(node, on);
-                                break;
-                            }
+                      
 
                     }
                 });

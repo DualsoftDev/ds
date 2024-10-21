@@ -595,7 +595,7 @@ public partial class UcView : UserControl
             vv.LampOrigin = (real.TagManager as RealVertexTagManager).OG.Value;
             UpdateOriginValue(viewNode, vv.LampOrigin, false);
         }
-        if (vv.Vertex is Call || vv.Vertex is Alias s)
+        if (vv.Vertex is Call c || vv.Vertex is Alias s)
         {
             if (vv.Vertex.TryGetPureCall() != null)
             {
@@ -604,7 +604,7 @@ public partial class UcView : UserControl
                 {
                     vv.LampInput = (call.TargetJob.TagManager as JobManager).InDetected.Value;
                     vv.LampOutput = (call.TargetJob.TagManager as JobManager).OutDetected.Value;
-                    vv.LampPlanEnd = EvaluateTaskDevs(s => Convert.ToBoolean(s.PlanEnd(call.TargetJob).Value));
+                    vv.LampPlanEnd = EvaluateTaskDevs(s => Convert.ToBoolean((call.TagManager as CoinVertexTagManager).PE.Value));
 
                     bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)
                     {

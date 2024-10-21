@@ -21,14 +21,8 @@ module internal ToDsTextModule =
             | :? Real as r -> r.Name.QuoteOnDemand()
             | :? Call as c -> c.NameForGraph
             | :? Alias as a -> a.Name.QuoteOnDemand()
-                    //match a.TargetWrapper.CallTarget() with
-                    //|Some c -> c.NameForGraph
-                    //|None ->
-                    //    a.Name.QuoteOnDemand()
-
             | _ -> failWithLog "ERROR"
         name
-
 
     type private MEI = ModelingEdgeInfo<Vertex>
     let private modelingEdgeInfosToDs (es:MEI seq) (tab:string) =
@@ -101,8 +95,6 @@ module internal ToDsTextModule =
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
             let aliasDefExist = flow.AliasDefs.Values.any()
-                                    //.Where(fun a-> a.AliasTexts.Count <> a.AliasTexts.Where(fun w->w.Contains('.')).length())
-                                    //.any()       //외부 Flow Alias 외에 하나라도 있으면
 
             if aliasDefExist then
                 let tab = getTab (indent+1)
@@ -139,10 +131,10 @@ module internal ToDsTextModule =
         ] |> combineLines
 
     let getHwSystemDefText (hw:HwSystemDef) (addresses:Addresses)=
-        if hw.TaskDevParamIO.IsDefaultParam then
+        if hw.IsDefaultValueParamIO then
             $"{hw.Name.QuoteOnDemand()}({addresses.In}, {addresses.Out})"
         else 
-            $"{hw.Name.QuoteOnDemand()}({hw.TaskDevParamIO.ToDsText(addresses)})"
+            $"{hw.Name.QuoteOnDemand()}({hw.ValueParamIO.ToDsText(addresses)})"
 
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
@@ -157,9 +149,9 @@ module internal ToDsTextModule =
                 yield flowToDs f indent
 
             if system.Jobs.Any() then
-                let printDev (d:TaskDev) (job:Job) skipApiPrint=
-                    let apiName = if skipApiPrint then "" else d.DeviceApiToDsText(job)
-                    let para = d.DicTaskDevParamIO[job.DequotedQualifiedName].TaskDevParamIO
+                let printDev (d:TaskDev)  skipApiPrint=
+                    let apiName = if skipApiPrint then "" else d.FullName
+                    let para = d.TaskDevParamIO
                     if para.IsDefaultParam then
                         $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
                     else
@@ -169,12 +161,12 @@ module internal ToDsTextModule =
                 for j in system.Jobs do
                     let jobItems =
                         j.TaskDefs
-                        |> Seq.map (fun d-> printDev d (j) false)
+                        |> Seq.map (fun d-> printDev d  false)
 
                     let jobItemText = jobItems.JoinWith("; ") + ";"
                     if j.JobParam.ToText() = "" then
                         if j.TaskDefs.length() = 1 && j.TaskDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit) then
-                            yield $"{tab2}{j.QualifiedName} = {printDev (j.TaskDefs.Head()) (j) true};"
+                            yield $"{tab2}{j.QualifiedName} = {printDev (j.TaskDefs.Head())  true};"
                         else
                             yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"
                     else
@@ -340,7 +332,7 @@ module internal ToDsTextModule =
                     if withSafeties.Any() then
                         yield $"{tab2}[safety] = {lb}"
                         for safetyHolder in withSafeties do
-                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetJob().QualifiedName).JoinWith("; ") + ";"
+                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetCall().QualifiedName).JoinWith("; ") + ";"
                             yield $"{tab3}{safetyHolder.GetCall()|> getSafetyAutoPreName } = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
@@ -359,7 +351,7 @@ module internal ToDsTextModule =
                     if withAutoPres.Any() then
                         yield $"{tab2}[autopre] = {lb}"
                         for autoPreHolder in withAutoPres do
-                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetJob().QualifiedName).JoinWith("; ") + ";"
+                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetCall().QualifiedName).JoinWith("; ") + ";"
                             yield $"{tab3}{autoPreHolder.GetCall()|>getSafetyAutoPreName} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
@@ -452,16 +444,16 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
 
-            let errorJobs = system.Jobs.Where(fun f -> not(f.JobTime.IsDefault))
+            let errorCalls = system.GetCallVertices().Where(fun f -> not(f.CallTime.IsDefault))
             let errors =
                 [
-                    if errorJobs.Any() then
+                    if errorCalls.Any() then
                         yield $"{tab2}[errors] = {lb}"
-                        for job in errorJobs do
-                            let max = job.JobTime.TimeOut     |> map (fun v -> $"{TextMAX}({v}ms)") |? ""
-                            let chk = job.JobTime.DelayCheck  |> map (fun v -> $"{TextCHK}({v}ms)") |? ""
+                        for call in errorCalls do
+                            let max = call.CallTime.TimeOut     |> map (fun v -> $"{TextMAX}({v}ms)") |? ""
+                            let chk = call.CallTime.DelayCheck  |> map (fun v -> $"{TextCHK}({v}ms)") |? ""
                             let paras = [max;chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
-                            yield $"""{tab3}{job.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
+                            yield $"""{tab3}{call.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 

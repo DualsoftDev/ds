@@ -11,7 +11,7 @@ module CoreCreateModule =
         let system = DsSystem.Create(systemName)
         system
 
-    let createTaskDevUsingApiName (sys: DsSystem) (jobName:string) (devName: string) (apiName: string) (taskDevParamIO:TaskDevParamIO): TaskDev =
+    let createTaskDevUsingApiName (sys: DsSystem)  (devName: string) (apiName: string): TaskDev =
         let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
 
         let api =
@@ -62,8 +62,7 @@ module CoreCreateModule =
             | _ ->
                 failwithf $"system {sys.Name} api {apiName} 중복 존재"
 
-        let apiParam = {TaskDevParamIO =  taskDevParamIO; ApiItem = api}
-        TaskDev(apiParam, jobName, devName, sys)
+        TaskDev(api, devName, sys)
 
 
     let updateSystemForSingleApi(sys:DsSystem) =

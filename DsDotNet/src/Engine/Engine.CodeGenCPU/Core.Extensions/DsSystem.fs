@@ -198,16 +198,16 @@ module ConvertCpuDsSystem =
 
             let jobDevices =x.GetTaskDevsSkipEmptyAddress().Distinct()
 
-            for dev, job in jobDevices do
-                let apiStgName = dev.GetApiStgName(job)
+            for dev, _job in jobDevices do
+                let apiStgName = dev.FullName
                 if  dev.InAddress <> TextSkip then
-                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.TaskDevice, Some x, dev, dev.GetInParam(job).DataType).Value
+                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.TaskDevice, Some x, dev, dev.TaskDevParamIO.InParam.DataType).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootOnlyDevice) then
                     if dev.OutAddress <> TextSkip then
-                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.TaskDevice, Some x , dev, dev.GetOutParam(job).DataType).Value
+                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.TaskDevice, Some x , dev, dev.TaskDevParamIO.OutParam.DataType).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
         member x.GenerationIO() =
@@ -221,7 +221,7 @@ module ConvertCpuDsSystem =
             let devCalls = x.GetDevicesForHMI()
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> CoinVertexTagManager
-                if call.TargetJob.JobTaskDevInfo.TaskDevCount = 1
+                if call.TargetJob.TaskDevCount = 1
                     ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)
                 then
                     cv.SF.Address    <- getMemory  cv.SF (getTarget(x))

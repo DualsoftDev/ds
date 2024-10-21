@@ -21,9 +21,10 @@ module EtcListenerModule =
         let (inAddr, inParam), (outAddr, outParm) =
             match nameNAddr.TryFindFirstChild<TaskDevParamInOutContext>() with
             | Some devParam ->
-                commonDeviceParamExtractor devParam
+                commonValueParamExtractor devParam
             | None ->
-                (TextAddrEmpty, defaultTaskDevParam()),(TextAddrEmpty, defaultTaskDevParam())
+
+                (TextAddrEmpty, defaultValueParam()),(TextAddrEmpty, defaultValueParam())
         name, inParam, outParm, inAddr, outAddr
 
     (* 모든 vertex 가 생성 된 이후, edge 연결 작업 수행 *)
@@ -84,9 +85,9 @@ module EtcListenerModule =
                     for fbi in flowBtnInfo |> List.choose id do
                         let targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr = fbi
                         if flows.IsEmpty then
-                            system.AddButtonDef(targetBtnType, btnName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), None)
+                            system.AddButtonDef(targetBtnType, btnName, ValueParamIO( inParam,  outParam), Addresses(inAddr, outAddr), None)
                         for flow in flows do
-                            system.AddButtonDef(targetBtnType, btnName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), Some flow)
+                            system.AddButtonDef(targetBtnType, btnName, ValueParamIO( inParam,  outParam), Addresses(inAddr, outAddr), Some flow)
 
         member x.ProcessLampBlock(ctx: LampBlockContext) =
             for ctxChild in ctx.children do
@@ -117,10 +118,10 @@ module EtcListenerModule =
                                     let flowNameCtxs = ld.Descendants<FlowNameContext>() |> toList
                                     let lmpName, inParam, outParam, inAddr, outAddr = getHwSysItem ld
                                     match flowNameCtxs with
-                                    | [] -> return targetLmpType, lmpName ,TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), None
+                                    | [] -> return targetLmpType, lmpName ,ValueParamIO( inParam,  outParam), Addresses(inAddr, outAddr), None
                                     | h::[] ->
                                         let! flow = h.GetText() |> system.TryFindFlow
-                                        return targetLmpType, lmpName, TaskDevParamIO(Some inParam, Some outParam), Addresses(inAddr, outAddr), Some flow
+                                        return targetLmpType, lmpName, ValueParamIO( inParam,  outParam), Addresses(inAddr, outAddr), Some flow
                                     | _ ->
                                         let flowNames = String.Join(", ", flowNameCtxs.Select(fun f->f.GetText()))
                                         failwith $"lamp flow assign error [ex: flow lamp : 1Lamp=1Flow, system lamp : 1Lamp=0Flow] ({lmpName} : {flowNames})"
@@ -171,7 +172,7 @@ module EtcListenerModule =
                         let cndName, inp, outp,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
-                            system.AddCondition(targetCndType, cndName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr), Some flow)
+                            system.AddCondition(targetCndType, cndName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
 
         member x.ProcessActionBlock(ctx: ActionBlockContext) =
             for ctxChild in ctx.children do
@@ -194,7 +195,7 @@ module EtcListenerModule =
                         let actionName, inp, outp,  flows, inAddr, outAddr = fci
 
                         for flow in flows do
-                            system.AddAction(targetActionType, actionName, TaskDevParamIO(Some inp, Some outp), Addresses(inAddr, outAddr), Some flow)
+                            system.AddAction(targetActionType, actionName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
 
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =
@@ -207,11 +208,11 @@ module EtcListenerModule =
                 let safetyConditions =
                     [
                         for value in values do
-                            match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
+                            match tryFindCall curSystem value with
                             | Some j -> yield j
                             | None -> failWithLog $"{value} is not job Name"
                     ]
-                    |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
+                    |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall (sc:?> Call))
 
                 safetyConditions.Iter(fun sc ->
                     safetyholder.SafetyConditions.Add(sc)
@@ -228,11 +229,11 @@ module EtcListenerModule =
                 let autopreConditions =
                     [
                         for value in values do
-                            match  curSystem.Jobs.TryFind(fun job-> job.DequotedQualifiedName = (value.Combine())) with
+                            match tryFindCall curSystem value with
                             | Some j -> yield j
                             | None -> failWithLog $"{value} is not job Name"
                     ]
-                    |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall sc)
+                    |> Seq.map(fun sc -> DuSafetyAutoPreConditionCall  (sc:?> Call))
 
                 for sc in autopreConditions do
                     autopreKey.AutoPreConditions.Add(sc)

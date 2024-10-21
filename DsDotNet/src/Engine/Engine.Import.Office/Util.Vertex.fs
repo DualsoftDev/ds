@@ -47,15 +47,15 @@ module ImportUtilVertex =
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
             |Some api ->
                 let devTask =
-                    let TaskDevPara =  node.TaskDevParam
+                    //let TaskDevPara =  node.TaskDevParam
 
-                    match sys.TaskDevs.TryFind(fun d->d.ApiItems.Contains(api)) with
+                    match sys.TaskDevs.TryFind(fun d->d.ApiItem = api) with
                     | Some (taskDev) ->
-                        taskDev.AddOrUpdateApiTaskDevParam(jobName, api, TaskDevPara)
+                        //taskDev.AddOrUpdateApiTaskDevParam(jobName, api, TaskDevPara)
                         taskDev
                     | _ ->
-                        let apiPara  = {TaskDevParamIO =  TaskDevPara; ApiItem = api}
-                        TaskDev(apiPara, jobName, loadSysName, sys)
+                        //let apiPara  = {TaskDevParamIO =  TaskDevPara; ApiItem = api}
+                        TaskDev(api, loadSysName, sys)
 
                 let job = Job(node.Job, sys, [devTask])
                 //job.UpdateTaskDevPara(node.TaskDevPara)
@@ -64,10 +64,9 @@ module ImportUtilVertex =
                 Call.Create(job, parentWrapper)
 
             | None ->
-                if device.AutoGenFromParentSystem || not(node.TaskDevParam.IsDefaultParam)
+                if device.AutoGenFromParentSystem 
                 then
-                    let TaskDevPara =  node.TaskDevParam
-                    let autoTaskDev = getAutoGenTaskDev device loadSysName jobName apiName TaskDevPara
+                    let autoTaskDev = getAutoGenTaskDev device loadSysName  apiName 
                     let job = Job(node.Job, sys, [autoTaskDev])
                     job.JobParam <- node.JobParam
                     sys.Jobs.Add job |> ignore
@@ -89,7 +88,7 @@ module ImportUtilVertex =
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
                     ApiName = node.ApiPureName
-                    TaskDevParamIO = node.TaskDevParam
+                    ValueParamIO = node.ValueParamIO
                     Parent = parentWrapper
                     PlatformTarget = platformTarget
                     }
@@ -108,27 +107,27 @@ module ImportUtilVertex =
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)
 
-    let createAutoPre(mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget, dicAutoPreJob: Dictionary<string, Job>) =
-        let param = {
-                    MySys = mySys
-                    Node = node
-                    JobName = node.Job.CombineQuoteOnDemand()
-                    DevName = node.DevName
-                    ApiName = node.ApiPureName
-                    TaskDevParamIO = node.TaskDevParam
-                    Parent = parentWrapper
-                    PlatformTarget = platformTarget
-                    }
-        let tasks = HashSet<TaskDev>()
-        handleActionJob tasks param
-        let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
-        match mySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = job.DequotedQualifiedName) with
-        | Some _existingJob -> ()
-        | None ->
-            mySys.Jobs.Add job
+    //let createAutoPre(mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget, dicAutoPreCall: Dictionary<string, Call>) =
+    //    let param = {
+    //                MySys = mySys
+    //                Node = node
+    //                JobName = node.Job.CombineQuoteOnDemand()
+    //                DevName = node.DevName
+    //                ApiName = node.ApiPureName
+    //                ValueParamIO = node.ValueParamIO
+    //                Parent = parentWrapper
+    //                PlatformTarget = platformTarget
+    //                }
+    //    let tasks = HashSet<TaskDev>()
+    //    handleActionJob tasks param
+    //    let job = Job(param.Node.Job, param.MySys, tasks |> Seq.toList)
+    //    match mySys.Jobs.TryFind(fun f -> f.DequotedQualifiedName = job.DequotedQualifiedName) with
+    //    | Some _existingJob -> ()
+    //    | None ->
+    //        mySys.Jobs.Add job
 
-        job.JobParam <- param.Node.JobParam
-        dicAutoPreJob.Add(node.Key, job)
+    //    job.JobParam <- param.Node.JobParam
+    //    dicAutoPreCall.Add(node.Key, job)
 
 
     let  getParent

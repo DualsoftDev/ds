@@ -11,8 +11,14 @@ open System.Runtime.CompilerServices
 module CoreExtensionModule =
     let tryGetTaskDevParamInOut (paramInOutText:string) =
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> Some (getAddressTaskDevParam tx,  getAddressTaskDevParam rx.Head)
+        | tx::rx when rx.Length = 1 -> Some (getTaskDevParam tx,  getTaskDevParam rx.Head)
         | _-> None
+
+    let tryGetValueParamInOut (paramInOutText:string) =
+        match paramInOutText.Split(',') |> Seq.toList with
+        | tx::rx when rx.Length = 1 -> Some (getAddressValueParam tx,  getAddressValueParam rx.Head)
+        | _-> None
+        
 
     let checkHwSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
         if system <> targetFlow.System then
@@ -88,7 +94,7 @@ module CoreExtensionModule =
                         { DeviceName = s.LoadedName; ChannelName = chName; Path= url; ScreenType = typeScreen; Xywh = xywh }))
 
 
-        member x.AddButtonDef(btnType:BtnType, btnName:string, taskDevParamIO:TaskDevParamIO,  addr:Addresses, flow:Flow option) =
+        member x.AddButtonDef(btnType:BtnType, btnName:string, valueParamIO:ValueParamIO,  addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkHwSystem(x, flow.Value, btnName)
           
@@ -97,11 +103,11 @@ module CoreExtensionModule =
             | Some btn when flow.IsSome -> btn.SettingFlows.Add(flow.Value) |> verifyM $"중복 Button [flow:{flow.Value.Name} name:{btnName}]"
             | _ ->
                 let flows = HashSet[match flow with | Some f -> f | None -> ()]
-                x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParamIO, addr, flows))
+                x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, valueParamIO, addr, flows))
                 |> verifyM $"중복 ButtonDef [name:{btnName}]"
 
-        member x.AddLampDef(lmpType:LampType, lmpName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
-            if not (taskDevParamIO.IsDefaultParam )
+        member x.AddLampDef(lmpType:LampType, lmpName: string, valueParamIO:ValueParamIO, addr:Addresses, flow:Flow option) =
+            if not (valueParamIO.IsDefaultParam)
             then 
                 failwithf $"LampDef [{lmpName}] Error: \r\nLamp는 타겟 Value 속성을 지정할 수 없습니다. 기본(true)"
 
@@ -113,17 +119,17 @@ module CoreExtensionModule =
             | Some lmp -> failwithf $"램프타입[{lmpType}]{lmpName}이 다른 Flow에 중복 정의 되었습니다.  위치:[{lmp.SettingFlows.First().Name}]"
             | None ->
                 let flows = HashSet[match flow with | Some f -> f | None -> ()]
-                x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParamIO, addr, flows))
+                x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, valueParamIO, addr, flows))
                 |> verifyM $"중복 LampDef [name:{lmpName}]"
         
         
         // Method for adding actions, passing the ActionType and setting isCondition = false
-        member x.AddAction(actionType: ActionType, actionName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow option) =
-                        x.AddDefinition(None, Some(actionType), actionName, taskDevParamIO, addr, flow, false)
+        member x.AddAction(actionType: ActionType, actionName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
+                        x.AddDefinition(None, Some(actionType), actionName, valueParamIO, addr, flow, false)
         // Method for adding conditions, passing the ConditionType and setting isCondition = true
-        member x.AddCondition(condiType: ConditionType, condiName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow option) =
-                       x.AddDefinition(Some(condiType), None, condiName, taskDevParamIO, addr, flow, true)
-        member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow option, isCondition: bool) =
+        member x.AddCondition(condiType: ConditionType, condiName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
+                       x.AddDefinition(Some(condiType), None, condiName, valueParamIO, addr, flow, true)
+        member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option, isCondition: bool) =
             if flow.IsSome then
                 checkHwSystem(x, flow.Value, defName)
 
@@ -136,14 +142,14 @@ module CoreExtensionModule =
                 | Some def when flow.IsSome ->
                     def.SettingFlows.Add(flow.Value) |> verifyM $"중복 {typeText} [flow:{flow.Value.Name} name:{defName}]"
                 | _ ->
-                    x.HwSystemDefs.Add(ConditionDef(defName, x, condiType.Value, taskDevParamIO, addr, flows))
+                    x.HwSystemDefs.Add(ConditionDef(defName, x, condiType.Value, valueParamIO, addr, flows))
                     |> verifyM $"중복 ConditionDef [flowname:{defName}]"
             else
                 match x.HWActions.TryFind(fun f -> f.Name = defName) with
                 | Some def when flow.IsSome ->
                     def.SettingFlows.Add(flow.Value) |> verifyM $"중복 {typeText} [flow:{flow.Value.Name} name:{defName}]"
                 | _ ->
-                    x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, taskDevParamIO, addr, flows))
+                    x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, valueParamIO, addr, flows))
                     |> verifyM $"중복 ActionDef [name:{defName}]"
   
 
@@ -213,51 +219,6 @@ module CoreExtensionModule =
 
 
     type TaskDev with
-
-        member x.FirstApi = x.ApiItems.First()
-
-        member x.GetInParam(jobFqdn:string) =
-            match x.DicTaskDevParamIO[jobFqdn].TaskDevParamIO.InParam with
-            | Some v -> v
-            | None -> defaultTaskDevParam()
-        member x.GetInParam(job:Job) = x.GetInParam (job.DequotedQualifiedName)
-
-        member x.GetOutParam(jobFqdn:string) =
-            match x.DicTaskDevParamIO[jobFqdn].TaskDevParamIO.OutParam with
-            | Some v -> v
-            | None -> defaultTaskDevParam()
-        member x.GetOutParam(job:Job) = x.GetOutParam (job.DequotedQualifiedName)
-
-        member x.GetApiParam(jobFqdn:string) = x.DicTaskDevParamIO[jobFqdn]
-        member x.GetApiParam(job:Job) = x.GetApiParam(job.DequotedQualifiedName)
-
-        member x.GetApiItem(jobFqdn:string) = x.GetApiParam(jobFqdn).ApiItem
-        member x.GetApiItem(job:Job) = x.GetApiParam(job.DequotedQualifiedName).ApiItem
-
-        ///LoadedSystem은 이름을 재정의 하기 때문에 ApiName을 제공 함
-        member x.GetApiStgName(jobFqdn:string) = $"{x.DeviceName}_{x.GetApiItem(jobFqdn).Name}"
-        member x.GetApiStgName(job:Job) =  x.GetApiStgName(job.DequotedQualifiedName)
-
-        member x.DeviceApiPureName(jobFqdn:string) = $"{x.DeviceName}.{x.GetApiItem(jobFqdn).PureName}"  //STN2.Device1."ROTATE(IN300_OUT400)"  파레메터 없는 ROTATE 순수이름만
-        member x.DeviceApiPureName(job:Job) = x.DeviceApiPureName(job.DequotedQualifiedName)
-
-        member x.DeviceApiToDsText(jobFqdn:string) = $"{x.DeviceName.QuoteOnDemand()}.{x.GetApiItem(jobFqdn).Name.QuoteOnDemand()}"
-        member x.DeviceApiToDsText(job:Job) = x.DeviceApiToDsText(job.DequotedQualifiedName)
-
-
-        member x.AddOrUpdateApiTaskDevParam(jobFqdn:string, api:ApiItem, taskDevParamIO:TaskDevParamIO) =
-            if x.ApiItems.any(fun f->f.PureName <> api.PureName) then
-                failwithf $"ApiItem이 다릅니다. {x.QualifiedName} {api.QualifiedName}"
-
-            if not (x.DicTaskDevParamIO.ContainsKey jobFqdn) then
-                x.DicTaskDevParamIO.Add(jobFqdn, {TaskDevParamIO = taskDevParamIO; ApiItem = api})
-            else
-                ()
-                //failWithLog $"중복된 TaskDevParamIO {jobFqdn} {x.QualifiedName}"
-
-        member x.AddOrUpdateApiTaskDevParam(job:Job, api:ApiItem, taskDevParamIO:TaskDevParamIO) =
-            x.AddOrUpdateApiTaskDevParam(job.DequotedQualifiedName, api, taskDevParamIO)
-
         member x.IsInAddressEmpty            = x.InAddress  = TextAddrEmpty
         member x.IsInAddressSkipOrEmpty      = x.InAddress  = TextAddrEmpty || x.InAddress = TextSkip
         member x.IsOutAddressEmpty           = x.OutAddress = TextAddrEmpty
@@ -267,44 +228,21 @@ module CoreExtensionModule =
         member x.IsMaunualAddressEmpty       = x.MaunualAddress = TextAddrEmpty
         member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
 
-        member x.SetInSymbol(symName:SymbolAlias) =
-            for param in x.DicTaskDevParamIO.Values do
-                match param.TaskDevParamIO.InParam with
-                | Some inParam ->
-                    inParam.SymbolAlias <- Some symName
-                | None ->
-                    param.TaskDevParamIO.InParam <- Some(createTaskDevParamWithSymbol (symName))
-
-        member x.SetOutSymbol(symName:SymbolAlias) =
-            for param in x.DicTaskDevParamIO.Values do
-                match param.TaskDevParamIO.OutParam with
-                | Some outParam ->
-                    outParam.SymbolAlias <- Some symName
-                | None ->
-                    param.TaskDevParamIO.OutParam <- Some(createTaskDevParamWithSymbol (symName))
-
-
-        member x.InDataType  = getType (x.InParams)
-        member x.OutDataType = getType (x.OutParams)
+        member x.SetInSymbol(symName:string)  =  x.TaskDevParamIO.InParam.Symbol <- symName
+        member x.SetOutSymbol(symName:string) =  x.TaskDevParamIO.OutParam.Symbol <- symName
+           
+        member x.InDataType  = x.TaskDevParamIO.InParam.DataType
+        member x.OutDataType  = x.TaskDevParamIO.OutParam.DataType
 
     type Job with
 
-        //member x.OnDelayTime =  //test ahn
-        //    let times = x.TaskDefs.Choose(fun t-> t.InParams[x.DequotedQualifiedName].Time)
-        //    if times.GroupBy(fun t->t).Count() > 1
-        //    then
-        //        let errTask = String.Join(", ",  x.TaskDefs.Select(fun t-> $"{t.Name} {t.InParams[x.DequotedQualifiedName].Time}"))
-        //        failWithLog $"다른 시간이 설정된 tasks가 있습니다. {errTask}"
-        //    if times.any() then times.First() |> Some else None
-
         member x.GetNullAddressDevTask() =
+            let cnt = x.TaskDefs.Count()
             x.TaskDefs
             |> Seq.mapi (fun i d ->
-                match x.JobTaskDevInfo.InCount, x.JobTaskDevInfo.OutCount with
-                | None, None -> None
-                | inCntOpt, outCntOpt ->
-                    let inCnt = Option.defaultValue 0 inCntOpt
-                    let outCnt = Option.defaultValue 0 outCntOpt
+                match x.AddressInCount, x.AddressOutCount with
+                | inCnt, outCnt when (inCnt =cnt && outCnt =cnt ) ->None 
+                | inCnt, outCnt ->
                     let inNullAddr = i < inCnt && d.IsInAddressEmpty
                     let outNullAddr = i < outCnt && d.IsOutAddressEmpty
 
@@ -366,12 +304,17 @@ module CoreExtensionModule =
         match x.JobOrFunc with
         | JobType job ->
             let jobFqdn = job.NameComponents
+            let valueParamText =  
+                if x.ValueParamIO.IsDefaultParam
+                then ""
+                else $"({x.ValueParamIO.In.ToText()}, {x.ValueParamIO.Out.ToText()})"
+
             let callOwnerFlow =  x.Parent.GetFlow().Name
             let jobOwnerFlow =  jobFqdn.Head()
             if callOwnerFlow = jobOwnerFlow then
-                jobFqdn.Skip(1).CombineQuoteOnDemand()
+                $"{jobFqdn.Skip(1).CombineQuoteOnDemand()}{valueParamText}"
             else
-                jobFqdn.CombineQuoteOnDemand() //다른 Flow는 skip flow 없음
+                $"{jobFqdn.CombineQuoteOnDemand()}{valueParamText}" //다른 Flow는 skip flow 없음
 
         | CommadFuncType func -> func.Name.QuoteOnDemand()+"()"
         | OperatorFuncType func -> "#"+func.Name.QuoteOnDemand()

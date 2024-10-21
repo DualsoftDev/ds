@@ -12,10 +12,6 @@ module ConvertCpuApiItem =
         member td.ExistInput   = addressExist td.InAddress
         member td.ExistOutput  = addressExist td.OutAddress
 
-        member td.GetPlanStart(job:Job)  = getTM(td).PlanStart(job)
-        member td.GetPlanEnd(job:Job)    = getTM(td).PlanEnd(job)
-        member td.GetPlanOutput(job:Job) = getTM(td).PlanOutput(job)
-
     type ApiItem with
         member a.ApiItemSet     = getAM(a).ApiItemSet
         member a.ApiItemEnd     = getAM(a).ApiItemEnd

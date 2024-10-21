@@ -186,7 +186,7 @@ module PptDocModule =
 
         member val DicFlow = Dictionary<int, Flow>() // page , flow
         member val DicVertex = Dictionary<string, Vertex>()
-        member val DicAutoPreJob = Dictionary<string, Job>()
+        member val DicAutoPreCall = Dictionary<string, Call>()
         member val IsBuilded = false with get, set
 
         member x.Parameter: DeviceLoadParameters = parameter.Value

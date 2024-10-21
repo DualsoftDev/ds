@@ -71,7 +71,7 @@ module ConvertHMI =
         member private x.GetHMIs() : HMIDevice seq =
             let containerCalls = x.ContainerSystem.GetVerticesOfJobCalls()
             containerCalls.Where(fun c->c.TaskDefs
-                                         .any(fun d->d.ApiItems.Select(fun a->a.ApiSystem).Contains(x.ReferenceSystem)))
+                                         .any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
                           .SelectMany(getDeiveHMIs)
 
     type Job with

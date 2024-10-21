@@ -14,14 +14,14 @@ type Spec07_CallStatement() =
     inherit EngineTestBaseClass()
     let t = CpuTestSample(WINDOWS)
 
-
     [<Test>]
     member __.``C1 CallMemo`` () =
         for call in t.Sys.GetVerticesHasJobInReal().Select(getVM) do
             call.C1_CallMemo() |> doCheck
 
-
     [<Test>]
     member __.`` J1 JobActionOuts`` () =
-        for c in t.Sys.GetVerticesOfJobCalls() do
-            c.TargetJob.J1_JobActionOuts(c) |> doChecks
+        let devCallSet =  t.Sys.GetTaskDevCalls()
+        for (td, coins) in devCallSet do
+            let tm = td.TagManager :?> TaskDevManager
+            tm.J1_JobActionOuts(coins)  |> doChecks

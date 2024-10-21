@@ -52,12 +52,7 @@ type DsPropertyTreeExt =
             | :? Call as call when call.IsJob ->
                 let taskDevNodes = call.TargetJob.TaskDefs 
                                     |> Seq.map (fun taskDef -> 
-                                            let paramNodes = 
-                                                taskDef.DicTaskDevParamIO.Values
-                                                |> Seq.map (fun apiParam -> CreateTreeNode(PropertyApiParam(apiParam), [])) 
-                                                |> Seq.toList
-
-                                            CreateTreeNode(PropertyTaskDev(taskDef), paramNodes) )
+                                            CreateTreeNode(PropertyTaskDev(taskDef), []) )
                                     |> Seq.toList
                 let jobNode = CreateTreeNode(PropertyJob(call.TargetJob), taskDevNodes)
                 CreateTreeNode(PropertyCall(call), [jobNode])

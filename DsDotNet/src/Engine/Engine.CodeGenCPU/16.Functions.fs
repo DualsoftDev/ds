@@ -66,9 +66,9 @@ type CoinVertexTagManager with
             call.TaskDefs
                 .Select(fun d->
                     if d.InAddress.IsOneOf(TextAddrEmpty, TextSkip) then //주소가 없으면 Plan 으로 처리
-                        d.GetPlanEnd(call.TargetJob).Expr
+                        d.ApiItem.ApiItemEnd.Expr
                     else
-                        d.GetInExpr(call.TargetJob)
+                        d.GetInExpr(call)
                 ) 
 
         if inOps.IsEmpty then

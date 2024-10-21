@@ -76,9 +76,9 @@ module ExportConfigsMoudle =
         let ifs = HashSet<DsPlanInterface>()
 
         sys.GetTaskDevsCall() |> distinctBy (fun (td, _c) -> td)
-        |> Seq.filter(fun (dev,_)-> dev.FirstApi.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
+        |> Seq.filter(fun (dev,_)-> dev.ApiItem.RX.Motion.IsSome) //RX 기준으로 모션 처리한다.
         |> Seq.iter(fun (dev,v) ->
-            let real = dev.FirstApi.RX
+            let real = dev.ApiItem.RX
             let dataSync =
                 {
                     Id = ifs.Count
@@ -90,9 +90,9 @@ module ExportConfigsMoudle =
                     MotionEndTag =   real.MotionEndTag.Name  , real.MotionEndTag.Address
                     Station = v.Parent.GetFlow().Name
                     Device = dev.DeviceName
-                    Action = dev.FirstApi.Name
+                    Action = dev.ApiItem.Name
                     LibraryPath = sys.LoadedSystems.TryFindWithName(dev.DeviceName).Value.RelativeFilePath
-                    Motion = dev.GetApiStgName(v.TargetJob)
+                    Motion = dev.FullName
                 }
             ifs.Add dataSync |> ignore
         )

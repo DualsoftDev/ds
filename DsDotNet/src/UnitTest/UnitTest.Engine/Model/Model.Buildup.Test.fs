@@ -25,11 +25,6 @@ module ModelBuildupTests1 =
         let systemRepo = ShareableSystemRepository()
 
         let createSimpleSystem() =
-            let defaultApiParam(api:ApiItem) =
-                { 
-                    ApiItem = api 
-                    TaskDevParamIO = defaultTaskDevParamIO()
-                }
             ModelParser.ClearDicParsingText()
             let system = DsSystem.Create4Test("My")
             let flow = Flow.Create("F", system)
@@ -41,15 +36,13 @@ module ModelBuildupTests1 =
             let apiM = apis.First(fun ai -> ai.Name = "RET")
             let callAp =
                 let jobFqdn = [|"F";"A";"p"|]
-                let jName = jobFqdn.Combine()
-                let apiItem = TaskDev(defaultApiParam(apiP), jName, dev.Name, system)
+                let apiItem = TaskDev((apiP),  dev.Name, system)
                 apiItem.InAddress <-"%I1"
                 apiItem.OutAddress<- "%Q1"
                 Job(jobFqdn, system, [apiItem])
             let callAm =
                 let jobFqdn = [|"F";"A";"m"|]
-                let jName = jobFqdn.Combine()
-                let apiItem = TaskDev(defaultApiParam(apiM), jName, dev.Name, system)
+                let apiItem = TaskDev((apiM),  dev.Name, system)
                 apiItem.InAddress <-"%I2"
                 apiItem.OutAddress<- "%Q2"
                 Job(jobFqdn, system, [apiItem])
@@ -192,7 +185,7 @@ module ModelBuildupTests1 =
         [<Test>]
         member __.``Model with buttons test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
-            let defParm = defaultTaskDevParamIO()
+            let defParm = defaultValueParamIO()
 
             system.AddButtonDef(BtnType.DuEmergencyBTN, "STOP",defParm , Addresses( "%I1","%Q1"),Some flow)
             system.AddButtonDef(BtnType.DuDriveBTN, "START",defParm,  Addresses("%I1","%Q1"),Some flow)

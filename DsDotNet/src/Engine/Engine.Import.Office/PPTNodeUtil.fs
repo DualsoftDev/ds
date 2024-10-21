@@ -16,39 +16,39 @@ module PptNodeUtilModule =
         let trimSpaceNewLine (text: string) = text |> trimSpace |> trimNewLine
         let trimStartEndSeq (texts: string seq) = texts |> Seq.map trimSpace
 
-        //api 이름 구분용 totext
-        let getPostParam(param:TaskDevParam option) (prefix:string)=
-            if param.IsNone then ""
-            else
-                let param = param |> Option.get
-                if param.IsDefaultParam then ""
-                else 
-                    if param.ValueParam.IsDefaultValue 
-                    then ""
-                    else $"{prefix}{param.ValueParam.ToText()}"
+        ////api 이름 구분용 totext
+        //let getPostParam(param:ValueParam option) (prefix:string)=
+        //    if param.IsNone then ""
+        //    else
+        //        let param = param |> Option.get
+        //        if param.IsDefault then ""
+        //        else 
+        //            if param.ValueParam.IsDefaultValue 
+        //            then ""
+        //            else $"{prefix}{param.ValueParam.ToText()}"
                         
 
-        let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
-            let newJob =
-                let inParaText  = getPostParam taskDevParamIO.InParam "IN"
-                let outParaText = getPostParam taskDevParamIO.OutParam "OUT"
+        //let getJobNameWithTaskDevParaIO(jobFqdn:string seq, taskDevParamIO:TaskDevParamIO) =
+        //    let newJob =
+        //        let inParaText  = getPostParam taskDevParamIO.InParam "IN"
+        //        let outParaText = getPostParam taskDevParamIO.OutParam "OUT"
 
 
-                if inParaText = "" && outParaText = "" //둘다 없는경우
-                then
-                    jobFqdn
+        //        if inParaText = "" && outParaText = "" //둘다 없는경우
+        //        then
+        //            jobFqdn
 
-                elif inParaText = "" && outParaText <> ""  //OUT 만 있는경우
-                then
-                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({outParaText})").ToArray()
+        //        elif inParaText = "" && outParaText <> ""  //OUT 만 있는경우
+        //        then
+        //            jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({outParaText})").ToArray()
 
-                elif inParaText <> "" && outParaText = ""  //IN 만 있는경우
-                then
-                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText})").ToArray()
+        //        elif inParaText <> "" && outParaText = ""  //IN 만 있는경우
+        //        then
+        //            jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText})").ToArray()
 
-                else //둘다 있는경우
-                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText}_{outParaText})").ToArray()
-            newJob
+        //        else //둘다 있는경우
+        //            jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}({inParaText}_{outParaText})").ToArray()
+        //    newJob
 
 
         let getJobNameWithJobParam(jobFqdn:string seq, jobDevParam:JobDevParam) =
@@ -59,25 +59,15 @@ module PptNodeUtilModule =
                     jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
 
-        let getNodeTaskDevParam (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
+        let getNodeValueParam (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
             let error(msg)  = $"{msg} \r\n{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
             try
                 let getParam x =
                         if x = TextSkip then
-                            defaultTaskDevParam()
+                            defaultValueParam() 
                         else
-                            getTaskDevParam x
-
-                            //match  with
-                            //| Some vp ->
-                            //    //if t = DuINT32 then  //ppt는 정수입력은 기본 int16으로 처리
-                            //    //    $":{v}s" |> getAddressTaskDevParam |> snd
-                            //    //else
-                            //        if vp.IsDefaultValue then
-                            //            $":True" |> getAddressTaskDevParam |> snd
-                            //        else
-                            //            $":{vp.ToText()}" |> getAddressTaskDevParam |> snd
-                            //| None -> failwithf $"{x} 입력규격을 확인하세요"
+                            createValueParam x 
+                            
 
                 let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
                 if func.Contains(",") then
@@ -85,18 +75,19 @@ module PptNodeUtilModule =
                     let inFunc, outFunc =
                         func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobDevParam에서 다시 처리
                         func.Split(",").Last() |> trimSpaceNewLine
-                    TaskDevParamIO((getParam inFunc)|>Some, (getParam outFunc)|>Some)
+                    ((getParam inFunc), (getParam outFunc))
                 else
                     let param = getParam func
                     if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
                     then
-                        TaskDevParamIO(param|>Some, (defaultTaskDevParam())|>Some)
+                        (param, defaultValueParam())
                     else
-                        if param.ValueParam.IsRangeValue
+                        if param.IsRangeValue
                         then 
                             failwithlog $"RangeValue은 입력규격만 가능합니다."    
 
-                        TaskDevParamIO((defaultTaskDevParam())|>Some, param|>Some)
+                        (defaultValueParam(), param)
+
             with ex ->
                 shape.ErrorName(error(ex.Message), iPage)
 
@@ -143,13 +134,13 @@ module PptNodeUtilModule =
             | _ -> failWithLog "Only one repeat count entry is allowed"
 
 
-        let getJobTime (contents: string) : JobTime  =
-            // JobTime 객체 생성 및 값 설정
-            let jobTime = JobTime()
-            jobTime.TimeOut    <- parseUIntMSec contents TextMAX
-            jobTime.DelayCheck <- parseUIntMSec contents TextCHK
+        let getCallTime (contents: string) : CallTime  =
+            // CallTime 객체 생성 및 값 설정
+            let CallTime = CallTime()
+            CallTime.TimeOut    <- parseUIntMSec contents TextMAX
+            CallTime.DelayCheck <- parseUIntMSec contents TextCHK
 
-            jobTime
+            CallTime
 
         let getBracketItems (name: string) =
                 name.Split('[').Select(fun w -> w.Trim()).Where(fun w -> w <> "")
@@ -159,20 +150,20 @@ module PptNodeUtilModule =
                     | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
 
 
-        let getPureNFunction (fullName: string, isInput:bool) =
+        let getPureNValueParam (fullName: string, isInput:bool) =
             let pureName = GetLastParenthesesReplaceName(fullName, "") |> trimSpaceNewLine
             let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
 
             let devParamIO =
                 if funcName <> ""
                 then
-                    let devParam = getTaskDevParam (funcName)
+                    let valParam = createValueParam (funcName)
                     if isInput 
                     then
-                        TaskDevParamIO(Some devParam, None)
+                        ValueParamIO( valParam, defaultValueParam())
                     else 
-                        TaskDevParamIO(None, Some devParam)
+                        ValueParamIO(defaultValueParam(), valParam)
                 else
-                    defaultTaskDevParamIO()
+                    defaultValueParamIO()
 
             pureName, devParamIO

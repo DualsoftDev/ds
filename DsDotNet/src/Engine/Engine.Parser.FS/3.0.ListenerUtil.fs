@@ -82,8 +82,6 @@ module ListnerCommonFunctionGeneratorUtil =
     type DevApiDefinition = {
             ApiFqnd : string array
             TaskDevParamIO : TaskDevParamIO
-            InAddress : string
-            OutAddress : string
         }
 
     type TimeDefinition = {
@@ -203,7 +201,7 @@ module ListnerCommonFunctionGeneratorUtil =
         let executeCode = fDef.operator().GetText()
         executeCode |> getCode
 
-    let commonDeviceParamExtractor (devCtx: TaskDevParamInOutContext) : (string*TaskDevParam)*(string*TaskDevParam) =
+    let commonDeviceParamExtractor (devCtx: TaskDevParamInOutContext) : (TaskDevParam)*(TaskDevParam) =
         match devCtx.TryFindFirstChild<TaskDevParamInOutBodyContext>() with
         | Some ctx ->
             match tryGetTaskDevParamInOut $"{ctx.GetText()}" with
@@ -211,7 +209,15 @@ module ListnerCommonFunctionGeneratorUtil =
             |_ -> errorLoadCore ctx
         | _-> errorLoadCore devCtx
 
+    let commonValueParamExtractor (devCtx: TaskDevParamInOutContext) : (string*ValueParam)*(string*ValueParam) =
+        match devCtx.TryFindFirstChild<TaskDevParamInOutBodyContext>() with
+        | Some ctx ->
+            match tryGetValueParamInOut $"{ctx.GetText()}" with
+            | Some v -> v
+            |_ -> errorLoadCore ctx
+        | _-> errorLoadCore devCtx
 
+        
     let commonCallParamExtractor (ctx: JobBlockContext) =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [
@@ -224,7 +230,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     | Some ctx ->
                             getParserJobType ($"[{ctx.GetText().DeQuoteOnDemand()}]")
                     | None ->
-                            JobDevParam(JobTypeAction.ActionNormal, JobTypeSensing.SensingNormal, defaultJobTypeTaskDevInfo())
+                            defaultJobDevParam()
 
                 let apiDefCtxs = callListingCtx.Descendants<CallApiDefContext>().ToArray()
                 yield jobFqdn, jobDevParam, apiDefCtxs, callListingCtx

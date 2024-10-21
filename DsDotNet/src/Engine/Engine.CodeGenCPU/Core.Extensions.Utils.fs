@@ -39,21 +39,22 @@ module ConvertCoreExtUtils =
         createBridgeTag(sys.TagManager.Storages, x.Name, x.OutAddress, (int)HwSysTag.HwSysOut, bridgeType, Some sys, hwApi, x.OutDataType)
         |> iter (fun t -> x.OutTag  <- t)
 
-    let getAddressTaskDevParamExpr (x:TaskDevParam option, devTag:ITag, sys:DsSystem) =
+    let getAddressTaskDevParamExpr (x:ValueParam , devTag:ITag, sys:DsSystem) =
         let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
         if devTag.IsNull() then
             sysOff.Expr  :> IExpression
         else
-            match x with
-            | None -> devTag.ToExpression()
-            | Some x ->
+            if x.IsDefaultValue 
+            then 
+                devTag.ToExpression()
+            else
                 if x.DataType = DuBOOL then
                     if Convert.ToBoolean(x.ReadBoolValue) then
                         devTag.ToExpression()
                     else
                         !@(devTag.ToExpression():?> Expression<bool>) :> IExpression
                 else // bool 타입아닌 경우 비교문 생성
-                    devTag.ToExpression() <@< x.ReadRangeValue
+                    devTag.ToExpression() <@< x
 
     [<AutoOpen>]
     [<Extension>]
@@ -62,9 +63,8 @@ module ConvertCoreExtUtils =
         [<Extension>] static member GetTagFlow (x:Flow     ,typ:FlowTag)    = getFM(x).GetFlowTag(typ )
 
         [<Extension>] static member GetInExpr (x:HwSystemDef) =
-                            getAddressTaskDevParamExpr (x.TaskDevParamIO.InParam, x.InTag, x.System) :?> Expression<bool>
-        [<Extension>] static member GetInExpr (x:TaskDev, job:Job) =
-                            getAddressTaskDevParamExpr (x.GetInParam(job)|>Some, x.InTag, x.GetApiItem(job).ApiSystem)  :?> Expression<bool>
-
-        [<Extension>] static member GetOutExpr (x:TaskDev, job:Job) =
-                            getAddressTaskDevParamExpr (x.GetOutParam(job)|>Some, x.OutTag, x.GetApiItem(job).ApiSystem)  :?> Expression<bool>
+                            getAddressTaskDevParamExpr (x.ValueParamIO.In, x.InTag, x.System) :?> Expression<bool>
+        [<Extension>] static member GetInExpr (x:TaskDev, call:Call) =
+                            getAddressTaskDevParamExpr (call.ValueParamIO.In, x.InTag, call.System)  :?> Expression<bool>
+        [<Extension>] static member GetOutExpr (x:TaskDev,  call:Call) =
+                            getAddressTaskDevParamExpr (call.ValueParamIO.Out  , x.OutTag, call.System)  :?> Expression<bool>

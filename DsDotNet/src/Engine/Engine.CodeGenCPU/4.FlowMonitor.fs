@@ -41,7 +41,7 @@ type Flow with
     member f.F5_FlowPauseAnalogAction() =
         [
             for pause in f.HWPauseAnalogActions do
-                let valExpr = pause.TaskDevParamIO.OutParam.Value.WriteValue |> any2expr
+                let valExpr = pause.ValueParamIO.Out.WriteValue |> any2expr
                 yield (f.p_st.Expr, valExpr) --> (pause.OutTag, getFuncName())
         ]
 
@@ -61,7 +61,7 @@ type Flow with
     member f.F7_FlowEmergencyAnalogAction() =
         [
             for emg in f.HWEmergencyAnalogActions do
-                let valExpr = emg.TaskDevParamIO.OutParam.Value.WriteValue |> any2expr
+                let valExpr = emg.ValueParamIO.Out.WriteValue |> any2expr
                 yield (f.emg_st.Expr, valExpr) --> (emg.OutTag, getFuncName())
         ]
 

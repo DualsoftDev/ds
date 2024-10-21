@@ -32,7 +32,7 @@ module OriginModule =
                 match x.GetPure() with
                 | :? Call as c  ->
                     let devs = c.TaskDefs
-                    Some (x, devs.First().ApiItems.First())
+                    Some (x, devs.First().ApiItem)
                 |_ -> None)
             |> dict
 

@@ -40,7 +40,7 @@ module DBLoggerApi =
         devices.Select(fun x->
             let info = InfoDevice.Create(x)
             let callUseds =
-                calls.Where(fun c-> c.TaskDefs.any(fun d->d.FirstApi.ApiSystem = x.ReferenceSystem))
+                calls.Where(fun c-> c.TaskDefs.any(fun d->d.ApiItem.ApiSystem = x.ReferenceSystem))
 
 
             callUseds

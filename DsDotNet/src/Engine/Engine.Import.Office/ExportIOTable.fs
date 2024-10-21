@@ -105,11 +105,11 @@ module ExportIOTable =
             head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
-        let inSym  =  dev.GetInParam(job).GetSymbolName()
-        let outSym =  dev.GetOutParam(job).GetSymbolName()
+        let inSym  =  dev.TaskDevParamIO.InParam.Symbol
+        let outSym =  dev.TaskDevParamIO.OutParam.Symbol
         let inSkip, outSkip = dev.GetSkipInfo(job)
 
-        let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.GetApiItem(job).PureName}"
+        let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.PureName}"
         [
             TextXlsAddress
             flow
@@ -272,8 +272,8 @@ module ExportIOTable =
                     getPptHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
-                    if cond.TaskDevParamIO.InParam.IsSome then cond.TaskDevParamIO.InParam.Value.GetSymbolName() else ""
-                    if cond.TaskDevParamIO.OutParam.IsSome then cond.TaskDevParamIO.OutParam.Value.GetSymbolName() else ""
+                    cond.TaskDevParamIO.InParam.Symbol
+                    cond.TaskDevParamIO.OutParam.Symbol
                 ]
             )
         let actionRows =
@@ -294,8 +294,8 @@ module ExportIOTable =
                     getPptHwDevDataTypeText action
                     action.InAddress
                     action.OutAddress
-                    if action.TaskDevParamIO.InParam.IsSome then action.TaskDevParamIO.InParam.Value.GetSymbolName() else ""
-                    if action.TaskDevParamIO.OutParam.IsSome then action.TaskDevParamIO.OutParam.Value.GetSymbolName() else ""
+                    action.TaskDevParamIO.InParam.Symbol 
+                    action.TaskDevParamIO.OutParam.Symbol 
                 ]
             )
 
@@ -502,7 +502,7 @@ module ExportIOTable =
             devCallSet.Select(fun (dev,call)->
 
                     let hasSafety = call.SafetyConditions.Count > 0
-                    rowDeviceItems (dev.GetApiStgName(call.TargetJob)) hasSafety)
+                    rowDeviceItems (dev.FullName) hasSafety)
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt

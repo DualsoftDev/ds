@@ -214,16 +214,16 @@ module rec CoreModule =
             abstract member GetCall: unit -> Call
 
         and SafetyAutoPreCondition =
-            | DuSafetyAutoPreConditionCall of Job
-            member x.GetJob() =
+            | DuSafetyAutoPreConditionCall of Call
+            member x.GetCall() =
                 match x with
-                | DuSafetyAutoPreConditionCall job -> job
+                | DuSafetyAutoPreConditionCall call -> call
             member x.Core:obj =
                 match x with
-                | DuSafetyAutoPreConditionCall job -> job
+                | DuSafetyAutoPreConditionCall call -> call
             member x.Name:string =
                 match x with
-                | DuSafetyAutoPreConditionCall job -> job.Name
+                | DuSafetyAutoPreConditionCall call -> call.Name
 
 
 
@@ -421,10 +421,13 @@ module rec CoreModule =
             member _.IsCommand = isCommand jobOrFunc
             member _.IsOperator = isOperator jobOrFunc
             member _.JobOrFunc = jobOrFunc
-   
 
+
+            member val CallTime = CallTime() with get, set
+            member val CallActionType = CallActionType.ActionNormal with get, set
             member val ExternalTags = HashSet<ExternalTagSet>()
             member val Disabled:bool = false with get, set
+            member val ValueParamIO = defaultValueParamIO()   with get, set
 
             interface ISafetyAutoPreRequisiteHolder with
                 member x.GetCall() = x
@@ -564,11 +567,11 @@ module rec CoreModule =
 
         /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.
         ///[jobs] = { Ap = { A."+"(%I1:true:1500, %Q1:true:500); } } job1 = { Dev.Api(InParam, OutParam), Dev... }
-        type ApiParam =
-            {
-                ApiItem : ApiItem
-                TaskDevParamIO : TaskDevParamIO
-            }
+        //type ApiParam =
+        //    {
+        //        ApiItem : ApiItem
+        //        TaskDevParamIO : TaskDevParamIO
+        //    }
 
         (*
             apiParam:
@@ -580,25 +583,19 @@ module rec CoreModule =
             device: STN1__Device1
             system: HelloDS
         *)
-        type TaskDev (apiParam:ApiParam, parentJob:string, deviceName:string, parentSys:DsSystem) =
-            inherit FqdnObject(apiParam.ApiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
-            let dicTaskDevParamIO = Dictionary<string, ApiParam>()
-            do
-                dicTaskDevParamIO.Add (parentJob, apiParam)
+        type TaskDev (apiItem:ApiItem, deviceName:string, parentSys:DsSystem) =
+            inherit FqdnObject(apiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
+           
 
             member x.ApiPureName = (x:>FqdnObject).QualifiedName
-            member x.ApiSystemName = apiParam.ApiItem.ApiSystem.Name //needs test animation
+            member x.ApiSystemName = apiItem.ApiSystem.Name //needs test animation
 
             member x.DeviceName = deviceName
             member x.FullName = $"{deviceName}.{x.Name}"
             member x.ParentSystem = parentSys
+            member x.ApiItem  = apiItem
 
-            member x.ApiParams = dicTaskDevParamIO.Values
-            member x.ApiItems  = x.ApiParams.Select(fun f -> f.ApiItem)
-            member x.InParams  = x.ApiParams.Choose(fun tdPara -> tdPara.TaskDevParamIO.InParam)
-            member x.OutParams = x.ApiParams.Choose(fun tdPara -> tdPara.TaskDevParamIO.OutParam)
-
-            member x.DicTaskDevParamIO = dicTaskDevParamIO
+            member val TaskDevParamIO = defaultTaskDevParamIO() with get, set   
 
             member val InAddress      = TextAddrEmpty with get, set
             member val OutAddress     = TextAddrEmpty with get, set
@@ -618,32 +615,33 @@ module rec CoreModule =
         /// Job 정의: Call 이 호출하는 Job 항목
         type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
             inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-            member val JobParam = defaultJobParam() with get, set
-            member val JobTime = JobTime() with get, set
-            member x.ActionType      = x.JobParam.JobAction
-            member x.JobTaskDevInfo  = x.JobParam.JobTaskDevInfo
-            member x.AddressInCount  = x.JobTaskDevInfo.AddressInCount
-            member x.AddressOutCount = x.JobTaskDevInfo.AddressOutCount
+            member val JobParam = defaultJobDevParam()  with get, set
+            member x.TaskDevCount  = x.JobParam.TaskDevCount
+            member x.AddressInCount  = x.JobParam.InCount 
+            member x.AddressOutCount = x.JobParam.OutCount
 
             member x.System = system
             member x.TaskDefs = tasks
-            member x.ApiDefs = tasks |> Seq.collect(fun t->t.ApiItems)
+            member x.ApiDefs = tasks |> Seq.map(fun t->t.ApiItem)
             member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
 
     [<AutoOpen>]
     module HwDefModule =
 
         [<AbstractClass>]
-        type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, taskDevParamIO:TaskDevParamIO, addr:Addresses)  =
+        type HwSystemDef (name: string, system:DsSystem, flows:HashSet<Flow>, valueParamIO:ValueParamIO, taskDevParamIO:TaskDevParamIO, addr:Addresses)  =
             inherit FqdnObject(name, system)
             member x.Name = name
             member x.System = system
             member val SettingFlows = flows with get, set
+            member val ValueParamIO = valueParamIO with get, set
             member val TaskDevParamIO = taskDevParamIO with get, set
+            member x.IsDefaultValueParamIO = valueParamIO.IsDefaultParam
+            member x.IsDefaultTaskDevParamIO = taskDevParamIO.IsDefaultParam
             //SettingFlows 없으면 전역 시스템 설정
             member x.IsGlobalSystemHw = x.SettingFlows.IsEmpty || (system.Flows |> Seq.forall(fun f ->x.SettingFlows.Contains(f)))
-            member x.InDataType  = match taskDevParamIO.InParam  with | Some p -> p.DataType | None -> DuBOOL
-            member x.OutDataType = match taskDevParamIO.OutParam with | Some p -> p.DataType | None -> DuBOOL
+            member x.InDataType  =  valueParamIO.InDataType
+            member x.OutDataType  =  valueParamIO.OutDataType
 
             member val InAddress = addr.In with get, set
             member val OutAddress = addr.Out with get, set
@@ -654,25 +652,23 @@ module rec CoreModule =
             member val OutTag = getNull<ITag>() with get, set
 
 
-        and ButtonDef (name:string, system:DsSystem, btnType: BtnType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows:HashSet<Flow>) =
-            inherit HwSystemDef(name, system, flows, taskDevParamIO, addr)
+        and ButtonDef (name:string, system:DsSystem, btnType: BtnType, valueParamIO:ValueParamIO, addr:Addresses, flows:HashSet<Flow>) =
+            inherit HwSystemDef(name, system, flows, valueParamIO, defaultTaskDevParamIO(), addr)
             member x.ButtonType = btnType
             member val ErrorEmergency = getNull<IStorage>() with get, set
 
-        and LampDef (name:string, system:DsSystem,lampType: LampType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows:HashSet<Flow>) =
-            inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) //inAddress lamp check bit
+        and LampDef (name:string, system:DsSystem,lampType: LampType, valueParamIO:ValueParamIO, addr:Addresses, flows:HashSet<Flow>) =
+            inherit HwSystemDef(name, system, flows, valueParamIO, defaultTaskDevParamIO(), addr) //inAddress lamp check bit
             member x.LampType = lampType
 
-        and ConditionDef (name:string, system:DsSystem, conditionType: ConditionType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows: HashSet<Flow>) =
-            inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) // outAddress condition check bit
+        and ConditionDef (name:string, system:DsSystem, conditionType: ConditionType, valueParamIO:ValueParamIO, addr:Addresses, flows: HashSet<Flow>) =
+            inherit HwSystemDef(name, system, flows, valueParamIO, defaultTaskDevParamIO(), addr) // outAddress condition check bit
             member x.ConditionType = conditionType
             member val ErrorCondition = getNull<IStorage>() with get, set
 
-        and ActionDef (name:string, system:DsSystem, actionType: ActionType, taskDevParamIO:TaskDevParamIO, addr:Addresses, flows: HashSet<Flow>) =
-            inherit HwSystemDef(name, system, flows, taskDevParamIO, addr) // outAddress condition check bit
+        and ActionDef (name:string, system:DsSystem, actionType: ActionType, valueParamIO:ValueParamIO, addr:Addresses, flows: HashSet<Flow>) =
+            inherit HwSystemDef(name, system, flows, valueParamIO, defaultTaskDevParamIO(), addr) // outAddress condition check bit
             member x.ActionType = actionType
-
-
 
         type OperatorFunction with
             static member Create(name:string,  excuteCode:string) =
@@ -685,9 +681,6 @@ module rec CoreModule =
                 let cmd = CommandFunction(name)
                 cmd.CommandCode <- excuteCode
                 cmd
-
-
-
 
     type DsSystem = DeviceAndSystemModule.DsSystem
     type DsGraph = TDsGraph<Vertex, Edge>

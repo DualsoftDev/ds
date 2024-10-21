@@ -13,8 +13,9 @@ type VertexTagManager with
         let v= v :?> CoinVertexTagManager
         let fn = getFuncName()
         let call= v.Vertex.GetPure() :?> Call
-        let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
-                                .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
+        let callMutualOns = call.MutualResetCoins
+                                .Choose(tryGetPureCall)
+                                .Choose(fun c->c.EndAction).ToOrElseOff()
         
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr

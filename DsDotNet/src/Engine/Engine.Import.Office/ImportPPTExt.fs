@@ -114,7 +114,7 @@ module ImportU =
                 
                 node.ButtonDefs.ForEach(fun b ->
                     let fullName = b.Key    
-                    let pureName, devParamIO = getPureNFunction(fullName, true)
+                    let pureName, devParamIO = getPureNValueParam(fullName, true)
                     mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), Some flow))
                     )
 
@@ -126,7 +126,7 @@ module ImportU =
                 else
                         node.ButtonHeadPageDefs.ForEach(fun b -> 
                             let fullName = b.Key    
-                            let pureName, devParamIO = getPureNFunction(fullName, true)
+                            let pureName, devParamIO = getPureNValueParam(fullName, true)
                             
                             mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), None))
                 )
@@ -155,14 +155,14 @@ module ImportU =
                 let flow = dicFlow.[node.PageNum]
                 node.LampDefs.Iter(fun l -> 
                     let fullName = l.Key    
-                    let pureName, devParamIO = getPureNFunction(fullName, false)
+                    let pureName, devParamIO = getPureNValueParam(fullName, false)
                     mySys.AddLampDef(l.Value, pureName, devParamIO, Addresses("", ""), Some flow)))
 
             headPageLamps
             |> Seq.iter (fun node ->
                 node.LampHeadPageDefs.Iter(fun l ->
                     let fullName = l.Key    
-                    let pureName, devParamIO = getPureNFunction(fullName, false)
+                    let pureName, devParamIO = getPureNValueParam(fullName, false)
                     mySys.AddLampDef(l.Value, pureName, devParamIO, Addresses("", ""), None)))
 
         //MakeReadyConditions 리스트 만들기
@@ -172,12 +172,12 @@ module ImportU =
 
             let addCondition(fullName, conditionType:ConditionType, settingflow:Flow option) =
                 let emptyAddr = Addresses("", "")
-                let pureName, devParamIO = getPureNFunction(fullName, true)
+                let pureName, devParamIO = getPureNValueParam(fullName, true)
                 mySys.AddCondition(conditionType, pureName, devParamIO, emptyAddr, settingflow)
 
             let addActiontion(fullName, aType:ActionType, settingflow:Flow option) =
                 let emptyAddr = Addresses("", "")
-                let pureName, devParamIO = getPureNFunction(fullName, false)
+                let pureName, devParamIO = getPureNValueParam(fullName, false)
 
                 mySys.AddAction(aType, pureName, devParamIO, emptyAddr, settingflow)
 
@@ -237,7 +237,7 @@ module ImportU =
         static member MakeSegment(doc: PptDoc, mySys: DsSystem, target:HwTarget) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
-            let dicAutoPreJob = doc.DicAutoPreJob
+            let dicAutoPreCall = doc.DicAutoPreCall
 
             let pptNodes = doc.Nodes
             let parents = doc.Parents
@@ -294,23 +294,33 @@ module ImportU =
                      )
                 let platformTarget = target.Platform
                 callNAutoPres
+                |> Seq.filter(fun node -> node.NodeType = CALL) //Call만 처리
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
                     try
+                        let parentWrapper =
+                            if dicChildParent.ContainsKey(node) then
+                                dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
+                            else
+                                dicFlow[node.PageNum] |> DuParentFlow
+                        createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
+                    with ex ->
+                        node.Shape.ErrorName(ex.Message, node.PageNum)
+                )
 
+                callNAutoPres
+                |> Seq.filter(fun node -> node.NodeType = AUTOPRE) //AUTOPRE만 처리
+                |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
+                |> Seq.iter (fun node ->
+                    try
+                        if not(dicChildParent.ContainsKey node) then
+                            failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
+                        let jobs  = node.AutoPres.Select(fun a->a.Combine()).ToList()
 
-                        if node.NodeType = AUTOPRE then
-                            if not(dicChildParent.ContainsKey node) then
-                                failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
+                        match mySys.GetCallVertices().TryFind(fun c-> jobs.Contains(c.TargetJob.DequotedQualifiedName)) with 
+                        | Some call -> dicAutoPreCall.Add(node.Key, call)
+                        | None -> failwithlog $"{node.Name} AUTOPRE dicAutoPreCall.Add Error"
 
-                            createAutoPre(mySys, node, (dicVertex[dicChildParent[node].Key] :?> Real)|>DuParentReal, platformTarget, dicAutoPreJob)
-                        else
-                            let parentWrapper =
-                                if dicChildParent.ContainsKey(node) then
-                                    dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
-                                else
-                                    dicFlow[node.PageNum] |> DuParentFlow
-                            createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
                     with ex ->
                         node.Shape.ErrorName(ex.Message, node.PageNum)
                 )
@@ -519,19 +529,16 @@ module ImportU =
                         yield pureJobName, job
                 }
 
-            let dicJobFromCall =
+            let dicCall =
                 doc.DicVertex.Values
                    .OfType<Call>().Where(fun call -> call.IsJob)
-                   .SelectMany(fun call -> getJobInfo call.TargetJob)
-
-
-            let dicJobFromAutoPre =
-                doc.DicAutoPreJob.Values
-                   .SelectMany(fun job -> getJobInfo job)
+                   .Select(fun call -> call.QualifiedName,  call)
 
 
 
-            let dicJob = (dicJobFromCall@dicJobFromAutoPre) |> dict
+
+
+            let dicJob = dicCall |> dict
 
             doc.Nodes
             |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
@@ -704,9 +711,9 @@ module ImportU =
 
         [<Extension>]
         static member CreateGenBtnLamp(mySys: DsSystem) =
-            let defParm = defaultTaskDevParamIO()
-            let defBtn  = Addresses ("", "-")
-            let defLamp = Addresses ("-", "")
+            let defParm = defaultValueParamIO()
+            let defBtn  = Addresses ("", TextSkip)
+            let defLamp = Addresses (TextSkip, "")
             mySys.AddButtonDef(BtnType.DuAutoBTN,      "AutoSelect",  defParm, defBtn , None)
             mySys.AddButtonDef(BtnType.DuManualBTN,    "ManualSelect",defParm, defBtn , None)
             mySys.AddButtonDef(BtnType.DuDriveBTN,     "DrivePushBtn",defParm, defBtn , None)
@@ -755,8 +762,8 @@ module ImportU =
             callSet.GroupBy(fun n -> n.DevName+n.ApiPureName)
                    .Select(fun calls ->
                             calls.DistinctBy(fun c-> (c.JobParam.TaskDevCount
-                                           , c.JobParam.TaskInCount
-                                           , c.JobParam.TaskOutCount))
+                                           , c.JobParam.InCount
+                                           , c.JobParam.OutCount))
                     ).Iter(errCheck)
 
 
@@ -833,7 +840,7 @@ module ImportU =
                     devApiDefinitions
                     |> Seq.iter(fun a->
                         let apiFqdn = a.ApiFqnd.Combine()
-                        match mySys.TaskDevs.TryFind(fun td->td.DeviceApiPureName(apiFqdn) = apiFqdn) with
+                        match mySys.TaskDevs.TryFind(fun td->td.ApiPureName = apiFqdn) with
                         | Some td ->
                             if not td.IsInAddressEmpty then
                                 failwithf $"Error: {apiFqdn} InAddress already exists"
@@ -841,8 +848,8 @@ module ImportU =
                             if not td.IsOutAddressEmpty then
                                 failwithf $"Error: {apiFqdn} OutAddress already exists"
 
-                            td.InAddress <- a.InAddress
-                            td.OutAddress <- a.OutAddress
+                            td.TaskDevParamIO.InParam.Address <- a.TaskDevParamIO.InParam.Address
+                            td.TaskDevParamIO.OutParam.Address <-  a.TaskDevParamIO.OutParam.Address
 
                         | None -> failwithf $"Error: {apiFqdn} not found"
                     )

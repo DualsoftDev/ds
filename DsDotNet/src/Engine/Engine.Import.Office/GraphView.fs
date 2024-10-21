@@ -43,9 +43,9 @@ module rec ViewModule =
 
         let callSafeAutoPreName (call: Call) =
             let getNameNValue(sa:SafetyAutoPreCondition) =  
-                let condiJob = sa.GetJob()
+                let condiCall = sa.GetCall()
                 let values = String.Join(","
-                    , condiJob
+                    , condiCall
                         .TaskDefs
                         .Select(fun td ->
                             if td.InTag.IsNonNull()
@@ -56,21 +56,21 @@ module rec ViewModule =
                                     then "T" else "F"
                                 | _-> td.InTag.BoxedValue.ToString()
                             else 
-                                let value  = (td.TagManager:?>TaskDevManager).PlanEnd(condiJob).Value
+                                let value  = getVMCall(call).PE.Value
                                 if Convert.ToBoolean(value)
                                 then "T" else "F"
                             ))
 
                 if values = ""
                 then
-                    failWithLog $"Error tag address {sa.GetJob().QualifiedName}"
+                    failWithLog $"Error tag address {sa.GetCall().QualifiedName}"
 
-                let jobFlow = condiJob.NameComponents.Head()
+                let jobFlow = condiCall.TargetJob.NameComponents.Head()
                 if call.Parent.GetFlow().Name = jobFlow
                 then 
-                    $"{condiJob.NameComponents.Skip(1).Combine()} {values}"
+                    $"{condiCall.TargetJob.NameComponents.Skip(1).Combine()} {values}"
                 else 
-                    $"{condiJob.DequotedQualifiedName} {values}"
+                    $"{condiCall.TargetJob.DequotedQualifiedName} {values}"
                     
             let safeties = String.Join(", ", call.SafetyConditions.Select(fun f->getNameNValue f))
             let safeName = if safeties.Length > 0 then $"[[{safeties}]]\r\n" else ""

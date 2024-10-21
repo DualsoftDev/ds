@@ -152,9 +152,7 @@ module ConvertCPU =
             let devCallSet =  s.GetTaskDevCalls()
             for (td, calls) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                yield! tm.TD1_PlanSend(s, calls)
-                yield! tm.TD2_PlanReceive(s)
-                yield! tm.TD3_PlanOutput(s)
+                yield! tm.TD3_PlanOutput(s, calls)
         |]
 
     let private applyApiItem(s:DsSystem) =
@@ -209,15 +207,13 @@ module ConvertCPU =
 
     let private applyJob(s:DsSystem) =
         [|
-            let callDevices =s.GetDevicesHasOutput()
-
-            for _, call in callDevices do
-                yield! call.TargetJob.J1_JobActionOuts(call)
-
-
-            for j in s.Jobs do
-                yield! j.J2_InputDetected()
-                yield! j.J3_OutputDetected()
+            let devCallSet =  s.GetTaskDevCalls()
+            for (td, coins) in devCallSet do
+                let tm = td.TagManager :?> TaskDevManager
+                yield! tm.J1_JobActionOuts(coins)
+            //for j in s.Jobs do
+            //    yield! j.J2_InputDetected()
+            //    yield! j.J3_OutputDetected()
         |]
 
 
@@ -238,7 +234,7 @@ module ConvertCPU =
                 | Some e -> e
                 | _ -> call._on.Expr
 
-            dev.GetApiItem(call.TargetJob).RX.ParentApiSensorExpr <-sensorExpr
+            dev.ApiItem.RX.ParentApiSensorExpr <-sensorExpr
 
 
     type DsSystem with

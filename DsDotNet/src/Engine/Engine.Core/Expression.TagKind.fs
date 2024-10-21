@@ -270,6 +270,12 @@ type TagKindExt =
               , int TaskDevTag.actionOut
               )
 
+    [<Extension>]
+    static member IsPlanEndTag(x:IStorage) =
+        x.TagKind.IsOneOf(
+                int VertexTag.planEnd
+              )
+
 
 
     [<Extension>]
@@ -310,9 +316,7 @@ type TagKindExt =
 
             | EventTaskDev (_, _, kind) ->
                 kind.IsOneOf(
-                      TaskDevTag.planStart
-                    , TaskDevTag.planEnd
-                    , TaskDevTag.actionIn
+                      TaskDevTag.actionIn
                     , TaskDevTag.actionOut
                     , TaskDevTag.actionMemory
                     )

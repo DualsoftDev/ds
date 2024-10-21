@@ -20,6 +20,23 @@ module DsCallTypeModule =
 
         member x.TimeOutMaxMSec  = x.TimeOut |> Option.defaultValue DefaultMax
         member x.TimeDelayCheckMSec  = x.DelayCheck |> Option.defaultValue DefaultChk
+        
+    let parseTime(item: string) =
+        let timePattern = @"^(?i:(\d+(\.\d+)?)(ms|msec|sec))$"
+        let m = Regex.Match(item.ToLower(), timePattern)
+        if m.Success then
+            let valueStr = m.Groups.[1].Value
+            let unit = m.Groups.[3].Value.ToLower()
+            match unit with
+            | "ms" | "msec" ->
+                if valueStr.Contains(".") then
+                    failwithlog $"ms and msec do not support #.# {valueStr}"
+                else
+                    Some(Convert.ToInt32(valueStr))
+            | "sec" ->
+                Some(Convert.ToInt32(float valueStr * 1000.0))
+            | _ -> None
+        else None
 
     let parseUIntMSec (txt: string) (findKey: string) =
         let parsePattern = @$"{findKey.ToLower()}\((\d+(\.\d+)?(ms)?)\)"

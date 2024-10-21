@@ -155,7 +155,7 @@ module internal ToDsTextModule =
                     if para.IsDefaultParam then
                         $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
                     else
-                        $"{apiName}({para.ToDsText(Addresses(d.InAddress, d.OutAddress))})"
+                        $"{apiName}({para.ToDsText()})"
 
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do

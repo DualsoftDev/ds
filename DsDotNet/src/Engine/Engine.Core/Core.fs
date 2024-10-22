@@ -341,7 +341,7 @@ module rec CoreModule =
             member x.Flow = flow
             member val Graph = DsGraph(flow.System.VertexAddRemoveHandlers)
             member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-            member val ExternalTags = HashSet<ExternalTagSet>()
+            member val ExternalTags = Dictionary<ExternalTag, IStorage>()
             member val ParentApiSensorExpr = getNull<IExpression>() with get, set
 
             //member val RealData:byte[] = [||] with get, set
@@ -433,7 +433,7 @@ module rec CoreModule =
                 | OperatorFuncType _ -> DuCMDUnDefined
 
 
-            member val ExternalTags = HashSet<ExternalTagSet>()
+            member val ExternalTags = Dictionary<ExternalTag, IStorage>()
             member val Disabled:bool = false with get, set
 
             interface ISafetyAutoPreRequisiteHolder with

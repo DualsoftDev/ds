@@ -255,7 +255,7 @@ module ImportU =
                 let reals = pptNodes
                             |> Seq.filter (fun node -> node.Alias.IsNone)
                             |> Seq.filter (fun node -> node.NodeType.IsReal)
-                            |> Seq.filter (fun node -> dicChildParent.ContainsKey(node) |> not)
+                            //|> Seq.filter (fun node -> dicChildParent.ContainsKey(node) |> not)
                             |> Seq.sortBy (fun node -> node.NodeType = REALExF) //real 부터 생성 후 realExF 처리
 
                 reals |> Seq.iter (fun node ->
@@ -310,7 +310,7 @@ module ImportU =
                         else
                             let parentWrapper =
                                 if dicChildParent.ContainsKey(node) then
-                                    dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
+                                    dicVertex[dicChildParent[node].Key].GetPureReal() |> DuParentReal
                                 else
                                     dicFlow[node.PageNum] |> DuParentFlow
                             createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)

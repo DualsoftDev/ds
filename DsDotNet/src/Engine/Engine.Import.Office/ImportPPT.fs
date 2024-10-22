@@ -256,7 +256,7 @@ module ImportPptModule =
                 let fileErr= "File contains corrupted data."
                 let msg =
                     if ex.Message.Contains(fileErr) then
-                        ex.Message.Replace(fileErr, "문서보안 복호화가 필요하거나 파일문제가 있습니다.")
+                        ex.Message.Replace(fileErr, "베타 버전에서는 문서보안 PPT를 지원하지 않거나, PPT파일에 문제가 있습니다./\r\n복호화 후 다른 PC 실행이 필요합니다.")
                     else
                         ex.Message
 

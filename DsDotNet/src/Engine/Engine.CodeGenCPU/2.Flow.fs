@@ -43,11 +43,13 @@ type VertexTagManager with
                 shareds.Select(fun s -> s.Vertex.GetResetRootAndCausals()).ToOrElseOn()
             else
                 v._off.Expr
-
+        let manualReset = if RuntimeDS.Package.IsPackageSIM() 
+                            then  v.RFP.Expr 
+                            else  v.RFP.Expr <&&> v.Flow.mop.Expr
         let sets =
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr)
             <||>
-            ( v.RFP.Expr <&&> v.Flow.mop.Expr )
+            ( manualReset)
              <||>
             (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr <&&> !@v.Vertex.VR.OG.Expr)
 

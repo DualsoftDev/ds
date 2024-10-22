@@ -31,10 +31,6 @@ module HelloDSRuntimeTestModule =
                 LayoutImgPaths = layoutImgPaths
             } = result
 
-            system.TagManager === null
-            let _ = DsCpuExt.CreateRuntime (system) (pptParms.HwTarget.Platform)
-            system.TagManager.Storages.Count > 0 === true
-
             system
 
         // - 항상 최신 버젼의 HelloDS.dsz 파일 만듬
@@ -42,8 +38,8 @@ module HelloDSRuntimeTestModule =
         [<Test>]
         member __.``X HelloDS runtime model test``() =
             let system = getSystem()
-            
             let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS)
+            system.TagManager.Storages.Count > 0 === true
 
             let json = SystemTextJson.Serialize(hMIPackage)
             let pkg = SystemTextJson.Deserialize<HMIPackage>(json)

@@ -16,12 +16,37 @@ module ModelLoaderModule =
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
     }
+
     type Model = {
         Config: ModelConfig
         System : DsSystem
         LoadingPaths : string list
     }
 
+    let createDefaultModelConfig() =
+        { 
+            DsFilePath = ""
+            HwIP = "127.0.0.1"
+            HwDriver = "LS_XGK_IO"
+            RuntimeMotionMode = MotionAsync
+            TimeSimutionMode = TimeX1
+            TimeoutCall = 15000u
+        }
+    let createModelConfig(path:string, hwIP:string, 
+            hwDriver:string, 
+            runtimeMotionMode:RuntimeMotionMode, 
+            timeSimutionMode:TimeSimutionMode, 
+            timeoutCall:uint32) =
+        { 
+            DsFilePath = path
+            HwIP = hwIP
+            HwDriver = hwDriver
+            RuntimeMotionMode = runtimeMotionMode
+            TimeSimutionMode = timeSimutionMode
+            TimeoutCall = timeoutCall
+        }
+    let createModelConfigReplacePath (cfg:ModelConfig, path:string) =
+        { cfg with DsFilePath = path }
 
 [<AutoOpen>]
 [<RequireQualifiedAccess>]
@@ -36,18 +61,7 @@ module ModelLoader =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
-    let createModelConfigWithPath (sysRunPaths: string) =
-        {
-            DsFilePath =  sysRunPaths.Replace("\\", "/")
-            HwIP =  RuntimeDS.HwIP
-            HwDriver =  RuntimeDS.HwDriver.ToString()
-            RuntimeMotionMode=  RuntimeDS.RuntimeMotionMode
-            TimeSimutionMode =  RuntimeDS.TimeSimutionMode
-            TimeoutCall=  RuntimeDS.TimeoutCall
-        }
-
-    let SaveConfigWithPath (path: string) (sysRunPaths: string) =
-        let cfg = createModelConfigWithPath sysRunPaths
+    let SaveConfigWithPath (path: string) (cfg: ModelConfig) =
         SaveConfig path cfg
         path
 
@@ -86,7 +100,7 @@ type ModelLoaderExt =
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))
 
     [<Extension>]
-    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq) =
+    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq, cfg:ModelConfig) =
         let targetPaths = (loadingPaths @ [activeFilePath])
         let zipPathDS  = targetPaths.ToDsZip(changeExtension (activeFilePath|> DsFile)  ".dsz")
 
@@ -103,8 +117,8 @@ type ModelLoaderExt =
 
         let baseTempFilePath = $"{topLevel}base.ext"  //상대 경로 구하기 위한 임시경로
         let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
-
-        let config = SaveConfigWithPath jsFilePath activeRelaPath
+        let newCfg = createModelConfigReplacePath (cfg, activeRelaPath)
+        let config = SaveConfigWithPath jsFilePath newCfg
 
         addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;config]@layoutImgFiles.ToList())
 

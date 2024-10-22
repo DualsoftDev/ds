@@ -29,7 +29,7 @@ module ZmqTestClient =
         let jsonPath = unZip testFile
         RuntimeDS.Package <- RuntimePackage.PCSIM;
         let model: Model = ParserLoader.LoadFromConfig(jsonPath) WINDOWS
-        let dsCPU, _, _ = DsCpuExt.CreateRuntime (model.System) WINDOWS
+        let dsCPU, _, _ = DsCpuExt.CreateRuntime (model.System) WINDOWS model.Config     
 
         let _serverThread = server.Run()
         let client =  new Client($"{zmqHWInfo.ServerIP}:{zmqHWInfo.ServerPort}")

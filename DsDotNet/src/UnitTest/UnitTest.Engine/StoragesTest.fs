@@ -23,8 +23,9 @@ type StoragesTest() =
         /// 파싱후에는 TagManager가 없어야 한다.
         sys.TagManager === null
         let target = getDefaltHwTarget()
+        let modelConfig = createDefaultModelConfig()
         DsAddressModule.assignAutoAddress(sys, 0, 100000, target) 
-        let _ = DsCpuExt.CreateRuntime (sys) target.Platform
+        let _ = DsCpuExt.CreateRuntime (sys) target.Platform modelConfig
 
         /// CPU 생성후 기본 Storage 생성 확인
         sys.TagManager.Storages.Count > 0 === true

@@ -20,7 +20,10 @@ module RuntimeTestCommon =
         RuntimeDS.Package <- PCSIM
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
-        let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms)
+        let modelConfig = createDefaultModelConfig() 
+        let newCng = { modelConfig with HwDriver = pptParms.HwTarget.HwDrive.ToString()}
+
+        let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms, newCng)
         let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.Platform)
 
         (*시뮬레이션 구동 테스트*)

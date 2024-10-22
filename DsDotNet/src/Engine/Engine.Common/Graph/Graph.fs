@@ -2,6 +2,7 @@
 namespace Engine.Common
 
 open System.Linq
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open System
 

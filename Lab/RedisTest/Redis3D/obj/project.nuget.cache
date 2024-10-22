@@ -1,13 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "7ZsVUDwWhJJ6VFlkjlwR9SOCEL8Mw0rgb0tWy6HZVP4wy7fW2WCB0IbMg1YC6PYTKMleoL3tj/y5Fe/m4DcaSQ==",
+  "dgSpecHash": "PPtkEtutAmA=",
   "success": true,
-  "projectFilePath": "C:\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
+  "projectFilePath": "F:\\Git\\ds\\Lab\\RedisTest\\Redis3D\\Redis3D.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\dskim\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
-    "C:\\Users\\dskim\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
-    "C:\\Users\\dskim\\.nuget\\packages\\stackexchange.redis\\2.7.33\\stackexchange.redis.2.7.33.nupkg.sha512",
-    "C:\\Users\\dskim\\.nuget\\packages\\system.io.pipelines\\5.0.1\\system.io.pipelines.5.0.1.nupkg.sha512"
+    "C:\\Users\\kwak\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\6.0.0\\microsoft.extensions.logging.abstractions.6.0.0.nupkg.sha512",
+    "C:\\Users\\kwak\\.nuget\\packages\\pipelines.sockets.unofficial\\2.2.8\\pipelines.sockets.unofficial.2.2.8.nupkg.sha512",
+    "C:\\Users\\kwak\\.nuget\\packages\\stackexchange.redis\\2.8.16\\stackexchange.redis.2.8.16.nupkg.sha512",
+    "C:\\Users\\kwak\\.nuget\\packages\\system.io.pipelines\\5.0.1\\system.io.pipelines.5.0.1.nupkg.sha512"
   ],
   "logs": []
 }

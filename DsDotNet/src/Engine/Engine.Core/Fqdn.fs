@@ -8,6 +8,7 @@ open System.Runtime.CompilerServices
 open System.Diagnostics
 open System.Runtime.InteropServices
 
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open Engine.Common
 

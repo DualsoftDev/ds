@@ -31,6 +31,8 @@
 		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.4.7" />
 	</ItemGroup>
 
-	<ItemGroup />
+	<ItemGroup>
+	  <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
+	</ItemGroup>
 
 </Project>

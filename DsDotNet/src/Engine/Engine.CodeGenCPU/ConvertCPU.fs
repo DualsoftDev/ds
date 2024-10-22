@@ -79,6 +79,7 @@ module ConvertCPU =
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
+                //if (v:?>Call).IsJob && not(RuntimeDS.Package.IsPackageSIM()) then
                 if (v:?>Call).IsJob then
                     yield! vc.E1_CallErrTimeOver()
                     yield! vc.E2_CallErrRXMonitor()

@@ -291,13 +291,13 @@ module CoreExtensionModule =
 
         member x.NoneAction = x.Motion.IsNone &&  x.Script.IsNone
 
-        member x.ErrGoingOrigin = x.ExternalTags.First(fun (t,_)-> t = ErrGoingOrigin)|> snd
+        member x.ErrGoingOrigin = x.ExternalTags[ErrGoingOrigin]
 
-        member x.MotionStartTag = x.ExternalTags.First(fun (t,_)-> t = MotionStart)|> snd
-        member x.ScriptStartTag = x.ExternalTags.First(fun (t,_)-> t = ScriptStart)|> snd
+        member x.MotionStartTag = x.ExternalTags[MotionStart]
+        member x.ScriptStartTag = x.ExternalTags[ScriptStart]
 
-        member x.MotionEndTag = x.ExternalTags.First(fun (t,_)-> t = MotionEnd)|> snd
-        member x.ScriptEndTag = x.ExternalTags.First(fun (t,_)-> t = ScriptEnd)|> snd
+        member x.MotionEndTag = x.ExternalTags[MotionEnd]
+        member x.ScriptEndTag = x.ExternalTags[ScriptEnd]
 
 
     let getCallName (x:Call) =
@@ -326,12 +326,12 @@ module CoreExtensionModule =
         member x.NameForGraph = getCallName x
 
         member x.System = x.Parent.GetSystem()
-        member x.ErrorSensorOn        = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOn)       |> snd
-        member x.ErrorSensorOff       = x.ExternalTags.First(fun (t,_)-> t = ErrorSensorOff)      |> snd
-        member x.ErrorOnTimeOver      = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeOver)     |> snd
-        member x.ErrorOnTimeUnder     = x.ExternalTags.First(fun (t,_)-> t = ErrorOnTimeUnder) |> snd
-        member x.ErrorOffTimeOver     = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeOver)    |> snd
-        member x.ErrorOffTimeUnder    = x.ExternalTags.First(fun (t,_)-> t = ErrorOffTimeUnder)|> snd
+        member x.ErrorSensorOn        = x.ExternalTags[ErrorSensorOn    ]
+        member x.ErrorSensorOff       = x.ExternalTags[ErrorSensorOff   ]
+        member x.ErrorOnTimeOver      = x.ExternalTags[ErrorOnTimeOver  ]
+        member x.ErrorOnTimeUnder     = x.ExternalTags[ErrorOnTimeUnder ]
+        member x.ErrorOffTimeOver     = x.ExternalTags[ErrorOffTimeOver ]
+        member x.ErrorOffTimeUnder    = x.ExternalTags[ErrorOffTimeUnder]
 
     let inValidTaskDevTags (x:DsSystem) =
         x.Jobs

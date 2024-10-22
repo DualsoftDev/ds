@@ -5,6 +5,7 @@ open System.Linq
 open System.Collections.Generic
 open System.Security
 
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open Engine.Core
 open Engine.Common

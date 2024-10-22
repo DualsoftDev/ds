@@ -23,6 +23,8 @@
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
     <ItemGroup>
         <!--<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />-->

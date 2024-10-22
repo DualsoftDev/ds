@@ -130,25 +130,22 @@ module ConvertCpuDsSystem =
                     ErrorSensorOn,        (cv.ErrShort           :> IStorage)
                     ErrorSensorOff,       (cv.ErrOpen            :> IStorage)
                     ErrorOnTimeOver,      (cv.ErrOnTimeOver      :> IStorage)
-                    ErrorOnTimeUnder,  (cv.ErrOnTimeUnder  :> IStorage)
+                    ErrorOnTimeUnder,  (cv.ErrOnTimeUnder        :> IStorage)
                     ErrorOffTimeOver,     (cv.ErrOffTimeOver     :> IStorage)
-                    ErrorOffTimeUnder, (cv.ErrOffTimeUnder :> IStorage)
+                    ErrorOffTimeUnder, (cv.ErrOffTimeUnder       :> IStorage)
                 |]
-                |> call.ExternalTags.AddRange
-                |> x.VerifyAdded
-
-
-        member private x.VerifyAdded = verifyM "ERROR: 중복 check"
+                |> Seq.iter(fun (k, v) ->call.ExternalTags.Add(k, v)) 
 
         member private x.GenerationRealAlarmMemory()  =
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
                 rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getTarget(x))
-                real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage) |> x.VerifyAdded
+                real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage)
 
         member  x.GenerationRealActionMemory()  =
             let target = getTarget(x)
-            for real in x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name) do
+            let reals = x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name)
+            for real in reals do
                 let rm =  real.TagManager :?> RealVertexTagManager
 
                 rm.ScriptStart.Address  <- getMemory  rm.ScriptStart target
@@ -164,8 +161,8 @@ module ConvertCpuDsSystem =
                     ScriptEnd,    (rm.ScriptEnd   :> IStorage)
                     MotionEnd,    (rm.MotionEnd   :> IStorage)
                 |]
-                |> real.ExternalTags.AddRange
-                |> x.VerifyAdded
+                |> Seq.iter(fun (k, v) ->real.ExternalTags.Add(k, v)) 
+               
 
         member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do

@@ -10,8 +10,9 @@ module testMain =
         let testPath = "F:/Git/ds/DsDotNet/bin/net8.0-windows/HelloDS.pptx";
         let testPath = "F:/DsModeling/Side9/Side9.pptx";
         let pptParms:PptParams = {HwTarget = getDefaltHwTarget(); AutoIOM = true; CreateFromPpt = false; CreateBtnLamp = true; StartMemory = 1000; OpMemory = 100}
+        let modelConfig = createDefaultModelConfig()    
 
 
-        let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms)
+        let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms, modelConfig)
 
         0

@@ -34,13 +34,13 @@ type ErrorListener<'Symbol>([<Optional; DefaultParameterValue(false)>] throwOnEr
         | :? Parser as parser ->
             let ambient = parser.RuleContext.GetText()
             base.SyntaxError(output, recognizer, offendingSymbol, line, col, msg, e)
-            logError ($"Parser error on [{line}:{col}]@{dsFile}: {msg}")
+            tracefn ($"Parser error on [{line}:{col}]@{dsFile}: {msg}")
             x.Errors.Add(new ParserErrorRecord(line, col, msg, ambient))
 
             if throwOnError then
                 ParserError($"{msg} near {ambient}", line, col) |> raise
         | :? Lexer ->
-            logError ($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
+            tracefn ($"Lexer error on [{line}:{col}]@{dsFile}: {msg}")
             x.Errors.Add(new ParserErrorRecord(line, col, msg, ""))
 
             if throwOnError then

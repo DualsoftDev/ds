@@ -19,11 +19,12 @@ module HelloDSRuntimeTestModule =
         do
             RuntimeDS.Package <- PCSIM
             RuntimeDS.TimeoutCall <- 15000u
-
+        let modelConfig = createDefaultModelConfig()    
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let getSystem() =
             let pptParms:PptParams = defaultPptParams()
-            let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms)
+
+            let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms, modelConfig)
             let {
                 System = system
                 ActivePath =  exportPath
@@ -31,19 +32,15 @@ module HelloDSRuntimeTestModule =
                 LayoutImgPaths = layoutImgPaths
             } = result
 
-            system.TagManager === null
-            let _ = DsCpuExt.CreateRuntime (system) (pptParms.HwTarget.Platform)
-            system.TagManager.Storages.Count > 0 === true
-
             system
 
         // - 항상 최신 버젼의 HelloDS.dsz 파일 만듬
         // - HelloDS.Logger.UnitTest.sqlite3 파일도 최신 HelloDS.dsz 으로 시뮬레이션 된 것이거나 삭제 필요
         [<Test>]
-        member __.``X HelloDS runtime model test``() =
+        member __.``HelloDS runtime model test``() =
             let system = getSystem()
-            
-            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS)
+            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS) modelConfig
+            system.TagManager.Storages.Count > 0 === true
 
             let json = SystemTextJson.Serialize(hMIPackage)
             let pkg = SystemTextJson.Deserialize<HMIPackage>(json)

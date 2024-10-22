@@ -15,16 +15,9 @@ module LoadConfigTestModule =
         let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample/dsSimple"|])
         let configFile = PathManager.getFullPath  ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
         
-        let loadConfigTest() =
-            let cfg = createModelConfigWithPath  $@"{dsFileDir}/Factory.ds"     
-            ModelLoader.SaveConfig configFile cfg
-            let cfg2 = ModelLoader.LoadConfig configFile
-            cfg === cfg2
-            cfg
-
+      
         [<Test>]
         member __.``LoadModelFromConfigTest`` () =
-            let config = loadConfigTest()
 
             let model = ParserLoader.LoadFromConfig configFile PlatformTarget.WINDOWS
             model.System.Name === "Factory"

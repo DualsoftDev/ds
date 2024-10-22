@@ -4,6 +4,7 @@ open System.Linq
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open Engine.Common
 

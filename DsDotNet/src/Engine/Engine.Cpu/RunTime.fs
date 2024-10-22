@@ -180,7 +180,14 @@ module RunTimeModule =
 type DsCpuExt  =
     /// DsSystem 으로부터 Runtime 생성 : DsCPU*HMIPackage*(PouGen[])
     [<Extension>]
-    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) : Runtime =
+    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig): Runtime =
+
+        RuntimeDS.HwIP <- modelCnf.HwIP 
+        RuntimeDS.HwDriver <- HwDriveTargetExtensions.fromString modelCnf.HwDriver
+        RuntimeDS.RuntimeMotionMode <- modelCnf.RuntimeMotionMode
+        RuntimeDS.TimeSimutionMode <- modelCnf.TimeSimutionMode
+        RuntimeDS.TimeoutCall <- modelCnf.TimeoutCall
+
         let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
         // Initialize storages and create POU's for the system

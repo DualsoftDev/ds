@@ -5,6 +5,7 @@ open System.Collections.Generic
 open System
 open System.Linq
 open Engine.Common
+open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 
 [<AutoOpen>]

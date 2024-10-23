@@ -79,13 +79,28 @@ type VertexTagManager with
                 yield (checkCondi <&&> rxFinishExpr                      <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         |]
         
+    //인터락 동시 에러 추가 전진시 다른센서해제안됨에러
+    member v.E3_CallErrRXInterlockMonitor() =
+        let v= v :?> CoinVertexTagManager
+        let fn = getFuncName()
+        let call= v.Vertex.GetPure() :?> Call
+        let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
+                                .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
+        let iop = call.V.Flow.iop.Expr
+        let rst = v.Flow.ClearExpr
+        let errRXInterlock = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock")
+        [|
+            yield! (call.End <&&> !@iop, v.System) --^ (errRXInterlock, fn)
+            yield (errRXInterlock.Expr <&&> callMutualOns, rst) ==| (v.ErrInterlock , fn)
+        |]
 
-    member v.E3_CallErrTotalMonitor() =
+
+    member v.E4_CallErrTotalMonitor() =
         let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
 
-    member v.E4_RealErrTotalMonitor() =
+    member v.E5_RealErrTotalMonitor() =
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
          

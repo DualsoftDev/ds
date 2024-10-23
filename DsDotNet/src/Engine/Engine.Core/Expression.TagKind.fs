@@ -222,6 +222,7 @@ type TagKindExt =
         | EventVertex (_, _, kind) ->
             kind.IsOneOf(
                   VertexTag.errorTRx
+                , VertexTag.rxErrInterlock
                 , VertexTag.rxErrOpen
                 , VertexTag.rxErrShort
                 , VertexTag.workErrOriginGoing

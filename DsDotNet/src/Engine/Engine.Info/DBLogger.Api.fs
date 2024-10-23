@@ -51,6 +51,7 @@ module DBLoggerApi =
                 let errOnTimeUnder     = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOnTimeUnder)
                 let errOffTimeOver     = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeOver)
                 let errOffTimeUnder    = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.txErrOffTimeUnder)
+                let errInterlock       = DBLogger.TryGetLastValue(call.QualifiedName, int VertexTag.rxErrInterlock)
                 let isTrue(opt:bool Option) = opt.IsSome && opt.Value
 
                 let errs =
@@ -61,6 +62,7 @@ module DBLoggerApi =
                         if isTrue(errOnTimeUnder)     then yield $"{call.Name} 감지시간부족 이상"
                         if isTrue(errOffTimeOver)     then yield $"{call.Name} 해지시간초과 이상"
                         if isTrue(errOffTimeUnder)    then yield $"{call.Name} 해지시간부족 이상"
+                        if isTrue(errInterlock)       then yield $"{call.Name} 반대센서오프 이상"
                     |]
 
                 info.ErrorMessages.AddRange errs

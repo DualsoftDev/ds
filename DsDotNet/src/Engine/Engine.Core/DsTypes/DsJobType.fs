@@ -22,6 +22,7 @@ module DsJobTypeModule =
                     $"{TextJobMulti}{x.TaskDevCount}({x.InCount}, {x.OutCount})"
 
     let parseMultiActionString (str:string) =
+        let str = str.TrimStart('[').TrimEnd(']')
         let mainPart, optionalPart = 
             if str.Contains("(") then 
                 let parts = str.Split([| '('; ')' |], StringSplitOptions.RemoveEmptyEntries)

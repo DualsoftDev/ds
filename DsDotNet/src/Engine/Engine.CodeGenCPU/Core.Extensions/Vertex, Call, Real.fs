@@ -66,7 +66,7 @@ module ConvertCpuVertex =
             else
                 c.TaskDefs.Select(fun td-> td.GetPlanEnd(c.TargetJob)).ToAnd()
 
-        member c.TimeOutMaxMSec     = c.TargetJob.JobTime.TimeOutMaxMSec
+        member c.TimeOutMaxMSec     =  c.TargetJob.JobTime.TimeOutMaxMSec
         member c.TimeDelayCheckMSec = c.TargetJob.JobTime.TimeDelayCheckMSec
         member c.UsingTimeDelayCheck  = c.IsJob && c.TargetJob.JobTime.TimeDelayCheckMSec > 0u
 

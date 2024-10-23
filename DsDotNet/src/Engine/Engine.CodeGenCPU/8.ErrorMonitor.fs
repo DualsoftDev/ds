@@ -15,7 +15,7 @@ type VertexTagManager with
         let call= v.Vertex.GetPure() :?> Call
         let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
                                 .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
-        
+        //인터락 동시 에러 추가 예정 test ahn  전진시 다른센서해제안됨에러
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
         let running = (v.MM.Expr <||> call.End) <&&> !@iop

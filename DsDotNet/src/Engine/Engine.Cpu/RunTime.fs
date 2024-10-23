@@ -188,6 +188,10 @@ type DsCpuExt  =
         RuntimeDS.TimeSimutionMode <- modelCnf.TimeSimutionMode
         RuntimeDS.TimeoutCall <- modelCnf.TimeoutCall
 
+        dsSys.GetCallVertices()
+             .Where(fun f-> f.IsJob && f.TargetJob.JobTime.Max.IsNone)
+             .Iter(fun f-> f.TargetJob.JobTime.Max <- Some modelCnf.TimeoutCall)
+
         let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 
         // Initialize storages and create POU's for the system

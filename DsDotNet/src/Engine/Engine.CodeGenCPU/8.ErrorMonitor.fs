@@ -30,23 +30,6 @@ type VertexTagManager with
         |]
 
     //member v.E2_CallErrTimeUnder() = //  시간 미달 DS Operator 정의로 해결
-        //let v= v :?> CoinVertexTagManager
-        //let call= v.Vertex.GetPure() :?> Call
-        //let iop = call.V.Flow.iop.Expr
-        //let rst = v.Flow.ClearExpr
-        //let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
-        //                        .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
-        
-        //let running = (v.MM.Expr <||> call.End) <&&> !@iop
-        //[|
-            (*TimeMinOnMSec*)
-            //if call.TimeMinOnMSec <> 0u 
-            //then
-            //    yield running --@ (v.TimeMinOn, call.TimeMinOnMSec, getFuncName())
-            //    yield (!@v.TimeMinOn.DN.Expr <&&> v.G.Expr <&&> v.ET.Expr, rst) ==| (v.ErrOnTimeUnder ,getFuncName())
-        //|]
-
-
 
     member v.E2_CallErrRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
@@ -88,10 +71,15 @@ type VertexTagManager with
                                 .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
-        let errRXInterlock = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock")
+            //pulse 3단 지연 임시 추가 test ahn    
+        let errRXInterlock1 = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock1")
+        let errRXInterlock2 = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock2")
+        let errRXInterlock3 = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock3")
         [|
-            yield! (call.End <&&> !@iop, v.System) --^ (errRXInterlock, fn)
-            yield (errRXInterlock.Expr <&&> callMutualOns, rst) ==| (v.ErrInterlock , fn)
+            yield! (call.End <&&> !@iop, v.System) --^ (errRXInterlock1, fn)
+            yield! (errRXInterlock1.Expr , v.System) --^ (errRXInterlock2, fn)
+            yield! (errRXInterlock2.Expr , v.System) --^ (errRXInterlock3, fn)
+            yield (errRXInterlock3.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
         |]
 
 

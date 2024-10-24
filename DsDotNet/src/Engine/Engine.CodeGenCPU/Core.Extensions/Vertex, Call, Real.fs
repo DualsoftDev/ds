@@ -141,6 +141,7 @@ module ConvertCpuVertex =
                 vmc.ErrOffTimeUnder
                 vmc.ErrShort
                 vmc.ErrOpen
+                vmc.ErrInterlock
             |]
 
 
@@ -191,10 +192,12 @@ module ConvertCpuVertex =
 
         member r.ErrOpens   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrOpen)
         member r.ErrShorts   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrShort)
+        member r.ErrInterlocks   = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ErrInterlock)
 
         member r.Errors     = r.ErrOnTimeOvers  @ r.ErrOnTimeUnders
                             @ r.ErrOffTimeOvers @ r.ErrOffTimeUnders
-                            @ r.ErrOpens @ r.ErrShorts  @ [ r.VR.ErrGoingOrigin  ]
+                            @ r.ErrOpens @ r.ErrShorts 
+                            @ r.ErrInterlocks @ [ r.VR.ErrGoingOrigin  ]
 
 [<Extension>]
 type RealExt =

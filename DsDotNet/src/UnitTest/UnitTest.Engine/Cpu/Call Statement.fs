@@ -15,9 +15,13 @@ type Spec07_CallStatement() =
     let t = CpuTestSample(WINDOWS)
 
     [<Test>]
-    member __.``C1 CallMemo`` () =
+    member __.``C1 CallPlanStart`` () =
         for call in t.Sys.GetVerticesHasJobInReal().Select(getVM) do
-            call.C1_CallMemo() |> doCheck
+            call.C1_CallPlanStart() |> doCheck
+    [<Test>]
+    member __.``C2 CallPlanEnd`` () =
+        for call in t.Sys.GetVerticesHasJobInReal().Select(getVM) do
+            call.C2_CallPlanEnd() |> doCheck
 
     [<Test>]
     member __.`` J1 JobActionOuts`` () =

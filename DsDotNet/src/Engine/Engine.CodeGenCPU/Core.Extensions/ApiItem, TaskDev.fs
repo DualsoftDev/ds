@@ -22,7 +22,7 @@ module ConvertCpuApiItem =
         member a.SL2     = getAM(a).SL2
 
         member a.RxET    = getVMReal(a.RX).ET
-        member a.TxST    = getVMReal(a.TX).ST
+        member a.TxET    = getVMReal(a.TX).ET
         //member a.UpperLimit =
         //    match a.TimeParam with
         //    |Some t -> t.USL

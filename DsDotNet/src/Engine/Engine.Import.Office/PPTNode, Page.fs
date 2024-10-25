@@ -32,7 +32,7 @@ module PptNodeModule =
         shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq
         , copySystems        : Dictionary<string, string> //copyName, orgiName
         , safeties           : HashSet<string>
-        , autoPres           : HashSet<string[]>  //jobFqdn
+        , autoPres           : HashSet<string[]>  //callFqdn
         , jobInfos           : Dictionary<string, HashSet<string>> // jobBase, api SystemNames
         , btnHeadPageDefs    : Dictionary<string, BtnType>
         , btnDefs            : Dictionary<string, BtnType>
@@ -156,7 +156,7 @@ module PptNodeModule =
             if not (nodeType = CALL || nodeType = AUTOPRE) then
                 shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
 
-            let parts = GetLastParenthesesReplaceName(name, "").Split('.')
+            let parts = GetLastParenthesesRemoveName(name).Split('.')
             if parts.Contains("")
             then
                 shape.ErrorName("이름 규격을 확인하세요", iPage)
@@ -166,14 +166,14 @@ module PptNodeModule =
                 let jobBody =
                     [ pageTitle
                       parts.[0] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
-                let api = GetLastParenthesesReplaceName(parts.[1] |> TrimSpace ,  "") |> TrimSpace
+                let api = GetLastParenthesesRemoveName(parts.[1] |> TrimSpace) |> TrimSpace
                 jobBody.Append api
 
             | 3 ->
                 let jobBody =
                     [ parts.[0] |> TrimSpace
                       parts.[1] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
-                let api = GetLastParenthesesReplaceName(parts.[2] |> TrimSpace ,  "")|> TrimSpace
+                let api = GetLastParenthesesRemoveName(parts.[2] |> TrimSpace)|> TrimSpace
                 jobBody.Append api
 
             | _ ->
@@ -229,22 +229,7 @@ module PptNodeModule =
             let mutable CallTime:CallTime option = None
             let mutable valueParamIO:ValueParamIO  = defaultValueParamIO()
 
-            let updateSafety (barckets: string) =
-                barckets.Split(';')
-                |> Seq.iter (fun f ->
-                    let safeItem =
-                        let items = f.Split('.').Select(fun s->s.Trim())
-                        match items.length() with
-                        | 2 ->
-                            $"{pageTitle}.{items.Combine()}"
-                        | 3 ->
-                            items.Combine()
-                        | _ ->
-                            failWithLog ErrID._79
-
-                    safeties.Add(safeItem) |> ignore
-                )
-
+          
 
             let updateCopySys (barckets: string, orgiSysName: string, groupJob: int) =
                 if (groupJob > 0) then
@@ -288,24 +273,26 @@ module PptNodeModule =
                 realRepeatCnt <- parseUIntMSec contents TextCOUNT
       
                 
-            let namePure(shape:Shape) = GetLastBracketRemoveName(GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "")) |> trimSpaceNewLine
+            let namePure(shape:Shape) =
+                let macrosName = nameNFunc(shape, macros, iPage)
+                let removeLastParentheses = GetLastParenthesesRemoveName(macrosName)
+                String.Join(".", removeLastParentheses.Split('.').Select(trimSpace).Select(GetLastBracketRemoveName)) 
+                |> trimSpaceNewLine
+
             let name =
-                let nameTrim  = String.Join(".", namePure(shape).Split('.').Select(trimSpace)) |> trimSpaceNewLine
-                GetLastParenthesesReplaceName(getTrimName(shape, nameTrim),  "")
+                let nameTrim  = namePure(shape)
+                GetLastParenthesesRemoveName(getTrimName(shape, nameTrim))
 
             //do
             let nodeType = getNodeType(shape, name, iPage)
             try
                 nameCheck (shape, nodeType, iPage, name)
                 match nodeType with
-                | ( CALL | REAL ) ->
+                |  REAL -> updateTimeNCounter()
+                |  CALL -> 
                     match GetSquareBrackets(shape.InnerText, true) with
-                    | Some text -> updateSafety text
+                    | Some text -> text.Split(';').Iter(fun s -> safeties.Add s |> ignore)
                     | None -> ()
-
-                    if nodeType = REAL 
-                    then updateTimeNCounter()
-                 
 
                 | IF_DEVICE -> updateDeviceIF shape.InnerText
 
@@ -348,9 +335,9 @@ module PptNodeModule =
                             failwith $"Error: {callNAutoPreName}"
 
                     let jobPram =
-                        let devP = devProp |> GetLastBracketContents    // e.g "[5(5,1)]"
-                        let apiP = apiProp |> GetLastParenthesesContents    // e.g "(!200, 300)"
-                        let jobP = callNAutoPreName|>GetLastBracketContents   // e.g "[PUSH, MAX(1200ms), CHK(500ms)]]"
+                        let devP = devProp           |> trimSpace |> GetLastBracketContents    // e.g "[5(5,1)]"
+                        let apiP = apiProp           |> trimSpace |> GetLastBracketRemoveName |> trimSpace |> GetLastParenthesesContents    // e.g "(!200, 300)"
+                        let jobP = callNAutoPreName  |> trimSpace |> GetLastParenthesesRemoveName |> trimSpace  |>GetLastBracketContents   // e.g "[PUSH, MAX(1200ms), CHK(500ms)]]"
                         if devP = "" && apiP = "" && jobP = "" then
                             defaultJobDevParam()
                         else
@@ -362,20 +349,23 @@ module PptNodeModule =
                                 | "", _ -> failWithLog $"err: {name}MultiAction Count >= 1 : {cntPara}"
                                 | _ , "" -> $"{TextJobMulti}{cntPara}"
                                 | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
-
-
-                            if apiP.Contains(',') then
-                                let inV = createValueParam (apiP.Split(',').Head().Trim() )
-                                let outV = createValueParam (apiP.Split(',').Last().Trim() )
-                                valueParamIO <- ValueParamIO(inV, outV)
-                            let jobPush     = if jobP.Contains(TextCallPush) then $"{TextCallPush}" else ""
                             
-                            let jobT = getCallTime jobP
-                            if not(jobT.IsDefault)
-                            then
-                                CallTime <- Some jobT
+                            if not (apiP.IsNullOrEmpty()) then
+                                if apiP.Contains(TextInOutSplit) then
+                                    let inV = createValueParam (apiP.Split(TextInOutSplit).Head().Trim() )
+                                    let outV = createValueParam (apiP.Split(TextInOutSplit).Last().Trim() )
+                                    valueParamIO <- ValueParamIO(inV, outV)
+                                else 
+                                    failWithLog $"err: {name}(input, output) {TextInOutSplit} 로 구분되어 입력해야 합니다. "
 
-                            getParserJobType(String.Join(";", [paraText; jobPush]))
+                            let jobPush = if jobP.Contains(TextCallPush) then $"{TextCallPush}" else ""
+                            
+                            let callT = getCallTime jobP
+                            if not(callT.IsDefault)
+                            then
+                                CallTime <- Some callT
+                            let items = [paraText; jobPush].Where(fun f->not(f.IsNullOrEmpty()))
+                            getParserJobType(String.Join(";", items))
 
 
                     jobDevParam <- jobPram

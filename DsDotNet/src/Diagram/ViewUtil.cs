@@ -31,7 +31,6 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using DocumentFormat.OpenXml.Spreadsheet;
 using DocumentFormat.OpenXml.VariantTypes;
 using static Engine.Info.DBWriterModule;
-using static Engine.CodeGenCPU.JobManagerModule;
 using System.Runtime.Versioning;
 using Dual.Common.Base.CS;
 using static Engine.Core.CoreModule.DeviceAndSystemModule;
@@ -41,7 +40,7 @@ using Newtonsoft.Json;
 
 namespace Diagram.View.MSAGL
 {
-[SupportedOSPlatform("windows")]
+    [SupportedOSPlatform("windows")]
     public static class ViewUtil
     {
         public static List<UcView> UcViews { get; set; } = new();
@@ -50,7 +49,6 @@ namespace Diagram.View.MSAGL
 
         static IDisposable _Disposable;
         static Dictionary<IStorage, List<ViewVertex>> DicTaskDevTag = new();
-        static Dictionary<IStorage, List<ViewVertex>> DicJobTag = new();
         static Dictionary<IStorage, List<ViewVertex>> DicMemoryTag = new();
         static private DsSystem _sys = null;
 
@@ -89,7 +87,6 @@ namespace Diagram.View.MSAGL
 
                     if (v.GetPure() is Call call && call.IsJob)
                     {
-                        UpdateDicJobTag(call.TargetJob, viewVertex);
                         UpdateDicCallPlanTag(call, viewVertex);
                     }
 
@@ -103,13 +100,25 @@ namespace Diagram.View.MSAGL
             });
 
 
-            _sys.GetRealVertices().Iter(real =>
+            var allSys = sys.GetRecursiveLoadedSystems().ToList();
+            allSys.Add(sys);
+            allSys.Iter(sys =>
             {
-                var og = (real.TagManager as RealVertexTagManager).OG;
-                UpdateOriginVertexTag(og, DicNode[real]);
+                sys.GetRealVertices().Iter(real =>
+                {
+                    var og = (real.TagManager as RealVertexTagManager).OG;
+                    UpdateOriginVertexTag(og, DicNode[real]);
 
-                real.GetSharedReal().Iter(alias => UpdateOriginVertexTag(og, DicNode[alias]));
+                    real.GetSharedReal().Iter(alias => UpdateOriginVertexTag(og, DicNode[alias]));
+                });
             });
+
+            void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
+            {
+                if (!DicMemoryTag.ContainsKey(tag))
+                    DicMemoryTag.Add(tag, new List<ViewVertex>());
+                DicMemoryTag[tag].Add(viewVertex);
+            }
 
 
             return flowViewNodes;
@@ -153,29 +162,17 @@ namespace Diagram.View.MSAGL
                 var cm = c.TagManager as CoinVertexTagManager;
                 var ps = cm.PS;
                 var pe = cm.PE;
-                var po = cm.PO;
+                var ci = cm.CallIn;
+                var co = cm.CallOut;
+                //var po = cm.PO;
                 if (!dic.ContainsKey(ps)) dic.Add(ps, new List<ViewVertex>() { viewVertex }); else dic[ps].Add(viewVertex);
                 if (!dic.ContainsKey(pe)) dic.Add(pe, new List<ViewVertex>() { viewVertex }); else dic[pe].Add(viewVertex);
-                if (!dic.ContainsKey(po)) dic.Add(po, new List<ViewVertex>() { viewVertex }); else dic[po].Add(viewVertex);
+                if (!dic.ContainsKey(ci)) dic.Add(ci, new List<ViewVertex>() { viewVertex }); else dic[ci].Add(viewVertex);
+                if (!dic.ContainsKey(co)) dic.Add(co, new List<ViewVertex>() { viewVertex }); else dic[co].Add(viewVertex);
             }
 
-            void UpdateDicJobTag(Job job, ViewVertex viewVertex)
-            {
-                var dic = DicJobTag;
-                var jm = job.TagManager as JobManager;
-                var inDetect = jm.InDetected;
-                var outDetect = jm.OutDetected;
-                if (!dic.ContainsKey(inDetect))   dic.Add(inDetect, new List<ViewVertex>() { viewVertex }); else dic[inDetect].Add(viewVertex);
-                if (!dic.ContainsKey(outDetect)) dic.Add(outDetect, new List<ViewVertex>() { viewVertex }); else dic[outDetect].Add(viewVertex);
-            }
 
-            void UpdateOriginVertexTag(IStorage tag, ViewVertex viewVertex)
-            {
-                if (!DicMemoryTag.ContainsKey(tag))
-                    DicMemoryTag.Add(tag, new List<ViewVertex>());
-                DicMemoryTag[tag].Add(viewVertex);
-            }
-
+         
 
             void ViewChangeSubject()
             {
@@ -192,39 +189,57 @@ namespace Diagram.View.MSAGL
                     {
                         HandleTaskDevEvent(rx as EventTaskDev);
                     }
-                    else if (rx.IsEventJob)
-                    {
-                        HandleJobEvent(rx as EventJob);
-                    }
+
                 });
             }
         }
 
-
-
         private static void HandleVertexEvent(EventVertex ev)
         {
-            if (ev.TagKind == VertexTag.planEnd && DicNode.ContainsKey(ev.Target))
+            if (DicNode.ContainsKey(ev.Target))
             {
-                bool on = false;
-                if (ev.Target is Call c || ev.Target is Alias s)
-                {
-                    if (ev.Target.TryGetPureCall() != null)
-                    {
-                        var cv = ev.Target.GetPureCall();
-                        on = Convert.ToBoolean((cv.TagManager as CoinVertexTagManager).PE.Value);
-                    }
-                }
-
                 var vv = DicNode[ev.Target];
-                vv.LampPlanEnd = on;
                 vv.Nodes.Iter(node =>
                 {
                     var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
-                    ucView?.UpdatePlanEndValue(node, on);
+
+                    switch (ev.TagKind)
+                    {
+                        case VertexTag.planEnd:
+                            {
+                                bool on = false;
+                                if (ev.Target is Call c || ev.Target is Alias s)
+                                {
+                                    if (ev.Target.TryGetPureCall() != null)
+                                    {
+                                        var cv = ev.Target.GetPureCall();
+                                        on = Convert.ToBoolean((cv.TagManager as CoinVertexTagManager).PE.Value);
+                                    }
+                                }
+                                vv.LampPlanEnd = on;
+
+                                ucView?.UpdatePlanEndValue(node, on);
+                                break;
+                            }
+                        case VertexTag.callIn:
+                            {
+                                var on = Convert.ToBoolean(ev.Tag.BoxedValue);
+                                vv.LampInput = on;
+                                ucView?.UpdateInValue(node, on, true);
+                                break;
+                            }
+                        case VertexTag.callOut:
+                            {
+                                var on = Convert.ToBoolean(ev.Tag.BoxedValue);
+                                vv.LampOutput = on;
+                                ucView?.UpdateOutValue(node, on, true);
+                                break;
+                            }
+                    }
                 });
             }
-            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue && DicNode.ContainsKey(ev.Target))
+
+            if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue)
             {
                 Status4 status = ev.TagKind switch
                 {
@@ -258,9 +273,9 @@ namespace Diagram.View.MSAGL
                     vv.DisplayNodes.Iter(node => { ucView.UpdateError(node, vv.IsError, vv.ErrorText); });
                 }
             }
+
             if (ev.IsVertexOriginTag())
             {
-                if (!DicMemoryTag.ContainsKey(ev.Tag)) return;
                 var viewNodes = DicMemoryTag[ev.Tag];
 
                 viewNodes.Iter(n =>
@@ -307,41 +322,41 @@ namespace Diagram.View.MSAGL
                 });
             });
         }
-        private static void HandleJobEvent(EventJob jobEv)
-        {
-            if (!DicJobTag.ContainsKey(jobEv.Tag)) return;
+        //private static void HandleJobEvent(EventJob jobEv)
+        //{
+        //    if (!DicJobTag.ContainsKey(jobEv.Tag)) return;
 
-            var viewNodes = DicJobTag[jobEv.Tag];
+        //    var viewNodes = DicJobTag[jobEv.Tag];
 
-            viewNodes.Iter(n =>
-            {
-                n.DisplayNodes.Iter(node =>
-                {
-                    if (!IsThisSystem(node)) return;
+        //    viewNodes.Iter(n =>
+        //    {
+        //        n.DisplayNodes.Iter(node =>
+        //        {
+        //            if (!IsThisSystem(node)) return;
 
 
-                    switch (jobEv.Tag.TagKind)
-                    {
-                        case (int)JobTag.inDetected:
-                            {
-                                var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
-                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-                                n.LampInput = on;
-                                ucView?.UpdateInValue(node, on, true);
-                                break;
-                            }
-                        case (int)JobTag.outDetected:
-                            {
-                                var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
-                                var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-                                n.LampOutput = on;
-                                ucView?.UpdateOutValue(node, on, true);
-                                break;
-                            }
-                    }
-                });
-            });
-        }
+        //            switch (jobEv.Tag.TagKind)
+        //            {
+        //                case (int)JobTag.inDetected:
+        //                    {
+        //                        var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
+        //                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+        //                        n.LampInput = on;
+        //                        ucView?.UpdateInValue(node, on, true);
+        //                        break;
+        //                    }
+        //                case (int)JobTag.outDetected:
+        //                    {
+        //                        var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
+        //                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
+        //                        n.LampOutput = on;
+        //                        ucView?.UpdateOutValue(node, on, true);
+        //                        break;
+        //                    }
+        //            }
+        //        });
+        //    });
+        //}
         private static bool IsThisSystem(ViewNode node)
         {
             if (!node.IsVertex

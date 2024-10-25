@@ -14,9 +14,9 @@ module CoreExtensionModule =
         | tx::rx when rx.Length = 1 -> Some (getTaskDevParam tx,  getTaskDevParam rx.Head)
         | _-> None
 
-    let tryGetValueParamInOut (paramInOutText:string) =
+    let tryGetHwSysValueParamInOut (paramInOutText:string) =
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> Some (getAddressValueParam tx,  getAddressValueParam rx.Head)
+        | tx::rx when rx.Length = 1 -> Some (getHwSysAddressValueParam tx,  getHwSysAddressValueParam rx.Head)
         | _-> None
         
 
@@ -301,13 +301,14 @@ module CoreExtensionModule =
 
 
     let getCallName (x:Call) =
+        let getFuncName(f:DsFunc) = "#"+f.Name.QuoteOnDemand()
         match x.JobOrFunc with
         | JobType job ->
             let jobFqdn = job.NameComponents
             let valueParamText =  
                 if x.ValueParamIO.IsDefaultParam
                 then ""
-                else $"({x.ValueParamIO.In.ToText()}, {x.ValueParamIO.Out.ToText()})"
+                else $"({x.ValueParamIO.In.ToText()} {TextInOutSplit} {x.ValueParamIO.Out.ToText()})"
 
             let callOwnerFlow =  x.Parent.GetFlow().Name
             let jobOwnerFlow =  jobFqdn.Head()
@@ -316,14 +317,15 @@ module CoreExtensionModule =
             else
                 $"{jobFqdn.CombineQuoteOnDemand()}{valueParamText}" //다른 Flow는 skip flow 없음
 
-        | CommadFuncType func -> func.Name.QuoteOnDemand()+"()"
-        | OperatorFuncType func -> "#"+func.Name.QuoteOnDemand()
+        | CommadFuncType func   -> getFuncName func
+        | OperatorFuncType func ->  getFuncName func
 
 
     type Call with
         member x.IsFlowCall = x.Parent.GetCore() :? Flow
         member x.Flow = x.Parent.GetFlow()
         member x.NameForGraph = getCallName x
+        member x.NameForProperty = (x.DequotedQualifiedName.Split('.')[1..]).CombineQuoteOnDemand()
 
         member x.System = x.Parent.GetSystem()
         member x.ErrorSensorOn        = x.ExternalTags[ErrorSensorOn    ]

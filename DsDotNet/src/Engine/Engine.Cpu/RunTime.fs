@@ -67,7 +67,6 @@ module RunTimeModule =
 
             //Changed 있는것만 IO Hub로 전송
             if chTags.any() then tagChangedForIOHub.OnNext chTags
-
             //ClearChangedTags 전에 exeStates 만들기
             let exeStates = chTags.ExecutableStatements(mapRungs)
             //ClearChangedTags
@@ -187,10 +186,12 @@ type DsCpuExt  =
         RuntimeDS.RuntimeMotionMode <- modelCnf.RuntimeMotionMode
         RuntimeDS.TimeSimutionMode <- modelCnf.TimeSimutionMode
         RuntimeDS.TimeoutCall <- modelCnf.TimeoutCall
+        RuntimeDS.Package <- modelCnf.RuntimePackage
+
 
         dsSys.GetCallVertices()
-             .Where(fun f-> f.IsJob && f.TargetJob.JobTime.Max.IsNone)
-             .Iter(fun f-> f.TargetJob.JobTime.Max <- Some modelCnf.TimeoutCall)
+             .Where(fun f-> f.CallTime.IsDefault)
+             .Iter(fun f-> f.CallTime.TimeOut <- Some modelCnf.TimeoutCall)
 
         let loadedSystems = dsSys.GetRecursiveLoadedSystems()
 

@@ -129,17 +129,6 @@ module DsValueTypeModule =
         member x.InDataType = inValueParam.DataType
         member x.OutDataType = outValueParam.DataType
         member x.IsDefaultParam = inValueParam.IsDefaultValue && outValueParam.IsDefaultValue
-            
-        member x.ToDsText(addrSet: Addresses) =
-            let inText = if inValueParam.IsDefaultValue 
-                         then addressPrint addrSet.In
-                         else $"{addrSet.In}:{inValueParam.ToText()}"
-
-            let outText = if outValueParam.IsDefaultValue
-                          then addressPrint addrSet.Out 
-                          else $"{addrSet.Out}:{outValueParam.ToText()}"
-
-            $"{inText}, {outText}"
 
     let defaultValueParam() = ValueParam(Some true, None, None, false, false, false)
     let defaultValueParamIO() = ValueParamIO(defaultValueParam(), defaultValueParam())
@@ -148,48 +137,63 @@ module DsValueTypeModule =
     let createValueParam (input: string) : ValueParam  =
         let xPattern = "(?i:x)(?-i)"  // Case insensitive 'x' pattern
         let singleValuePattern = $"{xPattern}\\s*=\\s*(.+)$"
-        let rangePattern = @"(?<open>[\(\[])\s*(?<min>.+?)\s*,\s*(?<max>.+?)\s*(?<close>[\)\]])"
+        let rangePattern1 = @"(?<open>[\(\[])\s*(?<min>.+?)\s*,\s*(?<max>.+?)\s*(?<close>[\)\]])"
+        let rangePattern2 = @"\s*(?<min>\d+(\.\d+)?)\s*(?<open><|<=)\s*[xX]\s*(?<close><|<=|>|>=)\s*(?<max>\d+(\.\d+)?)\s*"
         let comparisonPattern = @"(?<operator>>=|<=|>|<)\s*(?<value>.+)"
         let defaultV = defaultValueParam() 
         let tryCompare (minValue: obj) (maxValue: obj) =
             match minValue, maxValue with
             | (:? IComparable as min), (:? IComparable as max) when min.GetType() = max.GetType() ->
                 if min.CompareTo(max) > 0 then None else Some(min, max)
-            | _ -> None
+            | _ -> None  
 
-        match Regex.Match(input, singleValuePattern) with
-        | m when m.Success && isValidValue(m.Groups.[1].Value.Trim()) ->
-             ValueParam(Some(toValue(m.Groups.[1].Value.Trim())), None, None, false, false, false)
-        | _ ->
-            match Regex.Match(input, rangePattern) with
-            | m when m.Success && isValidValue(m.Groups.["min"].Value.Trim()) && isValidValue(m.Groups.["max"].Value.Trim()) ->
-                let minValue = toValue(m.Groups.["min"].Value.Trim())
-                let maxValue = toValue(m.Groups.["max"].Value.Trim())
-                match tryCompare minValue maxValue with
-                | Some(min, max) ->
-                    let inclusiveMin = m.Groups.["open"].Value = "["
-                    let inclusiveMax = m.Groups.["close"].Value = "]"
-                    ValueParam(None, Some(min), Some(max), false, inclusiveMin, inclusiveMax)
-                | None -> defaultV
+            //임시 추가  ppt  12 < x <= 234 지원
+        match Regex.Match(input, rangePattern2) with
+        | m when m.Success && isValidValue(m.Groups.["min"].Value.Trim()) && isValidValue(m.Groups.["max"].Value.Trim()) ->
+            let minValue = toValue(m.Groups.["min"].Value.Trim())
+            let maxValue = toValue(m.Groups.["max"].Value.Trim())
+            match tryCompare minValue maxValue with
+            | Some(min, max) ->
+                let inclusiveMin = m.Groups.["open"].Value = "<="
+                let inclusiveMax = m.Groups.["close"].Value = "<="
+                ValueParam(None, Some(min), Some(max), false, inclusiveMin, inclusiveMax)
+            | None -> failWithLog $"Invalid range values: {minValue}, {maxValue}"
+
+        |_ ->
+            match Regex.Match(input, singleValuePattern) with
+            | m when m.Success && isValidValue(m.Groups.[1].Value.Trim()) ->
+                 ValueParam(Some(toValue(m.Groups.[1].Value.Trim())), None, None, false, false, false)
             | _ ->
-                match Regex.Match(input, comparisonPattern) with
-                | m when m.Success ->
-                    let operatorStr = m.Groups.["operator"].Value.Trim()
-                    let valueStr = m.Groups.["value"].Value.Trim()
-                    match operatorStr with
-                    | ">=" -> ValueParam(None, Some(toValue valueStr), None, false, true, false)
-                    | ">"  -> ValueParam(None, Some(toValue valueStr), None, false, false, false)
-                    | "<=" -> ValueParam(None, None, Some(toValue valueStr), false, false, true)
-                    | "<"  -> ValueParam(None, None, Some(toValue valueStr), false, false, false)
-                    | _ -> defaultV
+                match Regex.Match(input, rangePattern1) with
+                | m when m.Success && isValidValue(m.Groups.["min"].Value.Trim()) && isValidValue(m.Groups.["max"].Value.Trim()) ->
+                    let minValue = toValue(m.Groups.["min"].Value.Trim())
+                    let maxValue = toValue(m.Groups.["max"].Value.Trim())
+                    match tryCompare minValue maxValue with
+                    | Some(min, max) ->
+                        let inclusiveMin = m.Groups.["open"].Value = "["
+                        let inclusiveMax = m.Groups.["close"].Value = "]"
+                        ValueParam(None, Some(min), Some(max), false, inclusiveMin, inclusiveMax)
+                    | None -> failWithLog $"Invalid range values: {minValue}, {maxValue}"
+     
                 | _ ->
-                    if getTextValueNType(input).IsSome then 
-                        ValueParam(Some(toValue input), None, None, false, false, false)
-                    else 
-                        defaultV
+                    match Regex.Match(input, comparisonPattern) with
+                    | m when m.Success ->
+                        let operatorStr = m.Groups.["operator"].Value.Trim()
+                        let valueStr = m.Groups.["value"].Value.Trim()
+                        match operatorStr with
+                        | ">=" -> ValueParam(None, Some(toValue valueStr), None, false, true, false)
+                        | ">"  -> ValueParam(None, Some(toValue valueStr), None, false, false, false)
+                        | "<=" -> ValueParam(None, None, Some(toValue valueStr), false, false, true)
+                        | "<"  -> ValueParam(None, None, Some(toValue valueStr), false, false, false)
+                        | _ -> defaultV
+                    | _ ->
+                        if getTextValueNType(input).IsSome then 
+                            ValueParam(Some(toValue input), None, None, false, false, false)
+                        else 
+                            failWithLog $"Invalid value: {input}"
     
     
-    let getAddressValueParam (txt: string) =
+    let getHwSysAddressValueParam (txt: string) =
         let parts = txt.Split(':') |> Seq.toList
         let addr = parts.Head
         if parts.Tail.IsEmpty then

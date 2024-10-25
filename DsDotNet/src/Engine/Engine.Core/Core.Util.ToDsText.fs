@@ -130,12 +130,15 @@ module internal ToDsTextModule =
                 yield $"{tab}[variables] = {lb}{rb}"
         ] |> combineLines
 
-    let getHwSystemDefText (hw:HwSystemDef) (addresses:Addresses)=
-        if hw.IsDefaultValueParamIO then
-            $"{hw.Name.QuoteOnDemand()}({addresses.In}, {addresses.Out})"
-        else 
-            $"{hw.Name.QuoteOnDemand()}({hw.ValueParamIO.ToDsText(addresses)})"
+    let getHwSystemDefText (hw:HwSystemDef) =
+        let inAddr = addressPrint hw.InAddress
+        let outAddr = addressPrint hw.OutAddress
 
+        let inAddrParam = if hw.ValueParamIO.In.IsDefaultValue then inAddr else $"{inAddr}:{hw.ValueParamIO.In.ToText()}"
+        let outAddrParam = if hw.ValueParamIO.Out.IsDefaultValue then outAddr else $"{outAddr}:{hw.ValueParamIO.Out.ToText()}"
+
+        $"{hw.Name.QuoteOnDemand()}({inAddrParam}, {outAddrParam})"
+     
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
         let tab = getTab indent
@@ -150,12 +153,10 @@ module internal ToDsTextModule =
 
             if system.Jobs.Any() then
                 let printDev (d:TaskDev)  skipApiPrint=
-                    let apiName = if skipApiPrint then "" else d.FullName
-                    let para = d.TaskDevParamIO
-                    if para.IsDefaultParam then
-                        $"{apiName}({addressPrint d.InAddress}, {addressPrint d.OutAddress})"
-                    else
-                        $"{apiName}({para.ToDsText()})"
+                    let apiName = if skipApiPrint then "" else d.FullNameToDsText
+                    let paraIn  = if d.TaskDevParamIO.InParam.IsDefault then addressPrint d.InAddress else d.TaskDevParamIO.InParam.ToText()
+                    let paraOut = if d.TaskDevParamIO.OutParam.IsDefault then addressPrint d.OutAddress else d.TaskDevParamIO.OutParam.ToText()
+                    $"{apiName}({paraIn}, {paraOut})"
 
                 yield $"{tab}[jobs] = {lb}"
                 for j in system.Jobs do
@@ -165,10 +166,7 @@ module internal ToDsTextModule =
 
                     let jobItemText = jobItems.JoinWith("; ") + ";"
                     if j.JobParam.ToText() = "" then
-                        if j.TaskDefs.length() = 1 && j.TaskDefs.Head().DeviceName = j.NameComponents.Take(2).Combine(TextDeviceSplit) then
-                            yield $"{tab2}{j.QualifiedName} = {printDev (j.TaskDefs.Head())  true};"
-                        else
-                            yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"
+                        yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"
                     else
                         yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"
 
@@ -246,21 +244,19 @@ module internal ToDsTextModule =
                 let getHwInfo(hw:HwSystemDef) =
                     let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).CombineQuoteOnDemand())
                     let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
-                    let inAddr =  addressPrint  hw.InAddress
-                    let outAddr = addressPrint  hw.OutAddress
-                    itemText, inAddr, outAddr
+                    itemText
 
                 [
                     match hws.length() with
                     | 0-> ()
                     | 1->
-                        let itemText, inAddr, outAddr = getHwInfo (hws.Head())
-                        yield $"{tab2}[{category}] = {lb} {getHwSystemDefText (hws.Head()) (Addresses(inAddr, outAddr))} = {lb} {itemText} {rb} {rb}"
+                        let itemText = getHwInfo (hws.Head())
+                        yield $"{tab2}[{category}] = {lb} {getHwSystemDefText (hws.Head())} = {lb} {itemText} {rb} {rb}"
                     | _->
                         yield $"{tab2}[{category}] = {lb}"
                         for hw in hws do
-                            let itemText, inAddr, outAddr = getHwInfo hw
-                            yield $"{tab3}{getHwSystemDefText hw (Addresses(inAddr, outAddr))} = {lb} {itemText} {rb}"
+                            let itemText = getHwInfo hw
+                            yield $"{tab3}{getHwSystemDefText hw} = {lb} {itemText} {rb}"
 
                         yield $"{tab2}{rb}"
                 ] |> combineLines
@@ -308,7 +304,7 @@ module internal ToDsTextModule =
             (* prop
                     safety
                     layouts *)
-            let safetyHolders =
+            let safetyAutoPreHolders =
                 [   for f in system.Flows do
                         yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
 
@@ -316,43 +312,26 @@ module internal ToDsTextModule =
                             yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
                 ] |> List.distinct
 
-            let getSafetyAutoPreName (call:Call) =
-                    match call.Parent with
-                    | DuParentReal r->
-                            $"{r.Flow.Name.QuoteOnDemand()}.{r.Name.QuoteOnDemand()}.{call.NameForGraph}"
 
-                    | DuParentFlow _ -> failWithLog $"ERROR getSafetyAutoPreName {call.QualifiedName}"
-
-            let withSafeties = safetyHolders.Where(fun h -> h.SafetyConditions.Any())
-
-
-
+            let withSafeties = safetyAutoPreHolders.Where(fun h -> h.SafetyConditions.Any())
             let safeties =
                 [
                     if withSafeties.Any() then
                         yield $"{tab2}[safety] = {lb}"
                         for safetyHolder in withSafeties do
-                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetCall().QualifiedName).JoinWith("; ") + ";"
-                            yield $"{tab3}{safetyHolder.GetCall()|> getSafetyAutoPreName } = {lb} {conds} {rb}"
+                            let conds = safetyHolder.SafetyConditions.Select(fun v->v.GetCall().NameForProperty).JoinWith("; ") + ";"
+                            yield $"{tab3}{safetyHolder.GetCall().NameForProperty } = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
-            let autoPreHolders =
-                [   for f in system.Flows do
-                        yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
-
-                        for r in f.Graph.Vertices.OfType<Real>() do
-                            yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
-                ] |> List.distinct
-
-            let withAutoPres = autoPreHolders.Where(fun h -> h.AutoPreConditions.Any())
+            let withAutoPres = safetyAutoPreHolders.Where(fun h -> h.AutoPreConditions.Any())
             let autoPres =
                 [
                     if withAutoPres.Any() then
                         yield $"{tab2}[autopre] = {lb}"
                         for autoPreHolder in withAutoPres do
-                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetCall().QualifiedName).JoinWith("; ") + ";"
-                            yield $"{tab3}{autoPreHolder.GetCall()|>getSafetyAutoPreName} = {lb} {conds} {rb}"
+                            let conds = autoPreHolder.AutoPreConditions.Select(fun v->v.GetCall().NameForProperty).JoinWith("; ") + ";"
+                            yield $"{tab3}{autoPreHolder.GetCall().NameForProperty} = {lb} {conds} {rb}"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 
@@ -453,7 +432,7 @@ module internal ToDsTextModule =
                             let max = call.CallTime.TimeOut     |> map (fun v -> $"{TextMAX}({v}ms)") |? ""
                             let chk = call.CallTime.DelayCheck  |> map (fun v -> $"{TextCHK}({v}ms)") |? ""
                             let paras = [max;chk] |> filter (fun s -> not (String.IsNullOrWhiteSpace(s)))
-                            yield $"""{tab3}{call.QualifiedName} = {lb}{String.Join(", ", paras)}{rb};"""
+                            yield $"""{tab3}{call.NameForProperty} = {lb}{String.Join(", ", paras)}{rb};"""
                         yield $"{tab2}{rb}"
                 ] |> combineLines
 

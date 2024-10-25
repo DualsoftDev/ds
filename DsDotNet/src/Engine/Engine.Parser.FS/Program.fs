@@ -758,147 +758,59 @@ module Program =
     let CpuTestText =
         """
 [sys] HelloDS = {
-    [flow] "1" = {
-        "2" => "1";
-        "2" = {
-            "1".ADV > "1".RET > "2".ADV > "2".RET;
-        }
-        "1" = {
-            "1".ADV > "1_RET_1" > "1".RET > "2".ADV > "2".RET;
-        }
+    [flow] STN1 = {
+        Work2 => Work1 => Work2;
+        Work1_1 > Work3;
         Work1 = {
-            "33".ADV; 
+            Device1.ADV > Device1.RET > Device1_ADV_1 > Device1_RET_1;
         }
-        "77_Work1", "2_1"; 
+        STN2_Work1; 
         [aliases] = {
-            "77".Work1 = { "77_Work1"; "77_Work1"; }
-            "2" = { "2_1"; "2_1"; }
-            "1"."1".RET = { "1_RET_1"; "1_RET_1"; }
-        }
-    }
-    [flow] "77" = {
-        Work2 > "1_Work1" > Work1_1;
-        "1"."33"."ADV(INTrue)" > Work1 > "1_Work1_1";
-        "3"."ADV(INTrue)" > Work1;
-        Work2 = {
-            "3".ADV; 
-        }
-        Work1 = {
-            "1".ADV > "2".ADV > "1_ADV_1";
-        }
-        [aliases] = {
-            "1".Work1 = { "1_Work1"; "1_Work1_1"; "1_Work1_1"; "1_Work1"; }
+            STN2.Work1 = { STN2_Work1; }
+            Work1.Device1.ADV = { Device1_ADV_1; }
+            Work1.Device1.RET = { Device1_RET_1; }
             Work1 = { Work1_1; }
-            Work1."1".ADV = { "1_ADV_1"; "1_ADV_1"; }
         }
     }
     [flow] STN2 = {
-        Work1 = {
-            Device11111.ADV > Device11111.RET > Device11111_ADV_1 > Device11111_RET_1;
-        }
-        [aliases] = {
-            Work1.Device11111.ADV = { Device11111_ADV_1; }
-            Work1.Device11111.RET = { Device11111_RET_1; }
-        }
-    }
-    [flow] STN3 = {
-        STN2.Device11111."ADV(INTrue)" > Work1;
-    }
-    [flow] STN11 = {
-        외부시작."ADV(INTrue)" > Work1_1;
-        Work2 => Work1 => Work2;
-        Work1 = {
-            Device1.ADV > Device1_ADV_1;
-        }
-        [aliases] = {
-            Work1 = { Work1_1; }
-            Work1.Device1.ADV = { Device1_ADV_1; }
-        }
+        Work1; 
     }
     [jobs] = {
-        STN11.외부시작."ADV(INTrue)" = { STN11_외부시작.ADV(IB1.4:True, -); }
-        STN2.Device11111."ADV(INTrue)"[N3(2, 2)] = { STN2_Device11111_01.ADV(IB1.5:True, OB1.5); STN2_Device11111_02.ADV(IB1.7:True, OB1.7); STN2_Device11111_03.ADV(-:True, -); }
-        "1"."33"."ADV(INTrue)"[N4(4, 4)] = { "1_33_01".ADV(IB0.4:True, OB0.4); "1_33_02".ADV(IB0.5:True, OB0.5); "1_33_03".ADV(IB0.6:True, OB0.6); "1_33_04".ADV(IB0.7:True, OB0.7); }
-        "1"."33".ADV[N4(4, 4)] = { "1_33_01".ADV(IB0.4, OB0.4); "1_33_02".ADV(IB0.5, OB0.5); "1_33_03".ADV(IB0.6, OB0.6); "1_33_04".ADV(IB0.7, OB0.7); }
-        "77"."2".ADV = { "77_2".ADV(IB1.1, OB1.1); }
-        "77"."1".ADV = { "77_1".ADV(IB1.0, OB1.0); }
-        STN2.Device11111.ADV[N3(2, 2)] = { STN2_Device11111_01.ADV(IB1.5, OB1.5); STN2_Device11111_02.ADV(IB1.7, OB1.7); STN2_Device11111_03.ADV(-, -); }
-        "1"."2".ADV = { "1_2".ADV(IB0.2, OB0.2); }
-        "1"."1".ADV = { "1_1".ADV(IB0.0, OB0.0); }
-        "77"."3"."ADV(INTrue)" = { "77_3".ADV(IB1.2:True, OB1.2); }
-        STN11.Device1.ADV = { STN11_Device1.ADV(IB1.3, OB1.3); }
-        "1"."2".RET = { "1_2".RET(IB0.3, OB0.3); }
-        "1"."1".RET = { "1_1".RET(IB0.1, OB0.1); }
-        "77"."3".ADV = { "77_3".ADV(IB1.2, OB1.2); }
-        STN2.Device11111.RET[N3(3, 1)] = { STN2_Device11111_01.RET(IB1.6, OB1.6); STN2_Device11111_02.RET(IB2.0, -); STN2_Device11111_03.RET(IB2.1, -); }
-    }
-    [interfaces] = {
-        Api1 = { "77".Work1 ~ "77".Work2 }
-        Api2 = { "1".Work1 ~ "1".Work1 }
+        STN1.Device1.ADV = { STN1__Device1.ADV(%IX0.0.0, %QX0.1.0); }
+        STN1.Device1.RET = { STN1__Device1.RET(%IX0.0.1, %QX0.1.1); }
     }
     [buttons] = {
-        [a] = { AutoSelect(M1001, -) = { "1"; "77"; STN2; STN3; STN11; } }
-        [m] = { ManualSelect(M1002, -) = { "1"; "77"; STN2; STN3; STN11; } }
-        [d] = { DrivePushBtn(M1003, -) = { "1"; "77"; STN2; STN3; STN11; } }
-        [e] = { EmergencyBtn(M1004, -) = { "1"; "77"; STN2; STN3; STN11; } }
-        [p] = { PausePushBtn(M1005, -) = { "1"; "77"; STN2; STN3; STN11; } }
-        [c] = { ClearPushBtn(M1006, -) = { "1"; "77"; STN2; STN3; STN11; } }
+        [a] = { AutoSelect(%MX1000, -) = {  } }
+        [m] = { ManualSelect(%MX1001, -) = {  } }
+        [d] = { DrivePushBtn(%MX1002, -) = {  } }
+        [e] = { EmergencyBtn(%MX1003, -) = {  } }
+        [p] = { PausePushBtn(%MX1004, -) = {  } }
+        [c] = { ClearPushBtn(%MX1005, -) = {  } }
     }
     [lamps] = {
-        [a] = { AutoModeLamp(-, M1007) = {  } }
-        [m] = { ManualModeLamp(-, M1008) = {  } }
-        [d] = { DriveLamp(-, M1009) = {  } }
-        [e] = { ErrorLamp(-, M1010) = {  } }
-        [r] = { ReadyStateLamp(-, M1011) = {  } }
-        [i] = { IdleModeLamp(-, M1012) = {  } }
-        [o] = { OriginStateLamp(-, M1013) = {  } }
+        [a] = { AutoModeLamp(-, %MX1006) = {  } }
+        [m] = { ManualModeLamp(-, %MX1007) = {  } }
+        [d] = { DriveLamp(-, %MX1008) = {  } }
+        [e] = { ErrorLamp(-, %MX1009) = {  } }
+        [r] = { ReadyStateLamp(-, %MX1010) = {  } }
+        [i] = { IdleModeLamp(-, %MX1011) = {  } }
+        [o] = { OriginStateLamp(-, %MX1012) = {  } }
     }
     [prop] = {
-        [safety] = {
-            "77".Work1."1".ADV = { "77"."3".ADV; }
-        }
-        [autopre] = {
-            STN2.Work1.Device11111.ADV = { STN2.Device11111.RET; }
-        }
         [layouts] = {
-            STN11_외부시작 = (1103, 95, 220, 80);
-            STN2_Device11111_01 = (1497, 134, 220, 80);
-            STN2_Device11111_02 = (1497, 134, 220, 80);
-            STN2_Device11111_03 = (1497, 134, 220, 80);
-            "1_33_01" = (64, 233, 220, 80);
-            "1_33_02" = (64, 233, 220, 80);
-            "1_33_03" = (64, 233, 220, 80);
-            "1_33_04" = (64, 233, 220, 80);
-            "77_2" = (772, 273, 220, 80);
-            "77_1" = (991, 346, 220, 80);
-            "1_2" = (1436, 498, 94, 48);
-            "1_1" = (1221, 539, 94, 48);
-            "77_3" = (69, 449, 220, 80);
-            STN11_Device1 = (843, 460, 220, 80);
+            STN1__Device1 = (1258, 799, 240, 80);
         }
-        [disable] = {
-            STN2.Work1."Device11111.RET";
+        [errors] = {
+            STN1.Work1.Device1.ADV = {MAX(1000ms)};
         }
     }
-    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] 
-        STN11_외부시작,
-        STN2_Device11111_01,
-        STN2_Device11111_02,
-        STN2_Device11111_03,
-        "1_33_01",
-        "1_33_02",
-        "1_33_03",
-        "1_33_04",
-        "77_2",
-        "77_1",
-        "1_2",
-        "1_1",
-        "77_3",
-        STN11_Device1; 
+    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] STN1__Device1; 
+    [versions] = {
+        DS-Langugage-Version = 1.0.0.1;
+        DS-Engine-Version = 0.9.10.16;
+    }
 }
-//DS Language Version = [1.0.0.1]
 //DS Library Date = [Library Release Date 24.3.26]
-//DS Engine Version = [0.9.9.1]
 """
 
     let CodeElementsText =

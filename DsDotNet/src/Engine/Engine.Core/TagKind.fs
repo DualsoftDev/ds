@@ -151,7 +151,6 @@ module TagKindList =
     | goingRealy                = 11025
     | realData                  = 11026
     | realLink                  = 11027
-    | callMemo                  = 11028
     | realToken                 = 11029
     | sourceToken               = 11030
     | mergeToken                = 11031
@@ -170,11 +169,6 @@ module TagKindList =
     | forceOnPulse              = 11041
 
 
-    | callCommandPulse          = 11042
-
-    | callCommandEnd            = 11043
-    | callOperatorValue         = 11044
-
     | scriptStart               = 11045
     | scriptEnd                 = 11046
     | scriptRelay               = 11047
@@ -186,6 +180,13 @@ module TagKindList =
     | timeStart                 = 11051
     | timeEnd                   = 11052
     | timeRelay                 = 11053
+
+    | callIn                    = 11055
+    | callOut                   = 11056
+    
+    | callCommandPulse          = 11057
+    | callCommandEnd            = 11058
+    | callOperatorValue         = 11059
 
     | txErrOnTimeUnder          = 11060
     | txErrOnTimeOver           = 11061
@@ -201,8 +202,6 @@ module TagKindList =
     | planStart                 = 11090
     /// Plan end: PlanStart on 이후에 특별히 내부적 문제 없으면 on 된다.
     | planEnd                   = 11091
-    /// Plan output: 실출력 on 시키기 위한 용도. Start && End
-    | planOutput                = 11092
 
     /// 12000 ~ 12999
     [<Flags>]
@@ -238,10 +237,4 @@ module TagKindList =
     | PlcSysVariable               = 16002
     | PlcUserVariable              = 16003
 
-
-    /// 17000 ~ 17999
-    [<Flags>]
-    type JobTag    =
-    | inDetected                   = 17000
-    | outDetected                  = 17001
 

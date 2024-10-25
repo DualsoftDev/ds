@@ -19,7 +19,7 @@ type VertexTagManager with
         
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
-        let running = (v.MM.Expr <||> call.End) <&&> !@iop
+        let running = (v.PS.Expr <||> call.End) <&&> !@iop
 
         [|
             yield running --@ (v.TimeMax, call.TimeOutMaxMSec, fn)
@@ -31,23 +31,6 @@ type VertexTagManager with
         |]
 
     //member v.E2_CallErrTimeUnder() = //  시간 미달 DS Operator 정의로 해결
-        //let v= v :?> CoinVertexTagManager
-        //let call= v.Vertex.GetPure() :?> Call
-        //let iop = call.V.Flow.iop.Expr
-        //let rst = v.Flow.ClearExpr
-        //let callMutualOns = call.MutualResetCoins.Choose(tryGetPureCall)
-        //                        .Select(fun c->getJM(c.TargetJob).InDetected).ToOrElseOff()
-        
-        //let running = (v.MM.Expr <||> call.End) <&&> !@iop
-        //[|
-            (*TimeMinOnMSec*)
-            //if call.TimeMinOnMSec <> 0u 
-            //then
-            //    yield running --@ (v.TimeMinOn, call.TimeMinOnMSec, getFuncName())
-            //    yield (!@v.TimeMinOn.DN.Expr <&&> v.G.Expr <&&> v.ET.Expr, rst) ==| (v.ErrOnTimeUnder ,getFuncName())
-        //|]
-
-
 
     member v.E2_CallErrRXMonitor() =
         let call  = v.Vertex.GetPure() :?> Call
@@ -80,13 +63,35 @@ type VertexTagManager with
                 yield (checkCondi <&&> rxFinishExpr                      <&&> errOpenRising.Expr, rst)  ==| (v.ErrOpen, fn)
         |]
         
+    //인터락 동시 에러 추가 전진시 다른센서해제안됨에러
+    member v.E3_CallErrRXInterlockMonitor() =
+        let v= v :?> CoinVertexTagManager
+        let fn = getFuncName()
+        let call= v.Vertex.GetPure() :?> Call
+        let callMutualOns = call.MutualResetCoins
+                                .Choose(tryGetPureCall)
+                                .Choose(fun c->c.EndAction)
+                                .Distinct()
+                                .ToOrElseOff()
+        
+        let iop = call.V.Flow.iop.Expr
+        let rst = v.Flow.ClearExpr
 
-    member v.E3_CallErrTotalMonitor() =
+        match call.EndAction with
+        | Some input ->
+            let errRXInterlock = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock")
+            [|
+                yield! (input <&&> !@iop, v.System) --^ (errRXInterlock, fn)
+                yield (errRXInterlock.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
+            |]
+        | _ -> [||]
+
+    member v.E4_CallErrTotalMonitor() =
         let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
         (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
 
-    member v.E4_RealErrTotalMonitor() =
+    member v.E5_RealErrTotalMonitor() =
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
          

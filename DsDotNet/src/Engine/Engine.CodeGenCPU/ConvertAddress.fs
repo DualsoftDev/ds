@@ -15,7 +15,7 @@ module ConvertAddressModule =
                     sys.GetTaskDevsSkipEmptyAddress()
                         .Select(fst)
                         .Distinct()
-                        .Collect(fun d -> [($"{d.ApiPureName}_IN", d.InTag); ($"{d.ApiPureName}_OUT", d.OutTag)])
+                        .Collect(fun d -> [($"{d.FullName}_IN", d.InTag); ($"{d.FullName}_OUT", d.OutTag)])
                        
                 yield!
                     sys.HwSystemDefs

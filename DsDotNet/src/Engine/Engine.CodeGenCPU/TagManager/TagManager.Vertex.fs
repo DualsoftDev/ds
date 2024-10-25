@@ -133,6 +133,8 @@ module TagManagerModule =
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
             | VertexTag.rxErrInterlock       -> callM().ErrInterlock            :> IStorage
+            | VertexTag.callIn               -> callM().CallIn            :> IStorage
+            | VertexTag.callOut              -> callM().CallOut            :> IStorage
             
             | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
 
@@ -268,10 +270,8 @@ module TagManagerModule =
         member val TimeMax     = timer  s ($"{v.QualifiedName}_TimeMax"|>validStorageName) sys (sysManager.TargetType)
         member val TimeCheck  =  timer  s ($"{v.QualifiedName}_TimeCheck"|>validStorageName) sys (sysManager.TargetType)
 
-        member val MM   = createTag  false VertexTag.callMemo
-        member val PS   = createTag  false VertexTag.planStart
-        member val PE   = createTag  false VertexTag.planEnd
-        member val PO   = createTag  false VertexTag.planOutput
+        member val PS   = createTag  true VertexTag.planStart
+        member val PE   = createTag  true VertexTag.planEnd
 
         member val ErrOnTimeUnder     = createTag true VertexTag.txErrOnTimeUnder
         member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver
@@ -282,14 +282,15 @@ module TagManagerModule =
         member val ErrOpen            = createTag true VertexTag.rxErrOpen
         member val ErrInterlock       = createTag true VertexTag.rxErrInterlock
         
+        member val CallIn             =  createTag  true VertexTag.callIn
+        member val CallOut            =  createTag  true VertexTag.callOut
+
         ///callCommandEnd
-        member val CallCommandEnd     =  createTag  false VertexTag.callCommandEnd
+        member val CallCommandEnd     =  createTag  true VertexTag.callCommandEnd
         ///callCommandPulse
-        member val CallCommandPulse   =  createTag  false VertexTag.callCommandPulse
-
+        member val CallCommandPulse   =  createTag  true VertexTag.callCommandPulse
         ///Call Operator 연산결과 값 (T/F)
-        member val CallOperatorValue  =  createTag false VertexTag.callOperatorValue
-
+        member val CallOperatorValue  =  createTag  true VertexTag.callOperatorValue
 
 
         member x.ErrorList =

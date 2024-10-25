@@ -108,8 +108,7 @@ module ParserUtilityModule =
                     || tree :? Identifier3Context
                     || tree :? Identifier4Context
                     || tree :? Identifier5Context
-                    || tree :? IdentifierCommandNameContext
-                    || tree :? IdentifierOperatorNameContext
+                    || tree :? IdentifierOpCmdContext
 
             x.TryFindFirstChild(pred, true)
 

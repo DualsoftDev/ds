@@ -593,7 +593,7 @@ module ExportIOTable =
 
         let rowItems (dev: TaskDev, addr:string) =
             [
-              dev.ApiPureName
+              dev.FullName
               dev.InDataType.ToPLCText()
               addr
                ]

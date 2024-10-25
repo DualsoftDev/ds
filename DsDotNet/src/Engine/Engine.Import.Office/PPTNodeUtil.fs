@@ -149,9 +149,10 @@ module PptNodeUtilModule =
                     | Some item -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), item
                     | None -> GetBracketsRemoveName("[" + f.TrimEnd('\n')), "")
 
-
+                    
+ 
         let getPureNValueParam (fullName: string, isInput:bool) =
-            let pureName = GetLastParenthesesReplaceName(fullName, "") |> trimSpaceNewLine
+            let pureName = GetLastParenthesesRemoveName(fullName) |> trimSpaceNewLine
             let funcName = GetLastParenthesesContents(fullName) |> trimSpaceNewLine
 
             let devParamIO =

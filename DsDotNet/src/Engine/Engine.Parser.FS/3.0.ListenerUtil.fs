@@ -70,7 +70,7 @@ module ListnerCommonFunctionGeneratorUtil =
 
                         let values =
                             valueHeader
-                                .Descendants<Identifier3Context>()
+                                .Descendants<Identifier45Context>()
                                 .Select(collectNameComponents)
                                 .ToArray()
 
@@ -173,15 +173,7 @@ module ListnerCommonFunctionGeneratorUtil =
                         yield fqdn, script.GetText()
                 }
 
-    let commonOpFunctionExtractor (funcCallCtxs: FuncCallContext array) (callName:string) (system:DsSystem) =
-        if funcCallCtxs.Length > 1 then
-            failwithlog $"not support job multi function {callName}"
 
-        if funcCallCtxs.any() then
-            let funcName = funcCallCtxs.Head().GetText().TrimStart('$')
-            Some (system.Functions.Cast<OperatorFunction>().First(fun f->f.Name = funcName))
-        else
-            None
 
     let getCode (executeCode:String) =
         assert( (executeCode.StartsWith("${") || executeCode.StartsWith("#{")) && executeCode.EndsWith("}"))
@@ -212,7 +204,7 @@ module ListnerCommonFunctionGeneratorUtil =
     let commonValueParamExtractor (devCtx: TaskDevParamInOutContext) : (string*ValueParam)*(string*ValueParam) =
         match devCtx.TryFindFirstChild<TaskDevParamInOutBodyContext>() with
         | Some ctx ->
-            match tryGetValueParamInOut $"{ctx.GetText()}" with
+            match tryGetHwSysValueParamInOut $"{ctx.GetText()}" with
             | Some v -> v
             |_ -> errorLoadCore ctx
         | _-> errorLoadCore devCtx

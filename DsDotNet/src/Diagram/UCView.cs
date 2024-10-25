@@ -14,7 +14,6 @@ using System.Data;
 using System.Linq;
 using System.Runtime.Versioning;
 using System.Windows.Forms;
-using static Engine.CodeGenCPU.JobManagerModule;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.CodeGenCPU.TaskDevManagerModule;
 using static Engine.Core.CoreModule;
@@ -602,8 +601,8 @@ public partial class UcView : UserControl
                 var call = vv.Vertex.GetPureCall();
                 if (call.IsJob)
                 {
-                    vv.LampInput = (call.TargetJob.TagManager as JobManager).InDetected.Value;
-                    vv.LampOutput = (call.TargetJob.TagManager as JobManager).OutDetected.Value;
+                    vv.LampInput = (call.TagManager as CoinVertexTagManager).CallIn.Value;
+                    vv.LampOutput = (call.TagManager as CoinVertexTagManager).CallOut.Value;
                     vv.LampPlanEnd = EvaluateTaskDevs(s => Convert.ToBoolean((call.TagManager as CoinVertexTagManager).PE.Value));
 
                     bool EvaluateTaskDevs(Func<TaskDevManager, bool> predicate)

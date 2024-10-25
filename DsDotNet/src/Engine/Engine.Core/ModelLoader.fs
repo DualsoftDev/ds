@@ -11,6 +11,7 @@ module ModelLoaderModule =
     type ModelConfig = {
         DsFilePath: string
         HwIP: string
+        RuntimePackage: RuntimePackage
         HwDriver: string //LS-XGI, LS-XGK, Paix hw drive 이름
         RuntimeMotionMode: RuntimeMotionMode
         TimeSimutionMode : TimeSimutionMode
@@ -27,12 +28,13 @@ module ModelLoaderModule =
         { 
             DsFilePath = ""
             HwIP = "127.0.0.1"
+            RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
             HwDriver = "LS_XGK_IO"
             RuntimeMotionMode = MotionAsync
             TimeSimutionMode = TimeX1
             TimeoutCall = 15000u
         }
-    let createModelConfig(path:string, hwIP:string, 
+    let createModelConfig(path:string, hwIP:string, runtimePackage:RuntimePackage,
             hwDriver:string, 
             runtimeMotionMode:RuntimeMotionMode, 
             timeSimutionMode:TimeSimutionMode, 
@@ -40,6 +42,7 @@ module ModelLoaderModule =
         { 
             DsFilePath = path
             HwIP = hwIP
+            RuntimePackage = runtimePackage
             HwDriver = hwDriver
             RuntimeMotionMode = runtimeMotionMode
             TimeSimutionMode = timeSimutionMode

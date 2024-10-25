@@ -28,8 +28,9 @@ type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
     member x.JsonPath = jsonPath
     member x.Storages = storages
     member x.PlatformTarget = target
-    member x.HwIP = model.Config.HwIP;
-    member x.HwDriver = hwDriver;
+    member x.HwIP = model.Config.HwIP
+    member x.HwDriver = hwDriver
+    member x.ModelConfig = model.Config
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

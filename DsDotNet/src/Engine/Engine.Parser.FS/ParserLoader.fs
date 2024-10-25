@@ -63,6 +63,7 @@ module ParserLoader =
         RuntimeDS.TimeoutCall       <- cfg.TimeoutCall
         RuntimeDS.RuntimeMotionMode <- cfg.RuntimeMotionMode
         RuntimeDS.TimeSimutionMode  <- cfg.TimeSimutionMode
+        RuntimeDS.Package           <- cfg.RuntimePackage
 
         let dir = PathManager.getDirectoryName (configPath.ToFile())
         let system, loadings = loadingDS dir  cfg.DsFilePath None false target

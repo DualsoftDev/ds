@@ -164,6 +164,13 @@ module ConvertCpuDsSystem =
                 |]
                 |> Seq.iter(fun (k, v) ->real.ExternalTags.Add(k, v)) 
                
+        member x.ClearExteralTags()  =
+            let calls = x.GetAlarmCalls().Distinct()
+            for call in calls do
+                call.ExternalTags.Clear()  
+                
+            for real in x.GetRealVertices().Distinct()  do
+                real.ExternalTags.Clear()  
 
         member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do
@@ -233,6 +240,7 @@ module ConvertCpuDsSystem =
 
             let startAlarm = DsAddressModule.getCurrentMemoryIndex()
             //Step2)Alarm base + (2 ~ N) bit
+
 
             x.GenerationCallAlarmMemory()
             x.GenerationRealAlarmMemory()

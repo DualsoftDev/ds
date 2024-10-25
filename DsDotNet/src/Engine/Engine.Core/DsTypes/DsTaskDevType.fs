@@ -31,7 +31,7 @@ module DsTaskDevTypeModule =
         member val Address = address with get, set
         member val Symbol  = symbol with get, set
         member x.DataType = dataType
-        member x.IsDefault = dataType = DuBOOL && x.Symbol = "" && x.Address = TextAddrEmpty
+        member x.IsDefault = dataType = DuBOOL && x.Symbol = ""
         
         member x.ToText() =
             [addressPrint x.Address; dataType.ToText(); x.Symbol]
@@ -43,6 +43,10 @@ module DsTaskDevTypeModule =
         member val OutParam = outParam with get, set
         member x.IsDefaultParam = x.InParam.IsDefault && x.OutParam.IsDefault
         member x.ToDsText() =  $"{x.InParam.ToText()}, {x.OutParam.ToText()}"
+
+    let updateTaskDevDatatype(t:TaskDevParamIO, v:ValueParamIO) =  
+            t.InParam <- TaskDevParam(t.InParam.Address, v.In.DataType, t.InParam.Symbol)   
+            t.OutParam <- TaskDevParam(t.OutParam.Address, v.Out.DataType, t.OutParam.Symbol)
 
     let defaultTaskDevParam() = TaskDevParam(DuBOOL)
     let defaultTaskDevParamIO() = TaskDevParamIO(defaultTaskDevParam(), defaultTaskDevParam())
@@ -67,19 +71,19 @@ module DsTaskDevTypeModule =
             | None -> failwithlog $"Invalid data type: {typeStr}"
 
         match parts with
-        | [addr; typeStr; symbol] ->
+        | [addr; typeStr; symbol] -> // Address, DataType, Symbol
             if not (isValidName symbol) then
                 failwithlog $"Invalid symbol name: {symbol}"
         
             let dataType = validateDataType typeStr
             TaskDevParam(addr, dataType, symbol)
 
-        | [addr; typeStr] ->
+        | [addr; typeStr] -> //두개는 무조건 Address, DataType        
             let dataType = validateDataType typeStr
             TaskDevParam(addr, dataType, "")
 
-        | [addr; ] when addr = TextAddrEmpty ->
-            defaultTaskDevParam()
+        | [addr]  -> //하나만 있으면 Address
+            TaskDevParam(addr, DuBOOL, "")
 
         | _ ->
             failwithlog $"Unknown format detected: text '{txt}'"

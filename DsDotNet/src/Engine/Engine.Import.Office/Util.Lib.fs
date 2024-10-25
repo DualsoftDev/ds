@@ -74,7 +74,7 @@ module ImportUtilForLib =
             processTask tasks param devName libFilePath autoGenSys getProperty
 
     let addNewCall (param: CallParams) =
-        let jobName = param.Node.Job.CombineQuoteOnDemand()
+        let jobName = param.Node.Job.CombineDequoteOnDemand()
         let tasks = HashSet<TaskDev>()
 
         handleActionJob tasks param
@@ -88,7 +88,6 @@ module ImportUtilForLib =
                 param.MySys.Jobs.Add(job)
                 job
 
-        let call = Call.Create(jobForCall, param.Parent)
-        call.ValueParamIO <- param.ValueParamIO
+        let call = Call.CreateWithValueParamIO(jobForCall, param.Parent, param.ValueParamIO)
         call.Name <- param.Node.Name
         call

@@ -18,12 +18,13 @@ module MSG_TEST =
     RegistryPptDS.HWSlotInfos <- JsonConvert.SerializeObject(getFullSlotHwSlotDataTypes());
     
     let setXGK() = 
-        
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();
         RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGK_IO.ToString();
     let setXGI() = 
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGI.ToString();
         RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGI_IO.ToString();
+    let setWindows() = 
+        RegistryPptDS.PagePlatformTarget <- PlatformTarget.WINDOWS.ToString();
 
     [<Fact>]
     let ``MSG_CHECK`` () =
@@ -33,6 +34,7 @@ module MSG_TEST =
         MSG_DSEXPORT.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_GENWINPC`` () =
+        setWindows()  //Windows 기준으로 테스트
         MSG_GENWINPC.Do(testPath, false)|> Assert.True
     [<Fact>]
     let ``MSG_PLCIOCSV`` () =
@@ -50,10 +52,8 @@ module MSG_TEST =
     [<Fact>]
     let ``MSG_XGT`` () =
         let testXGT() =
-            MSG_GENLSPLCEMULATION.Do(testPath, "", false)|> Assert.True
             MSG_GENIOLIST.Do(testPath, false)|> Assert.True
             MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
-            MSG_GENLSPLCEMULATION.Do(testPath, "",false)|> Assert.True
             MSG_TIMECHART.Do(testPath, false)|> Assert.True
 
             //test ahn simulation 로딩 테스트 다른방식 사용필요

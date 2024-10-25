@@ -36,16 +36,16 @@ module ModelBuildupTests1 =
             let apiM = apis.First(fun ai -> ai.Name = "RET")
             let callAp =
                 let jobFqdn = [|"F";"A";"p"|]
-                let apiItem = TaskDev((apiP),  dev.Name, system)
-                apiItem.InAddress <-"%I1"
-                apiItem.OutAddress<- "%Q1"
-                Job(jobFqdn, system, [apiItem])
+                let td = TaskDev((apiP),  dev.Name, system)
+                td.InAddress <-"%I1"
+                td.OutAddress<- "%Q1"
+                Job(jobFqdn, system, [td])
             let callAm =
                 let jobFqdn = [|"F";"A";"m"|]
-                let apiItem = TaskDev((apiM),  dev.Name, system)
-                apiItem.InAddress <-"%I2"
-                apiItem.OutAddress<- "%Q2"
-                Job(jobFqdn, system, [apiItem])
+                let td = TaskDev((apiM),  dev.Name, system)
+                td.InAddress <-"%I2"
+                td.OutAddress<- "%Q2"
+                Job(jobFqdn, system, [td])
             system.Jobs.AddRange([callAp; callAm])
             system, flow, real, callAp, callAm
 

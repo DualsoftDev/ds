@@ -76,7 +76,7 @@ module RuntimeGeneratorModule =
             | PCSIM | PLCSIM -> true
             | _ -> false
 
-    let RuntimePackageList = [ PC;PCSIM; PLC; PLCSIM;  ]
+    let RuntimePackageList = [ PC; PCSIM; PLC; PLCSIM;  ]
 
     let ToRuntimePackage s =
         match s with

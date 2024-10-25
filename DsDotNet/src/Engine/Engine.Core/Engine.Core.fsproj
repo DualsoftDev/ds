@@ -19,13 +19,14 @@
     <ItemGroup>
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
         <Compile Include="CommonAppSettings.fs" />
+        <Compile Include="DsTypes\DsTypeUtil.fs" />
         <Compile Include="Interface.fs" />
         <Compile Include="DSText.fs" />
         <Compile Include="DsConstants.fs" />
         <Compile Include="DsTypes\DsType.fs" />
         <Compile Include="DsTypes\DsDataType.fs" />
-        <Compile Include="DsTypes\DsTaskDevType.fs" />
         <Compile Include="DsTypes\DsValueType.fs" />
+        <Compile Include="DsTypes\DsTaskDevType.fs" />
         <Compile Include="DsTypes\DsJobType.fs" />
         <Compile Include="DsTypes\DsCallType.fs" />
         <Compile Include="DsEvent.fs" />

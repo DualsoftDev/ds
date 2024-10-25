@@ -16,12 +16,19 @@ type TaskDevManager with
         let fn = getFuncName()
         let _off = coins.First()._off.Expr
   
-        let rstMemos = coins.SelectMany(fun c-> c.MutualResetCoins.Select(fun c->c.VC.MM)).Distinct()
+        let rstMemos = coins.SelectMany(fun c-> c.MutualResetCoins.Select(fun c->c.VC.PS)).Distinct()
         let flowEmg = coins.Select(fun c-> c.Flow.emg_st).ToOr()    
         let flowPause = coins.Select(fun c-> c.Flow.p_st).ToOr()    
         let emgActions = coins.SelectMany(fun c-> c.Flow.HWEmergencyDigitalActions)
         let pauseActions = coins.SelectMany(fun c-> c.Flow.HWPauseDigitalActions)
-
+        
+        (*StatementTypeAnalog*)
+        let getStatementTypeAnalog(sets, td:TaskDev, call:Call) =
+            [
+                let valExpr = call.ValueParamIO.Out.WriteValue |> any2expr
+                yield (sets, valExpr) --> (td.OutTag, fn)  //test ahn Analog pulse 출력 안함 테스트중
+            ]
+        (*StatementTypeDigital*)
         let getStatementTypeDigital(set, td:TaskDev, callActionType:CallActionType) =
             let getStatement(actionSet:IExpression option, actionRst:IExpression option) =
                 let sets = if actionSet.IsSome then actionSet.Value<||>set else set
@@ -54,18 +61,13 @@ type TaskDevManager with
             | None, None  ->
                 getStatement (None, None)
 
-        let getStatementTypeAnalog(sets, td:TaskDev, call:Call) =
-            [
-                let valExpr = call.ValueParamIO.Out.WriteValue |> any2expr
-                yield (sets, valExpr) --> (td.OutTag, fn)  //test ahn Analog pulse 출력 안함 테스트중
-            ]
-
+    
 
 
         [|
             if d.TaskDev.ExistOutput 
             then
-                let coinPlanOuts = coins.Select(fun s->s.VC.PO).ToOr()
+                let coinPlanOuts = coins.Select(fun s-> s.VC.PS.Expr <&&> s.VC.PE.Expr).ToOr()
                 let sets = if RuntimeDS.Package.IsPackageSIM() then _off else coinPlanOuts
                 let callAction = coins.Head().GetPureCall().CallActionType
                 if d.TaskDev.OutDataType = DuBOOL then
@@ -74,20 +76,4 @@ type TaskDevManager with
                     for coin in coins do
                         yield! getStatementTypeAnalog(sets, d.TaskDev, coin:?>Call)
         |]
-
-
-
-    //member j.J2_InputDetected() =
-    //    let _off = j.System._off.Expr
-    //    let jm = getJM(j)
-    //    match j.ActionInExpr with
-    //    | Some inExprs -> [(inExprs, _off) --| (jm.InDetected, getFuncName())]
-    //    | None -> []
-
-    //member j.J3_OutputDetected() =
-    //    let _off = j.System._off.Expr
-    //    let jm = getJM(j)
-    //    match j.ActionOutExpr with
-    //    | Some outExprs ->[(outExprs, _off) --| (jm.OutDetected, getFuncName())]
-    //    | None -> []
 

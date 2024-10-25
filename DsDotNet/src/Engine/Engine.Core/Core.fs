@@ -374,7 +374,7 @@ module rec CoreModule =
             | CommadFuncType of CommandFunction
             | OperatorFuncType of OperatorFunction
 
-        type Call(jobOrFunc:CallType, parent:ParentWrapper) =
+        type Call(jobOrFunc:CallType, parent:ParentWrapper, valueParamIO:ValueParamIO) =
             inherit Indirect (
                 // indirect 의 인자로 name, parent 를 제공
                 match jobOrFunc with
@@ -400,8 +400,14 @@ module rec CoreModule =
             let isOperator = function
                 | OperatorFuncType _ -> true
                 | _ -> false
-
+            do 
+                match jobOrFunc with
+                | JobType job ->
+                    if not(valueParamIO.IsDefaultParam) then
+                        job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, valueParamIO))
+                | _ -> ()
             interface IVertex
+         
             member x.TargetJob =
                 match jobOrFunc with
                 | JobType job -> job
@@ -427,7 +433,7 @@ module rec CoreModule =
             member val CallActionType = CallActionType.ActionNormal with get, set
             member val ExternalTags = Dictionary<ExternalTag, IStorage>()
             member val Disabled:bool = false with get, set
-            member val ValueParamIO = defaultValueParamIO()   with get, set
+            member val ValueParamIO = valueParamIO
 
             interface ISafetyAutoPreRequisiteHolder with
                 member x.GetCall() = x
@@ -436,8 +442,8 @@ module rec CoreModule =
 
         type Call with
             static member private addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
-            static member Create(target:Job, parent:ParentWrapper) =
-                let call = Call(target|>JobType, parent)
+            static member CreateWithValueParamIO(target:Job, parent:ParentWrapper, valueParamIO:ValueParamIO) =
+                let call = Call(target|>JobType, parent, valueParamIO)
                 let duplicated =
                     parent.GetSystem().Flows
                         .SelectMany(fun f -> f.Graph.Vertices.OfType<Call>())
@@ -448,6 +454,9 @@ module rec CoreModule =
                 Call.addCallVertex parent call
                 call
 
+            static member Create(target:Job, parent:ParentWrapper) =
+                Call.CreateWithValueParamIO(target, parent, defaultValueParamIO())
+
             static member Create(func:DsFunc, parent:ParentWrapper) =
                 let callType =
                     match func with
@@ -455,7 +464,7 @@ module rec CoreModule =
                     | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
                     | _ -> failwithlog "Error"
 
-                let call = Call(callType, parent)
+                let call = Call(callType, parent, defaultValueParamIO())
                 Call.addCallVertex parent call
                 call
 
@@ -587,18 +596,20 @@ module rec CoreModule =
             inherit FqdnObject(apiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
            
 
-            member x.ApiPureName = (x:>FqdnObject).QualifiedName
+            //member x.ApiPureName = (x:>FqdnObject).QualifiedName
             member x.ApiSystemName = apiItem.ApiSystem.Name //needs test animation
 
             member x.DeviceName = deviceName
             member x.FullName = $"{deviceName}.{x.Name}"
+            member x.FullNameToDsText = $"{deviceName.QuoteOnDemand()}.{x.Name.QuoteOnDemand()}"
             member x.ParentSystem = parentSys
             member x.ApiItem  = apiItem
 
             member val TaskDevParamIO = defaultTaskDevParamIO() with get, set   
+            member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
+            member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
 
-            member val InAddress      = TextAddrEmpty with get, set
-            member val OutAddress     = TextAddrEmpty with get, set
+
             member val MaunualAddress = TextAddrEmpty with get, set
 
             //CPU 생성시 할당됨 InTag

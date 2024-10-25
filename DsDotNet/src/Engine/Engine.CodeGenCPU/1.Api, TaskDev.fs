@@ -9,20 +9,7 @@ open Dual.Common.Core.FS
 type TaskDevManager with
 
 
-
-    member d.TD3_PlanOutput(activeSys:DsSystem, coins:Vertex seq) =
-
-        let fn = getFuncName()
-        let off = activeSys._off.Expr
-        [|
-            for coin in coins do
-                let sets  = coin.VC.MM.Expr 
-                            <&&> d.ApiManager.ApiItemSet.Expr 
-                            <&&> d.ApiManager.ApiItemEnd.Expr
-                yield (sets, off) --| (coin.VC.PO, fn)
-        |]
-
-    member d.TD4_SensorLinking(call:Call) =
+    member d.TD1_SensorLinking(call:Call) =
         let fn = getFuncName()
         let off = d.TaskDev.ParentSystem._off.Expr
         let input = d.TaskDev.GetInExpr(call)
@@ -35,7 +22,7 @@ type TaskDevManager with
             yield (sets, off) --| (a.SL1, fn)
         |]
 
-    member d.TD5_SensorLinked(call:Call) =
+    member d.TD2_SensorLinked(call:Call) =
         let fn = getFuncName()
         let off = d.TaskDev.ParentSystem._off.Expr
         let input =  d.TaskDev.GetInExpr(call)
@@ -61,11 +48,10 @@ type ApiItemManager with
         let fn = getFuncName()
         [|
             let api = am.ApiItem
-            let pss = calls.Select(fun s->s.VC.MM).ToOr()
+            let pss = calls.Select(fun s->s.VC.PS).ToOr() <&&> !@api.RxET.Expr
             let tempRising  = getSM(td.ParentSystem).GetTempBoolTag(td.QualifiedName)
-
             yield! (pss, td.ParentSystem) --^ (tempRising, fn)
-            yield  (tempRising.Expr, api.TX.VR.ET.Expr) ==| (am.ApiItemSet, fn)
+            yield  (tempRising.Expr, api.RxET.Expr) ==|  (am.ApiItemSet, fn)
         |]
 
     member am.A2_ApiEnd() =

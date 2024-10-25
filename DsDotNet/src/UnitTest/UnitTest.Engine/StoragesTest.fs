@@ -93,7 +93,7 @@ type StoragesTest() =
         }
     }
     [jobs] = {
-        "0+1"."1"."ADV(INTrue)" = { "0+1_1".ADV(IB0.0:Boolean:True, -); }
+        "0+1"."1"."ADV(INTrue)" = { "0+1_1".ADV(IB0.0;Boolean, -); }
         "0+1".한글.RET = { "0+1_한글".RET(IB0.3, OB0.3); }
         "0+1".한글.ADV = { "0+1_한글".ADV(IB0.2, OB0.2); }
         "0-1"."2".RET = { "0-1_2".RET(IB0.5, OB0.5); }

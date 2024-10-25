@@ -792,30 +792,7 @@ module ModelAnswers =
         STN2_Device11111_03; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
 }
 """
-    let answerSafetyValid = """
-[sys] L = {
-    [flow] F = {
-        A.p > Main;		// A.p(Call)> Main(Real);
-        A.m > Main2;		// A.m(Call)> Main2(Real);
-        Main = {
-            A.p > A.m;		// A.p(Call)> A.m(Call);
-        }
-        Main2 = {
-            A.p > A.m;		// A.p(Call)> A.m(Call);
-        }
-    }
-    [jobs] = {
-        F.A.m = { A.ADV(_, _); }
-        F.A.p = { A.RET(_, _); }
-    }
-    [prop] = {
-        [safety] = {
-            F.Main.A.p = { F.A.m; }
-        }
-    }
-    [device file="./dsLib/Cylinder/DoubleCylinder.ds"] A; // C:/ds/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dsLib/Cylinder/DoubleCylinder.ds
-}
-"""
+    
     let answerLayoutValid = """
 [sys] L = {
     [flow] F = {

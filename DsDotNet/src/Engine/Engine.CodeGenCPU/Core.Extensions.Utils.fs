@@ -64,7 +64,10 @@ module ConvertCoreExtUtils =
 
         [<Extension>] static member GetInExpr (x:HwSystemDef) =
                             getAddressTaskDevParamExpr (x.ValueParamIO.In, x.InTag, x.System) :?> Expression<bool>
+
+
+
         [<Extension>] static member GetInExpr (x:TaskDev, call:Call) =
                             getAddressTaskDevParamExpr (call.ValueParamIO.In, x.InTag, call.System)  :?> Expression<bool>
         [<Extension>] static member GetOutExpr (x:TaskDev,  call:Call) =
-                            getAddressTaskDevParamExpr (call.ValueParamIO.Out  , x.OutTag, call.System)  :?> Expression<bool>
+                            getAddressTaskDevParamExpr (call.ValueParamIO.Out, x.OutTag, call.System)  :?> Expression<bool>

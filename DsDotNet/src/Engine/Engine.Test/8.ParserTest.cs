@@ -8,59 +8,54 @@ namespace Engine
         public static string SafetyValid = @"
 [sys] L = {
     [flow] F = {
-        A.m > Main2;
-        A.p > Main;
-
         Main = {
-            A.p > A.m;		// A.p(Call)> A.m(Call);
+            A.p > A.m;	
         }
         Main2 = {
-            A.p > A.m;		// A.p(Call)> A.m(Call);
+            A.p > A.m;	
         }
     }
     [jobs] = {
-        F.A.m = { A.ADV; }
-        F.A.p = { A.RET; }
+        F.A.m = { A.ADV(_, _); }
+        F.A.p = { A.RET(_, _); }
     }
     [prop] = {
         [safety] = {
-            F.Main.A.p = { F.A.m; }
+            F.Main.A.p = { F.Main.A.m; }
         }
     }
-    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]  A;
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] A;
 }
-
 ";
     public static string AutoPreValid = @"
-[sys] HelloDS = {
-    [flow] STN2 = {
+[sys] AutoPreValid = {
+    [flow] F1 = {
         Work1 = {
-            Device11111.ADV > Device11111.RET > Device11111_ADV_1 > Device11111_RET_1;
+            Device1.ADV; 
         }
-        [aliases] = {
-            Work1.Device11111.ADV = { Device11111_ADV_1; }
-            Work1.Device11111.RET = { Device11111_RET_1; }
+        Work2 = {
+            Device2.ADV; 
         }
     }
     [jobs] = {
-        STN2.Device11111.ADV[N3(2, 2)] = { STN2_Device11111_01.ADV(IB0.0, OB0.0); STN2_Device11111_02.ADV(IB0.2, OB0.2); STN2_Device11111_03.ADV(-, -); }
-        STN2.Device11111.RET[N3(3, 1)] = { STN2_Device11111_01.RET(IB0.1, OB0.1); STN2_Device11111_02.RET(IB0.3, -); STN2_Device11111_03.RET(IB0.4, -); }
+        F1.Device1.ADV = { F1__Device1.ADV(%IX0.0.0, %QX0.1.0); }
+        F1.Device2.ADV = { F1__Device2.ADV(%IX0.0.1, %QX0.1.1); }
     }
+   
     [prop] = {
         [autopre] = {
-            STN2.Work1.Device11111.ADV = { STN2.Device11111.RET; }
+            F1.Work2.Device2.ADV = { F1.Work1.Device1.ADV; }
         }
         [layouts] = {
-            STN2_Device11111_01 = (1369, 815, 220, 80);
-            STN2_Device11111_02 = (1369, 815, 220, 80);
-            STN2_Device11111_03 = (1369, 815, 220, 80);
+            F1__Device1 = (367, 456, 240, 80);
+            F1__Device2 = (1334, 664, 240, 80);
         }
     }
-    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]
-        STN2_Device11111_01,
-        STN2_Device11111_02,
-        STN2_Device11111_03;
+    [device file=""./dsLib/Cylinder/DoubleCylinder.ds""] 
+        F1__Device1,
+        F1__Device2; 
 }
+//DS Library Date = [Library Release Date 24.3.26]
 ";
 
 
@@ -596,8 +591,8 @@ namespace Engine
         }
     }
     [jobs] = {
-        F.mv1.up = { A.""+""(%I300:symbol1:UInt16, %Q300:ABC:Boolean); }
-        F.mv1.dn = { A.""-""(%I301, %Q301:0f); }
+        F.mv1.up = { A.""+""(%I300;UInt16;symbol1, %Q300;Boolean;ABC); }
+        F.mv1.dn = { A.""-""(%I301, %Q301); }
     }
     [variables] = {}
     [operators] = {
@@ -617,7 +612,7 @@ namespace Engine
         }
     }
     [jobs] = {
-        F.mv1.up = { A.""+""(%I300:symbol1:UInt16, %Q300); }
+        F.mv1.up = { A.""+""(%I300;UInt16;symbol1, %Q300); }
         F.mv1.dn = { A.""-""(%I301, %Q301); }
     }
     [variables] = {}
@@ -634,12 +629,12 @@ namespace Engine
     [flow] F = {
         Main <|> Reset;	
         Main = {
-            mv1.up > mv1.dn > CMD1(), CMD2();
+            mv1.up > mv1.dn > #CMD1, #CMD2;
         }
     }
     [jobs] = {
         F.mv1.up = { A.""+""(%I300, %Q300); }
-        F.mv1.dn = { A.""-""(%I301, %Q301:AOUT:Int32:300); }
+        F.mv1.dn = { A.""-""(%I301, %Q301;Int32;AOUT); }
     }
     [variables] = {
         Int32 v0;
@@ -729,8 +724,8 @@ namespace Engine
         [prop] = {
         
             [errors] = {
-                STN1.Device1.ADV = {CHK(500ms)};
-                STN1.Device2.ADV = {MAX(700ms), CHK(500ms)};
+                STN1.Work1.Device1.ADV = {CHK(500ms)};
+                STN1.Work1.Device2.ADV = {MAX(700ms), CHK(500ms)};
             }
         }
         [device file=""./dsLib/Cylinder/DoubleCylinder.ds""]

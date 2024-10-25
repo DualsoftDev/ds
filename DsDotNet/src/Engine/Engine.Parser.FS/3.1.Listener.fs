@@ -446,12 +446,11 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     if nonCausalsContext.any() then
                         let nonCausalGroup = nonCausalsContext.Head()
                         yield!  nonCausalGroup.TryFindChildren<Identifier1Context>().Cast<ParserRuleContext>()
-                        yield!  nonCausalGroup.TryFindChildren<IdentifierCommandNameContext>().Cast<ParserRuleContext>()
+                        //yield!  nonCausalGroup.TryFindChildren<IdentifierOpCmdContext>().Cast<ParserRuleContext>()
                 ]
             [
                 yield! normalCausalContext
-                yield! sysctx.Descendants<IdentifierCommandNameContext>().Cast<ParserRuleContext>()
-                yield! sysctx.Descendants<IdentifierOperatorNameContext>().Cast<ParserRuleContext>()
+                //yield! sysctx.Descendants<IdentifierOpCmdContext>().Cast<ParserRuleContext>()
                 yield! sysctx.Descendants<CausalTokenContext>().Cast<ParserRuleContext>()
                 yield! sysctx.Descendants<NonCausalContext>().Cast<ParserRuleContext>()
             ]
@@ -494,18 +493,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 for (optParent, ctxInfo, ctx) in candidates do
                     let parent = optParent
                     let existing = parent.GetGraph().TryFindVertex(ctxInfo.GetRawName())
-                    if  ( ctxInfo.ContextType = typeof<IdentifierOperatorNameContext>
-                       || ctxInfo.ContextType = typeof<IdentifierCommandNameContext>)
-                       && existing.IsNone
+                    if  (ctx.TryFindFirstChild<IdentifierOpCmdContext>().IsSome && existing.IsNone)
                     then
                         let opCmd = ctxInfo.GetRawName().DeQuoteOnDemand()
                         match tryFindFunc system opCmd with
                         | Some func -> Call.Create(func, parent) |> ignore
                         | _ ->
-                            if ctxInfo.ContextType = typeof<IdentifierCommandNameContext> then
-                                failwithlog $"Command({opCmd}) is not exist"
-                            elif ctxInfo.ContextType = typeof<IdentifierOperatorNameContext> then
-                                failwithlog $"Operator({opCmd}) is not exist"
+                            if ctxInfo.ContextType = typeof<IdentifierOpCmdContext> then
+                                failwithlog $"Operator or Command({opCmd}) is not exist"
                             else
                                 failwithlog $"ERROR Command/Operator parsing [{opCmd}]"
                     else
@@ -527,7 +522,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | 1, _ when not <| (isAliasMnemonic (parent, name)) ->
                                 match tryFindJob system (getJobName (parent, ctxInfo.Names)) with
                                 | Some job ->
-                                    Call.Create(job, parent) |> ignore
+                                    let vp =
+                                        match ctx.TryFindFirstChild<CausalInParamContext>(), ctx.TryFindFirstChild<CausalOutParamContext>() with
+                                        | Some inParam, Some outParam ->
+                                            ValueParamIO(createValueParam (inParam.TryFindFirstChild<ContentContext>().Value.GetText())
+                                                      ,  createValueParam (outParam.TryFindFirstChild<ContentContext>().Value.GetText()))
+                                        |_-> defaultValueParamIO()  
+                                    Call.CreateWithValueParamIO(job, parent, vp)  |> ignore
+                                            
                                 | None ->
                                     match system.Flows.TryFind(fun f->f.Name = ctxInfo.Names.Head) with
                                     | Some _f -> ()  //exFlow alisas 면  | cycle 2, _x1 :: [ _x2 ] 에서 등록
@@ -607,33 +609,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
             let callListings = commonCallParamExtractor ctx
-            let dicTaskDevs = Dictionary<string,TaskDev>()
-
-            let createTaskDev (apiPoint:ApiItem) (device:string) (addr:Addresses) =
+            let createTaskDev (apiPoint:ApiItem) (device:string) (taskDevParamIO:TaskDevParamIO) =
                 let taskDev = TaskDev(apiPoint, device, system)
-                let apiPureName = taskDev.FullName
-                let updatedTaskDev =
-                    if dicTaskDevs.ContainsKey(apiPureName) then
-                        let oldTaskDev = dicTaskDevs[apiPureName]
-                        oldTaskDev
-                    else
-                        dicTaskDevs.Add(apiPureName, taskDev)
-                        taskDev
-
-                let msg = $"Address is already assigned {device} {apiPoint.QualifiedName}\n old:{addr.Out} new:{updatedTaskDev.OutAddress}"
-                if addr.In <> updatedTaskDev.InAddress then
-                    updatedTaskDev.InAddress <-
-                        if updatedTaskDev.IsInAddressEmpty then
-                            addr.In
-                        else
-                            failWithLog msg
-                if addr.Out <> updatedTaskDev.OutAddress then
-                    updatedTaskDev.OutAddress <-
-                        if updatedTaskDev.IsOutAddressEmpty then
-                            addr.Out
-                        else
-                            failWithLog msg
-                updatedTaskDev
+                taskDev.TaskDevParamIO <- taskDevParamIO
+                taskDev
 
             for jobNameFqdn, jobDevParam, apiDefCtxs, callListingCtx in callListings do
 
@@ -648,8 +627,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                         commonDeviceParamExtractor taskDevParam
                                     | None ->
                                          (defaultTaskDevParam(), defaultTaskDevParam())
-                                let TaskDevParamIO = TaskDevParamIO( inParam,  outParam)
-                                yield {ApiFqnd = apiPath;  TaskDevParamIO = TaskDevParamIO;}
+                                let taskDevParamIO = TaskDevParamIO( inParam,  outParam)
+                                yield {ApiFqnd = apiPath;  TaskDevParamIO = taskDevParamIO;}
                         ]
                     else
                         [ getAutoGenDevApi (jobNameFqdn,  callListingCtx) ]
@@ -661,7 +640,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 let apiFqnd = ad.ApiFqnd |> Seq.toList
                                 let apiPure = ad.ApiFqnd.Last().Split([|'(';')'|]).Head()
                                 let devName = apiFqnd.Head
-                                let addr = Addresses(ad.TaskDevParamIO.InParam.Address, ad.TaskDevParamIO.OutParam.Address)
                                 let taskDevParamIO =  ad.TaskDevParamIO
                                 let task =
                                     match apiFqnd with
@@ -679,7 +657,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                         None
 
 
-                                                return createTaskDev  apiPoint  devName  addr 
+                                                return createTaskDev  apiPoint  devName  taskDevParamIO 
                                             }
 
                                         match taskFromLoaded with
@@ -689,10 +667,10 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                             | Some dev->
                                                 match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with
                                                 | Some apiItem ->
-                                                    createTaskDev apiItem device  addr 
+                                                    createTaskDev apiItem device  taskDevParamIO 
                                                 | None ->
                                                     let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) device api 
-                                                    createTaskDev (taskDev.ApiItem) device  addr 
+                                                    createTaskDev (taskDev.ApiItem) device  taskDevParamIO 
 
                                             | None -> failwithlog $"device({device}) api({api}) is not exist"
 
@@ -881,55 +859,56 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let fillErrors (system: DsSystem) (listErrorsCtx: List<dsParser.ErrorsBlockContext> ) =
             let fqdnErrors = getErrors listErrorsCtx
             for fqdn, t in fqdnErrors do
-                let call = (tryFindSystemInner system fqdn).Value :?> Call
-                call.CallTime.TimeOut  <- t.TimeOutMaxTime
-                call.CallTime.DelayCheck  <- t.CheckDelayTime
+                match tryFindSystemInner system fqdn with
+                | Some (:? Call as c) -> 
+                    c.CallTime.TimeOut  <- t.TimeOutMaxTime
+                    c.CallTime.DelayCheck  <- t.CheckDelayTime
+                | _ -> failWithLog $"Couldn't find Call object name {fqdn}"
         
         let fillRepeats (system: DsSystem) (listRepeatCtx: List<dsParser.RepeatsBlockContext> ) =
             let fqdnRepeats = getRepeats listRepeatCtx
             for fqdn, t in fqdnRepeats do
-                let real = (tryFindSystemInner system fqdn).Value :?> Real
-                match UInt32.TryParse t with
-                | true, count -> real.RepeatCount <- Some (count)
-                | _ -> failWithLog $"Repeat count must be a positive integer. {t} is not valid."
-
+                match tryFindSystemInner system fqdn with
+                | Some (:? Real as r) -> 
+                    match UInt32.TryParse t with
+                    | true, count -> r.RepeatCount <- Some (count)
+                    | _ -> failWithLog $"Repeat count must be a positive integer. {t} is not valid."
+                | _ -> failWithLog $"Couldn't find Real object name {fqdn}"
 
         let fillActions (system: DsSystem) (listMotionCtx: List<dsParser.MotionBlockContext> ) =
             let fqdnPath = getMotions listMotionCtx
             for fqdn, path in fqdnPath do
-                let real = (tryFindSystemInner system fqdn).Value :?> Real
-                real.Motion <- path|>Some
+                match tryFindSystemInner system fqdn with
+                | Some (:? Real as r) -> r.Motion <- path|>Some
+                | _ -> failWithLog $"Couldn't find Real object name {fqdn}"
 
         let fillScripts (system: DsSystem) (listScriptCtx: List<dsParser.ScriptsBlockContext>) =
             let fqdnPath = getScripts listScriptCtx
-
             for fqdn, script in fqdnPath do
-                let real = (tryFindSystemInner system fqdn).Value :?> Real
-                real.Script <- script|>Some
+                match tryFindSystemInner system fqdn with
+                | Some (:? Real as r) ->r.Script <- script|>Some
+                | _ -> failWithLog $"Couldn't find Real object name {fqdn}"
 
         let fillProperties (x: DsParserListener) (ctx: PropsBlockContext) =
             let theSystem = x.TheSystem
             //device, call에 layout xywh 채우기
-            ctx.Descendants<LayoutBlockContext>() .ToList() |> fillXywh     theSystem
-            //Real에 finished 채우기
-            ctx.Descendants<FinishBlockContext>() .ToList() |> fillFinished theSystem
-            //Real에 noTransData 채우기
-            ctx.Descendants<NotransBlockContext>().ToList() |> fillNoTrans  theSystem
-            //Real에 MotionBlock 채우기
-            ctx.Descendants<MotionBlockContext>() .ToList() |> fillActions  theSystem
-            //Real에 scripts 채우기
-            ctx.Descendants<ScriptsBlockContext>().ToList() |> fillScripts  theSystem
-            //Real에 times 채우기
-            ctx.Descendants<TimesBlockContext>()  .ToList() |> fillTimes    theSystem  
+            ctx.Descendants<LayoutBlockContext>() .ToList()  |> fillXywh     theSystem
+            //Real에 finished 채우기                         
+            ctx.Descendants<FinishBlockContext>() .ToList()  |> fillFinished theSystem
+            //Real에 noTransData 채우기                      
+            ctx.Descendants<NotransBlockContext>().ToList()  |> fillNoTrans  theSystem
+            //Real에 MotionBlock 채우기                      
+            ctx.Descendants<MotionBlockContext>() .ToList()  |> fillActions  theSystem
+            //Real에 scripts 채우기                          
+            ctx.Descendants<ScriptsBlockContext>().ToList()  |> fillScripts  theSystem
+            //Real에 times 채우기                            
+            ctx.Descendants<TimesBlockContext>()  .ToList()  |> fillTimes    theSystem  
             //Real에 Repeats 채우기
             ctx.Descendants<RepeatsBlockContext>() .ToList() |> fillRepeats  theSystem
             //Job에 errors (CallTime)채우기
-            ctx.Descendants<ErrorsBlockContext>() .ToList() |> fillErrors theSystem
-
+            ctx.Descendants<ErrorsBlockContext>() .ToList()  |> fillErrors   theSystem
             //Call에 disable 채우기
-            ctx.Descendants<DisableBlockContext>().ToList() |> fillDisabled theSystem
-
-
+            ctx.Descendants<DisableBlockContext>().ToList()  |> fillDisabled theSystem
 
         let createOperator(ctx:OperatorBlockContext) =
             ctx.operatorNameOnly() |> Seq.iter (fun fDef ->

@@ -182,12 +182,6 @@ identifier1234: (identifier1 | identifier2 | identifier3 | identifier4);
     identifier123CNF: identifier123 (COMMA identifier123)*;
     identifierFunction: IDENTIFIER1 | lexerTokenIdentifierCandidate;
 
-    identifierOperatorName : identifierFunction ;
-    identifierCommandName : identifierFunction ;
-    identifierCommandPara : identifierFunction ;  //추후 구현 (파라메터 인자추가)
-
-    identifierOperator: '#'identifierOperatorName;
-    identifierCommand: identifierCommandName '(' identifierCommandPara? ')';
 
     flowPath: identifier2;
 
@@ -224,46 +218,19 @@ loadDeviceBlock: '[' 'device' fileSpec? ']' deviceNameList SEMICOLON;
 loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEMICOLON;
     externalSystemName: identifier1;
 
-
-/*
-// global  property
-    [prop] = {
-        [safety] = {
-            F.Main = { F.Ap; F.Am; }
-            F.Ap = { F.Main; }
-        }
-
-        [times] = {
-            F.WorkA = {M:1000, S:200, D:30}; // average, std, onDelay msec
-            F.WorkB = {M:1000, S:200, D:30}; // average, std, onDelay msec
-        }
-        [motions] = {
-            F.WorkA  = {./Assets/dsLib/Cylinder/Robot.fbx:Load};
-            F.WorkB  = {./Assets/dsLib/Cylinder/Robot.obj:Unload};
-            F.WorkC  = {./Assets/dsLib/Cylinder/Robot.obj:Home};
-            F.Work1  = {./Assets/dsLib/Cylinder/DoubleType.obj:ADV};
-            F.Work2  = {./Assets/dsLib/Cylinder/DoubleType.obj:RET};
-        }
-        [scripts] = {
-            F.WorkA = {ThirdParty.AddressInfo.Provider.testFunc1()}; //
-            F.WorkB = {ThirdParty.AddressInfo.Provider.testFunc2()}; //
-        }
-    }
-
- */
-
 // STANDFLMS
 propsBlock: '[' 'prop' ']' '=' '{' (
           safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
         | timesBlock | motionBlock | scriptsBlock | repeatsBlock | errorsBlock
         | layoutBlock )* '}';
+    
+    safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
+        safetyAutoPreKey: identifier45;
+        safetyAutoPreValues: identifier45 (SEMICOLON identifier45)* (SEMICOLON)?;
+
     safetyBlock: '[' 'safety' ']' '=' '{' (safetyAutoPreDef)* '}';
-        safetyAutoPreDef: safetyAutoPreKey '=' '{' safetyAutoPreValues '}';
-            safetyAutoPreKey: identifier45;
-            safetyAutoPreValues: identifier3 (SEMICOLON identifier3)* (SEMICOLON)?;
-
     autoPreBlock: '[' 'autopre' ']' '=' '{' (safetyAutoPreDef)* '}';
-
+      
     layoutBlock: '[' 'layouts' fileSpec? ']' '=' '{' (positionDef)* '}';
         positionDef: deviceOrApiName '=' xywh;
             deviceOrApiName: identifier12;
@@ -305,7 +272,7 @@ propsBlock: '[' 'prop' ']' '=' '{' (
     
     errorsBlock: '[' 'errors' ']' '=' '{' (errorsDef)* '}';
     errorsDef: errorsKey '=' '{' errorsParams '}' SEMICOLON;
-    errorsKey: identifier3;
+    errorsKey: identifier4;
     errorsParams: content;
 
 
@@ -316,8 +283,8 @@ flowBlock
         | aliasBlock
         )* '}'  (SEMICOLON)?   // |flowTask|callDef
     ;
-    parentingBlock: identifier1 '=' '{' (causal | nonCausal | nonCausals)* '}';
-    nonCausal : (identifier123 | identifierCommand);
+    parentingBlock: identifier1 '=' '{' (causal | nonCausals)* '}';
+    nonCausal : causalToken;
     nonCausals: (nonCausal (COMMA nonCausal)*)?  SEMICOLON;     // A, B(), C;
 
     // [aliases] = { X; Y; Z } = P          // {MyFlowReal} or {Call}
@@ -393,11 +360,6 @@ jobBlock: '[' 'jobs' ']' '=' '{' (callListing)* '}';
 
 
 
-funcCall: identifierOperator | identifierCommand;
-
-
-
-
 interfaceBlock
     : '[' 'interfaces' ']' '=' '{'  (interfaceListing)* '}';
     interfaceListing: (interfaceDef (';')?) | interfaceResetDef;
@@ -443,7 +405,11 @@ actionBlock: '[' 'actions' ']' '=' '{' (categoryBlocks)* '}';
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF: causalToken (',' causalToken)* ;
-    causalToken: identifier1234 | identifierOperator | identifierCommand;
+    causalToken: causalTokenBase ('('causalInParam ':' causalOutParam')')? ;
+    causalTokenBase: identifier1234 | ('#'identifierOpCmd);
+    causalInParam: content;
+    causalOutParam: content;
+    identifierOpCmd: identifier1;
 
     causalOperator
         : '>'   // CAUSAL_FWD

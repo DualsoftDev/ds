@@ -240,10 +240,9 @@ module ImportU =
             let dicAutoPreCall = doc.DicAutoPreCall
 
             let pptNodes = doc.Nodes
-            let parents = doc.Parents
 
             let dicChildParent =
-                parents
+                doc.Parents
                 |> Seq.collect (fun (KeyValue(parent, children)) ->
                     children |> Seq.map (fun child -> child, parent))
                 |> dict
@@ -315,9 +314,8 @@ module ImportU =
                     try
                         if not(dicChildParent.ContainsKey node) then
                             failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
-                        let jobs  = node.AutoPres.Select(fun a->a.Combine()).ToList()
 
-                        match mySys.GetCallVertices().TryFind(fun c-> jobs.Contains(c.TargetJob.DequotedQualifiedName)) with 
+                        match mySys.GetCallVertices().TryFind(fun c-> c.TargetJob.DequotedQualifiedName = node.Job.Combine()) with 
                         | Some call -> dicAutoPreCall.Add(node.Key, call)
                         | None -> failwithlog $"{node.Name} AUTOPRE dicAutoPreCall.Add Error"
 
@@ -325,6 +323,7 @@ module ImportU =
                         node.Shape.ErrorName(ex.Message, node.PageNum)
                 )
 
+            
             let createAlias () =
                 pptNodes
                 |> Seq.filter (fun node -> node.IsAlias)
@@ -463,8 +462,8 @@ module ImportU =
                         [|edge.EndNode|]
 
                 tgts.Iter(fun node->
-                        let autoPreCondition =edge.StartNode.Job
-                        node.AutoPres.Add(autoPreCondition)|>ignore
+                        let autoPreCall = doc.DicAutoPreCall[edge.StartNode.Key]
+                        node.AutoPres.Add(autoPreCall.NameComponents)|>ignore
                         )
 
             dicEdges
@@ -518,70 +517,67 @@ module ImportU =
         //Safety & AutoPre만들기
         [<Extension>]
         static member MakeSafetyAutoPre(doc: PptDoc, mySys: DsSystem) =
-            let getJobInfo(job:Job) =
-                seq{
-                    let JobName = job.DequotedQualifiedName
-                    let pureJobName = GetBracketsRemoveName JobName
-                    yield JobName, job
-
-                    if JobName <> pureJobName
-                    then
-                        yield pureJobName, job
-                }
-
+            let dicJob =
+                doc.DicVertex.Values
+                   .OfType<Call>().Where(fun call -> call.IsJob)
+                   .Select(fun call -> call.TargetJob.DequotedQualifiedName,  call) |> dict
             let dicCall =
                 doc.DicVertex.Values
                    .OfType<Call>().Where(fun call -> call.IsJob)
-                   .Select(fun call -> call.QualifiedName,  call)
+                   .Select(fun call -> call.DequotedQualifiedName,  call) |> dict
 
-
-
-
-
-            let dicJob = dicCall |> dict
+            //let dicChildParent =
+            //    doc.Parents
+            //    |> Seq.collect (fun (KeyValue(parent, children)) ->
+            //        children |> Seq.map (fun child -> child, parent))
+            //    |> dict
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.NodeType.IsCall || node.NodeType = AUTOPRE)
             |> Seq.iter(fun node ->
-
                 node.Safeties
-                |> iter (fun safeName ->
-                    if not (dicJob.ContainsKey safeName) then
-                        node.Shape.ErrorName($"{ErrID._80}(err:{safeName})", node.PageNum)
+                |> iter (fun fqdn  ->
+                        //let parentWrapper =
+                        //    if dicChildParent.ContainsKey(node) then
+                        //        doc.DicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
+                        //    else
+                        //        node.Shape.ErrorName($"err: {fqdn} flow 에는 safety 입력이 불가능 합니다.", node.PageNum)
 
-                    if node.Job.Combine() = safeName then
-                        node.Shape.ErrorName($"{ErrID._81}(err:{safeName})", node.PageNum)
-                        )
+                        let safetyName =
+                            let items = fqdn.Split('.').Select(fun s->s.Trim())
+                            match items.length() with
+                            | 2 ->
+                                $"{node.FlowName}.{items.Combine()}"
+                            | 3 ->
+                                $"{items.Combine()}"
+                            | _ ->
+                                failWithLog ErrID._79
+                            
+                        let targeCall =
+                            if dicJob.ContainsKey (safetyName) then
+                                dicJob[safetyName]
+                            else
+                                failWithLog $"Safety 대상이 없습니다. {safetyName}"
 
-                node.AutoPres.Select(fun jobFqdn -> jobFqdn.Combine())
-                |> iter (fun autoPres ->
-                    if not (dicJob.ContainsKey autoPres) then
-                        node.Shape.ErrorName($"{ErrID._82}(err:{autoPres})", node.PageNum)
-
-                    if node.Job.Combine() = autoPres then
-                        node.Shape.ErrorName($"{ErrID._83}(err:{autoPres})", node.PageNum)
-                        )
-
-                node.Safeties
-                |> map (fun fullName -> dicJob.[fullName])
-                |> iter (fun condJob  ->
-                    match doc.DicVertex.[node.Key].GetPure() |> box with
-                    | :? ISafetyAutoPreRequisiteHolder as holder ->
-                            holder.SafetyConditions.Add(DuSafetyAutoPreConditionCall(condJob )) |> ignore
-                    | _ ->
-                            node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum))
+                        match doc.DicVertex.[node.Key].GetPure() |> box with
+                        | :? ISafetyAutoPreRequisiteHolder as holder ->
+                            holder.SafetyConditions.Add(DuSafetyAutoPreConditionCall(targeCall)) |> ignore
+                        | _ ->
+                            node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum)
+                            
+                            )
 
                 node.AutoPres
-                |> iter (fun jobFqdn  ->
-                    let condJob =
-                        if dicJob.ContainsKey (jobFqdn.Combine()) then
-                            dicJob[jobFqdn.Combine()]
+                |> iter (fun fqdn  ->
+                    let targeCall =
+                        let autoPresName = fqdn.Combine()
+                        if dicCall.ContainsKey (autoPresName) then
+                            dicCall[autoPresName]
                         else
-                            failWithLog $"AutoPres 대상이 없습니다. {jobFqdn}"
+                            failWithLog $"AutoPres 대상이 없습니다. {autoPresName}"
 
                     match doc.DicVertex.[node.Key].GetPure() |> box with
                     | :? ISafetyAutoPreRequisiteHolder as holder ->
-                            holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(condJob)) |> ignore
+                            holder.AutoPreConditions.Add(DuSafetyAutoPreConditionCall(targeCall)) |> ignore
                     | _ ->
                             node.Shape.ErrorName($"{ErrID._28}(err:{doc.DicVertex.[node.Key].QualifiedName})", node.PageNum))
             )
@@ -840,7 +836,7 @@ module ImportU =
                     devApiDefinitions
                     |> Seq.iter(fun a->
                         let apiFqdn = a.ApiFqnd.Combine()
-                        match mySys.TaskDevs.TryFind(fun td->td.ApiPureName = apiFqdn) with
+                        match mySys.TaskDevs.TryFind(fun td->td.FullName = apiFqdn) with
                         | Some td ->
                             if not td.IsInAddressEmpty then
                                 failwithf $"Error: {apiFqdn} InAddress already exists"

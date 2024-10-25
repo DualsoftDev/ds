@@ -91,11 +91,11 @@ module ModelTests1 =
 
         [<Test>]
         member __.``Model component [SafetyValid] test`` () =
-            compare ParserTest.SafetyValid answerSafetyValid
+            compareExact ParserTest.SafetyValid 
 
         [<Test>]
         member __.``Model component [AutoPreValid] test`` () =
-            compare ParserTest.AutoPreValid answerAutoPreValid
+            compareExact ParserTest.AutoPreValid 
 
         [<Test>]
         member __.``Model component [LayoutValid] test`` () =

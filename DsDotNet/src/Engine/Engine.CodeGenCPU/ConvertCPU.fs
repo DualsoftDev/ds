@@ -88,8 +88,11 @@ module ConvertCPU =
 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield vc.C1_CallMemo()
-
+                yield vc.C1_CallPlanStart()
+                yield vc.C2_CallPlanEnd()
+                yield! vc.C3_InputDetected()
+                yield! vc.C4_OutputDetected()
+                
             if IsSpec (v, VertexAll, AliasNotCare) then
                 let vm = v.TagManager :?> VertexTagManager
                 yield! vm.S1_RGFH()
@@ -149,13 +152,6 @@ module ConvertCPU =
           // 동일 job으로 선정해서 coin중에서 아무거나 가져옴
         pureCalls.TryFind(fun f->not(f.IsFlowCall))
 
-    let private applyTaskDev(s:DsSystem) =
-        [|
-            let devCallSet =  s.GetTaskDevCalls()
-            for (td, calls) in devCallSet do
-                let tm = td.TagManager :?> TaskDevManager
-                yield! tm.TD3_PlanOutput(s, calls)
-        |]
 
     let private applyApiItem(s:DsSystem) =
         [|
@@ -171,8 +167,8 @@ module ConvertCPU =
             let devCallSet =  s.GetTaskDevsCoin()
             for (td, call) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                yield! tm.TD4_SensorLinking(call)
-                yield! tm.TD5_SensorLinked(call)
+                yield! tm.TD1_SensorLinking(call)
+                yield! tm.TD2_SensorLinked(call)
         |]
 
     let private funcCall(s:DsSystem) =
@@ -245,6 +241,8 @@ module ConvertCPU =
             RuntimeDS.System <- Some sys
 
             sys.GenerationOrigins()
+            sys.ClearExteralTags()
+
 
             if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출
                 sys.GenerationMemory()
@@ -299,8 +297,6 @@ module ConvertCPU =
                 for v in sys.GetVertices() do
                     yield! applyVertexSpec v isActive
 
-                //TaskDev 적용
-                yield! applyTaskDev sys
                 //TaskDev Sensor Link 적용
                 yield! applyTaskDevSensorLink sys
                 //ApiItem 적용

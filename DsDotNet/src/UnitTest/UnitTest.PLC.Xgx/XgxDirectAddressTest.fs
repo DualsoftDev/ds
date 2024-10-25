@@ -17,12 +17,12 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
             [sys] HelloDS = {{
                 [flow] f1 = {{
                     Work1 = {{
-                        Device1."ADV(INTrue_OUT300)" > Device1."RET(INTrue_OUT500)";
+                        Device1.ADV(true : 500us) > Device1.RET(true : 500us);
                     }}
                 }}
                 [jobs] = {{
-                    f1.Device1."ADV(INTrue_OUT300)" = ({addBoolIn}:Boolean:True, {addInt16Out}:Int16:300s);  
-                    f1.Device1."RET(INTrue_OUT500)" = ({addBoolIn}:Boolean:True, {addInt16Out}:Int16:500s);  
+                    f1.Device1.ADV = ({addBoolIn}, {addInt16Out};UInt16);  
+                    f1.Device1.RET = ({addBoolIn}, {addInt16Out};UInt16);  
                 }}
                 [prop] = {{
                     [layouts] = {{

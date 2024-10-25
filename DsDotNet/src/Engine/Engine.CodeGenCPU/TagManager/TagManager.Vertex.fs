@@ -132,6 +132,8 @@ module TagManagerModule =
             | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver     :> IStorage
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
+            | VertexTag.rxErrInterlock       -> callM().ErrInterlock            :> IStorage
+            
             | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
 
             | VertexTag.origin               -> realM().OG     :> IStorage
@@ -278,7 +280,8 @@ module TagManagerModule =
 
         member val ErrShort           = createTag true VertexTag.rxErrShort
         member val ErrOpen            = createTag true VertexTag.rxErrOpen
-
+        member val ErrInterlock       = createTag true VertexTag.rxErrInterlock
+        
         ///callCommandEnd
         member val CallCommandEnd     =  createTag  false VertexTag.callCommandEnd
         ///callCommandPulse
@@ -297,6 +300,7 @@ module TagManagerModule =
                 if x.ErrOffTimeOver.Value     then yield "해지시간초과"
                 if x.ErrShort.Value           then yield "센서감지"
                 if x.ErrOpen.Value            then yield "센서오프"
+                if x.ErrInterlock.Value            then yield "반대센서오프"
             |]
         member x.ErrorText   =
             let errors = x.ErrorList

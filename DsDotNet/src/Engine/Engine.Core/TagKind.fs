@@ -192,7 +192,8 @@ module TagKindList =
     | txErrOffTimeUnder         = 11062
     | txErrOffTimeOver          = 11063
     | rxErrShort                = 11070
-    | rxErrOpen                 = 11074
+    | rxErrOpen                 = 11071
+    | rxErrInterlock            = 11072
 
     | workErrOriginGoing        = 11080
 

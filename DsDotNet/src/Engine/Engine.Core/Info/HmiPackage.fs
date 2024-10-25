@@ -20,7 +20,8 @@ module HmiPackageModule =
         TimeOffShortageErrorLamp : HMILamp        
         TimeOffOverErrorLamp : HMILamp      
         ShortErrorLamp    : HMILamp        
-        OpenErrorLamp     : HMILamp        
+        OpenErrorLamp     : HMILamp     
+        InterlockErrLamp  : HMILamp     
         ErrorTotalLamp    : HMILamp   
 
     } with
@@ -32,6 +33,7 @@ module HmiPackageModule =
                 yield x.TimeOffOverErrorLamp    
                 yield x.ShortErrorLamp           
                 yield x.OpenErrorLamp          
+                yield x.InterlockErrLamp          
                 yield x.ErrorTotalLamp   
             }
 

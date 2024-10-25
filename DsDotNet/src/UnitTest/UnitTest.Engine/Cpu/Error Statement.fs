@@ -27,13 +27,18 @@ type Spec15_ErrorStatement() =
             coin.E2_CallErrRXMonitor() |> doChecks
 
     [<Test>]
-    member __.``E3_CallErrTotalMonitor`` () =
-        for coin in t.InRealCalls do
-            coin.V.E3_CallErrTotalMonitor() |> doCheck
+    member __.``E3_CallErrRXInterlockMonitor`` () =
+        for coin in t.Coins do
+            coin.E3_CallErrRXInterlockMonitor() |> doChecks
 
     [<Test>]
-    member __.``E4_RealErrTotalMonitor`` () =
+    member __.``E4_CallErrTotalMonitor`` () =
+         for c in t.InRealCalls do
+            c.VC.E4_CallErrTotalMonitor() |> doCheck
+    
+    [<Test>]
+    member __.``E5_RealErrTotalMonitor`` () =
          for real in t.Reals do
-            real.E4_RealErrTotalMonitor() |> doCheck
+            real.E5_RealErrTotalMonitor() |> doCheck
 
     

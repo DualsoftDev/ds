@@ -332,6 +332,7 @@ module CoreExtensionModule =
         member x.ErrorOnTimeUnder     = x.ExternalTags[ErrorOnTimeUnder ]
         member x.ErrorOffTimeOver     = x.ExternalTags[ErrorOffTimeOver ]
         member x.ErrorOffTimeUnder    = x.ExternalTags[ErrorOffTimeUnder]
+        member x.ErrorInterlock       = x.ExternalTags[ErrorInterlock]
 
     let inValidTaskDevTags (x:DsSystem) =
         x.Jobs

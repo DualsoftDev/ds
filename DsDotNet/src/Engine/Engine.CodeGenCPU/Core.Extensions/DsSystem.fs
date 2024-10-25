@@ -125,14 +125,15 @@ module ConvertCpuDsSystem =
                 cv.ErrOnTimeUnder.Address    <- getMemory  cv.ErrOnTimeUnder target
                 cv.ErrOffTimeOver.Address       <- getMemory  cv.ErrOffTimeOver target
                 cv.ErrOffTimeUnder.Address   <- getMemory  cv.ErrOffTimeUnder target
-
+                cv.ErrInterlock.Address      <- getMemory  cv.ErrInterlock target
                 [|
-                    ErrorSensorOn,        (cv.ErrShort           :> IStorage)
-                    ErrorSensorOff,       (cv.ErrOpen            :> IStorage)
-                    ErrorOnTimeOver,      (cv.ErrOnTimeOver      :> IStorage)
-                    ErrorOnTimeUnder,  (cv.ErrOnTimeUnder        :> IStorage)
-                    ErrorOffTimeOver,     (cv.ErrOffTimeOver     :> IStorage)
-                    ErrorOffTimeUnder, (cv.ErrOffTimeUnder       :> IStorage)
+                    ErrorSensorOn,      (cv.ErrShort           :> IStorage)
+                    ErrorSensorOff,     (cv.ErrOpen            :> IStorage)
+                    ErrorOnTimeOver,    (cv.ErrOnTimeOver      :> IStorage)
+                    ErrorOnTimeUnder,   (cv.ErrOnTimeUnder     :> IStorage)
+                    ErrorOffTimeOver,   (cv.ErrOffTimeOver     :> IStorage)
+                    ErrorOffTimeUnder,  (cv.ErrOffTimeUnder    :> IStorage)
+                    ErrorInterlock,     (cv.ErrInterlock       :> IStorage)
                 |]
                 |> Seq.iter(fun (k, v) ->call.ExternalTags.Add(k, v)) 
 

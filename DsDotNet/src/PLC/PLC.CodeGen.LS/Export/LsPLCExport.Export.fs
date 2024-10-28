@@ -175,7 +175,7 @@ module XgiExportModule =
 
         // Rung 별로 생성
         for CommentAndStatements(cmt, stmts) in commentedStatements do
-            if cmt.Contains("VertexTagManager.F5_SourceTokenNumGeneration") && cmt.Contains("rising") then
+            if cmt <> null && cmt.Contains("VertexTagManager.F5_SourceTokenNumGeneration") && cmt.Contains("rising") then
                 noop()
             // 다중 라인 설명문을 하나의 설명문 rung 에..
             if prjParam.EnableXmlComment && cmt.NonNullAny() then

@@ -5,7 +5,7 @@ open Dual.Common.Core.FS
 open Dual.Common.Base.FS
 
 module FqdnParserModule =
-    let rTryParseFqdn (text: string) : Result<string list, string> =
+    let rTryParseFqdn (text: string) : Result<string[], string> =
         if text.IsNullOrEmpty() then
             Error "Empty name"
         else
@@ -25,7 +25,7 @@ module FqdnParserModule =
                 let parser = createParser (text)
                 let ctx = parser.fqdn ()
                 let ncs = ctx.Descendants<fqdnParser.NameComponentContext>()
-                Ok [ for nc in ncs -> nc.GetText() ]
+                Ok [| for nc in ncs -> nc.GetText() |]
             with
             | :? ParserError ->
                 logWarn $"Failed to parse FQDN: {text}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"

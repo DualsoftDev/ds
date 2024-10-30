@@ -109,10 +109,10 @@ module CoreExtensionModule =
                 x.HwSystemDefs.Add(ButtonDef(btnName,x, btnType, taskDevParamIO, addr, HashSet[|flow|]))
                 |> verifyM $"중복 ButtonDef [flow:{flow.Name} name:{btnName}]"
 
- 
+
         member x.AddLampDef(lmpType:LampType, lmpName: string, taskDevParamIO:TaskDevParamIO, addr:Addresses, flow:Flow option) =
             if not (taskDevParamIO.IsDefaultParam )
-            then 
+            then
                 failwithf $"LampDef [{lmpName}] Error: \r\nLamp는 타겟 Value 속성을 지정할 수 없습니다. 기본(true)"
 
             if flow.IsSome then
@@ -128,7 +128,7 @@ module CoreExtensionModule =
                 x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, taskDevParamIO, addr, flows))
                 |> verifyM $"중복 LampDef [name:{lmpName}]"
 
-     
+
         member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, taskDevParamIO: TaskDevParamIO, addr: Addresses, flow: Flow, isCondition: bool) =
             checkSystem(x, flow, defName)
 
@@ -331,19 +331,20 @@ module CoreExtensionModule =
         let maxShortSpeedMSec =TimerModule.MinTickInterval|>float
         let v =
             time |> bind(fun t ->
+                let ft = float t
                 if RuntimeDS.Package.IsPackageSIM() then
                     match RuntimeDS.TimeSimutionMode  with
                     | TimeSimutionMode.TimeNone -> None
-                    | TimeSimutionMode.TimeX1 ->   Some ((t|>float)* 1.0/1.0 )
-                    | TimeSimutionMode.TimeX2 ->   Some ((t|>float)* 1.0/2.0 )
-                    | TimeSimutionMode.TimeX4 ->   Some ((t|>float)* 1.0/4.0 )
-                    | TimeSimutionMode.TimeX8 ->   Some ((t|>float)* 1.0/8.0 )
-                    | TimeSimutionMode.TimeX16 ->  Some ((t|>float)* 1.0/16.0 )
-                    | TimeSimutionMode.TimeX100 -> Some ((t|>float)* 1.0/100.0 )
-                    | TimeSimutionMode.TimeX0_1 -> Some ((t|>float)* 1.0/0.1 )
-                    | TimeSimutionMode.TimeX0_5 -> Some ((t|>float)* 1.0/0.5 )
+                    | TimeSimutionMode.TimeX1 ->   Some (ft/1.0 )
+                    | TimeSimutionMode.TimeX2 ->   Some (ft/2.0 )
+                    | TimeSimutionMode.TimeX4 ->   Some (ft/4.0 )
+                    | TimeSimutionMode.TimeX8 ->   Some (ft/8.0 )
+                    | TimeSimutionMode.TimeX16 ->  Some (ft/16.0 )
+                    | TimeSimutionMode.TimeX100 -> Some (ft/100.0 )
+                    | TimeSimutionMode.TimeX0_1 -> Some (ft/0.1 )
+                    | TimeSimutionMode.TimeX0_5 -> Some (ft/0.5 )
                 else
-                    Some (t|>float)
+                    Some ft
                     )
 
         if v.IsSome && v.Value < maxShortSpeedMSec then

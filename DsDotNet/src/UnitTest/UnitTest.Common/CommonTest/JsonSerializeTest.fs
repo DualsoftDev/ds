@@ -104,10 +104,20 @@ module JsonSerializeTestModule =
     }
 
     type TheUnion =
-    | NoFieldCase
-    | OneFieldCase of string
-    | ManyFieldsCase of string*int
-    | RecordCase of TheRecord
+        | NoFieldCase
+        | OneFieldCase of string
+        | ManyFieldsCase of string*int
+        | RecordCase of TheRecord
+
+    type SimpleDU =
+        | Case1
+        | Case2
+        | Case3
+
+    type EnumDU =
+        | Enum1 = 1
+        | Enum2 = 2
+        | Enum3 = 3
 
     type OtherRecord = {
         Union: TheUnion
@@ -118,7 +128,6 @@ module JsonSerializeTestModule =
     type FSharpJsonSerializeTest() =
         let record = {Name="kwak"; Value=3.14; Message="Hello"; Tuple=(3, "three")}
 
-        // record type 은 serialize 안됨.
         [<Test>]
         member _.``FSharpJson FSharpRecordSerializeTest``() =
             let str = FSharpJson.Serialize record
@@ -126,7 +135,6 @@ module JsonSerializeTestModule =
             let str2 = FSharpJson.Serialize xx
             str === str2
 
-        // record type 은 serialize 안됨.
         [<Test>]
         member _.``FSharpJson Discriminated Union Test``() =
             let dus = [
@@ -139,3 +147,20 @@ module JsonSerializeTestModule =
             let xx = FSharpJson.Deserialize<TheUnion[]> str
             let str2 = FSharpJson.Serialize xx
             str === str2
+
+        [<Test>]
+        member _.``FSharpJson Simple Discriminated Union Test``() =
+            let dus = [Case1; Case2; Case3]
+            let str = FSharpJson.Serialize dus
+            let xx = FSharpJson.Deserialize<SimpleDU[]> str
+            let str2 = FSharpJson.Serialize xx
+            str === str2
+
+        [<Test>]
+        member _.``FSharpJson Enum Discriminated Union Test``() =
+            let dus = [EnumDU.Enum1; EnumDU.Enum2; EnumDU.Enum3]
+            let str = FSharpJson.Serialize dus
+            let xx = FSharpJson.Deserialize<EnumDU[]> str
+            let str2 = FSharpJson.Serialize xx
+            str === str2
+

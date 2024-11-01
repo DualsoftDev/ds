@@ -18,6 +18,14 @@ module MemoryAllocator =
             DWordAllocator: PLCMemoryAllocatorType
             LWordAllocator: PLCMemoryAllocatorType
         }
+        static member Create(bitAllocator, byteAllocator, wordAllocator, dwordAllocator, lwordAllocator) =
+            {
+                BitAllocator = bitAllocator
+                ByteAllocator = byteAllocator
+                WordAllocator = wordAllocator
+                DWordAllocator = dwordAllocator
+                LWordAllocator = lwordAllocator
+            }
 
     type IntRange = int * int
 

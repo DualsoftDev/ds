@@ -6,6 +6,8 @@ open Dual.Common.Core.FS
 open Dual.Common.UnitTest.FS
 open PLC.CodeGen.LS
 open Xunit
+open NUnit.Framework
+
 
 
 [<CollectionDefinition("XgiFromStatementTestCollection", DisableParallelization = true)>]
@@ -82,7 +84,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
             let stmt =
                 let stmt = DuAssign(Some c, source, target)
                 if xgx = XGI then
-                    let fParam = {FunctionName = XgiConstants.FunctionNameMove; Condition = Some c; Arguments = [c; source;]; Output = target; OriginalExpression = c}
+                    let fParam = {FunctionName = XgiConstants.FunctionNameMove; Condition = Some c; Arguments = [source;]; Output = target; OriginalExpression = c}
                     DuPLCFunction(fParam)
                 else
                     stmt
@@ -93,7 +95,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
             if xgx = XGK then
                 $"""	<Rung BlockMask="0">
 		<Element ElementType="6" Coordinate="1" >{conditionText}</Element>
-		<Element ElementType="2" Coordinate="4" Param="75"></Element>
+		<Element ElementType="2" Coordinate="4" Param="78"></Element>
 		<Element ElementType="33" Coordinate="94" Param="BAND,P00008,251,P00008,1"></Element>	</Rung>"""
             else
                 $"""	<Rung BlockMask="0">
@@ -146,15 +148,15 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
 [<Collection("XgiFromStatementTestCollection")>]
 type XgiFromStatementTest() =
     inherit XgxFromStatementTest(XGI)
-    [<Fact>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
-    [<Fact>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
-    [<Fact>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
-    [<Fact>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
+    [<Test>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
+    [<Test>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
+    [<Test>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
+    [<Test>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
 
 [<Collection("XgkFromStatementTestCollection")>]
 type XgkFromStatementTest() =
     inherit XgxFromStatementTest(XGK)
-    [<Fact>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
-    [<Fact>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
-    [<Fact>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
-    [<Fact>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()
+    [<Test>] member __.``DuAssign statement test`` () = base.``DuAssign statement test``()
+    [<Test>] member __.``DuCopy bool with condition statement test`` () = base.``DuCopy bool with condition statement test``()
+    [<Test>] member __.``DuCopy int with condition statement test`` () = base.``DuCopy int with condition statement test``()
+    [<Test>] member __.``DuCopy int add with condition statement test`` () = base.``DuCopy int add with condition statement test``()

@@ -2,5 +2,17 @@
   <PropertyGroup>
     <!-- UseNugetProjectReference 속성을 여기에서 정의 -->
     <UseNugetProjectReference>true</UseNugetProjectReference>
+
+    <!-- 임시 빌드 파일 경로 설정 -->
+    <!-- 
+    <BaseIntermediateOutputPath>R:\build\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)obj\</IntermediateOutputPath>
+    -->
+
+    <!-- 최종 빌드 출력 경로 설정 (필요시) -->
+    <!-- 
+    <OutputPath>R:\build\Output\</OutputPath>
+    -->
+
   </PropertyGroup>
 </Project>

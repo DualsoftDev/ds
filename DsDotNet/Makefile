@@ -12,6 +12,12 @@ use-nuget-package:
 	@rm -f Directory.Packages.props Directory.Build.props
 	@dotnet restore Ds.sln
 
+ramdisk:
+	@rm -rf /r/bin /r/build /r/packages ./bin ./packages
+	@mkdir /r/bin
+	@ln -s /r/bin
+	@mkdir /r/packages
+	@ln -s /r/packages
 
 # powerpoint addin unittest 실패시 임시 대처
 tmp-link:

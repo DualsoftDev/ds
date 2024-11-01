@@ -57,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Db", "..\Submod
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Dual.PLC.TagParser.FS", "..\Submodules\nuget\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj", "{D4F3389C-9EE1-4098-88B0-088CA6FB6AED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Winform", "..\Submodules\nuget\Common\Dual.Common.Winform\Dual.Common.Winform.csproj", "{D0457E88-A3B9-4FC8-861E-ED149D288F24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Winform", "..\Submodules\nuget\Windows\Dual.Common.Winform\Dual.Common.Winform.csproj", "{D0457E88-A3B9-4FC8-861E-ED149D288F24}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Utils", "..\Submodules\nuget\Common\Dual.Common.Utils\Dual.Common.Utils.csproj", "{4B2186C1-975D-4F9B-B73B-AD8E0B031084}"
 EndProject

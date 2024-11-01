@@ -40,6 +40,32 @@ type FSharpRecord = {
     Tuple: obj*string
 }
 
+    type TheRecord = {
+        Value: string
+    }
+
+    type TheUnion =
+        | NoFieldCase
+        | OneFieldCase of string
+        | ManyFieldsCase of string*int
+        | RecordCase of TheRecord
+
+    type SimpleDU =
+        | Case1
+        | Case2
+        | Case3
+
+    type EnumDU =
+        | Enum1 = 1
+        | Enum2 = 2
+        | Enum3 = 3
+
+    type OtherRecord = {
+        Union: TheUnion
+    }
+
+
+
 [<AutoOpen>]
 module JsonSerializeTestModule =
     [<TestFixture>]
@@ -97,32 +123,20 @@ module JsonSerializeTestModule =
             str === str2
 
 
+        [<Test>]
+        member _.``NewtonSoft FSharp DU SerializeTest``() =
+            let dus = [
+                OneFieldCase "one"
+                ManyFieldsCase ("many", 3)
+                RecordCase {Value="record"}
+                NoFieldCase
+            ]
+            let str = NewtonsoftJson.SerializeObject(dus)
+            let xx = NewtonsoftJson.DeserializeObject<TheUnion[]>(str)
+            let str2 = NewtonsoftJson.SerializeObject(xx)
+            str === str2
 
 
-
-    type TheRecord = {
-        Value: string
-    }
-
-    type TheUnion =
-        | NoFieldCase
-        | OneFieldCase of string
-        | ManyFieldsCase of string*int
-        | RecordCase of TheRecord
-
-    type SimpleDU =
-        | Case1
-        | Case2
-        | Case3
-
-    type EnumDU =
-        | Enum1 = 1
-        | Enum2 = 2
-        | Enum3 = 3
-
-    type OtherRecord = {
-        Union: TheUnion
-    }
 
 
     [<TestFixture>]
@@ -180,3 +194,27 @@ module JsonSerializeTestModule =
                 str === str2
             with ex ->
                 tracefn "%s" ex.Message
+
+
+
+    type ExStudent(name:string, age:int, union:TheUnion) =
+        inherit Student(name, age)
+        member x.Union = union
+
+    /// FSharpJson (FSharp.Json) 은 class 를 지원하지 않음
+    /// Newtonsoft.Json : Discriminated Union 을 지원하는 듯.
+    /// F# type 에 대해서 converter 를 적용하고, 나머지는 Newtonsoft.Json 에서 처리
+    [<TestFixture>]
+    type MixedModeFSharpJsonSerializeTest() =
+        let settings = new JsonSerializerSettings()
+        do
+            settings.Converters.Add(FSharpJsonConverter<TheUnion>())
+
+        [<Test>]
+        member _.``FSharpJson Object With Inner FSharp Member Test``() =
+            let exStudent = ExStudent("kwak", 20, OneFieldCase "one")
+            let str = NewtonsoftJson.SerializeObject(exStudent, settings)
+            let strXxx = NewtonsoftJson.SerializeObject(exStudent, getNull<JsonSerializerSettings>())
+            let xx = NewtonsoftJson.DeserializeObject<ExStudent>(str, settings)
+            let str2 = NewtonsoftJson.SerializeObject(xx, settings)
+            str === str2

@@ -233,7 +233,7 @@ module DsDataType =
         | UINT8     -> DuUINT8
         | _  -> failwithlog "ERROR"
 
-                
+
     let ToStringValue (value: obj) =
         match getDataType(value.GetType()), value  with
         | DuBOOL     , _ -> value.ToString()
@@ -333,8 +333,7 @@ module DsDataType =
 
 
     let textToDataType(typeName:string) : DataType =
-        tryTextToDataType typeName
-        |> Option.defaultWith(fun () -> failwithf $"'{typeName}' DataToType Error check type")
+        tryTextToDataType typeName |?? (fun () -> failwithf $"'{typeName}' DataToType Error check type")
 
     let textToSystemType(typeName:string) : System.Type =
         textToDataType typeName |> fun x -> x.ToType()

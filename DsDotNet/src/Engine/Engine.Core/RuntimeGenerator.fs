@@ -15,7 +15,7 @@ module RuntimeGeneratorModule =
         | XGK
         | AB
         | MELSEC
-        static member ofString(str:string) = DU.fromString<PlatformTarget> str |> Option.defaultWith (fun () -> failwith "ERROR")
+        static member ofString(str:string) = DU.fromString<PlatformTarget> str |?? (fun () -> failwith "ERROR")
 
         member x.Stringify() = x.ToString()
         member x.IsPLC = x <> WINDOWS

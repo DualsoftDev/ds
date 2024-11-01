@@ -51,7 +51,7 @@ module CoreExtensionModule =
         |_ -> None
 
     let getPure(v:Vertex) : Vertex =
-        tryGetPure v |> Option.defaultWith(fun () -> failwithlog $"ERROR: Failed to getPure({v})")
+        tryGetPure v |?? (fun () -> failwithlog $"ERROR: Failed to getPure({v})")
 
     /// Real 자신이거나 RealEx Target Real
     let tryGetPureReal(v:Vertex) : Real option=

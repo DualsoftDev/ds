@@ -205,3 +205,4 @@ Directory.Build.props
 Directory.Packages.props
 Experimental/
 src/UnitTest/dualsoft.json
+packages

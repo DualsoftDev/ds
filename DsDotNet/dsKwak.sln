@@ -198,7 +198,7 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Ppt.ToDS.FS", "Apps\PptAddI
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PLC.HW", "src\PLC\PLC.HW\PLC.HW.fsproj", "{46253BB3-F65C-484F-A05C-E75A2D6A9C20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dual.Common.Winform.DevX.24.1.4", "..\Submodules\nuget\Windows\Dual.Common.Winform.DevX.24.1.4\Dual.Common.Winform.DevX.24.1.4.csproj", "{944B204E-EF26-44D0-8C1F-BA63842F0534}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dual.Common.Winform.DevX.24.1.4", "..\Submodules\nuget\Windows\Dual.Common.Winform.DevX\Dual.Common.Winform.DevX.24.1.4.csproj", "{944B204E-EF26-44D0-8C1F-BA63842F0534}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestFormApp", "Apps\PptAddIn\TestFormApp\TestFormApp.csproj", "{06B8D7A7-303D-4564-BEA8-92E24226712B}"
 EndProject

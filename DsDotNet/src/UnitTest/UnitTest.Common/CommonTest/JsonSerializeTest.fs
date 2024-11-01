@@ -7,6 +7,7 @@ open NUnit.Framework
 open System
 open Newtonsoft.Json
 open FSharp.Json
+open Dual.Common.Base.FS.SampleDataTypes
 
 (*
     ------- F# JSON serialization test -------
@@ -164,3 +165,18 @@ module JsonSerializeTestModule =
             let str2 = FSharpJson.Serialize xx
             str === str2
 
+
+        /// Polymorphism 은 지원하지 않음: FSharp.Json.JsonSerializationError: 'Unknown type: Student'
+        [<Test>]
+        member _.``FSharpJson Object Polymorphism Test``() =
+            try
+                let people:Person list = [
+                    Student("kwak", 20)
+                    Teacher("kim", 30)
+                ]
+                let str = FSharpJson.Serialize people
+                let xx = FSharpJson.Deserialize<Person[]> str
+                let str2 = FSharpJson.Serialize xx
+                str === str2
+            with ex ->
+                tracefn "%s" ex.Message

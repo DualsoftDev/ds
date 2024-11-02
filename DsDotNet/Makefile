@@ -12,11 +12,14 @@ use-nuget-package:
 	@rm -f Directory.Packages.props Directory.Build.props
 	@dotnet restore Ds.sln
 
+SOLUTIONS := Ds dsKwak pptAddInVer2
 ramdisk:
 	@rm -rf /r/bin /r/build /r/packages ./bin ./packages
-	@mkdir /r/bin
+	# SOLUTIONS 정의 바탕으로 /r/build/{solution name}  폴더 생성
+
+	@mkdir /r/bin /r/packages
+	@$(foreach sol, $(SOLUTIONS), mkdir -p /r/build/$(sol)/output /r/build/$(sol)/bin;)
 	@ln -s /r/bin
-	@mkdir /r/packages
 	@ln -s /r/packages
 	@(cd ../Submodules/nuget; make ramdisk)
 

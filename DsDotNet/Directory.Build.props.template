@@ -3,15 +3,11 @@
     <!-- UseNugetProjectReference 속성을 여기에서 정의 -->
     <UseNugetProjectReference>true</UseNugetProjectReference>
 
-    <!-- 임시 빌드 파일 경로 설정 -->
+    <!-- 임시/최종 빌드 파일 경로 설정: RamDisk 가 'R:' 에 존재한다고 가정할 때 -->
     <!-- 
-    <BaseIntermediateOutputPath>R:\build\</BaseIntermediateOutputPath>
+    <BaseIntermediateOutputPath>R:\build\$(SolutionName)\$(MSBuildProjectName)\</BaseIntermediateOutputPath>    
     <IntermediateOutputPath>$(BaseIntermediateOutputPath)obj\</IntermediateOutputPath>
-    -->
-
-    <!-- 최종 빌드 출력 경로 설정 (필요시) -->
-    <!-- 
-    <OutputPath>R:\build\Output\</OutputPath>
+    <OutputPath>R:\build\$(SolutionName)\output\</OutputPath>
     -->
 
   </PropertyGroup>

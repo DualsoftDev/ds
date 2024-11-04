@@ -4,6 +4,7 @@ using Engine.Runtime;
 
 using Microsoft.AspNetCore.Authorization;
 
+using static Dual.Common.Core.FS.ObjectHolderTypeModule;
 using static Engine.Core.HmiPackageModule;
 using static Engine.Core.TagWebModule;
 using static Engine.Cpu.RunTimeModule;
@@ -83,7 +84,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
         var kindDescriptions = _model.TagKindDescriptions;
 
         // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
-        var objHolder = Dual.Common.Core.FS.ObjectHolder.Deserialize(serializedObject);
+        var objHolder = ObjectHolder.Deserialize(serializedObject);
         var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind, kindDescriptions[tagKind]);
 
         return await onTagWebChangedByClientBrowserAsync(tagWeb);

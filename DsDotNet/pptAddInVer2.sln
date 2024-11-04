@@ -82,11 +82,11 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Common", "src\Engine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Windows", "..\Submodules\nuget\Windows\Dual.Common.Windows\Dual.Common.Windows.csproj", "{6A24022B-EDCF-4D24-95CF-9242E90090D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ppt.AddIn", "Apps\PptAddIn\Ppt.AddIn\Ppt.AddIn.csproj", "{D052D25E-D669-4FA3-8273-91043FFB035E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PptAddIn", "Apps\PptAddIn\PptAddIn\PptAddIn.csproj", "{D052D25E-D669-4FA3-8273-91043FFB035E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ppt.AddIn.DevXUI", "Apps\PptAddIn\Ppt.AddIn.DevXUI\Ppt.AddIn.DevXUI.csproj", "{53B9E4B4-83E6-4FA5-BAC6-D5A7740E0F47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PptAddIn.DevXUI", "Apps\PptAddIn\PptAddIn.DevXUI\PptAddIn.DevXUI.csproj", "{53B9E4B4-83E6-4FA5-BAC6-D5A7740E0F47}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Ppt.ToDS.FS", "Apps\PptAddIn\Ppt.ToDS.FS\Ppt.ToDS.FS.fsproj", "{E1A39EF5-9699-4BD2-A413-48F7381870A2}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PptToDs.FS", "Apps\PptAddIn\PptToDs.FS\PptToDs.FS.fsproj", "{E1A39EF5-9699-4BD2-A413-48F7381870A2}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PLC.HW", "src\PLC\PLC.HW\PLC.HW.fsproj", "{46253BB3-F65C-484F-A05C-E75A2D6A9C20}"
 EndProject

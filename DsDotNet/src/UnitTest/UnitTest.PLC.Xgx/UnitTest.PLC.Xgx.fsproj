@@ -11,6 +11,8 @@
         <GenerateProgramFile>false</GenerateProgramFile>
         <NoWarn>NU1702</NoWarn>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 

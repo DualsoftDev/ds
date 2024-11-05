@@ -10,6 +10,9 @@
 		<IsPackable>false</IsPackable>
 		<GenerateProgramFile>false</GenerateProgramFile>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -17,6 +20,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="DataType\DataTypeTester.fs" />
 		<Compile Include="Value\ValueParamTester.fs" />
 		<Compile Include="Time\TimeSystemTester.fs" />

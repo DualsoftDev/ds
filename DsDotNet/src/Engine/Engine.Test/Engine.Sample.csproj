@@ -8,6 +8,8 @@
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <PlatformTarget>AnyCPU</PlatformTarget>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">

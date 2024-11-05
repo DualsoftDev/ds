@@ -21,11 +21,12 @@ open Antlr4.Runtime
 // The following GUID is for the ID of the typelib if this project is exposed to COM.
 
 [<assembly: Guid("2a959eec-ba9d-4c77-841b-d1dce28137b1")>]
-[<assembly: InternalsVisibleTo("UnitTest.Engine")>]
-[<assembly: InternalsVisibleTo("UnitTest.Expression")>]
-[<assembly: InternalsVisibleTo("UnitTest.Server")>]
-[<assembly: InternalsVisibleTo("UnitTest.PLC.Xgx")>]
-[<assembly: InternalsVisibleTo("Engine.Sample")>]
+
+//[<assembly: InternalsVisibleTo("UnitTest.Engine,   Publickey=0024000004800000940000000602000000240000525341310004000001000100855bad84d588e7de3f5f42fc5cbede2a86f6e5719177dd89ac5acff32c4ddf0fc646cdfc487daed9578addbf403b0e89b9efa628185a44af0d48667ab990c5a977544fbedef85764883d6654d0c01340d69846d14ca838e0b69fd0d4c5a7d851240aa568bf0b1a2987758f60ad8741a479510b5b8bf45710e78aebd0e32795ba")>]
+[<assembly: InternalsVisibleTo("UnitTest.Expression, Publickey=0024000004800000940000000602000000240000525341310004000001000100855bad84d588e7de3f5f42fc5cbede2a86f6e5719177dd89ac5acff32c4ddf0fc646cdfc487daed9578addbf403b0e89b9efa628185a44af0d48667ab990c5a977544fbedef85764883d6654d0c01340d69846d14ca838e0b69fd0d4c5a7d851240aa568bf0b1a2987758f60ad8741a479510b5b8bf45710e78aebd0e32795ba")>]
+//[<assembly: InternalsVisibleTo("UnitTest.Server,   Publickey=0024000004800000940000000602000000240000525341310004000001000100855bad84d588e7de3f5f42fc5cbede2a86f6e5719177dd89ac5acff32c4ddf0fc646cdfc487daed9578addbf403b0e89b9efa628185a44af0d48667ab990c5a977544fbedef85764883d6654d0c01340d69846d14ca838e0b69fd0d4c5a7d851240aa568bf0b1a2987758f60ad8741a479510b5b8bf45710e78aebd0e32795ba")>]
+[<assembly: InternalsVisibleTo("UnitTest.PLC.Xgx,    Publickey=0024000004800000940000000602000000240000525341310004000001000100855bad84d588e7de3f5f42fc5cbede2a86f6e5719177dd89ac5acff32c4ddf0fc646cdfc487daed9578addbf403b0e89b9efa628185a44af0d48667ab990c5a977544fbedef85764883d6654d0c01340d69846d14ca838e0b69fd0d4c5a7d851240aa568bf0b1a2987758f60ad8741a479510b5b8bf45710e78aebd0e32795ba")>]
+[<assembly: InternalsVisibleTo("Engine.Sample,       Publickey=0024000004800000940000000602000000240000525341310004000001000100855bad84d588e7de3f5f42fc5cbede2a86f6e5719177dd89ac5acff32c4ddf0fc646cdfc487daed9578addbf403b0e89b9efa628185a44af0d48667ab990c5a977544fbedef85764883d6654d0c01340d69846d14ca838e0b69fd0d4c5a7d851240aa568bf0b1a2987758f60ad8741a479510b5b8bf45710e78aebd0e32795ba")>]
 [<assembly: DebuggerDisplay("[Text={GetText()}]", Target = typeof<RuleContext>)>]
 
 do ()

@@ -74,12 +74,12 @@ module ParserLoader =
         }
 
 
-    let LoadFromActivePath (activePath: string) (target:PlatformTarget) (usingGpt:bool)=
+    let LoadFromActivePath (activePath: string) (target:PlatformTarget) (autoGenDevice:bool)=
         ModelParser.ClearDicParsingText()
 
         let f() =
             let dir = PathManager.getDirectoryName (activePath.ToFile())
-            loadingDS dir activePath None usingGpt target
+            loadingDS dir activePath None autoGenDevice target
 
         let ret, millisecond = duration f
         printfn $"Elapsed time: {millisecond} ms"

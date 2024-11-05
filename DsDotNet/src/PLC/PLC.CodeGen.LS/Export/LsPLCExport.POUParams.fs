@@ -53,7 +53,7 @@ module POUParametersModule =
         ProjectComment     : string
         ScanProgramName    : string         // "Scan Program" or "스캔 프로그램".  Damn it!
         GlobalStorages     : Storages
-        ExistingLSISprj    : string option
+        ExistingLSISprj    : string
         POUs               : XgxPOUParams list
         MemoryAllocatorSpec: PLCMemoryAllocatorSpec
         EnableXmlComment   : bool
@@ -88,7 +88,7 @@ module POUParametersModule =
             ProjectComment = ""
             ScanProgramName = "Scan Program"
             GlobalStorages = Storages()
-            ExistingLSISprj = None
+            ExistingLSISprj = null
             POUs = []
             MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (0, memorySize) [] targetType)
             EnableXmlComment = false

@@ -12,7 +12,7 @@ open Dual.Common.UnitTest.FS
 type XgxDirectAddressTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
     //ADV, RET 주소 같음
-    let code (addBoolIn, addInt16Out) = 
+    let code (addBoolIn, addInt16Out) =
         $"""
             [sys] HelloDS = {{
                 [flow] f1 = {{
@@ -21,15 +21,15 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
                     }}
                 }}
                 [jobs] = {{
-                    f1.Device1."ADV(INTrue_OUT300)" = ({addBoolIn}:Boolean:True, {addInt16Out}:Int16:300s);  
-                    f1.Device1."RET(INTrue_OUT500)" = ({addBoolIn}:Boolean:True, {addInt16Out}:Int16:500s);  
+                    f1.Device1."ADV(INTrue_OUT300)" = ({addBoolIn}:Boolean:True, {addInt16Out}:Int16:300s);
+                    f1.Device1."RET(INTrue_OUT500)" = ({addBoolIn}:Boolean:True, {addInt16Out}:Int16:500s);
                 }}
                 [prop] = {{
                     [layouts] = {{
                         f1__Device1 = (979, 460, 220, 80);
                     }}
                 }}
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] f1__Device1; 
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] f1__Device1;
                 [versions] = {{
                     DS-Langugage-Version = 1.0.0.1;
                     DS-Engine-Version = 0.9.9.6;
@@ -46,7 +46,7 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
             ParserOptions.Create4Simulation(systemRepo, libPath, "ActiveCpuNA.me", None, DuNone)
             )
 
-        exportXMLforLSPLC(xgx, sys, "XXXXXXXXX", None,  0, 0, true, None)
+        exportXMLforLSPLC(xgx, sys, "XXXXXXXXX", null,  0, 0, true, 0)
 
 type XgiDirectAddressTest() =
     inherit XgxDirectAddressTest(XGI)

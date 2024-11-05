@@ -56,6 +56,10 @@ module Interface =
     // Collections and Managers
     type Storages() =
         inherit Dictionary<string, IStorage>(StringComparer.OrdinalIgnoreCase)
+        new (existing:Storages) =
+            Storages() then        // constructor chaning
+            for kv in existing do
+                base.Add(kv.Key, kv.Value)
 
     /// obsidian 문서 : DsDotNet/src/Doc/Obsidian/DS/Engine.Core/ITagManager.canvas 참고
     type ITagManager =

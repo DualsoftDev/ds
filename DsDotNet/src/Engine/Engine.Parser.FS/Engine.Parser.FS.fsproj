@@ -4,7 +4,8 @@
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>Engine.Parser.FS</RootNamespace>
         <LangVersion>8.0</LangVersion>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>

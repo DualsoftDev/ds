@@ -3,6 +3,7 @@
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>Engine.CodeGenPLC</RootNamespace>
         <LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OutputType>Library</OutputType>
         <OtherFlags>--warnon:1182</OtherFlags>

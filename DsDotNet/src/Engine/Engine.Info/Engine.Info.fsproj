@@ -4,6 +4,7 @@
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
 		<OutputType>Library</OutputType>
 		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>

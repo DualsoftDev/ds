@@ -2,7 +2,9 @@
 
     <PropertyGroup>
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>

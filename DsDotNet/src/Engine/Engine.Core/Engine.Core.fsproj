@@ -5,7 +5,8 @@
         <RootNamespace>Engine.Core</RootNamespace>
         <OutputType>Library</OutputType>
         <LangVersion>8.0</LangVersion>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <AssemblyVersion>1.0.18</AssemblyVersion>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>

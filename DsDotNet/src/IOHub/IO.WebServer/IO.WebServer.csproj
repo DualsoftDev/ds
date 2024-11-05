@@ -2,8 +2,10 @@
 
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
-		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<ImplicitUsings>enable</ImplicitUsings>
         <UserSecretsId>cf8adc81-1e4b-417a-b988-0672152d0eb8</UserSecretsId>
         <DockerDefaultTargetOS>Windows</DockerDefaultTargetOS>

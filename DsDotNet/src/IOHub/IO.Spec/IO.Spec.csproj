@@ -2,6 +2,8 @@
 
     <PropertyGroup>
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>

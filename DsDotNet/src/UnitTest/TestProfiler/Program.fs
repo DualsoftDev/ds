@@ -39,8 +39,7 @@ let main argv =
     let txt= File.ReadAllText(dsPath);
     let sys = loadSampleSystem(txt)
 
-    let xgxGenParams = XgxGenerationParameters.Create(XGI, sys, "XXXXXXXXX")
-    let result = exportXMLforLSPLC xgxGenParams
+    let result = exportXMLforLSPLC (XGI, sys, "XXXXXXXXX", XgxGenerationParameters.Default())
 
     0 // return an integer exit code
 

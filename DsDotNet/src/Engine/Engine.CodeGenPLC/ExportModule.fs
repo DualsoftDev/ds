@@ -151,9 +151,6 @@ module ExportModule =
     /// LS PLC (XGI or XGK) 생성을 위한 파라미터.  API 를 통해 생성 패러미터 전달시 사용. LsPLC.ExportXML 및  exportXMLforLSPLC 함수에서 사용
     type XgxGenerationParameters =
         {
-            PlatformTarget: PlatformTarget
-            mutable System: DsSystem
-            mutable OutputXmlPath: string
             mutable ExistingLSISprj: string
             mutable StartTimer: int
             mutable StartCounter: int
@@ -161,9 +158,6 @@ module ExportModule =
             mutable MaxPouSplit: int
         }
         static member Default() = {
-            PlatformTarget = XGI
-            System = getNull<DsSystem>()
-            OutputXmlPath = ""
             ExistingLSISprj = ""
             StartTimer = 0
             StartCounter = 0
@@ -171,22 +165,11 @@ module ExportModule =
             MaxPouSplit = 0     // 사용한다면 2000 정도 권장
         }
 
-        static member Create(platformTarget: PlatformTarget, system: DsSystem, outputXmlPath: string) =
-            {
-                XgxGenerationParameters.Default() with
-                    PlatformTarget = platformTarget
-                    System = system
-                    OutputXmlPath = outputXmlPath
-            }
 
-
-    let exportXMLforLSPLC (xgxGenParams:XgxGenerationParameters) =
+    let exportXMLforLSPLC (platformTarget:PlatformTarget, system:DsSystem, path:string, xgxGenParams:XgxGenerationParameters) =
         let _, millisecond =
             duration (fun () ->
                 let {
-                    PlatformTarget = platformTarget
-                    System = system
-                    OutputXmlPath = path
                     ExistingLSISprj = existingLSISprj
                     StartTimer = startTimer
                     StartCounter = startCounter
@@ -241,7 +224,8 @@ module ExportModule =
 
 
 type LsPLC =
-    static member ExportXML(xgxGenParams:XgxGenerationParameters) = exportXMLforLSPLC xgxGenParams
+    static member ExportXML(platformTarget:PlatformTarget, system:DsSystem, outputXmlPath:string, xgxGenParams:XgxGenerationParameters) =
+        exportXMLforLSPLC(platformTarget, system, outputXmlPath, xgxGenParams)
 
 
 

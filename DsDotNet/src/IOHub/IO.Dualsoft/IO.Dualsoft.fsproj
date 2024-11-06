@@ -4,6 +4,7 @@
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>Engine.Base</RootNamespace>
 		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<OtherFlags>--warnon:1182</OtherFlags>

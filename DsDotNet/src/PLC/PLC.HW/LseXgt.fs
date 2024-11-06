@@ -207,8 +207,9 @@ module rec XGT =
 
         [<Todo("메모리 allocator 구현")>]
         member x.CreateMAllocators() =
+            let start, size = x.StartFreeMWord, x.FreeMWordSize
             let startByte, endByte =
-                let startWord, endWord = x.FreeMWordSize, x.FreeMWordSize + x.StartFreeMWord
+                let startWord, endWord = start, start + size
                 startWord * 2, endWord * 2
             let {
                 BitAllocator  = x
@@ -228,5 +229,7 @@ type XGTDupExtensionForCSharp =
     [<Extension>]
     static member Duplicate(plcHw:PlcHw) =
         let y = PlcHw.Create(plcHw.PLCType, plcHw.IsFixedSlotAllocation)
+        y.StartFreeMWord <- plcHw.StartFreeMWord
+        y.FreeMWordSize <- plcHw.FreeMWordSize
         y.Bases <- plcHw.Bases.Map(_.Duplicate())
         y

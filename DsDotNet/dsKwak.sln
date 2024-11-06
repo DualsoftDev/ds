@@ -153,7 +153,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Db", "..\Submod
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Dual.PLC.TagParser.FS", "..\Submodules\nuget\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj", "{D4F3389C-9EE1-4098-88B0-088CA6FB6AED}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Winform", "..\Submodules\nuget\Common\Dual.Common.Winform\Dual.Common.Winform.csproj", "{D0457E88-A3B9-4FC8-861E-ED149D288F24}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Winform", "..\Submodules\nuget\Windows\Dual.Common.Winform\Dual.Common.Winform.csproj", "{D0457E88-A3B9-4FC8-861E-ED149D288F24}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Web.Blazor", "..\Submodules\nuget\Web\Dual.Web.Blazor\Dual.Web.Blazor.csproj", "{E8EA2874-2EA1-4F69-AE45-0E8087C3D013}"
 EndProject
@@ -190,21 +190,23 @@ Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Engine.Common", "src\Engine
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.Windows", "..\Submodules\nuget\Windows\Dual.Common.Windows\Dual.Common.Windows.csproj", "{6A24022B-EDCF-4D24-95CF-9242E90090D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ppt.AddIn", "Apps\PptAddIn\Ppt.AddIn\Ppt.AddIn.csproj", "{D052D25E-D669-4FA3-8273-91043FFB035E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PptAddIn", "Apps\PptAddIn\PptAddIn\PptAddIn.csproj", "{D052D25E-D669-4FA3-8273-91043FFB035E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ppt.AddIn.DevXUI", "Apps\PptAddIn\Ppt.AddIn.DevXUI\Ppt.AddIn.DevXUI.csproj", "{53B9E4B4-83E6-4FA5-BAC6-D5A7740E0F47}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PptAddIn.DevXUI.23.1.5", "Apps\PptAddIn\PptAddIn.DevXUI\PptAddIn.DevXUI.23.1.5.csproj", "{53B9E4B4-83E6-4FA5-BAC6-D5A7740E0F47}"
 EndProject
-Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Ppt.ToDS.FS", "Apps\PptAddIn\Ppt.ToDS.FS\Ppt.ToDS.FS.fsproj", "{E1A39EF5-9699-4BD2-A413-48F7381870A2}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PptToDs.FS", "Apps\PptAddIn\PptToDs.FS\PptToDs.FS.fsproj", "{E1A39EF5-9699-4BD2-A413-48F7381870A2}"
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "PLC.HW", "src\PLC\PLC.HW\PLC.HW.fsproj", "{46253BB3-F65C-484F-A05C-E75A2D6A9C20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dual.Common.Winform.DevX.24.1.4", "..\Submodules\nuget\Windows\Dual.Common.Winform.DevX.24.1.4\Dual.Common.Winform.DevX.24.1.4.csproj", "{944B204E-EF26-44D0-8C1F-BA63842F0534}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dual.Common.Winform.DevX.24.1.4", "..\Submodules\nuget\Windows\Dual.Common.Winform.DevX\Dual.Common.Winform.DevX.24.1.4.csproj", "{944B204E-EF26-44D0-8C1F-BA63842F0534}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestFormApp", "Apps\PptAddIn\TestFormApp\TestFormApp.csproj", "{06B8D7A7-303D-4564-BEA8-92E24226712B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dual.Common.AppSettings", "..\Submodules\nuget\Common\Dual.Common.AppSettings\Dual.Common.AppSettings.csproj", "{F255661B-359E-4721-B8CE-554F92A378FE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GlobalEventDetector", "Apps\PptAddIn\GlobalEventDetector\GlobalEventDetector.csproj", "{FD66CF6D-E9E5-47F1-B5AD-B1AEEC2CEEA7}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DsToXyz.FS", "Apps\PptAddIn\DsToXyz.FS\DsToXyz.FS.fsproj", "{28D7D008-BF7B-4EF6-9735-AF85B544EACC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -780,6 +782,14 @@ Global
 		{FD66CF6D-E9E5-47F1-B5AD-B1AEEC2CEEA7}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FD66CF6D-E9E5-47F1-B5AD-B1AEEC2CEEA7}.Release|x86.ActiveCfg = Release|Any CPU
 		{FD66CF6D-E9E5-47F1-B5AD-B1AEEC2CEEA7}.Release|x86.Build.0 = Release|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Debug|x86.Build.0 = Debug|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Release|x86.ActiveCfg = Release|Any CPU
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -869,6 +879,7 @@ Global
 		{06B8D7A7-303D-4564-BEA8-92E24226712B} = {38805256-453C-419E-8D46-446F61631212}
 		{F255661B-359E-4721-B8CE-554F92A378FE} = {26C13474-CCE3-4F11-9FAD-437BFD7FC25F}
 		{FD66CF6D-E9E5-47F1-B5AD-B1AEEC2CEEA7} = {38805256-453C-419E-8D46-446F61631212}
+		{28D7D008-BF7B-4EF6-9735-AF85B544EACC} = {38805256-453C-419E-8D46-446F61631212}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

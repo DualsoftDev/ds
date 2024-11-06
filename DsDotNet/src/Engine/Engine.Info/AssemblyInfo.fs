@@ -3,7 +3,7 @@ module AssemblyInfo
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices
 
-[<assembly: InternalsVisibleTo("UnitTest.Engine")>]
+[<assembly: InternalsVisibleTo("UnitTest.Engine, Publickey=0024000004800000940000000602000000240000525341310004000001000100855bad84d588e7de3f5f42fc5cbede2a86f6e5719177dd89ac5acff32c4ddf0fc646cdfc487daed9578addbf403b0e89b9efa628185a44af0d48667ab990c5a977544fbedef85764883d6654d0c01340d69846d14ca838e0b69fd0d4c5a7d851240aa568bf0b1a2987758f60ad8741a479510b5b8bf45710e78aebd0e32795ba")>]
 [<assembly: InternalsVisibleTo("Newtonsoft.Json")>]
 [<assembly: InternalsVisibleTo("DsWebApp.Server")>]
 

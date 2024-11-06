@@ -13,7 +13,7 @@ module ParserUtil =
         let dummy (_param: DeviceLoadParameters) : ExternalSystem = failwithlog "Should be reimplemented." in dummy
 
     let mutable internal fwdParseFqdn =
-        let dummy (_text: string) : string list = failwithlog "Should be reimplemented." in dummy
+        let dummy (_text: string) : string [] = failwithlog "Should be reimplemented." in dummy
 
     let getText (x: IParseTree) = x.GetText()
 

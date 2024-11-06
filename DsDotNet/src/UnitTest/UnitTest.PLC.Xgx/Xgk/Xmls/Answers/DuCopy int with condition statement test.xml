@@ -64,7 +64,7 @@
                                 </Rung>
                                 <Rung BlockMask="0">
                                     <Element ElementType="63" Coordinate="1025">
-                                        [0] _t1_XX = 3;
+                                        [0] copyIf(true, 3, _t1_XX);
                                     </Element>
                                 </Rung>
                                 <Rung BlockMask="0">

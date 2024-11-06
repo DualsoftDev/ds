@@ -165,7 +165,8 @@ module ExportModule =
             |]
 
             let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
-            globalStorage.Iter(fun tagKV->
+            let globalStorageCc = new Storages(globalStorage)
+            globalStorageCc.Iter(fun tagKV->
 
                 if not (usedTagNames.ContainsKey(tagKV.Key))
                    && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림

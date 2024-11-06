@@ -2,6 +2,7 @@
     <PropertyGroup>
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
         <RootNamespace>Engine.Import.Office</RootNamespace>
 		<OutputType>Library</OutputType>

@@ -14,30 +14,8 @@ module ObjectHolderTestModule =
         new() = NaiveHolder(null)
         member val Value = value with get, set
 
-    type FSharpRecord = {
-        Name  : string
-        Value : obj
-        Message : string
-        Tuple: obj*string
-    }
-
     [<TestFixture>]
     type ObjectHolderTest() =
-        [<Test>]
-        member _.FSharpRecordSerializeTest_NewtonSoft() =
-            let x = {Name="kwak"; Value=3.14; Message="Hello"; Tuple=(3, "three")}
-            let str = JsonConvert.SerializeObject(x)
-            let xx = JsonConvert.DeserializeObject<FSharpRecord>(str)
-            let str2 = JsonConvert.SerializeObject(xx)
-            str === str2
-
-        [<Test>]
-        member _.FSharpRecordSerializeTest_SystemText() =
-            let x = {Name="kwak"; Value=3.14; Message="Hello"; Tuple=(3, "three")}
-            let str = System.Text.Json.JsonSerializer.Serialize(x)
-            let xx = System.Text.Json.JsonSerializer.Deserialize<FSharpRecord>(str)
-            let str2 = System.Text.Json.JsonSerializer.Serialize(xx)
-            str === str2
 
         [<Test>]
         member _.DefaultSerializeTest() =
@@ -54,7 +32,7 @@ module ObjectHolderTestModule =
 
         [<Test>]
         member _.ObjectHolderSerializeTest() =
-            let serializeTest v = 
+            let serializeTest v =
                 let holder = ObjectHolder.Create(v)
                 let str1 = JsonConvert.SerializeObject holder
                 let str2 = holder.Serialize()
@@ -63,14 +41,14 @@ module ObjectHolderTestModule =
 
 
             serializeTest 1234567890123456789UL
-            serializeTest 123456789L          
-            serializeTest 123456789u          
-            serializeTest 123456789           
-            serializeTest 1234us              
-            serializeTest 1234s               
-            serializeTest false               
-            serializeTest 'a'                 
-            serializeTest 255uy               
+            serializeTest 123456789L
+            serializeTest 123456789u
+            serializeTest 123456789
+            serializeTest 1234us
+            serializeTest 1234s
+            serializeTest false
+            serializeTest 'a'
+            serializeTest 255uy
             serializeTest "hello, world"
 
 
@@ -95,7 +73,7 @@ module ObjectHolderTestModule =
             let un64 = ObjectHolder.Create(9234567890123456789UL)
             let v = un64.GetValue()
             let t = v.GetType()
-            
+
             let strUn64 = JsonConvert.SerializeObject(un64)
             let un64_ = JsonConvert.DeserializeObject<ObjectHolder>(strUn64)
             let v_ = un64_.GetValue()

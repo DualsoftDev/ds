@@ -4,7 +4,8 @@
         <OutputType>Library</OutputType>
         <TargetFrameworks>net8.0-windows</TargetFrameworks>
         <UseWindowsForms>true</UseWindowsForms>
-        <LangVersion>12.0</LangVersion>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
@@ -16,7 +17,7 @@
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
 		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Winform\Dual.Common.Winform.csproj" />
+		<ProjectReference Include="..\..\..\Submodules\nuget\Windows\Dual.Common.Winform\Dual.Common.Winform.csproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">

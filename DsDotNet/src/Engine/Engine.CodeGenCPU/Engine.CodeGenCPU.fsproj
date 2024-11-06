@@ -3,11 +3,14 @@
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>Engine.CodeGenCPU</RootNamespace>
 		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputType>Library</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
     <ItemGroup>

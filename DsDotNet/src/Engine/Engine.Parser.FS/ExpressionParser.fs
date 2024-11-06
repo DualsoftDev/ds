@@ -168,7 +168,7 @@ module rec ExpressionParserModule =
                                 | _ -> None
                             let! storage = storageFinder name
                             return storage.ToBoxedExpression() :?> IExpression
-                        } |> Option.defaultWith (fun () -> failwith $"Failed to find variable/tag name in {sctx.GetText()}")
+                        } |?? (fun () -> failwith $"Failed to find variable/tag name in {sctx.GetText()}")
 
                     | _ -> failwithlog "ERROR"
 

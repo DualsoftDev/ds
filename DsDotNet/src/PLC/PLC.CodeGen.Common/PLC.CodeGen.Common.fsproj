@@ -4,14 +4,15 @@
         <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>PLC.CodeGen.Common</RootNamespace>
-        <LangVersion>8.0</LangVersion>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <GenerateDocumentationFile>true</GenerateDocumentationFile>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
     <ItemGroup>

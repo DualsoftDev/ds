@@ -34,8 +34,7 @@ module XgxExpressionConvertorModule =
                 | Some(IsOpAC op) -> //when level <> 0 ->
                     let args = functionExpression.FunctionArguments
                     let var:IStorage =
-                        expStore
-                        |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(functionExpression))
+                        expStore |?? (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(functionExpression))
 
                     expandFunctionStatements.Add
                     <| DuPLCFunction {
@@ -325,7 +324,7 @@ module XgxExpressionConvertorModule =
 
                         match fn with
                         | IsOpABC _ ->
-                            let stg = expStore |> Option.defaultWith (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(exp))
+                            let stg = expStore |?? (fun () -> prjParam.CreateAutoVariableWithFunctionExpression(exp))
                             let stmt = DuAssign(assignCondition, newExp, stg)
                             let varExp = stg.ToExpression()
                             varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])

@@ -12,6 +12,23 @@ use-nuget-package:
 	@rm -f Directory.Packages.props Directory.Build.props
 	@dotnet restore Ds.sln
 
+SOLUTIONS := Ds dsKwak pptAddInVer2
+ramdisk:
+	@rm -rf /r/bin /r/build /r/packages /r/tmp /r/vs ./bin ./packages .vs
+	# SOLUTIONS 정의 바탕으로 /r/build/{solution name}  폴더 생성
+
+	@mkdir -p /r/bin /r/packages /r/tmp /r/vs
+	@ln -s /r/vs ./.vs
+	#@$(foreach sol, $(SOLUTIONS), mkdir -p /r/build/$(sol)/output /r/build/$(sol)/bin /r/vs/${sol}/.vs;  ln -s /r/vs/${sol}/.vs .vs/${sol})
+	@$(foreach sol, $(SOLUTIONS), \
+		( \
+			mkdir -p /r/build/$(sol)/output /r/build/$(sol)/bin && \
+			echo ""
+		);)
+
+	@ln -s /r/bin
+	@ln -s /r/packages
+	@(cd ../Submodules/nuget; make ramdisk)
 
 # powerpoint addin unittest 실패시 임시 대처
 tmp-link:

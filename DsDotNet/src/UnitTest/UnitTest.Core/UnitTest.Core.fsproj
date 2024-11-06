@@ -3,12 +3,15 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
 		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<RootNamespace>UnitTestCore</RootNamespace>
 
         <IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>
         <IsTestProject>true</IsTestProject>
-    </PropertyGroup>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
 
     <ItemGroup>
         <Compile Include="CloneSystem\SystemCloneTester.fs" />

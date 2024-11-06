@@ -4,12 +4,13 @@
         <TargetFrameworks>net48;net8.0</TargetFrameworks>
         <RootNamespace>Engine.Parser.FS</RootNamespace>
         <LangVersion>8.0</LangVersion>
-        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>..\..\..\dualsoft.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
     <ItemGroup>
@@ -53,9 +54,11 @@
     </ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.4.7" />
 	</ItemGroup>
 
 

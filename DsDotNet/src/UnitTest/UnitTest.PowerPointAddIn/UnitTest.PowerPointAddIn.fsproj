@@ -3,6 +3,7 @@
     <PropertyGroup>
         <TargetFramework>net8.0-windows</TargetFramework>
 		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<NoWarn>$(NoWarn);NU1702;NU1702</NoWarn>
 		<IsPackable>false</IsPackable>
         <GenerateProgramFile>false</GenerateProgramFile>

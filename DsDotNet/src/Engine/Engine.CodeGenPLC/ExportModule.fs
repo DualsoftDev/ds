@@ -2,14 +2,16 @@ namespace Engine.CodeGenPLC
 
 open System.IO
 open System.Linq
-open System.Runtime.CompilerServices
-open Engine.Core
+
 open Dual.Common.Core.FS
-open PLC.CodeGen.LS
-open PLC.CodeGen.Common
-open Engine.CodeGenCPU
 open Dual.Common.Base.FS
 open Dual.Common.Base.CS
+
+open Engine.Core
+open Engine.CodeGenCPU
+
+open PLC.CodeGen.LS
+open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module ExportModule =
@@ -146,9 +148,47 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (platformTarget:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool, maxPouSplit:int) =
+    /// LS PLC (XGI or XGK) 생성을 위한 파라미터.  API 를 통해 생성 패러미터 전달시 사용. LsPLC.ExportXML 및  exportXMLforLSPLC 함수에서 사용
+    type XgxGenerationParameters =
+        {
+            PlatformTarget: PlatformTarget
+            System: DsSystem
+            OutputXmlPath: string
+            mutable ExistingLSISprj: string
+            mutable StartTimer: int
+            mutable StartCounter: int
+            mutable EnableXmlComment: bool
+            mutable MaxPouSplit: int
+        }
+        static member Create(platformTarget: PlatformTarget, system: DsSystem, outputXmlPath: string) = {
+                PlatformTarget = platformTarget
+                System = system
+                OutputXmlPath = outputXmlPath
+                ExistingLSISprj = null
+                StartTimer = 0
+                StartCounter = 0
+                EnableXmlComment = true
+                MaxPouSplit = 0     // 사용한다면 2000 정도 권장
+            }
+
+
+    let exportXMLforLSPLC (xgxGenParams:XgxGenerationParameters) =
         let _, millisecond =
             duration (fun () ->
+                let {
+                    PlatformTarget = platformTarget
+                    System = system
+                    OutputXmlPath = path
+                    ExistingLSISprj = existingLSISprj
+                    StartTimer = startTimer
+                    StartCounter = startCounter
+                    EnableXmlComment = enableXmlComment
+                    MaxPouSplit = maxPouSplit
+                } = xgxGenParams
+
+                if !! platformTarget.IsOneOf(XGI, XGK) then
+                    failwithf $"Not supported plc {platformTarget} type"
+
                 //use _ = DcLogger.CreateTraceEnabler()
                 let globalStorage = new Storages()
                 let localStorage = new Storages()
@@ -192,24 +232,8 @@ module ExportModule =
     let exportTextforDS () = ()
 
 
-    type XgxGenerationParameters =
-        {
-            System: DsSystem
-            OutputXmlPath: string
-            ExistingLSISprj: string
-            StartTimer: int
-            StartCounter: int
-            EnableXmlComment: bool
-            MaxPouSplit: int
-        }
+type LsPLC =
+    static member ExportXML(xgxGenParams:XgxGenerationParameters) = exportXMLforLSPLC xgxGenParams
 
-[<Extension>]
-type ExportModuleExt =
-    [<Extension>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, existingLSISprj:string, startTimer, startCounter, enableXmlComment, maxPouSplit) =
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter, enableXmlComment, maxPouSplit)
 
-    [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, existingLSISprj:string, startTimer, startCounter, enableXmlComment, maxPouSplit) =
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter, enableXmlComment, maxPouSplit)
 

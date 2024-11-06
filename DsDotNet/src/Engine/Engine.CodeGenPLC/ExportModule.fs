@@ -152,23 +152,31 @@ module ExportModule =
     type XgxGenerationParameters =
         {
             PlatformTarget: PlatformTarget
-            System: DsSystem
-            OutputXmlPath: string
+            mutable System: DsSystem
+            mutable OutputXmlPath: string
             mutable ExistingLSISprj: string
             mutable StartTimer: int
             mutable StartCounter: int
             mutable EnableXmlComment: bool
             mutable MaxPouSplit: int
         }
-        static member Create(platformTarget: PlatformTarget, system: DsSystem, outputXmlPath: string) = {
-                PlatformTarget = platformTarget
-                System = system
-                OutputXmlPath = outputXmlPath
-                ExistingLSISprj = null
-                StartTimer = 0
-                StartCounter = 0
-                EnableXmlComment = true
-                MaxPouSplit = 0     // 사용한다면 2000 정도 권장
+        static member Default() = {
+            PlatformTarget = XGI
+            System = getNull<DsSystem>()
+            OutputXmlPath = ""
+            ExistingLSISprj = ""
+            StartTimer = 0
+            StartCounter = 0
+            EnableXmlComment = true
+            MaxPouSplit = 0     // 사용한다면 2000 정도 권장
+        }
+
+        static member Create(platformTarget: PlatformTarget, system: DsSystem, outputXmlPath: string) =
+            {
+                XgxGenerationParameters.Default() with
+                    PlatformTarget = platformTarget
+                    System = system
+                    OutputXmlPath = outputXmlPath
             }
 
 

@@ -139,7 +139,7 @@ module rec XGT =
             with get() = isFixedSlotAllocation
             and set(v) =
                 if not v && x.PLCType = XGI then
-                    failwith "ERROR: XGI 에서는 가변 slot 을 사용할 수 없습니다."
+                    failwith "ERROR: XGI 나 WINDOWS 에서는 가변 slot 을 사용할 수 없습니다."
                 isFixedSlotAllocation <- v
 
         /// PLC HW 생성: Serialization 이외의 방법으로 생성하는 유일한 생성자

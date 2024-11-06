@@ -356,7 +356,7 @@ module DsAddressModule =
             let outA = if ce.OutAddress = "" then TextAddrEmpty else ce.OutAddress
             updateHwAddress ce (inA, outA)  target
 
-        let devsJob =  sys.GetTaskDevsSkipEmptyAddress()
+        let devsJob =  sys.GetTaskDevsWithoutSkipAddress()
         let mutable extCnt = 0
         for dev, job in devsJob do
             let inSkip, outSkip = getSkipInfo(dev, job)

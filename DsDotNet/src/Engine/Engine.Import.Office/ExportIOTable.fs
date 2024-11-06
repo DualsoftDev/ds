@@ -131,7 +131,7 @@ module ExportIOTable =
         let totalRows =
             seq {
                 let mutable extCnt = 0
-                let devsJob =  sys.GetTaskDevsSkipEmptyAddress()
+                let devsJob =  sys.GetTaskDevs()
 
                 for (dev, job) in  devsJob do
                     //외부입력 전용 확인하여 출력 생성하지 않는다.

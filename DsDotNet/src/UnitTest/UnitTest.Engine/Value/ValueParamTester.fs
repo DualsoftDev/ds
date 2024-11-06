@@ -15,6 +15,13 @@ module ValueParamTesterModule =
         let vp = createValueParam(input)
         ClassicAssert.AreEqual(expected, vp.ToText())
 
+    // Helper function to create and assert ValueParam
+    let tryCreateValueParam (input: string) =
+        try
+            createValueParam(input) |> Some
+        with 
+            | ex -> None
+
     // Define the ValueParamTester class for testing
     type ValueParamTester() =
 
@@ -129,18 +136,18 @@ module ValueParamTesterModule =
 
         [<Test>]
         member this.``Test invalid range input returns None``() =
-            let vp = createValueParam("[10, 5]")  // Invalid range where min > max
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("[10, 5]")  // Invalid range where min > max
+            Assert.That(vp.IsNone, Is.True)
 
         [<Test>]
         member this.``Test invalid type input returns None``() =
-            let vp = createValueParam("[5, 'A']")  // Invalid type comparison between int and string
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("[5, 'A']")  // Invalid type comparison between int and string
+            Assert.That(vp.IsNone, Is.True)
 
         [<Test>]
         member this.``Test invalid single value input returns None``() =
-            let vp = createValueParam("x = 'invalid'")  // Invalid single value
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("x = 'invalid'")  // Invalid single value
+            Assert.That(vp.IsNone, Is.True)
 
         [<Test>]
         member this.``Test range with floating point numbers parsing``() =
@@ -158,21 +165,21 @@ module ValueParamTesterModule =
 
         [<Test>]
         member this.``Test invalid range format returns None``() =
-            let vp = createValueParam("[1, 2, 3]")  // Invalid format for range
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("[1, 2, 3]")  // Invalid format for range
+            Assert.That(vp.IsNone, Is.True)
 
         [<Test>]
         member this.``Test empty input returns None``() =
-            let vp = createValueParam("")  // Empty input should return None
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("")  // Empty input should return None
+            Assert.That(vp.IsNone, Is.True)
 
        
         [<Test>]
         member this.``Test unsupported operator returns None``() =
-            let vp = createValueParam("?? 5")  // Unsupported operator
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("?? 5")  // Unsupported operator
+            Assert.That(vp.IsNone, Is.True)
 
         [<Test>]
         member this.``Test value with special characters returns None``() =
-            let vp = createValueParam("x = @#$")  // Special characters in value
-            Assert.That(vp.IsDefaultValue, Is.True)
+            let vp = tryCreateValueParam("x = @#$")  // Special characters in value
+            Assert.That(vp.IsNone, Is.True)

@@ -79,7 +79,6 @@ module ConvertCPU =
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                //if (v:?>Call).IsJob && not(RuntimeDS.Package.IsPackageSIM()) then
                 if (v:?>Call).IsJob then
                     yield! vc.E1_CallErrTimeOver()
                     yield! vc.E2_CallErrRXMonitor()
@@ -250,15 +249,15 @@ module ConvertCPU =
 
                 updateSourceTokenOrder sys
 
-                match RuntimeDS.Package with
-                | PCSIM ->
-                    setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
-                | _->
-                    updateDuplicateAddress sys
-                    CheckNullAddress sys
-                    checkJobs sys
-                    checkErrHWItem(sys)
-                    checkErrApi(sys)
+                //match RuntimeDS.Package with
+                //| PCSIM ->
+                //    setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
+                //| _->
+                updateDuplicateAddress sys
+                checkNullAddress sys
+                checkJobs sys
+                checkErrHWItem(sys)
+                checkErrApi(sys)
 
                 checkMultiDevPair(sys)
 

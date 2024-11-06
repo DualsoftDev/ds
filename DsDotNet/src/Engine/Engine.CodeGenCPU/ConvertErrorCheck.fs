@@ -100,7 +100,7 @@ module ConvertErrorCheck =
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
-    let CheckNullAddress (sys: DsSystem) =
+    let checkNullAddress (sys: DsSystem) =
         // Check for null addresses in jobs
         let nullTagJobs =
             sys.Jobs.SelectMany(fun j -> j.GetNullAddressDevTask()) |> toArray

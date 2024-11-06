@@ -4,6 +4,7 @@ open System.Collections.Concurrent
 open System
 open Engine.Core
 open System.Collections.Generic
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module Util =
@@ -95,4 +96,45 @@ module Util =
         | "P" ->Some ActionType.DuPauseAction
         | _ -> None
 
+
+    let parseMultiActionString (str:string) =
+        let str = str.TrimStart('[').TrimEnd(']')
+        let mainPart, optionalPart = 
+            if str.Contains("(") then 
+                let parts = str.Split([| '('; ')' |], StringSplitOptions.RemoveEmptyEntries)
+                (parts.[0].TrimStart(TextJobMulti.ToCharArray()), parts.TryItem(1))
+            else 
+                (str.TrimStart(TextJobMulti.ToCharArray()), None)
+
+        let cnt = int mainPart
+        let inCnt, outCnt = 
+            match optionalPart with
+            | Some opt -> 
+                let values = opt.Split(',')
+                values[0]|>int, values[1]|>int
+            | None ->  cnt,  cnt
+
+        cnt, inCnt, outCnt
+
+    let getJobDevParam param =
+        let cnt, inCnt, outCnt = parseMultiActionString param
+        if cnt < 1 then failWithLog $"MultiAction Count >= 1 : {param}"
+        { TaskDevCount = cnt; InCount = inCnt; OutCount = outCnt }
+
+
+    let getParserJobType (param: string) =
+        if param.IsNullOrEmpty() then defaultJobDevParam()
+        else
+            let cnt, inCnt, outCnt = parseMultiActionString param
+            { TaskDevCount = cnt; InCount = inCnt; OutCount = outCnt }
+
+    let updateAddressSkip (jobDevParam:JobDevParam, job:Job) =
+        let inCnt = jobDevParam.InCount
+        let outCnt = jobDevParam.OutCount
+        let taskdevs =job.TaskDefs |> Seq.toList
+        for i in [1..jobDevParam.TaskDevCount] do
+            if inCnt < i then 
+                taskdevs[i-1].InAddress <- TextSkip
+            if outCnt < i then
+                taskdevs[i-1].OutAddress <- TextSkip
 

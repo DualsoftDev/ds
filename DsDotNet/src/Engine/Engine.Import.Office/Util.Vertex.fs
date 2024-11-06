@@ -47,30 +47,25 @@ module ImportUtilVertex =
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
             |Some api ->
                 let devTask =
-                    //let TaskDevPara =  node.TaskDevParam
-
                     match sys.TaskDevs.TryFind(fun d->d.ApiItem = api) with
                     | Some (taskDev) ->
-                        //taskDev.AddOrUpdateApiTaskDevParam(jobName, api, TaskDevPara)
                         taskDev
                     | _ ->
-                        //let apiPara  = {TaskDevParamIO =  TaskDevPara; ApiItem = api}
                         TaskDev(api, loadSysName, sys)
 
                 let job = Job(node.Job, sys, [devTask])
-                //job.UpdateTaskDevPara(node.TaskDevPara)
-                job.JobParam <- node.JobParam
+                updateAddressSkip( node.JobParam, job)
                 sys.Jobs.Add job |> ignore
-                Call.Create(job, parentWrapper)
+                Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
 
             | None ->
                 if device.AutoGenFromParentSystem 
                 then
                     let autoTaskDev = getAutoGenTaskDev device loadSysName  apiName 
                     let job = Job(node.Job, sys, [autoTaskDev])
-                    job.JobParam <- node.JobParam
+                    updateAddressSkip( node.JobParam, job)  
                     sys.Jobs.Add job |> ignore
-                    Call.Create(job, parentWrapper)
+                    Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
                 else
                     let ableApis = String.Join(", ", device.ReferenceSystem.ApiItems.Select(fun a->a.Name))
                     failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
@@ -102,7 +97,10 @@ module ImportUtilVertex =
                 else
                     Call.Create(getCommandFunc mySys node, parentWrapper)
             else
-                createCall (mySys, node, parentWrapper, platformTarget)
+                match mySys.Flows.TryFind(fun f-> f.Name = node.Job.Head()) with
+                | Some _ ->
+                    createCall (mySys, node, parentWrapper, platformTarget)
+                | None ->   failWithLog $"Flow not found : {node.Job.Head()}"
 
         node.UpdateCallProperty(call)
         dicSeg.Add(node.Key, call)

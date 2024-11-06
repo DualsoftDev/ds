@@ -19,7 +19,7 @@ type VertexTagManager with
         
         let iop = call.V.Flow.iop.Expr
         let rst = v.Flow.ClearExpr
-        let running = (v.PS.Expr <||> call.End) <&&> !@iop
+        let running = (v.PS.Expr(* <||> call.End*)) <&&> !@iop
 
         [|
             yield running --@ (v.TimeMax, call.TimeOutMaxMSec, fn)

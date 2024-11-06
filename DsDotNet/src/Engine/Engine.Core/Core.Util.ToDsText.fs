@@ -165,10 +165,7 @@ module internal ToDsTextModule =
                         |> Seq.map (fun d-> printDev d  false)
 
                     let jobItemText = jobItems.JoinWith("; ") + ";"
-                    if j.JobParam.ToText() = "" then
-                        yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"
-                    else
-                        yield $"{tab2}{j.QualifiedName}[{j.JobParam.ToText()}] = {lb} {jobItemText} {rb}"
+                    yield $"{tab2}{j.QualifiedName} = {lb} {jobItemText} {rb}"
 
                 yield $"{tab}{rb}"
             elif system.Functions.Any() then

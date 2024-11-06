@@ -4,6 +4,7 @@ namespace Engine.Import.Office
 open System.Collections.Generic
 open Engine.Core
 open Dual.Common.Core.FS
+open System
 
 [<AutoOpen>]
 module InterfaceClass =
@@ -40,7 +41,14 @@ module InterfaceClass =
             | COPY_DEV -> DuDevice
             | _ -> failwithlog "error"
 
-
+    type JobDevParam =
+        {
+            TaskDevCount: int
+            InCount: int 
+            OutCount: int 
+        }
+    let defaultJobDevParam() = { TaskDevCount = 1; InCount =  1; OutCount =  1 }
+    
     type ViewType =
         | VFLOW
         | VREAL

@@ -50,6 +50,8 @@ module ModelLoaderModule =
         }
     let createModelConfigReplacePath (cfg:ModelConfig, path:string) =
         { cfg with DsFilePath = path }
+    let createModelConfigReplacePackage (cfg:ModelConfig, runtimePackage:RuntimePackage) =
+        { cfg with RuntimePackage = runtimePackage }
 
 [<AutoOpen>]
 [<RequireQualifiedAccess>]

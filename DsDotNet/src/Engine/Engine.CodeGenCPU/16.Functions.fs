@@ -34,14 +34,7 @@ type CoinVertexTagManager with
         let fn = comment
         [|
             if call.TargetFunc.Value.Statements.any() then
-                let sets = 
-                    if RuntimeDS.Package.IsPLCorPLCSIM() then
-                        fbRising [v.PS.Expr]:> IExpression<bool>
-                    elif RuntimeDS.Package.IsPCorPCSIM() then
-                        v.CallCommandPulse.Expr   
-                    else
-                        failWithLog $"Not supported {RuntimeDS.Package} package"
-
+                let sets = v.CallCommandPulse.Expr :> IExpression<bool>
                 yield! (v.PS.Expr, v.System) --^ (v.CallCommandPulse, fn) 
 
                     ////test ahn

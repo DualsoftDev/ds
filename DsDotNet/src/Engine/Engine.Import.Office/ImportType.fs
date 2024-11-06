@@ -141,10 +141,15 @@ module ImportType =
 
 
         match nodeType with
-        | REAL -> checkDotErr();
+        | REAL -> checkDotErr(); 
+                  if name.EndsWith(")") then failWithLog $"Error: {name} Work는 () 속성을 입력할 수 없습니다. ex) [T(500ms), C(5)] "
         | REALExF ->
             if name.Contains(".") |> not then
                 failwithlog ErrID._54
+
+            if name.EndsWith(")") || name.EndsWith("]") 
+            then failWithLog $"다른 Flow Work는 속성을 입력할 수 없습니다. 해당 원본 Work에 입력하세요"
+
         | CALL | AUTOPRE ->
           // ok :  dev.api(10,403)[XX]  err : dev(10,403)[XX] 순수CMD 호출은 속성입력 금지
             if not(name.Contains(".")) &&  GetSquareBrackets(name, false).IsSome

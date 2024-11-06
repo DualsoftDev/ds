@@ -45,7 +45,7 @@ module DsCallTypeModule =
         if matchResult.Success then
             let parsedValue = matchResult.Groups.[1].Value.Trim()
             if parsedValue.Contains(".") then failwith $"Invalid time format: {parsedValue} must be an integer"
-            if findKey.ToLower() <> TextCOUNT.ToLower() && not(parsedValue.EndsWith("ms")) then failwith $"Invalid time format: {parsedValue} must end with 'ms'"
+            if findKey.ToLower() <> TextPPTCOUNT.ToLower() && not(parsedValue.EndsWith("ms")) then failwith $"Invalid time format: {parsedValue} must end with 'ms'"
             let numericValue = parsedValue.Replace("ms", "")
             UInt32.TryParse(numericValue) |> function | true, value -> Some value | _ -> None
         else None

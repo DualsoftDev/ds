@@ -80,7 +80,7 @@ module ModelParser =
         [
             for ctx in sysctx.Descendants<JobBlockContext>() do
                 let callListings = commonCallParamExtractor ctx
-                for jobNameFqdn, _jobParam, _apiDefCtxs, callListingCtx in callListings do
+                for jobNameFqdn, _apiDefCtxs, callListingCtx in callListings do
                     yield getAutoGenDevApi (jobNameFqdn,  callListingCtx)
         ]
 

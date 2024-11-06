@@ -51,45 +51,13 @@ module PptNodeUtilModule =
         //    newJob
 
 
-        let getJobNameWithJobParam(jobFqdn:string seq, jobDevParam:JobDevParam) =
-            let jobParamText =  jobDevParam.ToText()
-            match jobParamText with
-            | "" -> jobFqdn
-            |_   ->
-                    jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
+        //let getJobNameWithJobParam(jobFqdn:string seq, jobDevParam:JobDevParam) =
+        //    let jobParamText =  jobDevParam.ToText()
+        //    match jobParamText with
+        //    | "" -> jobFqdn
+        //    |_   ->
+        //            jobFqdn.SkipLast(1).Append( $"{jobFqdn.Last()}[{jobParamText}]").ToArray()
 
-
-        let getNodeValueParam (shape:Shape, name:string, iPage:int, isRoot, nodeType) =
-            let error(msg)  = $"{msg} \r\n{name} 입출력 규격을 확인하세요. \r\nDevice.Api(입력, 출력) 규격 입니다. \r\n기본예시(300,500) 입력생략(-,500) 출력생략(300, -)"
-            try
-                let getParam x =
-                        if x = TextSkip then
-                            defaultValueParam() 
-                        else
-                            createValueParam x 
-                            
-
-                let func = GetLastParenthesesContents(name) |> trimSpaceNewLine
-                if func.Contains(",") then
-
-                    let inFunc, outFunc =
-                        func.Split(",").Head().Replace(TextJobNegative, "") |> trimSpaceNewLine, //JobNegative 은 jobDevParam에서 다시 처리
-                        func.Split(",").Last() |> trimSpaceNewLine
-                    ((getParam inFunc), (getParam outFunc))
-                else
-                    let param = getParam func
-                    if isRoot || nodeType = AUTOPRE //생략 규격 입력시에 Root/AUTOPRE 는 조건으로 Real내부는 출력으로 인식
-                    then
-                        (param, defaultValueParam())
-                    else
-                        if param.IsRangeValue
-                        then 
-                            failwithlog $"RangeValue은 입력규격만 가능합니다."    
-
-                        (defaultValueParam(), param)
-
-            with ex ->
-                shape.ErrorName(error(ex.Message), iPage)
 
         let getTrimName(shape:Shape, nameTrim:string) =
             match GetSquareBrackets(nameTrim, false) with

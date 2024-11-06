@@ -49,7 +49,9 @@ module PptNodeModule =
         , rootNode          : bool option
         //, taskDevParam      : TaskDevParamIO
         , jobDevParam       : JobDevParam
-        , CallTime           : CallTime option
+        , callTime          : CallTime option
+        , callActionType    : CallActionType 
+        
         , valueParamIO      : ValueParamIO 
         , ifTX              : string
         , ifRX              : string
@@ -121,36 +123,16 @@ module PptNodeModule =
             real.NoTransData <- x.RealNoTrans
 
         member x.Job = x.JobPure.ToArray()
-            //getJobNameWithTaskDevParaIO(x.JobPure, taskDevParam).ToArray()
-
-        member x.JobWithJobPara =
-            getJobNameWithJobParam(x.Job, jobDevParam).ToArray()
 
         member x.UpdateNodeRoot(isRoot: bool) =
             rootNode <- Some isRoot
-            //if nodeType = CALL || nodeType = AUTOPRE then
-            //    let hasTaskDevParam = GetLastParenthesesReplaceName(nameNFunc(shape, macros, iPage), "") <> nameNFunc(shape, macros, iPage)
-            //    if name.Contains(".")  //isDevCall
-            //    then
-            //        if hasTaskDevParam then
-            //            let tPara = getNodeTaskDevParam (shape, nameNFunc(shape, macros, iPage), iPage, isRoot , nodeType)
-            //            ValueParamIO <- tPara
-
-            //        else
-            //            if isRoot then
-            //                let inPara = createTaskDevParam  None None  |> Some
-            //                taskDevParam <-TaskDevParamIO(inPara, None)
-
-            //            elif nodeType = AUTOPRE then
-            //                taskDevParam <- createTaskDevParaIOInTrue()
-            //    else
-            //        if hasTaskDevParam then
-            //            failWithLog $"{name} 'TaskDevParam' error"
 
         member x.UpdateCallProperty(call: Call) =
+            call.CallActionType <- callActionType
             call.Disabled <- x.DisableCall
-            if CallTime.IsSome then
-                call.CallTime <- CallTime.Value
+            if callTime.IsSome then
+                call.CallTime <- callTime.Value
+
 
         member x.JobPure : string seq =
             if not (nodeType = CALL || nodeType = AUTOPRE) then
@@ -226,7 +208,9 @@ module PptNodeModule =
             let mutable ifRX = ""
             let mutable realGoingTime:CountUnitType option = None
             let mutable realRepeatCnt:CountUnitType option = None
-            let mutable CallTime:CallTime option = None
+            let mutable callTime:CallTime option = None
+            let mutable callActionType:CallActionType  = CallActionType.ActionNormal
+            
             let mutable valueParamIO:ValueParamIO  = defaultValueParamIO()
 
           
@@ -269,8 +253,8 @@ module PptNodeModule =
 
             let updateTimeNCounter() =
                 let contents = GetLastBracketContents (shape.InnerText)
-                realGoingTime <- parseUIntMSec contents TextTIME
-                realRepeatCnt <- parseUIntMSec contents TextCOUNT
+                realGoingTime <- parseUIntMSec contents TextPPTTIME
+                realRepeatCnt <- parseUIntMSec contents TextPPTCOUNT
       
                 
             let namePure(shape:Shape) =
@@ -288,7 +272,8 @@ module PptNodeModule =
             try
                 nameCheck (shape, nodeType, iPage, name)
                 match nodeType with
-                |  REAL -> updateTimeNCounter()
+                |  REAL -> 
+                    updateTimeNCounter()
                 |  CALL -> 
                     match GetSquareBrackets(shape.InnerText, true) with
                     | Some text -> text.Split(';').Iter(fun s -> safeties.Add s |> ignore)
@@ -319,8 +304,8 @@ module PptNodeModule =
                             | _, Some a -> addActionDic.Add(n |> TrimSpace, a)
                             | _ -> failWithLog $"{t} is Error Type")
 
-                | REALExF -> updateTimeNCounter()
-                | (LAYOUT | AUTOPRE | DUMMY) -> ()
+                
+                | (REALExF | LAYOUT | AUTOPRE | DUMMY) -> ()
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
                 if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
@@ -334,41 +319,39 @@ module PptNodeModule =
                         | _ ->
                             failwith $"Error: {callNAutoPreName}"
 
-                    let jobPram =
-                        let devP = devProp           |> trimSpace |> GetLastBracketContents    // e.g "[5(5,1)]"
-                        let apiP = apiProp           |> trimSpace |> GetLastBracketRemoveName |> trimSpace |> GetLastParenthesesContents    // e.g "(!200, 300)"
-                        let jobP = callNAutoPreName  |> trimSpace |> GetLastParenthesesRemoveName |> trimSpace  |>GetLastBracketContents   // e.g "[PUSH, MAX(1200ms), CHK(500ms)]]"
-                        if devP = "" && apiP = "" && jobP = "" then
-                            defaultJobDevParam()
-                        else
-                            let cntPara =    devP |> GetLastParenthesesRemoveName    // e.g "5"
-                            let cntOptPara = devP |> GetLastParenthesesContents      // e.g "5,1"
-                            let paraText =  // e.g "N5(5,1)"
-                                match  cntPara,  cntOptPara with
-                                | "", "" -> ""
-                                | "", _ -> failWithLog $"err: {name}MultiAction Count >= 1 : {cntPara}"
-                                | _ , "" -> $"{TextJobMulti}{cntPara}"
-                                | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
+                    let devP = devProp           |> trimSpace |> GetLastBracketContents    // e.g "[5(5,1)]"
+                    let apiP = apiProp           |> trimSpace |> GetLastBracketRemoveName |> trimSpace |> GetLastParenthesesContents    // e.g "(!200, 300)"
+                    let jobP = callNAutoPreName  |> trimSpace |> GetLastParenthesesRemoveName |> trimSpace  |>GetLastBracketContents   // e.g "[PUSH, MAX(1200ms), CHK(500ms)]]"
+                    if devP = "" && apiP = "" && jobP = "" then
+                        ()
+                    else
+                        let cntPara =    devP |> GetLastParenthesesRemoveName    // e.g "5"
+                        let cntOptPara = devP |> GetLastParenthesesContents      // e.g "5,1"
+                        let paraText =  // e.g "N5(5,1)"
+                            match  cntPara,  cntOptPara with
+                            | "", "" -> ""
+                            | "", _ -> failWithLog $"err: {name}MultiAction Count >= 1 : {cntPara}"
+                            | _ , "" -> $"{TextJobMulti}{cntPara}"
+                            | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
                             
-                            if not (apiP.IsNullOrEmpty()) then
-                                if apiP.Contains(TextInOutSplit) then
-                                    let inV = createValueParam (apiP.Split(TextInOutSplit).Head().Trim() )
-                                    let outV = createValueParam (apiP.Split(TextInOutSplit).Last().Trim() )
-                                    valueParamIO <- ValueParamIO(inV, outV)
-                                else 
-                                    failWithLog $"err: {name}(input, output) {TextInOutSplit} 로 구분되어 입력해야 합니다. "
+                        if not (apiP.IsNullOrEmpty()) then
+                            if apiP.Contains(TextInOutSplit) then
+                                let inV = createValueParam (apiP.Split(TextInOutSplit).Head().Trim() )
+                                let outV = createValueParam (apiP.Split(TextInOutSplit).Last().Trim() )
+                                valueParamIO <- ValueParamIO(inV, outV)
+                            else 
+                                failWithLog $"err: {name}(input, output) {TextInOutSplit} 로 구분되어 입력해야 합니다. "
 
-                            let jobPush = if jobP.Contains(TextCallPush) then $"{TextCallPush}" else ""
-                            
-                            let callT = getCallTime jobP
-                            if not(callT.IsDefault)
-                            then
-                                CallTime <- Some callT
-                            let items = [paraText; jobPush].Where(fun f->not(f.IsNullOrEmpty()))
-                            getParserJobType(String.Join(";", items))
+                        if jobP.Contains(TextCallPush) 
+                        then callActionType <- CallActionType.Push 
 
+                        let callT = getCallTime jobP
+                        if not(callT.IsDefault)
+                        then
+                            callTime <- Some callT
 
-                    jobDevParam <- jobPram
+                        let items = [paraText].Where(fun f->not(f.IsNullOrEmpty()))
+                        jobDevParam <- getParserJobType(String.Join(";", items))
             with ex ->
                 shape.ErrorShape(ex.Message, iPage)
 
@@ -391,7 +374,8 @@ module PptNodeModule =
                     , rootNode
                     //, taskDevParam
                     , jobDevParam
-                    , CallTime
+                    , callTime
+                    , callActionType
                     , valueParamIO
                     , ifTX
                     , ifRX

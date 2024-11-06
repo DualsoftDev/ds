@@ -12,7 +12,7 @@ module ConvertAddressModule =
         let allAddresses = 
             [
                 yield!
-                    sys.GetTaskDevsSkipEmptyAddress()
+                    sys.GetTaskDevsWithoutSkipAddress()
                         .Select(fst)
                         .Distinct()
                         .Collect(fun d -> [($"{d.FullName}_IN", d.InTag); ($"{d.FullName}_OUT", d.OutTag)])

@@ -445,7 +445,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 [
                     if nonCausalsContext.any() then
                         let nonCausalGroup = nonCausalsContext.Head()
-                        yield!  nonCausalGroup.TryFindChildren<Identifier1Context>().Cast<ParserRuleContext>()
+                        yield!  nonCausalGroup.TryFindChildren<CausalTokenContext>().Cast<ParserRuleContext>()
+                        //yield!  nonCausalGroup.TryFindChildren<Identifier1Context>().Cast<ParserRuleContext>()
                         //yield!  nonCausalGroup.TryFindChildren<IdentifierOpCmdContext>().Cast<ParserRuleContext>()
                 ]
             [
@@ -614,7 +615,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 taskDev.TaskDevParamIO <- taskDevParamIO
                 taskDev
 
-            for jobNameFqdn, jobDevParam, apiDefCtxs, callListingCtx in callListings do
+            for jobNameFqdn, apiDefCtxs, callListingCtx in callListings do
 
                 let apiDefs =
                     if apiDefCtxs.any() then
@@ -694,8 +695,6 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
 
                 let job = Job(jobNameFqdn, system, taskList)
-                job.JobParam <- jobDevParam
-
                 job |> system.Jobs.Add
 
 

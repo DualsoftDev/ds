@@ -27,7 +27,6 @@
         <Compile Include="DsTypes\DsDataType.fs" />
         <Compile Include="DsTypes\DsValueType.fs" />
         <Compile Include="DsTypes\DsTaskDevType.fs" />
-        <Compile Include="DsTypes\DsJobType.fs" />
         <Compile Include="DsTypes\DsCallType.fs" />
         <Compile Include="DsEvent.fs" />
         <Compile Include="DsLog.fs" />

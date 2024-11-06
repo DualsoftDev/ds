@@ -27,7 +27,7 @@ module RunTimeModule =
         let systems = [mySystem] @ loadedSystems |> toArray
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
-        let mutable scanSimDelay:int = 10
+        let mutable scanSimDelay:int = 1
         let disposables = new CompositeDisposable()
 
         let tagWebChangedFromCpuSubject = new Subject<TagWeb>()

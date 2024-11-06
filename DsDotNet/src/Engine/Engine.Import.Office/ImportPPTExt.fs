@@ -314,8 +314,9 @@ module ImportU =
                     try
                         if not(dicChildParent.ContainsKey node) then
                             failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
-
-                        match mySys.GetCallVertices().TryFind(fun c-> c.TargetJob.DequotedQualifiedName = node.Job.Combine()) with 
+                        
+                        let calls = mySys.GetCallVertices().Where(fun f->f.IsJob)
+                        match calls.TryFind(fun c-> c.TargetJob.DequotedQualifiedName = node.Job.Combine()) with 
                         | Some call -> dicAutoPreCall.Add(node.Key, call)
                         | None -> failwithlog $"{node.Name} AUTOPRE dicAutoPreCall.Add Error"
 
@@ -526,22 +527,11 @@ module ImportU =
                    .OfType<Call>().Where(fun call -> call.IsJob)
                    .Select(fun call -> call.DequotedQualifiedName,  call) |> dict
 
-            //let dicChildParent =
-            //    doc.Parents
-            //    |> Seq.collect (fun (KeyValue(parent, children)) ->
-            //        children |> Seq.map (fun child -> child, parent))
-            //    |> dict
-
             doc.Nodes
             |> Seq.iter(fun node ->
                 node.Safeties
                 |> iter (fun fqdn  ->
-                        //let parentWrapper =
-                        //    if dicChildParent.ContainsKey(node) then
-                        //        doc.DicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
-                        //    else
-                        //        node.Shape.ErrorName($"err: {fqdn} flow 에는 safety 입력이 불가능 합니다.", node.PageNum)
-
+                     
                         let safetyName =
                             let items = fqdn.Split('.').Select(fun s->s.Trim())
                             match items.length() with

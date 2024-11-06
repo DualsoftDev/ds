@@ -624,15 +624,14 @@ module rec CoreModule =
             member val IsRootOnlyDevice = false  with get, set
 
         /// Job 정의: Call 이 호출하는 Job 항목
-        type Job (names:Fqdn, system:DsSystem, tasks:TaskDev seq) =
+        type Job (names:Fqdn, system:DsSystem, tasks:TaskDev list) =
             inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-            member val JobParam = defaultJobDevParam()  with get, set
-            member x.TaskDevCount  = x.JobParam.TaskDevCount
-            member x.AddressInCount  = x.JobParam.InCount 
-            member x.AddressOutCount = x.JobParam.OutCount
+            member x.TaskDevCount  = tasks.length()
+            member x.AddressInCount  = tasks.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextSkip).length()
+            member x.AddressOutCount  = tasks.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextSkip).length()
 
             member x.System = system
-            member x.TaskDefs = tasks
+            member x.TaskDefs = tasks 
             member x.ApiDefs = tasks |> Seq.map(fun t->t.ApiItem)
             member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
 

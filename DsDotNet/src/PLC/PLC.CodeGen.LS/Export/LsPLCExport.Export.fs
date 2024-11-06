@@ -487,7 +487,7 @@ module XgiExportModule =
 
         member x.GenerateXmlDocument() : XmlDocument =
             let prjParam, xdoc =
-                if x.ExistingLSISprj = null then
+                if x.ExistingLSISprj.IsNullOrEmpty() then
                     let doc = getTemplateXgxXmlDoc x.TargetType
                     x, doc
                 else

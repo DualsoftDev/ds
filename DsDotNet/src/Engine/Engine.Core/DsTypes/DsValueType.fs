@@ -191,17 +191,9 @@ module DsValueTypeModule =
                         if getTextValueNType(targetValue).IsSome then 
                             let neg = input.StartsWith(TextCallNegative.ToString())
                             ValueParam(Some(toValue targetValue), None, None, neg, false, false)
-                        elif input = TextSkip then
+                        elif input = TextSkip  then
                             defaultV
                         else 
                             failWithLog $"Invalid ValueParam: {input}"
     
     
-    let getHwSysAddressValueParam (txt: string) =
-        let parts = txt.Split(':') |> Seq.toList
-        let addr = parts.Head
-        if parts.Tail.IsEmpty then
-            addr, defaultValueParam()
-        else
-            let valueParam = createValueParam (String.Join(":", parts.Tail))
-            addr, valueParam

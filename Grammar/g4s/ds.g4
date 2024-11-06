@@ -392,8 +392,10 @@ categoryBlocks: autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock |
 
     hwSysItemDef:  hwSysItemNameAddr '=' '{' hwSysItems? '}' (SEMICOLON)?;
     hwSysItems: flowName? ( ';' flowName)* (';')+;
-    hwSysItemNameAddr: hwSysItemName taskDevParamInOut;
+    hwSysItemNameAddr: hwSysItemName taskDevParamInOut ('@' '(' hwSysValueInParam':' hwSysValueOutParam ')')?;
     hwSysItemName: identifier1;
+    hwSysValueInParam : content;
+    hwSysValueOutParam : content;
     flowName: identifier1;
 
 buttonBlock: '[' 'buttons' ']' '=' '{' (categoryBlocks)* '}';

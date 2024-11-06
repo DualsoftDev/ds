@@ -314,11 +314,14 @@ module ImportU =
                     try
                         if not(dicChildParent.ContainsKey node) then
                             failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
+
+                        if node.Name.Split('.').Length < 3 then
+                            failWithLog $"{node.Job.Combine()} AUTOPRE는 다른 Work 있는 Action만 연결할 수 있습니다."
                         
                         let calls = mySys.GetCallVertices().Where(fun f->f.IsJob)
                         match calls.TryFind(fun c-> c.TargetJob.DequotedQualifiedName = node.Job.Combine()) with 
                         | Some call -> dicAutoPreCall.Add(node.Key, call)
-                        | None -> failwithlog $"{node.Name} AUTOPRE dicAutoPreCall.Add Error"
+                        | None -> failwithlog $"{node.Job.Combine()} AUTOPRE 조건을 찾을 수 없습니다."
 
                     with ex ->
                         node.Shape.ErrorName(ex.Message, node.PageNum)

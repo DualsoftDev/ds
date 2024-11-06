@@ -201,7 +201,7 @@ module ListnerCommonFunctionGeneratorUtil =
             |_ -> errorLoadCore ctx
         | _-> errorLoadCore devCtx
 
-    let commonValueParamExtractor (devCtx: TaskDevParamInOutContext) : (string*ValueParam)*(string*ValueParam) =
+    let commonValueParamExtractor (devCtx: TaskDevParamInOutContext) : (string)*(string) =
         match devCtx.TryFindFirstChild<TaskDevParamInOutBodyContext>() with
         | Some ctx ->
             match tryGetHwSysValueParamInOut $"{ctx.GetText()}" with
@@ -217,12 +217,6 @@ module ListnerCommonFunctionGeneratorUtil =
                 let item = callListingCtx.TryFindFirstChild<JobNameContext>().Value.GetText()
 
                 let jobFqdn = item.Split('.').Select(fun s->s.DeQuoteOnDemand()).ToArray()
-                //let jobDevParam =
-                //    match callListingCtx.TryFindFirstChild<JobTypeOptionContext>() with
-                //    | Some ctx ->
-                //            getParserJobType ($"[{ctx.GetText().DeQuoteOnDemand()}]")
-                //    | None ->
-                //            defaultJobDevParam()
 
                 let apiDefCtxs = callListingCtx.Descendants<CallApiDefContext>().ToArray()
                 yield jobFqdn,  apiDefCtxs, callListingCtx

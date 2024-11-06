@@ -16,7 +16,7 @@ module CoreExtensionModule =
 
     let tryGetHwSysValueParamInOut (paramInOutText:string) =
         match paramInOutText.Split(',') |> Seq.toList with
-        | tx::rx when rx.Length = 1 -> Some (getHwSysAddressValueParam tx,  getHwSysAddressValueParam rx.Head)
+        | tx::rx when rx.Length = 1 -> Some (tx,  rx.Head)
         | _-> None
         
 

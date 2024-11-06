@@ -269,13 +269,6 @@ module ImportPptModule =
             dicPptDoc.Values.Where(fun doc -> doc.IsNonNull()).Iter(dispose)
 
 
-
-    //type PptResult = {
-    //    System: DsSystem
-    //    Views: ViewNode seq
-    //}
-
-
     type ImportPpt =
         static member GetDSFromPptWithLib(fullName: string, isLib:bool, pptParams:PptParams, cfg:ModelConfig): DSFromPpt =
             ModelParser.ClearDicParsingText()

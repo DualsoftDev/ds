@@ -133,11 +133,12 @@ module internal ToDsTextModule =
     let getHwSystemDefText (hw:HwSystemDef) =
         let inAddr = addressPrint hw.InAddress
         let outAddr = addressPrint hw.OutAddress
+        let inParam = if hw.ValueParamIO.In.IsDefaultValue then TextSkip else hw.ValueParamIO.In.ToText()
+        let outParam = if hw.ValueParamIO.Out.IsDefaultValue then TextSkip else hw.ValueParamIO.Out.ToText()
 
-        let inAddrParam = if hw.ValueParamIO.In.IsDefaultValue then inAddr else $"{inAddr}:{hw.ValueParamIO.In.ToText()}"
-        let outAddrParam = if hw.ValueParamIO.Out.IsDefaultValue then outAddr else $"{outAddr}:{hw.ValueParamIO.Out.ToText()}"
+        let param = if hw.ValueParamIO.IsDefaultParam then "" else $"@({inParam}:{outParam})"
 
-        $"{hw.Name.QuoteOnDemand()}({inAddrParam}, {outAddrParam})"
+        $"{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}){param}"
      
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment

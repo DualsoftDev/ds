@@ -267,7 +267,6 @@ module PptNodeModule =
                 let nameTrim  = namePure(shape)
                 GetLastParenthesesRemoveName(getTrimName(shape, nameTrim))
 
-            //do
             let nodeType = getNodeType(shape, name, iPage)
             try
                 nameCheck (shape, nodeType, iPage, name)

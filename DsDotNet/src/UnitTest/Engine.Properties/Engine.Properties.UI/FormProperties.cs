@@ -96,7 +96,7 @@ namespace DSModeler
             try
             {
                 var runtimeModel = new RuntimeModel(filePath, PlatformTarget.WINDOWS);
-                _RootTree = DsPropertyTreeExt.GetPropertyTree(runtimeModel.System);
+                _RootTree = DsPropertyTreeExt.GetPropertyTree(runtimeModel);
                 PopulateTreeView(_RootTree);
                 ShowMessage("DSZ 파일이 성공적으로 열렸습니다.", "파일 열기 완료");
             }

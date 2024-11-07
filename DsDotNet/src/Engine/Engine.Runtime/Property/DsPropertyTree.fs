@@ -26,8 +26,8 @@ module DsPropertyTreeModule =
 type DsPropertyTreeExt =
 
     [<Extension>]
-    static member GetPropertyTree(sys: DsSystem) : DsTreeNode =
-
+    static member GetPropertyTree(model: RuntimeModel) : DsTreeNode =
+        let sys = model.System
         // 트리 구조 생성 함수
         let rec buildFlowTree (flow: Flow) =
             let vertices = flow.Graph.Vertices |> Seq.map buildVertexTree |> Seq.toList
@@ -62,10 +62,13 @@ type DsPropertyTreeExt =
         let buildHwSystemTree (hwSystemDef: HwSystemDef) : DsTreeNode =
             CreateTreeNode(PropertyHwSystemDef(hwSystemDef), [])
 
+        let buildModelConfigTree (modelConfig: ModelConfig) : DsTreeNode =
+            CreateTreeNode(PropertyModelConfig(modelConfig), [])
+
         // 그룹 생성
         let flowGroup = CreateTreeNode(PropertyBase("Flows"), sys.Flows |> Seq.map buildFlowTree |> Seq.toList)
         let hwGroup = CreateTreeNode(PropertyBase("Utils"), sys.HwSystemDefs |> Seq.map buildHwSystemTree |> Seq.toList)
-        let dummyGroup = CreateTreeNode(PropertyBase("Settings"), [])
-
+        let dummyGroup = CreateTreeNode(PropertyBase("Settings"), [model.ModelConfig |> buildModelConfigTree])
+        
         // 최상위 시스템 노드 생성
         CreateTreeNode(PropertySystem(sys), [flowGroup; hwGroup; dummyGroup])

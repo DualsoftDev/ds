@@ -293,3 +293,57 @@ module rec DsPropertyModule =
             x.Address <- tdp.Address
             x.DataType <- tdp.DataType.ToText()
             x.Symbol <- tdp.Symbol
+
+
+    type PropertyModelConfig()  =
+        inherit PropertyBase()
+
+        let mutable dsFilePath = ""
+        let mutable hwIP = ""
+        let mutable runtimePackage = RuntimePackage.PC
+        let mutable hwDriver = ""
+        let mutable runtimeMotionMode = RuntimeMotionMode.MotionAsync
+        let mutable timeSimutionMode = TimeSimutionMode.TimeX1
+        let mutable timeoutCall = 0u
+
+        new(x: ModelConfig) as this =
+            PropertyModelConfig()
+            then this.UpdateProperty(x)
+
+        member private x.UpdateProperty(config: ModelConfig) =
+            x.Name <- "Model Config"
+            x.UpdateField(&dsFilePath, config.DsFilePath, nameof dsFilePath)
+            x.UpdateField(&hwIP, config.HwIP, nameof hwIP)
+            x.UpdateField(&runtimePackage, config.RuntimePackage, nameof runtimePackage)
+            x.UpdateField(&hwDriver, config.HwDriver, nameof hwDriver)
+            x.UpdateField(&runtimeMotionMode, config.RuntimeMotionMode, nameof runtimeMotionMode)
+            x.UpdateField(&timeSimutionMode, config.TimeSimutionMode, nameof timeSimutionMode)
+            x.UpdateField(&timeoutCall, config.TimeoutCall, nameof timeoutCall)
+
+        member x.DsFilePath
+            with get() = dsFilePath
+            and set(v) = x.UpdateField(&dsFilePath, v, nameof x.DsFilePath)
+
+        member x.HwIP
+            with get() = hwIP
+            and set(v) = x.UpdateField(&hwIP, v, nameof x.HwIP)
+
+        member x.RuntimePackage
+            with get() = runtimePackage
+            and set(v) = x.UpdateField(&runtimePackage, v, nameof x.RuntimePackage)
+
+        member x.HwDriver
+            with get() = hwDriver
+            and set(v) = x.UpdateField(&hwDriver, v, nameof x.HwDriver)
+
+        member x.RuntimeMotionMode
+            with get() = runtimeMotionMode
+            and set(v) = x.UpdateField(&runtimeMotionMode, v, nameof x.RuntimeMotionMode)
+
+        member x.TimeSimutionMode
+            with get() = timeSimutionMode
+            and set(v) = x.UpdateField(&timeSimutionMode, v, nameof x.TimeSimutionMode)
+
+        member x.TimeoutCall
+            with get() = timeoutCall
+            and set(v) = x.UpdateField(&timeoutCall, v, nameof x.TimeoutCall)

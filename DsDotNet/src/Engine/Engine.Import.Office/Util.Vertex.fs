@@ -42,7 +42,8 @@ module ImportUtilVertex =
         let apiName = node.ApiName
 
         match sys.Jobs |> Seq.tryFind (fun job -> job.DequotedQualifiedName = jobName) with
-        | Some job -> Call.Create(job, parentWrapper)
+        | Some job ->
+            Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
         | None ->
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiName) with
             |Some api ->

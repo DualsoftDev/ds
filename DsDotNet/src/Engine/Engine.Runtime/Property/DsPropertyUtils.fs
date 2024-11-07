@@ -53,19 +53,9 @@ module PropertyUtils =
         override this.SetValue(_comp, value) = list.[index] <- value
         override this.ShouldSerializeValue(_comp) = true
         
-    /// DS Runtime 전체 속성 컬렉션 변경 이벤트 (Local로 하면 하나하나 이벤트 등록필요해서 Global Event처리)  
-    let PropertyCollectionChanged = new Event<EventHandler, EventArgs>()
-    // 변경 사항을 알리는 인터페이스
-    type ICollectionChangeNotifier =
-        abstract member CollectionChanged : IEvent<EventHandler, EventArgs> 
-
+   
     // 제네릭 ObservableBindingList: 컬렉션 변경을 감지하여 이벤트 발생
     [<TypeConverter(typeof<ExpandableCollectionConverter>)>]
-    type ObservableBindingList<'T>() as this =
+    type ExpandableBindingList<'T>()  =
         inherit BindingList<'T>()
-        do 
-            this.ListChanged.Add(fun _ -> PropertyCollectionChanged.Trigger(this, EventArgs.Empty))
-
-        interface ICollectionChangeNotifier with
-            member _.CollectionChanged = PropertyCollectionChanged.Publish
 

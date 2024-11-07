@@ -47,7 +47,6 @@ module PptNodeModule =
 
         , ifName            : string
         , rootNode          : bool option
-        //, taskDevParam      : TaskDevParamIO
         , jobDevParam       : JobDevParam
         , callTime          : CallTime option
         , callActionType    : CallActionType 
@@ -90,12 +89,9 @@ module PptNodeModule =
         member x.IsCall         = nodeType = CALL
         member x.IsRootNode     = rootNode
         member x.IsFunction     = x.IsCall && not(name.Contains("."))
-        //member x.TaskDevParam   = taskDevParam
         member x.JobParam       = jobDevParam
         member x.ValueParamIO   = valueParamIO
 
-        //member x.TaskDevParaIn  = taskDevParam.InParam
-        //member x.TaskDevParaOut = taskDevParam.OutParam
 
         member x.UpdateRealProperty(real: Real) =
             match realGoingTime with
@@ -122,7 +118,37 @@ module PptNodeModule =
             real.Finished <- x.RealFinished
             real.NoTransData <- x.RealNoTrans
 
-        member x.Job = x.JobPure.ToArray()
+        member x.Job = 
+            let jobPure =
+            
+                if not (nodeType = CALL || nodeType = AUTOPRE) then
+                    shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
+
+                let parts = GetLastParenthesesRemoveName(name).Split('.')
+                if parts.Contains("")
+                then
+                    shape.ErrorName("이름 규격을 확인하세요", iPage)
+
+                match parts.Length with
+                | 2 ->
+                    let jobBody =
+                        [ pageTitle
+                          parts.[0] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
+                    let api = GetLastParenthesesRemoveName(parts.[1] |> TrimSpace) |> TrimSpace
+                    jobBody.Append api
+
+                | 3 ->
+                    let jobBody =
+                        [ parts.[0] |> TrimSpace
+                          parts.[1] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
+                    let api = GetLastParenthesesRemoveName(parts.[2] |> TrimSpace)|> TrimSpace
+                    jobBody.Append api
+
+                | _ ->
+                    shape.ErrorShape("Action이름 규격을 확인하세요.", iPage)
+            
+            jobPure.ToArray()
+
 
         member x.UpdateNodeRoot(isRoot: bool) =
             rootNode <- Some isRoot
@@ -134,38 +160,9 @@ module PptNodeModule =
                 call.CallTime <- callTime.Value
 
 
-        member x.JobPure : string seq =
-            if not (nodeType = CALL || nodeType = AUTOPRE) then
-                shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
-
-            let parts = GetLastParenthesesRemoveName(name).Split('.')
-            if parts.Contains("")
-            then
-                shape.ErrorName("이름 규격을 확인하세요", iPage)
-
-            match parts.Length with
-            | 2 ->
-                let jobBody =
-                    [ pageTitle
-                      parts.[0] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
-                let api = GetLastParenthesesRemoveName(parts.[1] |> TrimSpace) |> TrimSpace
-                jobBody.Append api
-
-            | 3 ->
-                let jobBody =
-                    [ parts.[0] |> TrimSpace
-                      parts.[1] |> TrimSpace |> GetBracketsRemoveName |> TrimSpace]
-                let api = GetLastParenthesesRemoveName(parts.[2] |> TrimSpace)|> TrimSpace
-                jobBody.Append api
-
-            | _ ->
-                shape.ErrorShape("Action이름 규격을 확인하세요.", iPage)
-
-
 
         member x.DevName = $"{x.Job.Head()}{TextDeviceSplit}{x.Job.Skip(1).Head()}"
         member x.ApiName = x.Job.Last()
-        member x.ApiPureName = x.JobPure.Last()
 
         member x.FlowName =  pageTitle
         member x.IsAlias: bool = x.Alias.IsSome

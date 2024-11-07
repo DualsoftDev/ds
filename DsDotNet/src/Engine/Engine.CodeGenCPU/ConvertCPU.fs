@@ -249,12 +249,12 @@ module ConvertCPU =
 
                 updateSourceTokenOrder sys
 
-                //match RuntimeDS.Package with
-                //| PCSIM ->
-                //    setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
-                //| _->
+                if not(RuntimeDS.Package.IsPackageSIM())
+                then
+                    checkNullAddress sys
+                    //setSimulationEmptyAddress(sys) //시뮬레이션 주소를 위해 주소 지우기
+             
                 updateDuplicateAddress sys
-                checkNullAddress sys
                 checkJobs sys
                 checkErrHWItem(sys)
                 checkErrApi(sys)

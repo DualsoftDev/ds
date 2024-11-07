@@ -281,9 +281,9 @@ module ImportU =
                     .GroupBy(fun node -> node.DevName)
                     .Iter(fun kv ->
 
-                        let libApis = kv.Where(fun d-> libInfos.ContainsKey(d.ApiPureName))
-                                        .Select(fun d-> d.ApiPureName).Distinct()
-                        let usedApis = kv.Select(fun d->d.ApiPureName).Distinct()
+                        let libApis = kv.Where(fun d-> libInfos.ContainsKey(d.ApiName))
+                                        .Select(fun d-> d.ApiName).Distinct()
+                        let usedApis = kv.Select(fun d->d.ApiName).Distinct()
 
                         if libApis.any() && libApis.Count() <> usedApis.Count()
                         then
@@ -314,13 +314,15 @@ module ImportU =
                     try
                         if not(dicChildParent.ContainsKey node) then
                             failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
-
-                        if node.Name.Split('.').Length < 3 then
-                            failWithLog $"{node.Job.Combine()} AUTOPRE는 다른 Work 있는 Action만 연결할 수 있습니다."
-                        
+                  
                         let calls = mySys.GetCallVertices().Where(fun f->f.IsJob)
                         match calls.TryFind(fun c-> c.TargetJob.DequotedQualifiedName = node.Job.Combine()) with 
-                        | Some call -> dicAutoPreCall.Add(node.Key, call)
+                        | Some call -> 
+                                match dicVertex[dicChildParent[node].Key] with  //다른 Real에 연결된 Call은 예외 아님
+                                | :? Real as r when not (r.Graph.Vertices.Contains(call))-> ()
+                                | _-> failWithLog $"{node.Job.Combine()} AUTOPRE는 다른 Work 있는 Action만 연결할 수 있습니다."
+                                
+                                dicAutoPreCall.Add(node.Key, call)
                         | None -> failwithlog $"{node.Job.Combine()} AUTOPRE 조건을 찾을 수 없습니다."
 
                     with ex ->
@@ -748,7 +750,7 @@ module ImportU =
                     ).Iter(errCheck)
 
             (* Multi Call Api별 갯수 동일 체크*)
-            callSet.GroupBy(fun n -> n.DevName+n.ApiPureName)
+            callSet.GroupBy(fun n -> n.DevName+n.ApiName)
                    .Select(fun calls ->
                             calls.DistinctBy(fun c-> (c.JobParam.TaskDevCount
                                            , c.JobParam.InCount

@@ -14,7 +14,6 @@ open System.ComponentModel
 [<AutoOpen>]
 module rec DsPropertyModule =
 
-
     type PropertySystem() =
         inherit PropertyBase()
         new(x: DsSystem) as this = PropertySystem() then this.UpdateProperty(x)
@@ -22,17 +21,46 @@ module rec DsPropertyModule =
         member private x.UpdateProperty(sys: DsSystem) =
             x.Name <- sys.Name
 
-    and PropertyReal() =
+    type PropertyReal() =
         inherit PropertyBase()
+
+        let mutable finished = false
+        let mutable noTransData = false
+        let mutable motion = getNull<string>()
+        let mutable script = getNull<string>()
+        let mutable repeatCount = Nullable()
+        let mutable avg = Nullable()
+        let mutable std = Nullable()
+
         new(x: Real) as this = PropertyReal() then this.UpdateProperty(x)
 
-        member val Finished = false with get, set
-        member val NoTransData = false with get, set
-        member val Motion = getNull<string>() with get, set
-        member val Script = getNull<string>() with get, set
-        member val RepeatCount = Nullable() with get, set
-        member val AVG = Nullable() with get, set
-        member val STD = Nullable() with get, set
+        member x.Finished
+            with get() = finished
+            and set(v) = x.UpdateField(&finished, v)
+
+        member x.NoTransData
+            with get() = noTransData
+            and set(v) = x.UpdateField(&noTransData, v)
+
+        member x.Motion
+            with get() = motion
+            and set(v) = x.UpdateField(&motion, v)
+
+        member x.Script
+            with get() = script
+            and set(v) = x.UpdateField(&script, v)
+
+        member x.RepeatCount
+            with get() = repeatCount
+            and set(v) = x.UpdateField(&repeatCount, v)
+
+        member x.AVG
+            with get() = avg
+            and set(v) = x.UpdateField(&avg, v)
+
+        member x.STD
+            with get() = std
+            and set(v) = x.UpdateField(&std, v)
 
         member private x.UpdateProperty(real: Real) =
             x.Name <- real.Name
@@ -49,45 +77,81 @@ module rec DsPropertyModule =
         new(x: Job) as this = PropertyJob() then this.UpdateProperty(x)
         member private x.UpdateProperty(job: Job) =
             x.Name <- job.DequotedQualifiedName
-    
-    // Custom class to be displayed in PropertyGrid with expandable collections
-    and PropertyCall()  =
-        inherit PropertyBase()
-        let safetyConditions = ObservableBindingList<string>()
-        let autoPreConditions = ObservableBindingList<string>()
-
-        new(x: Call) as this = PropertyCall() then this.UpdateProperty(x)
-        // Properties
-        member val Disabled = false with get, set
-        member val ValueParamIO = getNull<ValueParamIO>() with get, set
-
-        member x.SafetyConditions = safetyConditions
-        member x.AutoPreConditions = autoPreConditions
-
-        // Method to update properties
-        member private x.UpdateProperty(call: Call) =
-            x.Name <- call.Name
-            x.Disabled <- call.Disabled
-            x.ValueParamIO <- call.ValueParamIO
-            call.SafetyConditions.Select(fun f ->  f.GetCall().DequotedQualifiedName ).Iter (x.SafetyConditions.Add)
-            call.AutoPreConditions.Select(fun f -> f.GetCall().DequotedQualifiedName).Iter (x.AutoPreConditions.Add)
-        
 
     and PropertyTaskDev() =
         inherit PropertyBase()
         new(x: TaskDev) as this = PropertyTaskDev() then this.UpdateProperty(x)
-        member x.TaskDevName = x.Name
-
+        member val In =  getNull<PropertyTaskDevParam>() with get, set
+        member val Out =  getNull<PropertyTaskDevParam>() with get, set
+        
         member private x.UpdateProperty(taskDev: TaskDev) =
             x.Name <- taskDev.FullName
+            x.In <- PropertyTaskDevParam(taskDev.TaskDevParamIO.InParam)
+            x.Out <- PropertyTaskDevParam(taskDev.TaskDevParamIO.OutParam)
+
+    and PropertyCall() as this =
+        inherit PropertyBase()
+        let safetyConditions = ExpandableBindingList<string>()
+        let autoPreConditions = ExpandableBindingList<string>()
+        
+        // Properties
+        let mutable disabled = false
+        do
+            safetyConditions.ListChanged.Add(fun _ -> this.OnPropertyChanged((nameof this.SafetyConditions)))
+            autoPreConditions.ListChanged.Add(fun _ -> this.OnPropertyChanged((nameof this.AutoPreConditions)))
+
+        new(x: Call) as this = PropertyCall() then this.UpdateProperty(x)
+
+        member x.Disabled
+            with get() = disabled
+            and set(v) = x.UpdateField(&disabled, v)
+
+        member val ValueParamIO =  getNull<PropertyValueParamIO>() with get, set
+
+        member x.SafetyConditions = safetyConditions
+        member x.AutoPreConditions = autoPreConditions
+        // Method to update properties
+        member private x.UpdateProperty(call: Call) =
+            x.Name <- call.Name
+            x.Disabled <- call.Disabled
+            x.ValueParamIO <- PropertyValueParamIO(call.ValueParamIO)
+            call.SafetyConditions.Select(fun f ->  f.GetCall().DequotedQualifiedName ).Iter (x.SafetyConditions.Add)
+            call.AutoPreConditions.Select(fun f -> f.GetCall().DequotedQualifiedName).Iter (x.AutoPreConditions.Add)
+        
+    and PropertyValueParamIO() =
+        inherit PropertyBase()
+
+        new(x: ValueParamIO) as this = PropertyValueParamIO() then this.UpdateProperty(x)
+        member val In =  getNull<PropertyValueParam>() with get, set
+        member val Out =  getNull<PropertyValueParam>() with get, set
+        member private x.UpdateProperty(vp: ValueParamIO) =
+            x.In <- PropertyValueParam(vp.In)
+            x.Out <- PropertyValueParam(vp.Out)
 
     and PropertyValueParam() =
         inherit PropertyBase()
+        let mutable targetValue = getNull<string>()
+        let mutable max = getNull<string>()
+        let mutable min = getNull<string>()
+        let mutable isInclusiveMax = Nullable<bool>()
+
         new(x: ValueParam) as this = PropertyValueParam() then this.UpdateProperty(x)
-        member val TargetValue = getNull<string>() with get, set
-        member val Max = getNull<string>() with get, set
-        member val Min = getNull<string>() with get, set
-        member val IsInclusiveMax = Nullable<bool>() with get, set
+
+        member x.TargetValue
+            with get() = targetValue
+            and set(v) = x.UpdateField(&targetValue, v)
+
+        member x.Max
+            with get() = max
+            and set(v) = x.UpdateField(&max, v)
+
+        member x.Min
+            with get() = min
+            and set(v) = x.UpdateField(&min, v)
+
+        member x.IsInclusiveMax
+            with get() = isInclusiveMax
+            and set(v) = x.UpdateField(&isInclusiveMax, v)
 
         member private x.UpdateProperty(vp: ValueParam) =
             x.TargetValue <- vp.TargetValueText
@@ -95,31 +159,21 @@ module rec DsPropertyModule =
             x.Min <- vp.MinText
             x.IsInclusiveMax <- vp.IsInclusiveMax
 
-    //and PropertyApiParam() =
-    //    inherit PropertyBase()
-    //    new(x: ApiParam) as this = PropertyApiParam() then this.UpdateProperty(x)
-    //    [<TypeConverter(typeof<ExpandableObjectConverter>)>]
-    //    member val InParam = getNull<PropertyTaskDevParam>() with get, set
-    //    [<TypeConverter(typeof<ExpandableObjectConverter>)>]
-    //    member val OutParam = getNull<PropertyTaskDevParam>() with get, set
-
-    //    member private x.UpdateProperty(apiParam: ApiParam) =
-    //        x.Name <- apiParam.ApiItem.QualifiedName
-    //        x.InParam  <-  match apiParam.TaskDevParamIO.InParam  with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
-    //        x.OutParam <-  match apiParam.TaskDevParamIO.OutParam with |Some x -> PropertyTaskDevParam(x) | _ -> getNull<PropertyTaskDevParam>()
-
     and PropertyFlow() =
         inherit PropertyBase()
         new(x: Flow) as this = PropertyFlow() then this.UpdateProperty(x)
 
-        member x.UpdateProperty(flow: Flow) =
+        member private x.UpdateProperty(flow: Flow) =
             x.Name <- flow.Name
 
     and PropertyAlias() =
         inherit PropertyBase()
+        let mutable targetName = getNull<string>()
         new(x: Alias) as this = PropertyAlias() then this.UpdateProperty(x)
 
-        member val TargetName = null with get, set
+        member x.TargetName
+            with get() = targetName
+            and set(v) = x.UpdateField(&targetName, v)
 
         member private x.UpdateProperty(alias: Alias) =
             x.Name <- alias.Name
@@ -127,10 +181,17 @@ module rec DsPropertyModule =
 
     and PropertyApiItem() =
         inherit PropertyBase()
+        let mutable txName = ""
+        let mutable rxName = ""
         new(x: ApiItem) as this = PropertyApiItem() then this.UpdateProperty(x)
 
-        member val TxName = "" with get, set
-        member val RxName = "" with get, set
+        member x.TxName
+            with get() = txName
+            and set(v) = x.UpdateField(&txName, v)
+
+        member x.RxName
+            with get() = rxName
+            and set(v) = x.UpdateField(&rxName, v)
 
         member private x.UpdateProperty(apiItem: ApiItem) =
             x.Name <- apiItem.Name
@@ -139,9 +200,12 @@ module rec DsPropertyModule =
 
     and PropertyOperatorFunction() =
         inherit PropertyBase()
+        let mutable operatorCode = ""
         new(x: OperatorFunction) as this = PropertyOperatorFunction() then this.UpdateProperty(x)
 
-        member val OperatorCode = "" with get, set
+        member x.OperatorCode
+            with get() = operatorCode
+            and set(v) = x.UpdateField(&operatorCode, v)
 
         member private x.UpdateProperty(opFunc: OperatorFunction) =
             x.Name <- opFunc.Name
@@ -149,9 +213,12 @@ module rec DsPropertyModule =
 
     and PropertyCommandFunction() =
         inherit PropertyBase()
+        let mutable commandCode = ""
         new(x: CommandFunction) as this = PropertyCommandFunction() then this.UpdateProperty(x)
 
-        member val CommandCode = "" with get, set
+        member x.CommandCode
+            with get() = commandCode
+            and set(v) = x.UpdateField(&commandCode, v)
 
         member private x.UpdateProperty(cmdFunc: CommandFunction) =
             x.Name <- cmdFunc.Name
@@ -159,14 +226,38 @@ module rec DsPropertyModule =
 
     and PropertyHwSystemDef() =
         inherit PropertyBase()
+        let mutable settingFlows = ""
+        let mutable inAddress = getNull<string>()
+        let mutable outAddress = getNull<string>()
+        let mutable hwDefType = ""
+        let mutable inParam = getNull<PropertyTaskDevParam>()
+        let mutable outParam = getNull<PropertyTaskDevParam>()
+
         new(x: HwSystemDef) as this = PropertyHwSystemDef() then this.UpdateProperty(x)
 
-        member val SettingFlows = "" with get, set
-        member val InAddress = null with get, set
-        member val OutAddress = null with get, set
-        member val HwDefType = "" with get, set
-        member val InParam = getNull<PropertyTaskDevParam>() with get, set
-        member val OutParam = getNull<PropertyTaskDevParam>() with get, set
+        member x.SettingFlows
+            with get() = settingFlows
+            and set(v) = x.UpdateField(&settingFlows, v)
+
+        member x.InAddress
+            with get() = inAddress
+            and set(v) = x.UpdateField(&inAddress, v)
+
+        member x.OutAddress
+            with get() = outAddress
+            and set(v) = x.UpdateField(&outAddress, v)
+
+        member x.HwDefType
+            with get() = hwDefType
+            and set(v) = x.UpdateField(&hwDefType, v)
+
+        member x.InParam
+            with get() = inParam
+            and set(v) = x.UpdateField(&inParam, v)
+
+        member x.OutParam
+            with get() = outParam
+            and set(v) = x.UpdateField(&outParam, v)
 
         member private x.UpdateProperty(hwDef: HwSystemDef) =
             x.Name <- hwDef.Name
@@ -174,20 +265,85 @@ module rec DsPropertyModule =
             x.InAddress <- hwDef.InAddress
             x.OutAddress <- hwDef.OutAddress
             x.HwDefType <- hwDef.GetType().Name
-            x.InParam  <-  PropertyTaskDevParam(hwDef.TaskDevParamIO.InParam  )
-            x.OutParam <-  PropertyTaskDevParam(hwDef.TaskDevParamIO.OutParam )
+            x.InParam <- PropertyTaskDevParam(hwDef.TaskDevParamIO.InParam)
+            x.OutParam <- PropertyTaskDevParam(hwDef.TaskDevParamIO.OutParam)
        
     type PropertyTaskDevParam(address: string, dataType: string, symbol: string) =
         inherit PropertyBase()
+        let mutable address = address
+        let mutable dataType = dataType
+        let mutable symbol = symbol
+
         new() = PropertyTaskDevParam("", "", "")
         new(x: TaskDevParam) as this = PropertyTaskDevParam() then this.UpdateProperty(x)
         
-        member val Address = address with get, set
-        member val DataType = dataType with get, set
-        member val Symbol = symbol with get, set
+        member x.Address
+            with get() = address
+            and set(v) = x.UpdateField(&address, v)
 
-        member x.UpdateProperty(tdp: TaskDevParam) =
+        member x.DataType
+            with get() = dataType
+            and set(v) = x.UpdateField(&dataType, v)
+
+        member x.Symbol
+            with get() = symbol
+            and set(v) = x.UpdateField(&symbol, v)
+
+        member private x.UpdateProperty(tdp: TaskDevParam) =
             x.Address <- tdp.Address
             x.DataType <- tdp.DataType.ToText()
             x.Symbol <- tdp.Symbol
-            
+
+
+    type PropertyModelConfig()  =
+        inherit PropertyBase()
+
+        let mutable dsFilePath = ""
+        let mutable hwIP = ""
+        let mutable runtimePackage = RuntimePackage.PC
+        let mutable hwDriver = ""
+        let mutable runtimeMotionMode = RuntimeMotionMode.MotionAsync
+        let mutable timeSimutionMode = TimeSimutionMode.TimeX1
+        let mutable timeoutCall = 0u
+
+        new(x: ModelConfig) as this =
+            PropertyModelConfig()
+            then this.UpdateProperty(x)
+
+        member private x.UpdateProperty(config: ModelConfig) =
+            x.Name <- "Model Config"
+            x.UpdateField(&dsFilePath, config.DsFilePath, nameof dsFilePath)
+            x.UpdateField(&hwIP, config.HwIP, nameof hwIP)
+            x.UpdateField(&runtimePackage, config.RuntimePackage, nameof runtimePackage)
+            x.UpdateField(&hwDriver, config.HwDriver, nameof hwDriver)
+            x.UpdateField(&runtimeMotionMode, config.RuntimeMotionMode, nameof runtimeMotionMode)
+            x.UpdateField(&timeSimutionMode, config.TimeSimutionMode, nameof timeSimutionMode)
+            x.UpdateField(&timeoutCall, config.TimeoutCall, nameof timeoutCall)
+
+        member x.DsFilePath
+            with get() = dsFilePath
+            and set(v) = x.UpdateField(&dsFilePath, v, nameof x.DsFilePath)
+
+        member x.HwIP
+            with get() = hwIP
+            and set(v) = x.UpdateField(&hwIP, v, nameof x.HwIP)
+
+        member x.RuntimePackage
+            with get() = runtimePackage
+            and set(v) = x.UpdateField(&runtimePackage, v, nameof x.RuntimePackage)
+
+        member x.HwDriver
+            with get() = hwDriver
+            and set(v) = x.UpdateField(&hwDriver, v, nameof x.HwDriver)
+
+        member x.RuntimeMotionMode
+            with get() = runtimeMotionMode
+            and set(v) = x.UpdateField(&runtimeMotionMode, v, nameof x.RuntimeMotionMode)
+
+        member x.TimeSimutionMode
+            with get() = timeSimutionMode
+            and set(v) = x.UpdateField(&timeSimutionMode, v, nameof x.TimeSimutionMode)
+
+        member x.TimeoutCall
+            with get() = timeoutCall
+            and set(v) = x.UpdateField(&timeoutCall, v, nameof x.TimeoutCall)

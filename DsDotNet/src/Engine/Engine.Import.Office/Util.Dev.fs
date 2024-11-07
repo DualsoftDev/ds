@@ -119,8 +119,8 @@ module ImportUtilForDev =
         let referenceSystem = autoGenSys.ReferenceSystem
         createTaskDevUsingApiName referenceSystem  loadedName apiName  
 
-    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiPureName:string) (loadParameters:DeviceLoadParameters) (node:PptNode) jobName =
-        let tastDevKey = $"{newloadedName}_{apiPureName}"
+    let getLoadedTasks (mySys:DsSystem)(loadedSys:DsSystem) (newloadedName:string) (apiName:string) (loadParameters:DeviceLoadParameters) (node:PptNode) jobName =
+        let tastDevKey = $"{newloadedName}_{apiName}"
         //let taskDevParam = node.TaskDevParam
         let jobFqdn = node.Job.Combine()
 
@@ -128,15 +128,15 @@ module ImportUtilForDev =
 
         match devCalls.TryFind(fun (d,c) -> d.FullName = tastDevKey) with
         | Some (taskDev, c) ->
-            let api = loadedSys.ApiItems.First(fun f -> f.Name = apiPureName)
+            let api = loadedSys.ApiItems.First(fun f -> f.Name = apiName)
             //if not (taskDevParam.IsDefaultParam) then
             //    taskDev.AddOrUpdateApiTaskDevParam(jobFqdn, api, taskDevParam)
             taskDev
         | None ->
             let devOrg = addOrGetExistSystem mySys loadedSys newloadedName loadParameters
-            match devOrg.ApiItems.TryFind(fun f -> f.Name = apiPureName) with
+            match devOrg.ApiItems.TryFind(fun f -> f.Name = apiName) with
             | Some api ->
                 //let apiParam = {TaskDevParamIO =  taskDevParam; ApiItem = api}
                 TaskDev(api, newloadedName, mySys)
             | None ->
-                failWithLog $"Api {apiPureName} not found in {newloadedName}"
+                failWithLog $"Api {apiName} not found in {newloadedName}"

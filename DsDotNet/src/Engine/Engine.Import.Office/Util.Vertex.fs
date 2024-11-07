@@ -39,12 +39,13 @@ module ImportUtilVertex =
     let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: PptNode) parentWrapper =
         let loadSysName = device.Name
         let jobName = node.Job.Combine()
-        let apiName = node.ApiPureName
+        let apiName = node.ApiName
 
         match sys.Jobs |> Seq.tryFind (fun job -> job.DequotedQualifiedName = jobName) with
-        | Some job -> Call.Create(job, parentWrapper)
+        | Some job ->
+            Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
         | None ->
-            match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiPureName) with
+            match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiName) with
             |Some api ->
                 let devTask =
                     match sys.TaskDevs.TryFind(fun d->d.ApiItem = api) with
@@ -82,7 +83,7 @@ module ImportUtilVertex =
                     Node = node
                     JobName = node.Job.CombineQuoteOnDemand()
                     DevName = node.DevName
-                    ApiName = node.ApiPureName
+                    ApiName = node.ApiName
                     ValueParamIO = node.ValueParamIO
                     Parent = parentWrapper
                     PlatformTarget = platformTarget

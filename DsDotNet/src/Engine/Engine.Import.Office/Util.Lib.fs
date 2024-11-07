@@ -27,8 +27,8 @@ module ImportUtilForLib =
         | Some f -> f.ReferenceSystem
         | None -> (ParserLoader.LoadFromDevicePath libFilePath name platformTarget) |>fst
 
-    let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiPureName: string) (taskDevParamIO: DeviceLoadParameters) =
-        let task = getLoadedTasks param.MySys devOrg loadedName apiPureName taskDevParamIO param.Node (param.Node.Job.Combine())
+    let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiName: string) (taskDevParamIO: DeviceLoadParameters) =
+        let task = getLoadedTasks param.MySys devOrg loadedName apiName taskDevParamIO param.Node (param.Node.Job.Combine())
         tasks.Add(task) |> ignore
 
     let getTaskDev (autoGenSys: LoadedSystem option) (loadedName: string)  (apiName: string) =

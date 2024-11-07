@@ -404,7 +404,7 @@ module rec CoreModule =
                 match jobOrFunc with
                 | JobType job ->
                     if not(valueParamIO.IsDefaultParam) then
-                        job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, valueParamIO))
+                        job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, valueParamIO, td.DequotedQualifiedName))
                 | _ -> ()
             interface IVertex
          

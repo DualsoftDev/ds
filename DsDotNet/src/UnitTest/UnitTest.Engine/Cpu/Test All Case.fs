@@ -15,7 +15,7 @@ open Engine.Parser.FS
 type XgxConvertDsCPU(target:PlatformTarget) =
     inherit EngineTestBaseClass()
 
-    let myTemplate testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/{testName}.xml")
+    let getOutputPath testName = Path.Combine($"{__SOURCE_DIRECTORY__}", $"../../UnitTest.PLC.Xgx/Xgi/Xmls/{testName}.xml")
 
 
     member __.``Test DS Case`` () =
@@ -67,7 +67,8 @@ type XgxConvertDsCPU(target:PlatformTarget) =
         ModelParser.ClearDicParsingText()
         let helperSys = ModelParser.ParseFromString(testCode, ParserOptions.Create4Simulation(systemRepo, referenceDir, "ActiveCpuName", None, DuNone))
 
-        let result = exportXMLforLSPLC(target, helperSys, myTemplate f, None, 0, 0, true, None)
+        let xgxGenParams = XgxGenerationParameters.Default()
+        let result = exportXMLforLSPLC(target, helperSys, getOutputPath f, xgxGenParams)
         result === result
 
 type XgiConvertDsCPU() =

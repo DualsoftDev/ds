@@ -114,7 +114,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
 """
         let f = getFuncName()
         parseCodeForWindows globalStorages code |> ignore
-        let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = Some myTemplate }
+        let projectParams = { createProjectParams(f) with GlobalStorages = globalStorages; ExistingLSISprj = myTemplate }
         let xml = projectParams.GenerateXmlString()
         x.saveTestResult f xml
 
@@ -157,7 +157,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let projectParams = {
             createProjectParams(f) with
                 GlobalStorages = globalStorages
-                ExistingLSISprj = Some myTemplate
+                ExistingLSISprj = myTemplate
                 ScanProgramName = "스캔 프로그램"    // hard coding..
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
@@ -194,7 +194,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let projectParams = {
             createProjectParams(f) with
                 GlobalStorages = globalStorages
-                ExistingLSISprj = Some myTemplate
+                ExistingLSISprj = myTemplate
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         ( fun () ->
@@ -225,7 +225,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let projectParams = {
             createProjectParams(f) with
                 GlobalStorages = globalStorages
-                ExistingLSISprj = Some myTemplate
+                ExistingLSISprj = myTemplate
                 MemoryAllocatorSpec = AllocatorFunctions (createMemoryAllocator "M" (0, 640*1024) usedMemoryByteIndices xgx)    // 640K M memory 영역
         }
         ( fun () ->
@@ -242,7 +242,7 @@ type XgxPOUTest(xgx:PlatformTarget) =
         let projectParams = {
             createProjectParams("POU 이름 충돌 test 중..") with
                 GlobalStorages = globalStorages
-                ExistingLSISprj = Some myTemplate
+                ExistingLSISprj = myTemplate
                 POUs = [collidingPou]
         }
         ( fun () ->

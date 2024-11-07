@@ -251,27 +251,27 @@ propsBlock: '[' 'prop' ']' '=' '{' (
 
 
     motionBlock: '[' 'motions' ']' '=' '{' (motionDef)* '}';
-    motionDef: motionKey '=' '{' motionParams '}' SEMICOLON;
+    motionDef: motionKey '=' '{' motionParams '}' (SEMICOLON)?;
     motionKey: identifier23;
     motionParams: content;
 
     scriptsBlock: '[' 'scripts' ']' '=' '{' (scriptDef)* '}';
-    scriptDef: scriptKey '=' '{' scriptParams '}' SEMICOLON;
+    scriptDef: scriptKey '=' '{' scriptParams '}' (SEMICOLON)?;
     scriptKey: identifier23;
     scriptParams: content;
 
     timesBlock: '[' 'times' ']' '=' '{' (timeDef)* '}';
-    timeDef: timeKey '=' '{' timeParams '}' SEMICOLON;
+    timeDef: timeKey '=' '{' timeParams '}' (SEMICOLON)?;
     timeKey: identifier23;
     timeParams: content;
 
     repeatsBlock: '[' 'repeats' ']' '=' '{' (repeatDef)* '}';
-    repeatDef: repeatKey '=' '{' repeatParams '}' SEMICOLON;
+    repeatDef: repeatKey '=' '{' repeatParams '}' (SEMICOLON)?;
     repeatKey: identifier23;
     repeatParams: INTEGER;
     
     errorsBlock: '[' 'errors' ']' '=' '{' (errorsDef)* '}';
-    errorsDef: errorsKey '=' '{' errorsParams '}' SEMICOLON;
+    errorsDef: errorsKey '=' '{' errorsParams '}' (SEMICOLON)?;
     errorsKey: identifier4;
     errorsParams: content;
 

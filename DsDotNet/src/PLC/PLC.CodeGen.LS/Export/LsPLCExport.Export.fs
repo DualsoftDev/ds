@@ -487,9 +487,11 @@ module XgiExportModule =
 
         member x.GenerateXmlDocument() : XmlDocument =
             let prjParam, xdoc =
-                match x.ExistingLSISprj with
-                | Some existing ->
-                    let doc = DualXmlDocument.loadFromFile existing
+                if x.ExistingLSISprj.IsNullOrEmpty() then
+                    let doc = getTemplateXgxXmlDoc x.TargetType
+                    x, doc
+                else
+                    let doc = DualXmlDocument.loadFromFile x.ExistingLSISprj
                     let scanProgramName =
                         doc.GetXmlNodes("//Configurations/Configuration/Tasks/Task")
                             .Where(fun t ->
@@ -500,12 +502,10 @@ module XgiExportModule =
                             |? "Scan Program"
                     let pp = { x with ScanProgramName = scanProgramName }
                     pp, doc
-                | None ->
-                    let doc = getTemplateXgxXmlDoc x.TargetType
-                    x, doc
+
             let prjParam =
-                match prjParam.TargetType, prjParam.ExistingLSISprj with
-                | XGK, Some _existing ->
+                match prjParam.TargetType with
+                | XGK when prjParam.ExistingLSISprj.NonNullAny() ->
                     let counters = collectCounterAddressesXgk xdoc
                     let timers = collectTimerAddressesXgk xdoc
                     let newPrjParam = {

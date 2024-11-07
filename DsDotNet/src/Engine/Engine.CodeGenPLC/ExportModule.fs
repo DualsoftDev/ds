@@ -2,14 +2,16 @@ namespace Engine.CodeGenPLC
 
 open System.IO
 open System.Linq
-open System.Runtime.CompilerServices
-open Engine.Core
+
 open Dual.Common.Core.FS
-open PLC.CodeGen.LS
-open PLC.CodeGen.Common
-open Engine.CodeGenCPU
 open Dual.Common.Base.FS
 open Dual.Common.Base.CS
+
+open Engine.Core
+open Engine.CodeGenCPU
+
+open PLC.CodeGen.LS
+open PLC.CodeGen.Common
 
 [<AutoOpen>]
 module ExportModule =
@@ -18,7 +20,7 @@ module ExportModule =
     let private generateXmlXGX
         (plcType:PlatformTarget) (system: DsSystem)
         (globalStorages:Storages, localStorages:Storages)
-        (pous: PouGen seq, maxPouSplit:int option, existingLSISprj:string option)
+        (pous: PouGen seq, maxPouSplit:int, existingLSISprj:string)
         (startMemory:int, startTimer:int, startCounter:int)
         (enableXmlComment:bool)
       : string =
@@ -101,11 +103,10 @@ module ExportModule =
                 cs |> chunkBySize max
 
             let activeCss, deviceCss =
-                match maxPouSplit with
-                | Some max ->
-                    pous  .Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
-                    , pous.Where(fun p -> p.IsDevice).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements max
-                | None ->
+                if maxPouSplit > 0 then
+                    pous  .Where(fun p -> p.IsActive).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements maxPouSplit
+                    , pous.Where(fun p -> p.IsDevice).Collect(fun p -> p.CommentedStatements()) |> splitCommentedStatements maxPouSplit
+                else
                     [], []
             // } Split POU's
 
@@ -128,15 +129,14 @@ module ExportModule =
                     AutoVariableCounter = counterGenerator 0
 
                     POUs = [
-                        match maxPouSplit with
-                        | Some _ ->
+                        if maxPouSplit > 0 then
                             for (n, a) in activeCss |> Seq.indexed do
                                 let name = $"Active{n}"
                                 yield getXgxPOUParamsFromCss name a
                             for (n, d) in deviceCss |> Seq.indexed do
                                 let name = $"Devices{n}"
                                 yield getXgxPOUParamsFromCss name d
-                        | None ->
+                        else
                             (* No split *)
                             yield pous.Where(fun f -> f.IsActive) |> getXgxPOUParams "Active"
                             yield pous.Where(fun f -> f.IsDevice) |> getXgxPOUParams "Devices"
@@ -148,43 +148,73 @@ module ExportModule =
 
         prjParam.GenerateXmlString()
 
-    let exportXMLforLSPLC (platformTarget:PlatformTarget, system: DsSystem, path: string, existingLSISprj, startTimer, startCounter, enableXmlComment:bool, maxPouSplit:int option) =
-        let _, millisecond = duration (fun () ->
-            //use _ = DcLogger.CreateTraceEnabler()
-            let globalStorage = new Storages()
-            let localStorage = new Storages()
-            let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
-
-            let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
-
-            // Create a list to hold <C>ommented <S>tatement<S>
-            let css = [|
-                // Add commented statements from each CPU
-                for cpu in pous do
-                    yield! cpu.CommentedStatements()
-            |]
-
-            let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
-            let globalStorageCc = new Storages(globalStorage)
-            globalStorageCc.Iter(fun tagKV->
-
-                if not (usedTagNames.ContainsKey(tagKV.Key))
-                   && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
-                   && TagKindExt.TryGetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
-                then
-                    globalStorage.Remove(tagKV.Key)|>ignore
-                )
-
-            let xml, millisecond = duration (fun () ->
-                generateXmlXGX platformTarget system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (startMemory, startTimer, startCounter) enableXmlComment )
-
-            forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
+    /// LS PLC (XGI or XGK) 생성을 위한 파라미터.  API 를 통해 생성 패러미터 전달시 사용. LsPLC.ExportXML 및  exportXMLforLSPLC 함수에서 사용
+    type XgxGenerationParameters =
+        {
+            mutable ExistingLSISprj: string
+            mutable StartTimer: int
+            mutable StartCounter: int
+            mutable EnableXmlComment: bool
+            mutable MaxPouSplit: int
+        }
+        static member Default() = {
+            ExistingLSISprj = ""
+            StartTimer = 0
+            StartCounter = 0
+            EnableXmlComment = true
+            MaxPouSplit = 0     // 사용한다면 2000 정도 권장
+        }
 
 
+    let exportXMLforLSPLC (platformTarget:PlatformTarget, system:DsSystem, path:string, xgxGenParams:XgxGenerationParameters) =
+        let _, millisecond =
+            duration (fun () ->
+                let {
+                    ExistingLSISprj = existingLSISprj
+                    StartTimer = startTimer
+                    StartCounter = startCounter
+                    EnableXmlComment = enableXmlComment
+                    MaxPouSplit = maxPouSplit
+                } = xgxGenParams
 
-            let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
-            File.WriteAllText(path, crlfXml)
-        )
+                if !! platformTarget.IsOneOf(XGI, XGK) then
+                    failwithf $"Not supported plc {platformTarget} type"
+
+                //use _ = DcLogger.CreateTraceEnabler()
+                let globalStorage = new Storages()
+                let localStorage = new Storages()
+                let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
+
+                let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
+
+                // Create a list to hold <C>ommented <S>tatement<S>
+                let css = [|
+                    // Add commented statements from each CPU
+                    for cpu in pous do
+                        yield! cpu.CommentedStatements()
+                |]
+
+                let usedTagNames = getTotalTags(css.Select(fun s->s.Statement)) |> Seq.map(fun t->t.Name, t) |> dict
+                let globalStorageCc = new Storages(globalStorage)
+                globalStorageCc.Iter(fun tagKV->
+
+                    if not (usedTagNames.ContainsKey(tagKV.Key))
+                       && tagKV.Value.DataType = typedefof<bool>  //bool 타입만 지우기 가능 타이머 카운터 살림
+                       && TagKindExt.TryGetVariableTagKind(tagKV.Value).IsNone //VariableTag 살림
+                    then
+                        globalStorage.Remove(tagKV.Key)|>ignore
+                    )
+
+                let xml, millisecond = duration (fun () ->
+                    generateXmlXGX platformTarget system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (startMemory, startTimer, startCounter) enableXmlComment )
+
+                forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
+
+
+
+                let crlfXml = xml.Replace("\r\n", "\n").Replace("\n", "\r\n")
+                File.WriteAllText(path, crlfXml)
+            )
         forceTrace $"exportXMLforLSPLC : elapsed {millisecond} ms"
 
 
@@ -192,15 +222,10 @@ module ExportModule =
 
     let exportTextforDS () = ()
 
-[<Extension>]
-type ExportModuleExt =
-    [<Extension>]
-    static member ExportXMLforXGI(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment, maxPouSplit) =
-        let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGI, system, path, existingLSISprj, startTimer, startCounter, enableXmlComment, maxPouSplit)
 
-    [<Extension>]
-    static member ExportXMLforXGK(system: DsSystem, path: string, tempLSISxml:string, startTimer, startCounter, enableXmlComment, maxPouSplit) =
-        let existingLSISprj = if not(tempLSISxml.IsNullOrEmpty()) then Some(tempLSISxml) else None
-        exportXMLforLSPLC (XGK, system, path, existingLSISprj,  startTimer, startCounter, enableXmlComment, maxPouSplit)
+type LsPLC =
+    static member ExportXML(platformTarget:PlatformTarget, system:DsSystem, outputXmlPath:string, xgxGenParams:XgxGenerationParameters) =
+        exportXMLforLSPLC(platformTarget, system, outputXmlPath, xgxGenParams)
+
+
 

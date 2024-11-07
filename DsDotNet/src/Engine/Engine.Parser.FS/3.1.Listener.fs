@@ -490,6 +490,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let exFlow = (aliasFqdnCnt = 2 || (aliasFqdnCnt = 3 && isRoot))
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
 
+            let createCall(parent: ParentWrapper, job: Job, ctx:ParserRuleContext) =
+                let vp =
+                    match ctx.TryFindFirstChild<CausalInParamContext>(), ctx.TryFindFirstChild<CausalOutParamContext>() with
+                    | Some inParam, Some outParam ->
+                        ValueParamIO(createValueParam (inParam.TryFindFirstChild<ContentContext>().Value.GetText())
+                                    ,  createValueParam (outParam.TryFindFirstChild<ContentContext>().Value.GetText()))
+                    |_-> defaultValueParamIO() 
+                job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, vp, td.DequotedQualifiedName))
+                Call.CreateWithValueParamIO(job, parent, vp)  |> ignore
+
             let loop () =
                 for (optParent, ctxInfo, ctx) in candidates do
                     let parent = optParent
@@ -523,13 +533,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | 1, _ when not <| (isAliasMnemonic (parent, name)) ->
                                 match tryFindJob system (getJobName (parent, ctxInfo.Names)) with
                                 | Some job ->
-                                    let vp =
-                                        match ctx.TryFindFirstChild<CausalInParamContext>(), ctx.TryFindFirstChild<CausalOutParamContext>() with
-                                        | Some inParam, Some outParam ->
-                                            ValueParamIO(createValueParam (inParam.TryFindFirstChild<ContentContext>().Value.GetText())
-                                                      ,  createValueParam (outParam.TryFindFirstChild<ContentContext>().Value.GetText()))
-                                        |_-> defaultValueParamIO()  
-                                    Call.CreateWithValueParamIO(job, parent, vp)  |> ignore
+                                    createCall(parent, job, ctx)
                                             
                                 | None ->
                                     match system.Flows.TryFind(fun f->f.Name = ctxInfo.Names.Head) with

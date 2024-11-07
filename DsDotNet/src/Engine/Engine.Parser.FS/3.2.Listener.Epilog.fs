@@ -179,9 +179,11 @@ module EtcListenerModule =
 
                     for fci in flowConditionInfo |> List.choose id do
                         let cndName, inp, outp,  flows, inAddr, outAddr = fci
-
-                        for flow in flows do
-                            system.AddCondition(targetCndType, cndName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
+                        if flows.any() then
+                            for flow in flows do
+                                system.AddCondition(targetCndType, cndName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
+                        else
+                                system.AddCondition(targetCndType, cndName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), None)
 
         member x.ProcessActionBlock(ctx: ActionBlockContext) =
             for ctxChild in ctx.children do
@@ -202,9 +204,11 @@ module EtcListenerModule =
 
                     for fci in flowActionInfo |> List.choose id do
                         let actionName, inp, outp,  flows, inAddr, outAddr = fci
-
-                        for flow in flows do
-                            system.AddAction(targetActionType, actionName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
+                        if flows.any() then
+                            for flow in flows do
+                                system.AddAction(targetActionType, actionName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
+                        else 
+                                system.AddAction(targetActionType, actionName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), None)
 
 
         member x.ProcessSafetyBlock(ctx: SafetyBlockContext) =

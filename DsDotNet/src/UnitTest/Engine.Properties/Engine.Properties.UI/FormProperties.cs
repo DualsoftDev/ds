@@ -8,6 +8,12 @@ using static Engine.Runtime.DsPropertyTreeModule;
 using static Engine.Runtime.DsPropertyTreeExt;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Runtime.DsPropertyModule;
+using System.Diagnostics;
+using static Engine.Runtime.DsPropertyBaseModule;
+using System.ComponentModel;
+using System.Threading.Channels;
+using System.Collections;
+using System.Reflection;
 
 namespace DSModeler
 {
@@ -27,6 +33,12 @@ namespace DSModeler
             {
                 propertyGrid1.SelectedObject = e.Node.Tag;
             
+            };
+            treeView1.AfterSelect += (s, e) =>
+            {
+                if (e.Node != null)
+                    propertyGrid1.SelectedObject = e.Node.Tag;
+
             };
             KeyPreview = true;
             this.KeyDown += FormProperties_KeyDown;
@@ -118,10 +130,41 @@ namespace DSModeler
         {
             treeView1.Nodes.Clear();
             treeView1.Nodes.Add(ConvertToTreeViewNode(rootTree));
-            PropertyUtils.PropertyCollectionChanged
-                         .Publish.Subscribe(_ => propertyGrid1.Refresh());
+            var lst = ConvertToINotifyProperty(rootTree, new List<INotifyPropertyChanged>());   
+            foreach (var item in lst)
+            {
+                item.PropertyChanged += (s, e) =>
+                {
+                    Console.WriteLine($"Changed{e.PropertyName} ({s})");
 
+                    if (s != null && e.PropertyName != null)
+                    {
+                        var property = s.GetType().GetProperty(e.PropertyName);
+
+                        if (property != null)
+                        {
+                            var value = property.GetValue(s);
+                            // value가 ICollection 타입인지 확인
+                            if (value is ICollection)
+                            {
+                                // Collection 타입일 경우 propertyGrid1을 새로고침합니다.
+                                propertyGrid1.Refresh();
+                            }
+                        }
+                    }
+                };
+            }
             treeView1.ExpandAll();
+        }
+
+        private List<INotifyPropertyChanged> ConvertToINotifyProperty(DsTreeNode tree, List<INotifyPropertyChanged> lst)
+        {
+            lst.Add(tree.Node as INotifyPropertyChanged);   
+            foreach (var child in tree.Children)
+            {
+                ConvertToINotifyProperty(child, lst);
+            }
+            return lst;
         }
 
         private TreeNode ConvertToTreeViewNode(DsTreeNode tree)
@@ -133,6 +176,7 @@ namespace DSModeler
             }
             return node;
         }
+
 
         private string GetFilePath(string filter, string title, bool isSaveDialog = false)
         {

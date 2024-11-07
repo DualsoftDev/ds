@@ -41,10 +41,20 @@ module DsTaskDevTypeModule =
     type TaskDevParamIO(inParam: TaskDevParam, outParam: TaskDevParam) =
         member val InParam = inParam with get, set
         member val OutParam = outParam with get, set
+        //ValueParamIO 의해 업데이트 되었는지 여부
+        member val IsDirty = false with get, set
         member x.IsDefaultParam = x.InParam.IsDefault && x.OutParam.IsDefault
         member x.ToDsText() =  $"{x.InParam.ToText()}, {x.OutParam.ToText()}"
 
-    let updateTaskDevDatatype(t:TaskDevParamIO, v:ValueParamIO) =  
+    let updateTaskDevDatatype(t:TaskDevParamIO, v:ValueParamIO, name:string) =  
+        
+        if t.IsDirty then  
+            if t.InParam.DataType <> v.InDataType   then
+                failWithLog $"Error: multi IN parameter in taskDev  \r\n name:{name} \r\n ({t.InParam.DataType} != {v.InDataType})"
+            if t.OutParam.DataType <> v.OutDataType   then
+                failWithLog $"Error: multi OUT parameter in taskDev  \r\n name:{name} \r\n ({t.OutParam.DataType} != {v.OutDataType})"
+        else 
+            t.IsDirty <- true
             t.InParam <- TaskDevParam(t.InParam.Address, v.In.DataType, t.InParam.Symbol)   
             t.OutParam <- TaskDevParam(t.OutParam.Address, v.Out.DataType, t.OutParam.Symbol)
 

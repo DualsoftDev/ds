@@ -42,6 +42,8 @@ clean:
 	-@rm -rf /c/Users/kwak/.nuget/packages/dual*
 	-@find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +
 	make dotnet-restore
+CLEAN: clean
+	@dotnet nuget locals all --clear
 
 # copy-template if not exists:
 TEMPLATES := ./Apps/CommonAppSettings.json.template \

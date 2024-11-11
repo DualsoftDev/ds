@@ -19,8 +19,8 @@ module XgiXmlProjectAnalyzerModule =
                 Comment = dic["Comment"]
                 Address   = dic.TryFindValue("Address")   |> Option.toString
                 Device    = dic.TryFindValue("Device")    |> Option.toString
-                DevicePos = dic.TryFindValue("DevicePos") |> Option.bind Parse.Int |> Option.defaultValue(-1)
-                Kind      = dic.TryFindValue("Kind")      |> Option.bind Parse.Int |> Option.defaultValue(-1)
+                DevicePos = dic.TryFindValue("DevicePos") |> Option.bind Parse.TryInt |> Option.defaultValue(-1)
+                Kind      = dic.TryFindValue("Kind")      |> Option.bind Parse.TryInt |> Option.defaultValue(-1)
         }
 
     let collectByteIndices target (addresses: string seq) : int list =
@@ -92,7 +92,7 @@ module XgiXmlProjectAnalyzerModule =
     let collectXgkBasicParameters (xdoc: XmlDocument) : Dictionary<string, int> =
         xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam").GetAttributes()
         |> map (fun (KeyValue(k, v)) ->
-            match Parse.Int v with
+            match Parse.TryInt v with
             | Some v -> Some (k, v)
             | None -> None)
         |> choose id

@@ -93,7 +93,7 @@ type XgxXmlExtension =
             for pou in pous do
                 let rungs = pou.GetXmlNodes("Rung")
                 let mutable c = 0
-                let getCoordinate (e:XmlNode) = e.Attributes.["Coordinate"].Value |> Parse.Int |> Option.get
+                let getCoordinate (e:XmlNode) = e.Attributes.["Coordinate"].Value |> Parse.TryInt |> Option.get
                 for r in rungs do
                     let rungName =
                         match r.Attributes.["Name"] with
@@ -106,7 +106,7 @@ type XgxXmlExtension =
                         | e::[] when getCoordinate(e) <= c ->
                             failwith $"Rung {rungName} has invalid coordinates : {getCoordinate(e)} <= {c}."
                         | _ ->
-                            let coordinates = elements |> map (fun x -> Parse.Int x.Attributes.["Coordinate"].Value |> Option.get) |> toArray
+                            let coordinates = elements |> map (fun x -> Parse.TryInt x.Attributes.["Coordinate"].Value |> Option.get) |> toArray
 
                             (* C = A || B 래더 생성 시, 좌표 순서가 A, C, B 로 나와야 하지만, 현재는 A, B, C 순서로 나와서 일단 check 보류 *)
                             let isOrdered = coordinates |> pairwise |> Seq.forall (fun (a, b) -> a < b)

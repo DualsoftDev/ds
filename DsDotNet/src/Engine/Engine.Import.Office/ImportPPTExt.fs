@@ -188,8 +188,8 @@ module ImportU =
                     let flow = dicFlow.[node.PageNum]
                     node.CondiDefs.ForEach(fun c ->  addCondition (c.Key, c.Value, Some flow))
                     node.ActionDefs.ForEach(fun a ->  addActiontion (a.Key, a.Value, Some flow))
-                with _ ->
-                    Office.ErrorName(node.Shape, ErrID._67, node.PageNum)
+                with ex ->
+                    Office.ErrorName(node.Shape, ex.Message, node.PageNum)
                     )
 
             doc.NodesHeadPage
@@ -703,8 +703,8 @@ module ImportU =
         [<Extension>]
         static member CreateGenBtnLamp(mySys: DsSystem) =
             let defParm = defaultValueParamIO()
-            let defBtn  = Addresses ("", TextSkip)
-            let defLamp = Addresses (TextSkip, "")
+            let defBtn  = Addresses ("", TextNotUsed)
+            let defLamp = Addresses (TextNotUsed, "")
             mySys.AddButtonDef(BtnType.DuAutoBTN,      "AutoSelect",  defParm, defBtn , None)
             mySys.AddButtonDef(BtnType.DuManualBTN,    "ManualSelect",defParm, defBtn , None)
             mySys.AddButtonDef(BtnType.DuDriveBTN,     "DrivePushBtn",defParm, defBtn , None)

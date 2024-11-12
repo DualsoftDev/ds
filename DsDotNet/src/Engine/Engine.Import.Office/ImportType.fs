@@ -87,7 +87,7 @@ module ImportType =
 
     let checkPptDataType (taskDevParamRaw:TaskDevParamRawItem) (taskDevParam:TaskDevParam) =
         let address, typePpt = taskDevParamRaw |>fun (addr,t,_) -> addr, t
-        if (address <> TextSkip) && (typePpt <> taskDevParam.DataType)
+        if (address <> TextNotUsed) && (typePpt <> taskDevParam.DataType)
         then
             failWithLog $"error datatype : {taskDevParamRaw} <> {taskDevParam.DataType}"
 

@@ -8,7 +8,7 @@ open ConvertCoreExtUtils
 [<AutoOpen>]
 module ConvertCpuDsSystem =
     let emptyAddressCheck(address:string) (name:string) =
-        if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextSkip then
+        if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextNotUsed then
             failwithf $"{name} 해당 주소가 없습니다."
 
     let getMemory (tag:IStorage) (target:PlatformTarget) =
@@ -205,13 +205,13 @@ module ConvertCpuDsSystem =
 
             for dev, _job in jobDevices do
                 let apiStgName = dev.FullName
-                if  dev.InAddress <> TextSkip then
+                if  dev.InAddress <> TextNotUsed then
                     let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.TaskDevice, Some x, dev, dev.TaskDevParamIO.InParam.DataType).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
                 if not(dev.IsRootOnlyDevice) then
-                    if dev.OutAddress <> TextSkip then
+                    if dev.OutAddress <> TextNotUsed then
                         let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.TaskDevice, Some x , dev, dev.TaskDevParamIO.OutParam.DataType).Value
                         dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
 
@@ -227,12 +227,12 @@ module ConvertCpuDsSystem =
             for (dev, call) in devCalls do
                 let cv =  call.TagManager :?> CoinVertexTagManager
                 if call.TargetJob.TaskDevCount = 1
-                    ||( dev.OutAddress <> TextSkip  &&  cv.SF.Address = TextAddrEmpty)
+                    ||( dev.OutAddress <> TextNotUsed  &&  cv.SF.Address = TextAddrEmpty)
                 then
                     cv.SF.Address    <- getMemory  cv.SF (getTarget(x))
                     dev.MaunualAddress  <- cv.SF.Address
                 else
-                    dev.MaunualAddress  <- TextSkip  //다중 작업은 수동 작업을 사용하지 않는다.
+                    dev.MaunualAddress  <- TextNotUsed  //다중 작업은 수동 작업을 사용하지 않는다.
 
         member x.GenerationMemory() =
             //Step1)Emulation base + 1 bit

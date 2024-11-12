@@ -55,11 +55,11 @@ module rec CodeElements =
         inherit DsFunc(name)
         member val OperatorCode = "" with get, set
 
-        member x.ToDsText() = if x.OperatorCode = "" then TextSkip else x.OperatorCode
+        member x.ToDsText() = if x.OperatorCode = "" then TextNotUsed else x.OperatorCode
 
     ///Copy, Assign, ... Commands (복사, 대입 명령)
     and CommandFunction(name:string) =
         inherit DsFunc(name)
         member val CommandCode = "" with get, set
 
-        member x.ToDsText() = if x.CommandCode = "" then TextSkip else x.CommandCode
+        member x.ToDsText() = if x.CommandCode = "" then TextNotUsed else x.CommandCode

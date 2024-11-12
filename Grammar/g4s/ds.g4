@@ -401,7 +401,7 @@ categoryBlocks: autoBlock | manualBlock | driveBlock | clearBlock | pauseBlock |
 buttonBlock: '[' 'buttons' ']' '=' '{' (categoryBlocks)* '}';
 lampBlock: '[' 'lamps' ']' '=' '{' (categoryBlocks)* '}';
 conditionBlock: '[' 'conditions' ']' '=' '{' (categoryBlocks)* '}';
-actionBlock: '[' ('actions' | 'triggers') ']' '=' '{' (categoryBlocks)* '}';
+actionBlock: '[' 'actions' ']' '=' '{' (categoryBlocks)* '}';
 
 // B.F1 > Set1F > T.A21;
 causal: causalPhrase SEMICOLON;

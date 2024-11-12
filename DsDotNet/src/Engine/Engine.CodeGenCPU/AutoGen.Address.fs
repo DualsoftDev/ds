@@ -25,7 +25,7 @@ module DsAddressModule =
                 outAnalogByteCnt <- 0
 
 
-    let emptyToSkipAddress address = if address = TextAddrEmpty then TextSkip else address.Trim().ToUpper()
+    let emptyToSkipAddress address = if address = TextAddrEmpty then TextNotUsed else address.Trim().ToUpper()
     let getPCIOMTextBySize (device:string, offset: int, bitSize:int) : string =
             match bitSize with
             | 1 -> $"{device}X{offset}"
@@ -271,9 +271,9 @@ module DsAddressModule =
 
                 | _ -> TextAddrEmpty
 
-            elif addr <> TextSkip && isSkip then
+            elif addr <> TextNotUsed && isSkip then
                  failwithf $"{name} 인터페이스 대상이 없으면 대쉬('-') 기입 필요."
-            elif addr = TextSkip then TextSkip
+            elif addr = TextNotUsed then TextNotUsed
 
             else
                 if cpu = XGK || (cpu = WINDOWS && driver = LS_XGK_IO)
@@ -338,21 +338,21 @@ module DsAddressModule =
 
         for b in sys.HWButtons do
             let inA = if b.InAddress = "" then TextAddrEmpty else b.InAddress
-            let outA = TextSkip
+            let outA = TextNotUsed
             updateHwAddress b (inA, outA)  target
 
         for l in sys.HWLamps do
-            let inA = TextSkip
+            let inA = TextNotUsed
             let outA = if l.OutAddress = "" then TextAddrEmpty else l.OutAddress
             updateHwAddress l (inA, outA)  target
 
-        for c in sys.ReadyConditions@sys.DriveConditions do
+        for c in sys.HWConditions do
             let inA = if c.InAddress = "" then TextAddrEmpty else c.InAddress
-            let outA = TextSkip
+            let outA = TextNotUsed
             updateHwAddress c (inA, outA)  target
 
-        for ce in sys.EmergencyActions do
-            let inA = TextSkip
+        for ce in sys.HWActions do
+            let inA = TextNotUsed
             let outA = if ce.OutAddress = "" then TextAddrEmpty else ce.OutAddress
             updateHwAddress ce (inA, outA)  target
 
@@ -370,7 +370,7 @@ module DsAddressModule =
                     dev.InAddress  <-  getExternalTempMemory(target, extCnt)
                     extCnt <- extCnt+1
 
-                dev.OutAddress <- TextSkip
+                dev.OutAddress <- TextNotUsed
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

@@ -627,8 +627,8 @@ module rec CoreModule =
         type Job (names:Fqdn, system:DsSystem, tasks:TaskDev list) =
             inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
             member x.TaskDevCount  = tasks.length()
-            member x.AddressInCount  = tasks.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextSkip).length()
-            member x.AddressOutCount  = tasks.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextSkip).length()
+            member x.AddressInCount  = tasks.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).length()
+            member x.AddressOutCount  = tasks.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).length()
 
             member x.System = system
             member x.TaskDefs = tasks 

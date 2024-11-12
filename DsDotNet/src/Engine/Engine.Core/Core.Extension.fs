@@ -125,13 +125,13 @@ module CoreExtensionModule =
         
         // Method for adding actions, passing the ActionType and setting isCondition = false
         member x.AddAction(actionType: ActionType, actionName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
-                        if addr.Out = TextSkip then
+                        if addr.Out = TextNotUsed then
                             failwithf $"ActionDef [{actionName}] Error: \r\nOutput Address는 Skip 할 수 없습니다."
 
                         x.AddDefinition(None, Some(actionType), actionName, valueParamIO, addr, flow, false)
         // Method for adding conditions, passing the ConditionType and setting isCondition = true
         member x.AddCondition(condiType: ConditionType, condiName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
-                       if addr.In = TextSkip then
+                       if addr.In = TextNotUsed then
                             failwithf $"ConditionDef [{condiName}] Error: \r\nInput Address는 Skip 할 수 없습니다."
 
                        x.AddDefinition(Some(condiType), None, condiName, valueParamIO, addr, flow, true)
@@ -227,13 +227,13 @@ module CoreExtensionModule =
 
     type TaskDev with
         member x.IsInAddressEmpty            = x.InAddress  = TextAddrEmpty
-        member x.IsInAddressSkipOrEmpty      = x.InAddress  = TextAddrEmpty || x.InAddress = TextSkip
+        member x.IsInAddressSkipOrEmpty      = x.InAddress  = TextAddrEmpty || x.InAddress = TextNotUsed
         member x.IsOutAddressEmpty           = x.OutAddress = TextAddrEmpty
-        member x.IsOutAddressSkipOrEmpty     = x.OutAddress = TextAddrEmpty || x.OutAddress = TextSkip
+        member x.IsOutAddressSkipOrEmpty     = x.OutAddress = TextAddrEmpty || x.OutAddress = TextNotUsed
         member x.IsAddressEmpty              = x.IsInAddressEmpty  && x.IsOutAddressEmpty
         member x.IsAddressSkipOrEmpty        = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
         member x.IsMaunualAddressEmpty       = x.MaunualAddress = TextAddrEmpty
-        member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextSkip
+        member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextNotUsed
 
         member x.SetInSymbol(symName:string)  =  x.TaskDevParamIO.InParam.Symbol <- symName
         member x.SetOutSymbol(symName:string) =  x.TaskDevParamIO.OutParam.Symbol <- symName

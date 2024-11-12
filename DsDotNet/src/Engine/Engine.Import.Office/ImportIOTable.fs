@@ -47,7 +47,7 @@ module ImportIOTable =
 
 
             let getFunctionNUpdate (callName:string, funcName:string, funcBodyText:string, isCommand: bool, page) =
-                if ((trimSpace funcBodyText) = "" || funcBodyText = TextSkip || funcBodyText = TextFuncNotUsed)
+                if ((trimSpace funcBodyText) = "" || funcBodyText = TextNotUsed || funcBodyText = TextFuncNotUsed)
                 then
                     None
                 else
@@ -93,8 +93,8 @@ module ImportIOTable =
 
                 let checkInType, checkOutType = getInOutDataType dataTypeText
 
-                if addrIn  <> TextSkip then checkHardwareDataType (checkInType, valueIn)
-                if addrOut <> TextSkip then checkHardwareDataType (checkOutType, valueOut)
+                if addrIn  <> TextNotUsed then checkHardwareDataType (checkInType, valueIn)
+                if addrOut <> TextNotUsed then checkHardwareDataType (checkOutType, valueOut)
 
             let getSymbol x = if x <> "" then Some x else None
 
@@ -141,9 +141,9 @@ module ImportIOTable =
                     match isConst with
                     | _ when dataType = "" -> 
                         failwithlog $"상수 {name} datatype 입력이 필요합니다."
-                    | true when value = "" || value = TextSkip -> 
+                    | true when value = "" || value = TextNotUsed -> 
                         failwithlog $"상수 {name} Input 영역에 상수 값 입력이 필요합니다."
-                    | false when value <> TextSkip -> 
+                    | false when value <> TextNotUsed -> 
                         failwithlog $"변수 {name} Input 영역에 값 입력이 없어야 합니다. ('-' 입력)"
                     | _ -> ()
 

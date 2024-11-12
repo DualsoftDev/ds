@@ -137,7 +137,7 @@ module ExportIOTable =
                     //외부입력 전용 확인하여 출력 생성하지 않는다.
                     if  dev.IsRootOnlyDevice
                     then
-                        dev.OutAddress <- (TextSkip)
+                        dev.OutAddress <- (TextNotUsed)
                         if dev.InAddress = TextAddrEmpty
                         then
                             dev.InAddress  <-  getExternalTempMemory (target, extCnt)
@@ -211,11 +211,11 @@ module ExportIOTable =
                                     [ TextXlsOperator
                                       TextXlsAllFlow
                                       name
-                                      TextSkip
+                                      TextNotUsed
                                       funcText
-                                      TextSkip
-                                      TextSkip
-                                      TextSkip
+                                      TextNotUsed
+                                      TextNotUsed
+                                      TextNotUsed
                                       ]
                                       )
 
@@ -230,11 +230,11 @@ module ExportIOTable =
                                     [ TextXlsCommand
                                       TextXlsAllFlow
                                       name
-                                      TextSkip
-                                      TextSkip
+                                      TextNotUsed
+                                      TextNotUsed
                                       funcText
-                                      TextSkip
-                                      TextSkip
+                                      TextNotUsed
+                                      TextNotUsed
                                       ]
                                       )
 
@@ -244,10 +244,10 @@ module ExportIOTable =
                   TextXlsAllFlow
                   vari.Name
                   vari.Type.ToText()
-                  if vari.VariableType = Mutable then  TextSkip else vari.InitValue
-                  TextSkip
-                  TextSkip
-                  TextSkip
+                  if vari.VariableType = Mutable then  TextNotUsed else vari.InitValue
+                  TextNotUsed
+                  TextNotUsed
+                  TextNotUsed
                   ]
                   )
 
@@ -448,7 +448,7 @@ module ExportIOTable =
             let devs =  sys.GetDevicesForHMI()
             devs.Select(fun (dev, _)->
                 let text =
-                    if dev.MaunualAddress = TextSkip then
+                    if dev.MaunualAddress = TextNotUsed then
                         ""//"·"
                     else
                         "□"

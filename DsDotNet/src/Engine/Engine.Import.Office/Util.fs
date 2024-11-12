@@ -134,7 +134,7 @@ module Util =
         let taskdevs =job.TaskDefs |> Seq.toList
         for i in [1..jobDevParam.TaskDevCount] do
             if inCnt < i then 
-                taskdevs[i-1].InAddress <- TextSkip
+                taskdevs[i-1].InAddress <- TextNotUsed
             if outCnt < i then
-                taskdevs[i-1].OutAddress <- TextSkip
+                taskdevs[i-1].OutAddress <- TextNotUsed
 

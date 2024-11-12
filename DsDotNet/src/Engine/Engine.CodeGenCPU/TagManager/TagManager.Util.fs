@@ -8,7 +8,7 @@ open Engine.Common
 module TagManagerUtil =
 
     let addressExist address =
-        address  <> TextSkip && address <> TextAddrEmpty
+        address  <> TextNotUsed && address <> TextAddrEmpty
 
 
 
@@ -61,7 +61,7 @@ module TagManagerUtil =
 
     type BridgeType = | TaskDevice | Button | Lamp | Condition | Action | DummyTemp
     let createBridgeTag(stg:Storages, (name: string), address:string, tagKind:int, bridgeType:BridgeType, sys, fqdn:IQualifiedNamed, duType:DataType): ITag option=
-        if address = TextSkip || address = "" then
+        if address = TextNotUsed || address = "" then
             None
         else
             let validTagName =

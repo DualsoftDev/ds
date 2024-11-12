@@ -24,11 +24,11 @@ module ConvertErrorCheck =
 
         if RuntimeDS.Package.IsPLCorPLCSIM() then
             for btn in sys.HWButtons do
-                if btn.InAddress.IsOneOf(TextAddrEmpty, TextSkip) then
+                if btn.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
                     failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
 
             for lamp in sys.HWLamps do
-                if lamp.OutAddress.IsOneOf(TextAddrEmpty, TextSkip) then
+                if lamp.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
                     failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
 
 
@@ -41,7 +41,7 @@ module ConvertErrorCheck =
                 if api.TX.IsNull() then
                     failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
-                if td.OutAddress <> TextSkip && coin.CallActionType =CallActionType.Push then
+                if td.OutAddress <> TextNotUsed && coin.CallActionType =CallActionType.Push then
                     if coin.MutualResetCoins.isEmpty() then
                         failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
 
@@ -112,7 +112,7 @@ module ConvertErrorCheck =
         // Check for null buttons
         let nullBtns =
             sys.HWButtons
-            |> filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextSkip))
+            |> filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextNotUsed))
             |> toArray
 
         if nullBtns.Any() then

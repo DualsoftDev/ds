@@ -191,7 +191,7 @@ module DsValueTypeModule =
                         if getTextValueNType(targetValue).IsSome then 
                             let neg = input.StartsWith(TextCallNegative.ToString())
                             ValueParam(Some(toValue targetValue), None, None, neg, false, false)
-                        elif input = TextSkip  then
+                        elif input = TextNotUsed  then
                             defaultV
                         else 
                             failWithLog $"Invalid ValueParam: {input}"

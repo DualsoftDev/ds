@@ -133,13 +133,13 @@ module internal ToDsTextModule =
     let getHwSystemDefText (hw:HwSystemDef) =
         let inAddr = addressPrint hw.InAddress
         let outAddr = addressPrint hw.OutAddress
-        let inParam = if hw.ValueParamIO.In.IsDefaultValue then TextSkip else hw.ValueParamIO.In.ToText()
-        let outParam = if hw.ValueParamIO.Out.IsDefaultValue then TextSkip else hw.ValueParamIO.Out.ToText()
+        let inParam = if hw.ValueParamIO.In.IsDefaultValue then TextNotUsed else hw.ValueParamIO.In.ToText()
+        let outParam = if hw.ValueParamIO.Out.IsDefaultValue then TextNotUsed else hw.ValueParamIO.Out.ToText()
 
         let param = if hw.ValueParamIO.IsDefaultParam then "" else $"@({inParam}:{outParam})"
 
         $"{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}){param}"
-     
+        
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
         let tab = getTab indent
@@ -181,7 +181,7 @@ module internal ToDsTextModule =
                         for line in codeLines
                             do yield $"{tab3}{line}"
                         yield $"{tab2}{rbCode}"
-                    elif code = TextSkip || code = ""
+                    elif code = TextNotUsed || code = ""
                     then 
                         yield $"{tab2}{funcName};"
                     else

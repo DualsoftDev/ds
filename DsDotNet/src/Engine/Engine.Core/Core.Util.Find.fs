@@ -219,9 +219,9 @@ module internal ModelFindModule =
             |> iter(fun (dev, job) ->
                 let inSkip, outSkip = getSkipInfo(dev, job)
                 if inSkip then
-                    dev.InAddress <- TextSkip
+                    dev.InAddress <- TextNotUsed
                 if outSkip then
-                    dev.OutAddress <- TextSkip )
+                    dev.OutAddress <- TextNotUsed )
 
     let getTaskDevs(x: DsSystem, onlyCoin:bool) =
         let calls = getVerticesHasJob(x)
@@ -370,7 +370,7 @@ type FindExtension =
         //출력있는건 무조건  Coin
         x.GetTaskDevsCoin()
             .DistinctBy(fun (td, c) -> (td, c.TargetJob))
-            .Where(fun (dev,_) -> dev.OutAddress <> TextSkip)
+            .Where(fun (dev,_) -> dev.OutAddress <> TextNotUsed)
 
     [<Extension>]
         static member GetDevicesForHMI(x:DsSystem) =
@@ -391,7 +391,7 @@ type FindExtension =
     [<Extension>]
         static member GetTaskDevsWithoutSkipAddress(x:DsSystem) =
             x.GetTaskDevs()
-             .Where(fun (td, _j) -> not(td.OutAddress = TextSkip && td.InAddress= TextSkip))
+             .Where(fun (td, _j) -> not(td.OutAddress = TextNotUsed && td.InAddress= TextNotUsed))
 
     [<Extension>]
     static member GetQualifiedName(vertex:IVertex) =

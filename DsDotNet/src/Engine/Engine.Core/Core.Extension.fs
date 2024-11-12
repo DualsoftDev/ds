@@ -125,10 +125,17 @@ module CoreExtensionModule =
         
         // Method for adding actions, passing the ActionType and setting isCondition = false
         member x.AddAction(actionType: ActionType, actionName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
+                        if addr.Out = TextSkip then
+                            failwithf $"ActionDef [{actionName}] Error: \r\nOutput Address는 Skip 할 수 없습니다."
+
                         x.AddDefinition(None, Some(actionType), actionName, valueParamIO, addr, flow, false)
         // Method for adding conditions, passing the ConditionType and setting isCondition = true
         member x.AddCondition(condiType: ConditionType, condiName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
+                       if addr.In = TextSkip then
+                            failwithf $"ConditionDef [{condiName}] Error: \r\nInput Address는 Skip 할 수 없습니다."
+
                        x.AddDefinition(Some(condiType), None, condiName, valueParamIO, addr, flow, true)
+
         member private x.AddDefinition(condiType: ConditionType option, actionType: ActionType option, defName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option, isCondition: bool) =
             if flow.IsSome then
                 checkHwSystem(x, flow.Value, defName)

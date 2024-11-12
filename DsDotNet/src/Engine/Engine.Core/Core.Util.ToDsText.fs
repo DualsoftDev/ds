@@ -136,7 +136,7 @@ module internal ToDsTextModule =
         let inParam = if hw.ValueParamIO.In.IsDefaultValue then TextNotUsed else hw.ValueParamIO.In.ToText()
         let outParam = if hw.ValueParamIO.Out.IsDefaultValue then TextNotUsed else hw.ValueParamIO.Out.ToText()
 
-        let param = if hw.ValueParamIO.IsDefaultParam then "" else $"@({inParam}:{outParam})"
+        let param = if hw.ValueParamIO.IsDefaultParam then "" else $"@({inParam}: {outParam})"
 
         $"{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}){param}"
         

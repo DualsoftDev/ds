@@ -33,6 +33,9 @@ module MemoryAllocator =
         | RangeSpec of IntRange
         | AllocatorFunctions of PLCMemoryAllocator
 
+    /// C# 에서 Func<Unit, xxx> 형태의 함수를 직접 호출 불가능해서, 대신 호출하는 함수
+    let CsInvoke(allocator: PLCMemoryAllocatorType) = allocator()
+
     let getByteSizeFromPrefix prefix target =
         match prefix with
         | "B" ->
@@ -53,7 +56,7 @@ module MemoryAllocator =
     let createMemoryAllocator
         (typ: string)
         (availableByteRange: IntRange)
-        (reservedBytes: int list)
+        (FList(reservedBytes: int list))
         (target: PlatformTarget)
       : PLCMemoryAllocator =
         tracefn $"xxx-------------------------MemoryAllocator created!"

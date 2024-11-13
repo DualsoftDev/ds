@@ -1,0 +1,1 @@
+mkdir R:\tmp R:\vs R:\bin R:\packages

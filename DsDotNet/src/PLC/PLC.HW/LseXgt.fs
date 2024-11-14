@@ -149,6 +149,8 @@ module rec XGT =
                 plc.Bases <- [| for i in 1..MaxNumberBases -> Base.Create() |]
             )
 
+        member x.NumTotalUsedSlot = x.Bases |> sumBy(_.NumUsedSlot)
+
     /// PLC IO slot 구성에 따라서 가용한 io bit 번호를 뱉는 함수.  더 이상 가용 bit 가 없으면 None 반환
     type IOAllocatorFunction = unit -> string option
 
@@ -206,7 +208,7 @@ module rec XGT =
             inputAllocator, outputAllocator
 
         [<Todo("메모리 allocator 구현")>]
-        member x.CreateMAllocators() =
+        member x.CreateMAllocators(reservedBytes:int []) =
             let start, size = x.StartFreeMWord, x.FreeMWordSize
             let startByte, endByte =
                 let startWord, endWord = start, start + size
@@ -217,7 +219,7 @@ module rec XGT =
                 WordAllocator = w
                 DWordAllocator= d
                 LWordAllocator= l
-            } = MemoryAllocator.createMemoryAllocator "M" (startByte, endByte) [] x.PLCType
+            } = MemoryAllocator.createMemoryAllocator "M" (startByte, endByte) reservedBytes x.PLCType
             x, b, w, d, l
 
 

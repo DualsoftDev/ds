@@ -42,13 +42,15 @@ clean:
 	-@rm -rf /c/Users/kwak/.nuget/packages/dual*
 	-@find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +
 	make dotnet-restore
+CLEAN: clean
+	@dotnet nuget locals all --clear
 
 # copy-template if not exists:
 TEMPLATES := ./Apps/CommonAppSettings.json.template \
 			 ./Apps/DSPilot/App.config.template \
 			 ./Apps/HMI.Obsolete/AppHMI/App.config.template \
 			 ./Apps/OfficeAddIn/PowerPointAddInHelper/App.config.template \
-			 ./Apps/PptAddIn/Ppt.AddIn/appsettings.json.template \
+			 ./Apps/PptAddIn/PptAddIn/appsettings.json.template \
 			 ./src/IOHub/IO.Core/zmqsettings.json.template \
 			 ./src/IOHub/ThirdParty/LS/IOClient.Xgi/zmqhw.json.template \
 			 ./src/UnitTest/Engine.TestSimulator/App.config.template \

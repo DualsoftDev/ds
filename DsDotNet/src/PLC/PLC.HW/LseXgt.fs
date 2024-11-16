@@ -85,9 +85,11 @@ module rec XGT =
 
 
         member x.GetCapacity(isFixedSlotAllocation:bool) =
-            if isFixedSlotAllocation then
+            if x.IsEmpty then
+                0
+            elif isFixedSlotAllocation then
                 64
-            elif x.IsEmpty || not x.IsDigital then // 가변식: 비어 있거나, 아날로그이거나
+            elif not x.IsDigital then // 가변식 아날로그이거나
                 16
             else
                 max 16 x.Length
@@ -122,7 +124,12 @@ module rec XGT =
             if isFixedSlotAllocation then
                 64 * 16
             else
-                slots |> sumBy(_.GetCapacity(isFixedSlotAllocation))
+                slots
+                |> sumBy(fun sl ->
+                    if sl = null then
+                        0
+                    else
+                        sl.GetCapacity(isFixedSlotAllocation))
 
     type Base with
         member x.Compress() =
@@ -183,25 +190,27 @@ module rec XGT =
                     let mutable baseStart = 0
                     // 이번 slot 의 시작 bit 주소
                     for b, bbase in x.Bases.Indexed() do
-                        bbase.BaseNumber <- b
-                        let mutable slotStart = baseStart
-                        for s, slot in bbase.Slots.Indexed() do
-                            slot.SlotNumber <- s
-                            if slot.IsEmpty || not slot.IsDigital then
-                                slot.Addresses <- [||]
-                            else
-                                let cap= slot.Length
-                                let addresses = [| for i in 0..cap-1 -> createAddress(slot.IsInput, b, s, i, i+slotStart)|]
-                                slot.Addresses <- addresses
+                        if bbase <> null then
+                            bbase.BaseNumber <- b
+                            let mutable slotStart = baseStart
+                            for s, slot in bbase.Slots.Indexed() do
+                                if slot <> null then
+                                    slot.SlotNumber <- s
+                                    if slot.IsEmpty || not slot.IsDigital then
+                                        slot.Addresses <- [||]
+                                    else
+                                        let cap= slot.Length
+                                        let addresses = [| for i in 0..cap-1 -> createAddress(slot.IsInput, b, s, i, i+slotStart)|]
+                                        slot.Addresses <- addresses
 
-                                if slot.IsInput then
-                                    yield addresses, [||]
-                                else
-                                    yield [||], addresses
+                                        if slot.IsInput then
+                                            yield addresses, [||]
+                                        else
+                                            yield [||], addresses
 
-                            slotStart <- slotStart + slot.GetCapacity(x.IsFixedSlotAllocation)
+                                    slotStart <- slotStart + slot.GetCapacity(x.IsFixedSlotAllocation)
 
-                        baseStart <- baseStart + bbase.GetCapacity(x.IsFixedSlotAllocation)
+                            baseStart <- baseStart + bbase.GetCapacity(x.IsFixedSlotAllocation)
                 |] |> Array.unzip
             let xs = xss |> Array.concat
             let ys = yss |> Array.concat

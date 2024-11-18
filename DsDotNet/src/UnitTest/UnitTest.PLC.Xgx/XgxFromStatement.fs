@@ -18,21 +18,35 @@ type XgkFromStatementTestCollection() = class end
 
 type XgxFromStatementTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
-
-    let prjParam = getXgxProjectParams xgx "UnitTestProject"
+    let createParam() =  getXgxProjectParams xgx "UnitTestProject"
+    let mutable prjParam = createParam() 
+    let resetPrjParam() = 
+        prjParam.GlobalStorages.Clear()
+        prjParam <- createParam() 
+                            
+    let mutable addressIndex = 0
     let noComment:string = null
-    member x.CreateVar name =
-        prjParam.CreateTypedAutoVariable(name, false, null)
+    member x.CreateVar name init =
+        prjParam.CreateTypedAutoVariable(name, init, null)
         |> tee (fun x ->
-            x.Address <- name   // 일단 test 용으로 name 을 그대로 address 로 할당.  XGK 에서는 address 가 반드시 필요.
-            prjParam.GlobalStorages.Add (x.Name, x))
+            if xgx = XGK then
+                let typ = init.GetType()
+                match typ.Name with
+                | BOOL    -> x.Address <-  sprintf "P0000%X" addressIndex  //test로 최대 16개만
+                             addressIndex <- addressIndex + 1
+                | _-> x.Address <- $"P0000"
+
+            if not(prjParam.GlobalStorages.ContainsKey x.Name)
+            then 
+                prjParam.GlobalStorages.Add (x.Name, x))
 
     member x.``DuAssign statement test`` () =
-
+        resetPrjParam()
         let varName = "XX"
-        let targetVarname = if xgx = XGI then $"_t1_{varName}" else varName
+        let target = x.CreateVar varName false
+        let targetVarname = if xgx = XGI then target.Name else target.Address
         let cmtStmts =
-            let stmt = DuAssign(None, literal2expr false, x.CreateVar varName)
+            let stmt = DuAssign(None, literal2expr false, target)
             CommentedStatements(noComment, [stmt])
         let xml = generateRungs prjParam noComment [cmtStmts]
         let answer = $"""	<Rung BlockMask="0">
@@ -44,9 +58,10 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
         xml.Replace("\r\n", "\n").StartsWith(answer) === true
 
 
-        let targetVarname = if xgx = XGI then $"_t2_{varName}" else varName
+        let target = x.CreateVar varName false
+        let targetVarname = if xgx = XGI then target.Name else target.Address
         let cmtStmts =
-            let stmt = DuAssign(None, literal2expr true, x.CreateVar "XX")
+            let stmt = DuAssign(None, literal2expr true, target)
             CommentedStatements(noComment, [stmt])
         let xml = generateRungs prjParam noComment [cmtStmts]
         let answer = $"""	<Rung BlockMask="0">
@@ -74,13 +89,14 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
                     - XGI : DuPLCFunction({FunctionName = XgiConstants.FunctionNameMove ...}) 이용 변환
      *)
     member x.``DuCopy bool with condition statement test`` () =
+        resetPrjParam()
         let varName = "XX"
 
         let condition = true
         let cmtStmts =
             let c = literal2expr condition
             let source = literal2expr false
-            let target = x.CreateVar varName |> tee (fun t -> t.Address <- "P0000A" )
+            let target = x.CreateVar varName false
             let stmt =
                 let stmt = DuAssign(Some c, source, target)
                 if xgx = XGI then
@@ -96,7 +112,7 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
                 $"""	<Rung BlockMask="0">
 		<Element ElementType="6" Coordinate="1" >{conditionText}</Element>
 		<Element ElementType="2" Coordinate="4" Param="78"></Element>
-		<Element ElementType="33" Coordinate="94" Param="BAND,P00008,251,P00008,1"></Element>	</Rung>"""
+		<Element ElementType="33" Coordinate="94" Param="BAND,P00000,251,P00000,1"></Element>	</Rung>"""
             else
                 $"""	<Rung BlockMask="0">
 		<Element ElementType="6" Coordinate="1" >_ON</Element>
@@ -112,34 +128,22 @@ type XgxFromStatementTest(xgx:PlatformTarget) =
         storages, statements
 
     member x.``DuCopy int with condition statement test`` () =
+        resetPrjParam()
         let varName = "XX"
         let condition = literal2expr true
         let source = literal2expr 3
-        let target =
-            prjParam.CreateTypedAutoVariable(varName, 0, null)
-            |> tee (fun x ->
-                if prjParam.TargetType = XGK then
-                    x.Address <- "P0000"   // 일단 test 용으로 name 을 그대로 address 로 할당.  XGK 에서는 address 가 반드시 필요.
-                prjParam.GlobalStorages.Add (x.Name, x))
-
-
+        let target = x.CreateVar varName 0
         let statements = [DuAssign(Some condition, source, target)]
         x.MyTestCode(getFuncName(), statements, prjParam.GlobalStorages) |> ignore
         ()
 
     member x.``DuCopy int add with condition statement test`` () =
+        resetPrjParam()
         let varName = "XX"
         let condition = literal2expr true
         let source =
             createBinaryExpression (literal2expr 3) "+" (literal2expr 5)
-        let target =
-            prjParam.CreateTypedAutoVariable(varName, 0, null)
-            |> tee (fun x ->
-                if prjParam.TargetType = XGK then
-                    x.Address <- "P0000"   // 일단 test 용으로 name 을 그대로 address 로 할당.  XGK 에서는 address 가 반드시 필요.
-                prjParam.GlobalStorages.Add (x.Name, x))
-
-
+        let target = x.CreateVar varName 0
         let statements = [DuAssign(Some condition, source, target)]
         x.MyTestCode(getFuncName(), statements, prjParam.GlobalStorages) |> ignore
         ()

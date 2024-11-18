@@ -491,13 +491,42 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
 
             let createCall(parent: ParentWrapper, job: Job, ctx:ParserRuleContext) =
-                let vp =
-                    match ctx.TryFindFirstChild<CausalInParamContext>(), ctx.TryFindFirstChild<CausalOutParamContext>() with
-                    | Some inParam, Some outParam ->
-                        ValueParamIO(createValueParam (inParam.TryFindFirstChild<ContentContext>().Value.GetText())
-                                    ,  createValueParam (outParam.TryFindFirstChild<ContentContext>().Value.GetText()))
-                    |_-> defaultValueParamIO() 
-                job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, vp, td.DequotedQualifiedName))
+                match ctx.TryFindFirstChild<CausalInParamContext>(), ctx.TryFindFirstChild<CausalOutParamContext>() with
+                | Some _, Some _ -> ()
+                | None,  None -> ()
+                | Some _inParam, None    -> failWithLog $"{job.DequotedQualifiedName} ValueParam Output is empty"
+                | None,  Some _outParam  -> failWithLog $"{job.DequotedQualifiedName} ValueParam Input  is empty"
+
+                let callInput =
+                    match ctx.TryFindFirstChild<CausalInParamContext>() with
+                    | Some inParam ->
+                        createValueParam (inParam.TryFindFirstChild<ContentContext>().Value.GetText())
+                    |_-> defaultValueParam() 
+
+                let callOutput =
+                    match ctx.TryFindFirstChild<CausalOutParamContext>() with
+                    | Some outParam ->
+                        createValueParam (outParam.TryFindFirstChild<ContentContext>().Value.GetText())
+                    |_-> defaultValueParam() 
+
+                let vp = ValueParamIO(callInput, callOutput)
+                job.TaskDefs.Iter(fun (td: TaskDev) ->
+                        let inParam = td.TaskDevParamIO.InParam
+                        let outParam = td.TaskDevParamIO.OutParam
+
+                        if not(callInput.IsDefaultValue) then
+                            if inParam.DataType <> DuBOOL && inParam.DataType <> callInput.DataType then
+                                failWithLog $"Input DataType is not match {td.TaskDevParamIO.InParam.DataType} != {callInput.DataType}"
+                        
+                            td.TaskDevParamIO.InParam <- TaskDevParam(inParam.Address, callInput.DataType, inParam.Symbol)   
+                            
+                        if not(callOutput.IsDefaultValue) then
+                            if outParam.DataType <> DuBOOL && outParam.DataType <> callOutput.DataType then
+                                failWithLog $"Output DataType is not match {td.TaskDevParamIO.OutParam.DataType} != {callOutput.DataType}"
+                        
+                            td.TaskDevParamIO.OutParam <- TaskDevParam(outParam.Address, callOutput.DataType, outParam.Symbol)
+                        )
+
                 Call.CreateWithValueParamIO(job, parent, vp)  |> ignore
 
             let loop () =

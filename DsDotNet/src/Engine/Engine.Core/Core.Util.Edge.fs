@@ -86,6 +86,8 @@ module EdgeModule =
     let toText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (e:'E) =
         $"{e.Source.Name} {e.EdgeType.ToText()} {e.Target.Name}"
 
+    let toMermaidText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (e:'E) =
+        $"{e.Source.Name} --> {e.Target.Name}"
 
     let ofResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) =
         edges.Where(fun e -> e.EdgeType.HasFlag(EdgeType.Reset))
@@ -282,7 +284,8 @@ module EdgeModule =
 [<Extension>]
 type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (edge:'E) = toText edge
-
+    [<Extension>] static member ToMermaidText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (edge:'E) = toMermaidText edge
+    
     [<Extension>] static member OfResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
 

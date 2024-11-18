@@ -20,7 +20,11 @@ module ObjectHolderTestModule =
         [<Test>]
         member _.DefaultSerializeTest() =
             let x = ObjectHolder()
-            let xxx = System.Text.Json.JsonSerializer.Serialize(ObjectHolderType.Undefined)
+
+            // System.Text.Json 은 F# discriminated union serialization 을 지원하지 않는다.
+            (fun () -> System.Text.Json.JsonSerializer.Serialize(ObjectHolderType.Undefined) |> ignore)
+                |> ShouldFailWithSubstringT "F# discriminated union serialization is not supported"
+
             let un64 = NaiveHolder(1234567890UL)
             let strUn64 = System.Text.Json.JsonSerializer.Serialize(un64)
             let yyy = JsonConvert.SerializeObject(un64)

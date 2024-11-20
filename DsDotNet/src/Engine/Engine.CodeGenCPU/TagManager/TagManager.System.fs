@@ -35,6 +35,7 @@ module SystemManagerModule =
         let dsSysUint8   autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT8    autoAddr target t sysTag) :?> PlanVar<uint8>
         let dsSysUint16  autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT16   autoAddr target t sysTag) :?> PlanVar<uint16>
         let dsSysUint32  autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT32   autoAddr target t sysTag) :?> PlanVar<uint32>
+        let dsSysUint64  autoAddr target (t:SystemTag) sysTag = (dsSysTag DuUINT64   autoAddr target t sysTag) :?> PlanVar<uint64>
 
 
         let mutualCalls = getMutualInfo (sys.GetVerticesOfJobCalls().Cast<Vertex>())
@@ -88,6 +89,7 @@ module SystemManagerModule =
         let originMonitor    = dsSysBit true sys SystemTag.originMonitor    false
         let goingMonitor     = dsSysBit true sys SystemTag.goingMonitor     false
 
+        //test ahn : pc 제어일경우 timer 동작 코드 생성 필요 
         let flicker20msec  = dsSysBit true sys SystemTag._T20MS  true
         let flicker100msec = dsSysBit true sys SystemTag._T100MS true
         let flicker200msec = dsSysBit true sys SystemTag._T200MS true

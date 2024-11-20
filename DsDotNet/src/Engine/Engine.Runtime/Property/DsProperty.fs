@@ -20,6 +20,7 @@ module rec DsPropertyModule =
 
         member private x.UpdateProperty(sys: DsSystem) =
             x.Name <- sys.Name
+            x.FqdnObject <- Some sys
 
     type PropertyReal() =
         inherit PropertyBase()
@@ -64,6 +65,7 @@ module rec DsPropertyModule =
 
         member private x.UpdateProperty(real: Real) =
             x.Name <- real.Name
+            x.FqdnObject <- Some real
             x.Finished <- real.Finished
             x.NoTransData <- real.NoTransData
             x.Motion <- toNull real.Motion
@@ -86,6 +88,7 @@ module rec DsPropertyModule =
         
         member private x.UpdateProperty(taskDev: TaskDev) =
             x.Name <- taskDev.FullName
+            x.FqdnObject <- Some taskDev
             x.In <- PropertyTaskDevParam(taskDev.TaskDevParamIO.InParam)
             x.Out <- PropertyTaskDevParam(taskDev.TaskDevParamIO.OutParam)
 
@@ -113,6 +116,7 @@ module rec DsPropertyModule =
         // Method to update properties
         member private x.UpdateProperty(call: Call) =
             x.Name <- call.Name
+            x.FqdnObject <- Some call
             x.Disabled <- call.Disabled
             x.ValueParamIO <- PropertyValueParamIO(call.ValueParamIO)
             call.SafetyConditions.Select(fun f ->  f.GetCall().DequotedQualifiedName ).Iter (x.SafetyConditions.Add)
@@ -165,6 +169,7 @@ module rec DsPropertyModule =
 
         member private x.UpdateProperty(flow: Flow) =
             x.Name <- flow.Name
+            x.FqdnObject <- Some flow
 
     and PropertyAlias() =
         inherit PropertyBase()
@@ -177,6 +182,7 @@ module rec DsPropertyModule =
 
         member private x.UpdateProperty(alias: Alias) =
             x.Name <- alias.Name
+            x.FqdnObject <- Some alias
             x.TargetName <- alias.TargetWrapper.GetTarget().DequotedQualifiedName
 
     and PropertyApiItem() =
@@ -261,6 +267,7 @@ module rec DsPropertyModule =
 
         member private x.UpdateProperty(hwDef: HwSystemDef) =
             x.Name <- hwDef.Name
+            x.FqdnObject <- Some hwDef
             x.SettingFlows <- String.Join("; ", hwDef.SettingFlows |> Seq.map (fun f -> f.Name))
             x.InAddress <- hwDef.InAddress
             x.OutAddress <- hwDef.OutAddress

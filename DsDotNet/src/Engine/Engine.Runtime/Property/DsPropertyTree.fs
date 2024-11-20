@@ -26,8 +26,7 @@ module DsPropertyTreeModule =
 type DsPropertyTreeExt =
 
     [<Extension>]
-    static member GetPropertyTree(model: RuntimeModel) : DsTreeNode =
-        let sys = model.System
+    static member GetPropertyTreeFromSystem(sys:DsSystem) =
         // 트리 구조 생성 함수
         let rec buildFlowTree (flow: Flow) =
             let vertices = flow.Graph.Vertices |> Seq.map buildVertexTree |> Seq.toList
@@ -59,16 +58,21 @@ type DsPropertyTreeExt =
             | :? Alias as alias -> CreateTreeNode(PropertyAlias(alias), [])
             | _ -> failwith $"Unknown coin type: {coin.DequotedQualifiedName}"
 
-        let buildHwSystemTree (hwSystemDef: HwSystemDef) : DsTreeNode =
-            CreateTreeNode(PropertyHwSystemDef(hwSystemDef), [])
-
-        let buildModelConfigTree (modelConfig: ModelConfig) : DsTreeNode =
-            CreateTreeNode(PropertyModelConfig(modelConfig), [])
 
         // 그룹 생성
         let flowGroup = CreateTreeNode(PropertyBase("Flows"), sys.Flows |> Seq.map buildFlowTree |> Seq.toList)
-        let hwGroup = CreateTreeNode(PropertyBase("Utils"), sys.HwSystemDefs |> Seq.map buildHwSystemTree |> Seq.toList)
+        flowGroup
+
+    [<Extension>]
+    static member GetPropertyTree(model: RuntimeModel) : DsTreeNode =
+
+        let buildModelConfigTree (modelConfig: ModelConfig) : DsTreeNode =
+            CreateTreeNode(PropertyModelConfig(modelConfig), [])
+        let buildHwSystemTree (hwSystemDef: HwSystemDef) : DsTreeNode =
+            CreateTreeNode(PropertyHwSystemDef(hwSystemDef), [])
+
+        let flowGroup = DsPropertyTreeExt.GetPropertyTreeFromSystem model.System
+        let hwGroup = CreateTreeNode(PropertyBase("Utils"), model.System.HwSystemDefs |> Seq.map buildHwSystemTree |> Seq.toList)
         let dummyGroup = CreateTreeNode(PropertyBase("Settings"), [model.ModelConfig |> buildModelConfigTree])
-        
         // 최상위 시스템 노드 생성
-        CreateTreeNode(PropertySystem(sys), [flowGroup; hwGroup; dummyGroup])
+        CreateTreeNode(PropertySystem(model.System), [flowGroup; hwGroup; dummyGroup])

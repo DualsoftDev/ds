@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net48;net8.0</TargetFrameworks>
+        <RootNamespace>OPC.DSServer</RootNamespace>
+        <LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+        <OutputType>Exe</OutputType>
+        <OutputPath>$(SolutionDir)\bin\</OutputPath>
+        <OtherFlags>--warnon:1182</OtherFlags>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
+
+    <ItemGroup>
+		<None Include="DsOpcServer.Config.xml">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+        <Compile Include="DsNodeManager.fs" />
+        <Compile Include="DsOPCServer.fs" />
+        <Compile Include="ServerStartStop.fs" />
+        <Compile Include="Program.fs" />
+    </ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup />
+
+	<ItemGroup>
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.374.126" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+	  <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+	</ItemGroup>
+
+</Project>

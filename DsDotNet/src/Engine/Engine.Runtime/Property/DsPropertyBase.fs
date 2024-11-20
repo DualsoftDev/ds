@@ -19,6 +19,7 @@ module DsPropertyBaseModule =
     type PropertyBase(?name: string) as this =
         let propertyChanged = Event<PropertyChangedEventHandler, PropertyChangedEventArgs>()
         let mutable name = defaultArg name ""
+        let mutable fqdnObject :FqdnObject option = None
 
         interface INotifyPropertyChanged with
             [<CLIEvent>]
@@ -32,6 +33,8 @@ module DsPropertyBaseModule =
 
         [<Browsable(false)>] // 속성 창에서 숨기기
         member x._ClassType = x.GetType().Name
+
+        member val FqdnObject = fqdnObject with get, set
 
         override x.ToString() = ""//x._ClassType
 

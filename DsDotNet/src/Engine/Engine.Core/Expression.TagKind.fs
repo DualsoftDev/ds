@@ -56,6 +56,7 @@ module TagKindModule =
 
     let getStorageName (fqdn:FqdnObject) (tagKind:TagKind) =
         $"{fqdn.QualifiedName}_{allTagKinds[tagKind]}" |> validStorageName
+    let getTagKindName (tagKind:TagKind) = allTagKinds[tagKind]
 
 
 [<AutoOpen>]

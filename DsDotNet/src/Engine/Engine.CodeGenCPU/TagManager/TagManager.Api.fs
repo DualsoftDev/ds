@@ -13,7 +13,7 @@ module ApiTagManagerModule =
         /// Create Plan Var
         let cpv (apiItemTag:ApiItemTag) =
             let name = getStorageName apiItem (int apiItemTag)
-            let pv:IStorage = createPlanVar stg name DuBOOL false apiItem (int apiItemTag) apiItem.ApiSystem
+            let pv:IStorage = createPlanVar stg name DuBOOL false (Some(apiItem)) (int apiItemTag) apiItem.ApiSystem
             pv :?> PlanVar<bool>
 
         let apiItemTags = [|

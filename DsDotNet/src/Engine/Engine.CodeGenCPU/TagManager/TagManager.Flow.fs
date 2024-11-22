@@ -13,7 +13,7 @@ module FlowManagerModule =
         /// Create Plan Var
         let cpv  (flowTag:FlowTag) =
             let name = getStorageName f (int flowTag)
-            createPlanVar s name DuBOOL true f (int flowTag) f.System
+            createPlanVar s name DuBOOL true (Some(f)) (int flowTag) f.System
 
         let flowTags = [|
             FlowTag.idle_mode             // Idle  Operation Mode

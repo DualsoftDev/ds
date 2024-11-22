@@ -53,14 +53,14 @@ namespace OPC.DSClient
             foreach (var reference in references)
                 nodeIds.Add(ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris));
 
-            var dataTypeMap = GetDataTypes(session, nodeIds);
+            //var dataTypeMap = GetDataTypes(session, nodeIds);
 
             foreach (var reference in references)
             {
                 var nodeId = ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris);
                 var nodePath = $"{currentPath}/{reference.DisplayName.Text}";
                 var isFolder = reference.TypeDefinition?.Equals(ObjectTypeIds.FolderType) == true;
-                var dataType = dataTypeMap.TryGetValue(nodeId, out var dtName) ? dtName : "Unknown";
+                //var dataType = dataTypeMap.TryGetValue(nodeId, out var dtName) ? dtName : "Unknown";
 
                 var tag = new OpcTag
                 {
@@ -68,7 +68,7 @@ namespace OPC.DSClient
                     ParentPath = currentPath,
                     Name = reference.DisplayName.Text,
                     Value = "N/A",
-                    DataType = isFolder ? "Folder" : dataType,
+                    DataType = isFolder ? "Folder" : "Unknown",
                     IsFolder = isFolder,
                     Timestamp = "Unknown"
                 };
@@ -150,6 +150,7 @@ namespace OPC.DSClient
                     {
                         tag.Value = value.Value;
                         tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                        tag.DataType = value.Value?.GetType().Name ?? "Unknown";
                     }
                 };
 

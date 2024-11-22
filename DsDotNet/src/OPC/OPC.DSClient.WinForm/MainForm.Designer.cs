@@ -56,10 +56,10 @@ namespace OPC.DSClient.WinForm
             // 
             // fluentDesignFormContainer1
             // 
+            fluentDesignFormContainer1.Controls.Add(ucDsSunburst1);
             fluentDesignFormContainer1.Controls.Add(ucDsTreemap1);
             fluentDesignFormContainer1.Controls.Add(ucDsTree1);
             fluentDesignFormContainer1.Controls.Add(ucDsTable1);
-            fluentDesignFormContainer1.Controls.Add(ucDsSunburst1);
             fluentDesignFormContainer1.Controls.Add(ucDsSankey1);
             fluentDesignFormContainer1.Controls.Add(ucDsHeatmap1);
             fluentDesignFormContainer1.Dock = DockStyle.Fill;

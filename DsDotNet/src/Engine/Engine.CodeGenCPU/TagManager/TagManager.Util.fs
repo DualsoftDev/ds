@@ -13,12 +13,12 @@ module TagManagerUtil =
 
 
     /// fillAutoAddress : PLC 에 내릴 때, 자동으로 주소를 할당할 지의 여부
-    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed, tagIndex:int,  system:ISystem) : IStorage =
+    let private createPlanVarHelper(stg:Storages, name:string, dataType:DataType, fillAutoAddress:bool, target:IQualifiedNamed option, tagIndex:int,  system:ISystem) : IStorage =
         let v = dataType.DefaultValue()
         let address = if fillAutoAddress then Some TextAddrEmpty else None
         let createParam () =
             {   defaultStorageCreationParams(unbox v) tagIndex with
-                    Name=name; IsGlobal=true; Address=address; Target= Some target; TagKind = tagIndex; System = Some system}
+                    Name=name; IsGlobal=true; Address=address; Target=  target; TagKind = tagIndex; System = Some system}
         let t:IStorage =
             match dataType with
             | DuINT8    -> PlanVar<int8>  (createParam())
@@ -49,14 +49,14 @@ module TagManagerUtil =
         let cs = CTRStruct.Create(CounterType.CTR, storages, name, 0u, 0u, sys, target)
         cs
 
-    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =
+    let createPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed option) (tagIndex:int) (sys:ISystem) =
         let name = getPlcTagAbleName name storages
         let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
         t
 
     let createSystemPlanVar (storages:Storages) (name:string) (dataType:DataType) (fillAutoAddress:bool) (target:IQualifiedNamed) (tagIndex:int) (sys:ISystem) =
         let name = getPlcTagAbleName name storages
-        let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, target, tagIndex, sys)
+        let t= createPlanVarHelper (storages, name, dataType, fillAutoAddress, Some target, tagIndex, sys)
         t
 
     type BridgeType = | TaskDevice | Button | Lamp | Condition | Action | DummyTemp

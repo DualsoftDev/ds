@@ -22,7 +22,7 @@ module TagManagerModule =
         let s =  sys.TagManager.Storages
         let vertexTag = vertexTag |> int
         let name = getStorageName v vertexTag
-        let t = createPlanVar  s name DuBOOL autoAddr v vertexTag sys
+        let t = createPlanVar  s name DuBOOL autoAddr (Some(v)) vertexTag sys
         t :?> PlanVar<bool>
 
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
@@ -175,7 +175,7 @@ module TagManagerModule =
         let createTokenData (vertexTag, tokenType)  =
             let vertexTagInt = vertexTag |> int
             let name = $"{v.QualifiedName}_{tokenType}" |> validStorageName
-            createPlanVar s name DuUINT32 true v vertexTagInt sys
+            createPlanVar s name DuUINT32 true (Some(v)) vertexTagInt sys
 
         let realTokenData = createTokenData(VertexTag.realToken, "realToken")
         let mergeTokenData = createTokenData(VertexTag.mergeToken, "mergeToken")
@@ -254,7 +254,7 @@ module TagManagerModule =
         let sourceTokenData  =
             let vertexTag = VertexTag.sourceToken |> int
             let name = $"{v.QualifiedName}_{VertexTag.sourceToken}" |> validStorageName
-            createPlanVar s name DuUINT32 true v vertexTag sys
+            createPlanVar s name DuUINT32 true (Some(v)) vertexTag sys
 
         ///Source SEQ Data
         member val SourceTokenData = sourceTokenData

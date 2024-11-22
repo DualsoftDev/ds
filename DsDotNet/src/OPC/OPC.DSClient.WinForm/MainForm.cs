@@ -54,9 +54,9 @@ namespace OPC.DSClient.WinForm
 
                 ucDsTable1.SetDataSource(_OpcTagManager);
                 ucDsTree1.SetDataSource(_OpcTagManager);
-                ucDsHeatmap1.SetDataSource(_OpcTagManager.OpcTags);
-                ucDsTreemap1.SetDataSource(_OpcTagManager);
-                //ucDsSunburst1.SetDataSource(_OpcTagManager);
+                ucDsHeatmap1.SetDataSource(_OpcTagManager);
+                ucDsSunburst1.SetDataSource(_OpcTagManager);
+                //ucDsTreemap1.SetDataSource(_OpcTagManager);
             }
         }
 

@@ -14,7 +14,7 @@ module TaskDevManagerModule =
         /// Create Plan Var
         let cpv (t:TaskDevTag) =
             let name = getStorageName td (int t)
-            let pv:IStorage = createPlanVar stg name DuBOOL false td (int t) sys
+            let pv:IStorage = createPlanVar stg name DuBOOL false (Some(td)) (int t) sys
             pv :?> PlanVar<bool>
 
 

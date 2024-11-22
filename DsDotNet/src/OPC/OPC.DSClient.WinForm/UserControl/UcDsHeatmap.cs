@@ -13,8 +13,8 @@ namespace OPC.DSClient.WinForm.UserControl
 
     public partial class UcDsHeatmap : XtraUserControl
     {
-        private BindingList<OpcTag> _opcTags;
         private DevExpress.Utils.ToolTipController toolTipController1 = new DevExpress.Utils.ToolTipController();
+        BindingList<OpcTag> _opcTags;
 
         public UcDsHeatmap()
         {
@@ -55,32 +55,17 @@ namespace OPC.DSClient.WinForm.UserControl
             toolTipController1.BeforeShow += ToolTipController1_BeforeShow;
         }
 
-        public void SetDataSource(BindingList<OpcTag> opcTags)
+        public void SetDataSource(OpcTagManager opcTagManager)
         {
-            if (opcTags == null || opcTags.Count == 0)
-            {
-                MessageBox.Show("No data to display.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return;
-            }
+            _opcTags = opcTagManager.OpcTags; ;
 
             try
             {
-                // 이전 구독 해제 및 새로운 데이터 설정
-                if (_opcTags != null)
-                {
-                    foreach (var tag in _opcTags)
-                    {
-                        tag.PropertyChanged -= OpcTag_PropertyChanged;
-                    }
-                }
-
-                _opcTags = opcTags;
-
                 foreach (var tag in _opcTags)
                 {
+                    tag.PropertyChanged -= OpcTag_PropertyChanged;
                     tag.PropertyChanged += OpcTag_PropertyChanged;
                 }
-
                 // 초기 Heatmap 설정
                 UpdateHeatmap();
             }
@@ -90,7 +75,7 @@ namespace OPC.DSClient.WinForm.UserControl
             }
         }
 
-        private void OpcTag_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        private void OpcTag_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(OpcTag.ChangeCount))
             {
@@ -100,10 +85,6 @@ namespace OPC.DSClient.WinForm.UserControl
         }
         private void UpdateHeatmap()
         {
-            if (_opcTags == null || _opcTags.Count == 0)
-                return;
-
-
             int width = (int)Math.Ceiling(Math.Sqrt(_opcTags.Count));
             int height = width;
 

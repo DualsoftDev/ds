@@ -1,43 +1,37 @@
-using DevExpress.XtraTreeMap;
+using DevExpress.Map.Kml.Model;
 using DevExpress.XtraEditors;
+using DevExpress.XtraTreeMap;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
-using DevExpress.Utils;
-using DevExpress.ClipboardSource.SpreadsheetML;
-using DevExpress.XtraCharts.Heatmap;
 
 namespace OPC.DSClient.WinForm.UserControl
 {
     public partial class UcDsSunburst : XtraUserControl
     {
-        public SunInfo SunInfo { get; set; }
         public SunburstHierarchicalDataAdapter DataAdapter { get; private set; }
-        private DevExpress.Utils.ToolTipController toolTipController1 = new DevExpress.Utils.ToolTipController();
 
         public UcDsSunburst()
         {
             InitializeComponent();
             InitializeSunburst();
+            SetDemoDataSource();
         }
 
         private void InitializeSunburst()
         {
             // Sunburst Data Adapter 초기화
-            DataAdapter = new SunburstHierarchicalDataAdapter
+            DataAdapter = new SunburstHierarchicalDataAdapter();
+
+            // Sunburst Data Mapping 설정
+            var sunburstMapping = new SunburstHierarchicalDataMapping
             {
-                Mappings =
-                {
-                    new SunburstHierarchicalDataMapping
-                    {
-                        ChildrenDataMember = "SunItems",
-                        LabelDataMember = "Label",
-                        ValueDataMember = "Value"
-                    }
-                }
+                ChildrenDataMember = "SunItems", // 하위 데이터
+                LabelDataMember = "Label", // 항목 레이블
+                ValueDataMember = "Value" // 항목 값
             };
+            DataAdapter.Mappings.Add(sunburstMapping);
+            DataAdapter.Mappings[0].Type = typeof(SunInfo); // 데이터 타입 지정
 
             // Sunburst Control 설정
             sunburstControl1.DataAdapter = DataAdapter;
@@ -50,79 +44,120 @@ namespace OPC.DSClient.WinForm.UserControl
                 VaryColorInGroup = true,
                 Palette = Palette.PastelKitPalette
             };
-            // 툴팁 설정
-            sunburstControl1.ToolTipController = this.toolTipController1;
-            sunburstControl1.ToolTipController.BeforeShow += ToolTipController_BeforeShow;
         }
 
-        private void ToolTipController_BeforeShow(object sender, DevExpress.Utils.ToolTipControllerShowEventArgs e)
+        internal void SetDemoDataSource()
         {
-            if (e.SelectedObject is SunburstItem item)
+            try
             {
-                // Sunburst 항목에 대한 툴팁 구성
-                var sunInfo = item.Tag as SunInfo;
-                var superToolTip = new DevExpress.Utils.SuperToolTip
+                // 데모 데이터 생성
+                var data = new List<SunInfo>
                 {
-                    Items =
+                    new SunInfo
                     {
-                        new ToolTipTitleItem { Text = sunInfo?.Label ?? "Unknown" },
-                        new ToolTipItem { Text = $"Value: {sunInfo?.Value ?? 0}" }
+                        Label = "Root 1",
+                        Value = 0,
+                        SunItems = new List<SunInfo>
+                        {
+                            new SunInfo { Label = "Child 1.1", Value = 10 },
+                            new SunInfo { Label = "Child 1.2", Value = 20 },
+                            new SunInfo
+                            {
+                                Label = "Child 1.3",
+                                Value = 0,
+                                SunItems = new List<SunInfo>
+                                {
+                                    new SunInfo { Label = "Subchild 1.3.1", Value = 5 },
+                                    new SunInfo { Label = "Subchild 1.3.2", Value = 15 }
+                                }
+                            }
+                        }
+                    },
+                    new SunInfo
+                    {
+                        Label = "Root 2",
+                        Value = 0,
+                        SunItems = new List<SunInfo>
+                        {
+                            new SunInfo { Label = "Child 2.1", Value = 25 },
+                            new SunInfo { Label = "Child 2.2", Value = 35 }
+                        }
                     }
                 };
-                e.SuperTip = superToolTip;
+
+                DataAdapter.DataSource = data;
+                sunburstControl1.CenterLabel.TextPattern = "Demo Sunburst Diagram";
+                sunburstControl1.Refresh();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error setting demo data: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        public void SetDataSource()
-        {
-        
-        }
+
         internal void SetDataSource(OpcTagManager opcTagManager)
         {
-            // SunInfo 데이터를 위한 리스트 생성
-            List<SunInfo> data = new List<SunInfo>();
+            System.ComponentModel.BindingList<OpcTag> treeData = new System.ComponentModel.BindingList<OpcTag>();
 
-            // OpcFolderTags를 최상위 레벨로 추가
-            foreach (var folder in opcTagManager.OpcFolderTags)
+            opcTagManager.OpcFolderTags.ForEach(f => treeData.Add(f)); // OpcFolderTags를 OpcTags에 추가 
+
+            foreach (var item in opcTagManager.OpcTags)
             {
-                var folderInfo = new SunInfo
+                treeData.Add(item);
+            }
+
+
+            try
+            {
+                // 루트 노드 생성
+                var root = new SunInfo
                 {
-                    Label = folder.Name,
-                    Value = 0, // 기본값 (폴더는 값이 없음)
+                    Label = "Root",
+                    Value = 0,
                     SunItems = new List<SunInfo>()
                 };
 
-                // OpcTags 중 해당 폴더에 속하는 태그를 추가
-                var childTags = opcTagManager.OpcTags.Where(tag => tag.ParentPath == folder.Path);
-                foreach (var tag in childTags)
+                // Path와 ParentPath를 기반으로 SunInfo 계층 구조 생성
+                var pathMap = new Dictionary<string, SunInfo>
+                        {
+                            { "", root } // 루트를 기본으로 추가
+                        };
+
+                foreach (var opcTag in treeData)
                 {
-                    folderInfo.SunItems.Add(new SunInfo
+                    // 현재 태그 또는 폴더의 SunInfo 생성
+                    var sunInfo = new SunInfo
                     {
-                        Label = tag.Name,
-                        Value = tag.ChangeCount, // 태그의 변경 횟수를 값으로 사용
-                        SunItems = new List<SunInfo>() // Leaf 노드
-                    });
+                        Label = opcTag.Name,
+                        Value = opcTag.IsFolder ? 0 : opcTag.ChangeCount, // 폴더는 값이 0
+                        SunItems = new List<SunInfo>()
+                    };
+
+                    // Path를 키로 SunInfo 저장
+                    pathMap[opcTag.Path] = sunInfo;
+
+                    // ParentPath를 통해 부모를 찾고, 해당 부모의 SunItems에 추가
+                    if (pathMap.TryGetValue(opcTag.ParentPath, out var parentSunInfo))
+                    {
+                        parentSunInfo.SunItems.Add(sunInfo);
+                    }
+                    else
+                    {
+                        // 부모가 없으면 루트에 추가
+                        root.SunItems.Add(sunInfo);
+                    }
                 }
 
-                data.Add(folderInfo);
+                // Sunburst 데이터 어댑터에 루트 데이터 설정
+                DataAdapter.DataSource = new List<SunInfo> { root };
+                sunburstControl1.CenterLabel.TextPattern = "Sunburst Diagram";
+                sunburstControl1.Refresh();
             }
-
-            // 루트 태그가 없는 독립 태그를 추가
-            var independentTags = opcTagManager.OpcTags.Where(tag => string.IsNullOrEmpty(tag.ParentPath));
-            foreach (var tag in independentTags)
+            catch (Exception ex)
             {
-                data.Add(new SunInfo
-                {
-                    Label = tag.Name,
-                    Value = tag.ChangeCount,
-                    SunItems = new List<SunInfo>() // Leaf 노드
-                });
+                MessageBox.Show($"Error setting data source: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-
-            // Sunburst 데이터 어댑터에 데이터 설정
-            DataAdapter.DataSource = data;
-            sunburstControl1.CenterLabel.TextPattern = "Sunburst Diagram";
-            sunburstControl1.Refresh();
         }
 
     }

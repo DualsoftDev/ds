@@ -124,7 +124,7 @@ module SystemManagerModule =
         member s.TargetType = platformTarget
         member s.MutualCalls = mutualCalls
         member s.GetTempBoolTag(name:string) : PlanVar<bool>=
-                createPlanVar  stg  name DuBOOL true sys (int SystemTag.temp) sys :?> PlanVar<bool>
+                createPlanVar  stg  name DuBOOL true None (int SystemTag.temp) sys :?> PlanVar<bool>
 
         member s.GetTempTimerTag(name:string) : TimerStruct =
                 timer stg name sys cpu

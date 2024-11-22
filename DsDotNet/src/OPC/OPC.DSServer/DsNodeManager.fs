@@ -51,7 +51,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         printfn "Write Value: %A, Node: %s" value node.BrowseName.Name
 
         if dsStorages.ContainsKey(node.BrowseName.Name) then
-            dsStorages.[node.BrowseName.Name].BoxedValue <- value
+            dsStorages[node.BrowseName.Name].BoxedValue <- value
             printfn "DS Tag '%s' updated to: %A" node.BrowseName.Name value
         else
             printfn "DS Tag '%s' not found!" node.BrowseName.Name
@@ -126,16 +126,16 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         folder
 
     override this.CreateAddressSpace(externalReferences: IDictionary<NodeId, IList<IReference>>) =
-        let nIndex = this.NamespaceIndexes.[0]
+        let nIndex = this.NamespaceIndexes[0]
 
         // Create the Objects folder if it does not exist
         let objectsFolder =
             if not (externalReferences.ContainsKey(ObjectIds.ObjectsFolder)) then
                 let references = List<IReference>()
-                externalReferences.[ObjectIds.ObjectsFolder] <- references
+                externalReferences[ObjectIds.ObjectsFolder] <- references
                 references
             else
-                externalReferences.[ObjectIds.ObjectsFolder] |> List<IReference>
+                externalReferences[ObjectIds.ObjectsFolder] |> List<IReference>
 
         // Dualsoft root folder under Objects
         let rootNode = this.CreateFolder("Dualsoft", "Dualsoft", nIndex, None)
@@ -181,7 +181,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                     TagEventSubject.Subscribe(fun evt ->
                         let tag = TagKindExt.GetStorage(evt)
                         if _variables.ContainsKey(tag.Name) then
-                            let variable = _variables.[tag.Name]
+                            let variable = _variables[tag.Name]
                             variable.Value <- tag.ObjValue
                             variable.Timestamp <- DateTime.Now
                             variable.ClearChangeMasks(this.SystemContext, false)

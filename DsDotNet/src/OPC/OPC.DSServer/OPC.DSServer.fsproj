@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net48;net8.0</TargetFrameworks>
-        <RootNamespace>OPC.DSServer</RootNamespace>
+		<TargetFramework>net8.0</TargetFramework>  
+		<RootNamespace>OPC.DSServer</RootNamespace>
         <LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
         <OutputType>Exe</OutputType>
@@ -13,9 +13,6 @@
 	</PropertyGroup>
 
     <ItemGroup>
-		<None Include="DsOpcServer.Config.xml">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </None>
 		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
         <Compile Include="DsNodeManager.fs" />
         <Compile Include="DsOPCServer.fs" />
@@ -29,10 +26,9 @@
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
 	</ItemGroup>
 
-	<ItemGroup />
-
 	<ItemGroup>
 	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.374.126" />
+	  <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>

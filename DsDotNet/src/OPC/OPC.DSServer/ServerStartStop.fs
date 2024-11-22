@@ -15,26 +15,26 @@ module DsOpcUaServerManager =
     /// <summary>
     /// OPC UA 서버 시작
     /// </summary>
-    let Start(dsSys: DsSystem, opcConfigPath:string) =
+    let Start(dsSys: DsSystem) =
         printfn "OPC UA 서버 초기화 중..."
 
-        let config = 
-            if String.IsNullOrEmpty opcConfigPath
-            then "DsOpcServer"
-            else opcConfigPath
-
+     
         // 1. 애플리케이션 인스턴스 생성
         let application = 
             ApplicationInstance(
                 ApplicationName = "DsOpcServer",
-                ApplicationType = ApplicationType.Server,
-                ConfigSectionName = config
+                ApplicationType = ApplicationType.Server
             )
-        // 2. 설정 파일 로드
-        application.LoadApplicationConfiguration(false).Wait()
+        // 2. 설정 로드
+        let config = DsOPCServerConfig.createApplicationConfiguration()
+        //application.LoadApplicationConfiguration(false).Wait()
+        application.ApplicationConfiguration <- config
 
         // 3. 인증서  확인
-        application.CheckApplicationInstanceCertificate(false, 2048us).Wait()  
+        let isCertValid  = application.CheckApplicationInstanceCertificate(false, 2048us).Result
+        if not(isCertValid)
+        then
+            failwith("Failed to validate or generate the application certificate.")
 
         // 4. 서버 시작
         let opcServer = new DsOPCServer(dsSys)

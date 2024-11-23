@@ -1,8 +1,11 @@
 using Opc.Ua;
 using Opc.Ua.Client;
+using OPC.DSClient.WinForm.UserControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
+using static DevExpress.DataProcessing.InMemoryDataProcessor.AddSurrogateOperationAlgorithm;
 
 namespace OPC.DSClient
 {
@@ -41,7 +44,6 @@ namespace OPC.DSClient
             }
             return null;
         }
-
         private void BrowseAndAddVariables(Session session, NodeId parentNodeId, string currentPath)
         {
             session.Browse(
@@ -53,14 +55,15 @@ namespace OPC.DSClient
             foreach (var reference in references)
                 nodeIds.Add(ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris));
 
-            //var dataTypeMap = GetDataTypes(session, nodeIds);
-
             foreach (var reference in references)
             {
                 var nodeId = ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris);
                 var nodePath = $"{currentPath}/{reference.DisplayName.Text}";
                 var isFolder = reference.TypeDefinition?.Equals(ObjectTypeIds.FolderType) == true;
-                //var dataType = dataTypeMap.TryGetValue(nodeId, out var dtName) ? dtName : "Unknown";
+                //var dataTypeMap = GetDataTypes(session, nodeIds);
+
+                // 정규식을 사용하여 괄호 () 안의 내용 추출
+                string tagKindDefinition = Regex.Match(reference.BrowseName.Name, @"\(([^)]*)\)")?.Groups[1]?.Value ?? "";
 
                 var tag = new OpcTag
                 {
@@ -70,7 +73,8 @@ namespace OPC.DSClient
                     Value = "N/A",
                     DataType = isFolder ? "Folder" : "Unknown",
                     IsFolder = isFolder,
-                    Timestamp = "Unknown"
+                    Timestamp = "Unknown",
+                    TagKindDefinition = tagKindDefinition
                 };
 
                 if (isFolder)
@@ -85,6 +89,7 @@ namespace OPC.DSClient
                 }
             }
         }
+
 
         private Dictionary<NodeId, string> GetDataTypes(Session session, List<NodeId> nodeIds)
         {
@@ -151,6 +156,10 @@ namespace OPC.DSClient
                         tag.Value = value.Value;
                         tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
                         tag.DataType = value.Value?.GetType().Name ?? "Unknown";
+                        if(tag.TagKindDefinition.ToLower().Contains("err"))
+                        {
+
+                        }
                     }
                 };
 

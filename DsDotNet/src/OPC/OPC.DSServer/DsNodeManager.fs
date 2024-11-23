@@ -60,11 +60,11 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         ServiceResult.Good
     
 
-    let createVariable(folder: FolderState, name: string, displayName: string, description: string, namespaceIndex: uint16, initialValue: Variant, typ: Type) =
+    let createVariable(folder: FolderState, name: string, description: string, namespaceIndex: uint16, initialValue: Variant, typ: Type) =
         let variable = 
             new BaseDataVariableState(folder, SymbolicName = name, NodeId = NodeId(name, namespaceIndex),
-                                  BrowseName = QualifiedName(name, namespaceIndex), Description = description,
-                                  DisplayName = displayName, DataType = mapToDataTypeId(typ),
+                                  BrowseName = QualifiedName($"({description}){name}", namespaceIndex), Description = description,
+                                  DisplayName = name, DataType = mapToDataTypeId(typ),
                                   Value = initialValue.Value, AccessLevel = AccessLevels.CurrentReadOrWrite,
                                   UserAccessLevel = AccessLevels.CurrentReadOrWrite)
         
@@ -84,7 +84,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 let variable =
                     createVariable(
                         parentNode,
-                        tag.Name,
                         tag.Name,
                         getTagKindName tag.TagKind,
                         namespaceIndex,
@@ -147,18 +146,23 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         this.CreateOpcNodes sysTags rootTagfolder nIndex
 
         // Create Tree Structure
-        let flowTree = DsPropertyTreeExt.GetPropertyTreeFromSystem(dsSys)
+        let treeFlows = DsPropertyTreeExt.GetPropertyTreeFromSystem(dsSys)
 
         let rec addTreeNodes (parentNode: FolderState) (treeNode: DsTreeNode) =
             // Create a folder for the current tree node under the parentNode
-            let folderName = $"{treeNode.Node.Name}"
-            let folder = this.CreateFolder(folderName, folderName, nIndex, Some parentNode)
+            let target = treeNode.Node.FqdnObject
+            let isJob = target.IsSome && (target.Value :? Job)
+            let folder = 
+                if not(isJob)
+                then
+                    let folderName = $"[{treeNode.Node.Name}]"
+                    this.CreateFolder(folderName, folderName, nIndex, Some parentNode)
+                else 
+                    parentNode
             
-            if treeNode.Node.FqdnObject.IsSome then
-                let tagFolderName =  $"{treeNode.Node.Name} tags"
-                let tagFolder = this.CreateFolder(tagFolderName, tagFolderName, nIndex, Some parentNode)
-                let tags = getTags treeNode.Node.FqdnObject.Value
-                this.CreateOpcNodes tags tagFolder nIndex
+            if target.IsSome && not(isJob) then
+                let tags = getTags target.Value
+                this.CreateOpcNodes tags folder nIndex
 
             printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
 
@@ -167,7 +171,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 addTreeNodes folder child
 
         // Add the tree groups under the Dualsoft folder
-        addTreeNodes rootNode flowTree
+        for flowTree in treeFlows.Children do
+            addTreeNodes rootNode flowTree
 
         // Subscribe to tag events
         this.SubscribeToTagEvents()

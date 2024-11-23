@@ -1,4 +1,5 @@
 using DevExpress.Data.Helpers;
+using DevExpress.Mvvm.Native;
 using DevExpress.XtraBars.FluentDesignSystem;
 using DevExpress.XtraEditors;
 using Opc.Ua;
@@ -47,9 +48,8 @@ namespace OPC.DSClient.WinForm
         private void OnConnectComplete(object? sender, EventArgs e)
         {
             var session = ConnectServerCTRL.Session;
-            if (session != null)
+            if (session != null && !_OpcTagManager.OpcTags.Any())
             {
-                _OpcTagManager.Clear();
                 _OpcTagManager.LoadTags(session);
 
                 ucDsTable1.SetDataSource(_OpcTagManager);

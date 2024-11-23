@@ -29,10 +29,11 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <Compile Update="UserControl\Sunburst\Sunburst.Util.cs" />
     <Compile Update="UserControl\UcDsSankey.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="UserControl\UcDsSunburst.cs">
+    <Compile Update="UserControl\Sunburst\UcDsSunburst.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="UserControl\UcDsTreemap.cs" />

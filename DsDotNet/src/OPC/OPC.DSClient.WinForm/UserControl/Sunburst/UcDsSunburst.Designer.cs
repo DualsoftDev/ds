@@ -7,18 +7,7 @@ namespace OPC.DSClient.WinForm.UserControl
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary> 
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+
 
         #region Component Designer generated code
 
@@ -40,16 +29,16 @@ namespace OPC.DSClient.WinForm.UserControl
             sunburstControl1.Location = new Point(0, 0);
             sunburstControl1.Name = "sunburstControl1";
             sunburstControl1.Padding = new Padding(2);
-            sunburstControl1.Size = new Size(901, 552);
+            sunburstControl1.Size = new Size(901, 483);
             sunburstControl1.TabIndex = 0;
             // 
             // UcDsSunburst
             // 
-            AutoScaleDimensions = new SizeF(7F, 16F);
+            AutoScaleDimensions = new SizeF(7F, 14F);
             AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(sunburstControl1);
             Name = "UcDsSunburst";
-            Size = new Size(901, 552);
+            Size = new Size(901, 483);
             ((System.ComponentModel.ISupportInitialize)sunburstControl1).EndInit();
             ResumeLayout(false);
         }

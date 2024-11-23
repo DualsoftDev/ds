@@ -79,6 +79,7 @@ module rec DsPropertyModule =
         new(x: Job) as this = PropertyJob() then this.UpdateProperty(x)
         member private x.UpdateProperty(job: Job) =
             x.Name <- job.DequotedQualifiedName
+            x.FqdnObject <- Some job
 
     and PropertyTaskDev() =
         inherit PropertyBase()

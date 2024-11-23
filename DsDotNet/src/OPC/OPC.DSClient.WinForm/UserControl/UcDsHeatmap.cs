@@ -80,7 +80,7 @@ namespace OPC.DSClient.WinForm.UserControl
             if (e.PropertyName == nameof(OpcTag.ChangeCount))
             {
                 // 변경 횟수가 업데이트되면 Heatmap 갱신
-                UpdateHeatmap();
+                //UpdateHeatmap();
             }
         }
         private void UpdateHeatmap()

@@ -9,6 +9,8 @@ public class OpcTag : INotifyPropertyChanged
     private object _value = "N/A"; // 기본값 설정
     private DateTime _timestamp = DateTime.Now; // 기본값 설정
     private int _changeCount; // 값 변경 횟수
+    [Browsable(false)]
+    public string TagKindDefinition { get; set; } = string.Empty; // 기본값 설정
 
     public string Path { get; set; } = string.Empty; // 기본값 설정
 

@@ -28,28 +28,102 @@ namespace OPC.DSClient.WinForm.UserControl
 
     public static class SunburstColor
     {
-        internal static Color GetColor(OpcTag opcTag, bool bOn)
+        private static readonly Dictionary<string, Color> FlowColors = new()
         {
-            return opcTag.TagKindDefinition switch
+            { "drive_state", Color.Blue },
+            { "error_state", Color.Red },
+            { "emergency_state", Color.Orange },
+            { "pause_state", Color.Salmon },
+            { "idle_mode", Color.Gray },
+        };
+
+        private static readonly Dictionary<string, Color> VertexColors = new()
+        {
+            { "ready", Color.Green },
+            { "going", Color.Green },
+            { "finish", Color.Green },
+            { "homing", Color.Green },
+            { "pause", Color.Salmon },
+            { "txErrOnTimeUnder", Color.Red },
+            { "txErrOnTimeOver", Color.Red },
+            { "txErrOffTimeOver", Color.Red },
+            { "txErrOffTimeUnder", Color.Red },
+            { "rxErrShort", Color.Red },
+            { "rxErrOpen", Color.Red },
+            { "rxErrInterlock", Color.Red },
+            { "workErrOriginGoing", Color.Red },
+            { "errorTRx", Color.Red },
+        };
+
+        private static readonly Dictionary<string, Color> DeviceColors = new()
+        {
+            { "actionIn", Color.Green },
+            { "actionOut", Color.Blue }
+        };
+
+        /// <summary>
+        /// TagKind에 따라 적절한 색상을 반환합니다.
+        /// </summary>
+        /// <param name="opcTag">현재 OPC 태그</param>
+        /// <param name="bOn">태그 활성 상태</param>
+        /// <returns>적절한 Color</returns>
+        internal static Color GetFolderColor(OpcTag opcTag, bool bOn)
+        {
+            // Flow TagKind 색상 반환
+            if (FlowColors.TryGetValue(opcTag.TagKindDefinition, out var flowColor) && bOn)
             {
-                /// Flow TagKind
-                "idle_mode" or "homing" when bOn => Color.Gray,
-                "drive_state" or "going_state" when bOn => Color.Blue,
-                "error_state" or "rxErrShort" or "rxErrOpen" or "rxErrInterlock" or "workErrOriginGoing" or "errorTRx" when bOn => Color.Red,
-                "emergency_state" when bOn => Color.Orange,
-                "ready_state" or "ready" or "going" or "finish" when bOn => Color.Green,
-                "pause_state" or "pause" when bOn => Color.Salmon,
+                return flowColor;
+            }
 
-                /// Vertex TagKind
-                "txErrOnTimeUnder" or "txErrOnTimeOver" or "txErrOffTimeUnder" or "txErrOffTimeOver" when bOn => Color.Brown,
+            // Real, Call Vertex TagKind 색상 반환
+            if (VertexColors.TryGetValue(opcTag.TagKindDefinition, out var vertexColor) && bOn)
+            {
+                return vertexColor;
+            }
 
-                /// Device TagKind
-                "actionIn" => bOn ? Color.Green : Color.Gray,
+            // Device TagKind 색상 반환
+            if (DeviceColors.TryGetValue(opcTag.TagKindDefinition, out var deviceColor))
+            {
+                return bOn ? deviceColor : Color.Gray;
+            }
 
-                /// 기본값
-                _ => Color.Transparent
-            };
+            // 기본값: Transparent
+            return Color.Transparent;
+        }
+        private static readonly Dictionary<string, System.Timers.Timer> BlinkTimers = new();
+
+
+
+        internal static void StartBlinking(string tagName, SunInfo sunInfo)
+        {
+            if (!BlinkTimers.ContainsKey(tagName))
+            {
+                var timer = new System.Timers.Timer(500); // 500ms 간격으로 깜빡임
+                timer.Elapsed += (s, e) =>
+                {
+                    sunInfo.Color = sunInfo.Color == Color.IndianRed ? Color.LightGray : Color.IndianRed;
+                };
+                BlinkTimers[tagName] = timer;
+                timer.Start();
+            }
         }
 
+        internal static void StopBlinking(string tagName)
+        {
+            if (BlinkTimers.TryGetValue(tagName, out var timer))
+            {
+                timer.Stop();
+                timer.Dispose();
+                BlinkTimers.Remove(tagName);
+            }
+        }
+
+        internal static Color GetSubItemColor(OpcTag opcTag, bool bOn)
+        {
+            if (opcTag.TagKindDefinition.ToLower().Contains("err"))
+                return bOn ? Color.IndianRed : Color.LightGray;
+            else
+                return bOn ? Color.SkyBlue : Color.LightGray;
+        }
     }
 }

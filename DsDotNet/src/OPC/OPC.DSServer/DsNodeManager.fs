@@ -148,31 +148,64 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         // Create Tree Structure
         let treeFlows = DsPropertyTreeExt.GetPropertyTreeFromSystem(dsSys)
 
-        let rec addTreeNodes (parentNode: FolderState) (treeNode: DsTreeNode) =
-            // Create a folder for the current tree node under the parentNode
-            let target = treeNode.Node.FqdnObject
-            let isJob = target.IsSome && (target.Value :? Job)
-            let folder = 
-                if not(isJob)
-                then
-                    let folderName = $"[{treeNode.Node.Name}]"
-                    this.CreateFolder(folderName, folderName, nIndex, Some parentNode)
-                else 
-                    parentNode
+        //let rec addTreeNodes (parentNode: FolderState) (treeNode: DsTreeNode) =
+        //    // Create a folder for the current tree node under the parentNode
+        //    let target = treeNode.Node.FqdnObject
+        //    let isJob = target.IsSome && (target.Value :? Job)
+        //    let folder = 
+        //        if not(isJob)
+        //        then
+        //            let folderName = $"[{treeNode.Node.Name}]"
+        //            this.CreateFolder(folderName, folderName, nIndex, Some parentNode)
+        //        else 
+        //            parentNode
             
-            if target.IsSome && not(isJob) then
-                let tags = getTags target.Value
-                this.CreateOpcNodes tags folder nIndex
+        //    if target.IsSome && not(isJob) then
+        //        let tags = getTags target.Value
+        //        this.CreateOpcNodes tags folder nIndex
 
-            printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
+        //    printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
 
-            // Recursively process child nodes
-            for child in treeNode.Children do
-                addTreeNodes folder child
+        //    // Recursively process child nodes
+        //    for child in treeNode.Children do
+        //        addTreeNodes folder child
+        let processTreeLevels (rootNode: FolderState) (treeFlows: DsTreeNode) =
+            // 큐를 사용하여 단계별로 처리
+            let queue = Queue<(FolderState * DsTreeNode)>()
 
-        // Add the tree groups under the Dualsoft folder
-        for flowTree in treeFlows.Children do
-            addTreeNodes rootNode flowTree
+            // 초기 루트 노드를 큐에 추가
+            for flowTree in treeFlows.Children do
+                queue.Enqueue((rootNode, flowTree))
+
+            while queue.Count > 0 do
+                // 현재 레벨의 노드를 처리
+                let parentNode, treeNode = queue.Dequeue()
+
+                // 현재 노드에 해당하는 폴더 생성
+                let target = treeNode.Node.FqdnObject
+                let isJob = target.IsSome && (target.Value :? Job)
+
+                let folder = 
+                    if isJob
+                    then
+                        parentNode
+                    else 
+                        let folderDisplayName = $"[{treeNode.Node.Name}]"
+                        let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
+                        this.CreateFolder(folderName, folderDisplayName, nIndex, Some parentNode)
+
+                // 태그가 있는 경우 OPC 노드 생성
+                if target.IsSome && not (isJob) then
+                    let tags = getTags target.Value
+                    this.CreateOpcNodes tags folder nIndex
+
+                printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
+
+                // 자식 노드를 큐에 추가
+                for child in treeNode.Children do
+                    queue.Enqueue((folder, child))
+
+        processTreeLevels rootNode treeFlows 
 
         // Subscribe to tag events
         this.SubscribeToTagEvents()

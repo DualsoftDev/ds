@@ -83,9 +83,9 @@ namespace OPC.DSClient.WinForm.UserControl
         /// </summary>
         private void HandleSunburstItemClick(SunburstHitInfo hitInfo, SunburstHierarchicalDataAdapter adapter)
         {
-            if (hitInfo.SunburstItem.Tag is SunInfo si && si.SunItems.Count > 0)
+            if (hitInfo.SunburstItem.Tag is DsUnit si && si.DsUnits.Count > 0)
             {
-                var drillDownDataSource = si.SunItems;
+                var drillDownDataSource = si.DsUnits;
                 if (drillDownDataSource != null && adapter.DataSource != drillDownDataSource)
                 {
                     // 현재 데이터 소스를 Stack에 저장
@@ -144,11 +144,11 @@ namespace OPC.DSClient.WinForm.UserControl
         }
     }
 
-    public class SunInfo
+    public class DsUnit
     {
         public string Label { get; set; } = string.Empty;
         public int Value { get; set; } // 면적 값
         public Color Color { get; set; } // 색상 값 
-        public List<SunInfo> SunItems { get; set; } = new List<SunInfo>();
+        public List<DsUnit> DsUnits { get; set; } = new List<DsUnit>();
     }
 }

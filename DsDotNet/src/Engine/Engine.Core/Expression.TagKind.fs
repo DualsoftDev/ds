@@ -312,6 +312,9 @@ type TagKindExt =
                       TaskDevTag.actionIn
                     , TaskDevTag.actionOut
                     , TaskDevTag.actionMemory
+                    , TaskDevTag.actionCount
+                    , TaskDevTag.actionMean
+                    , TaskDevTag.actionVariance
                     )
             | EventHwSys (_, _, _) -> false
             | EventVariable (_, _, _) -> true

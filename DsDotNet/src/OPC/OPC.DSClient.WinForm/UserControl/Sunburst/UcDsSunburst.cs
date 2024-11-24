@@ -16,7 +16,7 @@ namespace OPC.DSClient.WinForm.UserControl
     public partial class UcDsSunburst : XtraUserControl
     {
         public SunburstHierarchicalDataAdapter DataAdapter { get; private set; }
-        public Dictionary<string, SunInfo> DicPathMap = new Dictionary<string, SunInfo>();
+        public Dictionary<string, DsUnit> DicPathMap = new Dictionary<string, DsUnit>();
         private readonly Dictionary<string, System.Timers.Timer> BlinkTimers = new();
         private readonly System.Timers.Timer uiUpdateTimer;
         private bool isUpdatePending = false;
@@ -64,13 +64,13 @@ namespace OPC.DSClient.WinForm.UserControl
                 {
                     new SunburstHierarchicalDataMapping
                     {
-                        ChildrenDataMember = "SunItems",
+                        ChildrenDataMember = "DsUnits",
                         LabelDataMember = "Label",
                         ValueDataMember = "Value",
                     }
                 }
             };
-            DataAdapter.Mappings[0].Type = typeof(SunInfo);
+            DataAdapter.Mappings[0].Type = typeof(DsUnit);
             sunburstControl1.DataAdapter = DataAdapter;
             sunburstControl1.StartAngle = 0;
             sunburstControl1.HoleRadiusPercent = 15;
@@ -99,25 +99,25 @@ namespace OPC.DSClient.WinForm.UserControl
             }
 
 
-            List<SunInfo> dataSource = new List<SunInfo>();
-            DicPathMap = SunburstManager.GetPathMap(opcTagManager, dataSource);
+            List<DsUnit> dataSource = new List<DsUnit>();
+            DicPathMap = CommonUIManager.GetPathMapWithTags(opcTagManager, dataSource);
             if (dataSource.Count > 0)
             {
                 DataAdapter.DataSource = dataSource;
-                sunburstControl1.CenterLabel.TextPattern = "Diagnostics Diagram";
+                sunburstControl1.CenterLabel.TextPattern = "Diagnostics Diagram\r\n(←)";
                 sunburstControl1.Refresh();
             }
         }
 
         // 깜빡임 시작
-        internal void StartBlinking(string tagName, SunInfo sunInfo)
+        internal void StartBlinking(string tagName, DsUnit DsUnit)
         {
             if (!BlinkTimers.ContainsKey(tagName))
             {
                 var timer = new System.Timers.Timer(500); // 500ms 간격으로 깜빡임
                 timer.Elapsed += (s, e) =>
                 {
-                    sunInfo.Color = sunInfo.Color == Color.IndianRed ? Color.LightGray : Color.IndianRed;
+                    DsUnit.Color = DsUnit.Color == Color.IndianRed ? Color.LightGray : Color.IndianRed;
                     isUpdatePending = true; // UI 갱신 플래그 설정
                 };
                 BlinkTimers[tagName] = timer;
@@ -141,41 +141,41 @@ namespace OPC.DSClient.WinForm.UserControl
             if (e.PropertyName == nameof(OpcTag.Value) && sender is OpcTag opcTag && opcTag.Value is bool bOn)
             {
                 // SubTag 업데이트
-                if (DicPathMap.TryGetValue(opcTag.Name, out var sunInfoSubTag))
+                if (DicPathMap.TryGetValue(opcTag.Name, out var DsUnitSubTag))
                 {
                     // "err" 상태의 깜빡임 처리 포함
                     var color = SunburstColor.GetSubItemColor(opcTag, bOn);
-                    sunInfoSubTag.Color = color;
+                    DsUnitSubTag.Color = color;
 
                     // 깜빡임 로직 추가
                     if (opcTag.TagKindDefinition.ToLower().Contains("err"))
                     {
                         if (bOn)
                         {
-                            StartBlinking(opcTag.Name, sunInfoSubTag); // 에러 발생 시 깜빡임 시작
+                            StartBlinking(opcTag.Name, DsUnitSubTag); // 에러 발생 시 깜빡임 시작
                         }
                         else
                         {
                             StopBlinking(opcTag.Name); // 에러 해제 시 깜빡임 중지
-                            sunInfoSubTag.Color = Color.LightGray; // 기본 색상으로 복원
+                            DsUnitSubTag.Color = Color.LightGray; // 기본 색상으로 복원
                             isUpdatePending = true;
                         }
                     }
                     else
                     {
-                        sunInfoSubTag.Color = bOn ? Color.SkyBlue : Color.LightGray;
+                        DsUnitSubTag.Color = bOn ? Color.SkyBlue : Color.LightGray;
                         isUpdatePending = true;
                     }
                 }
 
                 // FQDN 노드 업데이트
-                if (DicPathMap.TryGetValue(opcTag.ParentPath, out var sunInfoFqdn))
+                if (DicPathMap.TryGetValue(opcTag.ParentPath, out var DsUnitFqdn))
                 {
                     // ParentPath 기반의 색상 결정
                     var color = SunburstColor.GetFolderColor(opcTag, bOn);
                     if (color != Color.Transparent)
                     {
-                        sunInfoFqdn.Color = color;
+                        DsUnitFqdn.Color = color;
                         isUpdatePending = true;
                     }
                 }

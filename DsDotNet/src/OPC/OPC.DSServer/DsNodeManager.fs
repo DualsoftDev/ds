@@ -17,8 +17,8 @@ module DsNodeManagerExt =
         match typ with
         | t when t = typeof<bool> -> DataTypeIds.Boolean
         | t when t = typeof<char> -> DataTypeIds.String
-        | t when t = typeof<float> -> DataTypeIds.Float
-        | t when t = typeof<double> -> DataTypeIds.Double
+        | t when t = typeof<float> -> DataTypeIds.Double
+        | t when t = typeof<float32> -> DataTypeIds.Float
         | t when t = typeof<int16> -> DataTypeIds.Int16
         | t when t = typeof<int32> -> DataTypeIds.Int32
         | t when t = typeof<int64> -> DataTypeIds.Int64
@@ -28,7 +28,7 @@ module DsNodeManagerExt =
         | t when t = typeof<uint32> -> DataTypeIds.UInt32
         | t when t = typeof<uint64> -> DataTypeIds.UInt64
         | t when t = typeof<byte> -> DataTypeIds.Byte
-        | _ -> DataTypeIds.Boolean
+        | _ -> failwithf "Unsupported data type"
 
 
     let getTags(fqdn:FqdnObject) =
@@ -147,28 +147,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
 
         // Create Tree Structure
         let treeFlows = DsPropertyTreeExt.GetPropertyTreeFromSystem(dsSys)
-
-        //let rec addTreeNodes (parentNode: FolderState) (treeNode: DsTreeNode) =
-        //    // Create a folder for the current tree node under the parentNode
-        //    let target = treeNode.Node.FqdnObject
-        //    let isJob = target.IsSome && (target.Value :? Job)
-        //    let folder = 
-        //        if not(isJob)
-        //        then
-        //            let folderName = $"[{treeNode.Node.Name}]"
-        //            this.CreateFolder(folderName, folderName, nIndex, Some parentNode)
-        //        else 
-        //            parentNode
-            
-        //    if target.IsSome && not(isJob) then
-        //        let tags = getTags target.Value
-        //        this.CreateOpcNodes tags folder nIndex
-
-        //    printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
-
-        //    // Recursively process child nodes
-        //    for child in treeNode.Children do
-        //        addTreeNodes folder child
         let processTreeLevels (rootNode: FolderState) (treeFlows: DsTreeNode) =
             // 큐를 사용하여 단계별로 처리
             let queue = Queue<(FolderState * DsTreeNode)>()

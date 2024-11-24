@@ -29,15 +29,14 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="UserControl\Sunburst\Sunburst.Util.cs" />
     <Compile Update="UserControl\UcDsSankey.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="UserControl\Sunburst\UcDsSunburst.cs">
+    <Compile Update="UserControl\UcDsSunburst.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Update="UserControl\UcDsTreemap.cs" />
-    <Compile Update="UserControl\UcDsHeatmap.cs" />
+    <Compile Update="UserControl\Treemap\UcDsTreemap.cs" />
+    <Compile Update="UserControl\Heatmap\UcDsHeatmap.cs" />
   </ItemGroup>
 
 

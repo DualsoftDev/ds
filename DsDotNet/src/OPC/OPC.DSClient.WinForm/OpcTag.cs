@@ -20,6 +20,9 @@ public class OpcTag : INotifyPropertyChanged
     [Browsable(false)]
     public bool IsFolder { get; set; } = false;
 
+    [Browsable(false)]
+    public double Variance { get; set; } = 0.0;
+
     public string Name { get; set; } = string.Empty; // 기본값 설정
 
     public object Value

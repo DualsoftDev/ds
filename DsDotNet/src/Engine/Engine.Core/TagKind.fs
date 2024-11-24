@@ -215,10 +215,13 @@ module TagKindList =
     /// 14000 ~ 14999
     [<Flags>]
     type TaskDevTag =
-
     | actionIn                 = 14010
     | actionOut                = 14011
     | actionMemory             = 14012
+
+    | actionCount              = 14100
+    | actionMean               = 14101
+    | actionVariance           = 14102
 
     /// 15000 ~ 14999
     [<Flags>]

@@ -14,8 +14,16 @@ module TaskDevManagerModule =
         /// Create Plan Var
         let cpv (t:TaskDevTag) =
             let name = getStorageName td (int t)
-            let pv:IStorage = createPlanVar stg name DuBOOL false (Some(td)) (int t) sys
-            pv :?> PlanVar<bool>
+            let pv:IStorage = createPlanVar stg name DuFLOAT32 false (Some(td)) (int t) sys
+            pv :?> PlanVar<single>
+
+
+        let taskDevTagTags = [|
+            TaskDevTag.actionCount
+            TaskDevTag.actionMean
+            TaskDevTag.actionVariance
+        |]
+        let taskDevDic = taskDevTagTags |> map (fun t -> t, cpv t) |> Tuple.toReadOnlyDictionary
 
 
         interface ITagManager with
@@ -26,8 +34,11 @@ module TaskDevManagerModule =
             match vt with
             | TaskDevTag.actionIn  -> td.InTag :> IStorage
             | TaskDevTag.actionOut -> td.OutTag :> IStorage
+            | TaskDevTag.actionCount    -> taskDevDic[TaskDevTag.actionCount] :> IStorage
+            | TaskDevTag.actionMean     -> taskDevDic[TaskDevTag.actionMean] :> IStorage
+            | TaskDevTag.actionVariance -> taskDevDic[TaskDevTag.actionVariance] :> IStorage
             | _ -> failwithlog $"Error : GetVertexTag {vt} type not support!!"  //planStart, planEnd 지원 안함
 
-        member _.TaskDev   = td
-        member _.ApiManager  =  td.ApiItem.TagManager :?> ApiItemManager
+        member _.TaskDev       = td
+
 

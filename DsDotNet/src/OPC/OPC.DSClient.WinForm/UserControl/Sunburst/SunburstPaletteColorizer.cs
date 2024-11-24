@@ -19,8 +19,8 @@ namespace OPC.DSClient.WinForm.UserControl
 
         protected override Color GetItemColor(ISunburstItem item, SunburstItemGroupInfo group)
         {
-            if (item.Tag is SunInfo sunInfo)
-                return sunInfo.Color;
+            if (item.Tag is DsUnit DsUnit)
+                return DsUnit.Color;
             else return base.GetItemColor(item, group);
         }
 
@@ -94,14 +94,14 @@ namespace OPC.DSClient.WinForm.UserControl
 
 
 
-        internal static void StartBlinking(string tagName, SunInfo sunInfo)
+        internal static void StartBlinking(string tagName, DsUnit DsUnit)
         {
             if (!BlinkTimers.ContainsKey(tagName))
             {
                 var timer = new System.Timers.Timer(500); // 500ms 간격으로 깜빡임
                 timer.Elapsed += (s, e) =>
                 {
-                    sunInfo.Color = sunInfo.Color == Color.IndianRed ? Color.LightGray : Color.IndianRed;
+                    DsUnit.Color = DsUnit.Color == Color.IndianRed ? Color.LightGray : Color.IndianRed;
                 };
                 BlinkTimers[tagName] = timer;
                 timer.Start();

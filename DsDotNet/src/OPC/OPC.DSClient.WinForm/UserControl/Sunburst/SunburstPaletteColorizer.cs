@@ -8,22 +8,15 @@ namespace OPC.DSClient.WinForm.UserControl
     {
         public DsSunburstPaletteColorizer()
         {
-            // 상태별 색상을 가진 Custom Palette 생성
-            var customPalette = new Palette
-            {
-                Color.FromArgb(169, 169, 169),  // : 회색
-            };
-            // Custom Palette를 Colorizer에 설정
-            Palette = customPalette;
         }
 
         protected override Color GetItemColor(ISunburstItem item, SunburstItemGroupInfo group)
         {
-            if (item.Tag is DsUnit DsUnit)
-                return DsUnit.Color;
-            else return base.GetItemColor(item, group);
+            if (item.Tag is DsUnit dsUnit)
+                return dsUnit.Color;
+            else 
+                return base.GetItemColor(item, group);
         }
-
     }
 
     public static class SunburstColor

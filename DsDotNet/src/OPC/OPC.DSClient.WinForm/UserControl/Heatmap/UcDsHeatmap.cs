@@ -27,11 +27,11 @@ namespace OPC.DSClient.WinForm.UserControl
                 ToolTipType = ToolTipType.SuperTip // SuperToolTip 사용
             };
             heatmapControl1.ToolTipEnabled = true;
+            heatmapControl1.ToolTipController = _toolTipController;
             _toolTipController.BeforeShow += ToolTipController_BeforeShow;
 
             // Heatmap 초기화
             HeatmapManager.InitializeHeatmapColorProvider(heatmapControl1);
-            heatmapControl1.ToolTipController = _toolTipController;
         }
 
         protected override void Dispose(bool disposing)

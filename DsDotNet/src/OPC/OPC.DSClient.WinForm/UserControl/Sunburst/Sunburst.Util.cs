@@ -148,6 +148,10 @@ namespace OPC.DSClient.WinForm.UserControl
     {
         public string Label { get; set; } = string.Empty;
         public int Value { get; set; } // 면적 값
+        public int Count { get; set; } // 횟수 값
+        public double Mean { get; set; }
+        public double Variance { get; set; } // 평균값
+        public int Level { get; set; } // 폴더 레벨
         public Color Color { get; set; } // 색상 값 
         public List<DsUnit> DsUnits { get; set; } = new List<DsUnit>();
     }

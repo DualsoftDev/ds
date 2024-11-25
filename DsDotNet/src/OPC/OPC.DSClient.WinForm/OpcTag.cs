@@ -22,6 +22,10 @@ public class OpcTag : INotifyPropertyChanged
 
     [Browsable(false)]
     public double Variance { get; set; } = 0.0;
+    [Browsable(false)]
+    public double Mean { get; set; } =  0.001; // 평균값 기본 1msec 설정 UI 영역때문에
+    [Browsable(false)]
+    public int Count { get; set; } = 0;
 
     public string Name { get; set; } = string.Empty; // 기본값 설정
 

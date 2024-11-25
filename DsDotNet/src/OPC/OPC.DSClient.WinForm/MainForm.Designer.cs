@@ -197,7 +197,7 @@ namespace OPC.DSClient.WinForm
             IconOptions.Icon = (Icon)resources.GetObject("MainForm.IconOptions.Icon");
             Name = "MainForm";
             NavigationControl = accordionControl1;
-            Text = "DS Viewer";
+            Text = "DS Pilot";
             fluentDesignFormContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)accordionControl1).EndInit();
             ((System.ComponentModel.ISupportInitialize)fluentDesignFormControl1).EndInit();

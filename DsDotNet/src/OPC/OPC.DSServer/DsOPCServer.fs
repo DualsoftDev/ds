@@ -15,6 +15,35 @@ open Opc.Ua.Configuration
 [<AutoOpen>]
 module DsOPCServerConfig =
     let createApplicationConfiguration () =
+        let applySecurityPolicies (serverConfig: ServerConfiguration) =
+            // SignAndEncrypt with Basic256Sha256
+            let policy1 = ServerSecurityPolicy(
+                SecurityMode = MessageSecurityMode.SignAndEncrypt,
+                SecurityPolicyUri = SecurityPolicies.Basic256Sha256
+            )
+            serverConfig.SecurityPolicies.Add(policy1)
+
+            // None
+            let policy2 = ServerSecurityPolicy(
+                SecurityMode = MessageSecurityMode.None,
+                SecurityPolicyUri = SecurityPolicies.None
+            )
+            serverConfig.SecurityPolicies.Add(policy2)
+
+            // Sign (example, without specific SecurityPolicyUri)
+            let policy3 = ServerSecurityPolicy(
+                SecurityMode = MessageSecurityMode.Sign,
+                SecurityPolicyUri = "" // 빈 URI
+            )
+            serverConfig.SecurityPolicies.Add(policy3)
+
+            // SignAndEncrypt (example, without specific SecurityPolicyUri)
+            let policy4 = ServerSecurityPolicy(
+                SecurityMode = MessageSecurityMode.SignAndEncrypt,
+                SecurityPolicyUri = "" // 빈 URI
+            )
+            serverConfig.SecurityPolicies.Add(policy4)
+
         let config = ApplicationConfiguration()
         config.ApplicationName <- "Dualsoft OPC UA Server"
         config.ApplicationUri <- "urn:localhost:UA:DualsoftServer"
@@ -70,6 +99,8 @@ module DsOPCServerConfig =
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000
         config.ServerConfiguration <- serverConfig
+
+        applySecurityPolicies serverConfig
 
         // Trace Configuration
         let traceConfig = TraceConfiguration()

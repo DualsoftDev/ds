@@ -34,7 +34,11 @@ namespace OPC.DSClient.WinForm.UserControl
             AddTreeListColumn("Data Type", "DataType", 2);
             AddTreeListColumn("Timestamp", "Timestamp", 3);
 
-            Controls.Add(treeList1);
+
+            treeList1.BeforeCollapse += (s, e) => treeList1.BeginUpdate();
+            treeList1.AfterCollapse += (s, e) => treeList1.EndUpdate();
+            treeList1.BeforeExpand += (s, e) => treeList1.BeginUpdate();
+            treeList1.AfterExpand += (s, e) => treeList1.EndUpdate();
         }
 
         private void AddTreeListColumn(string caption, string fieldName, int visibleIndex)

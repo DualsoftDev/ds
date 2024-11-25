@@ -1,18 +1,20 @@
+using DevExpress.Mvvm.Native;
 using Opc.Ua;
 using Opc.Ua.Client;
-using OPC.DSClient.WinForm.UserControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
-using static DevExpress.DataProcessing.InMemoryDataProcessor.AddSurrogateOperationAlgorithm;
 
 namespace OPC.DSClient
 {
     public class OpcTagManager
     {
-        public BindingList<OpcTag> OpcTags { get; } = new();
-        public List<OpcTag> OpcFolderTags { get; } = new();
+        public BindingList<OpcDsTag> OpcTags { get; } = new();
+        public List<OpcDsTag> OpcFolderTags { get; } = new();
+        public string OpcDsText { get; set; } = string.Empty;
+        public string OpcJsonText { get; set; } = string.Empty;
+        Dictionary<string, OpcDsTag> _dicTagKeyPath = new();
 
         public void Clear()
         {
@@ -28,6 +30,9 @@ namespace OPC.DSClient
             var rootNodeId = FindNodeIdByName(session, ObjectIds.ObjectsFolder, "Dualsoft");
             if (rootNodeId != null)
                 BrowseAndAddVariables(session, rootNodeId, "Dualsoft");
+
+            List<OpcDsTag> tempOpcs = [.. OpcTags, .. OpcFolderTags];
+            _dicTagKeyPath = tempOpcs.ToDictionary(folder => folder.Path, folder => folder);
         }
 
         private NodeId? FindNodeIdByName(Session session, NodeId parentNodeId, string name)
@@ -44,6 +49,7 @@ namespace OPC.DSClient
             }
             return null;
         }
+
         private void BrowseAndAddVariables(Session session, NodeId parentNodeId, string currentPath)
         {
             session.Browse(
@@ -51,29 +57,29 @@ namespace OPC.DSClient
                 ReferenceTypeIds.HierarchicalReferences, true,
                 (uint)NodeClass.Object | (uint)NodeClass.Variable, out _, out var references);
 
-            var nodeIds = new List<NodeId>();
-            foreach (var reference in references)
-                nodeIds.Add(ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris));
-
             foreach (var reference in references)
             {
                 var nodeId = ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris);
-                var nodePath = $"{currentPath}/{reference.DisplayName.Text}";
+                var browseName = reference.BrowseName.Name;
+                var name = reference.DisplayName.Text;
+                var nodePath = $"{currentPath}/{name}";
                 var isFolder = reference.TypeDefinition?.Equals(ObjectTypeIds.FolderType) == true;
-                //var dataTypeMap = GetDataTypes(session, nodeIds);
 
-                // 정규식을 사용하여 괄호 () 안의 내용 추출
-                string tagKindDefinition = Regex.Match(reference.BrowseName.Name, @"\(([^)]*)\)")?.Groups[1]?.Value ?? "";
+                string tagKindDefinition = Regex.Match(browseName, @"\(([^)]*)\)")?.Groups[1]?.Value ?? "";
+                string qualifiedName = tagKindDefinition == ""
+                    ? browseName.TrimStart('[').TrimEnd(']')
+                    : browseName.Substring($"({tagKindDefinition})".Length);
 
-                var tag = new OpcTag
+                var tag = new OpcDsTag
                 {
                     Path = nodePath,
                     ParentPath = currentPath,
-                    Name = reference.DisplayName.Text,
+                    Name = name,
                     Value = "N/A",
                     DataType = isFolder ? "Folder" : "Unknown",
                     IsFolder = isFolder,
                     Timestamp = "Unknown",
+                    QualifiedName = qualifiedName,
                     TagKindDefinition = tagKindDefinition
                 };
 
@@ -90,47 +96,10 @@ namespace OPC.DSClient
             }
         }
 
-
-        private Dictionary<NodeId, string> GetDataTypes(Session session, List<NodeId> nodeIds)
-        {
-            var dataTypeMap = new Dictionary<NodeId, string>();
-            var nodesToRead = new ReadValueIdCollection();
-
-            foreach (var nodeId in nodeIds)
-            {
-                if (!NodeId.IsNull(nodeId))
-                {
-                    nodesToRead.Add(new ReadValueId
-                    {
-                        NodeId = nodeId,
-                        AttributeId = Attributes.DataType
-                    });
-                }
-            }
-
-            if (nodesToRead.Count == 0) return dataTypeMap;
-
-            session.Read(null, 0, TimestampsToReturn.Neither, nodesToRead, out var results, out _);
-
-            for (int i = 0; i < results.Count; i++)
-            {
-                if (results[i].WrappedValue.Value is NodeId dataTypeNodeId)
-                {
-                    var dataTypeNode = session.NodeCache.FetchNode(dataTypeNodeId);
-                    dataTypeMap[nodeIds[i]] = dataTypeNode?.DisplayName.Text ?? "Unknown";
-                }
-                else
-                {
-                    dataTypeMap[nodeIds[i]] = "Unknown";
-                }
-            }
-            return dataTypeMap;
-        }
-        private void AddMonitoredItem(Session session, OpcTag tag, NodeId nodeId)
+        private void AddMonitoredItem(Session session, OpcDsTag tag, NodeId nodeId)
         {
             try
             {
-                // 기본 구독 확인 및 생성
                 var subscription = session.DefaultSubscription ?? CreateDefaultSubscription(session);
 
                 if (!session.Subscriptions.Contains(subscription))
@@ -139,7 +108,6 @@ namespace OPC.DSClient
                     subscription.Create();
                 }
 
-                // MonitoredItem 생성
                 var monitoredItem = new MonitoredItem(subscription.DefaultItem)
                 {
                     DisplayName = tag.Name,
@@ -148,18 +116,18 @@ namespace OPC.DSClient
                     SamplingInterval = 1000
                 };
 
+                if (tag.Name.EndsWith(".ds") || tag.Name.EndsWith(".json"))
+                { // text데이터는 초기 값을 읽기
+                    var initialValue = session.ReadValue(nodeId);
+                    UpdateTagValue(tag, initialValue);
+                }
+
                 // 알림 이벤트 핸들러
                 monitoredItem.Notification += (item, args) =>
                 {
                     foreach (var value in item.DequeueValues())
                     {
-                        tag.Value = value.Value;
-                        tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                        tag.DataType = value.Value?.GetType().Name ?? "Unknown";
-                        if(tag.TagKindDefinition.ToLower().Contains("err"))
-                        {
-
-                        }
+                        UpdateTagValue(tag, value);
                     }
                 };
 
@@ -170,6 +138,28 @@ namespace OPC.DSClient
             {
                 Console.WriteLine($"Error creating subscription or monitored item: {ex.Message}");
             }
+        }
+
+        private void UpdateTagValue(OpcDsTag tag, DataValue value)
+        {
+            if (tag.Name.EndsWith(".ds"))
+            {
+                OpcDsText = value.Value?.ToString() ?? string.Empty;
+            }
+            else if (tag.Name.EndsWith(".json"))
+            {
+                OpcJsonText = value.Value?.ToString() ?? string.Empty;
+            }
+            else
+            {
+                if (tag.TagKindDefinition == "finish")
+                    _dicTagKeyPath[tag.ParentPath].Value = value.Value; 
+
+                tag.Value = value.Value;
+            }
+
+            tag.DataType = value.Value?.GetType().Name ?? "Unknown";
+            tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
         }
 
         private Subscription CreateDefaultSubscription(Session session)
@@ -191,6 +181,5 @@ namespace OPC.DSClient
                 throw;
             }
         }
-
     }
 }

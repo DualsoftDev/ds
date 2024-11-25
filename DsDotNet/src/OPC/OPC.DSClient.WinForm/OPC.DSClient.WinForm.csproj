@@ -29,7 +29,7 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Update="UserControl\UcDsSankey.cs">
+    <Compile Update="UserControl\Sankey\UcDsSankey.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Update="UserControl\UcDsSunburst.cs">

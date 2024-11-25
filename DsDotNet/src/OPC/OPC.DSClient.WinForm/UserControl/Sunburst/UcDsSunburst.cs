@@ -100,7 +100,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
 
             List<DsUnit> dataSource = new List<DsUnit>();
-            DicPathMap = CommonUIManager.GetPathMapWithTags(opcTagManager, dataSource);
+            DicPathMap = SankeyUtils.GetPathMapWithTags(opcTagManager, dataSource);
             if (dataSource.Count > 0)
             {
                 DataAdapter.DataSource = dataSource;
@@ -138,45 +138,50 @@ namespace OPC.DSClient.WinForm.UserControl
 
         private void OpcTag_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(OpcTag.Value) && sender is OpcTag opcTag && opcTag.Value is bool bOn)
+            if (e.PropertyName == nameof(OpcDsTag.Value))
             {
-                // SubTag 업데이트
-                if (DicPathMap.TryGetValue(opcTag.Name, out var DsUnitSubTag))
+                if (!(sender is OpcDsTag opcTag)) return; 
+                
+                if(opcTag.Value is bool bOn)
                 {
-                    // "err" 상태의 깜빡임 처리 포함
-                    var color = SunburstColor.GetSubItemColor(opcTag, bOn);
-                    DsUnitSubTag.Color = color;
-
-                    // 깜빡임 로직 추가
-                    if (opcTag.TagKindDefinition.ToLower().Contains("err"))
+                    // SubTag 업데이트
+                    if (DicPathMap.TryGetValue(opcTag.Name, out var DsUnitSubTag))
                     {
-                        if (bOn)
+                        // "err" 상태의 깜빡임 처리 포함
+                        var color = SunburstColor.GetSubItemColor(opcTag, bOn);
+                        DsUnitSubTag.Color = color;
+
+                        // 깜빡임 로직 추가
+                        if (opcTag.TagKindDefinition.ToLower().Contains("err"))
                         {
-                            StartBlinking(opcTag.Name, DsUnitSubTag); // 에러 발생 시 깜빡임 시작
+                            if (bOn)
+                            {
+                                StartBlinking(opcTag.Name, DsUnitSubTag); // 에러 발생 시 깜빡임 시작
+                            }
+                            else
+                            {
+                                StopBlinking(opcTag.Name); // 에러 해제 시 깜빡임 중지
+                                DsUnitSubTag.Color = Color.LightGray; // 기본 색상으로 복원
+                                isUpdatePending = true;
+                            }
                         }
                         else
                         {
-                            StopBlinking(opcTag.Name); // 에러 해제 시 깜빡임 중지
-                            DsUnitSubTag.Color = Color.LightGray; // 기본 색상으로 복원
+                            DsUnitSubTag.Color = bOn ? Color.SkyBlue : Color.LightGray;
                             isUpdatePending = true;
                         }
                     }
-                    else
-                    {
-                        DsUnitSubTag.Color = bOn ? Color.SkyBlue : Color.LightGray;
-                        isUpdatePending = true;
-                    }
-                }
 
-                // FQDN 노드 업데이트
-                if (DicPathMap.TryGetValue(opcTag.ParentPath, out var DsUnitFqdn))
-                {
-                    // ParentPath 기반의 색상 결정
-                    var color = SunburstColor.GetFolderColor(opcTag, bOn);
-                    if (color != Color.Transparent)
+                    // FQDN 노드 업데이트
+                    if (DicPathMap.TryGetValue(opcTag.ParentPath, out var DsUnitFqdn))
                     {
-                        DsUnitFqdn.Color = color;
-                        isUpdatePending = true;
+                        // ParentPath 기반의 색상 결정
+                        var color = SunburstColor.GetFolderColor(opcTag, bOn);
+                        if (color != Color.Transparent)
+                        {
+                            DsUnitFqdn.Color = color;
+                            isUpdatePending = true;
+                        }
                     }
                 }
             }

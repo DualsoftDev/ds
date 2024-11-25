@@ -13,7 +13,7 @@ namespace OPC.DSClient.WinForm.UserControl
 {
     public partial class UcDsHeatmap : XtraUserControl
     {
-        private BindingList<OpcTag> _opcTags;
+        private BindingList<OpcDsTag> _opcTags;
         private Timer _updateTimer;
         private readonly ToolTipController _toolTipController;
 

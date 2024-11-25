@@ -14,6 +14,7 @@
 
     <ItemGroup>
 		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+		<Compile Include="Utils.fs" />
         <Compile Include="DsNodeManager.fs" />
         <Compile Include="DsOPCServer.fs" />
         <Compile Include="ServerStartStop.fs" />

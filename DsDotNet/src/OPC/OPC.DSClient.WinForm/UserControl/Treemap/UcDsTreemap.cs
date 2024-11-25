@@ -98,7 +98,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
         private void OpcTag_PropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == nameof(OpcTag.Value) && sender is OpcTag opcTag && opcTag.Value is bool bOn)
+            if (e.PropertyName == nameof(OpcDsTag.Value) && sender is OpcDsTag opcTag && opcTag.Value is bool bOn)
             {
                 // FQDN 노드 업데이트
                 if (DicPathMap.TryGetValue(opcTag.ParentPath, out var DsUnitFqdn) && bOn)

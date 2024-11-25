@@ -60,7 +60,7 @@ namespace OPC.DSClient.WinForm.UserControl
         /// <param name="opcTag">현재 OPC 태그</param>
         /// <param name="bOn">태그 활성 상태</param>
         /// <returns>적절한 Color</returns>
-        internal static Color GetFolderColor(OpcTag opcTag, bool bOn)
+        internal static Color GetFolderColor(OpcDsTag opcTag, bool bOn)
         {
             // Flow TagKind 색상 반환
             if (FlowColors.TryGetValue(opcTag.TagKindDefinition, out var flowColor) && bOn)
@@ -111,7 +111,7 @@ namespace OPC.DSClient.WinForm.UserControl
             }
         }
 
-        internal static Color GetSubItemColor(OpcTag opcTag, bool bOn)
+        internal static Color GetSubItemColor(OpcDsTag opcTag, bool bOn)
         {
             if (opcTag.TagKindDefinition.ToLower().Contains("err"))
                 return bOn ? Color.IndianRed : Color.LightGray;

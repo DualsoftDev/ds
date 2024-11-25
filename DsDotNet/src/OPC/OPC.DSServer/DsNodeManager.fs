@@ -2,6 +2,7 @@ namespace OPC.DSServer
 
 open System
 open System.Collections.Generic
+open System.Linq
 open Opc.Ua
 open Opc.Ua.Server
 open System.Reactive.Subjects
@@ -9,6 +10,8 @@ open Engine.Core.Interface
 open Engine.Core
 open Engine.Core.TagKindModule
 open Engine.Runtime
+open Dual.Common.Core.FS
+
 
 [<AutoOpen>]
 module DsNodeManagerExt =
@@ -60,24 +63,34 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         ServiceResult.Good
     
 
-    let createVariable(folder: FolderState, name: string, description: string, namespaceIndex: uint16, initialValue: Variant, typ: Type) =
+    let createVariable(folder: FolderState, name: string, tagKind: string , namespaceIndex: uint16, initialValue: Variant, typ: Type) =
         let variable = 
-            new BaseDataVariableState(folder, SymbolicName = name, NodeId = NodeId(name, namespaceIndex),
-                                  BrowseName = QualifiedName($"({description}){name}", namespaceIndex), Description = description,
-                                  DisplayName = name, DataType = mapToDataTypeId(typ),
-                                  Value = initialValue.Value, AccessLevel = AccessLevels.CurrentReadOrWrite,
-                                  UserAccessLevel = AccessLevels.CurrentReadOrWrite)
-        
+            new BaseDataVariableState(folder, 
+                SymbolicName = name, 
+                NodeId = NodeId(name, namespaceIndex),
+                BrowseName = QualifiedName($"({tagKind}){name}", namespaceIndex),
+                Description = "",
+                DisplayName = name,
+                DataType = mapToDataTypeId(typ),
+                Value = initialValue.Value,
+                AccessLevel = AccessLevels.CurrentReadOrWrite,
+                UserAccessLevel = AccessLevels.CurrentReadOrWrite
+                )
+
+              
+
         variable.OnWriteValue <- NodeValueEventHandler(fun context node indexRange dataEncoding value statusCode timestamp ->
             handleWriteValue(context, node, indexRange, dataEncoding, &value, &statusCode, &timestamp)
         )
-
+        
         folder.AddChild(variable)
         variable
 
 
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
-            // Create Variables for storages
+
+      
+        // Create Variables for storages
         for tag in tags do
             if tag.ObjValue.GetType().IsValueType 
                 && not(_variables.ContainsKey tag.Name) then
@@ -119,14 +132,11 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         | Some parent -> parent.AddChild(folder)
         | None -> () // Root folder does not have a parent
 
-        // Add the folder to the address space
-
         this.AddPredefinedNode(this.SystemContext, folder)
         folder
 
     override this.CreateAddressSpace(externalReferences: IDictionary<NodeId, IList<IReference>>) =
         let nIndex = this.NamespaceIndexes[0]
-
         // Create the Objects folder if it does not exist
         let objectsFolder =
             if not (externalReferences.ContainsKey(ObjectIds.ObjectsFolder)) then
@@ -184,10 +194,27 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                     queue.Enqueue((folder, child))
 
         processTreeLevels rootNode treeFlows 
+        this.processTextAdd rootNode dsSys
 
         // Subscribe to tag events
         this.SubscribeToTagEvents()
 
+    /// JSON 데이터를 추가하는 함수
+    member private this.processTextAdd(rootNode: FolderState)(dsSys: DsSystem) =
+        let dsData = dsSys.ToDsText(false, false)
+        let graphData = dsSys.ToJsonGraph()
+        let dsVariable =
+            createVariable(rootNode, $"{dsSys.Name}.ds", "Metadata",
+                this.NamespaceIndexes.[0], Variant(dsData), typeof<string>
+            )
+        let graphVariable =
+            createVariable(rootNode, $"{dsSys.Name}.json", "Metadata",
+                this.NamespaceIndexes.[0], Variant(graphData), typeof<string>
+            )
+
+        // NodeState로 형변환 후 AddPredefinedNode 호출
+        this.AddPredefinedNode(this.SystemContext, dsVariable)
+        this.AddPredefinedNode(this.SystemContext, graphVariable)
 
     member private this.SubscribeToTagEvents() =
         if _disposableTagDS.IsNone 
@@ -201,5 +228,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                             variable.Value <- tag.ObjValue
                             variable.Timestamp <- DateTime.Now
                             variable.ClearChangeMasks(this.SystemContext, false)
+
                     )
                 ) 

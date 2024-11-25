@@ -58,7 +58,7 @@ namespace OPC.DSClient.WinForm.UserControl
         {
             try
             {
-                System.ComponentModel.BindingList<OpcTag> treeData = new System.ComponentModel.BindingList<OpcTag>();
+                System.ComponentModel.BindingList<OpcDsTag> treeData = new System.ComponentModel.BindingList<OpcDsTag>();
 
                 opcTagManager.OpcFolderTags.ForEach(f => treeData.Add(f)); // OpcFolderTags를 OpcTags에 추가 
 

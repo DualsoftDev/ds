@@ -43,7 +43,7 @@ namespace OPC.DSClient.WinForm.UserControl
             heatmapControl.ColorProvider = colorProvider;
         }
 
-        public static void UpdateHeatmap(HeatmapControl heatmapControl, BindingList<OpcTag> opcTags)
+        public static void UpdateHeatmap(HeatmapControl heatmapControl, BindingList<OpcDsTag> opcTags)
         {
             int count = opcTags.Count;
             int width = (int)Math.Ceiling(Math.Sqrt(count));

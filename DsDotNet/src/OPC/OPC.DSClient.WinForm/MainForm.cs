@@ -40,6 +40,7 @@ namespace OPC.DSClient.WinForm
 
             ConnectServerCTRL.Configuration = application.ApplicationConfiguration;
             ConnectServerCTRL.ServerUrl = "opc.tcp://192.168.9.203:2747/DS";
+            //ConnectServerCTRL.ServerUrl = "opc.tcp://localhost:2747/DS";
             ConnectServerCTRL.ConnectComplete += OnConnectComplete;
             ConnectServerCTRL.ReconnectComplete += OnConnectComplete;
             ConnectServerCTRL.Connect();
@@ -52,14 +53,12 @@ namespace OPC.DSClient.WinForm
             {
                 _OpcTagManager.LoadTags(session);
 
+                ucDsSankey1.SetDataSource(_OpcTagManager);
                 ucDsTable1.SetDataSource(_OpcTagManager);
                 ucDsTree1.SetDataSource(_OpcTagManager);
                 ucDsHeatmap1.SetDataSource(_OpcTagManager);
                 ucDsSunburst1.SetDataSource(_OpcTagManager);
-                //ucDsSankey1.SetDataSource(_OpcTagManager);
-                ucDsSankey1.SetSampleDataSource();
                 ucDsTreemap1.SetDataSource(_OpcTagManager);
-                //ucDsTreemap1.SetSampleDataSource();
             }
         }
 

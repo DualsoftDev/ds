@@ -1,0 +1,7 @@
+{
+  "AppSettings": {
+    "EjectIntervalMs": 100,
+    "EventTypes": [ "MM", "MD", "MU", "MW", "KD", "KU", "KP" ]
+  }
+}
+

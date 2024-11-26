@@ -45,6 +45,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
         public static void UpdateHeatmap(HeatmapControl heatmapControl, BindingList<OpcDsTag> opcTags)
         {
+
             int count = opcTags.Count;
             int width = (int)Math.Ceiling(Math.Sqrt(count));
             int height = width;
@@ -64,12 +65,6 @@ namespace OPC.DSClient.WinForm.UserControl
                     if (index < count)
                     {
                         var tag = opcTags[index++];
-
-                        if (index % 220 == 1 || index % 220 == 2 || index % 220 == 0)
-                            tag.Variance = RandomHelper.GetRandomDouble(10, 40); // 임의의 Variance 값 설정
-                        else 
-                            tag.Variance = RandomHelper.GetRandomDouble(0, 10); // 임의의 Variance 값 설정
-
 
                         values[y, x] = Math.Round(tag.Variance, 2); // Variance 값을 소수점 두 자리로 반올림
                     }

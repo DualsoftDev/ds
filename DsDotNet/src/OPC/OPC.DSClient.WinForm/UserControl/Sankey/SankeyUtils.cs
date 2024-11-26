@@ -51,7 +51,9 @@ namespace OPC.DSClient.WinForm.UserControl
             if (string.IsNullOrWhiteSpace(opcTagManager.OpcJsonText))
                 throw new InvalidOperationException("OPC JSON text is empty.");
 
-            var tagDictionary = opcTagManager.OpcFolderTags.ToDictionary(
+
+            //test ahn 중복 call 다른플로우 처리
+            var tagDictionary = opcTagManager.OpcFolderTags.DistinctBy(d=>d.QualifiedName).ToDictionary(
                 folder => folder.QualifiedName,
                 folder => folder
             );

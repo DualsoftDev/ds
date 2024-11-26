@@ -30,6 +30,8 @@ namespace OPC.DSClient.WinForm.UserControl
             uiUpdateTimer = new System.Timers.Timer(500); // 500ms 간격으로 UI 업데이트
             uiUpdateTimer.Elapsed += (s, e) =>
             {
+                if (Global.SelectedUserControl != this) return; // 현재 선택된 UserControl이 아닌 경우 갱신하지 않음
+
                 if (isUpdatePending)
                 {
                     Invoke((Action)UpdateTreemapUI);

@@ -10,8 +10,8 @@ namespace OPC.DSClient.WinForm.UserControl
         {
             // 데이터 소스 생성
             List<DsUnit> dataSource = new List<DsUnit>();
-            var dicPathMap = SankeyUtils.GetPathMap(opcTagManager, dataSource);
-            SankeyUtils.FilterNoChildFolderUnits(dataSource);
+            var dicPathMap = CommonUIManagerUtils.GetPathMap(opcTagManager, dataSource);
+            CommonUIManagerUtils.FilterNoChildFolderUnits(dataSource);
 
             if (dataSource.Count > 0)
             {

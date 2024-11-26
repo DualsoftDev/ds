@@ -2,6 +2,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
 using System;
+using System.Runtime.Versioning;
 using System.Windows.Forms;
 
 namespace OPC.DSClient.WinForm.UserControl
@@ -19,11 +20,11 @@ namespace OPC.DSClient.WinForm.UserControl
             treeList1.OptionsBehavior.Editable = false; // 읽기 전용 설정
             treeList1.OptionsBehavior.ReadOnly = true; // 노드와 데이터를 변경할 수 없도록 설정
             treeList1.OptionsView.ShowIndicator = false; // 좌측 인덱스 열 숨김
-            treeList1.OptionsView.AutoWidth = false; // 열 너비 자동 조정 해제
-            treeList1.OptionsView.BestFitMode = DevExpress.XtraTreeList.TreeListBestFitMode.Full; // Best Fit 적용
+            treeList1.OptionsView.AutoWidth = true; // 열 너비 자동 조정 해제
+            //treeList1.OptionsView.BestFitMode = DevExpress.XtraTreeList.TreeListBestFitMode.Full; // Best Fit 적용
             treeList1.OptionsSelection.EnableAppearanceFocusedCell = false; // 선택된 셀의 포커스 효과 비활성화
             treeList1.OptionsSelection.MultiSelect = true; // 다중 선택 가능
-            treeList1.OptionsFilter.AllowFilterEditor = true; // 필터 편집기 활성화
+            treeList1.OptionsFilter.AllowFilterEditor = false; // 필터 편집기 활성화
             treeList1.OptionsView.ShowAutoFilterRow = true; // 필터 입력창 활성화
             treeList1.ParentFieldName = "ParentPath"; // 부모 경로 필드
             treeList1.KeyFieldName = "Path"; // 고유 경로 필드
@@ -68,7 +69,7 @@ namespace OPC.DSClient.WinForm.UserControl
                 }
                 
                 treeList1.DataSource = treeData;
-                treeList1.CollapseAll(); //         모든 노드를 닫음   
+                treeList1.CollapseAll();
                 foreach (TreeListColumn column in treeList1.Columns)
                 {
                     column.BestFit();

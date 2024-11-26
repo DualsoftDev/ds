@@ -48,6 +48,8 @@ namespace OPC.DSClient.WinForm.UserControl
             uiUpdateTimer = new System.Timers.Timer(500); // 500ms
             uiUpdateTimer.Elapsed += (s, e) =>
             {
+                if (Global.SelectedUserControl != this) return; // 현재 선택된 UserControl이 아닌 경우 갱신하지 않음
+
                 if (isUpdatePending)
                 {
                     Invoke((Action)UpdateSunburstUI);
@@ -100,7 +102,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
 
             List<DsUnit> dataSource = new List<DsUnit>();
-            DicPathMap = SankeyUtils.GetPathMapWithTags(opcTagManager, dataSource);
+            DicPathMap = CommonUIManagerUtils.GetPathMapWithTags(opcTagManager, dataSource);
             if (dataSource.Count > 0)
             {
                 DataAdapter.DataSource = dataSource;

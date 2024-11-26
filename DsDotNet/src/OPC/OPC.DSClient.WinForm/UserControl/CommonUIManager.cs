@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace OPC.DSClient.WinForm.UserControl
 {
-    public static class SankeyUtils
+    public static class CommonUIManagerUtils
     {
         public static Dictionary<string, DsUnit> GetPathMap(OpcTagManager opcTagManager, List<DsUnit> dsUnits)
         {

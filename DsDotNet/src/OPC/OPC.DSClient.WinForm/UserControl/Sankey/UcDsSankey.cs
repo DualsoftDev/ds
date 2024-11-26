@@ -98,6 +98,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
         private void UpdateSankeyData(object sender, EventArgs e)
         {
+            if (Global.SelectedUserControl != this) return; // 현재 선택된 UserControl이 아닌 경우 갱신하지 않음
             if (_opcTagManager == null) return;
 
             try

@@ -42,9 +42,10 @@ module DsNodeManagerExt =
 
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem) =
     inherit CustomNodeManager2(server, configuration, "https://dualsoft.com//ds")
-
     let _variables = Dictionary<string, BaseDataVariableState>()
+    let _folders = Dictionary<string, FolderState>()
     let mutable _disposableTagDS: IDisposable option = None
+    let mutable opcItemCnt:int = 0
     let dsStorages = dsSys.TagManager.Storages
 
     let handleWriteValue(
@@ -132,6 +133,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         | Some parent -> parent.AddChild(folder)
         | None -> () // Root folder does not have a parent
 
+        _folders.Add(name, folder)
         this.AddPredefinedNode(this.SystemContext, folder)
         folder
 
@@ -212,9 +214,20 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 this.NamespaceIndexes.[0], Variant(graphData), typeof<string>
             )
 
+        let totalOpcItemFolder=
+            createVariable(rootNode, $"folderCount", "Count",
+                this.NamespaceIndexes.[0], Variant(_folders.Count), typeof<string>
+            )
+        let totalOpcItemVariable =
+            createVariable(rootNode, $"variableCount", "Count",
+                this.NamespaceIndexes.[0], Variant(_variables.Count), typeof<string>
+            )
+
         // NodeState로 형변환 후 AddPredefinedNode 호출
         this.AddPredefinedNode(this.SystemContext, dsVariable)
         this.AddPredefinedNode(this.SystemContext, graphVariable)
+        this.AddPredefinedNode(this.SystemContext, totalOpcItemFolder)
+        this.AddPredefinedNode(this.SystemContext, totalOpcItemVariable)
 
     member private this.SubscribeToTagEvents() =
         if _disposableTagDS.IsNone 

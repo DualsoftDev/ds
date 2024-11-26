@@ -1,13 +1,17 @@
 using DevExpress.Mvvm.Native;
+using DevExpress.XtraEditors;
 using Opc.Ua;
 using Opc.Ua.Client;
+using OPC.DSClient.WinForm.UserControl;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 
-namespace OPC.DSClient
+namespace OPC.DSClient.WinForm
 {
+
+
     public class OpcTagManager
     {
         public BindingList<OpcDsTag> OpcTags { get; } = new();
@@ -28,13 +32,19 @@ namespace OPC.DSClient
                 throw new InvalidOperationException("Session is not connected.");
 
             var rootNodeId = FindNodeIdByName(session, ObjectIds.ObjectsFolder, "Dualsoft");
-            if (rootNodeId != null)
-                BrowseAndAddVariables(session, rootNodeId, "Dualsoft");
+            if (rootNodeId == null)
+                throw new InvalidOperationException("Root Node not found.");
 
-            List<OpcDsTag> tempOpcs = [.. OpcTags, .. OpcFolderTags];
-            _dicTagKeyPath = tempOpcs.ToDictionary(folder => folder.Path, folder => folder);
+            // 1. folderCount 및 variableCount 값을 먼저 설정
+            SetGlobalCounts(session, rootNodeId);
+
+            // 2. 나머지 태그 처리
+            BrowseAndAddVariables(session, rootNodeId, "Dualsoft");
+
+            // 딕셔너리 생성
+            _dicTagKeyPath = OpcTags.Concat(OpcFolderTags)
+                .ToDictionary(tag => tag.Path, tag => tag);
         }
-
         private NodeId? FindNodeIdByName(Session session, NodeId parentNodeId, string name)
         {
             session.Browse(
@@ -95,11 +105,41 @@ namespace OPC.DSClient
                 }
             }
         }
+        private void SetGlobalCounts(Session session, NodeId parentNodeId)
+        {
+            session.Browse(
+                null, null, parentNodeId, 0u, BrowseDirection.Forward,
+                ReferenceTypeIds.HierarchicalReferences, true,
+                (uint)NodeClass.Object | (uint)NodeClass.Variable, out _, out var references);
+
+            foreach (var reference in references)
+            {
+                var nodeId = ExpandedNodeId.ToNodeId(reference.NodeId, session.NamespaceUris);
+                var name = reference.DisplayName.Text;
+
+                if (name == "folderCount")
+                {
+                    var initialValue = session.ReadValue(nodeId);
+                    Global.FolderCount = initialValue.Value is int count ? count : 0;
+                }
+                else if (name == "variableCount")
+                {
+                    var initialValue = session.ReadValue(nodeId);
+                    Global.VariableCount = initialValue.Value is int count ? count : 0;
+                }
+
+                // folderCount와 variableCount가 모두 설정되면 중단
+                if (Global.FolderCount > 0 && Global.VariableCount > 0)
+                    break;
+            }
+        }
 
         private void AddMonitoredItem(Session session, OpcDsTag tag, NodeId nodeId)
         {
             try
             {
+                Global.OpcProcessCount++;
+
                 var subscription = session.DefaultSubscription ?? CreateDefaultSubscription(session);
 
                 if (!session.Subscriptions.Contains(subscription))
@@ -121,6 +161,7 @@ namespace OPC.DSClient
                     var initialValue = session.ReadValue(nodeId);
                     UpdateTagValue(tag, initialValue);
                 }
+
 
                 // 알림 이벤트 핸들러
                 monitoredItem.Notification += (item, args) =>
@@ -157,6 +198,16 @@ namespace OPC.DSClient
 
                 tag.Value = value.Value;
             }
+
+            tag.Count += 1;
+            tag.Mean = RandomHelper.GetRandomDouble(1000, 1500); // 임의의 Variance 값 설정
+
+            if (tag.Path.Length % 10 == 0)
+            {
+                tag.Variance = RandomHelper.GetRandomDouble(10, 40); // 임의의 Variance 값 설정
+            }
+            else
+                tag.Variance = RandomHelper.GetRandomDouble(0, 10); // 임의의 Variance 값 설정
 
             tag.DataType = value.Value?.GetType().Name ?? "Unknown";
             tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");

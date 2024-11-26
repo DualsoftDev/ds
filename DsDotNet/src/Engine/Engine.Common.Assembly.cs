@@ -1,4 +1,5 @@
 using System.Reflection;
+using System.Runtime.Versioning;
 
 
 #if DEBUG

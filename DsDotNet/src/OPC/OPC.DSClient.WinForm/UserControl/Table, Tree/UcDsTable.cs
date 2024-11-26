@@ -13,6 +13,7 @@ namespace OPC.DSClient.WinForm.UserControl
             gridView1.OptionsView.ShowAutoFilterRow = true; // Enable filter row
             gridView1.OptionsView.ShowGroupPanel = false; // Disable group panel
             gridView1.OptionsBehavior.Editable = false; // Read-only grid
+            gridView1.OptionsView.EnableAppearanceEvenRow = true;   
         }
 
         public void SetDataSource(OpcTagManager opcTagManager)

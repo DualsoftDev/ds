@@ -1,4 +1,4 @@
-﻿namespace OPC.DSClient.WinForm.UserControl
+namespace OPC.DSClient.WinForm.UserControl
 {
     partial class UcDsTable
     {

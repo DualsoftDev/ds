@@ -38,7 +38,6 @@ namespace OPC.DSClient
         public string Name { get; set; } = string.Empty; // 기본값 설정
         [Browsable(false)]
         public string QualifiedName { get; set; } = string.Empty; // 기본값 설정
-
         public object Value
         {
             get => _value;

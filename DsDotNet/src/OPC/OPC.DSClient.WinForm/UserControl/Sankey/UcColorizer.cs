@@ -44,7 +44,7 @@ namespace OPC.DSClient.WinForm.UserControl
             {
                 return getLinkColor(false);
             }
-        }
+        } 
 
         /// <summary>
         /// Determines the color of a Sankey node.

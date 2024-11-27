@@ -14,6 +14,7 @@ module CpusEvent =
 
     // Subjects to broadcast status and value changes.
     let StatusSubject = new Subject<VertexStatusParam>()
+    /// Represents (system, storage, value)
     let ValueSubject  = new Subject<ISystem * IStorage * obj>()
 
     // Notifies subscribers about a status change.
@@ -21,5 +22,5 @@ module CpusEvent =
         StatusSubject.OnNext(EventCPU (sys, vertex, status))
 
     // Notifies subscribers about a value change.
-    let onValueChanged(sys: ISystem, stg: IStorage, v: obj) =
-        ValueSubject.OnNext(sys, stg, v)
+    let onValueChanged(sys: ISystem, stg: IStorage, value: obj) =
+        ValueSubject.OnNext(sys, stg, value)

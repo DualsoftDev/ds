@@ -13,7 +13,7 @@ namespace OPC.DSClient.WinForm.UserControl
 {
     public partial class UcDsHeatmap : XtraUserControl
     {
-        private BindingList<OpcDsTag> _opcTags;
+        private List<OpcDsTag> _opcTags;
         private Timer _updateTimer;
         private readonly ToolTipController _toolTipController;
 
@@ -56,7 +56,7 @@ namespace OPC.DSClient.WinForm.UserControl
                 return;
             }
 
-            _opcTags = opcTagManager.OpcTags;
+            _opcTags = opcTagManager.OpcFolderTags.Where(w => w.Path.Split('/').Length == 4).ToList();
 
             // Heatmap UI 갱신 타이머
             _updateTimer = new Timer
@@ -95,7 +95,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
                         // SuperToolTip 내용 추가
                         superToolTip.Items.Add(new ToolTipItem { Text = $"Name: {tag.Name}" });
-                        superToolTip.Items.Add(new ToolTipItem { Text = $"Variance: {tag.Variance:F2}" });
+                        superToolTip.Items.Add(new ToolTipItem { Text = $"MovingSTD: {tag.MovingSTD/1000.0:F2} sec" });
                         superToolTip.Items.Add(new ToolTipItem { Text = $"Timestamp: {tag.Timestamp}" });
                     }
                     else

@@ -75,11 +75,13 @@ module TagKindList =
     | _T1S                       = 0103  //system timer  LS 특수비트랑 이름 통일
     | _T2S                       = 0104  //system timer  LS 특수비트랑 이름 통일
     ///emulation
-    | emulation                 = 9997
+    | emulation                 = 9990
     ///simulation
-    | sim                       = 9998
+    | sim                       = 9991
+    ///temp (data 처리를위한 임시변수)
+    | tempData                  = 9998
     ///temp (not logic 정의를 위한 plc 임시변수)
-    | temp                      = 9999
+    | tempBit                   = 9999
 
     /// 10000 ~ 10999
     [<Flags>]
@@ -202,7 +204,15 @@ module TagKindList =
     | planStart                 = 11090
     /// Plan end: PlanStart on 이후에 특별히 내부적 문제 없으면 on 된다.
     | planEnd                   = 11091
+     
 
+    | calcActiveTime            = 11101
+    | calcWaitingTime           = 11102
+    | calcMovingTime            = 11103
+    | calcCount                 = 11104 //calcMovingTime 기준
+    | calcAverage               = 11105 //calcMovingTime 기준
+    | calcStandardDeviation     = 11106 //calcMovingTime 기준
+    
     /// 12000 ~ 12999
     [<Flags>]
     type ApiItemTag =
@@ -219,9 +229,6 @@ module TagKindList =
     | actionOut                = 14011
     | actionMemory             = 14012
 
-    | actionCount              = 14100
-    | actionMean               = 14101
-    | actionVariance           = 14102
 
     /// 15000 ~ 14999
     [<Flags>]

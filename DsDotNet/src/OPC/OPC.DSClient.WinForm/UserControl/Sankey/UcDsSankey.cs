@@ -133,8 +133,8 @@ namespace OPC.DSClient.WinForm.UserControl
                 e.Title = $"Name: {opc.Name}";
                 e.Content = $"QualifiedName: {opc.QualifiedName}\n" +
                             $"Count: {opc.Count}\n" +
-                            $"Mean: {opc.Mean}\n" +
-                            $"Variance: {opc.Variance}";
+                            $"Average: {opc.MovingAVG}\n" +
+                            $"Variance: {opc.MovingSTD}";
             }
         }
 

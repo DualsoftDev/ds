@@ -31,7 +31,6 @@ namespace OPC.DSClient.WinForm
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashScreenDS));
-            peImage = new DevExpress.XtraEditors.PictureEdit();
             labelControl2 = new DevExpress.XtraEditors.LabelControl();
             labelControl_ReferencedAssemblies = new DevExpress.XtraEditors.LabelControl();
             labelControl1 = new DevExpress.XtraEditors.LabelControl();
@@ -39,25 +38,9 @@ namespace OPC.DSClient.WinForm
             labelControl_Ver = new DevExpress.XtraEditors.LabelControl();
             timer1 = new System.Windows.Forms.Timer(components);
             labelControl_Process = new DevExpress.XtraEditors.LabelControl();
+            peImage = new DevExpress.XtraEditors.PictureEdit();
             ((System.ComponentModel.ISupportInitialize)peImage.Properties).BeginInit();
             SuspendLayout();
-            // 
-            // peImage
-            // 
-            peImage.Dock = DockStyle.Fill;
-            peImage.EditValue = resources.GetObject("peImage.EditValue");
-            peImage.Location = new Point(1, 1);
-            peImage.Margin = new Padding(3, 4, 3, 4);
-            peImage.Name = "peImage";
-            peImage.Properties.AllowFocused = false;
-            peImage.Properties.Appearance.BackColor = Color.Transparent;
-            peImage.Properties.Appearance.Options.UseBackColor = true;
-            peImage.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            peImage.Properties.ShowMenu = false;
-            peImage.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Stretch;
-            peImage.Properties.SvgImageColorizationMode = DevExpress.Utils.SvgImageColorizationMode.None;
-            peImage.Size = new Size(502, 313);
-            peImage.TabIndex = 9;
             // 
             // labelControl2
             // 
@@ -67,10 +50,10 @@ namespace OPC.DSClient.WinForm
             labelControl2.Appearance.Options.UseBackColor = true;
             labelControl2.Appearance.Options.UseFont = true;
             labelControl2.Appearance.Options.UseForeColor = true;
-            labelControl2.Location = new Point(24, 232);
-            labelControl2.Margin = new Padding(3, 4, 3, 4);
+            labelControl2.Location = new Point(24, 265);
+            labelControl2.Margin = new Padding(3, 5, 3, 5);
             labelControl2.Name = "labelControl2";
-            labelControl2.Size = new Size(55, 14);
+            labelControl2.Size = new Size(57, 16);
             labelControl2.TabIndex = 29;
             labelControl2.Text = "Starting...";
             // 
@@ -83,10 +66,10 @@ namespace OPC.DSClient.WinForm
             labelControl_ReferencedAssemblies.Appearance.Options.UseFont = true;
             labelControl_ReferencedAssemblies.Appearance.Options.UseForeColor = true;
             labelControl_ReferencedAssemblies.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            labelControl_ReferencedAssemblies.Location = new Point(98, 232);
-            labelControl_ReferencedAssemblies.Margin = new Padding(3, 4, 3, 4);
+            labelControl_ReferencedAssemblies.Location = new Point(98, 265);
+            labelControl_ReferencedAssemblies.Margin = new Padding(3, 5, 3, 5);
             labelControl_ReferencedAssemblies.Name = "labelControl_ReferencedAssemblies";
-            labelControl_ReferencedAssemblies.Size = new Size(121, 14);
+            labelControl_ReferencedAssemblies.Size = new Size(129, 16);
             labelControl_ReferencedAssemblies.TabIndex = 28;
             labelControl_ReferencedAssemblies.Text = "ReferencedAssemblies";
             // 
@@ -99,10 +82,10 @@ namespace OPC.DSClient.WinForm
             labelControl1.Appearance.Options.UseFont = true;
             labelControl1.Appearance.Options.UseForeColor = true;
             labelControl1.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            labelControl1.Location = new Point(353, 274);
-            labelControl1.Margin = new Padding(3, 4, 3, 4);
+            labelControl1.Location = new Point(353, 313);
+            labelControl1.Margin = new Padding(3, 5, 3, 5);
             labelControl1.Name = "labelControl1";
-            labelControl1.Size = new Size(42, 14);
+            labelControl1.Size = new Size(44, 16);
             labelControl1.TabIndex = 26;
             labelControl1.Text = "DS Pilot";
             // 
@@ -115,10 +98,10 @@ namespace OPC.DSClient.WinForm
             labelCopyright.Appearance.Options.UseFont = true;
             labelCopyright.Appearance.Options.UseForeColor = true;
             labelCopyright.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            labelCopyright.Location = new Point(24, 274);
-            labelCopyright.Margin = new Padding(3, 4, 3, 4);
+            labelCopyright.Location = new Point(24, 313);
+            labelCopyright.Margin = new Padding(3, 5, 3, 5);
             labelCopyright.Name = "labelCopyright";
-            labelCopyright.Size = new Size(247, 14);
+            labelCopyright.Size = new Size(258, 16);
             labelCopyright.TabIndex = 27;
             labelCopyright.Text = "Copyright © 2019 Dualsoft All right reserved.";
             // 
@@ -131,10 +114,10 @@ namespace OPC.DSClient.WinForm
             labelControl_Ver.Appearance.Options.UseFont = true;
             labelControl_Ver.Appearance.Options.UseForeColor = true;
             labelControl_Ver.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            labelControl_Ver.Location = new Point(24, 24);
-            labelControl_Ver.Margin = new Padding(3, 4, 3, 4);
+            labelControl_Ver.Location = new Point(24, 27);
+            labelControl_Ver.Margin = new Padding(3, 5, 3, 5);
             labelControl_Ver.Name = "labelControl_Ver";
-            labelControl_Ver.Size = new Size(19, 14);
+            labelControl_Ver.Size = new Size(20, 16);
             labelControl_Ver.TabIndex = 25;
             labelControl_Ver.Text = "Ver";
             // 
@@ -147,17 +130,34 @@ namespace OPC.DSClient.WinForm
             labelControl_Process.Appearance.Options.UseFont = true;
             labelControl_Process.Appearance.Options.UseForeColor = true;
             labelControl_Process.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            labelControl_Process.Location = new Point(24, 254);
-            labelControl_Process.Margin = new Padding(3, 4, 3, 4);
+            labelControl_Process.Location = new Point(24, 290);
+            labelControl_Process.Margin = new Padding(3, 5, 3, 5);
             labelControl_Process.Name = "labelControl_Process";
-            labelControl_Process.Size = new Size(0, 14);
+            labelControl_Process.Size = new Size(0, 16);
             labelControl_Process.TabIndex = 27;
+            // 
+            // peImage
+            // 
+            peImage.Dock = DockStyle.Fill;
+            peImage.EditValue = resources.GetObject("DS6");
+            peImage.Location = new Point(1, 1);
+            peImage.Margin = new Padding(3, 5, 3, 5);
+            peImage.Name = "peImage";
+            peImage.Properties.AllowFocused = false;
+            peImage.Properties.Appearance.BackColor = Color.Transparent;
+            peImage.Properties.Appearance.Options.UseBackColor = true;
+            peImage.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            peImage.Properties.ShowMenu = false;
+            peImage.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Stretch;
+            peImage.Properties.SvgImageColorizationMode = DevExpress.Utils.SvgImageColorizationMode.None;
+            peImage.Size = new Size(502, 358);
+            peImage.TabIndex = 9;
             // 
             // SplashScreenDS
             // 
-            AutoScaleDimensions = new SizeF(7F, 14F);
+            AutoScaleDimensions = new SizeF(7F, 16F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(504, 315);
+            ClientSize = new Size(504, 360);
             Controls.Add(labelControl2);
             Controls.Add(labelControl_ReferencedAssemblies);
             Controls.Add(labelControl1);
@@ -165,7 +165,7 @@ namespace OPC.DSClient.WinForm
             Controls.Add(labelCopyright);
             Controls.Add(labelControl_Ver);
             Controls.Add(peImage);
-            Margin = new Padding(3, 4, 3, 4);
+            Margin = new Padding(3, 5, 3, 5);
             Name = "SplashScreenDS";
             Padding = new Padding(1);
             Text = "SplashScreen1";
@@ -175,7 +175,6 @@ namespace OPC.DSClient.WinForm
         }
 
         #endregion
-        private DevExpress.XtraEditors.PictureEdit peImage;
         private DevExpress.XtraEditors.LabelControl labelControl2;
         private DevExpress.XtraEditors.LabelControl labelControl_ReferencedAssemblies;
         private DevExpress.XtraEditors.LabelControl labelControl1;
@@ -183,5 +182,6 @@ namespace OPC.DSClient.WinForm
         private DevExpress.XtraEditors.LabelControl labelControl_Ver;
         private System.Windows.Forms.Timer timer1;
         private DevExpress.XtraEditors.LabelControl labelControl_Process;
+        private DevExpress.XtraEditors.PictureEdit peImage;
     }
 }

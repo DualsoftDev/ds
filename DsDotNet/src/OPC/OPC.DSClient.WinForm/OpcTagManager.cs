@@ -183,34 +183,42 @@ namespace OPC.DSClient.WinForm
 
         private void UpdateTagValue(OpcDsTag tag, DataValue value)
         {
-            if (tag.Name.EndsWith(".ds"))
-            {
-                OpcDsText = value.Value?.ToString() ?? string.Empty;
-            }
-            else if (tag.Name.EndsWith(".json"))
-            {
-                OpcJsonText = value.Value?.ToString() ?? string.Empty;
-            }
-            else
-            {
-                if (tag.TagKindDefinition == "finish")
-                    _dicTagKeyPath[tag.ParentPath].Value = value.Value; 
-
-                tag.Value = value.Value;
-            }
-
-            tag.Count += 1;
-            tag.Mean = RandomHelper.GetRandomDouble(1000, 1500); // 임의의 Variance 값 설정
-
-            if (tag.Path.Length % 10 == 0)
-            {
-                tag.Variance = RandomHelper.GetRandomDouble(10, 40); // 임의의 Variance 값 설정
-            }
-            else
-                tag.Variance = RandomHelper.GetRandomDouble(0, 10); // 임의의 Variance 값 설정
-
+            string tagValue = value.Value?.ToString() ?? string.Empty;
+            tag.Value = value.Value;
             tag.DataType = value.Value?.GetType().Name ?? "Unknown";
             tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+            if (tag.Name.EndsWith(".ds"))
+            {
+                OpcDsText = tagValue;
+                return;
+            }
+
+            if (tag.Name.EndsWith(".json"))
+            {
+                OpcJsonText = tagValue;
+                return;
+            }
+
+            if (_dicTagKeyPath.TryGetValue(tag.ParentPath, out var parent))
+            {
+                // 태그 종류와 동작을 매핑
+                var actionMap = new Dictionary<string, Action>
+                {
+                    { "finish", () => parent.Value = value.Value },
+                    { "calcCount", () => parent.Count = Convert.ToInt32(value.Value) },
+                    { "calcActiveTime", () => parent.ActiveTime = Convert.ToSingle(value.Value) },
+                    { "calcWaitingTime", () => parent.WaitingTime = Convert.ToSingle(value.Value) },
+                    { "calcMovingTime", () => parent.MovingTime = Convert.ToSingle(value.Value) },
+                    { "calcAverage", () => parent.MovingAVG = Convert.ToSingle(value.Value) },
+                    { "calcStandardDeviation", () => parent.MovingSTD = Convert.ToSingle(value.Value) }
+                };
+                // 태그 종류에 따른 동작 수행
+                if (actionMap.TryGetValue(tag.TagKindDefinition, out var action))
+                {
+                    action();
+                }
+            }
         }
 
         private Subscription CreateDefaultSubscription(Session session)
@@ -220,7 +228,7 @@ namespace OPC.DSClient.WinForm
                 var subscription = new Subscription
                 {
                     DisplayName = "OpcTagSubscription",
-                    PublishingInterval = 1000
+                    PublishingInterval = 500
                 };
                 session.AddSubscription(subscription);
                 subscription.Create();

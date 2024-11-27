@@ -28,12 +28,21 @@ namespace OPC.DSClient
         public bool IsFolder { get; set; } = false;
 
         [Browsable(false)]
-        public double Variance { get; set; } = 0.0;
-        [Browsable(false)]
-        public double Mean { get; set; } = 0.001; // 평균값 기본 1msec 설정 UI 영역때문에
-        [Browsable(false)]
         public int Count { get; set; } = 0;
-      
+
+        [Browsable(false)]
+        public float MovingSTD { get; set; } = 0.0f;
+        [Browsable(false)]
+        public float MovingAVG { get; set; } = 0.001f; // 평균값 기본 1msec 설정 UI 영역때문에
+
+        [Browsable(false)]
+        public float MovingTime { get; set; } = 0.0f;
+
+        [Browsable(false)]
+        public float WaitingTime { get; set; } = 0.0f;
+
+        [Browsable(false)]
+        public float ActiveTime { get; set; } = 0.0f;
 
         public string Name { get; set; } = string.Empty; // 기본값 설정
         [Browsable(false)]

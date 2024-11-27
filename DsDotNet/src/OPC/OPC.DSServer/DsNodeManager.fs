@@ -174,26 +174,29 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 // 현재 노드에 해당하는 폴더 생성
                 let target = treeNode.Node.FqdnObject
                 let isJob = target.IsSome && (target.Value :? Job)
+                let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
 
-                let folder = 
-                    if isJob
-                    then
-                        parentNode
-                    else 
-                        let folderDisplayName = $"[{treeNode.Node.Name}]"
-                        let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
-                        this.CreateFolder(folderName, folderDisplayName, nIndex, Some parentNode)
+                if _folders.ContainsKey folderName then
+                    printfn "Folder already exists: %s" treeNode.Node.Name
+                else 
+                    let folder = 
+                        if isJob
+                        then
+                            parentNode
+                        else 
+                            let folderDisplayName = $"[{treeNode.Node.Name}]"
+                            this.CreateFolder(folderName, folderDisplayName, nIndex, Some parentNode)
 
-                // 태그가 있는 경우 OPC 노드 생성
-                if target.IsSome && not (isJob) then
-                    let tags = getTags target.Value
-                    this.CreateOpcNodes tags folder nIndex
+                    // 태그가 있는 경우 OPC 노드 생성
+                    if target.IsSome && not (isJob) then
+                        let tags = getTags target.Value
+                        this.CreateOpcNodes tags folder nIndex
 
-                printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
+                    printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
 
-                // 자식 노드를 큐에 추가
-                for child in treeNode.Children do
-                    queue.Enqueue((folder, child))
+                    // 자식 노드를 큐에 추가
+                    for child in treeNode.Children do
+                        queue.Enqueue((folder, child))
 
         processTreeLevels rootNode treeFlows 
         this.processTextAdd rootNode dsSys
@@ -234,11 +237,13 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         then 
             _disposableTagDS <- 
                 Some(
-                    TagEventSubject.Subscribe(fun evt ->
-                        let tag = TagKindExt.GetStorage(evt)
-                        if _variables.ContainsKey(tag.Name) then
-                            let variable = _variables[tag.Name]
-                            variable.Value <- tag.ObjValue
+                    ValueSubject.Subscribe(fun (_sys, stg, value) ->
+                        if stg.IsVertexOpcDataTag() then 
+                            handleCalcTag (stg) |> ignore
+
+                        if _variables.ContainsKey(stg.Name) then
+                            let variable = _variables[stg.Name]
+                            variable.Value <- value
                             variable.Timestamp <- DateTime.Now
                             variable.ClearChangeMasks(this.SystemContext, false)
 

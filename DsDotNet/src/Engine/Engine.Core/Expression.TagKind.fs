@@ -33,7 +33,7 @@ module TagKindModule =
     type TagKind = int
     type TagKindTuple = TagKind * string        //TagKind, TagKindName
 
-    type private EnumEx() =
+    type EnumEx() =
         static member Extract<'T when 'T: struct>(formatWithType: bool) : TagKindTuple array =
             let typ = typeof<'T>
             let values = Enum.GetValues(typ) :?> 'T[] |> Seq.cast<int> |> Array.ofSeq
@@ -226,6 +226,23 @@ type TagKindExt =
                 )
         | _ -> false
 
+        
+    [<Extension>]
+    static member IsVertexOpcCalcTag(x:TagEvent) =
+        match x with
+        | EventVertex (_, _, kind) ->
+            kind.IsOneOf(
+                  VertexTag.endTag
+                , VertexTag.planStart
+                )
+        | _ -> false
+
+    [<Extension>]
+    static member IsVertexOpcDataTag(x:IStorage) =
+        x.TagKind.IsOneOf(
+              int VertexTag.planStart,
+              int VertexTag.startTag, 
+              int VertexTag.endTag)
 
 
     [<Extension>]
@@ -312,9 +329,6 @@ type TagKindExt =
                       TaskDevTag.actionIn
                     , TaskDevTag.actionOut
                     , TaskDevTag.actionMemory
-                    , TaskDevTag.actionCount
-                    , TaskDevTag.actionMean
-                    , TaskDevTag.actionVariance
                     )
             | EventHwSys (_, _, _) -> false
             | EventVariable (_, _, _) -> true

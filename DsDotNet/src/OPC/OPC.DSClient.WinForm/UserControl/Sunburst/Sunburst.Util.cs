@@ -1,4 +1,5 @@
 using DevExpress.Entity.Model.Metadata;
+using DevExpress.Mvvm.Native;
 using DevExpress.XtraTreeMap;
 using System;
 using System.Collections.Generic;
@@ -86,10 +87,19 @@ namespace OPC.DSClient.WinForm.UserControl
             if (hitInfo.SunburstItem.Tag is DsUnit si && si.DsUnits.Count > 0)
             {
                 var drillDownDataSource = si.DsUnits;
+                foreach (var item in drillDownDataSource)
+                {
+                    if (item.Level != 4) continue;    //flow/work/call/taskDev
+
+                    item.Area = si.Level == 3 ? 1 : 0;   //flow/work/call 선택시만 하위 영역 1 할당해서 보이게
+                }
+
                 if (drillDownDataSource != null && adapter.DataSource != drillDownDataSource)
                 {
+          
                     // 현재 데이터 소스를 Stack에 저장
                     dataStack.Push(new DataSourceInfo(adapter.DataSource, sunburst.CenterLabel.TextPattern));
+                    
 
                     // 새로운 데이터 소스로 전환
                     adapter.DataSource = drillDownDataSource;
@@ -107,14 +117,42 @@ namespace OPC.DSClient.WinForm.UserControl
         {
             DataSourceInfo sourceInfo = dataStack.Pop();
 
+   
+            // 하위 레벨 4를 재귀적으로 찾아 Area = 0 설정
+            if (sourceInfo.Source is IEnumerable<DsUnit> dsUnits)
+            {
+                foreach (var unit in dsUnits)
+                {
+                    ResetAreaForLevel4(unit);
+                }
+            }
             // 이전 데이터 소스 복원
             adapter.DataSource = sourceInfo.Source;
-
             // CenterLabel 텍스트 복원
             sunburst.CenterLabel.TextPattern = sourceInfo.Label;
 
             // UI 갱신
             sunburst.Refresh();
+        }
+
+        /// <summary>
+        /// 재귀적으로 레벨 4 항목의 Area를 0으로 설정
+        /// </summary>
+        private void ResetAreaForLevel4(DsUnit unit)
+        {
+            if (unit.Level == 4)
+            {
+                unit.Area = 0;
+            }
+
+            // 하위 항목에 대해 재귀 호출
+            if (unit.DsUnits != null && unit.DsUnits.Count > 0)
+            {
+                foreach (var childUnit in unit.DsUnits)
+                {
+                    ResetAreaForLevel4(childUnit);
+                }
+            }
         }
 
         // DataSourceInfo 클래스
@@ -144,15 +182,5 @@ namespace OPC.DSClient.WinForm.UserControl
         }
     }
 
-    public class DsUnit
-    {
-        public string Label { get; set; } = string.Empty;
-        public int Value { get; set; } // 면적 값
-        public int Count { get; set; } // 횟수 값
-        public double Mean { get; set; }
-        public double Variance { get; set; } // 평균값
-        public int Level { get; set; } // 폴더 레벨
-        public Color Color { get; set; } // 색상 값 
-        public List<DsUnit> DsUnits { get; set; } = new List<DsUnit>();
-    }
+    
 }

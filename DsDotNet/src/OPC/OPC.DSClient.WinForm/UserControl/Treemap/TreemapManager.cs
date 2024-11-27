@@ -23,7 +23,7 @@ namespace OPC.DSClient.WinForm.UserControl
                     {
                         new TreeMapHierarchicalDataMapping
                         {
-                            ValueDataMember = "Mean",
+                            ValueDataMember = "MovingAVG",
                             LabelDataMember = "Label",
                             ChildrenDataMember = "DsUnits",
                             Type = typeof(DsUnit)

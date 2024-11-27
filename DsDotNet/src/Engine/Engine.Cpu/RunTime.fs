@@ -72,7 +72,7 @@ module RunTimeModule =
             //ClearChangedTags
             chTags.ClearChangedTags(systems)
 
-            // 상태보고/물리Out 처리
+            // 상태보고/물리Out 처리 (주의 !! 연산에 관련된건만 이벤트 처리)
             chTags.Iter(notifyPreExcute)
 
             //exeStates Do 연산하기

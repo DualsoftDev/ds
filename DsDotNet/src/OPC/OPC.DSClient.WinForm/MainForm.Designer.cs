@@ -42,15 +42,15 @@ namespace OPC.DSClient.WinForm
             navigationPage4 = new DevExpress.XtraBars.Navigation.NavigationPage();
             navigationPage5 = new DevExpress.XtraBars.Navigation.NavigationPage();
             navigationPage7 = new DevExpress.XtraBars.Navigation.NavigationPage();
-            ucDsDataGrid1 = new UserControl.UcDsDataGrid();
-            ucDsTextEdit1 = new UserControl.UcDsTextEdit();
             navigationPage8 = new DevExpress.XtraBars.Navigation.NavigationPage();
-            ucDsSankey1 = new UserControl.UcDsSankey();
-            ucDsTreemap1 = new UserControl.UcDsTreemap();
-            ucDsSunburst1 = new UserControl.UcDsSunburst();
-            ucDsTree1 = new UserControl.UcDsTree();
-            ucDsTable1 = new UserControl.UcDsTable();
-            ucDsHeatmap1 = new UserControl.UcDsHeatmap();
+            ucDsSankey1 = new UcDsSankey();
+            ucDsTreemap1 = new UcDsTreemap();
+            ucDsSunburst1 = new UcDsSunburst();
+            ucDsTree1 = new UcDsTree();
+            ucDsTable1 = new UcDsTable();
+            ucDsHeatmap1 = new UcDsHeatmap();
+            ucDsDataGrid1 = new UcDsDataGrid();
+            ucDsTextEdit1 = new UcDsTextEdit();
             accordionControl1 = new DevExpress.XtraBars.Navigation.AccordionControl();
             ace_Treemap = new DevExpress.XtraBars.Navigation.AccordionControlElement();
             ace_Sunburst = new DevExpress.XtraBars.Navigation.AccordionControlElement();
@@ -63,11 +63,11 @@ namespace OPC.DSClient.WinForm
             fluentDesignFormControl1 = new DevExpress.XtraBars.FluentDesignSystem.FluentDesignFormControl();
             skinDropDownButtonItem1 = new DevExpress.XtraBars.SkinDropDownButtonItem();
             skinPaletteDropDownButtonItem1 = new DevExpress.XtraBars.SkinPaletteDropDownButtonItem();
+            skinBarSubItem1 = new DevExpress.XtraBars.SkinBarSubItem();
             fluentFormDefaultManager1 = new DevExpress.XtraBars.FluentDesignSystem.FluentFormDefaultManager(components);
             fluentDesignFormContainer1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)navigationFrame1).BeginInit();
             navigationFrame1.SuspendLayout();
-            navigationPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)accordionControl1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)fluentDesignFormControl1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)fluentFormDefaultManager1).BeginInit();
@@ -83,9 +83,9 @@ namespace OPC.DSClient.WinForm
             fluentDesignFormContainer1.Controls.Add(ucDsTable1);
             fluentDesignFormContainer1.Controls.Add(ucDsHeatmap1);
             fluentDesignFormContainer1.Dock = DockStyle.Fill;
-            fluentDesignFormContainer1.Location = new Point(226, 41);
+            fluentDesignFormContainer1.Location = new Point(226, 43);
             fluentDesignFormContainer1.Name = "fluentDesignFormContainer1";
-            fluentDesignFormContainer1.Size = new Size(1249, 635);
+            fluentDesignFormContainer1.Size = new Size(1219, 715);
             fluentDesignFormContainer1.TabIndex = 0;
             // 
             // navigationFrame1
@@ -103,44 +103,97 @@ namespace OPC.DSClient.WinForm
             navigationFrame1.Name = "navigationFrame1";
             navigationFrame1.Pages.AddRange(new DevExpress.XtraBars.Navigation.NavigationPageBase[] { navigationPage1, navigationPage2, navigationPage3, navigationPage4, navigationPage5, navigationPage6, navigationPage7, navigationPage8 });
             navigationFrame1.SelectedPage = navigationPage1;
-            navigationFrame1.Size = new Size(1249, 635);
+            navigationFrame1.Size = new Size(1219, 715);
             navigationFrame1.TabIndex = 7;
             navigationFrame1.Text = "navigationFrame1";
             // 
             // navigationPage1
             // 
             navigationPage1.Name = "navigationPage1";
-            navigationPage1.Size = new Size(1249, 635);
+            navigationPage1.Size = new Size(1219, 715);
             // 
             // navigationPage2
             // 
             navigationPage2.Name = "navigationPage2";
-            navigationPage2.Size = new Size(1249, 635);
+            navigationPage2.Size = new Size(1219, 715);
             // 
             // navigationPage6
             // 
             navigationPage6.Name = "navigationPage6";
-            navigationPage6.Size = new Size(1249, 635);
+            navigationPage6.Size = new Size(1219, 715);
             // 
             // navigationPage3
             // 
             navigationPage3.Name = "navigationPage3";
-            navigationPage3.Size = new Size(1249, 635);
+            navigationPage3.Size = new Size(1219, 715);
             // 
             // navigationPage4
             // 
             navigationPage4.Name = "navigationPage4";
-            navigationPage4.Size = new Size(1249, 635);
+            navigationPage4.Size = new Size(1219, 715);
             // 
             // navigationPage5
             // 
             navigationPage5.Name = "navigationPage5";
-            navigationPage5.Size = new Size(1249, 635);
+            navigationPage5.Size = new Size(1219, 715);
             // 
             // navigationPage7
             // 
             navigationPage7.Name = "navigationPage7";
-            navigationPage7.Size = new Size(1249, 635);
+            navigationPage7.Size = new Size(1219, 715);
+            // 
+            // navigationPage8
+            // 
+            navigationPage8.Name = "navigationPage8";
+            navigationPage8.Size = new Size(1219, 715);
+            // 
+            // ucDsSankey1
+            // 
+            ucDsSankey1.Dock = DockStyle.Fill;
+            ucDsSankey1.Location = new Point(0, 0);
+            ucDsSankey1.Name = "ucDsSankey1";
+            ucDsSankey1.Size = new Size(1219, 715);
+            ucDsSankey1.TabIndex = 1;
+            // 
+            // ucDsTreemap1
+            // 
+            ucDsTreemap1.Dock = DockStyle.Fill;
+            ucDsTreemap1.Location = new Point(0, 0);
+            ucDsTreemap1.Name = "ucDsTreemap1";
+            ucDsTreemap1.Size = new Size(1219, 715);
+            ucDsTreemap1.TabIndex = 5;
+            // 
+            // ucDsSunburst1
+            // 
+            ucDsSunburst1.Dock = DockStyle.Fill;
+            ucDsSunburst1.Location = new Point(0, 0);
+            ucDsSunburst1.Name = "ucDsSunburst1";
+            ucDsSunburst1.Size = new Size(1219, 715);
+            ucDsSunburst1.TabIndex = 2;
+            // 
+            // ucDsTree1
+            // 
+            ucDsTree1.Dock = DockStyle.Fill;
+            ucDsTree1.Location = new Point(0, 0);
+            ucDsTree1.Name = "ucDsTree1";
+            ucDsTree1.Size = new Size(1219, 715);
+            ucDsTree1.TabIndex = 6;
+            // 
+            // ucDsTable1
+            // 
+            ucDsTable1.Dock = DockStyle.Fill;
+            ucDsTable1.Location = new Point(0, 0);
+            ucDsTable1.Name = "ucDsTable1";
+            ucDsTable1.Size = new Size(1219, 715);
+            ucDsTable1.TabIndex = 3;
+            // 
+            // ucDsHeatmap1
+            // 
+            ucDsHeatmap1.Dock = DockStyle.Fill;
+            ucDsHeatmap1.Location = new Point(0, 0);
+            ucDsHeatmap1.Name = "ucDsHeatmap1";
+            ucDsHeatmap1.Size = new Size(1219, 715);
+            ucDsHeatmap1.TabIndex = 0;
             // 
             // ucDsDataGrid1
             // 
@@ -149,59 +202,6 @@ namespace OPC.DSClient.WinForm
             ucDsDataGrid1.Name = "ucDsDataGrid1";
             ucDsDataGrid1.Size = new Size(1249, 635);
             ucDsDataGrid1.TabIndex = 0;
-            // 
-            // navigationPage8
-            // 
-            navigationPage8.Name = "navigationPage8";
-            navigationPage8.Size = new Size(1249, 635);
-            // 
-            // ucDsSankey1
-            // 
-            ucDsSankey1.Dock = DockStyle.Fill;
-            ucDsSankey1.Location = new Point(0, 0);
-            ucDsSankey1.Name = "ucDsSankey1";
-            ucDsSankey1.Size = new Size(1249, 635);
-            ucDsSankey1.TabIndex = 1;
-            // 
-            // ucDsTreemap1
-            // 
-            ucDsTreemap1.Dock = DockStyle.Fill;
-            ucDsTreemap1.Location = new Point(0, 0);
-            ucDsTreemap1.Name = "ucDsTreemap1";
-            ucDsTreemap1.Size = new Size(1249, 635);
-            ucDsTreemap1.TabIndex = 5;
-            // 
-            // ucDsSunburst1
-            // 
-            ucDsSunburst1.Dock = DockStyle.Fill;
-            ucDsSunburst1.Location = new Point(0, 0);
-            ucDsSunburst1.Name = "ucDsSunburst1";
-            ucDsSunburst1.Size = new Size(1249, 635);
-            ucDsSunburst1.TabIndex = 2;
-            // 
-            // ucDsTree1
-            // 
-            ucDsTree1.Dock = DockStyle.Fill;
-            ucDsTree1.Location = new Point(0, 0);
-            ucDsTree1.Name = "ucDsTree1";
-            ucDsTree1.Size = new Size(1249, 635);
-            ucDsTree1.TabIndex = 6;
-            // 
-            // ucDsTable1
-            // 
-            ucDsTable1.Dock = DockStyle.Fill;
-            ucDsTable1.Location = new Point(0, 0);
-            ucDsTable1.Name = "ucDsTable1";
-            ucDsTable1.Size = new Size(1249, 635);
-            ucDsTable1.TabIndex = 3;
-            // 
-            // ucDsHeatmap1
-            // 
-            ucDsHeatmap1.Dock = DockStyle.Fill;
-            ucDsHeatmap1.Location = new Point(0, 0);
-            ucDsHeatmap1.Name = "ucDsHeatmap1";
-            ucDsHeatmap1.Size = new Size(1249, 635);
-            ucDsHeatmap1.TabIndex = 0;
             // 
             // ucDsTextEdit1
             // 
@@ -215,10 +215,10 @@ namespace OPC.DSClient.WinForm
             // 
             accordionControl1.Dock = DockStyle.Left;
             accordionControl1.Elements.AddRange(new DevExpress.XtraBars.Navigation.AccordionControlElement[] { ace_Treemap, ace_Sunburst, ace_Sankey, ace_Heatmap, ace_DataGrid, ace_Table, ace_Tree, ace_TextEdit });
-            accordionControl1.Location = new Point(0, 41);
+            accordionControl1.Location = new Point(0, 43);
             accordionControl1.Name = "accordionControl1";
             accordionControl1.ScrollBarMode = DevExpress.XtraBars.Navigation.ScrollBarMode.Touch;
-            accordionControl1.Size = new Size(226, 635);
+            accordionControl1.Size = new Size(226, 715);
             accordionControl1.TabIndex = 1;
             accordionControl1.ViewType = DevExpress.XtraBars.Navigation.AccordionControlViewType.HamburgerMenu;
             // 
@@ -282,11 +282,11 @@ namespace OPC.DSClient.WinForm
             // fluentDesignFormControl1
             // 
             fluentDesignFormControl1.FluentDesignForm = this;
-            fluentDesignFormControl1.Items.AddRange(new DevExpress.XtraBars.BarItem[] { skinDropDownButtonItem1, skinPaletteDropDownButtonItem1 });
+            fluentDesignFormControl1.Items.AddRange(new DevExpress.XtraBars.BarItem[] { skinDropDownButtonItem1, skinPaletteDropDownButtonItem1, skinBarSubItem1 });
             fluentDesignFormControl1.Location = new Point(0, 0);
             fluentDesignFormControl1.Manager = fluentFormDefaultManager1;
             fluentDesignFormControl1.Name = "fluentDesignFormControl1";
-            fluentDesignFormControl1.Size = new Size(1475, 41);
+            fluentDesignFormControl1.Size = new Size(1445, 43);
             fluentDesignFormControl1.TabIndex = 2;
             fluentDesignFormControl1.TabStop = false;
             fluentDesignFormControl1.TitleItemLinks.Add(skinPaletteDropDownButtonItem1);
@@ -305,17 +305,23 @@ namespace OPC.DSClient.WinForm
             skinPaletteDropDownButtonItem1.Id = 1;
             skinPaletteDropDownButtonItem1.Name = "skinPaletteDropDownButtonItem1";
             // 
+            // skinBarSubItem1
+            // 
+            skinBarSubItem1.Caption = "skinBarSubItem1";
+            skinBarSubItem1.Id = 2;
+            skinBarSubItem1.Name = "skinBarSubItem1";
+            // 
             // fluentFormDefaultManager1
             // 
             fluentFormDefaultManager1.Form = this;
-            fluentFormDefaultManager1.Items.AddRange(new DevExpress.XtraBars.BarItem[] { skinDropDownButtonItem1, skinPaletteDropDownButtonItem1 });
-            fluentFormDefaultManager1.MaxItemId = 2;
+            fluentFormDefaultManager1.Items.AddRange(new DevExpress.XtraBars.BarItem[] { skinDropDownButtonItem1, skinPaletteDropDownButtonItem1, skinBarSubItem1 });
+            fluentFormDefaultManager1.MaxItemId = 3;
             // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 14F);
+            AutoScaleDimensions = new SizeF(7F, 16F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1475, 676);
+            ClientSize = new Size(1445, 758);
             ControlContainer = fluentDesignFormContainer1;
             Controls.Add(fluentDesignFormContainer1);
             Controls.Add(accordionControl1);
@@ -328,7 +334,6 @@ namespace OPC.DSClient.WinForm
             fluentDesignFormContainer1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)navigationFrame1).EndInit();
             navigationFrame1.ResumeLayout(false);
-            navigationPage7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)accordionControl1).EndInit();
             ((System.ComponentModel.ISupportInitialize)fluentDesignFormControl1).EndInit();
             ((System.ComponentModel.ISupportInitialize)fluentFormDefaultManager1).EndInit();
@@ -369,5 +374,6 @@ namespace OPC.DSClient.WinForm
         private DevExpress.XtraBars.SkinPaletteDropDownButtonItem skinPaletteDropDownButtonItem1;
         private DevExpress.XtraBars.Navigation.NavigationPage navigationPage8;
         private DevExpress.XtraBars.Navigation.AccordionControlElement ace_TextEdit;
+        private DevExpress.XtraBars.SkinBarSubItem skinBarSubItem1;
     }
 }

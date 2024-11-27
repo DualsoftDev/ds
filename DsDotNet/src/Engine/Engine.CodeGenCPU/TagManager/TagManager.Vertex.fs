@@ -25,10 +25,17 @@ module TagManagerModule =
         let t = createPlanVar  s name DuBOOL autoAddr (Some(v)) vertexTag sys
         t :?> PlanVar<bool>
 
+    let createData(v:Vertex, vertexTag:VertexTag, dataType :DataType)  =
+        let vertexTagInt = vertexTag |> int
+        let name = $"{v.QualifiedName}_{getTagKindName(vertexTagInt)}" |> validStorageName
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
+        createPlanVar s name dataType true (Some(v)) vertexTagInt sys
+
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
-    type VertexTagManager (v:Vertex)  =
+    type VertexTagManager (v:Vertex, isActive:bool)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
 
@@ -36,7 +43,7 @@ module TagManagerModule =
 
         let sysM = sys.TagManager :?> SystemManager
 
-
+  
         interface ITagManager with
             member x.Target = v
             member x.Storages = s
@@ -74,7 +81,37 @@ module TagManagerModule =
                     et.Value <- true
             et
 
-
+        ///OPC Server에서 계산 endTag 횟수 
+        member val CalcCount = 
+            if isActive
+            then createData(v, VertexTag.calcCount, DuUINT32)
+            else sysM.TempDataDuUINT32
+        ///OPC Server에서 계산 planStart=>endTag 평균시간 
+        member val CalcAverage = 
+            if isActive 
+            then createData(v, VertexTag.calcAverage, DuFLOAT32)
+            else sysM.TempDataDuFLOAT32
+        ///OPC Server에서 계산 planStart=>endTag 표준편차 
+        member val CalcStandardDeviation = 
+            if isActive
+            then createData(v, VertexTag.calcStandardDeviation, DuFLOAT32)
+            else sysM.TempDataDuFLOAT32
+        ///OPC Server에서 계산 startTag=>planStart 시간에서 동작시간을 제외한 시간
+        member val CalcWaitingTime = 
+            if isActive
+            then createData(v, VertexTag.calcWaitingTime, DuFLOAT32)
+            else sysM.TempDataDuFLOAT32
+        ///OPC Server에서 계산 startTag=>endTag 시간
+        member val CalcActiveTime = 
+            if isActive
+            then createData(v, VertexTag.calcActiveTime, DuFLOAT32)
+            else sysM.TempDataDuFLOAT32
+        ///OPC Server에서 계산 planStart=>endTag 시간
+        member val CalcMovingTime = 
+            if isActive
+            then createData(v, VertexTag.calcMovingTime, DuFLOAT32)
+            else sysM.TempDataDuFLOAT32
+            
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member val ON = createTag true VertexTag.forceOn
         ///forceOnBit HMI Pulse, forceOffBit HMI 는 RF 사용
@@ -126,6 +163,13 @@ module TagManagerModule =
             | VertexTag.errorTRx        -> x.ErrTRX :> IStorage
             | VertexTag.pause           -> x.PA     :> IStorage
 
+            | VertexTag.calcCount               -> x.CalcCount 
+            | VertexTag.calcAverage             -> x.CalcAverage 
+            | VertexTag.calcStandardDeviation   -> x.CalcStandardDeviation 
+            | VertexTag.calcWaitingTime         -> x.CalcWaitingTime
+            | VertexTag.calcActiveTime          -> x.CalcActiveTime
+            | VertexTag.calcMovingTime          -> x.CalcMovingTime
+            
             | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
             | VertexTag.txErrOffTimeUnder    -> callM().ErrOffTimeUnder :> IStorage
@@ -147,6 +191,7 @@ module TagManagerModule =
             | VertexTag.realToken            -> realM().RealTokenData :> IStorage
             | VertexTag.mergeToken           -> realM().MergeTokenData :> IStorage
 
+  
             | (VertexTag.counter | VertexTag.timerOnDelay) ->
                 failwithlog $"Error : Time Counter Type {vt} not support!!"
 
@@ -154,8 +199,8 @@ module TagManagerModule =
 
 
 
-    and RealVertexTagManager(v:Vertex) =
-        inherit VertexTagManager(v)
+    and RealVertexTagManager(v:Vertex, isActive:bool) =
+        inherit VertexTagManager(v, isActive)
 
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
@@ -172,13 +217,9 @@ module TagManagerModule =
 
         //let timeOutGoingOriginTimeOut = timer  s "TOUTOrigin" sys
 
-        let createTokenData (vertexTag, tokenType)  =
-            let vertexTagInt = vertexTag |> int
-            let name = $"{v.QualifiedName}_{tokenType}" |> validStorageName
-            createPlanVar s name DuUINT32 true (Some(v)) vertexTagInt sys
-
-        let realTokenData = createTokenData(VertexTag.realToken, "realToken")
-        let mergeTokenData = createTokenData(VertexTag.mergeToken, "mergeToken")
+      
+        let realToken  = createData(v, VertexTag.realToken, DuUINT32)
+        let mergeToken = createData(v, VertexTag.mergeToken, DuUINT32)
 
 
         member x.Real = x.Vertex :?> Real
@@ -187,9 +228,9 @@ module TagManagerModule =
             and set(v) = originInfo <- v
 
         ///Real SEQ Data
-        member val RealTokenData = realTokenData
+        member val RealTokenData = realToken
         ///병합되기전 사라진 SEQ Data
-        member val MergeTokenData = mergeTokenData
+        member val MergeTokenData = mergeToken
 
         /// Real Origin Init
         member val RO         = createTag false VertexTag.realOriginInit
@@ -244,8 +285,8 @@ module TagManagerModule =
         member val MotionRelay  = if useMotion then createTag true VertexTag.motionRelay else off
         member val TimeRelay    = if useTime   then createTag true VertexTag.timeRelay   else off
 
-    and CoinVertexTagManager(v:Vertex) =
-        inherit VertexTagManager(v)
+    and CoinVertexTagManager(v:Vertex, isActive:bool) =
+        inherit VertexTagManager(v, isActive)
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
         let sysManager = sys.TagManager :?> SystemManager

@@ -2,32 +2,23 @@ namespace OPC.DSClient.WinForm.UserControl
 {
     partial class UcDsDataGrid
     {
-        /// <summary> 
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        #region Component Designer generated code
-
-        /// <summary> 
-        /// Required method for Designer support - do not modify 
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
             this.gridControl1 = new DevExpress.XtraGrid.GridControl();
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.colVariance = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.repositoryItemProgressBar1 = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
             this.colName = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.colMean = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colSensor = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colMovingAVG = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colMovingSTD = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colActiveTime = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colWaitingTime = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colMovingTime = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colRatio = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colCount = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.repositoryItemProgressBar2 = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
+            this.repositoryItemProgressBar = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar)).BeginInit();
             this.SuspendLayout();
             // 
             // gridControl1
@@ -37,9 +28,8 @@ namespace OPC.DSClient.WinForm.UserControl
             this.gridControl1.MainView = this.gridView1;
             this.gridControl1.Name = "gridControl1";
             this.gridControl1.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
-            this.repositoryItemProgressBar1,
-            this.repositoryItemProgressBar2});
-            this.gridControl1.Size = new System.Drawing.Size(901, 483);
+            this.repositoryItemProgressBar});
+            this.gridControl1.Size = new System.Drawing.Size(1200, 600);
             this.gridControl1.TabIndex = 0;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView1});
@@ -48,94 +38,136 @@ namespace OPC.DSClient.WinForm.UserControl
             // 
             this.gridView1.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
             this.colName,
-            this.colVariance,
-            this.colMean,
             this.colSensor,
-            this.colCount});
-            this.gridView1.DetailHeight = 306;
+            this.colCount,
+            this.colMovingAVG,
+            this.colMovingSTD,
+            this.colActiveTime,
+            this.colWaitingTime,
+            this.colMovingTime,
+            this.colRatio
+            });
             this.gridView1.GridControl = this.gridControl1;
             this.gridView1.Name = "gridView1";
             this.gridView1.OptionsView.ShowAutoFilterRow = true;
             this.gridView1.OptionsView.ShowGroupPanel = false;
+            this.gridView1.OptionsView.ColumnAutoWidth = false;
+            this.gridView1.BestFitColumns(); // 모든 컬럼 최적 크기로 설정
             // 
-            // Variance
-            // 
-            this.colVariance.Caption = "Variance";
-            this.colVariance.ColumnEdit = this.repositoryItemProgressBar1;
-            this.colVariance.FieldName = "Variance";
-            this.colVariance.Name = "Variance";
-            this.colVariance.Visible = true;
-            this.colVariance.VisibleIndex = 1;
-            // 
-            // repositoryItemProgressBar1
-            // 
-            this.repositoryItemProgressBar1.Minimum = -100;
-            this.repositoryItemProgressBar1.Name = "repositoryItemProgressBar1";
-            // 
-            // Name
+            // colName
             // 
             this.colName.Caption = "Name";
             this.colName.FieldName = "Name";
-            this.colName.Name = "Name";
+            this.colName.Name = "colName";
             this.colName.Visible = true;
             this.colName.VisibleIndex = 0;
+            this.colName.Width = 150;
             // 
-            // Mean
-            // 
-            this.colMean.Caption = "Mean";
-            this.colMean.ColumnEdit = this.repositoryItemProgressBar2; // ProgressBar 적용
-            this.colMean.FieldName = "Mean";
-            this.colMean.Name = "Mean";
-            this.colMean.Visible = true;
-            this.colMean.VisibleIndex = 2;
-            // 
-            // Sensor
+            // colSensor
             // 
             this.colSensor.Caption = "Sensor";
             this.colSensor.FieldName = "Sensor";
-            this.colSensor.Name = "Sensor";
+            this.colSensor.Name = "colSensor";
             this.colSensor.Visible = true;
-            this.colSensor.VisibleIndex = 3;
+            this.colSensor.VisibleIndex = 1;
+            this.colSensor.Width = 150;
             // 
-            // Count
+            // colMovingAVG
+            // 
+            this.colMovingAVG.Caption = "Moving AVG";
+            this.colMovingAVG.FieldName = "MovingAVG";
+            this.colMovingAVG.Name = "colMovingAVG";
+            this.colMovingAVG.Visible = true;
+            this.colMovingAVG.VisibleIndex = 2;
+            this.colMovingAVG.Width = 150;
+            // 
+            // colMovingSTD
+            // 
+            this.colMovingSTD.Caption = "Moving STD";
+            this.colMovingSTD.FieldName = "MovingSTD";
+            this.colMovingSTD.Name = "colMovingSTD";
+            this.colMovingSTD.Visible = true;
+            this.colMovingSTD.VisibleIndex = 3;
+            this.colMovingSTD.Width = 150;
+            // 
+            // colActiveTime
+            // 
+            this.colActiveTime.Caption = "Active Time";
+            this.colActiveTime.FieldName = "ActiveTime";
+            this.colActiveTime.Name = "colActiveTime";
+            this.colActiveTime.Visible = true;
+            this.colActiveTime.VisibleIndex = 4;
+            this.colActiveTime.Width = 150;
+            // 
+            // colWaitingTime
+            // 
+            this.colWaitingTime.Caption = "Waiting Time";
+            this.colWaitingTime.FieldName = "WaitingTime";
+            this.colWaitingTime.Name = "colWaitingTime";
+            this.colWaitingTime.Visible = true;
+            this.colWaitingTime.VisibleIndex = 5;
+            this.colWaitingTime.Width = 150;
+            // 
+            // colMovingTime
+            // 
+            this.colMovingTime.Caption = "Moving Time";
+            this.colMovingTime.FieldName = "MovingTime";
+            this.colMovingTime.Name = "colMovingTime";
+            this.colMovingTime.Visible = true;
+            this.colMovingTime.VisibleIndex = 6;
+            this.colMovingTime.Width = 150;
+            // 
+            // colRatio
+            // 
+            this.colRatio.Caption = "Waiting/Active Ratio";
+            this.colRatio.ColumnEdit = this.repositoryItemProgressBar; // ProgressBar 추가
+            this.colRatio.FieldName = "Ratio";
+            this.colRatio.Name = "colRatio";
+            this.colRatio.Visible = true;
+            this.colRatio.VisibleIndex = 7;
+            this.colRatio.Width = 150;
+            // 
+            // colCount
             // 
             this.colCount.Caption = "Count";
             this.colCount.FieldName = "Count";
-            this.colCount.Name = "Count";
+            this.colCount.Name = "colCount";
             this.colCount.Visible = true;
-            this.colCount.VisibleIndex = 4;
+            this.colCount.VisibleIndex = 8;
+            this.colCount.Width = 150;
             // 
-            // repositoryItemProgressBar2
+            // repositoryItemProgressBar
             // 
-            this.repositoryItemProgressBar2.Maximum = 5000;
-            this.repositoryItemProgressBar2.Name = "repositoryItemProgressBar2";
+            this.repositoryItemProgressBar.Name = "repositoryItemProgressBar";
+            this.repositoryItemProgressBar.Maximum = 100;
+            this.repositoryItemProgressBar.StartColor = System.Drawing.Color.Green;
+            this.repositoryItemProgressBar.EndColor = System.Drawing.Color.Red;
             // 
             // UcDsDataGrid
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.gridControl1);
-            this.Size = new System.Drawing.Size(901, 483);
+            this.Name = "UcDsDataGrid";
+            this.Size = new System.Drawing.Size(1200, 600);
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.repositoryItemProgressBar)).EndInit();
             this.ResumeLayout(false);
-
         }
 
-        #endregion
 
         private DevExpress.XtraGrid.GridControl gridControl1;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
-        private DevExpress.XtraGrid.Columns.GridColumn colVariance;
-        private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryItemProgressBar1;
         private DevExpress.XtraGrid.Columns.GridColumn colName;
-        private DevExpress.XtraGrid.Columns.GridColumn colMean;
         private DevExpress.XtraGrid.Columns.GridColumn colSensor;
+        private DevExpress.XtraGrid.Columns.GridColumn colMovingAVG;
+        private DevExpress.XtraGrid.Columns.GridColumn colMovingSTD;
+        private DevExpress.XtraGrid.Columns.GridColumn colActiveTime;
+        private DevExpress.XtraGrid.Columns.GridColumn colWaitingTime;
+        private DevExpress.XtraGrid.Columns.GridColumn colMovingTime;
+        private DevExpress.XtraGrid.Columns.GridColumn colRatio;
         private DevExpress.XtraGrid.Columns.GridColumn colCount;
-        private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryItemProgressBar2;
-
-      
+        private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryItemProgressBar;
     }
 }

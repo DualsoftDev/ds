@@ -6,9 +6,10 @@ open Engine.CodeGenCPU
 
 [<AutoOpen>]
 module internal RunTimeUtil =
+    /// Notify PreExcute(주의 !! 연산에 관련된건만 이벤트 처리)
     let notifyPreExcute ( x:IStorage) =
-        x.GetTagInfo() |> Option.iter(fun t -> t.OnChanged())
-
+        x.GetTagInfo() 
+        |> Option.iter(fun t -> t.OnChanged())
 
     ///시뮬레이션 비트 ON
     let cpuSimOn(sys:DsSystem) =

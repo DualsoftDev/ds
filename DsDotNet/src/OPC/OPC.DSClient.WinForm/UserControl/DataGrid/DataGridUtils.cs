@@ -13,12 +13,21 @@ namespace OPC.DSClient.WinForm.UserControl
     public class GridItem
     {
         public string Name { get; set; } = string.Empty;
-        public object Sensor => OpcDsTag.Value;
-        public double Mean => OpcDsTag.Mean;
-        public double Variance => OpcDsTag.Variance;
-        public int Count => OpcDsTag.Count;
+        public object Sensor => OpcDsTag?.Value;
+        public int Count => OpcDsTag?.Count ?? 0;
+        public float MovingAVG => OpcDsTag?.MovingAVG ?? 0;
+        public float MovingSTD => OpcDsTag?.MovingSTD ?? 0;
+        public float ActiveTime => OpcDsTag?.ActiveTime ?? 0;
+        public float MovingTime => OpcDsTag?.MovingTime ?? 0;
+        public float WaitingTime => OpcDsTag?.WaitingTime ?? 0;
+
+        // 비율 계산: WaitingTime / ActiveTime
+        public float Ratio => ActiveTime > 0 ? (WaitingTime / ActiveTime) * 100 : 0;
+
+
         public OpcDsTag OpcDsTag { get; set; }
     }
+
     public static class DataGridUtil
     {
         public static BindingList<GridItem> GetDataSource(OpcTagManager opcTagManager)

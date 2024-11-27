@@ -43,7 +43,7 @@ namespace OPC.DSClient.WinForm.UserControl
             heatmapControl.ColorProvider = colorProvider;
         }
 
-        public static void UpdateHeatmap(HeatmapControl heatmapControl, BindingList<OpcDsTag> opcTags)
+        public static void UpdateHeatmap(HeatmapControl heatmapControl, List<OpcDsTag> opcTags)
         {
 
             int count = opcTags.Count;
@@ -66,7 +66,7 @@ namespace OPC.DSClient.WinForm.UserControl
                     {
                         var tag = opcTags[index++];
 
-                        values[y, x] = Math.Round(tag.Variance, 2); // Variance 값을 소수점 두 자리로 반올림
+                        values[y, x] = Math.Round(tag.MovingSTD/1000.0, 2); //  값을 소수점 두 자리로 반올림
                     }
                     else
                     {

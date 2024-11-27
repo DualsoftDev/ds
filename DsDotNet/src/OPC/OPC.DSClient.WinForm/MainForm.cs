@@ -28,7 +28,28 @@ namespace OPC.DSClient.WinForm
             var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
             Text = $"DS Pilot v{version}";  
             navigationFrame1.SelectedPageChanged += NavigationFrame1_SelectedPageChanged;
-            navigationFrame1.SelectedPage = navigationPage8;
+            navigationFrame1.SelectedPage = navigationPage7;
+        }
+
+        private void InitializeOPC()
+        {
+            var application = new ApplicationInstance
+            {
+                ApplicationName = "UA Reference Client",
+                ApplicationType = ApplicationType.Client,
+                ConfigSectionName = "DsOpcClient"
+            };
+
+            application.LoadApplicationConfiguration(false).Wait();
+
+            if (!application.CheckApplicationInstanceCertificate(false, 0).Result)
+                throw new Exception("Invalid application certificate!");
+
+            ConnectServerCTRL.Configuration = application.ApplicationConfiguration;
+            ConnectServerCTRL.ServerUrl = "opc.tcp://192.168.9.203:2747/DS";
+            ConnectServerCTRL.ConnectComplete += OnConnectComplete;
+            ConnectServerCTRL.ReconnectComplete += OnConnectComplete;
+            ConnectServerCTRL.Connect();
         }
 
         private void SetupNavigationPages()
@@ -100,7 +121,7 @@ namespace OPC.DSClient.WinForm
         {
             var savedSkin = Properties.Settings.Default.SelectedSkin;
             if (!string.IsNullOrEmpty(savedSkin))
-                UserLookAndFeel.Default.SetSkinStyle("Basic", savedSkin);
+                UserLookAndFeel.Default.SetSkinStyle("The Bezier", savedSkin);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -113,27 +134,6 @@ namespace OPC.DSClient.WinForm
 
             base.OnFormClosing(e);
             SaveSkinSettings(UserLookAndFeel.Default.ActiveSvgPaletteName);
-        }
-
-        private void InitializeOPC()
-        {
-            var application = new ApplicationInstance
-            {
-                ApplicationName = "UA Reference Client",
-                ApplicationType = ApplicationType.Client,
-                ConfigSectionName = "DsOpcClient"
-            };
-
-            application.LoadApplicationConfiguration(false).Wait();
-
-            if (!application.CheckApplicationInstanceCertificate(false, 0).Result)
-                throw new Exception("Invalid application certificate!");
-
-            ConnectServerCTRL.Configuration = application.ApplicationConfiguration;
-            ConnectServerCTRL.ServerUrl = "opc.tcp://192.168.9.203:2747/DS";
-            ConnectServerCTRL.ConnectComplete += OnConnectComplete;
-            ConnectServerCTRL.ReconnectComplete += OnConnectComplete;
-            ConnectServerCTRL.Connect();
         }
 
         private void OnConnectComplete(object? sender, EventArgs e)

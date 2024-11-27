@@ -109,7 +109,6 @@ namespace OPC.DSClient.WinForm.UserControl
                     var color = TreemapColor.GetCategoryColor(opcTag.TagKindDefinition);
                     if (color != Color.Transparent)
                     {
-                        DsUnitFqdn.Mean = opcTag.Mean;
                         DsUnitFqdn.Color = color;
                         isUpdatePending = true;
                     }
@@ -126,7 +125,13 @@ namespace OPC.DSClient.WinForm.UserControl
                 if (tag == null)
                     throw new InvalidOperationException("Invalid ToolTip tag object.");
                 else
-                    e.ToolTip = $"Name: {tag.Label}\nCount: {tag.Count}\nMean: {tag.Mean}\nVariance: {tag.Variance}";
+                    e.ToolTip = $"Name: {tag.Label}" +
+                        $"\nCount: {tag.Count}" +
+                        $"\nActiveTime: {tag.ActiveTime}" +
+                        $"\nWaitingTime: {tag.WaitingTime}" +
+                        $"\nMovingTime: {tag.MovingTime}" +
+                        $"\nMovingAVG: {tag.MovingAVG}" +
+                        $"\nMovingSTD: {tag.MovingSTD}";
             }
             else
             {

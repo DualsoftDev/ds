@@ -124,10 +124,15 @@ module SystemManagerModule =
         member s.TargetType = platformTarget
         member s.MutualCalls = mutualCalls
         member s.GetTempBoolTag(name:string) : PlanVar<bool>=
-                createPlanVar  stg  name DuBOOL true None (int SystemTag.temp) sys :?> PlanVar<bool>
+                createPlanVar  stg  name DuBOOL true None (int SystemTag.tempBit) sys :?> PlanVar<bool>
 
         member s.GetTempTimerTag(name:string) : TimerStruct =
                 timer stg name sys cpu
+
+        member val TempDataDuUINT32 =
+                createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys
+        member val TempDataDuFLOAT32 =
+                createPlanVar  stg "temp_DuFLOAT32" DuFLOAT32 true None (int SystemTag.tempData) sys
 
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with

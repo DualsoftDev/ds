@@ -68,7 +68,7 @@ namespace OPC.DSClient.WinForm.UserControl
                     {
                         ChildrenDataMember = "DsUnits",
                         LabelDataMember = "Label",
-                        ValueDataMember = "Value",
+                        ValueDataMember = "Area",
                     }
                 }
             };

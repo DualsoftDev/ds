@@ -16,7 +16,7 @@ namespace OPC.DSClient.WinForm.UserControl
                 folder => new DsUnit
                 {
                     Label = folder.Name.TrimStart('[').TrimEnd(']'),
-                    Value = 1,
+                    OpcDsTag = folder,
                     Color = Color.Gray,
                     DsUnits = new List<DsUnit>(),
                     Level = CalculateLevel(folder.Path) // 레벨 계산 및 설정
@@ -62,7 +62,7 @@ namespace OPC.DSClient.WinForm.UserControl
                 var lstDsUnits = opcItems.Select(s => new DsUnit
                 {
                     Label = s.Name,
-                    Value = 1,
+                    OpcDsTag = s,
                     Color = Color.Gray,
                     DsUnits = new List<DsUnit>(),
                     Level = CalculateLevel(endNodePath) + 1 // 레벨 계산 및 설정
@@ -74,7 +74,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
             // 자식 노드의 수를 Value로 설정
             dicPathMap.Where(w => w.Value.DsUnits.Count > 0)
-                      .ForEach(f => f.Value.Value = f.Value.DsUnits.Count);
+                      .ForEach(f => f.Value.Area = f.Value.DsUnits.Count);
 
             dsUnits.AddRange(flowList);
 
@@ -109,8 +109,8 @@ namespace OPC.DSClient.WinForm.UserControl
 
             // 현재 리스트에서 조건을 만족하는 항목 제거
             units.RemoveAll(r => 
-                    (r.Level == 2 && r.DsUnits.Count == 0)  //sys/flow/work
-                    || r.Level == 4                         //sys/flow/work/call/taskDev
+                    (r.Level == 2 && r.DsUnits.Count == 0)  //flow/work
+                    || r.Level == 4                         //flow/work/call/taskDev
                     );
         }
     }

@@ -51,7 +51,7 @@ namespace OPC.DSClient.WinForm.UserControl
         private static readonly Dictionary<string, Color> DeviceColors = new()
         {
             { "actionIn", Color.Green },
-            { "actionOut", Color.Blue }
+            { "actionOut", Color.Salmon }
         };
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace OPC.DSClient.WinForm.UserControl
             // Device TagKind 색상 반환
             if (DeviceColors.TryGetValue(opcTag.TagKindDefinition, out var deviceColor))
             {
-                return bOn ? deviceColor : Color.Gray;
+                return bOn ? deviceColor : Color.LightGray;
             }
 
             // 기본값: Transparent

@@ -124,7 +124,7 @@
   <data name="peImage.EditValue" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
     <value>
         iVBORw0KGgoAAAANSUhEUgAABQAAAALQCAIAAABAH0oBAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAAO
-        vQAADr0BR/uQrQAA/7JJREFUeF7s3QWAHOXdP/CZ3UuCa4BAodT7tm9LFfpv+9KWUorWgEIgFAsUtxDi
+        vAAADrwBlbxySQAA/7JJREFUeF7s3QWAHOXdP/CZ3UuCa4BAodT7tm9LFfpv+9KWUorWgEIgFAsUtxDi
         7glxdzfiHuKeEHc597t137FH5v/7zW7C3XG5XEL8fh8md3u7I888M7s8331GFJsQQgghhBBCCKkDKAAT
         QgghhBBCCKkTKAATQgghhBBCCKkTKAATQgghhBBCCKkTKAATQgghhBBCCKkTKAATQgghhBBCCKkTKAAT
         QgghhBBCCKkTKAATQgghhBBCCKkTKAATQgghhBBCCKkTKAATQgghhBBCCKkTKAATQgghhBBCCKkTKAAT
@@ -4929,27 +4929,5 @@
         AAAAAAAAUBUQgAEAAAAAAKAqIAADAAAAAABAVUAABgAAAAAAgKqAAAwAAAAAAABVAQEYAAAAAAAAqoDv
         ///lEqEnpVwLFQAAAABJRU5ErkJggg==
 </value>
-  </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="DS1" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DS2" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DS3" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DS4" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS4.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DS5" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS5.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DS6" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS6.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="DS7" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>Resources\DS7.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

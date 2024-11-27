@@ -10,7 +10,7 @@ open Newtonsoft.Json
 open Newtonsoft.Json.Linq
 
 [<AutoOpen>]
-module internal ToJsonGraphModule =
+module rec ToJsonGraphModule =
 
     /// 공통적으로 JProperty 배열에서 JObject를 생성하는 유틸리티 함수
     let createJson properties = JObject(properties |> Array.ofSeq)
@@ -50,11 +50,7 @@ module internal ToJsonGraphModule =
     let graphToJson (graph: DsGraph) =
         let vertices = 
             graph.Vertices
-            |> Seq.map (fun vertex ->
-                createJson [
-                    JProperty("name", JValue(vertex.QualifiedName))
-                ]
-            )
+            |> Seq.map vertexToJson
             |> JArray
 
         let edges = 
@@ -73,11 +69,31 @@ module internal ToJsonGraphModule =
             JProperty("vertices", vertices :> JToken)
             JProperty("edges", edges :> JToken)
         ]
+    /// Call 객체를 JSON으로 변환
+    let callToJson (call: Call) =
+        // TaskDefs를 JSON으로 변환
+        let taskDevs = 
+            call.TaskDefs
+            |> Seq.map (fun td ->
+                createJson [
+                    JProperty("name", JValue(td.QualifiedName))
+                    JProperty("type", JValue("TaskDev"))
+                ]
+            )
+            |> JArray
+
+        createJson [
+            JProperty("name", JValue(call.QualifiedName))
+            JProperty("type", JValue("Call"))
+            JProperty("taskDevs", taskDevs :> JToken) // Tasks 추가
+        ]
+
 
     /// Vertex를 JSON으로 변환
     let vertexToJson (vertex: Vertex) =
         match vertex with
         | :? Real as real -> realToJson real
+        | :? Call as call -> callToJson call
         | _ ->
             createJson [
                 JProperty("name", JValue(vertex.QualifiedName))
@@ -86,16 +102,7 @@ module internal ToJsonGraphModule =
 
     /// Flow를 JSON으로 변환
     let flowToJson (flow: Flow) =
-        let vertices = 
-            flow.Graph.Vertices
-            |> Seq.map vertexToJson
-            |> JArray
-
-        let edges = 
-            flow.Graph.Edges
-            |> Seq.map edgeToJson
-            |> JArray
-
+        let vertices, edges = graphToJson flow.Graph
         let aliases = aliasDefsToJson flow
 
         createJson [
@@ -116,6 +123,7 @@ module internal ToJsonGraphModule =
     let systemToJsonGraph (system: DsSystem) =
         createJson [
             JProperty("name", JValue(system.QualifiedName))
+            JProperty("type", JValue("DsSystem"))
             JProperty("flows", flowsToJson system.Flows :> JToken)
         ]
 

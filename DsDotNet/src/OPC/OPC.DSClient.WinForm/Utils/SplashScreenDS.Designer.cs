@@ -139,7 +139,7 @@ namespace OPC.DSClient.WinForm
             // peImage
             // 
             peImage.Dock = DockStyle.Fill;
-            peImage.EditValue = resources.GetObject("DS6");
+            peImage.EditValue = resources.GetObject("peImage.EditValue");
             peImage.Location = new Point(1, 1);
             peImage.Margin = new Padding(3, 5, 3, 5);
             peImage.Name = "peImage";

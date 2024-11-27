@@ -45,6 +45,7 @@ namespace OPC.DSClient.WinForm.UserControl
                 // BindingList를 데이터 소스로 설정
                 _bindingList = DataGridUtil.GetDataSource(_opcTagManager);
                 gridControl1.DataSource = _bindingList;
+                gridView1.BestFitColumns(); // 컬럼 크기 최적화    
 
                 _refreshTimer.Start(); // 데이터 소스 설정 후 타이머 시작
             }

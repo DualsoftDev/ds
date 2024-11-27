@@ -1,5 +1,6 @@
 using DevExpress.Mvvm.Native;
 using DevExpress.XtraEditors;
+using DevExpress.XtraRichEdit.Import.Html;
 using Opc.Ua;
 using Opc.Ua.Client;
 using OPC.DSClient.WinForm.UserControl;
@@ -18,7 +19,11 @@ namespace OPC.DSClient.WinForm
         public List<OpcDsTag> OpcFolderTags { get; } = new();
         public string OpcDsText { get; set; } = string.Empty;
         public string OpcJsonText { get; set; } = string.Empty;
+
+        public DsSystemJson DsSystemJson { get; set; } = new();
+
         Dictionary<string, OpcDsTag> _dicTagKeyPath = new();
+        Dictionary<string, DsJsonBase> _dicDsJson = new();
 
         public void Clear()
         {
@@ -43,7 +48,12 @@ namespace OPC.DSClient.WinForm
 
             // 딕셔너리 생성
             _dicTagKeyPath = OpcTags.Concat(OpcFolderTags)
-                .ToDictionary(tag => tag.Path, tag => tag);
+                .ToDictionary(tag => tag.Path);
+            // 딕셔너리 생성
+            _dicDsJson = DsSystemJsonUtils.GetAllDsJsons(DsSystemJson)  
+                .ToDictionary(dsJson => dsJson.Name);
+
+            DsSystemJsonUtils.UpdateOpcDSTags(this);
         }
         private NodeId? FindNodeIdByName(Session session, NodeId parentNodeId, string name)
         {
@@ -107,6 +117,8 @@ namespace OPC.DSClient.WinForm
         }
         private void SetGlobalCounts(Session session, NodeId parentNodeId)
         {
+            
+
             session.Browse(
                 null, null, parentNodeId, 0u, BrowseDirection.Forward,
                 ReferenceTypeIds.HierarchicalReferences, true,
@@ -128,8 +140,21 @@ namespace OPC.DSClient.WinForm
                     Global.VariableCount = initialValue.Value is int count ? count : 0;
                 }
 
-                // folderCount와 variableCount가 모두 설정되면 중단
-                if (Global.FolderCount > 0 && Global.VariableCount > 0)
+                if (name.EndsWith(".ds"))
+                { // text데이터는 초기 값을 읽기
+                    var initialValue = session.ReadValue(nodeId);
+                    OpcDsText = initialValue.Value?.ToString() ?? string.Empty;
+                }
+                if (name.EndsWith(".json"))
+                { // text데이터는 초기 값을 읽기
+                    var initialValue = session.ReadValue(nodeId);
+                    OpcJsonText = initialValue.Value?.ToString() ?? string.Empty;
+                    DsSystemJson = DsSystemJsonUtils.LoadJson(OpcJsonText);                  
+                }
+
+                //  모두 설정되면 중단
+                if (Global.FolderCount > 0 && Global.VariableCount > 0
+                    && OpcDsText.Length > 0 && OpcJsonText.Length > 0)
                     break;
             }
         }
@@ -156,12 +181,6 @@ namespace OPC.DSClient.WinForm
                     SamplingInterval = 1000
                 };
 
-                if (tag.Name.EndsWith(".ds") || tag.Name.EndsWith(".json"))
-                { // text데이터는 초기 값을 읽기
-                    var initialValue = session.ReadValue(nodeId);
-                    UpdateTagValue(tag, initialValue);
-                }
-
 
                 // 알림 이벤트 핸들러
                 monitoredItem.Notification += (item, args) =>
@@ -180,46 +199,116 @@ namespace OPC.DSClient.WinForm
                 Console.WriteLine($"Error creating subscription or monitored item: {ex.Message}");
             }
         }
-
         private void UpdateTagValue(OpcDsTag tag, DataValue value)
         {
-            string tagValue = value.Value?.ToString() ?? string.Empty;
+            // 공통 데이터 업데이트
+            UpdateTagCommonInfo(tag, value);
+
+            // `.ds` 및 `.json` 태그 처리
+            if (HandleSpecialTags(tag, value.Value?.ToString()))
+                return;
+
+            // 부모 태그 및 JSON 데이터 매핑 처리
+            if (_dicTagKeyPath.TryGetValue(tag.ParentPath, out var parent))
+            {
+                UpdateParentValues(tag, value, parent);
+
+                if (_dicDsJson.TryGetValue(parent.QualifiedName, out var dsJson))
+                {
+                    UpdateDsJsonValues(tag, value, dsJson);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 태그의 공통 정보 업데이트
+        /// </summary>
+        private void UpdateTagCommonInfo(OpcDsTag tag, DataValue value)
+        {
             tag.Value = value.Value;
             tag.DataType = value.Value?.GetType().Name ?? "Unknown";
             tag.Timestamp = value.SourceTimestamp.ToString("yyyy-MM-dd HH:mm:ss.fff");
+        }
 
+        /// <summary>
+        /// `.ds` 및 `.json` 태그 처리
+        /// </summary>
+        /// <returns>해당 태그를 처리했는지 여부</returns>
+        private bool HandleSpecialTags(OpcDsTag tag, string? tagValue)
+        {
             if (tag.Name.EndsWith(".ds"))
             {
-                OpcDsText = tagValue;
-                return;
+                OpcDsText = tagValue ?? string.Empty;
+                return true;
             }
 
             if (tag.Name.EndsWith(".json"))
             {
-                OpcJsonText = tagValue;
-                return;
+                OpcJsonText = tagValue ?? string.Empty;
+                DsSystemJson = DsSystemJsonUtils.LoadJson(OpcJsonText);
+                return true;
             }
 
-            if (_dicTagKeyPath.TryGetValue(tag.ParentPath, out var parent))
+            return false;
+        }
+
+        /// <summary>
+        /// 부모 태그의 값을 업데이트
+        /// </summary>
+        private void UpdateParentValues(OpcDsTag tag, DataValue value, OpcDsTag parent)
+        {
+            var actionMap = new Dictionary<string, Action>
             {
-                // 태그 종류와 동작을 매핑
-                var actionMap = new Dictionary<string, Action>
+                { "actionIn", () => parent.Value = value.Value },
+                { "finish", () => parent.Value = value.Value },
+                { "calcCount", () => parent.Count = Convert.ToInt32(value.Value) },
+                { "calcActiveTime", () => parent.ActiveTime = Convert.ToSingle(value.Value) },
+                { "calcWaitingTime", () => parent.WaitingTime = Convert.ToSingle(value.Value) },
+                { "calcMovingTime", () => parent.MovingTime = Convert.ToSingle(value.Value) },
+                { "calcAverage", () => parent.MovingAVG = Convert.ToSingle(value.Value) },
+                { "calcStandardDeviation", () => parent.MovingSTD = Convert.ToSingle(value.Value) }
+            };
+
+            if (actionMap.TryGetValue(tag.TagKindDefinition, out var action))
+            {
+                action();
+            }
+        }
+
+        /// <summary>
+        /// DsJson 관련 값을 업데이트
+        /// </summary>
+        private void UpdateDsJsonValues(OpcDsTag tag, DataValue value, DsJsonBase dsJson)
+        {
+            if (dsJson is VertexJson vertexJson && dsJson.Type == "Call")
+            {
+                var actionCallMap = new Dictionary<string, Action>
                 {
-                    { "finish", () => parent.Value = value.Value },
-                    { "calcCount", () => parent.Count = Convert.ToInt32(value.Value) },
-                    { "calcActiveTime", () => parent.ActiveTime = Convert.ToSingle(value.Value) },
-                    { "calcWaitingTime", () => parent.WaitingTime = Convert.ToSingle(value.Value) },
-                    { "calcMovingTime", () => parent.MovingTime = Convert.ToSingle(value.Value) },
-                    { "calcAverage", () => parent.MovingAVG = Convert.ToSingle(value.Value) },
-                    { "calcStandardDeviation", () => parent.MovingSTD = Convert.ToSingle(value.Value) }
+                    { "calcCount", () => UpdateTaskDevs(vertexJson, dev => dev.Count = Convert.ToInt32(value.Value)) },
+                    { "calcActiveTime", () => UpdateTaskDevs(vertexJson, dev => dev.ActiveTime = Convert.ToSingle(value.Value)) },
+                    { "calcWaitingTime", () => UpdateTaskDevs(vertexJson, dev => dev.WaitingTime = Convert.ToSingle(value.Value)) },
+                    { "calcMovingTime", () => UpdateTaskDevs(vertexJson, dev => dev.MovingTime = Convert.ToSingle(value.Value)) },
+                    { "calcAverage", () => UpdateTaskDevs(vertexJson, dev => dev.MovingAVG = Convert.ToSingle(value.Value)) },
+                    { "calcStandardDeviation", () => UpdateTaskDevs(vertexJson, dev => dev.MovingSTD = Convert.ToSingle(value.Value)) }
                 };
-                // 태그 종류에 따른 동작 수행
-                if (actionMap.TryGetValue(tag.TagKindDefinition, out var action))
+
+                if (actionCallMap.TryGetValue(tag.TagKindDefinition, out var actionCall))
                 {
-                    action();
+                    actionCall();
                 }
             }
         }
+
+        /// <summary>
+        /// VertexJson의 모든 TaskDevs에 대해 작업 수행
+        /// </summary>
+        private void UpdateTaskDevs(VertexJson vertexJson, Action<OpcDsTag> updateAction)
+        {
+            vertexJson.TaskDevs
+                .SelectMany(dev => dev.SubOpcDsTags)
+                .ForEach(updateAction);
+        }
+
 
         private Subscription CreateDefaultSubscription(Session session)
         {

@@ -8,13 +8,13 @@ namespace OPC.DSClient.WinForm.UserControl
             this.gridView1 = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.colName = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colSensor = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colCount = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colMovingAVG = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colMovingSTD = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colActiveTime = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colWaitingTime = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colMovingTime = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colRatio = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.colCount = new DevExpress.XtraGrid.Columns.GridColumn();
             this.repositoryItemProgressBar = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
             ((System.ComponentModel.ISupportInitialize)(this.gridControl1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView1)).BeginInit();
@@ -29,6 +29,7 @@ namespace OPC.DSClient.WinForm.UserControl
             this.gridControl1.Name = "gridControl1";
             this.gridControl1.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.repositoryItemProgressBar});
+
             this.gridControl1.Size = new System.Drawing.Size(1200, 600);
             this.gridControl1.TabIndex = 0;
             this.gridControl1.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
@@ -45,8 +46,7 @@ namespace OPC.DSClient.WinForm.UserControl
             this.colActiveTime,
             this.colWaitingTime,
             this.colMovingTime,
-            this.colRatio
-            });
+            this.colRatio});
             this.gridView1.GridControl = this.gridControl1;
             this.gridView1.Name = "gridView1";
             this.gridView1.OptionsView.ShowAutoFilterRow = true;
@@ -120,8 +120,8 @@ namespace OPC.DSClient.WinForm.UserControl
             // colRatio
             // 
             this.colRatio.Caption = "Waiting/Active Ratio";
-            this.colRatio.ColumnEdit = this.repositoryItemProgressBar; // ProgressBar 추가
             this.colRatio.FieldName = "Ratio";
+            this.colRatio.ColumnEdit = this.repositoryItemProgressBar; // ProgressBar와 값 표시
             this.colRatio.Name = "colRatio";
             this.colRatio.Visible = true;
             this.colRatio.VisibleIndex = 7;
@@ -140,6 +140,7 @@ namespace OPC.DSClient.WinForm.UserControl
             // 
             this.repositoryItemProgressBar.Name = "repositoryItemProgressBar";
             this.repositoryItemProgressBar.Maximum = 100;
+            this.repositoryItemProgressBar.ShowTitle = true; // 값과 ProgressBar 함께 표시
             this.repositoryItemProgressBar.StartColor = System.Drawing.Color.Green;
             this.repositoryItemProgressBar.EndColor = System.Drawing.Color.Red;
             // 
@@ -156,18 +157,17 @@ namespace OPC.DSClient.WinForm.UserControl
             this.ResumeLayout(false);
         }
 
-
         private DevExpress.XtraGrid.GridControl gridControl1;
         private DevExpress.XtraGrid.Views.Grid.GridView gridView1;
         private DevExpress.XtraGrid.Columns.GridColumn colName;
         private DevExpress.XtraGrid.Columns.GridColumn colSensor;
+        private DevExpress.XtraGrid.Columns.GridColumn colCount;
         private DevExpress.XtraGrid.Columns.GridColumn colMovingAVG;
         private DevExpress.XtraGrid.Columns.GridColumn colMovingSTD;
         private DevExpress.XtraGrid.Columns.GridColumn colActiveTime;
         private DevExpress.XtraGrid.Columns.GridColumn colWaitingTime;
         private DevExpress.XtraGrid.Columns.GridColumn colMovingTime;
         private DevExpress.XtraGrid.Columns.GridColumn colRatio;
-        private DevExpress.XtraGrid.Columns.GridColumn colCount;
         private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryItemProgressBar;
     }
 }

@@ -59,7 +59,7 @@ namespace OPC.DSClient.WinForm.UserControl
             );
 
             string jsonText = opcTagManager.OpcJsonText;
-            var jsonDsSystem = JsonConvert.DeserializeObject<JsonDsSystem>(jsonText);
+            var jsonDsSystem = JsonConvert.DeserializeObject<DsSystemJson>(jsonText);
             if (jsonDsSystem?.Flows == null)
                 throw new InvalidOperationException("Invalid OPC data format.");
 
@@ -73,7 +73,7 @@ namespace OPC.DSClient.WinForm.UserControl
 
                 if (selectTagNames.Any())  //미선택시 Real만 그림
                 {
-                    foreach (var vertex in flow.Vertices ?? Enumerable.Empty<Vertex>())
+                    foreach (var vertex in flow.Vertices ?? Enumerable.Empty<VertexJson>())
                     {
                         if (vertex.Type == "Real")
                         {
@@ -94,7 +94,7 @@ namespace OPC.DSClient.WinForm.UserControl
         /// <param name="tagDictionary">태그 사전</param>
         /// <param name="selectTagNames">선택한 태그 이름 리스트</param>
         private static void ProcessEdges(
-            IEnumerable<Edge>? edges,
+            IEnumerable<EdgeJson>? edges,
             List<SankeyDsLink> sankeyData,
             Dictionary<string, OpcDsTag> tagDictionary,
             HashSet<string> selectTagNames)

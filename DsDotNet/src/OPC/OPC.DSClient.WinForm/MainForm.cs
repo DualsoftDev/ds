@@ -9,6 +9,7 @@ using Opc.Ua.Configuration;
 using System;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace OPC.DSClient.WinForm
@@ -17,18 +18,23 @@ namespace OPC.DSClient.WinForm
     {
         private readonly ConnectServerCtrl ConnectServerCTRL = new();
         private readonly OpcTagManager _OpcTagManager = new();
-
         public MainForm()
         {
             InitializeComponent();
             LoadSkinSettings();
+
+
+
             InitializeEvents();
+            InitializeMenu();
             InitializeOPC();
             SetupNavigationPages();
+
+
             var version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
-            Text = $"DS Pilot v{version}";  
-            navigationFrame1.SelectedPageChanged += NavigationFrame1_SelectedPageChanged;
-            navigationFrame1.SelectedPage = navigationPage7;
+            Text = $"DS Pilot v{version}";
+            nFrame1.SelectedPageChanged += NavigationFrame1_SelectedPageChanged;
+            nFrame1.SelectedPage = nPage7;
         }
 
         private void InitializeOPC()
@@ -40,28 +46,52 @@ namespace OPC.DSClient.WinForm
                 ConfigSectionName = "DsOpcClient"
             };
 
+            // 애플리케이션 구성 로드
             application.LoadApplicationConfiguration(false).Wait();
 
+            // 인증서 확인
             if (!application.CheckApplicationInstanceCertificate(false, 0).Result)
                 throw new Exception("Invalid application certificate!");
 
+            // OPC 서버 연결 설정
             ConnectServerCTRL.Configuration = application.ApplicationConfiguration;
             ConnectServerCTRL.ServerUrl = "opc.tcp://192.168.9.203:2747/DS";
             ConnectServerCTRL.ConnectComplete += OnConnectComplete;
             ConnectServerCTRL.ReconnectComplete += OnConnectComplete;
-            ConnectServerCTRL.Connect();
+
+            // 연결 시도
+            var timeoutMs = 5000;
+            ConnectWithTimeout(timeoutMs); // 타임아웃 5초
         }
+
+        private void ConnectWithTimeout(int timeoutMs)
+        {
+            ConnectServerCTRL.DiscoverTimeout = timeoutMs;
+            ConnectServerCTRL.Connect();
+            Task.Run(async () =>
+            {
+                await Task.Delay(timeoutMs);
+                if (ConnectServerCTRL.Session == null)
+                {
+                    XtraMessageBox.Show("Connection failed. " +
+                        "\nPlease check the OPC server address and try again.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            });
+        }
+
 
         private void SetupNavigationPages()
         {
-            navigationPage1.Controls.Add(ucDsTree1);
-            navigationPage2.Controls.Add(ucDsTable1);
-            navigationPage3.Controls.Add(ucDsSunburst1);
-            navigationPage4.Controls.Add(ucDsTreemap1);
-            navigationPage5.Controls.Add(ucDsHeatmap1);
-            navigationPage6.Controls.Add(ucDsSankey1);
-            navigationPage7.Controls.Add(ucDsDataGrid1);
-            navigationPage8.Controls.Add(ucDsTextEdit1);
+            nPage1.Controls.Add(ucDsTree1);
+            nPage2.Controls.Add(ucDsTable1);
+            nPage3.Controls.Add(ucDsSunburst1);
+            nPage4.Controls.Add(ucDsTreemap1);
+            nPage5.Controls.Add(ucDsHeatmap1);
+            nPage6.Controls.Add(ucDsSankey1);
+            nPage7.Controls.Add(ucDsDataGridFlow);
+            nPage8.Controls.Add(ucDsDataGridIO);
+            nPage9.Controls.Add(ucDsTextEdit1);
+            //nPage10.Controls.Add(ucDsTextEdit1);
         }
 
 
@@ -72,9 +102,26 @@ namespace OPC.DSClient.WinForm
                 if (tabPage.Controls.Count > 0 && tabPage.Controls[0] is XtraUserControl userControl)
                 {
                     Global.SelectedUserControl = userControl;
+                    ResetAceSelection(); // 모든 컨트롤 상태 초기화
 
                     // 선택된 페이지에 따라 컨트롤 상태 업데이트
-                    UpdateAceSelection(tabPage.Name);
+                    var selectedControl = tabPage.Name switch
+                    {
+                        "nPage1" => ace_Tree,
+                        "nPage2" => ace_Table,
+                        "nPage3" => ace_Sunburst,
+                        "nPage4" => ace_Treemap,
+                        "nPage5" => ace_Heatmap,
+                        "nPage6" => ace_Sankey,
+                        "nPage7" => ace_DataGridFlow,
+                        "nPage8" => ace_DataGridIO,
+                        "nPage9" => ace_TextEdit,
+                        "nPage10" => ace_HMI,
+                        _ => null
+                    };
+
+                    if (selectedControl != null)
+                        selectedControl.Appearance.Normal.BackColor = Color.DarkBlue;
                 }
             }
             else
@@ -82,34 +129,14 @@ namespace OPC.DSClient.WinForm
                 Global.SelectedUserControl = null; // 유효하지 않은 경우 null 처리
                 ResetAceSelection(); // 모든 컨트롤 상태 초기화
             }
-        }
-
-        private void UpdateAceSelection(string? pageName)
-        {
-            ResetAceSelection();
-
-            var selectedControl = pageName switch
+            void ResetAceSelection()
             {
-                "navigationPage1" => ace_Tree,
-                "navigationPage2" => ace_Table,
-                "navigationPage3" => ace_Sunburst,
-                "navigationPage4" => ace_Treemap,
-                "navigationPage5" => ace_Heatmap,
-                "navigationPage6" => ace_Sankey,
-                "navigationPage7" => ace_DataGrid,
-                "navigationPage8" => ace_TextEdit,
-                _ => null
-            };
-
-            if (selectedControl != null)
-                selectedControl.Appearance.Normal.BackColor = Color.DarkBlue;
+                //new[] { ace_Tree, ace_Table, ace_Sunburst, ace_Treemap, ace_Heatmap, ace_Sankey, ace_DataGridFlow, ace_DataGridIO, ace_TextEdit, ace_HMI }
+                foreach (var aceControl in accordionControl1.Elements)
+                    aceControl.Appearance.Normal.BackColor = Color.Transparent;
+            }
         }
 
-        private void ResetAceSelection()
-        {
-            foreach (var aceControl in new[] { ace_Tree, ace_Table, ace_Sunburst, ace_Treemap, ace_Heatmap, ace_Sankey, ace_DataGrid, ace_TextEdit })
-                aceControl.Appearance.Normal.BackColor = Color.Transparent;
-        }
 
         private void SaveSkinSettings(string skinName)
         {
@@ -151,23 +178,14 @@ namespace OPC.DSClient.WinForm
                 ucDsHeatmap1.SetDataSource(_OpcTagManager);
                 ucDsSunburst1.SetDataSource(_OpcTagManager);
                 ucDsTreemap1.SetDataSource(_OpcTagManager);
-                ucDsDataGrid1.SetDataSource(_OpcTagManager);
+                ucDsDataGridFlow.SetDataSource(_OpcTagManager, true);
+                ucDsDataGridIO.SetDataSource(_OpcTagManager, false);
                 ucDsTextEdit1.SetDataSource(_OpcTagManager);
 
                 SplashScreenManager.CloseForm();
             }
         }
 
-        private void InitializeEvents()
-        {
-            ace_Tree.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage1;
-            ace_Table.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage2;
-            ace_Sunburst.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage3;
-            ace_Treemap.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage4;
-            ace_Heatmap.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage5;
-            ace_Sankey.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage6;
-            ace_DataGrid.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage7;
-            ace_TextEdit.Click += (_, _) => navigationFrame1.SelectedPage = navigationPage8;
-        }
+     
     }
 }

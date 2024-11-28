@@ -60,6 +60,7 @@ module TagManagerModule =
             | :? Call as c -> c.IsCommand
             |_-> false
         member _.Flow   = v.Parent.GetFlow()
+        member _.FlowManager   = v.Parent.GetFlow().TagManager :?> FlowManager   
         member x.System =
             assert(sys = x.Flow.System)
             x.Flow.System
@@ -86,31 +87,26 @@ module TagManagerModule =
             if isActive
             then createData(v, VertexTag.calcCount, DuUINT32)
             else sysM.TempDataDuUINT32
-        ///OPC Server에서 계산 planStart=>endTag 평균시간 
         member val CalcAverage = 
             if isActive 
             then createData(v, VertexTag.calcAverage, DuFLOAT32)
             else sysM.TempDataDuFLOAT32
-        ///OPC Server에서 계산 planStart=>endTag 표준편차 
         member val CalcStandardDeviation = 
             if isActive
             then createData(v, VertexTag.calcStandardDeviation, DuFLOAT32)
             else sysM.TempDataDuFLOAT32
-        ///OPC Server에서 계산 startTag=>planStart 시간에서 동작시간을 제외한 시간
-        member val CalcWaitingTime = 
+        member val CalcWaitingDuration = 
             if isActive
-            then createData(v, VertexTag.calcWaitingTime, DuFLOAT32)
-            else sysM.TempDataDuFLOAT32
-        ///OPC Server에서 계산 startTag=>endTag 시간
-        member val CalcActiveTime = 
+            then createData(v, VertexTag.calcWaitingDuration, DuUINT32)
+            else sysM.TempDataDuUINT32
+        member val CalcActiveDuration = 
             if isActive
-            then createData(v, VertexTag.calcActiveTime, DuFLOAT32)
-            else sysM.TempDataDuFLOAT32
-        ///OPC Server에서 계산 planStart=>endTag 시간
-        member val CalcMovingTime = 
+            then createData(v, VertexTag.calcActiveDuration, DuUINT32)
+            else sysM.TempDataDuUINT32
+        member val CalcMovingDuration = 
             if isActive
-            then createData(v, VertexTag.calcMovingTime, DuFLOAT32)
-            else sysM.TempDataDuFLOAT32
+            then createData(v, VertexTag.calcMovingDuration, DuUINT32)
+            else sysM.TempDataDuUINT32
             
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member val ON = createTag true VertexTag.forceOn
@@ -166,9 +162,9 @@ module TagManagerModule =
             | VertexTag.calcCount               -> x.CalcCount 
             | VertexTag.calcAverage             -> x.CalcAverage 
             | VertexTag.calcStandardDeviation   -> x.CalcStandardDeviation 
-            | VertexTag.calcWaitingTime         -> x.CalcWaitingTime
-            | VertexTag.calcActiveTime          -> x.CalcActiveTime
-            | VertexTag.calcMovingTime          -> x.CalcMovingTime
+            | VertexTag.calcWaitingDuration         -> x.CalcWaitingDuration
+            | VertexTag.calcActiveDuration          -> x.CalcActiveDuration
+            | VertexTag.calcMovingDuration          -> x.CalcMovingDuration
             
             | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder  :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage

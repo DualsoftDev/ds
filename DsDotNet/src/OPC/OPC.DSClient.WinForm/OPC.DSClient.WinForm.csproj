@@ -29,6 +29,9 @@
 
 
   <ItemGroup>
+    <Compile Update="MainForm.Menu.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Update="Properties\Resources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -66,11 +69,6 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Resources\" />
   </ItemGroup>
 
 </Project>

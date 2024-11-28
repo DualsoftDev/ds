@@ -36,13 +36,16 @@ namespace OPC.DSClient
         public float MovingAVG { get; set; } = 0.001f; // 평균값 기본 1msec 설정 UI 영역때문에
 
         [Browsable(false)]
-        public float MovingTime { get; set; } = 0.0f;
+        public uint MovingDuration { get; set; } = 0;
 
         [Browsable(false)]
-        public float WaitingTime { get; set; } = 0.0f;
+        public List<uint> MovingTimes { get; set; } = new List<uint>();
 
         [Browsable(false)]
-        public float ActiveTime { get; set; } = 0.0f;
+        public uint WaitingDuration { get; set; } = 0;
+
+        [Browsable(false)]
+        public uint ActiveDuration { get; set; } = 0;
 
         public string Name { get; set; } = string.Empty; // 기본값 설정
         [Browsable(false)]
@@ -81,22 +84,39 @@ namespace OPC.DSClient
         {
             try
             {
-                if (Application.OpenForms.Count > 0 && Application.OpenForms[0]?.InvokeRequired == true)
+                if (Application.OpenForms.Count > 0)
                 {
-                    Application.OpenForms[0]?.Invoke(new Action(() =>
+                    var mainForm = Application.OpenForms[0]; // 첫 번째 열린 폼 가져오기
+                    if (mainForm != null && mainForm.InvokeRequired)
                     {
-                        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                    }));
+                                // UI 스레드에서 실행
+                        mainForm.Invoke(new Action(() =>
+                        {
+                            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                        }));
+                        return;
+                    }
                 }
-                else
-                {
-                    PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-                }
+
+                // Invoke가 필요 없는 경우 직접 호출
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"OnPropertyChanged error: {ex.Message}");
             }
         }
+
+    }
+    public enum TagKindOpc
+    {
+        ActionIn,
+        Finish,
+        CalcCount,
+        CalcActiveDuration,
+        CalcWaitingDuration,
+        CalcMovingDuration,
+        CalcAverage,
+        CalcStandardDeviation
     }
 }

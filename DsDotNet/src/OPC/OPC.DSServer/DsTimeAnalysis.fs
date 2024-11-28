@@ -17,55 +17,67 @@ module DsTimeAnalysisMoudle =
 
     /// 통계 계산 클래스
     type CalcStats() =
-        let mutable count = 0
-        let mutable mean = 0.0
-        let mutable M2 = 0.0
-        let mutable activeDuration = 0.0 // startTag → endTag
-        let mutable movingDuration = 0.0 // planStart → endTag
-        let mutable startTime = DateTime.MinValue
-        let mutable planTime = DateTime.MinValue
+        let mutable count = 0u
+        let mutable mean = 0.0f
+        let mutable M2 = 0.0f
+        let mutable activeDuration = 0.0 // StatsStart → endTag
+        let mutable movingDuration = 0.0 // MovingStart → endTag
 
-        /// 시간 기록 시작
-        member this.StartTracking(tagType: VertexTag) =
-            match tagType with
-            | VertexTag.planStart -> planTime <- DateTime.UtcNow
-            | VertexTag.startTag -> startTime <- DateTime.UtcNow
-            | _ -> ()
+        let mutable updateAble = false //drive_state tag가 켜지고 endTag가 살고 다음부터 저장
+
+
+        member val MovingStart = DateTime.MinValue with get, set
+        member val StatsStart = DateTime.MinValue with get, set
 
         /// 시간 기록 종료 및 지속 시간 계산
         member this.EndTracking() =
             let endTime = DateTime.UtcNow
-            if startTime <> DateTime.MinValue then
-                activeDuration <- activeDuration + (endTime - startTime).TotalMilliseconds
-                startTime <- DateTime.MinValue
-            if planTime <> DateTime.MinValue then
-                movingDuration <- movingDuration + (endTime - planTime).TotalMilliseconds
-                planTime <- DateTime.MinValue
+            if this.StatsStart <> DateTime.MinValue then
+                activeDuration <-  (endTime - this.StatsStart).TotalMilliseconds
+                this.StatsStart <- DateTime.MinValue
+            if this.MovingStart <> DateTime.MinValue then
+                movingDuration <-  (endTime - this.MovingStart).TotalMilliseconds
+                this.MovingStart <- DateTime.MinValue
 
         /// 대기 시간 계산
-        member this.WaitingTime = activeDuration - movingDuration
-
+        member this.WaitingDuration  =  activeDuration - movingDuration
         /// 동작 시간
-        member this.ActiveTime = activeDuration
-        member this.MovingTime = movingDuration 
+        member this.ActiveDuration  = activeDuration
+        member this.MovingDuration  = movingDuration 
 
         /// 데이터 추가 및 평균/분산 업데이트
-        member this.Update(isWork:bool) =
-            let duration = if isWork then  activeDuration else movingDuration
-            count <- count + 1
-            let delta = duration - mean
-            mean <- mean + (delta / float count)
-            let delta2 = duration - mean
-            M2 <- M2 + (delta * delta2)
+        member this.Update(vertex:Vertex) =  
+            let tm = vertex.TagManager :?> VertexTagManager
+
+            if updateAble = false then 
+                updateAble <- tm.FlowManager.GetFlowTag(FlowTag.drive_state).Value   
+            else 
+                let duration =  movingDuration |> float32
+                count <- count + 1u
+                let delta = duration - mean
+                mean <- mean + (delta / float32 count)
+                let delta2 = duration - mean
+                M2 <- M2 + (delta * delta2)
+             
+                tm.CalcAverage.BoxedValue <- this.Average 
+                tm.CalcStandardDeviation.BoxedValue <- this.StandardDeviation 
+                tm.CalcCount.BoxedValue <- this.Count 
+                tm.CalcWaitingDuration.BoxedValue <- this.WaitingDuration |> uint32
+                tm.CalcActiveDuration.BoxedValue <- this.ActiveDuration   |> uint32
+                tm.CalcMovingDuration.BoxedValue <- this.MovingDuration   |> uint32
+
+        member this.DriveStateChaged(driveOn:bool) =   
+            if not(driveOn) then    //drive_state가 꺼지면 초기화
+                updateAble <- false
 
         /// 평균 값
         member this.Average = mean
 
         /// 모집단 분산
-        member this.GetPopulationVariance() = if count > 0 then M2 / float count else 0.0
+        member this.GetPopulationVariance() = if count > 0u then (float M2) / (float count) else 0.0
 
         /// 모집단 표준편차
-        member this.StandardDeviation = this.GetPopulationVariance() |> Math.Sqrt
+        member this.StandardDeviation = this.GetPopulationVariance() |> Math.Sqrt |> float32
 
         /// 데이터 개수
         member this.Count = count
@@ -74,42 +86,57 @@ module DsTimeAnalysisMoudle =
     let statsMap = Dictionary<string, CalcStats>()
 
     /// 통계 객체 가져오기 (없으면 생성)
-    let getOrCreateStats (tagName:string) =
-        match statsMap.TryGetValue(tagName) with
+    let getOrCreateStats (fqdn:string) =
+        match statsMap.TryGetValue(fqdn) with
         | true, stats -> stats
         | _ ->
             let newStats = CalcStats()
-            statsMap.[tagName] <- newStats
+            statsMap[fqdn] <- newStats
             newStats
 
-    /// 통계 업데이트 함수
-    let updateStats (vertex:Vertex) (stats:CalcStats) =
-        stats.Update(vertex :? Real)
-        
-        let tagManager = vertex.TagManager :?> VertexTagManager
-        tagManager.CalcAverage.BoxedValue <- stats.Average |> float32
-        tagManager.CalcStandardDeviation.BoxedValue <- stats.StandardDeviation |> float32
-        tagManager.CalcCount.BoxedValue <- stats.Count |> uint
-        tagManager.CalcWaitingTime.BoxedValue <- stats.WaitingTime |> float32
-        tagManager.CalcActiveTime.BoxedValue <- stats.ActiveTime |> float32
-        tagManager.CalcMovingTime.BoxedValue <- stats.ActiveTime |> float32
-
+    let processFlow (flow: Flow) =
+        let driveOn = (flow.TagManager:?> FlowManager).GetFlowTag(FlowTag.drive_state).Value
+        flow.GetVerticesOfFlow()
+            |> Seq.iter (fun vertex -> 
+                let stats = getOrCreateStats (vertex.QualifiedName)
+                stats.DriveStateChaged(driveOn)
+                
+                if vertex :? Real &&  driveOn then
+                    stats.StatsStart <- DateTime.UtcNow
+                )
+       
     /// 태그별 시간 처리 로직
-    let processTag tagKind (vertex: Vertex) =
-        let stats = getOrCreateStats vertex.QualifiedName
+    let processCallTag tagKind (call: Call) =
+        let stats = getOrCreateStats call.QualifiedName
         match tagKind with
         | VertexTag.startTag ->
-            stats.StartTracking(VertexTag.startTag)
-            debugfn "Tracking started for startTag '%s'." vertex.QualifiedName
+            stats.StatsStart <- DateTime.UtcNow
         | VertexTag.planStart ->
-            stats.StartTracking(VertexTag.planStart)
-            debugfn "Tracking started for planTag '%s'." vertex.QualifiedName
+            stats.MovingStart <- DateTime.UtcNow
+
         | VertexTag.endTag ->
             stats.EndTracking()
-            updateStats vertex stats
-            debugfn "Tracking ended for endTag '%s'. Active Time: %f ms, Waiting Time: %f ms"
-                vertex.QualifiedName stats.ActiveTime stats.WaitingTime
+            stats.Update(call) 
         | _ -> debugfn "Unhandled VertexTag: %A" tagKind
+
+
+    /// 태그별 시간 처리 로직
+    let processRealTag tagKind (real: Real option) (flow: Flow option) =
+        match real, flow with
+        | Some real, None ->
+            let stats = getOrCreateStats real.QualifiedName
+            match tagKind with
+            | VertexTag.startTag ->
+                stats.MovingStart <- DateTime.UtcNow
+            | VertexTag.endTag ->
+                stats.EndTracking()
+                stats.Update(real) 
+            | _ -> debugfn "Unhandled VertexTag: %A" tagKind
+
+        | None, Some flow -> processFlow flow
+        | _ -> failWithLog "Invalid arguments: Real: %A, Flow: %A" real flow
+       
+
 
     /// 이벤트 처리 함수
     let handleCalcTag (stg: IStorage) =
@@ -118,11 +145,22 @@ module DsTimeAnalysisMoudle =
             match stg.ObjValue with
             | :? bool as isActive when isActive ->
                 match Enum.TryParse<VertexTag>(getTagKindName stg.TagKind) with
-                | true, tagKind -> 
-                    processTag tagKind vertex
+                | true, tagKind ->
+                    if vertex :? Call
+                    then
+                        processCallTag tagKind (vertex:?> Call)
+                    elif vertex :? Real
+                    then
+                        processRealTag tagKind (Some(vertex:?> Real)) None
+
                 | false, _ -> 
-                    debugfn "Invalid TagKind value: %d" stg.TagKind
+                    failWithLog "Invalid TagKind value: %d" stg.TagKind
+            | _ -> ()
+        | Some (:? Flow as flow) ->
+            match Enum.TryParse<FlowTag>(getTagKindName stg.TagKind) with
+            | true, tagKind when tagKind = FlowTag.drive_state -> 
+                processFlow flow
             | _ -> 
-                debugfn "Invalid ObjValue: Expected boolean but got %A" stg.ObjValue
+                failWithLog "Invalid TagKind value: %d" stg.TagKind
         | _ -> 
-            debugfn "Invalid Target: Expected Vertex but got %A" stg.Target
+                failWithLog "Invalid Target: Expected Vertex or Flow but got %A" stg.Target

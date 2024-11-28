@@ -206,12 +206,12 @@ module TagKindList =
     | planEnd                   = 11091
      
 
-    | calcActiveTime            = 11101
-    | calcWaitingTime           = 11102
-    | calcMovingTime            = 11103
-    | calcCount                 = 11104 //calcMovingTime 기준
-    | calcAverage               = 11105 //calcMovingTime 기준
-    | calcStandardDeviation     = 11106 //calcMovingTime 기준
+    | calcActiveDuration        = 11101
+    | calcWaitingDuration       = 11102
+    | calcMovingDuration        = 11103
+    | calcCount                 = 11104 //calcMovingDuration 기준
+    | calcAverage               = 11105 //calcMovingDuration 기준
+    | calcStandardDeviation     = 11106 //calcMovingDuration 기준
     
     /// 12000 ~ 12999
     [<Flags>]

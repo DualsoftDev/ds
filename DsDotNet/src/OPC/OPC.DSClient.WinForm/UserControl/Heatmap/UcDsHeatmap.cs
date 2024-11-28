@@ -16,7 +16,6 @@ namespace OPC.DSClient.WinForm.UserControl
         private List<OpcDsTag> _opcTags;
         private Timer _updateTimer;
         private readonly ToolTipController _toolTipController;
-
         public UcDsHeatmap()
         {
             InitializeComponent();
@@ -112,5 +111,7 @@ namespace OPC.DSClient.WinForm.UserControl
                 e.SuperTip = superToolTip;
             }
         }
+
+      
     }
 }

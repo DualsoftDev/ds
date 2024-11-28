@@ -9,19 +9,22 @@ namespace OPC.DSClient.WinForm.UserControl
 {
     public static class HeatmapManager
     {
+        public static double ScaleUnit = 1.0;
         public static void InitializeHeatmapColorProvider(HeatmapControl heatmapControl)
         {
-            // 색상 팔레트 정의
-            var palette = new DevExpress.XtraCharts.Palette("VariancePalette")
+            // 색상 팔레트 정의 (10단계)
+            var palette = new DevExpress.XtraCharts.Palette("ExtendedVariancePalette")
             {
-                Color.FromArgb(105, 168, 204),
-                Color.FromArgb(125, 205, 168),
-                Color.FromArgb(180, 224, 149),
-                Color.FromArgb(253, 204, 138),
-                Color.FromArgb(251, 167, 86),
-                Color.FromArgb(225, 123, 49),
-                Color.FromArgb(199, 73, 25),
-                Color.FromArgb(180, 43, 1)
+                Color.FromArgb(105, 168, 204), // 1단계
+                Color.FromArgb(125, 205, 168), // 2단계
+                Color.FromArgb(155, 215, 155), // 3단계
+                Color.FromArgb(180, 224, 149), // 4단계
+                Color.FromArgb(215, 225, 135), // 5단계
+                Color.FromArgb(253, 204, 138), // 6단계
+                Color.FromArgb(251, 167, 86),  // 7단계
+                Color.FromArgb(225, 123, 49),  // 8단계
+                Color.FromArgb(199, 73, 25),   // 9단계
+                Color.FromArgb(180, 43, 1)     // 10단계
             };
 
             // 색상 공급자 설정
@@ -32,8 +35,8 @@ namespace OPC.DSClient.WinForm.UserControl
             };
 
             // 범위 설정
-            double maxVariance = 50.0; // 최대 Variance 값
-            double step = maxVariance / (palette.Count - 1);
+            double maxVariance = 100; // 최대 Variance 값
+            double step = maxVariance / (palette.Count);
 
             for (double i = 0; i <= maxVariance; i += step)
             {
@@ -66,7 +69,7 @@ namespace OPC.DSClient.WinForm.UserControl
                     {
                         var tag = opcTags[index++];
 
-                        values[y, x] = Math.Round(tag.MovingSTD/1000.0, 2); //  값을 소수점 두 자리로 반올림
+                        values[y, x] = Math.Round(tag.MovingSTD/1000.0 * ScaleUnit, 2); //  값을 소수점 두 자리로 반올림
                     }
                     else
                     {

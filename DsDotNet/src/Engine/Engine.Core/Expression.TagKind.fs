@@ -240,6 +240,7 @@ type TagKindExt =
     [<Extension>]
     static member IsVertexOpcDataTag(x:IStorage) =
         x.TagKind.IsOneOf(
+              int FlowTag.drive_state,
               int VertexTag.planStart,
               int VertexTag.startTag, 
               int VertexTag.endTag)

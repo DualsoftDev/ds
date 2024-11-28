@@ -22,25 +22,51 @@ public partial class SplashScreenDS : SplashScreen
         labelControl_Ver.Text = string.Format(" v{0} ({1})", version
             , File.GetLastWriteTime(Assembly.GetExecutingAssembly().Location).ToShortDateString());
     }
-
     private void Timer1_Tick(object sender, EventArgs e)
     {
-        if (Global.FolderCount > 0 && Global.VariableCount > 0)
+        // OPC 서버 탐색 상태 표시
+        if (Global.FolderCount <= 0 || Global.VariableCount <= 0)
         {
-            double progress = (double)Global.OpcProcessCount / (Global.FolderCount + Global.VariableCount);
-            labelControl_Process.Text = "Connecting... "+progress.ToString("P2"); // 퍼센트 형식으로 표시
+            labelControl_Process.Text = "Initializing OPC server connection... Please wait.";
+            progressBarControl1.Position = 0; // 초기화 상태
+            return;
         }
 
-        AssemblyName[] asmNameDll = Assembly.GetEntryAssembly().GetReferencedAssemblies();
-
-        if (curDll < asmNameDll.Length)
+        // 진행 상태 계산
+        double progress = (double)Global.OpcProcessCount / (Global.FolderCount + Global.VariableCount);
+        if (progress < 1)
         {
-            labelControl_ReferencedAssemblies.Text = $"{asmNameDll[curDll].Name}, Ver{asmNameDll[curDll].Version}";
-            curDll++;
+            labelControl_Process.Text = $"Connecting to OPC Server... {progress:P2} completed.";
         }
         else
-            curDll = 0;
+        {
+            labelControl_Process.Text = "OPC Server connection successful! Preparing resources...";
+        }
+
+        // 진행률 업데이트
+        progressBarControl1.Position = (int)(progress * 100);
+
+        // 로드된 어셈블리 정보 표시
+        AssemblyName[] asmNameDll = Assembly.GetEntryAssembly().GetReferencedAssemblies();
+        if (asmNameDll.Length > 0)
+        {
+            if (curDll < asmNameDll.Length)
+            {
+                labelControl_ReferencedAssemblies.Text = $"{asmNameDll[curDll].Name} {asmNameDll[curDll].Version}.";
+                curDll++;
+            }
+            else
+            {
+                labelControl_ReferencedAssemblies.Text = "All referenced assemblies loaded successfully.";
+                curDll = 0; // 초기화
+            }
+        }
+        else
+        {
+            labelControl_ReferencedAssemblies.Text = "No referenced assemblies found.";
+        }
     }
+
 
 
     #region Overrides

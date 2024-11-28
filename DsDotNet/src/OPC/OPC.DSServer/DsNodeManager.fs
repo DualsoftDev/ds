@@ -237,15 +237,16 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         then 
             _disposableTagDS <- 
                 Some(
-                    ValueSubject.Subscribe(fun (_sys, stg, value) ->
-                        if stg.IsVertexOpcDataTag() then 
-                            handleCalcTag (stg) |> ignore
+                    ValueSubject.Subscribe(fun (sys, stg, value) ->
+                        if dsSys = (sys:?>DsSystem) // active만 처리
+                        then
+                            if stg.IsVertexOpcDataTag() then 
+                                handleCalcTag (stg) |> ignore
 
-                        if _variables.ContainsKey(stg.Name) then
-                            let variable = _variables[stg.Name]
-                            variable.Value <- value
-                            variable.Timestamp <- DateTime.Now
-                            variable.ClearChangeMasks(this.SystemContext, false)
-
+                            if _variables.ContainsKey(stg.Name) then
+                                let variable = _variables[stg.Name]
+                                variable.Value <- value
+                                variable.Timestamp <- DateTime.Now
+                                variable.ClearChangeMasks(this.SystemContext, false)    
                     )
-                ) 
+                )

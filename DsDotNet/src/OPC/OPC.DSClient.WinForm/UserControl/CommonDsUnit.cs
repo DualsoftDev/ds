@@ -17,9 +17,9 @@ namespace OPC.DSClient.WinForm.UserControl
         public string Label { get; set; } = string.Empty;
         public object Value => OpcDsTag.Value;
         public int Count => OpcDsTag.Count;
-        public float ActiveTime => OpcDsTag.ActiveTime;
-        public float WaitingTime => OpcDsTag.WaitingTime;
-        public float MovingTime => OpcDsTag.MovingTime;
+        public uint ActiveTime => OpcDsTag.ActiveDuration;
+        public uint WaitingTime => OpcDsTag.WaitingDuration;
+        public uint MovingTime => OpcDsTag.MovingDuration;
         public float MovingAVG => OpcDsTag.MovingAVG;
         public float MovingSTD => OpcDsTag.MovingSTD;
         public double Area { get; set; } // 면적 정의 값

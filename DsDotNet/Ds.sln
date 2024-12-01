@@ -197,6 +197,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSPilot.Winform.Opc", "Apps
 EndProject
 Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "DSPilot.Model", "Apps\DSPilot\DSPilot.Model\DSPilot.Model.fsproj", "{C9DD907B-5811-4304-869E-61D61AB5E100}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSPilot.WebServer", "Apps\DSPilot\DSPilot.WebServer\DSPilot.WebServer.csproj", "{2C37225E-FE6B-4972-B942-9C875F889B73}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -747,6 +749,14 @@ Global
 		{C9DD907B-5811-4304-869E-61D61AB5E100}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C9DD907B-5811-4304-869E-61D61AB5E100}.Release|x86.ActiveCfg = Release|Any CPU
 		{C9DD907B-5811-4304-869E-61D61AB5E100}.Release|x86.Build.0 = Release|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Debug|x86.Build.0 = Debug|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Release|x86.ActiveCfg = Release|Any CPU
+		{2C37225E-FE6B-4972-B942-9C875F889B73}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -833,6 +843,7 @@ Global
 		{34A559D4-BA86-42C4-82A9-7D1CFF7B6D65} = {0A52190F-FA8D-4D89-AEEF-10DBDDB97895}
 		{ABE00D14-B69E-4955-8164-71D81E65B1CC} = {0A52190F-FA8D-4D89-AEEF-10DBDDB97895}
 		{C9DD907B-5811-4304-869E-61D61AB5E100} = {0A52190F-FA8D-4D89-AEEF-10DBDDB97895}
+		{2C37225E-FE6B-4972-B942-9C875F889B73} = {0A52190F-FA8D-4D89-AEEF-10DBDDB97895}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

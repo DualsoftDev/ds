@@ -45,7 +45,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
     let _variables = Dictionary<string, BaseDataVariableState>()
     let _folders = Dictionary<string, FolderState>()
     let mutable _disposableTagDS: IDisposable option = None
-    let mutable opcItemCnt:int = 0
     let dsStorages = dsSys.TagManager.Storages
 
     let handleWriteValue(
@@ -113,16 +112,19 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
     member private this.CreateFolder(
         name: string, 
         displayName: string, 
+        fqdnKind: string, 
         namespaceIndex: uint16, 
         parentFolder: FolderState option
     ) =
+        let nameWithFqdn = if String.IsNullOrWhiteSpace(fqdnKind) then name else $"({fqdnKind}){name}"
+
         // Create the folder node
         let folder = 
             new FolderState(
                 parentFolder |> Option.toObj, 
                 SymbolicName = name, 
                 NodeId = NodeId(name, namespaceIndex),
-                BrowseName = QualifiedName(name, namespaceIndex), 
+                BrowseName = QualifiedName(nameWithFqdn, namespaceIndex), 
                 DisplayName = displayName,
                 TypeDefinitionId = ObjectTypeIds.FolderType, 
                 EventNotifier = EventNotifiers.SubscribeToEvents
@@ -149,10 +151,10 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 externalReferences[ObjectIds.ObjectsFolder] |> List<IReference>
 
         // Dualsoft root folder under Objects
-        let rootNode = this.CreateFolder("Dualsoft", "Dualsoft", nIndex, None)
+        let rootNode = this.CreateFolder("Dualsoft", "Dualsoft", "", nIndex, None)
         objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootNode.NodeId))
         
-        let rootTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name} tags",  nIndex, Some rootNode)
+        let rootTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name} tags",  $"{dsSys.GetType().Name}", nIndex, Some rootNode)
 
         let sysTags = getTags dsSys
         this.CreateOpcNodes sysTags rootTagfolder nIndex
@@ -175,6 +177,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 let target = treeNode.Node.FqdnObject
                 let isJob = target.IsSome && (target.Value :? Job)
                 let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
+                let fqdnName = $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
 
                 if _folders.ContainsKey folderName then
                     printfn "Folder already exists: %s" treeNode.Node.Name
@@ -185,7 +188,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                             parentNode
                         else 
                             let folderDisplayName = $"[{treeNode.Node.Name}]"
-                            this.CreateFolder(folderName, folderDisplayName, nIndex, Some parentNode)
+                            this.CreateFolder(folderName, folderDisplayName, fqdnName, nIndex, Some parentNode)
 
                     // 태그가 있는 경우 OPC 노드 생성
                     if target.IsSome && not (isJob) then
@@ -246,7 +249,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                             if _variables.ContainsKey(stg.Name) then
                                 let variable = _variables[stg.Name]
                                 variable.Value <- value
-                                variable.Timestamp <- DateTime.Now
+                                variable.Timestamp <- DateTime.UtcNow
                                 variable.ClearChangeMasks(this.SystemContext, false)    
                     )
                 )

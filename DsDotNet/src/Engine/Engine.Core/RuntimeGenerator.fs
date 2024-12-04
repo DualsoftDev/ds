@@ -27,6 +27,7 @@ module RuntimeGeneratorModule =
 
     //제어 Driver IO 기기 타입
     type HwDriveTarget =
+        | NONE
         | LS_XGI_IO
         | LS_XGK_IO
         | AB_IO
@@ -171,10 +172,10 @@ module HwDriveTargetExtensions =
             | "MELSEC_IO"  -> MELSEC_IO
             | "SIEMENS_IO" -> SIEMENS_IO
             | "PAIX_IO"    -> PAIX_IO
-            | _ -> failwithf $"Error ToHwDriveTarget: {s}"
+            | _ -> NONE
 
     let allDrivers =
-        [ LS_XGI_IO; LS_XGK_IO; AB_IO; MELSEC_IO; SIEMENS_IO; PAIX_IO ]
+        [ LS_XGI_IO; LS_XGK_IO; AB_IO; MELSEC_IO; SIEMENS_IO; PAIX_IO; NONE ]
 
 
 module TimeSimutionModeExtensions =

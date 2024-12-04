@@ -233,6 +233,8 @@ module DsDataType =
         | UINT8     -> DuUINT8
         | _  -> failwithlog "ERROR"
 
+    let getDataTypeFromName (textTypeName:string) =
+        getDataType(Type.GetType(textTypeName))
 
     let ToStringValue (value: obj) =
         match getDataType(value.GetType()), value  with
@@ -304,6 +306,23 @@ module DsDataType =
         member x.SlotIndex = slotIndex
         member x.IOType = ioType
         member x.DataType = dataType
+
+        member x.ToText() = sprintf "%d %A %A" x.SlotIndex x.IOType (x.DataType.ToType().FullName)
+        /// 문자열로부터 SlotDataType 생성
+        static member Create(slotIndex: string, ioType: string, dataTypeText: string) =
+            try
+                let slotIndex = int slotIndex
+                let ioType = 
+                    match ioType with
+                    | "In" -> IOType.In
+                    | "Out" -> IOType.Out
+                    | _ -> failwithf "Invalid IOType: %s" ioType
+
+                let dataType = getDataTypeFromName(dataTypeText.Trim('"'))
+                SlotDataType(slotIndex, ioType, dataType)
+            with
+            | _ as ex ->
+                failwithf "Failed to create SlotDataType: %s" ex.Message
 
     let getBlockType(blockSlottype:string) =
         match blockSlottype.ToLower() with

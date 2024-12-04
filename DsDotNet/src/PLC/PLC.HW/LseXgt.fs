@@ -220,6 +220,7 @@ module rec XGT =
         /// 미리 할당된 주소 영역(입력: forbiddenXs, 출력:forbiddenYs) 를 제외하고,
         /// 입력 및 출력을 순차적으로 spit 하는 함수 두개를 반환
         member x.CreateIOAllocator(forbiddenXs:string seq, forbiddenYs:string seq) =
+            // hw 상으로 전체 가능한 input/output
             let xs, ys = x.CreateIOHaystacks()
 
             let availableXs = xs |> Seq.except forbiddenXs

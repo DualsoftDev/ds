@@ -119,12 +119,61 @@ module rec ToJsonGraphModule =
         |> Seq.map flowToJson
         |> JArray
 
+    /// 공용 데이터 수집 및 JSON 변환 함수
+    let collectAndConvertToJson 
+        (system: DsSystem)
+        (predicate: ISafetyAutoPreRequisiteHolder -> bool) // 조건 필터
+        (getName: ISafetyAutoPreRequisiteHolder -> string) // 이름 추출
+        (getConditions: ISafetyAutoPreRequisiteHolder -> seq<string>) // 조건 추출
+        =
+        // Collect holders that match the predicate
+        let holders =
+            [
+                for f in system.Flows do
+                    yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
+                    for r in f.Graph.Vertices.OfType<Real>() do
+                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
+            ]
+            |> List.distinct
+            |> List.filter predicate
+
+        // Convert holders to JSON
+        JArray(
+            holders
+            |> Seq.map (fun holder ->
+                let name = getName holder
+                let conditions = getConditions holder |> Seq.toList
+                JObject(
+                    JProperty("Holder", name),
+                    JProperty("Conditions", JArray(conditions))
+                )
+            )
+        )
+
+    /// 시스템의 Safety 데이터를 JSON으로 변환
+    let safetyToJson (system: DsSystem) =
+        collectAndConvertToJson
+            system
+            (fun holder -> holder.SafetyConditions.Any()) // Safety 조건 필터
+            (fun holder -> holder.GetCall().QualifiedName) // Holder 이름 추출
+            (fun holder -> holder.SafetyConditions |> Seq.map (fun v -> v.GetCall().QualifiedName)) // Safety 조건 추출
+
+    /// 시스템의 AutoPre 데이터를 JSON으로 변환
+    let autopreToJson (system: DsSystem) =
+        collectAndConvertToJson
+            system
+            (fun holder -> holder.AutoPreConditions.Any()) // AutoPre 조건 필터
+            (fun holder -> holder.GetCall().QualifiedName) // Holder 이름 추출
+            (fun holder -> holder.AutoPreConditions |> Seq.map (fun v -> v.GetCall().QualifiedName)) // AutoPre 조건 추출
+
     /// 전체 시스템을 JSON으로 변환
     let systemToJsonGraph (system: DsSystem) =
         createJson [
             JProperty("name", JValue(system.QualifiedName))
             JProperty("type", JValue("DsSystem"))
             JProperty("flows", flowsToJson system.Flows :> JToken)
+            JProperty("autopre", autopreToJson system :> JToken)
+            JProperty("safety", safetyToJson system :> JToken)
         ]
 
 [<Extension>]

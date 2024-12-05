@@ -54,7 +54,8 @@ namespace Opc.Ua.Client.Controls
         {
             try
             {
-                return new Icon("App.ico");
+                return null;
+                //return new Icon("App.ico");
             }
             catch (Exception)
             {

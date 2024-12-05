@@ -41,7 +41,7 @@ module DsNodeManagerExt =
     
 
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem) =
-    inherit CustomNodeManager2(server, configuration, "https://dualsoft.com//ds")
+    inherit CustomNodeManager2(server, configuration, "ds")
     let _variables = Dictionary<string, BaseDataVariableState>()
     let _folders = Dictionary<string, FolderState>()
     let mutable _disposableTagDS: IDisposable option = None
@@ -124,7 +124,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 parentFolder |> Option.toObj, 
                 SymbolicName = name, 
                 NodeId = NodeId(name, namespaceIndex),
-                BrowseName = QualifiedName(nameWithFqdn, namespaceIndex), 
+                BrowseName = nameWithFqdn, 
                 DisplayName = displayName,
                 TypeDefinitionId = ObjectTypeIds.FolderType, 
                 EventNotifier = EventNotifiers.SubscribeToEvents

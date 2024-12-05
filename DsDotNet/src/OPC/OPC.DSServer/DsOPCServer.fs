@@ -16,31 +16,31 @@ open Opc.Ua.Configuration
 module DsOPCServerConfig =
     let createApplicationConfiguration () =
         let applySecurityPolicies (serverConfig: ServerConfiguration) =
-            // SignAndEncrypt with Basic256Sha256
+            // Basic256Sha256 (SignAndEncrypt)
             let policy1 = ServerSecurityPolicy(
                 SecurityMode = MessageSecurityMode.SignAndEncrypt,
                 SecurityPolicyUri = SecurityPolicies.Basic256Sha256
             )
             serverConfig.SecurityPolicies.Add(policy1)
 
-            // None
+            // Basic256 (SignAndEncrypt, Deprecated)
             let policy2 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.None,
-                SecurityPolicyUri = SecurityPolicies.None
+                SecurityMode = MessageSecurityMode.SignAndEncrypt,
+                SecurityPolicyUri = SecurityPolicies.Basic256
             )
             serverConfig.SecurityPolicies.Add(policy2)
 
-            // Sign (example, without specific SecurityPolicyUri)
+            // Basic128Rsa15 (SignAndEncrypt, Deprecated)
             let policy3 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.Sign,
-                SecurityPolicyUri = "" // 빈 URI
+                SecurityMode = MessageSecurityMode.SignAndEncrypt,
+                SecurityPolicyUri = SecurityPolicies.Basic128Rsa15
             )
             serverConfig.SecurityPolicies.Add(policy3)
 
-            // SignAndEncrypt (example, without specific SecurityPolicyUri)
+            // None (Insecure)
             let policy4 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.SignAndEncrypt,
-                SecurityPolicyUri = "" // 빈 URI
+                SecurityMode = MessageSecurityMode.None,
+                SecurityPolicyUri = SecurityPolicies.None
             )
             serverConfig.SecurityPolicies.Add(policy4)
 
@@ -72,11 +72,10 @@ module DsOPCServerConfig =
             StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\rejected"
         )
 
-
-
-        securityConfig.AutoAcceptUntrustedCertificates <- true
-        securityConfig.RejectSHA1SignedCertificates <- false
-        securityConfig.RejectUnknownRevocationStatus <- false
+        // 보안 정책에서 설정한 속성을 반영
+        securityConfig.AutoAcceptUntrustedCertificates <- false
+        securityConfig.RejectSHA1SignedCertificates <- true
+        securityConfig.RejectUnknownRevocationStatus <- true
         securityConfig.MinimumCertificateKeySize <- 2048us
         config.SecurityConfiguration <- securityConfig
 
@@ -94,12 +93,16 @@ module DsOPCServerConfig =
 
         // Server Configuration
         let serverConfig = ServerConfiguration()
-        serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747/DS")
+        serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747")
         serverConfig.MinRequestThreadCount <- 5
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000
+        // 사용자 인증 정책 추가
+        serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.UserName)) // 사용자 이름/비밀번호 기반 인증
+        serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous)) // 익명 인증 (제거 가능)
         config.ServerConfiguration <- serverConfig
 
+        // 적용된 보안 정책 추가
         applySecurityPolicies serverConfig
 
         // Trace Configuration
@@ -110,6 +113,7 @@ module DsOPCServerConfig =
         config.TraceConfiguration <- traceConfig
 
         config
+
 
 
 type DsOPCServer(dsSys: DsSystem) =

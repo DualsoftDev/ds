@@ -32,7 +32,7 @@ namespace OPC.DSClient
         private void InitializeClient()
         {
             ConnectServerCTRL.Configuration = m_configuration;
-            ConnectServerCTRL.ServerUrl = "opc.tcp://192.168.9.203:2747/DS";
+            ConnectServerCTRL.ServerUrl = "opc.tcp://192.168.9.151:2747/DS";
             //ConnectServerCTRL.ServerUrl = "opc.tcp://localhost:2747/DS";
             Text = m_configuration.ApplicationName;
 

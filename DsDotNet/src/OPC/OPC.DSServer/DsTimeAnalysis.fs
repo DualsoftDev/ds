@@ -129,8 +129,11 @@ module DsTimeAnalysisMoudle =
             | VertexTag.startTag ->
                 stats.MovingStart <- DateTime.UtcNow
             | VertexTag.endTag ->
-                stats.EndTracking()
-                stats.Update(real) 
+                if stats.StatsStart = DateTime.MinValue then
+                    stats.StatsStart <- DateTime.UtcNow
+                else
+                    stats.EndTracking()
+                    stats.Update(real) 
             | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 
         | None, Some flow -> processFlow flow

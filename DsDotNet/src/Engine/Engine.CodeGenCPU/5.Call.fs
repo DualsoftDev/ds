@@ -12,7 +12,6 @@ type VertexTagManager with
         let call = v.Vertex.GetPureCall()
        
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
-
         let sets =
             (
                      (mop <&&> call.StartPointExpr)

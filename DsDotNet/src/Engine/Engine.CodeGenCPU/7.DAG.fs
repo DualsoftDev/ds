@@ -15,10 +15,8 @@ type VertexTagManager with
         let f = getFuncName()
         [|
             for coin in coins do
-                let call = coin.Vertex.TryGetPureCall().Value
-                let safety = call.SafetyExpr
-                let autoPreExpr = call.AutoPreExpr
-                let start = !@real.V.ErrTRX.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr <&&> safety <&&> autoPreExpr
+          
+                let start = !@real.V.ErrTRX.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr 
                 let sets = v.RR.Expr  <&&> start
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, f)
@@ -30,10 +28,8 @@ type VertexTagManager with
         [|
             let f = getFuncName()
             for coin in coins do
-                let call = coin.Vertex.TryGetPureCall().Value
-                let safety = call.SafetyExpr
-                let autoPreExpr = call.AutoPreExpr
-                let start = !@real.V.ErrTRX.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr <&&> safety <&&> autoPreExpr
+             
+                let start = !@real.V.ErrTRX.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr
                 let sets = coin.Vertex.GetStartDAGAndCausals() <&&> start
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, f)

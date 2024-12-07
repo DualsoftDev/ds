@@ -11,6 +11,7 @@ open Engine.Core
 module DsOpcUaServerManager =
 
     let mutable server: DsOPCServer option = None
+    let IsRunning:bool= server.IsSome 
 
     /// <summary>
     /// OPC UA 서버 시작

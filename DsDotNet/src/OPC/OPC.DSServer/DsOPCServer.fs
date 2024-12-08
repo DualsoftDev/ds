@@ -16,28 +16,6 @@ open Opc.Ua.Configuration
 module DsOPCServerConfig =
     let createApplicationConfiguration () =
         let applySecurityPolicies (serverConfig: ServerConfiguration) =
-            // Basic256Sha256 (SignAndEncrypt)
-            let policy1 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.SignAndEncrypt,
-                SecurityPolicyUri = SecurityPolicies.Basic256Sha256
-            )
-            serverConfig.SecurityPolicies.Add(policy1)
-
-            // Basic256 (SignAndEncrypt, Deprecated)
-            let policy2 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.SignAndEncrypt,
-                SecurityPolicyUri = SecurityPolicies.Basic256
-            )
-            serverConfig.SecurityPolicies.Add(policy2)
-
-            // Basic128Rsa15 (SignAndEncrypt, Deprecated)
-            let policy3 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.SignAndEncrypt,
-                SecurityPolicyUri = SecurityPolicies.Basic128Rsa15
-            )
-            serverConfig.SecurityPolicies.Add(policy3)
-
-            // None (Insecure)
             let policy4 = ServerSecurityPolicy(
                 SecurityMode = MessageSecurityMode.None,
                 SecurityPolicyUri = SecurityPolicies.None
@@ -48,7 +26,7 @@ module DsOPCServerConfig =
         config.ApplicationName <- "Dualsoft OPC UA Server"
         config.ApplicationUri <- "urn:localhost:UA:DualsoftServer"
         config.ProductUri <- "uri:dualsoft.com:opc:server"
-        config.ApplicationType <- ApplicationType.Server
+        config.ApplicationType <- ApplicationType.ClientAndServer
 
         // Security Configuration
         let securityConfig = SecurityConfiguration()
@@ -58,25 +36,17 @@ module DsOPCServerConfig =
             SubjectName = "CN=Dualsoft OPC UA Server, C=US, S=Arizona, O=OPC Foundation, DC=localhost"
         )
 
-        securityConfig.TrustedIssuerCertificates <- CertificateTrustList(
-            StoreType = "Directory",
-            StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\issuer"
-        )
-        securityConfig.TrustedPeerCertificates <- CertificateTrustList(
-            StoreType = "Directory",
-            StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\trusted"
-        )
+        let configureSecurity (securityConfig: SecurityConfiguration) =
+            securityConfig.AutoAcceptUntrustedCertificates <- true
+            securityConfig.RejectSHA1SignedCertificates <- false
+            securityConfig.RejectUnknownRevocationStatus <- false
+            securityConfig.TrustedPeerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
+            securityConfig.TrustedIssuerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
+            securityConfig.RejectedCertificateStore <- null
+            securityConfig.TrustedPeerCertificates <- null
+            securityConfig.TrustedIssuerCertificates <- null
 
-        securityConfig.RejectedCertificateStore <- CertificateStoreIdentifier(
-            StoreType = "Directory",
-            StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\rejected"
-        )
-
-        // 보안 정책에서 설정한 속성을 반영
-        securityConfig.AutoAcceptUntrustedCertificates <- false
-        securityConfig.RejectSHA1SignedCertificates <- true
-        securityConfig.RejectUnknownRevocationStatus <- true
-        securityConfig.MinimumCertificateKeySize <- 2048us
+        configureSecurity securityConfig
         config.SecurityConfiguration <- securityConfig
 
         // Transport Quotas
@@ -97,9 +67,10 @@ module DsOPCServerConfig =
         serverConfig.MinRequestThreadCount <- 5
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000
-        // 사용자 인증 정책 추가
-        serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.UserName)) // 사용자 이름/비밀번호 기반 인증
-        serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous)) // 익명 인증 (제거 가능)
+
+        // 익명 인증만 활성화
+        serverConfig.UserTokenPolicies.Clear()
+        serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous))
         config.ServerConfiguration <- serverConfig
 
         // 적용된 보안 정책 추가
@@ -113,6 +84,7 @@ module DsOPCServerConfig =
         config.TraceConfiguration <- traceConfig
 
         config
+
 
 
 

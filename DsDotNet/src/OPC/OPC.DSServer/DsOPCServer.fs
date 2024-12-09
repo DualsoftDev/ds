@@ -34,28 +34,25 @@ module DsOPCServerConfig =
                     SecurityPolicyUri = policyUri
                 )
                 serverConfig.SecurityPolicies.Add(policy)
+                  // User Token Policies
+            serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous))
+            serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.UserName))
+            serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Certificate))
+
 
 
 
         let config = ApplicationConfiguration()
-        config.ApplicationName <- "Dualsoft OPC UA Server"
+        config.ApplicationName <- "Dualsoft4 OPC UA Server"
         config.ApplicationUri <- "urn:localhost:UA:DualsoftServer"
         config.ProductUri <- "uri:dualsoft.com:opc:server"
         config.ApplicationType <- ApplicationType.Server
 
-        // Security Configuration
-        let securityConfig = SecurityConfiguration()
-        securityConfig.ApplicationCertificate <- CertificateIdentifier(
-            StoreType = "Directory",
-            StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\own",
-            SubjectName = "CN=Dualsoft OPC UA Server, C=US, S=Arizona, O=OPC Foundation, DC=localhost"
-        )
-
         let configureSecurity (securityConfig: SecurityConfiguration) =
             securityConfig.MinimumCertificateKeySize <- 2048us
-            //securityConfig.AutoAcceptUntrustedCertificates <- true //기본 false
-            //securityConfig.RejectSHA1SignedCertificates <- false  //기본 true
-            //securityConfig.RejectUnknownRevocationStatus <- false //기본 false
+            securityConfig.AutoAcceptUntrustedCertificates <- true //기본 false
+            securityConfig.RejectSHA1SignedCertificates <- false  //기본 true
+            securityConfig.RejectUnknownRevocationStatus <- false //기본 false
             securityConfig.TrustedPeerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
             securityConfig.TrustedIssuerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
             securityConfig.RejectedCertificateStore <- null
@@ -63,7 +60,16 @@ module DsOPCServerConfig =
             securityConfig.TrustedIssuerCertificates <- null
 
 
-        configureSecurity securityConfig
+
+        // Security Configuration
+        let securityConfig = SecurityConfiguration()
+        securityConfig.ApplicationCertificate <- CertificateIdentifier(
+            StoreType = "Directory",
+            StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\own",
+            SubjectName = "CN=OPC UA Server, C=US, S=Arizona, O=OPC Foundation, DC=localhost"
+        )
+
+        //configureSecurity securityConfig
         config.SecurityConfiguration <- securityConfig
 
         // Transport Quotas
@@ -80,7 +86,10 @@ module DsOPCServerConfig =
 
         // Server Configuration
         let serverConfig = ServerConfiguration()
-        serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747")
+        serverConfig.BaseAddresses.Add("https://ahn:2747")
+        serverConfig.BaseAddresses.Add("https://localhost:2747")
+        serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747/ds")
+        serverConfig.AlternateBaseAddresses.Add("opc.tcp://ahn:2747")
         serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:2747")
         serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:55555")
         serverConfig.MinRequestThreadCount <- 5

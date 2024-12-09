@@ -16,17 +16,32 @@ open Opc.Ua.Configuration
 module DsOPCServerConfig =
     let createApplicationConfiguration () =
         let applySecurityPolicies (serverConfig: ServerConfiguration) =
-            let policy4 = ServerSecurityPolicy(
-                SecurityMode = MessageSecurityMode.None,
-                SecurityPolicyUri = SecurityPolicies.None
-            )
-            serverConfig.SecurityPolicies.Add(policy4)
+            // 기본적인 보안 정책 리스트
+            let securityPolicies = [
+                (MessageSecurityMode.None, SecurityPolicies.None) // 서명, 보안 없음
+                (MessageSecurityMode.None, SecurityPolicies.Https)
+                (MessageSecurityMode.SignAndEncrypt, SecurityPolicies.Https)
+                (MessageSecurityMode.SignAndEncrypt, SecurityPolicies.None) 
+                (MessageSecurityMode.SignAndEncrypt, SecurityPolicies.Basic256Sha256)
+                (MessageSecurityMode.SignAndEncrypt, SecurityPolicies.Basic256)
+                (MessageSecurityMode.SignAndEncrypt, SecurityPolicies.Basic128Rsa15)
+            ]
+
+            // 각 정책을 ServerConfiguration에 추가
+            for (securityMode, policyUri) in securityPolicies do
+                let policy = ServerSecurityPolicy(
+                    SecurityMode = securityMode,
+                    SecurityPolicyUri = policyUri
+                )
+                serverConfig.SecurityPolicies.Add(policy)
+
+
 
         let config = ApplicationConfiguration()
         config.ApplicationName <- "Dualsoft OPC UA Server"
         config.ApplicationUri <- "urn:localhost:UA:DualsoftServer"
         config.ProductUri <- "uri:dualsoft.com:opc:server"
-        config.ApplicationType <- ApplicationType.ClientAndServer
+        config.ApplicationType <- ApplicationType.Server
 
         // Security Configuration
         let securityConfig = SecurityConfiguration()
@@ -37,14 +52,16 @@ module DsOPCServerConfig =
         )
 
         let configureSecurity (securityConfig: SecurityConfiguration) =
-            securityConfig.AutoAcceptUntrustedCertificates <- true
-            securityConfig.RejectSHA1SignedCertificates <- false
-            securityConfig.RejectUnknownRevocationStatus <- false
+            securityConfig.MinimumCertificateKeySize <- 2048us
+            //securityConfig.AutoAcceptUntrustedCertificates <- true //기본 false
+            //securityConfig.RejectSHA1SignedCertificates <- false  //기본 true
+            //securityConfig.RejectUnknownRevocationStatus <- false //기본 false
             securityConfig.TrustedPeerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
             securityConfig.TrustedIssuerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
             securityConfig.RejectedCertificateStore <- null
             securityConfig.TrustedPeerCertificates <- null
             securityConfig.TrustedIssuerCertificates <- null
+
 
         configureSecurity securityConfig
         config.SecurityConfiguration <- securityConfig
@@ -64,13 +81,18 @@ module DsOPCServerConfig =
         // Server Configuration
         let serverConfig = ServerConfiguration()
         serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747")
+        serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:2747")
+        serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:55555")
         serverConfig.MinRequestThreadCount <- 5
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000
 
         // 익명 인증만 활성화
-        serverConfig.UserTokenPolicies.Clear()
-        serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous))
+        //serverConfig.UserTokenPolicies.Clear()
+        //serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous))
+
+
+
         config.ServerConfiguration <- serverConfig
 
         // 적용된 보안 정책 추가
@@ -80,7 +102,8 @@ module DsOPCServerConfig =
         let traceConfig = TraceConfiguration()
         traceConfig.OutputFilePath <- "%CommonApplicationData%\\OPC Foundation\\Logs\\DualsoftServer.log.txt"
         traceConfig.DeleteOnLoad <- true
-        traceConfig.TraceMasks <- 519
+        traceConfig.TraceMasks <- 519     
+        //traceConfig.TraceMasks <- 0xFFFFFFFF  // 디버그 출력 활성화
         config.TraceConfiguration <- traceConfig
 
         config

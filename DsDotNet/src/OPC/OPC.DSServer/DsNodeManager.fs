@@ -87,6 +87,30 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         variable
 
 
+    //let createVariableTemp(folder: FolderState, name: string,  namespaceIndex: uint16, initialValue: Variant, typ: Type) =
+    //    let variable = 
+    //        new BaseDataVariableState(folder, 
+    //            SymbolicName = name, 
+    //            NodeId = NodeId(name, namespaceIndex),
+    //            BrowseName = QualifiedName(name, namespaceIndex),
+    //            Description = "",
+    //            DisplayName = name,
+    //            DataType = mapToDataTypeId(typ),
+    //            Value = initialValue.Value,
+    //            AccessLevel = AccessLevels.CurrentReadOrWrite,
+    //            UserAccessLevel = AccessLevels.CurrentReadOrWrite
+    //            )
+
+              
+
+    //    variable.OnWriteValue <- NodeValueEventHandler(fun context node indexRange dataEncoding value statusCode timestamp ->
+    //        handleWriteValue(context, node, indexRange, dataEncoding, &value, &statusCode, &timestamp)
+    //    )
+        
+    //    folder.AddChild(variable)
+    //    variable
+
+
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
 
       
@@ -124,7 +148,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 parentFolder |> Option.toObj, 
                 SymbolicName = name, 
                 NodeId = NodeId(name, namespaceIndex),
-                BrowseName = nameWithFqdn, 
+                BrowseName = QualifiedName(nameWithFqdn, namespaceIndex), 
                 DisplayName = displayName,
                 TypeDefinitionId = ObjectTypeIds.FolderType, 
                 EventNotifier = EventNotifiers.SubscribeToEvents
@@ -149,7 +173,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 references
             else
                 externalReferences[ObjectIds.ObjectsFolder] |> List<IReference>
-
+                
         // Dualsoft root folder under Objects
         let rootNode = this.CreateFolder("Dualsoft", "Dualsoft", "", nIndex, None)
         objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootNode.NodeId))
@@ -229,6 +253,23 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 this.NamespaceIndexes.[0], Variant(_variables.Count), typeof<string>
             )
 
+
+        //let A =
+        //    createVariableTemp(rootNode, "A", 
+        //        this.NamespaceIndexes.[0], Variant(false), typeof<bool>
+        //    )
+
+        //let B =
+        //    createVariableTemp(rootNode, $"B", 
+        //        this.NamespaceIndexes.[0], Variant(false), typeof<bool>
+        //    )
+
+        //_variables.Add("A", A)
+        //_variables.Add("B", A)
+        //this.AddPredefinedNode(this.SystemContext, A)
+        //this.AddPredefinedNode(this.SystemContext, B)
+
+
         // NodeState로 형변환 후 AddPredefinedNode 호출
         this.AddPredefinedNode(this.SystemContext, dsVariable)
         this.AddPredefinedNode(this.SystemContext, graphVariable)
@@ -245,11 +286,19 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         then
                             if stg.IsVertexOpcDataTag() then 
                                 handleCalcTag (stg) |> ignore
+                                //_variables["B"].Value <- not(Convert.ToBoolean(value))
+                                //_variables["B"].Timestamp <- DateTime.UtcNow
+                                //_variables["B"].ClearChangeMasks(this.SystemContext, false)    
+                                //_variables["A"].Value <- Convert.ToBoolean(value)
+                                //_variables["A"].Timestamp <- DateTime.UtcNow
+                                //_variables["A"].ClearChangeMasks(this.SystemContext, false)    
 
                             if _variables.ContainsKey(stg.Name) then
                                 let variable = _variables[stg.Name]
                                 variable.Value <- value
                                 variable.Timestamp <- DateTime.UtcNow
                                 variable.ClearChangeMasks(this.SystemContext, false)    
+
+                        
                     )
                 )

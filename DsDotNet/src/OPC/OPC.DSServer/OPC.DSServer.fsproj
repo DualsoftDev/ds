@@ -18,7 +18,6 @@
 		<Compile Include="DsTimeAnalysis.fs" />
         <Compile Include="DsNodeManager.fs" />
         <Compile Include="DsOPCServer.fs" />
-        <Compile Include="DsOPCServer2.fs" />
         <Compile Include="ServerStartStop.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>

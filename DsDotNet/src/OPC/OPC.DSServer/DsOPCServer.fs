@@ -43,7 +43,7 @@ module DsOPCServerConfig =
 
 
         let config = ApplicationConfiguration()
-        config.ApplicationName <- "Dualsoft4 OPC UA Server"
+        config.ApplicationName <- "Dualsoft OPC UA Server"
         config.ApplicationUri <- "urn:localhost:UA:DualsoftServer"
         config.ProductUri <- "uri:dualsoft.com:opc:server"
         config.ApplicationType <- ApplicationType.Server

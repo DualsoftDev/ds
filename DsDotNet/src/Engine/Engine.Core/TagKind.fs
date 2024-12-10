@@ -206,6 +206,7 @@ module TagKindList =
     | planEnd                   = 11091
      
 
+    | calcActiveTime            = 11100
     | calcActiveDuration        = 11101
     | calcWaitingDuration       = 11102
     | calcMovingDuration        = 11103

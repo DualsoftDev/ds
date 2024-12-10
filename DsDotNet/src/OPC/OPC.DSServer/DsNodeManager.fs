@@ -116,7 +116,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
       
         // Create Variables for storages
         for tag in tags do
-            if tag.ObjValue.GetType().IsValueType 
+            if (tag.ObjValue.GetType().IsValueType || tag.ObjValue :? string)
                 && not(_variables.ContainsKey tag.Name) then
                 let variable =
                     createVariable(
@@ -196,34 +196,36 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             while queue.Count > 0 do
                 // 현재 레벨의 노드를 처리
                 let parentNode, treeNode = queue.Dequeue()
+                if treeNode.Node.FqdnObject.IsSome
+                then
+                    // 현재 노드에 해당하는 폴더 생성
+                    let target = treeNode.Node.FqdnObject
+                    let isJob = target.IsSome && (target.Value :? Job)
+                    let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
+                    let fqdnName = $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
 
-                // 현재 노드에 해당하는 폴더 생성
-                let target = treeNode.Node.FqdnObject
-                let isJob = target.IsSome && (target.Value :? Job)
-                let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
-                let fqdnName = $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
+                    //OP, CMD   FqdnObject 없는 요소도 추후 추가 필요 ?
+                    if  _folders.ContainsKey folderName then
+                        printfn "Folder already exists: %s" treeNode.Node.Name
+                    else 
+                        let folder = 
+                            if isJob
+                            then
+                                parentNode
+                            else 
+                                let folderDisplayName = $"[{treeNode.Node.Name}]"
+                                this.CreateFolder(folderName, folderDisplayName, fqdnName, nIndex, Some parentNode)
 
-                if _folders.ContainsKey folderName then
-                    printfn "Folder already exists: %s" treeNode.Node.Name
-                else 
-                    let folder = 
-                        if isJob
-                        then
-                            parentNode
-                        else 
-                            let folderDisplayName = $"[{treeNode.Node.Name}]"
-                            this.CreateFolder(folderName, folderDisplayName, fqdnName, nIndex, Some parentNode)
+                        // 태그가 있는 경우 OPC 노드 생성
+                        if target.IsSome && not (isJob) then
+                            let tags = getTags target.Value
+                            this.CreateOpcNodes tags folder nIndex
 
-                    // 태그가 있는 경우 OPC 노드 생성
-                    if target.IsSome && not (isJob) then
-                        let tags = getTags target.Value
-                        this.CreateOpcNodes tags folder nIndex
+                        printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
 
-                    printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
-
-                    // 자식 노드를 큐에 추가
-                    for child in treeNode.Children do
-                        queue.Enqueue((folder, child))
+                        // 자식 노드를 큐에 추가
+                        for child in treeNode.Children do
+                            queue.Enqueue((folder, child))
 
         processTreeLevels rootNode treeFlows 
         this.processTextAdd rootNode dsSys

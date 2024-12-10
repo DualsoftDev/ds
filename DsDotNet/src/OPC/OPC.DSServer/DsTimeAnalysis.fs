@@ -23,29 +23,30 @@ module DsTimeAnalysisMoudle =
         let mutable activeDuration = 0.0 // StatsStart → endTag
         let mutable movingDuration = 0.0 // MovingStart → endTag
 
+        let mutable statsStart = DateTime.MinValue 
         let mutable updateAble = false //drive_state tag가 켜지고 endTag가 살고 다음부터 저장
 
 
+        member x.StatsStart = statsStart
         member val MovingStart = DateTime.MinValue with get, set
-        member val StatsStart = DateTime.MinValue with get, set
+
+        /// 시간 기록 시작
+        member this.StartTracking(vertex:Vertex) =  
+            statsStart <- DateTime.UtcNow
+            let tm = vertex.TagManager :?> VertexTagManager
+            tm.CalcActiveTime.BoxedValue <- this.StatsStart.ToString("yyyy-MM-dd HH:mm:ss.fff");
 
         /// 시간 기록 종료 및 지속 시간 계산
         member this.EndTracking() =
             let endTime = DateTime.UtcNow
             if this.StatsStart <> DateTime.MinValue then
                 activeDuration <-  (endTime - this.StatsStart).TotalMilliseconds
-                this.StatsStart <- DateTime.MinValue
+                statsStart <- DateTime.MinValue
             if this.MovingStart <> DateTime.MinValue then
                 movingDuration <-  (endTime - this.MovingStart).TotalMilliseconds
                 this.MovingStart <- DateTime.MinValue
 
-        /// 대기 시간 계산
-        member this.WaitingDuration  =  activeDuration - movingDuration
-        /// 동작 시간
-        member this.ActiveDuration  = activeDuration
-        member this.MovingDuration  = movingDuration 
-
-        /// 데이터 추가 및 평균/분산 업데이트
+                    /// 데이터 추가 및 평균/분산 업데이트
         member this.Update(vertex:Vertex) =  
             let tm = vertex.TagManager :?> VertexTagManager
 
@@ -66,6 +67,13 @@ module DsTimeAnalysisMoudle =
                 tm.CalcActiveDuration.BoxedValue <- this.ActiveDuration   |> uint32
                 tm.CalcMovingDuration.BoxedValue <- this.MovingDuration   |> uint32
 
+        /// 대기 시간 계산
+        member this.WaitingDuration  =  activeDuration - movingDuration
+        /// 동작 시간
+        member this.ActiveDuration  = activeDuration
+        member this.MovingDuration  = movingDuration 
+
+    
         member this.DriveStateChaged(driveOn:bool) =   
             if not(driveOn) then    //drive_state가 꺼지면 초기화
                 updateAble <- false
@@ -102,7 +110,7 @@ module DsTimeAnalysisMoudle =
                 stats.DriveStateChaged(driveOn)
                 
                 if vertex :? Real &&  driveOn then
-                    stats.StatsStart <- DateTime.UtcNow
+                    stats.StartTracking(vertex)
                 )
        
     /// 태그별 시간 처리 로직
@@ -110,7 +118,7 @@ module DsTimeAnalysisMoudle =
         let stats = getOrCreateStats call.QualifiedName
         match tagKind with
         | VertexTag.startTag ->
-            stats.StatsStart <- DateTime.UtcNow
+            stats.StartTracking(call) 
         | VertexTag.planStart ->
             stats.MovingStart <- DateTime.UtcNow
 
@@ -130,7 +138,7 @@ module DsTimeAnalysisMoudle =
                 stats.MovingStart <- DateTime.UtcNow
             | VertexTag.endTag ->
                 if stats.StatsStart = DateTime.MinValue then
-                    stats.StatsStart <- DateTime.UtcNow
+                    stats.StartTracking(real)
                 else
                     stats.EndTracking()
                     stats.Update(real) 

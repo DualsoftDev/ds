@@ -130,7 +130,9 @@ module SystemManagerModule =
                 timer stg name sys cpu
 
         member val TempDataDuUINT32 =
-                createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys
+                createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys 
+        member val TempDataDuString =
+                createPlanVar  stg "temp_DuString" DuSTRING true None (int SystemTag.tempData) sys
         member val TempDataDuFLOAT32 =
                 createPlanVar  stg "temp_DuFLOAT32" DuFLOAT32 true None (int SystemTag.tempData) sys
 

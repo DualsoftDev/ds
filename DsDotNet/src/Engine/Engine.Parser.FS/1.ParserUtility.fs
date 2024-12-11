@@ -15,6 +15,32 @@ open Engine.Core
 module ParserUtilityModule =
     let collectNameComponents (parseTree: IParseTree) = parseTree.CollectNameComponents()
 
+    let createParser<'P, 'L when 'P :> Parser and 'L :> Lexer>
+        (text: string, lexerCtor: AntlrInputStream -> 'L, parserCtor: CommonTokenStream -> 'P) : 'P =
+
+        let inputStream = AntlrInputStream(text)
+        let lexer = lexerCtor(inputStream)
+        let tokenStream = CommonTokenStream(lexer)
+        let parser = parserCtor(tokenStream)
+
+        // 에러 리스너 추가
+        let listener_lexer = new ErrorListener<int>(true)
+        let listener_parser = new ErrorListener<IToken>(true)
+        lexer.AddErrorListener(listener_lexer)
+        parser.AddErrorListener(listener_parser)
+
+        parser
+
+    let createFqdnParser (text: string) : fqdnParser =
+        let l = fun inputStream -> fqdnLexer(inputStream)
+        let p = fun tokenStream -> fqdnParser(tokenStream)
+        createParser(text, l, p)
+
+    let createExpressionParser (text: string) : exprParser =
+        let l = fun inputStream -> exprLexer(inputStream)
+        let p = fun tokenStream -> exprParser(tokenStream)
+        createParser(text, l, p)
+
     type IParseTree with
 
         member x.Descendants<'T when 'T :> IParseTree>

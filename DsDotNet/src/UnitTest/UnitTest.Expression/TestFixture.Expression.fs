@@ -11,7 +11,7 @@ open Engine.Parser.FS
 module ExpressionFixtures =
     let tryParseStatement4UnitTest (targetType:PlatformTarget) (storages: Storages) (text: string) : Statement option =
         try
-            let parser = ExpressionParserModule.createParser (text)
+            let parser = ParserUtilityModule.createExpressionParser (text)
             let ctx = parser.statement ()
             let parserData = new ParserData(targetType, storages, Some parser)
 
@@ -31,7 +31,7 @@ module ExpressionFixtures =
 
     let parseExpression4UnitTest (storages: Storages) (text: string) : IExpression =
         try
-            let parser = createParser (text)
+            let parser = createExpressionParser (text)
             let ctx = parser.expr ()
             let parserData = ParserData((WINDOWS), Storages(), None)
 

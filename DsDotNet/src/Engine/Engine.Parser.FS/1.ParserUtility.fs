@@ -41,6 +41,11 @@ module ParserUtilityModule =
         let p = fun tokenStream -> exprParser(tokenStream)
         createParser(text, l, p)
 
+    let createDsParser (text: string) : dsParser =
+        let l = fun inputStream -> dsLexer(inputStream)
+        let p = fun tokenStream -> dsParser(tokenStream)
+        createParser(text, l, p)
+
     type IParseTree with
 
         member x.Descendants<'T when 'T :> IParseTree>

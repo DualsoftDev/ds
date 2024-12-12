@@ -256,20 +256,30 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             )
 
 
-        //let A =
-        //    createVariableTemp(rootNode, "A", 
-        //        this.NamespaceIndexes.[0], Variant(false), typeof<bool>
-        //    )
+        let TEST_A =
+            createVariable(rootNode, "TEST_A",  $"TEST_A", 
+                this.NamespaceIndexes.[0], Variant(false), typeof<bool>
+            )
 
-        //let B =
-        //    createVariableTemp(rootNode, $"B", 
-        //        this.NamespaceIndexes.[0], Variant(false), typeof<bool>
-        //    )
+        let TEST_B =
+            createVariable(rootNode, $"TEST_B",  $"TEST_B", 
+                this.NamespaceIndexes.[0], Variant(false), typeof<bool>
+            )
+        this.AddPredefinedNode(this.SystemContext, TEST_A)
+        this.AddPredefinedNode(this.SystemContext, TEST_B)
+      
+        // 타이머 설정
+        let timer = new System.Timers.Timer(1000.0) // 1초 간격으로 타이머 실행
+        timer.Elapsed.Add(fun _ ->
+            TEST_A.Value <- not (Convert.ToBoolean(TEST_A.Value))
+            TEST_A.Timestamp <- DateTime.UtcNow
+            TEST_A.ClearChangeMasks(this.SystemContext, false)
 
-        //_variables.Add("A", A)
-        //_variables.Add("B", A)
-        //this.AddPredefinedNode(this.SystemContext, A)
-        //this.AddPredefinedNode(this.SystemContext, B)
+            TEST_B.Value <- not (Convert.ToBoolean(TEST_A.Value))
+            TEST_B.Timestamp <- DateTime.UtcNow
+            TEST_B.ClearChangeMasks(this.SystemContext, false)
+        )
+        timer.Start()
 
 
         // NodeState로 형변환 후 AddPredefinedNode 호출
@@ -288,12 +298,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         then
                             if stg.IsVertexOpcDataTag() then 
                                 handleCalcTag (stg) |> ignore
-                                //_variables["B"].Value <- not(Convert.ToBoolean(value))
-                                //_variables["B"].Timestamp <- DateTime.UtcNow
-                                //_variables["B"].ClearChangeMasks(this.SystemContext, false)    
-                                //_variables["A"].Value <- Convert.ToBoolean(value)
-                                //_variables["A"].Timestamp <- DateTime.UtcNow
-                                //_variables["A"].ClearChangeMasks(this.SystemContext, false)    
 
                             if _variables.ContainsKey(stg.Name) then
                                 let variable = _variables[stg.Name]

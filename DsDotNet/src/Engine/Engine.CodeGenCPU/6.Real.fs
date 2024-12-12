@@ -87,27 +87,36 @@ type RealVertexTagManager with
         let sinkReals =srcReals.Where(fun w-> w.NoTransData)
         let moveReals =srcReals.Where(fun w-> not(w.NoTransData))      
         let causalCalls = srcs.GetPureCalls()
+        [| 
+
+            (* 자신의 alias가 소스로 사용될경우 토큰 전송*)
+            let usedAliasSet = v.SysAliasFlowEdgeSet
+                                    .Where(fun w-> w.Source :? Alias)
+                                    .Where(fun w-> w.Source.GetPure() = v.Vertex)
+
+            for edge in usedAliasSet do
+                let srcAliasSEQ = v.RealTokenData
+                let tgtAliasSEQ = edge.Target.GetPureReal().V.RealTokenData
+                yield (v.GP.Expr, srcAliasSEQ.ToExpression()) --> (tgtAliasSEQ, fn) 
 
 
-        let tgtTagSEQ = v.RealTokenData
-        let srcTagSEQ = 
-            match moveReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
-            | _, true -> 
-                causalCalls.First().VC.SourceTokenData  |>Some
-            | true, false -> 
-                moveReals.First().VR.RealTokenData  |>Some
-            | false, false -> 
-                None
+            (* 자신이 타겟으로로 사용될경우 토큰 받기*)
+            let tgtTagSEQ = v.RealTokenData
+            let srcTagSEQ = 
+                match moveReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
+                | _, true -> 
+                    causalCalls.First().VC.SourceTokenData  |>Some
+                | true, false -> 
+                    moveReals.First().VR.RealTokenData  |>Some
+                | false, false -> 
+                    None
 
-        if srcTagSEQ.IsSome
-        then 
-            [| 
+            if srcTagSEQ.IsSome
+            then 
                 yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) 
                 for sinkReal in sinkReals do
                     yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (sinkReal.VR.MergeTokenData, fn) 
-            |]
-        else 
-            [||]
+        |]
 
 
 

@@ -4,6 +4,7 @@ open System
 open System.Diagnostics
 open Dual.Common.Core.FS
 open Engine.Core
+open System.Linq
 
 [<AutoOpen>]
 module TagManagerModule =
@@ -42,7 +43,7 @@ module TagManagerModule =
         let createTag = createTagOnVertex v
 
         let sysM = sys.TagManager :?> SystemManager
-
+        let sysAliasFlowEdgeSet = sys.GetFlowEdges().Where(fun e -> e.Target :? Alias || e.Source :? Alias)
   
         interface ITagManager with
             member x.Target = v
@@ -50,12 +51,13 @@ module TagManagerModule =
 
         member _.Name   = v.QualifiedName
         member _.Vertex = v
+        member val SysAliasFlowEdgeSet = sysAliasFlowEdgeSet
 
-        member val IsOperator =
+        member x.IsOperator =
             match v with
             | :? Call as c -> c.IsOperator
             |_-> false
-        member val IsCommand =
+        member x.IsCommand =
             match v with
             | :? Call as c -> c.IsCommand
             |_-> false

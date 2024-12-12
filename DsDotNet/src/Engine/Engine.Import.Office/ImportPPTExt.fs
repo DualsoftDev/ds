@@ -409,6 +409,14 @@ module ImportU =
 
                 let mei = ModelingEdgeInfo<Vertex>(srcs, edge.Causal.ToText(), tgts)
 
+                let srcNodes = mei.Sources.Select(fun s->s.GetPure().QualifiedName) |> Set.ofSeq
+                let tgtNodes = mei.Targets.Select(fun s->s.GetPure().QualifiedName) |> Set.ofSeq
+                let intersect = Set.intersect srcNodes tgtNodes
+                if not (Set.isEmpty intersect) then
+                    let conflictingNames = String.Join(", ", intersect)
+                    failWithLog $"Source and target nodes have conflicting names: {conflictingNames}"
+
+
                 match getParent (edge, parents, dicVertex) with
                 | Some(real) -> (real :?> Real).CreateEdge(mei)
                 | None ->
@@ -525,10 +533,12 @@ module ImportU =
         static member MakeSafetyAutoPre(doc: PptDoc, mySys: DsSystem) =
             let dicJob =
                 doc.DicVertex.Values
+                   .OfType<Call>().Where(fun call -> not(call.IsFlowCall))
                    .OfType<Call>().Where(fun call -> call.IsJob)
                    .Select(fun call -> call.TargetJob.DequotedQualifiedName,  call) |> dict
             let dicCall =
                 doc.DicVertex.Values
+                   .OfType<Call>().Where(fun call -> not(call.IsFlowCall))
                    .OfType<Call>().Where(fun call -> call.IsJob)
                    .Select(fun call -> call.DequotedQualifiedName,  call) |> dict
 

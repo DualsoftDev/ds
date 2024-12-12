@@ -48,16 +48,16 @@ module DsOPCServerConfig =
         config.ProductUri <- "uri:dualsoft.com:opc:server"
         config.ApplicationType <- ApplicationType.Server
 
-        let configureSecurity (securityConfig: SecurityConfiguration) =
-            securityConfig.MinimumCertificateKeySize <- 2048us
-            securityConfig.AutoAcceptUntrustedCertificates <- true //기본 false
-            securityConfig.RejectSHA1SignedCertificates <- false  //기본 true
-            securityConfig.RejectUnknownRevocationStatus <- false //기본 false
-            securityConfig.TrustedPeerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
-            securityConfig.TrustedIssuerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
-            securityConfig.RejectedCertificateStore <- null
-            securityConfig.TrustedPeerCertificates <- null
-            securityConfig.TrustedIssuerCertificates <- null
+        //let configureSecurity (securityConfig: SecurityConfiguration) =
+        //    securityConfig.MinimumCertificateKeySize <- 2048us
+        //    securityConfig.AutoAcceptUntrustedCertificates <- true //기본 false
+        //    securityConfig.RejectSHA1SignedCertificates <- false  //기본 true
+        //    securityConfig.RejectUnknownRevocationStatus <- false //기본 false
+        //    securityConfig.TrustedPeerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
+        //    securityConfig.TrustedIssuerCertificates.ValidationOptions <- CertificateValidationOptions.CheckRevocationStatusOnline
+        //    securityConfig.RejectedCertificateStore <- null
+        //    securityConfig.TrustedPeerCertificates <- null
+        //    securityConfig.TrustedIssuerCertificates <- null
 
 
 
@@ -94,11 +94,7 @@ module DsOPCServerConfig =
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000
 
-        // 익명 인증만 활성화
-        //serverConfig.UserTokenPolicies.Clear()
-        //serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Anonymous))
-
-
+   
 
         config.ServerConfiguration <- serverConfig
 

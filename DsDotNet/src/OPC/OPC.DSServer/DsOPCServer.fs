@@ -86,8 +86,10 @@ module DsOPCServerConfig =
 
         // Server Configuration
         let serverConfig = ServerConfiguration()
-        serverConfig.BaseAddresses.Add("https://localhost:2747")
-        serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:55555")
+        serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747")
+        //serverConfig.BaseAddresses.Add("https://localhost:2747")
+        //serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:55555")
+        //serverConfig.AlternateBaseAddresses.Add("https://127.0.0.1:55555")
         serverConfig.MinRequestThreadCount <- 5
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000

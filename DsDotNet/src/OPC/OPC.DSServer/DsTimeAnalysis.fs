@@ -34,7 +34,9 @@ module DsTimeAnalysisMoudle =
         member this.StartTracking(vertex:Vertex) =  
             statsStart <- DateTime.UtcNow
             let tm = vertex.TagManager :?> VertexTagManager
-            tm.CalcActiveStartTime.BoxedValue <- this.StatsStart.ToString("yyyy-MM-dd HH:mm:ss.fff");
+            tm.CalcActiveStartTime.BoxedValue <- 
+                TimeZoneInfo.ConvertTime(this.StatsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
+                            .ToString("yyyy-MM-dd HH:mm:ss.fff");
 
         /// 시간 기록 종료 및 지속 시간 계산
         member this.EndTracking() =

@@ -97,7 +97,7 @@ type RealVertexTagManager with
             for edge in usedAliasSet do
                 let srcAliasSEQ = v.RealTokenData
                 let tgtAliasSEQ = edge.Target.GetPureReal().V.RealTokenData
-                yield (v.GP.Expr, srcAliasSEQ.ToExpression()) --> (tgtAliasSEQ, fn) 
+                yield (v.R.Expr, srcAliasSEQ.ToExpression()) --> (tgtAliasSEQ, fn) 
 
 
             (* 자신이 타겟으로로 사용될경우 토큰 받기*)
@@ -113,9 +113,9 @@ type RealVertexTagManager with
 
             if srcTagSEQ.IsSome
             then 
-                yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) 
+                yield (v.R.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) 
                 for sinkReal in sinkReals do
-                    yield (v.GP.Expr, srcTagSEQ.Value.ToExpression()) --> (sinkReal.VR.MergeTokenData, fn) 
+                    yield (v.R.Expr, srcTagSEQ.Value.ToExpression()) --> (sinkReal.VR.MergeTokenData, fn) 
         |]
 
 

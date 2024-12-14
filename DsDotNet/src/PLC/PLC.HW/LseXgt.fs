@@ -70,7 +70,7 @@ module rec XGT =
         member val IsInput = isInput with get, set
         member val IsDigital = isDigital with get, set
         /// Digital 접점 수
-        member val Length = length with get, set
+        member val NumPoints = length with get, set
 
         // { UI 표출, debugging 용
         /// Slot 에 할당된 address 들.  UI 및 debugging 표시 용.   PlcHw.CreateIOHaystacks() 수행 중에 값 채움.
@@ -92,7 +92,7 @@ module rec XGT =
             elif not x.IsDigital then // 가변식 아날로그이거나
                 16
             else
-                max 16 x.Length
+                max 16 x.NumPoints
 
     [<AllowNullLiteral>]
     type Base(slots: Slot seq) =
@@ -199,7 +199,7 @@ module rec XGT =
                                     if slot.IsEmpty || not slot.IsDigital then
                                         slot.Addresses <- [||]
                                     else
-                                        let cap= slot.Length
+                                        let cap= slot.NumPoints
                                         let addresses = [| for i in 0..cap-1 -> createAddress(slot.IsInput, b, s, i, i+slotStart)|]
                                         slot.Addresses <- addresses
 
@@ -253,7 +253,7 @@ type XGTDupExtensionForCSharp =
         if slot = null then
             Slot()
         else
-            Slot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.Length)
+            Slot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.NumPoints)
 
     [<Extension>] static member private duplicate(ioBase:Base) = Base(ioBase.Slots.Map(_.duplicate()))
 

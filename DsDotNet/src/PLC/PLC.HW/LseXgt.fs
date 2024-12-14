@@ -64,13 +64,13 @@ module rec XGT =
 
     /// PLC IO slot 하나.
     [<AllowNullLiteral>]
-    type Slot(isEmpty:bool, isInput:bool, isDigital:bool, length:int) =
-        new() = Slot(true, true, true, 16)
-        member val IsEmpty = isEmpty with get, set
+    type Slot(isInput:bool, isDigital:bool, numPoints:int) =
+        new() = Slot(true, true, 0)
+        member x.IsEmpty = x.NumPoints = 0
         member val IsInput = isInput with get, set
         member val IsDigital = isDigital with get, set
         /// Digital 접점 수
-        member val NumPoints = length with get, set
+        member val NumPoints = numPoints with get, set
 
         // { UI 표출, debugging 용
         /// Slot 에 할당된 address 들.  UI 및 debugging 표시 용.   PlcHw.CreateIOHaystacks() 수행 중에 값 채움.
@@ -103,7 +103,8 @@ module rec XGT =
         new() = Base([])    // Serialize 를 위해서 default constructor 꼭 필요
         member val Slots = slots with get, set     // get, set for newtonsoft
         static member Create(isFillContents:bool) =
-            Base([ for i in 0..MaxNumberSlots-1 -> if isFillContents then Slot() else null ])
+            //Base([ for i in 0..MaxNumberSlots-1 -> if isFillContents then Slot() else null ])
+            Base([||])
 
         [<JsonIgnore>]
         [<DisplayName("총 슬롯수")>]
@@ -253,7 +254,7 @@ type XGTDupExtensionForCSharp =
         if slot = null then
             Slot()
         else
-            Slot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.NumPoints)
+            Slot(slot.IsInput, slot.IsDigital, slot.NumPoints)
 
     [<Extension>] static member private duplicate(ioBase:Base) = Base(ioBase.Slots.Map(_.duplicate()))
 

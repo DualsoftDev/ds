@@ -201,6 +201,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "DSControl", "DSControl", "{
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DSControl.Winform", "Apps\DSControl\DSControl.Winform\DSControl.Winform.csproj", "{4A9E4E44-0B39-4115-B68A-0253AB53B79F}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "DSPilot.CCTVRecord", "Apps\DSPilot\DSPilot.CCTVRecord\DSPilot.CCTVRecord.fsproj", "{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -759,6 +761,14 @@ Global
 		{4A9E4E44-0B39-4115-B68A-0253AB53B79F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4A9E4E44-0B39-4115-B68A-0253AB53B79F}.Release|x86.ActiveCfg = Release|Any CPU
 		{4A9E4E44-0B39-4115-B68A-0253AB53B79F}.Release|x86.Build.0 = Release|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Debug|x86.Build.0 = Debug|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Release|Any CPU.Build.0 = Release|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Release|x86.ActiveCfg = Release|Any CPU
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -847,6 +857,7 @@ Global
 		{15CFA8E3-177B-4320-B896-0D281DB470D5} = {0A52190F-FA8D-4D89-AEEF-10DBDDB97895}
 		{BD051DC9-3219-4135-9F67-9E16773DD719} = {A0DABA06-FC1F-4129-B89E-1EAA3E01A6A9}
 		{4A9E4E44-0B39-4115-B68A-0253AB53B79F} = {BD051DC9-3219-4135-9F67-9E16773DD719}
+		{93DB6DE3-83B1-4EF0-B55C-2B2453CB9432} = {0A52190F-FA8D-4D89-AEEF-10DBDDB97895}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

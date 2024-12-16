@@ -38,6 +38,7 @@ Grammar/CsParser/bin/
 *.bak2
 *.osts
 *.dsz
+*.~*#
 
 /.vs
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*

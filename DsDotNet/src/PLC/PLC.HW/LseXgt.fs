@@ -75,12 +75,12 @@ module rec XGT =
         // { UI 표출, debugging 용
         /// Slot 에 할당된 address 들.  UI 및 debugging 표시 용.   PlcHw.CreateIOHaystacks() 수행 중에 값 채움.
         [<Browsable(false)>]
-        [<JsonIgnore>]
-        member val Addresses: string[] = [||] with get, set
+        [<JsonIgnore>] member val SlotNumber = -1 with get, set
+        /// Any object.  일단 image 저장용
+        [<JsonIgnore>] member val Tag:obj = null with get, set
+        [<JsonIgnore>] member val Addresses: string[] = [||] with get, set
         member x.StartAddress = x.Addresses.TryHead() |? null
         member x.EndAddress = x.Addresses.TryLast() |? null
-        [<JsonIgnore>]
-        member val SlotNumber = -1 with get, set
         // } UI 표출, debugging 용
 
 
@@ -254,7 +254,7 @@ type XGTDupExtensionForCSharp =
         if slot = null then
             Slot()
         else
-            Slot(slot.IsInput, slot.IsDigital, slot.NumPoints)
+            EmJson.Duplicate(slot)
 
     [<Extension>] static member private duplicate(ioBase:Base) = Base(ioBase.Slots.Map(_.duplicate()))
 

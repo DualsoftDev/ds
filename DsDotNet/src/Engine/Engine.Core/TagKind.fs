@@ -142,7 +142,6 @@ module TagKindList =
     | origin                    = 11010
     | pause                     = 11011
     
-    | errorTRx                  = 11012
     | errorAction               = 11013
     | errorWork                 = 11014
     | realOriginAction          = 11015

@@ -16,7 +16,7 @@ type VertexTagManager with
         [|
             for coin in coins do
           
-                let start = !@real.V.ErrTRX.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr 
+                let start = !@real.V.ErrWork.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr 
                 let sets = v.RR.Expr  <&&> start
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, f)
@@ -29,7 +29,7 @@ type VertexTagManager with
             let f = getFuncName()
             for coin in coins do
              
-                let start = !@real.V.ErrTRX.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr
+                let start = !@real.V.ErrWork.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr
                 let sets = coin.Vertex.GetStartDAGAndCausals() <&&> start
                 let rsts = coin.ET.Expr <||> coin.RT.Expr  
                 yield (sets, rsts) ==| (coin.ST, f)
@@ -48,7 +48,7 @@ type VertexTagManager with
                 else 
 
                     let setStart = coin.ST.Expr <&&> real.V.G.Expr
-                    let setEnd =  call.End <&&> !@real.V.ErrTRX.Expr 
+                    let setEnd =  call.End <&&> !@real.V.ErrWork.Expr 
 
                      //아날로그 전용 job 은 기다리지 않고 값 성립하면 Coin 뒤집기
                     if call.IsAnalog then

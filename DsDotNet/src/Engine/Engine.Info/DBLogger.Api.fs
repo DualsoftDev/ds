@@ -71,8 +71,8 @@ module DBLoggerApi =
             let errInfos =
                 callUseds
                 |> map (fun c ->
-                    let count = DBLogger.Count(c.QualifiedName, int VertexTag.errorTRx)
-                    let duration = DBLogger.Average(c.QualifiedName, int VertexTag.errorTRx)
+                    let count = DBLogger.Count(c.QualifiedName, int VertexTag.errorAction)
+                    let duration = DBLogger.Average(c.QualifiedName, int VertexTag.errorAction)
                     (count, duration))
                 |> toArray
 
@@ -90,14 +90,14 @@ module DBLoggerApi =
     let getInfoCall (x:Call) : InfoCall =
         let info = InfoCall.Create(x)
         let loadedDevices = x.Parent.GetSystem().Devices
-        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
+        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorAction|>int, VertexTag.pause|>int)
         let infoDevices = x.TaskDefs.Select(fun d->loadedDevices.First(fun f->f.Name = d.DeviceName))
         info.InfoDevices.AddRange(getInfoDevices(infoDevices)) |> ignore
         info
 
     let getInfoReal (x:Real) : InfoReal =
         let info = InfoReal.Create(x)
-        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorTRx|>int, VertexTag.pause|>int)
+        updateInfoBase (info, x.QualifiedName, VertexTag.going|>int,  VertexTag.errorWork|>int, VertexTag.pause|>int)
         let infoCalls = x.Graph.Vertices.OfType<Call>().Select(getInfoCall)
         info.InfoCalls.AddRange(infoCalls) |> ignore
         info

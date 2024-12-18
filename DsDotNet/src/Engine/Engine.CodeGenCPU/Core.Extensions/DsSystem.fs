@@ -187,14 +187,14 @@ module ConvertCpuDsSystem =
             for real in x.GetVerticesOfRealOrderByName().Distinct() do
                 let rm =  real.TagManager :?> RealVertexTagManager
                 let target = getTarget(x)
-                rm.ON.Address     <- getMemory rm.ON target
-                rm.RF.Address     <- getMemory rm.RF target
-                rm.SF.Address     <- getMemory rm.SF target
-                rm.OB.Address     <- getMemory rm.OB target
-                rm.ErrTRX.Address <- getMemory rm.ErrTRX target
-                rm.R.Address      <- getMemory rm.R target
-                rm.G.Address      <- getMemory rm.G target
-                rm.F.Address      <- getMemory rm.F target
+                rm.ON.Address      <- getMemory rm.ON target
+                rm.RF.Address      <- getMemory rm.RF target
+                rm.SF.Address      <- getMemory rm.SF target
+                rm.OB.Address      <- getMemory rm.OB target
+                rm.ErrWork.Address <- getMemory rm.ErrWork target
+                rm.R.Address       <- getMemory rm.R target
+                rm.G.Address       <- getMemory rm.G target
+                rm.F.Address       <- getMemory rm.F target
                 rm.H.Address      <- getMemory rm.H target
 
         member private x.GenerationTaskDevIOM() =

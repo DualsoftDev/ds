@@ -89,10 +89,10 @@ type VertexTagManager with
     member v.E4_CallErrTotalMonitor() =
         let v= v :?> CoinVertexTagManager
         let call= v.Vertex.GetPure() :?> Call
-        (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrTRX, getFuncName())
+        (call.Errors.ToOrElseOff() , v._off.Expr) --| (v.ErrAction, getFuncName())
 
     member v.E5_RealErrTotalMonitor() =
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
          
-        (real.Errors.ToOrElseOff(), rst) --| (v.ErrTRX, getFuncName())
+        (real.Errors.ToOrElseOff(), rst) --| (real.VR.ErrWork, getFuncName())

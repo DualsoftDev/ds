@@ -66,7 +66,7 @@ module ConvertHMI =
                 OpenErrorLamp            = getLamp  tm (i VertexTag.rxErrOpen)
                 InterlockErrLamp         = getLamp  tm (i VertexTag.rxErrInterlock)
                 
-                ErrorTotalLamp           = getLamp  tm (i VertexTag.errorTRx)
+                ErrorTotalLamp           = getLamp  tm (i VertexTag.errorAction)
             }
 
     type LoadedSystem with
@@ -101,7 +101,7 @@ module ConvertHMI =
                 HomingLamp   = getLamp tm (i VertexTag.homing)
                 OriginLamp   = getLamp tm (i VertexTag.origin)
                 PauseLamp    = getLamp tm (i VertexTag.pause)
-                Error        = getLamp tm (i VertexTag.errorTRx)
+                Error        = getLamp tm (i VertexTag.errorWork)
 
                 Devices      = calls.SelectMany(fun c-> getDeiveHMIs(c)).ToArray()
 

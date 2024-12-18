@@ -138,7 +138,8 @@ type TagKindExt =
         match x with
         | EventVertex (_, _, kind) ->
             match kind with
-            | VertexTag.errorTRx -> "작업이상발생"
+            | VertexTag.errorAction -> "디바이스이상발생"
+            | VertexTag.errorWork   -> "공정이상발생"
             | VertexTag.workErrOriginGoing -> "작업원위치필요"
             | _ -> x.GetTagToText();
 
@@ -213,7 +214,8 @@ type TagKindExt =
         match x with
         | EventVertex (_, _, kind) ->
             kind.IsOneOf(
-                  VertexTag.errorTRx
+                  VertexTag.errorAction
+                , VertexTag.errorWork
                 , VertexTag.rxErrInterlock
                 , VertexTag.rxErrOpen
                 , VertexTag.rxErrShort

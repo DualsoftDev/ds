@@ -139,8 +139,7 @@ module TagManagerModule =
         member val H = createTag true VertexTag.homing
         /// Going Pulse
         member val GP = createTag false VertexTag.goingPulse
-        //ErrTRX Monitor
-        member val ErrTRX = createTag false VertexTag.errorTRx
+
         ///Pause Monitor
         member val PA = createTag false VertexTag.pause
 
@@ -163,7 +162,6 @@ module TagManagerModule =
             | VertexTag.forceOn         -> x.ON     :> IStorage
             | VertexTag.forceOnPulse    -> x.ONP    :> IStorage
             | VertexTag.goingPulse      -> x.GP     :> IStorage
-            | VertexTag.errorTRx        -> x.ErrTRX :> IStorage
             | VertexTag.pause           -> x.PA     :> IStorage
 
             | VertexTag.calcCount               -> x.CalcCount 
@@ -174,15 +172,17 @@ module TagManagerModule =
             | VertexTag.calcMovingDuration      -> x.CalcMovingDuration
             | VertexTag.calcActiveStartTime     -> x.CalcActiveStartTime
             
-            | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder  :> IStorage
+            | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder     :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
-            | VertexTag.txErrOffTimeUnder    -> callM().ErrOffTimeUnder :> IStorage
+            | VertexTag.txErrOffTimeUnder    -> callM().ErrOffTimeUnder    :> IStorage
             | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver     :> IStorage
             | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
             | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
-            | VertexTag.rxErrInterlock       -> callM().ErrInterlock            :> IStorage
+            | VertexTag.rxErrInterlock       -> callM().ErrInterlock       :> IStorage
+            | VertexTag.errorAction          -> callM().ErrAction         :> IStorage
+
             | VertexTag.callIn               -> callM().CallIn            :> IStorage
-            | VertexTag.callOut              -> callM().CallOut            :> IStorage
+            | VertexTag.callOut              -> callM().CallOut           :> IStorage
             
             | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
 
@@ -194,6 +194,7 @@ module TagManagerModule =
             | VertexTag.goingRealy           -> realM().GG :> IStorage
             | VertexTag.realToken            -> realM().RealTokenData :> IStorage
             | VertexTag.mergeToken           -> realM().MergeTokenData :> IStorage
+            | VertexTag.errorWork            -> realM().ErrWork :> IStorage
 
   
             | (VertexTag.counter | VertexTag.timerOnDelay) ->
@@ -245,7 +246,7 @@ module TagManagerModule =
 
         ///Origin Monitor
         member val OG = createTag false VertexTag.origin
-
+        member val ErrWork = createTag false VertexTag.errorWork
 
         ///Real Init Relay
         member val RR         = createTag false VertexTag.relayReal
@@ -326,6 +327,7 @@ module TagManagerModule =
         member val ErrShort           = createTag true VertexTag.rxErrShort
         member val ErrOpen            = createTag true VertexTag.rxErrOpen
         member val ErrInterlock       = createTag true VertexTag.rxErrInterlock
+        member val ErrAction          = createTag false VertexTag.errorAction
         
         member val CallIn             =  createTag  true VertexTag.callIn
         member val CallOut            =  createTag  true VertexTag.callOut

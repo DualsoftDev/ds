@@ -37,7 +37,7 @@ type Flow with
 
     member f.ST5_ErrorState() =
         let setDeviceError = (f.Graph.Vertices.OfType<Real>().Select(getVMReal) 
-                                |> Seq.collect(fun r-> [|r.ErrTRX|])).ToOrElseOff()
+                                |> Seq.collect(fun r-> [|r.ErrWork|])).ToOrElseOff()
         let setConditionError = !@f.readyCondition.Expr <&&> f.r_st.Expr //f.driveCondition.Expr  는 수동 운전해야 해서 에러는 아님
         let set =  setDeviceError<||> setConditionError
         let rst = f.ClearExpr

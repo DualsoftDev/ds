@@ -34,7 +34,7 @@ module DBLoggerTestModule =
                 now.AddSeconds(counter())
             helper
 
-        let cyl1Error = createStorage "cyl1.trxErr" (int VertexTag.errorTRx)
+        let cyl1Error = createStorage "cyl1.trxErr" (int VertexTag.errorAction)
         (*             2s      1s
                       +--|--+  +--+
                 ------+     +--+  +--------
@@ -50,17 +50,17 @@ module DBLoggerTestModule =
 
         let storages = [
             cyl1Error
-            createStorage "my.Test2.TRXERR" (int VertexTag.errorTRx)
+            createStorage "my.Test2.TRXERR" (int VertexTag.errorAction)
         ]
 
         let queryCriteria = QueryCriteria(getNull<DSCommonAppSettings>(), -1, None, None)
         let logSet = createTestLoggerInfoSetForReader(queryCriteria, storages, logs)
-        let fqdn, kind = cyl1Error.Fqdn, int VertexTag.errorTRx
+        let fqdn, kind = cyl1Error.Fqdn, int VertexTag.errorAction
 
         [<Test>]
         member __.``Basic Test`` () =
-            let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorTRx)
-            let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorTRx)
+            let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorAction)
+            let cyl2Error = createStorage "cyl2.trxErr" (int VertexTag.errorAction)
             let k = 1000.0
 
             2 === DBLogger.Count(fqdn, kind, logSet)

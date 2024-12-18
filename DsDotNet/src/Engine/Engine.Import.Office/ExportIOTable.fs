@@ -532,7 +532,7 @@ module ExportIOTable =
                     yield rowItems ($"{name}_RESET", real.V.RF.Address)
                     yield rowItems ($"{name}_START", real.V.SF.Address)
                     yield rowItems ($"{name}_ORIGIN", real.V.OB.Address)
-                    yield rowItems ($"{name}_ERROR", real.V.ErrTRX.Address)
+                    yield rowItems ($"{name}_ERROR", real.V.ErrWork.Address)
                     yield rowItems ($"{name}_STATE_R", real.V.R.Address)
                     yield rowItems ($"{name}_STATE_G", real.V.G.Address)
                     yield rowItems ($"{name}_STATE_F", real.V.F.Address)

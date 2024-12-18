@@ -141,12 +141,14 @@ module TagKindList =
     | homing                    = 11009
     | origin                    = 11010
     | pause                     = 11011
-    | errorTRx                  = 11014
+    
+    | errorTRx                  = 11012
+    | errorAction               = 11013
+    | errorWork                 = 11014
     | realOriginAction          = 11015
     | realOriginInit            = 11016
     | realOriginButton          = 11017
     | relayReal                 = 11018
-
 
     | counter                   = 11023
     | timerOnDelay              = 11024

@@ -28,7 +28,6 @@ Grammar/CsParser/bin/
 
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.xlsx
 *.zip
-*.exe
 *.dll
 *.xgwx
 *.xgdb

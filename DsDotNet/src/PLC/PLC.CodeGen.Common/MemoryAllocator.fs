@@ -202,13 +202,15 @@ module MemoryAllocator =
         member x.GetMemorySizePrefix() =
             if x = typedefof<bool> then
                 "X"
+            elif x = typedefof<string> then
+                "L"
             else
                 match x.GetByteSize() with
                 | 1 -> "B"
                 | 2 -> "W"
                 | 4 -> "D"
                 | 8 -> "L"
-                | _ -> failwithlog "ERROR"
+                | _ -> failwithlog "GetMemorySizePrefix ERROR"
 
 
 [<AutoOpen>]

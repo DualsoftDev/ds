@@ -99,6 +99,9 @@ module SystemManagerModule =
 
         let sim            = dsSysBit true sys SystemTag.sim       true
         let emulation      = dsSysBit true sys SystemTag.emulation true
+        let tempDataDuUINT32  = createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys 
+        let tempDataDuString  = createPlanVar  stg "temp_DuString" DuSTRING true None (int SystemTag.tempData) sys
+        let tempDataDuFLOAT32 = createPlanVar  stg "temp_DuFLOAT32" DuFLOAT32 true None (int SystemTag.tempData) sys
 
 
         do
@@ -129,12 +132,10 @@ module SystemManagerModule =
         member s.GetTempTimerTag(name:string) : TimerStruct =
                 timer stg name sys cpu
 
-        member val TempDataDuUINT32 =
-                createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys 
-        member val TempDataDuString =
-                createPlanVar  stg "temp_DuString" DuSTRING true None (int SystemTag.tempData) sys
-        member val TempDataDuFLOAT32 =
-                createPlanVar  stg "temp_DuFLOAT32" DuFLOAT32 true None (int SystemTag.tempData) sys
+        member s.TempDataDuUINT32 = tempDataDuUINT32
+        member s.TempDataDuFLOAT32 = tempDataDuFLOAT32
+        member s.TempDataDuString = tempDataDuString
+                
 
         member s.GetSystemTag(st:SystemTag) : IStorage=
             match st with

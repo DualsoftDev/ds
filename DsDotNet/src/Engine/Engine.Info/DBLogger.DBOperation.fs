@@ -136,8 +136,8 @@ module internal DBLoggerImpl =
             let! storageRows = conn.QueryAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE modelId = {modelId}")
             let dbStorageDic = storageRows |> map (fun s -> getStorageKey s, s) |> Tuple.toDictionary
 
-
-            let storageRows: ORMStorage[] = systemStorages |> map(fun s -> ORMStorage(s, modelId))
+            //Storage.Target 이 없으면 DB 관리 대상에서 제외
+            let storageRows: ORMStorage[] = systemStorages |> filter(fun s->s.Target.IsSome) |> map(fun s -> ORMStorage(s, modelId))
             let existingStorageRows, newStorageRows =
                 storageRows
                 |> Array.partition (fun s -> dbStorageDic.ContainsKey(getStorageKey s))

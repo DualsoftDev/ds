@@ -65,8 +65,6 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.json
 /DsDotNet/src/UnitTest/UnitTest.Model/dualsoft.json
-/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dualsoft.json
-/DsDotNet/src/UnitTest/UnitTest.Model/UnitTestExample/dsSimple/dualsoft.json
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.xlsx
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/Sample.7z

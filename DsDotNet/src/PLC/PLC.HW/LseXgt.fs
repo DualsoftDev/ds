@@ -64,23 +64,23 @@ module rec XGT =
 
     /// PLC IO slot 하나.
     [<AllowNullLiteral>]
-    type Slot(isEmpty:bool, isInput:bool, isDigital:bool, length:int) =
-        new() = Slot(true, true, true, 16)
-        member val IsEmpty = isEmpty with get, set
+    type Slot(isInput:bool, isDigital:bool, numPoints:int) =
+        new() = Slot(true, true, 0)
+        member x.IsEmpty = x.NumPoints = 0
         member val IsInput = isInput with get, set
         member val IsDigital = isDigital with get, set
         /// Digital 접점 수
-        member val Length = length with get, set
+        member val NumPoints = numPoints with get, set
 
         // { UI 표출, debugging 용
         /// Slot 에 할당된 address 들.  UI 및 debugging 표시 용.   PlcHw.CreateIOHaystacks() 수행 중에 값 채움.
         [<Browsable(false)>]
-        [<JsonIgnore>]
-        member val Addresses: string[] = [||] with get, set
+        [<JsonIgnore>] member val SlotNumber = -1 with get, set
+        /// Any object.  일단 image 저장용
+        [<JsonIgnore>] member val Tag:obj = null with get, set
+        [<JsonIgnore>] member val Addresses: string[] = [||] with get, set
         member x.StartAddress = x.Addresses.TryHead() |? null
         member x.EndAddress = x.Addresses.TryLast() |? null
-        [<JsonIgnore>]
-        member val SlotNumber = -1 with get, set
         // } UI 표출, debugging 용
 
 
@@ -92,7 +92,7 @@ module rec XGT =
             elif not x.IsDigital then // 가변식 아날로그이거나
                 16
             else
-                max 16 x.Length
+                max 16 x.NumPoints
 
     [<AllowNullLiteral>]
     type Base(slots: Slot seq) =
@@ -103,7 +103,8 @@ module rec XGT =
         new() = Base([])    // Serialize 를 위해서 default constructor 꼭 필요
         member val Slots = slots with get, set     // get, set for newtonsoft
         static member Create(isFillContents:bool) =
-            Base([ for i in 0..MaxNumberSlots-1 -> if isFillContents then Slot() else null ])
+            //Base([ for i in 0..MaxNumberSlots-1 -> if isFillContents then Slot() else null ])
+            Base([||])
 
         [<JsonIgnore>]
         [<DisplayName("총 슬롯수")>]
@@ -199,7 +200,7 @@ module rec XGT =
                                     if slot.IsEmpty || not slot.IsDigital then
                                         slot.Addresses <- [||]
                                     else
-                                        let cap= slot.Length
+                                        let cap= slot.NumPoints
                                         let addresses = [| for i in 0..cap-1 -> createAddress(slot.IsInput, b, s, i, i+slotStart)|]
                                         slot.Addresses <- addresses
 
@@ -220,6 +221,7 @@ module rec XGT =
         /// 미리 할당된 주소 영역(입력: forbiddenXs, 출력:forbiddenYs) 를 제외하고,
         /// 입력 및 출력을 순차적으로 spit 하는 함수 두개를 반환
         member x.CreateIOAllocator(forbiddenXs:string seq, forbiddenYs:string seq) =
+            // hw 상으로 전체 가능한 input/output
             let xs, ys = x.CreateIOHaystacks()
 
             let availableXs = xs |> Seq.except forbiddenXs
@@ -252,7 +254,7 @@ type XGTDupExtensionForCSharp =
         if slot = null then
             Slot()
         else
-            Slot(slot.IsEmpty, slot.IsInput, slot.IsDigital, slot.Length)
+            EmJson.Duplicate(slot)
 
     [<Extension>] static member private duplicate(ioBase:Base) = Base(ioBase.Slots.Map(_.duplicate()))
 

@@ -166,6 +166,15 @@ expr: funcCall                                        # FunctionCallExpr    // f
     binaryOperatorLogicalAnd: '&&';     // logical and
     binaryOperatorLogicalOr: '||';     // logical or
 
+    // 참/거짓을 판정할 수있는 boolean 수식
+    predicate:
+         'true' | 'false'
+        | storage | tag    // identifier with boolean...
+        |   expr binaryOperatorLogicalAnd expr
+        |   expr binaryOperatorLogicalOr expr
+        |   expr binaryOperatorEquality expr
+        ;
+
 
     binaryOperator:
           binaryOperatorMultiplicative

@@ -5,8 +5,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 	</PropertyGroup>
-	
-	
+
+
 	<ItemGroup>
 	  <Compile Remove="Pages\Hmis\Obsolete\**" />
 	  <Content Remove="Pages\Hmis\Obsolete\**" />
@@ -23,14 +23,14 @@
 	<ItemGroup>
 	  <_ContentIncludedByDefault Remove="wwwroot\js\pages\PageMermaidBasic_razor.js" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<PackageReference Include="Blazored.Toast" Version="4.2.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.8" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
 		<PackageReference Include="Radzen.Blazor" Version="5.1.2" />
 	</ItemGroup>
-	
+
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
@@ -48,8 +48,8 @@
 		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.5.1" />
 		<PackageReference Include="DualSoft-Web-Blazor-Client-Canvas2d" Version="0.5.1" />
 	</ItemGroup>
-	
-		
+
+
 	<ItemGroup>
 		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\..\Engine\Engine.Info\Engine.Info.fsproj" />
@@ -57,13 +57,13 @@
 		<ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj" />
 		<ProjectReference Include="..\DsWebApp.Shared\DsWebApp.Shared.csproj" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 	  <Folder Include="Pages\Hmis\Widget\GridColumn\" />
 	  <Folder Include="Pages\Monitoring\" />
 	  <Folder Include="Test\" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
 	  <None Include="Components\CompFqdnSelector.razor.cs" />
 	  <None Include="Pages\Demo\PageDynamicLoadScript.razor" />
@@ -74,5 +74,5 @@
 	  <None Include="wwwroot\js\pages\PageMermaidBasic_razor.js" />
 	  <None Include="wwwroot\lib\bootstrap-icons\fonts\bootstrap-icons.woff2" />
 	</ItemGroup>
-	
+
 </Project>

@@ -95,7 +95,7 @@ module XgxFixtures =
 
     let parseExpression4UnitTest (storages: Storages) (text: string) : IExpression =
         try
-            let parser = createParser (text)
+            let parser = createExpressionParser (text)
             let ctx = parser.expr ()
             let parserData = ParserData((WINDOWS), Storages(), None)
 

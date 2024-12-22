@@ -15,7 +15,8 @@ module MSG_TEST =
 
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
     RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
-    RegistryPptDS.HWSlotDataTypes <- JsonConvert.SerializeObject(getFullSlotHwSlotDataTypes());
+    RegistryPptDS.HWIP <-  "127.0.0.1"
+
     
     let setXGK() = 
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();

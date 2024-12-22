@@ -35,9 +35,7 @@
       <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
     </ItemGroup>
 
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-		<Exec Command="xcopy /s /e /y $(SolutionDir)Apps\OfficeAddIn\PowerPointAddInHelper\dsLib\*.* $(TargetDir)dsLib\" />
-	</Target>
+
 	
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.*" />

@@ -13,17 +13,6 @@ open System
 [<AutoOpen>]
 module rec ExpressionParserModule =
     let enableSubroutine = false
-    let internal createParser (text: string) : exprParser =
-        let inputStream = new AntlrInputStream(text)
-        let lexer = exprLexer (inputStream)
-        let tokenStream = CommonTokenStream(lexer)
-        let parser = exprParser (tokenStream)
-
-        let listener_lexer = new ErrorListener<int>(true)
-        let listener_parser = new ErrorListener<IToken>(true)
-        lexer.AddErrorListener(listener_lexer)
-        parser.AddErrorListener(listener_parser)
-        parser
 
     /// storage 이름이 주어졌을 때, 그 이름에 해당하는 storage 를 반환하는 함수의 type
     type StorageFinder = string -> IStorage option
@@ -542,7 +531,7 @@ module rec ExpressionParserModule =
     let parseCodeForTarget (storages: Storages) (text: string) (target:PlatformTarget): Statement list =
         try
             ParserUtil.runtimeTarget  <- target
-            let parser = createParser (text)
+            let parser = createExpressionParser (text)
             let parserData = new ParserData(target, storages, Some parser)
 
             let children = parser.toplevels().children

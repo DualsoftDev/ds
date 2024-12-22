@@ -293,13 +293,14 @@ type FindExtension =
 
     [<Extension>] static member GetAliasTypeReals(xs:Vertex seq)   = ofAliasForRealVertex xs
     [<Extension>] static member GetAliasTypeCalls(xs:Vertex seq)   = ofAliasForCallVertex xs
-    [<Extension>] static member GetFlowEdges(x:DsSystem) = x.Flows.Collect(fun f-> f.Graph.Edges)
-
 
     [<Extension>] static member GetVertices(edges:IEdge<'V> seq) = edges.Collect(fun e -> [e.Source; e.Target])
     [<Extension>] static member GetVertices(x:DsSystem) =  getVerticesOfSystem x
     [<Extension>] static member GetRealVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Real>()
     [<Extension>] static member GetCallVertices(x:DsSystem) =  (getVerticesOfSystem x).OfType<Call>()
+
+    [<Extension>] static member GetFlowEdges(x:DsSystem) = x.Flows.Collect(fun f-> f.Graph.Edges)
+    
 
     [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
     [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =

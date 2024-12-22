@@ -5,7 +5,9 @@ open Dual.Common.Core.FS
 open System.Collections.Generic
 open System.Runtime.CompilerServices
 open System.Reflection
+open System.IO
 open System
+open Newtonsoft.Json
 
 [<AutoOpen>]
 module internal ToDsTextModule =
@@ -536,3 +538,15 @@ type SystemToDsExt =
     [<Extension>]
     static member ToDsText (system:DsSystem, printComment:bool, printVersions:bool) =
         systemToDs system 1 printComment printVersions
+
+    [<Extension>]
+    static member ToMermaidText (system:DsSystem) =
+        let subgraphs = system.GetRealVertices()
+                            .Where(fun r-> r.Graph.Vertices.any())
+                            .Select(fun r-> 
+                                let graphText = String.Join("\r\n\t\t", r.Graph.Edges.Select(fun e->e.ToMermaidText()))
+                                $"\tsubgraph {r.Name} [{r.QualifiedName}]\r\n\t\t{graphText}\r\n\t\tend"
+                                )
+
+        let subgraphText = String.Join("\r\n", subgraphs)
+        $"graph LR\r\n{subgraphText}"

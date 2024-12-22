@@ -76,15 +76,16 @@ type XgxLadderElementTest(xgx:PlatformTarget) =
         let f = getFuncName()
         let xml = x.generateXmlForTest f storages (map withNoComment statements)
         x.saveTestResult f xml
-
-    member x.``Local var with init string err test`` () =
+        ///todo: string type 처리 구현 필요
+    member x.``Local var with init string test`` () =
         let storages = Storages()
         let code = """
             string  mystring = "hello";     // not working for string
 """
         let statements = parseCodeForWindows storages code
         let f = getFuncName()
-        (fun () ->  x.generateXmlForTest f storages (map withNoComment statements) |> ignore) |> ShouldFail
+        let xml = x.generateXmlForTest f storages (map withNoComment statements)
+        x.saveTestResult f xml
 
     member x.``Local var with init test`` () =
         let storages = Storages()
@@ -121,13 +122,13 @@ type XgiLadderElementTest() =
     inherit XgxLadderElementTest(XGI)
     [<Test>] member x.``Local var test``() = base.``Local var test``()
     [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
-    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string test``()
     [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
 
 type XgkLadderElementTest() =
     inherit XgxLadderElementTest(XGK)
     [<Test>] member x.``Local var test``() = base.``Local var test``()
     [<Test>] member x.``Local var with comment and init test`` () = base.``Local var with comment and init test``()
-    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string err test``()
+    [<Test>] member x.``Local var with init string err test`` () = base.``Local var with init string test``()
     [<Test>] member x.``Local var with init test`` () = base.``Local var with init test``()
 

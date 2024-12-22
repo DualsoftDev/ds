@@ -55,7 +55,7 @@ module ImportUtilForDev =
             if Net48Path.Exists (Path.Combine(runDir, "dsLib")) then
                 runDir
             else
-                @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/"
+                @$"{__SOURCE_DIRECTORY__}../../../../Apps/PptAddIn/PptAddIn/"
 
         let curDir = currentFileName |> Path.GetDirectoryName
 
@@ -63,7 +63,7 @@ module ImportUtilForDev =
 
         let libPath =
             if not <| Net48Path.Exists libConfigPath then
-                failWithLog $"{libConfigPath}Library.config file not found"
+                failWithLog $"{libConfigPath} file not found"
 
             libConfigPath
 

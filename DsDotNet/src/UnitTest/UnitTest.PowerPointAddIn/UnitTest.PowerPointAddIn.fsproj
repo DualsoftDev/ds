@@ -27,8 +27,5 @@
 		<ProjectReference Include="..\..\..\Apps\OfficeAddIn\PowerPointAddInShared\PowerPointAddInShared.fsproj" />
 	</ItemGroup>
 
-	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="copy $(ProjectDir)..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\Utils\HelloDS.pptx $(TargetDir)HelloDS.pptx" />
-	</Target>
-	
+
 </Project>

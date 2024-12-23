@@ -119,12 +119,12 @@ module DsTimeAnalysisMoudle =
     let processCallTag tagKind (call: Call) =
         let stats = getOrCreateStats call.QualifiedName
         match tagKind with
-        | VertexTag.startTag ->
+        | VertexTag.going ->
             stats.StartTracking(call) 
         | VertexTag.planStart ->
             stats.MovingStart <- DateTime.UtcNow
 
-        | VertexTag.endTag ->
+        | VertexTag.finish ->
             stats.EndTracking()
             stats.Update(call) 
         | _ -> debugfn "Unhandled VertexTag: %A" tagKind
@@ -136,9 +136,9 @@ module DsTimeAnalysisMoudle =
         | Some real, None ->
             let stats = getOrCreateStats real.QualifiedName
             match tagKind with
-            | VertexTag.startTag ->
+            | VertexTag.going ->
                 stats.MovingStart <- DateTime.UtcNow
-            | VertexTag.endTag ->
+            | VertexTag.finish->
                 if stats.StatsStart = DateTime.MinValue then
                     stats.StartTracking(real)
                 else

@@ -244,8 +244,8 @@ type TagKindExt =
         x.TagKind.IsOneOf(
               int FlowTag.drive_state,
               int VertexTag.planStart,
-              int VertexTag.startTag, 
-              int VertexTag.endTag)
+              int VertexTag.going, 
+              int VertexTag.finish)
 
 
     [<Extension>]

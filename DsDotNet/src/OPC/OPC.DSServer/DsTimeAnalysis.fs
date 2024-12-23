@@ -20,11 +20,11 @@ module DsTimeAnalysisMoudle =
         let mutable count = 0u
         let mutable mean = 0.0f
         let mutable M2 = 0.0f
-        let mutable activeDuration = 0.0 // StatsStart → endTag
-        let mutable movingDuration = 0.0 // MovingStart → endTag
+        let mutable activeDuration = 0.0 // StatsStart → finishTag
+        let mutable movingDuration = 0.0 // MovingStart → finishTag
 
         let mutable statsStart = DateTime.MinValue 
-        let mutable updateAble = false //drive_state tag가 켜지고 endTag가 살고 다음부터 저장
+        let mutable updateAble = false //drive_state tag가 켜지고 finishTag가 살고 다음부터 저장
 
 
         member x.StatsStart = statsStart
@@ -37,6 +37,7 @@ module DsTimeAnalysisMoudle =
             tm.CalcActiveStartTime.BoxedValue <- 
                 TimeZoneInfo.ConvertTime(this.StatsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
                             .ToString("yyyy-MM-dd HH:mm:ss.fff");
+            tm.CalcStatFinish.BoxedValue <- false
 
         /// 시간 기록 종료 및 지속 시간 계산
         member this.EndTracking() =
@@ -68,6 +69,7 @@ module DsTimeAnalysisMoudle =
                 tm.CalcWaitingDuration.BoxedValue <- this.WaitingDuration |> uint32
                 tm.CalcActiveDuration.BoxedValue <- this.ActiveDuration   |> uint32
                 tm.CalcMovingDuration.BoxedValue <- this.MovingDuration   |> uint32
+                tm.CalcStatFinish.BoxedValue <- true
 
         /// 대기 시간 계산
         member this.WaitingDuration  =  activeDuration - movingDuration

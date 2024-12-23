@@ -207,13 +207,14 @@ module TagKindList =
     | planEnd                   = 11091
      
 
-    | calcActiveStartTime       = 11100
-    | calcActiveDuration        = 11101
-    | calcWaitingDuration       = 11102
-    | calcMovingDuration        = 11103
-    | calcCount                 = 11104 //calcMovingDuration 기준
-    | calcAverage               = 11105 //calcMovingDuration 기준
-    | calcStandardDeviation     = 11106 //calcMovingDuration 기준
+    | calcStatFinish            = 11100 //calc 통계측정 완료  calcActiveDuration 까지 계산될경우 true
+    | calcActiveStartTime       = 11101
+    | calcActiveDuration        = 11102
+    | calcWaitingDuration       = 11103
+    | calcMovingDuration        = 11104
+    | calcCount                 = 11105 //calcMovingDuration 기준
+    | calcAverage               = 11106 //calcMovingDuration 기준
+    | calcStandardDeviation     = 11107 //calcMovingDuration 기준
     
     /// 12000 ~ 12999
     [<Flags>]

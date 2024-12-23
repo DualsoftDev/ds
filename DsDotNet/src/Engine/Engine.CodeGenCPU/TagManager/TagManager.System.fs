@@ -102,7 +102,7 @@ module SystemManagerModule =
         let tempDataDuUINT32  = createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys 
         let tempDataDuString  = createPlanVar  stg "temp_DuString" DuSTRING true None (int SystemTag.tempData) sys
         let tempDataDuFLOAT32 = createPlanVar  stg "temp_DuFLOAT32" DuFLOAT32 true None (int SystemTag.tempData) sys
-
+        let tempDataDuBool    = createPlanVar  stg "temp_DuBOOL" DuBOOL true None (int SystemTag.tempData) sys
 
         do
 
@@ -135,6 +135,7 @@ module SystemManagerModule =
         member s.TempDataDuUINT32 = tempDataDuUINT32
         member s.TempDataDuFLOAT32 = tempDataDuFLOAT32
         member s.TempDataDuString = tempDataDuString
+        member s.TempDataDuBool = tempDataDuBool
                 
 
         member s.GetSystemTag(st:SystemTag) : IStorage=

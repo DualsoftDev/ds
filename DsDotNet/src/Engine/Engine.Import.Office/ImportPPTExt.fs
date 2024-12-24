@@ -793,7 +793,7 @@ module ImportU =
                                 .Select(fun e-> doc.DicVertex.[e.StartNode.Key])
 
                         let pureReals = xs.GetPureReals()
-                        if pureReals.Where(fun f -> not(f.NoTransData)).Count() > 1 then
+                        if pureReals.DistinctBy(fun w->w.GetPureReal()).Where(fun f -> not(f.NoTransData)).Count() > 1 then
                             let error = String.Join("\r\n", (pureReals.Select(fun f->f.DequotedQualifiedName)))
                             failwithlog $"복수의 작업에서 SEQ 전송을 시도하고 있습니다. \r\n미전송 작업 이름에 취소선을 사용하세요 \r\n복수 작업 :\r\n {error}"
                     )

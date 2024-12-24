@@ -219,7 +219,7 @@ module ConvertCPU =
             for edge in noTransEdges do
                 let src = edge.Source.GetPureReal()
                 let data = src.VR.RealTokenData
-                yield (src.VR.G.Expr, data.ToExpression()) --> (src.VR.MergeTokenData, fn) 
+                yield (src.VR.GP.Expr, data.ToExpression()) --> (src.VR.MergeTokenData, fn) 
         |]
   
 

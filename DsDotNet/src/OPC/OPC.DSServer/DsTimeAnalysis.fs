@@ -33,6 +33,13 @@ module DsTimeAnalysisMoudle =
         /// 모집단 표준편차
         let getStandardDeviation() = getPopulationVariance() |> Math.Sqrt |> float32
 
+        let resetStat(vertex:Vertex) =  
+            let tm = vertex.TagManager :?> VertexTagManager
+            tm.CalcWaitingDuration.BoxedValue <- 0u
+            tm.CalcActiveDuration.BoxedValue <-  0u
+            tm.CalcMovingDuration.BoxedValue <-  0u
+            tm.CalcStatFinish.BoxedValue <- false  
+
         /// 데이터 추가 및 평균/분산 업데이트
         let updateStat(vertex:Vertex) =  
             let tm = vertex.TagManager :?> VertexTagManager
@@ -71,14 +78,13 @@ module DsTimeAnalysisMoudle =
         /// 시간 기록 종료 및 지속 시간 계산
         member this.EndTracking(vertex:Vertex) =
             let tm = vertex.TagManager :?> VertexTagManager
-            tm.CalcStatFinish.BoxedValue <- false  //rising 처리
-            
             let endTime = DateTime.UtcNow
             if statsStart <> DateTime.MinValue then
                 activeDuration <-  (endTime - statsStart).TotalMilliseconds
             if movingStart <> DateTime.MinValue then
                 movingDuration <-  (endTime - movingStart).TotalMilliseconds
-
+            
+            resetStat vertex  //opc rising 위해서 값 초기화
             updateStat vertex
 
             statsStart <- DateTime.MinValue
@@ -145,7 +151,7 @@ module DsTimeAnalysisMoudle =
 
 
     /// 태그별 시간 처리 로직
-    let processRealTag tagKind (finishOn:bool) (real: Real option) (flow: Flow option) =
+    let processRealTag tagKind  (real: Real option) (flow: Flow option) =
         match real, flow with
         | Some real, None ->
             let stats = getOrCreateStats real.QualifiedName
@@ -153,10 +159,8 @@ module DsTimeAnalysisMoudle =
             | VertexTag.going ->
                 stats.StartMoving()
             | VertexTag.finish->
-                if finishOn then
-                    stats.EndTracking(real)
-                else
-                    stats.StartTracking(real)
+                stats.EndTracking(real)    //work는 종료하고 바로 시작(실제Going을 Moving으로 처리)
+                stats.StartTracking(real)
 
             | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 
@@ -170,15 +174,15 @@ module DsTimeAnalysisMoudle =
         match stg.Target with
         | Some (:? Vertex as vertex) ->
             match stg.ObjValue with
-            | :? bool as isActive ->
+            | :? bool as isActive  when isActive ->
                 match Enum.TryParse<VertexTag>(getTagKindName stg.TagKind) with
                 | true, tagKind ->
-                    if vertex :? Call && isActive
+                    if vertex :? Call
                     then
                         processCallTag tagKind (vertex:?> Call)
                     elif vertex :? Real
                     then
-                        processRealTag tagKind isActive (Some(vertex:?> Real)) None
+                        processRealTag tagKind  (Some(vertex:?> Real)) None
 
                 | false, _ -> 
                     failWithLog "Invalid TagKind value: %d" stg.TagKind

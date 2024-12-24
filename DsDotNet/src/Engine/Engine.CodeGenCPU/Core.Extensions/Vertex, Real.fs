@@ -40,6 +40,7 @@ module ConvertCpuVertex =
         /// 실제 Token >= 1.   Token 없을 경우, 0 return.
         // 원래 token 없으면 null 을 반환해야 함!!
         member r.MergeToken:uint32 = r.V.GetVertexTag(VertexTag.mergeToken).BoxedValue :?> uint32
+        member r.SourceToken:uint32 = r.V.GetVertexTag(VertexTag.sourceToken).BoxedValue :?> uint32
 
         member r.CoinSTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.ST)
         member r.CoinRTContacts = r.Graph.Vertices.Select(getVMCall).Select(fun f->f.RT)
@@ -67,4 +68,6 @@ type RealExt =
     static member GetRealToken(r:Real):uint32 option = match r.RealToken with | 0u -> None | v -> Some v
     [<Extension>]
     static member GetMergeToken(r:Real):uint32 option = match r.MergeToken with | 0u -> None | v -> Some v
+    [<Extension>]
+    static member GetSourceToken(r:Real):uint32 option = match r.SourceToken with | 0u -> None | v -> Some v
 

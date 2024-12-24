@@ -238,7 +238,19 @@ module PptUtil =
                 | null -> false
                 | runProps -> runProps.Strike <> null && runProps.Strike.InnerText = "sngStrike" //DocumentFormat.OpenXml.Drawing.TextStrikeValues.Single
             )
-        
+
+        [<Extension>]
+        static member IsItalic(shape: Shape) =
+            shape.Descendants<TextBody>()
+            |> Seq.collect (fun textBody -> textBody.Descendants<Paragraph>())
+            |> Seq.collect (fun paragraph -> paragraph.Descendants<DocumentFormat.OpenXml.Drawing.Run>())
+            |> Seq.exists (fun run ->
+                match run.RunProperties with
+                | null -> false
+                | runProps -> 
+                    runProps.Italic <> null && runProps.Italic.Value = true
+            )
+
 
         [<Extension>]
         static member ShapeID(shape: Shape) =

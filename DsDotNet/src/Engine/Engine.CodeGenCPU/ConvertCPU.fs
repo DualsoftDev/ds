@@ -3,6 +3,7 @@ namespace Engine.CodeGenCPU
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Linq
+open Engine.Common
 
 [<AutoOpen>]
 module ConvertCPU =
@@ -32,7 +33,7 @@ module ConvertCPU =
         isValidVertex
 
     ///Vertex 타입이 Spec에 해당하면 적용
-    let private applyVertexSpec(v:Vertex) isActive =
+    let private applyVertexSpec(v:Vertex)  =
         [
             if IsSpec (v, RealInFlow, AliasFalse) then
                 let vr = v.TagManager :?> RealVertexTagManager
@@ -58,11 +59,8 @@ module ConvertCPU =
                 yield! vr.D2_DAGTailStart()
                 yield! vr.D3_DAGCoinEnd()
                 yield! vr.D4_DAGCoinReset()
-
-                if isActive then
-                    yield! vr.R6_RealTokenMoveNSink()
-
-
+                yield! vr.R6_SourceTokenNumGeneration()
+            
 
             if IsSpec (v, RealExSystem ||| RealExFlow, AliasNotCare) then
                 let vm = v.TagManager :?> RealVertexTagManager
@@ -73,9 +71,9 @@ module ConvertCPU =
                 let vc = v.TagManager :?> CoinVertexTagManager
                 yield  vc.F4_CallEndInFlow()
 
-            if IsSpec (v, CallInFlow, AliasFalse) then
-                let vc = v.TagManager :?> CoinVertexTagManager
-                yield! vc.F5_SourceTokenNumGeneration()
+            //if IsSpec (v, CallInFlow, AliasFalse) then
+            //    let vc = v.TagManager :?> CoinVertexTagManager
+            //    yield! vc.F5_SourceTokenNumGeneration()
 
             if IsSpec (v, CallInReal , AliasFalse) then
                 let vc = v.TagManager :?> CoinVertexTagManager
@@ -202,6 +200,29 @@ module ConvertCPU =
                 yield v.VM.V2_ActionVairableMove(s)
         |]
 
+    let private applyVertexToken(sys:DsSystem) =
+        let fn = getFuncName()
+        let edges = sys.GetFlowEdges()
+                        .Where(fun e->e.EdgeType.HasFlag(EdgeType.Start))
+                        .Where(fun e->e.Source.TryGetPureReal().IsSome && e.Target.TryGetPureReal().IsSome)
+                    |> Seq.distinctBy(fun e -> (e.Source.GetPureReal(), e.Target.GetPureReal()))
+
+        let noTransEdges= edges.Where(fun e->e.Source.GetPureReal().NoTransData)
+        let transEdges  = edges.Except noTransEdges
+        [|
+            for edge in transEdges do
+                let src = edge.Source.GetPureReal()
+                let tgt = edge.Target.GetPureReal()
+                let data = src.VR.RealTokenData
+                yield (tgt.VR.R.Expr, data.ToExpression()) --> (tgt.VR.RealTokenData, fn) 
+
+            for edge in noTransEdges do
+                let src = edge.Source.GetPureReal()
+                let data = src.VR.RealTokenData
+                yield (src.VR.G.Expr, data.ToExpression()) --> (src.VR.MergeTokenData, fn) 
+        |]
+  
+
     let private applyJob(s:DsSystem) =
         [|
             let devCallSet =  s.GetTaskDevCalls()
@@ -280,6 +301,7 @@ module ConvertCPU =
                         yield! emulationDevice sys
 
                     yield! sys.Y1_SystemBtnForFlow(sys)
+                    yield! applyVertexToken sys
 
                 //Variables  적용
                 yield! applyVariables sys
@@ -294,7 +316,7 @@ module ConvertCPU =
 
                 //Vertex 적용
                 for v in sys.GetVertices() do
-                    yield! applyVertexSpec v isActive
+                    yield! applyVertexSpec v 
 
                 //TaskDev Sensor Link 적용
                 yield! applyTaskDevSensorLink sys

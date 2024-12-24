@@ -90,33 +90,6 @@ type VertexTagManager with
 
 
 
-
-    member v.F5_SourceTokenNumGeneration() =
-        let vc = getVMCall v.Vertex
-        let fn = getFuncName()
-        match v.Vertex.TokenSourceOrder with
-        | Some order ->
-            [|
-                let tempInit= v.System.GetTempBoolTag("tempInitCheckTokenSrc")
-                let initExpr = 0u |> literal2expr ==@ vc.SourceTokenData.ToExpression()
-                yield (initExpr, v._off.Expr) --| (tempInit, fn)
-
-                let order = order |> uint32 |> literal2expr
-                let totalSrcToken = v.System.GetSourceTokenCount() |> uint32 |>literal2expr
-
-                if RuntimeDS.Package.IsPLCorPLCSIM()
-                then
-                    //처음에는 자기 순서로 시작
-                    yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vc.SourceTokenData, fn)
-                    //이후부터는 전체 값 만큼 증가
-                    yield (!@tempInit.Expr <&&> fbRising[v.ET.Expr], totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
-                else
-                    yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vc.SourceTokenData, fn)
-                    yield (!@tempInit.Expr <&&> v.ET.Expr, totalSrcToken, vc.SourceTokenData.ToExpression()) --+ (vc.SourceTokenData, fn)
-            |]
-        |None -> [||]
-
-
     member v.F7_HomeCommand() =
         let real = v.Vertex :?> Real
         (real.Flow.HomeExpr <&&> real.Flow.mop.Expr , v._off.Expr) --| (real.VR.OA, getFuncName())

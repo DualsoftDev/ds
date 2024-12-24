@@ -68,7 +68,8 @@ module PptNodeModule =
         member x.CopySys = copySystems
         member x.JobCallNames = jobInfos.Keys
         member x.RealFinished = shape.IsUnderlined()
-        member x.RealNoTrans = if nodeType.IsReal then shape.IsStrikethrough() else failWithLog $"err: {name}RealNoTrans is not real Type"
+        member x.RealNoTrans =     if nodeType.IsReal then shape.IsStrikethrough() else failWithLog $"err: {name}RealNoTrans is not real Type"
+        member x.RealSourceToken = if nodeType.IsReal then shape.IsItalic() else failWithLog $"err: {name}RealNoTrans is not real Type"
         member x.DisableCall = if nodeType.IsCall then shape.IsStrikethrough() else failWithLog $"err: {name}CallSkipCoin is not call Type"
 
         member x.Safeties = safeties
@@ -114,10 +115,13 @@ module PptNodeModule =
                 shape.ErrorName(ErrID._77, iPage)
             if real.NoTransData = true && x.RealNoTrans = false then //이미 설정을 true 하고 다른데서 변경
                 shape.ErrorName(ErrID._77, iPage)
+            if real.IsSourceToken = true && x.RealSourceToken = false then //이미 설정을 true 하고 다른데서 변경
+                shape.ErrorName(ErrID._77, iPage)
 
             real.Finished <- x.RealFinished
             real.NoTransData <- x.RealNoTrans
-
+            real.IsSourceToken <- x.RealSourceToken
+            
         member x.Job = 
             let jobPure =
             

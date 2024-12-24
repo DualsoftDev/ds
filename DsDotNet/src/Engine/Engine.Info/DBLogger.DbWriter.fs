@@ -247,8 +247,8 @@ module DBWriterModule =
                                     let! trunkToken  = real.GetMergeToken() //삭제한 메인경로 토큰번호
                                     dbWriter.OnTokenMerged(branchToken, trunkToken) |> ignore
                                 elif t = st then
-                                    let call = target :?> Call
-                                    let sourceToken = call.GetSourceToken()
+                                    let real = target :?> Real
+                                    let! sourceToken = real.GetSourceToken()
                                     dbWriter.AllocateTokenId(sourceToken, now) |> ignore
 
                             dbWriter.InsertValueLog(now, tag, tokenId) |> ignore

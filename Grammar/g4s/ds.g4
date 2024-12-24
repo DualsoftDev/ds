@@ -220,7 +220,7 @@ loadExternalSystemBlock: '[' EXTERNAL_SYSTEM fileSpec ']' externalSystemName SEM
 
 // STANDFLMS
 propsBlock: '[' 'prop' ']' '=' '{' (
-          safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock
+          safetyBlock | autoPreBlock | finishBlock | disableBlock | notransBlock| sourcetokenBlock
         | timesBlock | motionBlock | scriptsBlock | repeatsBlock | errorsBlock
         | layoutBlock )* '}';
     
@@ -245,6 +245,12 @@ propsBlock: '[' 'prop' ']' '=' '{' (
     notransBlock: '[' 'notrans' ']' '=' '{' (notransListing)* '}';
         notransTarget: identifier2;
         notransListing: notransTarget (SEMICOLON notransTarget)* (SEMICOLON)?;
+
+    sourcetokenBlock: '[' 'sourcetoken' ']' '=' '{' (sourcetokenListing)* '}';
+        sourcetokenTarget: identifier2;
+        sourcetokenListing: sourcetokenTarget (SEMICOLON sourcetokenTarget)* (SEMICOLON)?;
+
+        
     disableBlock: '[' 'disable' ']' '=' '{' (disableListing)* '}';
         disableTarget: identifier23;
         disableListing: disableTarget (SEMICOLON disableTarget)* (SEMICOLON)?;

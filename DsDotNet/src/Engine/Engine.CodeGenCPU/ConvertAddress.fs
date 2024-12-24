@@ -44,7 +44,8 @@ module ConvertAddressModule =
              
     let updateSourceTokenOrder(sys: DsSystem) = 
               // Aggregate all addresses to check for duplicates along with their API names
-        sys.GetVerticesCallOperator().OrderBy(fun f->f.QualifiedName) |> Seq.iteri(fun i v -> v.TokenSourceOrder <- Some (i+1))
+        sys.GetRealVertices().Where(fun w->w.IsSourceToken)
+           .OrderBy(fun f->f.QualifiedName) |> Seq.iteri(fun i v -> v.TokenSourceOrder <- Some (i+1))
              
     let setSimulationEmptyAddress(sys:DsSystem) = 
         for j in sys.Jobs do

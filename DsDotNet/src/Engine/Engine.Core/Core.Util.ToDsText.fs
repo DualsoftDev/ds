@@ -377,6 +377,7 @@ module internal ToDsTextModule =
             let reals = system.GetRealVertices()
             let finishedReals = reals.Filter(fun f->f.Finished)
             let noTransDataReals =  reals.Filter(fun f->f.NoTransData)
+            let sourceTokenReals =  reals.Filter(fun f->f.IsSourceToken)
             let timeReals = reals.Where(fun f -> f.DsTime.AVG.IsSome || f.DsTime.STD.IsSome)
             let times =
                 [
@@ -453,6 +454,16 @@ module internal ToDsTextModule =
                             yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
+            
+            let sourceToken =
+                [
+                    if sourceTokenReals.Any() then
+                        yield $"{tab2}[sourcetoken] = {lb}"
+                        for real in sourceTokenReals do
+                            yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
+                        yield $"{tab2}{rb}"
+                ] |> combineLines
+                
 
             let disabledVertices =
                 [
@@ -478,7 +489,7 @@ module internal ToDsTextModule =
                 ] |> combineLines
 
             let props =
-                [| safeties; autoPres; layouts; motions; scripts; times; repeats; errors; finished; disabled; noTransData |]
+                [| safeties; autoPres; layouts; motions; scripts; times; repeats; errors; finished; disabled; noTransData; sourceToken |]
                 |> filter(fun p -> p.NonNullAny())
 
             if props.Any() then

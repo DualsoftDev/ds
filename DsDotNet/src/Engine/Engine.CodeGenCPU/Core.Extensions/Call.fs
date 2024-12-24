@@ -118,7 +118,6 @@ module ConvertCpuCall =
             | _ ->
                 c._off.Expr
 
-        member c.SourceToken:uint32 = c.V.GetVertexTag(VertexTag.sourceToken).BoxedValue :?> uint32
 
         member c.ActionInExpr =
             let inExprs =
@@ -143,7 +142,7 @@ module ConvertCpuCall =
 
            
 
-[<Extension>]
-type CallExt =
-    [<Extension>]
-    static member GetSourceToken(c:Call):uint32 = c.SourceToken
+//[<Extension>]
+//type CallExt =
+//    [<Extension>]
+//    static member GetSourceToken(c:Call):uint32 = c.SourceToken

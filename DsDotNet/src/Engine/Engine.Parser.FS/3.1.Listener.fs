@@ -864,7 +864,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | Some r -> r.NoTransData <- true
                     | None -> failwith $"Couldn't find target real object name {getText (notrans)}"
 
+        let fillSourceToken (system: DsSystem) (listCtx: List<dsParser.SourcetokenBlockContext>) =
+            for ctx in listCtx do
+                let list = ctx.Descendants<SourcetokenTargetContext>().ToList()
 
+                for notrans in list do
+                    let fqdn = collectNameComponents notrans // in array.. [0] : flow, [1] : real
+                    let real = tryFindReal system (fqdn |> List.ofArray)
+
+                    match real with
+                    | Some r -> r.IsSourceToken <- true
+                    | None -> failwith $"Couldn't find target real object name {getText (notrans)}"
+
+                    
 
         let fillDisabled (system: DsSystem) (listDisabledCtx: List<dsParser.DisableBlockContext>) =
             for disabledCtx in listDisabledCtx do
@@ -924,23 +936,25 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let fillProperties (x: DsParserListener) (ctx: PropsBlockContext) =
             let theSystem = x.TheSystem
             //device, call에 layout xywh 채우기
-            ctx.Descendants<LayoutBlockContext>() .ToList()  |> fillXywh     theSystem
-            //Real에 finished 채우기                         
-            ctx.Descendants<FinishBlockContext>() .ToList()  |> fillFinished theSystem
-            //Real에 noTransData 채우기                      
-            ctx.Descendants<NotransBlockContext>().ToList()  |> fillNoTrans  theSystem
+            ctx.Descendants<LayoutBlockContext>() .ToList()      |> fillXywh     theSystem
+            //Real에 finished 채우기                             
+            ctx.Descendants<FinishBlockContext>() .ToList()      |> fillFinished theSystem
+            //Real에 noTransData 채우기                          
+            ctx.Descendants<NotransBlockContext>().ToList()      |> fillNoTrans  theSystem
+            //Real에 SourceToken  채우기                      
+            ctx.Descendants<SourcetokenBlockContext>().ToList()  |> fillSourceToken  theSystem
             //Real에 MotionBlock 채우기                      
-            ctx.Descendants<MotionBlockContext>() .ToList()  |> fillActions  theSystem
-            //Real에 scripts 채우기                          
-            ctx.Descendants<ScriptsBlockContext>().ToList()  |> fillScripts  theSystem
-            //Real에 times 채우기                            
-            ctx.Descendants<TimesBlockContext>()  .ToList()  |> fillTimes    theSystem  
+            ctx.Descendants<MotionBlockContext>() .ToList()      |> fillActions  theSystem
+            //Real에 scripts 채우기                              
+            ctx.Descendants<ScriptsBlockContext>().ToList()      |> fillScripts  theSystem
+            //Real에 times 채우기                                
+            ctx.Descendants<TimesBlockContext>()  .ToList()      |> fillTimes    theSystem  
             //Real에 Repeats 채우기
-            ctx.Descendants<RepeatsBlockContext>() .ToList() |> fillRepeats  theSystem
+            ctx.Descendants<RepeatsBlockContext>() .ToList()     |> fillRepeats  theSystem
             //Job에 errors (CallTime)채우기
-            ctx.Descendants<ErrorsBlockContext>() .ToList()  |> fillErrors   theSystem
+            ctx.Descendants<ErrorsBlockContext>() .ToList()      |> fillErrors   theSystem
             //Call에 disable 채우기
-            ctx.Descendants<DisableBlockContext>().ToList()  |> fillDisabled theSystem
+            ctx.Descendants<DisableBlockContext>().ToList()      |> fillDisabled theSystem
 
         let createOperator(ctx:OperatorBlockContext) =
             ctx.operatorNameOnly() |> Seq.iter (fun fDef ->

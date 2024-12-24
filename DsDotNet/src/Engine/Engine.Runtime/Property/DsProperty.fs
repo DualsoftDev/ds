@@ -27,6 +27,7 @@ module rec DsPropertyModule =
 
         let mutable finished = false
         let mutable noTransData = false
+        let mutable sourceToken = false
         let mutable motion = getNull<string>()
         let mutable script = getNull<string>()
         let mutable repeatCount = Nullable()
@@ -42,6 +43,10 @@ module rec DsPropertyModule =
         member x.NoTransData
             with get() = noTransData
             and set(v) = x.UpdateField(&noTransData, v)
+
+        member x.IsSourceToken
+            with get() = sourceToken
+            and set(v) = x.UpdateField(&sourceToken, v)
 
         member x.Motion
             with get() = motion
@@ -68,6 +73,7 @@ module rec DsPropertyModule =
             x.FqdnObject <- Some real
             x.Finished <- real.Finished
             x.NoTransData <- real.NoTransData
+            x.IsSourceToken <- real.IsSourceToken
             x.Motion <- toNull real.Motion
             x.Script <- toNull real.Script
             x.RepeatCount <- toNullable real.RepeatCount

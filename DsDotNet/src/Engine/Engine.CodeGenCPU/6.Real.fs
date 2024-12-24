@@ -5,6 +5,7 @@ open System.Linq
 open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
+open Engine.Common
 
 type RealVertexTagManager with
 
@@ -80,43 +81,76 @@ type RealVertexTagManager with
         else
             [||]
 
-    member v.R6_RealTokenMoveNSink() = 
+
+    member v.R6_SourceTokenNumGeneration() =
+        let vr = v.Vertex.VR
         let fn = getFuncName()
-        let srcs = getStartEdgeSources(v.Vertex)
-        let srcReals = srcs.GetPureReals().ToArray()
-        let sinkReals =srcReals.Where(fun w-> w.NoTransData)
-        let moveReals =srcReals.Where(fun w-> not(w.NoTransData))      
-        let causalCalls = srcs.GetPureCalls()
-        [| 
+        match v.Vertex.TokenSourceOrder with
+        | Some order ->
+            [|
+                let tempInit= v.System.GetTempBoolTag("tempInitCheckTokenSrc")
+                let initExpr = 0u |> literal2expr ==@ vr.SourceTokenData.ToExpression()
+                yield (initExpr, v._off.Expr) --| (tempInit, fn)
 
-            (* 자신의 alias가 소스로 사용될경우 토큰 전송*)
-            let usedAliasSet = v.SysAliasFlowEdgeSet
-                                    .Where(fun w-> w.Source :? Alias)
-                                    .Where(fun w-> w.Source.GetPure() = v.Vertex)
+                let order = order |> uint32 |> literal2expr
+                let totalSrcToken = v.System.GetSourceTokenCount() |> uint32 |>literal2expr
 
-            for edge in usedAliasSet do
-                let srcAliasSEQ = v.RealTokenData
-                let tgtAliasSEQ = edge.Target.GetPureReal().V.RealTokenData
-                yield (v.R.Expr, srcAliasSEQ.ToExpression()) --> (tgtAliasSEQ, fn) 
+                if RuntimeDS.Package.IsPLCorPLCSIM()
+                then
+                    //처음에는 자기 순서로 시작
+                    yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vr.SourceTokenData, fn)
+                    yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vr.RealTokenData, fn)
+                    //이후부터는 전체 값 만큼 증가
+                    yield (!@tempInit.Expr <&&> fbRising[v.GP.Expr], totalSrcToken, vr.SourceTokenData.ToExpression()) --+ (vr.SourceTokenData, fn)
+                    yield (!@tempInit.Expr <&&> fbRising[v.GP.Expr], vr.SourceTokenData.ToExpression()) --> (vr.RealTokenData, fn)
+                else
+                    yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vr.SourceTokenData, fn)
+                    yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vr.RealTokenData, fn)
+                    yield (!@tempInit.Expr <&&> v.GP.Expr, totalSrcToken, vr.SourceTokenData.ToExpression()) --+ (vr.SourceTokenData, fn)
+                    yield (!@tempInit.Expr <&&> v.GP.Expr, vr.SourceTokenData.ToExpression()) --> (vr.RealTokenData, fn)
+            |]
+        |None -> [||]
 
 
-            (* 자신이 타겟으로로 사용될경우 토큰 받기*)
-            let tgtTagSEQ = v.RealTokenData
-            let srcTagSEQ = 
-                match moveReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
-                | _, true -> 
-                    causalCalls.First().VC.SourceTokenData  |>Some
-                | true, false -> 
-                    moveReals.First().VR.RealTokenData  |>Some
-                | false, false -> 
-                    None
+    //member v.R6_RealTokenMoveNSink() = 
+    //    let fn = getFuncName()
+    //    let srcs = getStartEdgeSources(v.Vertex)
+    //    let srcReals = srcs.GetPureReals().ToArray()
+    //    let sinkReals =srcReals.Where(fun w-> w.NoTransData)
+    //    let moveReals =srcReals.Where(fun w-> not(w.NoTransData))      
+    //    let causalCalls = srcs.GetPureCalls()
+    //    [| 
 
-            if srcTagSEQ.IsSome
-            then 
-                yield (v.R.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) 
-                for sinkReal in sinkReals do
-                    yield (v.R.Expr, srcTagSEQ.Value.ToExpression()) --> (sinkReal.VR.MergeTokenData, fn) 
-        |]
+    //        //(* 자신의 alias가 소스로 사용될경우 토큰 전송*)
+    //        //let usedAliasSet = v.SysAliasFlowEdgeSet
+    //        //                        .Where(fun w-> w.EdgeType.HasFlag(EdgeType.Start))
+    //        //                        .Where(fun w-> w.Source :? Alias)
+    //        //                        .Where(fun w-> w.Source.GetPure() = v.Vertex)
+    //        //                        .Where(fun w-> not(v.Real.NoTransData))
+
+    //        //for edge in usedAliasSet do
+    //        //    let srcAliasSEQ = v.RealTokenData
+    //        //    let tgtAliasSEQ = edge.Target.GetPureReal().V.RealTokenData
+    //        //    yield (v.R.Expr, srcAliasSEQ.ToExpression()) --> (tgtAliasSEQ, fn) 
+
+
+    //        (* 자신이 타겟으로로 사용될경우 토큰 받기*)
+    //        let tgtTagSEQ = v.RealTokenData
+    //        let srcTagSEQ = 
+    //            match moveReals.any(), causalCalls.any() with    // Call SourceTokenData 가 우선
+    //            | _, true -> 
+    //                causalCalls.First().VC.SourceTokenData  |>Some
+    //            | true, false -> 
+    //                moveReals.First().VR.RealTokenData  |>Some
+    //            | false, false -> 
+    //                None
+
+    //        if srcTagSEQ.IsSome
+    //        then 
+    //            yield (v.R.Expr, srcTagSEQ.Value.ToExpression()) --> (tgtTagSEQ, fn) 
+    //            for sinkReal in sinkReals do
+    //                yield (v.R.Expr, srcTagSEQ.Value.ToExpression()) --> (sinkReal.VR.MergeTokenData, fn) 
+    //    |]
 
 
 

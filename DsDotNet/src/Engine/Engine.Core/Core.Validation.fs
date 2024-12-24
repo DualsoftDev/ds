@@ -71,7 +71,7 @@ module ValidateMoudle =
 
     let validateRootCallConnection(sys:DsSystem) =
         let rootEdgeSrcs = sys.GetFlowEdges().Select(fun e->e.Source).Distinct()
-        sys.GetVerticesCallOperator().Iter(fun callOp->
+        sys.GetVerticesCallInFlow().Iter(fun callOp->
             if rootEdgeSrcs.Contains (callOp) then
                 ()
             else

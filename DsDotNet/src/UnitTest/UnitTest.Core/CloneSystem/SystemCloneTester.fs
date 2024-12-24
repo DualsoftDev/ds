@@ -26,12 +26,14 @@ type DsSystemCloneTests() =
         real1.DsTime <- DsTime() // Assuming DsTime has a default constructor
         real1.Finished <- true
         real1.NoTransData <- true
+        real1.IsSourceToken <- true
 
         real2.Motion <- Some "Motion2"
         real2.Script <- Some "Script2"
         real2.DsTime <- DsTime() // Assuming DsTime has a default constructor
         real2.Finished <- false
         real2.NoTransData <- false
+        real2.IsSourceToken <- false
 
         // Adding edges between vertices
         flow1.CreateEdge(ModelingEdgeInfo<Vertex>(real1, ">", real3)) |> ignore
@@ -98,12 +100,14 @@ type DsSystemCloneTests() =
         real1Clone.Script |> should equal (Some "Script1")
         real1Clone.Finished |> should equal true
         real1Clone.NoTransData |> should equal true
+        real1Clone.IsSourceToken |> should equal true
         
         let real2Clone = clonedSystem.GetVertices().OfType<Real>().First(fun r -> r.Name = "Real2")
         real2Clone.Motion |> should equal (Some "Motion2")
         real2Clone.Script |> should equal (Some "Script2")
         real2Clone.Finished |> should equal false
         real2Clone.NoTransData |> should equal false
+        real2Clone.IsSourceToken |> should equal false
 
     [<Fact>]
     member _.``Test Clone Graph Structure in Flow1``() =

@@ -43,15 +43,13 @@ module TagManagerModule =
         let createTag = createTagOnVertex v
 
         let sysM = sys.TagManager :?> SystemManager
-        let sysAliasFlowEdgeSet = sys.GetFlowEdges().Where(fun e -> e.Target :? Alias || e.Source :? Alias)
-  
+     
         interface ITagManager with
             member x.Target = v
             member x.Storages = s
 
         member _.Name   = v.QualifiedName
         member _.Vertex = v
-        member val SysAliasFlowEdgeSet = sysAliasFlowEdgeSet
 
         member x.IsOperator =
             match v with
@@ -189,8 +187,6 @@ module TagManagerModule =
 
             | VertexTag.callIn               -> callM().CallIn            :> IStorage
             | VertexTag.callOut              -> callM().CallOut           :> IStorage
-            
-            | VertexTag.sourceToken          -> callM().SourceTokenData :> IStorage
 
             | VertexTag.origin               -> realM().OG     :> IStorage
             | VertexTag.realOriginInit       -> realM().RO :> IStorage
@@ -200,6 +196,7 @@ module TagManagerModule =
             | VertexTag.goingRealy           -> realM().GG :> IStorage
             | VertexTag.realToken            -> realM().RealTokenData :> IStorage
             | VertexTag.mergeToken           -> realM().MergeTokenData :> IStorage
+            | VertexTag.sourceToken          -> realM().SourceTokenData :> IStorage
             | VertexTag.errorWork            -> realM().ErrWork :> IStorage
 
   
@@ -231,7 +228,7 @@ module TagManagerModule =
       
         let realToken  = createData(v, VertexTag.realToken, DuUINT32)
         let mergeToken = createData(v, VertexTag.mergeToken, DuUINT32)
-
+        let sourceToken = createData(v, VertexTag.sourceToken, DuUINT32)
 
         member x.Real = x.Vertex :?> Real
         member x.OriginInfo
@@ -242,6 +239,8 @@ module TagManagerModule =
         member val RealTokenData = realToken
         ///병합되기전 사라진 SEQ Data
         member val MergeTokenData = mergeToken
+       ///병합되기전 사라진 SEQ Data
+        member val SourceTokenData = sourceToken
 
         /// Real Origin Init
         member val RO         = createTag false VertexTag.realOriginInit
@@ -283,6 +282,8 @@ module TagManagerModule =
 
         member x.IsFinished = x.Real.Finished
         member x.NoTransData = x.Real.NoTransData
+        member x.IsSourceToken = x.Real.IsSourceToken
+        
 
         member val ScriptStart  = if useScript then createTag true VertexTag.scriptStart else off
         member val MotionStart  = if useMotion then createTag true VertexTag.motionStart else off
@@ -303,13 +304,7 @@ module TagManagerModule =
         let sysManager = sys.TagManager :?> SystemManager
         let createTag (autoAddr:bool) (vertexTag:VertexTag) : PlanVar<bool> = createTagOnVertex v autoAddr vertexTag
 
-        let sourceTokenData  =
-            let vertexTag = VertexTag.sourceToken |> int
-            let name = $"{v.QualifiedName}_{VertexTag.sourceToken}" |> validStorageName
-            createPlanVar s name DuUINT32 true (Some(v)) vertexTag sys
 
-        ///Source SEQ Data
-        member val SourceTokenData = sourceTokenData
 
         ///Ring Counter
         //member val CTR  = counter  s ($"{v.QualifiedName}_CTR"|>validStorageName) sys (sysManager.TargetType)

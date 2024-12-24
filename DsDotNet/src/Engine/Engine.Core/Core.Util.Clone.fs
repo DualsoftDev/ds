@@ -34,6 +34,8 @@ module rec CoreCloneModule =
             newReal.DsTime <- x.DsTime
             newReal.Finished <- x.Finished
             newReal.NoTransData <- x.NoTransData
+            newReal.IsSourceToken <- x.IsSourceToken
+            
             newReal
 
     type Alias with

@@ -122,7 +122,7 @@ module internal ModelFindModule =
     let tryFindAliasDefWithMnemonic (flow:Flow) aliasMnemonic =
         flow.AliasDefs.Values.TryFind(fun ad -> ad.AliasTexts.Contains(aliasMnemonic))
 
-    let ofCallForOperator (xs:Vertex seq) =
+    let ofCallnFlow(xs:Vertex seq) =
         xs.OfType<Call>().Where(fun f -> f.Parent.GetCore() :? Flow).Cast<Vertex>()
 
     let ofAliasForRealVertex (xs:Vertex seq) =
@@ -302,9 +302,9 @@ type FindExtension =
     [<Extension>] static member GetFlowEdges(x:DsSystem) = x.Flows.Collect(fun f-> f.Graph.Edges)
     
 
-    [<Extension>] static member GetVerticesCallOperator(xs:Vertex seq)   = ofCallForOperator xs
-    [<Extension>] static member GetVerticesCallOperator(x:DsSystem) =
-                    getVerticesOfSystem(x) |> ofCallForOperator
+    [<Extension>] static member GetVerticesCallInFlow(xs:Vertex seq)   = ofCallnFlow xs
+    [<Extension>] static member GetVerticesCallInFlow(x:DsSystem) =
+                    getVerticesOfSystem(x) |> ofCallnFlow
 
     [<Extension>] static member GetVerticesOfRealOrderByName(x:DsSystem) =
                     x.GetRealVertices().OrderBy(fun r-> $"{r.Flow.Name}_{r.Name}" )

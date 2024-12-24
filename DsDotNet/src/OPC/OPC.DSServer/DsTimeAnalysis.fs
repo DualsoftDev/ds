@@ -27,30 +27,13 @@ module DsTimeAnalysisMoudle =
         let mutable updateAble = false //drive_state tag가 켜지고 finishTag가 살고 다음부터 저장
 
 
-        member x.StatsStart = statsStart
-        member val MovingStart = DateTime.MinValue with get, set
+        /// 모집단 분산
+        let getPopulationVariance() = if count > 0u then (float M2) / (float count) else 0.0
+        /// 모집단 표준편차
+        let getStandardDeviation() = getPopulationVariance() |> Math.Sqrt |> float32
 
-        /// 시간 기록 시작
-        member this.StartTracking(vertex:Vertex) =  
-            statsStart <- DateTime.UtcNow
-            let tm = vertex.TagManager :?> VertexTagManager
-            tm.CalcActiveStartTime.BoxedValue <- 
-                TimeZoneInfo.ConvertTime(this.StatsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
-                            .ToString("yyyy-MM-dd HH:mm:ss.fff");
-            tm.CalcStatFinish.BoxedValue <- false
-
-        /// 시간 기록 종료 및 지속 시간 계산
-        member this.EndTracking() =
-            let endTime = DateTime.UtcNow
-            if this.StatsStart <> DateTime.MinValue then
-                activeDuration <-  (endTime - this.StatsStart).TotalMilliseconds
-                statsStart <- DateTime.MinValue
-            if this.MovingStart <> DateTime.MinValue then
-                movingDuration <-  (endTime - this.MovingStart).TotalMilliseconds
-                this.MovingStart <- DateTime.MinValue
-
-                    /// 데이터 추가 및 평균/분산 업데이트
-        member this.Update(vertex:Vertex) =  
+        /// 데이터 추가 및 평균/분산 업데이트
+        let updateStat(vertex:Vertex) =  
             let tm = vertex.TagManager :?> VertexTagManager
 
             if updateAble = false then 
@@ -63,14 +46,44 @@ module DsTimeAnalysisMoudle =
                 let delta2 = duration - mean
                 M2 <- M2 + (delta * delta2)
              
-                tm.CalcAverage.BoxedValue <- this.Average 
-                tm.CalcStandardDeviation.BoxedValue <- this.StandardDeviation 
-                tm.CalcCount.BoxedValue <- this.Count 
-                tm.CalcWaitingDuration.BoxedValue <- this.WaitingDuration |> uint32
-                tm.CalcActiveDuration.BoxedValue <- this.ActiveDuration   |> uint32
-                tm.CalcMovingDuration.BoxedValue <- this.MovingDuration   |> uint32
-                tm.CalcStatFinish.BoxedValue <- true
+                tm.CalcAverage.BoxedValue <- mean
+                tm.CalcStandardDeviation.BoxedValue <- getStandardDeviation() 
+                tm.CalcCount.BoxedValue <- count
+                tm.CalcWaitingDuration.BoxedValue <- activeDuration - movingDuration |> uint32
+                tm.CalcActiveDuration.BoxedValue <- activeDuration   |> uint32
+                tm.CalcMovingDuration.BoxedValue <- movingDuration   |> uint32
 
+
+        member x.StatsStart = statsStart
+        member val MovingStart = DateTime.MinValue with get, set
+
+        /// 시간 기록 시작
+        member this.StartTracking(vertex:Vertex) =  
+            statsStart <- DateTime.UtcNow
+            let tm = vertex.TagManager :?> VertexTagManager
+            tm.CalcActiveStartTime.BoxedValue <- 
+                TimeZoneInfo.ConvertTime(this.StatsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
+                            .ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+      /// 시간 기록 종료 및 지속 시간 계산
+        member this.EndTracking(vertex:Vertex) =
+            let tm = vertex.TagManager :?> VertexTagManager
+            tm.CalcStatFinish.BoxedValue <- false  //rising 처리
+            
+            let endTime = DateTime.UtcNow
+            if this.StatsStart <> DateTime.MinValue then
+                activeDuration <-  (endTime - this.StatsStart).TotalMilliseconds
+            if this.MovingStart <> DateTime.MinValue then
+                movingDuration <-  (endTime - this.MovingStart).TotalMilliseconds
+
+            updateStat vertex
+
+            statsStart <- DateTime.MinValue
+            this.MovingStart <- DateTime.MinValue
+
+            tm.CalcStatFinish.BoxedValue <- true //rising 처리
+
+      
         /// 대기 시간 계산
         member this.WaitingDuration  =  activeDuration - movingDuration
         /// 동작 시간
@@ -85,11 +98,8 @@ module DsTimeAnalysisMoudle =
         /// 평균 값
         member this.Average = mean
 
-        /// 모집단 분산
-        member this.GetPopulationVariance() = if count > 0u then (float M2) / (float count) else 0.0
-
         /// 모집단 표준편차
-        member this.StandardDeviation = this.GetPopulationVariance() |> Math.Sqrt |> float32
+        member this.StandardDeviation = getStandardDeviation() 
 
         /// 데이터 개수
         member this.Count = count
@@ -127,13 +137,12 @@ module DsTimeAnalysisMoudle =
             stats.MovingStart <- DateTime.UtcNow
 
         | VertexTag.finish ->
-            stats.EndTracking()
-            stats.Update(call) 
+            stats.EndTracking(call)
         | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 
 
     /// 태그별 시간 처리 로직
-    let processRealTag tagKind (real: Real option) (flow: Flow option) =
+    let processRealTag tagKind (finishOn:bool) (real: Real option) (flow: Flow option) =
         match real, flow with
         | Some real, None ->
             let stats = getOrCreateStats real.QualifiedName
@@ -141,11 +150,11 @@ module DsTimeAnalysisMoudle =
             | VertexTag.going ->
                 stats.MovingStart <- DateTime.UtcNow
             | VertexTag.finish->
-                if stats.StatsStart = DateTime.MinValue then
-                    stats.StartTracking(real)
+                if finishOn then
+                    stats.EndTracking(real)
                 else
-                    stats.EndTracking()
-                    stats.Update(real) 
+                    stats.StartTracking(real)
+
             | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 
         | None, Some flow -> processFlow flow
@@ -158,15 +167,15 @@ module DsTimeAnalysisMoudle =
         match stg.Target with
         | Some (:? Vertex as vertex) ->
             match stg.ObjValue with
-            | :? bool as isActive when isActive ->
+            | :? bool as isActive ->
                 match Enum.TryParse<VertexTag>(getTagKindName stg.TagKind) with
                 | true, tagKind ->
-                    if vertex :? Call
+                    if vertex :? Call && isActive
                     then
                         processCallTag tagKind (vertex:?> Call)
                     elif vertex :? Real
                     then
-                        processRealTag tagKind (Some(vertex:?> Real)) None
+                        processRealTag tagKind isActive (Some(vertex:?> Real)) None
 
                 | false, _ -> 
                     failWithLog "Invalid TagKind value: %d" stg.TagKind

@@ -24,6 +24,7 @@ module DsTimeAnalysisMoudle =
         let mutable movingDuration = 0.0 // MovingStart → finishTag
 
         let mutable statsStart = DateTime.MinValue 
+        let mutable movingStart = DateTime.MinValue 
         let mutable updateAble = false //drive_state tag가 켜지고 finishTag가 살고 다음부터 저장
 
 
@@ -54,32 +55,34 @@ module DsTimeAnalysisMoudle =
                 tm.CalcMovingDuration.BoxedValue <- movingDuration   |> uint32
 
 
-        member x.StatsStart = statsStart
-        member val MovingStart = DateTime.MinValue with get, set
-
-        /// 시간 기록 시작
+        //member x.StatsStart = statsStart
+        //member val MovingStart = DateTime.MinValue with get, set
+    
         member this.StartTracking(vertex:Vertex) =  
             statsStart <- DateTime.UtcNow
             let tm = vertex.TagManager :?> VertexTagManager
             tm.CalcActiveStartTime.BoxedValue <- 
-                TimeZoneInfo.ConvertTime(this.StatsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
+                TimeZoneInfo.ConvertTime(statsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
                             .ToString("yyyy-MM-dd HH:mm:ss.fff");
-
-      /// 시간 기록 종료 및 지속 시간 계산
+        /// Moving 기록 시작
+        member this.StartMoving() =  
+            movingStart <- DateTime.UtcNow
+        
+        /// 시간 기록 종료 및 지속 시간 계산
         member this.EndTracking(vertex:Vertex) =
             let tm = vertex.TagManager :?> VertexTagManager
             tm.CalcStatFinish.BoxedValue <- false  //rising 처리
             
             let endTime = DateTime.UtcNow
-            if this.StatsStart <> DateTime.MinValue then
-                activeDuration <-  (endTime - this.StatsStart).TotalMilliseconds
-            if this.MovingStart <> DateTime.MinValue then
-                movingDuration <-  (endTime - this.MovingStart).TotalMilliseconds
+            if statsStart <> DateTime.MinValue then
+                activeDuration <-  (endTime - statsStart).TotalMilliseconds
+            if movingStart <> DateTime.MinValue then
+                movingDuration <-  (endTime - movingStart).TotalMilliseconds
 
             updateStat vertex
 
             statsStart <- DateTime.MinValue
-            this.MovingStart <- DateTime.MinValue
+            movingStart <- DateTime.MinValue
 
             tm.CalcStatFinish.BoxedValue <- true //rising 처리
 
@@ -134,7 +137,7 @@ module DsTimeAnalysisMoudle =
         | VertexTag.going ->
             stats.StartTracking(call) 
         | VertexTag.planStart ->
-            stats.MovingStart <- DateTime.UtcNow
+            stats.StartMoving() 
 
         | VertexTag.finish ->
             stats.EndTracking(call)
@@ -148,7 +151,7 @@ module DsTimeAnalysisMoudle =
             let stats = getOrCreateStats real.QualifiedName
             match tagKind with
             | VertexTag.going ->
-                stats.MovingStart <- DateTime.UtcNow
+                stats.StartMoving()
             | VertexTag.finish->
                 if finishOn then
                     stats.EndTracking(real)

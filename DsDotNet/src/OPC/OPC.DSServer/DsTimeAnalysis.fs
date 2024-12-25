@@ -141,12 +141,12 @@ module DsTimeAnalysisMoudle =
     let processCallTag tagKind (call: Call) =
         let stats = getOrCreateStats call.QualifiedName
         match tagKind with
-        | VertexTag.going ->
+        | VertexTag.startTag ->
             stats.StartTracking(call) 
         | VertexTag.planStart ->
             stats.StartMoving() 
 
-        | VertexTag.finish ->
+        | VertexTag.endTag ->
             stats.EndTracking(call)
         | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 
@@ -157,9 +157,9 @@ module DsTimeAnalysisMoudle =
         | Some real, None ->
             let stats = getOrCreateStats real.QualifiedName
             match tagKind with
-            | VertexTag.going ->
+            | VertexTag.startTag ->
                 stats.StartMoving()
-            | VertexTag.finish->
+            | VertexTag.endTag->
                 stats.EndTracking(real)    //work는 종료하고 바로 시작(실제Going을 Moving으로 처리)
                 stats.StartTracking(real)
 

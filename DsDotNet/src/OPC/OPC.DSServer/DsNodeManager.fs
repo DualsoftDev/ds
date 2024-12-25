@@ -256,28 +256,18 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             )
 
 
-        let TEST_A =
-            createVariable(rootNode, "TEST_A",  $"TEST_A", 
+        let heartBit =
+            createVariable(rootNode, "HeartBit",  $"HeartBit", 
                 this.NamespaceIndexes.[0], Variant(false), typeof<bool>
             )
-
-        let TEST_B =
-            createVariable(rootNode, $"TEST_B",  $"TEST_B", 
-                this.NamespaceIndexes.[0], Variant(false), typeof<bool>
-            )
-        this.AddPredefinedNode(this.SystemContext, TEST_A)
-        this.AddPredefinedNode(this.SystemContext, TEST_B)
+        this.AddPredefinedNode(this.SystemContext, heartBit)
       
         // 타이머 설정
         let timer = new System.Timers.Timer(1000.0) // 1초 간격으로 타이머 실행
         timer.Elapsed.Add(fun _ ->
-            TEST_A.Value <- not (Convert.ToBoolean(TEST_A.Value))
-            TEST_A.Timestamp <- DateTime.UtcNow
-            TEST_A.ClearChangeMasks(this.SystemContext, false)
-
-            TEST_B.Value <- not (Convert.ToBoolean(TEST_A.Value))
-            TEST_B.Timestamp <- DateTime.UtcNow
-            TEST_B.ClearChangeMasks(this.SystemContext, false)
+            heartBit.Value <- not (Convert.ToBoolean(heartBit.Value))
+            heartBit.Timestamp <- DateTime.UtcNow
+            heartBit.ClearChangeMasks(this.SystemContext, false)
         )
         timer.Start()
 

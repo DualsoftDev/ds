@@ -228,24 +228,15 @@ type TagKindExt =
                 )
         | _ -> false
 
-        
-    [<Extension>]
-    static member IsVertexOpcCalcTag(x:TagEvent) =
-        match x with
-        | EventVertex (_, _, kind) ->
-            kind.IsOneOf(
-                  VertexTag.endTag
-                , VertexTag.planStart
-                )
-        | _ -> false
+    
 
     [<Extension>]
     static member IsVertexOpcDataTag(x:IStorage) =
         x.TagKind.IsOneOf(
               int FlowTag.drive_state,
               int VertexTag.planStart,
-              int VertexTag.going, 
-              int VertexTag.finish)
+              int VertexTag.startTag, 
+              int VertexTag.endTag)
 
 
     [<Extension>]

@@ -20,8 +20,8 @@ module DsTimeAnalysisMoudle =
         let mutable count = 0u
         let mutable mean = 0.0f
         let mutable M2 = 0.0f
-        let mutable activeDuration = 0.0 // StatsStart → finishTag
-        let mutable movingDuration = 0.0 // MovingStart → finishTag
+        let mutable activeDuration = 0u // StatsStart → finishTag
+        let mutable movingDuration = 0u // MovingStart → finishTag
 
         let mutable statsStart = DateTime.MinValue 
         let mutable movingStart = DateTime.MinValue 
@@ -57,9 +57,10 @@ module DsTimeAnalysisMoudle =
                 tm.CalcAverage.BoxedValue <- mean
                 tm.CalcStandardDeviation.BoxedValue <- getStandardDeviation() 
                 tm.CalcCount.BoxedValue <- count
-                tm.CalcWaitingDuration.BoxedValue <- activeDuration - movingDuration |> uint32
-                tm.CalcActiveDuration.BoxedValue <- activeDuration   |> uint32
-                tm.CalcMovingDuration.BoxedValue <- movingDuration   |> uint32
+
+                tm.CalcWaitingDuration.BoxedValue <- activeDuration - movingDuration
+                tm.CalcActiveDuration.BoxedValue <- activeDuration  
+                tm.CalcMovingDuration.BoxedValue <- movingDuration  
 
 
         //member x.StatsStart = statsStart
@@ -80,9 +81,9 @@ module DsTimeAnalysisMoudle =
             let tm = vertex.TagManager :?> VertexTagManager
             let endTime = DateTime.UtcNow
             if statsStart <> DateTime.MinValue then
-                activeDuration <-  (endTime - statsStart).TotalMilliseconds
+                activeDuration <-  (endTime - statsStart).TotalMilliseconds |> uint32
             if movingStart <> DateTime.MinValue then
-                movingDuration <-  (endTime - movingStart).TotalMilliseconds
+                movingDuration <-  (endTime - movingStart).TotalMilliseconds |> uint32
             
             resetStat vertex  //opc rising 위해서 값 초기화
             updateStat vertex

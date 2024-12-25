@@ -80,3 +80,6 @@ Grammar/CsParser/bin/
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/dsLib/Cylinder/DoubleCylinder.ds
 Logger.sqlite3
 Tmp/
+**/Unused/
+**/unused/
+**/bak/

@@ -16,7 +16,8 @@ module rec ToJsonGraphModule =
     let createJson properties = JObject(properties |> Array.ofSeq)
 
     /// Edge를 JSON으로 변환
-    let edgeToJson (edge: Edge) =
+    let edgeToJson (edge: Edge) = 
+        let srcName = i  f edge.Source :? Alias then edge.Source.QualifiedName else edge.Source.QualifiedName
         createJson [
             JProperty("source", JValue(edge.Source.QualifiedName))
             JProperty("target", JValue(edge.Target.QualifiedName))

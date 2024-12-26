@@ -203,7 +203,7 @@ module DsTimeAnalysisMoudle =
             | true, tagKind when tagKind = FlowTag.drive_state -> 
                 processFlow flow
             | _ -> 
-                failWithLog "Invalid TagKind value: %d" stg.TagKind
+                ()
         | _ -> 
                 failWithLog "Invalid Target: Expected Vertex or Flow but got %A" stg.Target
 

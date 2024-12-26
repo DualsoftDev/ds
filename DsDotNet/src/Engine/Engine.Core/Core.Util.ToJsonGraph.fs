@@ -30,9 +30,9 @@ module rec ToJsonGraphModule =
         |> Seq.map (fun aliasDef ->
             let aliasTexts = 
                 aliasDef.AliasTexts
-                |> Seq.map (fun text -> JValue(text.QuoteOnDemand()))
+                |> Seq.map (fun text -> JValue($"{flow.QualifiedName}.{text.QuoteOnDemand()}"))
                 |> JArray
-
+                
             let aliasTarget = 
                 match aliasDef.AliasTarget with
                 | Some(DuAliasTargetReal real) -> real.QualifiedName

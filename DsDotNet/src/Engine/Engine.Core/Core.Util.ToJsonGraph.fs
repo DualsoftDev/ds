@@ -86,9 +86,17 @@ module rec ToJsonGraphModule =
     let callISafetyAutoPreConvertToJson (items:HashSet<SafetyAutoPreCondition>) (name:string)  =
         JObject(
             JProperty("Holder", name),
-            JProperty("Conditions", JArray(items.Select(fun s->s.GetCall().QualifiedName)))
-        )
-
+            JProperty("Conditions"
+                , JArray(items
+                            .SelectMany(fun s->
+                                let sys = s.GetCall().System
+                                let job = s.GetCall().TargetJob
+                                let calls = sys.GetVerticesOfJobCalls().Where(fun c->c.TargetJob = job)
+                                calls.Select(fun c -> c.QualifiedName)
+                                )
+                            )
+                    )
+            )
 
     let callToJson (call: Call) =
         let taskDevs = 

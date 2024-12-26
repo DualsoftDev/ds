@@ -35,8 +35,8 @@ module rec ToJsonGraphModule =
 
             let aliasTarget = 
                 match aliasDef.AliasTarget with
-                | Some(DuAliasTargetReal real) -> real.GetAliasTargetToDs(flow).CombineQuoteOnDemand()
-                | Some(DuAliasTargetCall call) -> call.GetAliasTargetToDs(flow).CombineQuoteOnDemand()
+                | Some(DuAliasTargetReal real) -> real.QualifiedName
+                | Some(DuAliasTargetCall call) -> call.QualifiedName
                 | None -> "ERROR"
 
             createJson [

@@ -52,6 +52,7 @@
         <Compile Include="16.Functions.fs" />
         <Compile Include="17.Timer, Counter.fs" />
         <Compile Include="18.HmiPulse.fs" />
+        <Compile Include="19.SequenceToken.fs" />
         <Compile Include="ConvertErrorCheck.fs" />
         <Compile Include="ConvertAddress.fs" />
         <Compile Include="ConvertCPU.fs" />

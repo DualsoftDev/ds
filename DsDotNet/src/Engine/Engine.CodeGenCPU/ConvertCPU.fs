@@ -200,29 +200,7 @@ module ConvertCPU =
                 yield v.VM.V2_ActionVairableMove(s)
         |]
 
-    let private applyVertexToken(sys:DsSystem) =
-        let fn = getFuncName()
-        let edges = sys.GetFlowEdges()
-                        .Where(fun e->e.EdgeType.HasFlag(EdgeType.Start))
-                        .Where(fun e->e.Source.TryGetPureReal().IsSome && e.Target.TryGetPureReal().IsSome)
-                    |> Seq.distinctBy(fun e -> (e.Source.GetPureReal(), e.Target.GetPureReal()))
-
-        let noTransEdges= edges.Where(fun e->e.Source.GetPureReal().NoTransData)
-        let transEdges  = edges.Except noTransEdges
-        [|
-            for edge in transEdges do
-                let src = edge.Source.GetPureReal()
-                let tgt = edge.Target.GetPureReal()
-                let data = src.VR.RealTokenData
-                yield (tgt.VR.R.Expr, data.ToExpression()) --> (tgt.VR.RealTokenData, fn) 
-
-            for edge in noTransEdges do
-                let src = edge.Source.GetPureReal()
-                let data = src.VR.RealTokenData
-                yield (src.VR.GP.Expr, data.ToExpression()) --> (src.VR.MergeTokenData, fn) 
-        |]
-  
-
+    
     let private applyJob(s:DsSystem) =
         [|
             let devCallSet =  s.GetTaskDevCalls()

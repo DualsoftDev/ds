@@ -13,8 +13,12 @@
 	</PropertyGroup>
 
     <ItemGroup>
+		<None Include="ServerConfig.json">
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</None>
 		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="Utils.fs" />
+		<Compile Include="ServerConfig.fs" />
 		<Compile Include="DsTimeAnalysis.fs" />
         <Compile Include="DsNodeManager.fs" />
         <Compile Include="DsOPCServer.fs" />

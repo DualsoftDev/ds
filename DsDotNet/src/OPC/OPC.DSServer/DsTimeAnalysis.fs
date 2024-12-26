@@ -2,6 +2,7 @@ namespace OPC.DSServer
 
 open System
 open System.Collections.Generic
+open System.IO
 open Opc.Ua
 open Opc.Ua.Server
 open System.Reactive.Subjects
@@ -11,6 +12,8 @@ open Engine.Core.TagKindModule
 open Engine.Runtime
 open Dual.Common.Core.FS
 open Engine.CodeGenCPU
+open Newtonsoft.Json
+open System.Configuration
 
 [<AutoOpen>]
 module DsTimeAnalysisMoudle =
@@ -100,22 +103,29 @@ module DsTimeAnalysisMoudle =
         member this.ActiveDuration  = activeDuration
         member this.MovingDuration  = movingDuration 
 
-    
         member this.DriveStateChaged(driveOn:bool) =   
             if not(driveOn) then    //drive_state가 꺼지면 초기화
                 updateAble <- false
 
-        /// 평균 값
-        member this.Average = mean
+        member x.Count with get () = count and set v = count <- v
+        member x.Mean with get () = mean and set v = mean <- v
+        member x.MeanTemp with get () = M2 and set v = M2 <- v
+
 
         /// 모집단 표준편차
         member this.StandardDeviation = getStandardDeviation() 
 
-        /// 데이터 개수
-        member this.Count = count
-
     /// 태그별 통계 관리
     let statsMap = Dictionary<string, CalcStats>()
+    let GetStatsJson() = 
+        statsMap
+        |> Seq.map(fun kvp -> 
+            let statJson =  
+                {   Count = kvp.Value.Count;
+                    Mean = kvp.Value.Mean; 
+                    MeanTemp = kvp.Value.MeanTemp }
+            kvp.Key, statJson) 
+        |> dict     
 
     /// 통계 객체 가져오기 (없으면 생성)
     let getOrCreateStats (fqdn:string) =
@@ -196,3 +206,4 @@ module DsTimeAnalysisMoudle =
                 failWithLog "Invalid TagKind value: %d" stg.TagKind
         | _ -> 
                 failWithLog "Invalid Target: Expected Vertex or Flow but got %A" stg.Target
+

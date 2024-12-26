@@ -1,0 +1,8 @@
+{
+	"OPCServerConfig": {
+		"OPCServerPort": "2747"
+	},
+	"StatisticsConfig": {
+		"StatisticsFilePath": "%APPDATA%\\dualsoft\\DSPilot\\StatisticsData\\"
+	}
+}

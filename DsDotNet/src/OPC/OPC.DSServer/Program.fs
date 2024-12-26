@@ -22,7 +22,7 @@ module Program =
             Console.ReadKey() |> ignore
 
             // OPC UA 서버 종료
-            DsOpcUaServerManager.Stop()
+            DsOpcUaServerManager.Stop(runtimeModel.System)
         with ex ->
             printfn "오류: %s" ex.Message
         0 // 프로그램 종료 코드

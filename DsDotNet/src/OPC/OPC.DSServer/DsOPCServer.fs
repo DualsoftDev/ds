@@ -86,7 +86,8 @@ module DsOPCServerConfig =
 
         // Server Configuration
         let serverConfig = ServerConfiguration()
-        serverConfig.BaseAddresses.Add("opc.tcp://localhost:2747")
+        let serverPort = ServerConfigModule.GetServerPort()    
+        serverConfig.BaseAddresses.Add($"opc.tcp://localhost:{serverPort}")
         //serverConfig.BaseAddresses.Add("https://localhost:2747")
         //serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:55555")
         //serverConfig.AlternateBaseAddresses.Add("https://127.0.0.1:55555")
@@ -116,6 +117,9 @@ module DsOPCServerConfig =
 
 type DsOPCServer(dsSys: DsSystem) =
     inherit StandardServer()
+
+    do
+        LoadStatisticsFromJson (dsSys.Name) |> ignore
 
     // NodeManager를 생성하여 주소 공간 관리
     override this.CreateMasterNodeManager(server: IServerInternal, configuration: ApplicationConfiguration) =

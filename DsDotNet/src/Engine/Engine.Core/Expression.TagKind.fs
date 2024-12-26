@@ -244,6 +244,7 @@ type TagKindExt =
               int FlowTag.idle_mode,
               int VertexTag.planStart,
               int VertexTag.startTag, 
+              int VertexTag.finish, 
               int VertexTag.endTag)
 
 

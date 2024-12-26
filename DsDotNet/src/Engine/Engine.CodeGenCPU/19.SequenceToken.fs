@@ -47,12 +47,8 @@ let applyVertexToken(sys: DsSystem) =
     let andEdgeCheck = transEdges.Where(fun e->e.Target:?Real) // alias Or 처리아니고 And Edge인 경우만 체크
     // 그룹 내부에 아이템이 1개 초과인 경우 체크
     checkMultipleTransitionGroups(sys, andEdgeCheck)
-    //let groups = 
-    //    transEdges
-    //    |> Seq.groupBy (fun e -> e.Target.GetPureReal())
 
     [|
-        //for (tgt, items) in groups do
         for edge in transEdges do
             let src = edge.Source.GetPureReal()
             let tgt = edge.Target.GetPureReal()

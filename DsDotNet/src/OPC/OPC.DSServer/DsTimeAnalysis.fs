@@ -17,6 +17,7 @@ open System.Configuration
 
 [<AutoOpen>]
 module DsTimeAnalysisMoudle =
+    let _startDelay = 50.0 //ms  Real만 endTag 후 바로 StartTracking 하므로 시작시간 지연 발생 시작시보정
 
     /// 통계 계산 클래스
     type CalcStats() =
@@ -69,8 +70,8 @@ module DsTimeAnalysisMoudle =
         //member x.StatsStart = statsStart
         //member val MovingStart = DateTime.MinValue with get, set
     
-        member this.StartTracking(vertex:Vertex) =  
-            statsStart <- DateTime.UtcNow
+        member this.StartTracking(vertex:Vertex, offset:float) =  
+            statsStart <- DateTime.UtcNow.AddMilliseconds(-offset)
             let tm = vertex.TagManager :?> VertexTagManager
             tm.CalcActiveStartTime.BoxedValue <- 
                 TimeZoneInfo.ConvertTime(statsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
@@ -89,12 +90,13 @@ module DsTimeAnalysisMoudle =
                 movingDuration <-  (endTime - movingStart).TotalMilliseconds |> uint32
             
             resetStat vertex  //opc rising 위해서 값 초기화
-            updateStat vertex
+            updateStat vertex  
+            
+            tm.CalcStatFinish.BoxedValue <- true //rising 처리
 
             statsStart <- DateTime.MinValue
             movingStart <- DateTime.MinValue
 
-            tm.CalcStatFinish.BoxedValue <- true //rising 처리
 
       
         /// 대기 시간 계산
@@ -114,6 +116,7 @@ module DsTimeAnalysisMoudle =
 
         /// 모집단 표준편차
         member this.StandardDeviation = getStandardDeviation() 
+
 
     /// 태그별 통계 관리
     let statsMap = Dictionary<string, CalcStats>()
@@ -144,7 +147,7 @@ module DsTimeAnalysisMoudle =
                 stats.DriveStateChaged(driveOn)
                 
                 if vertex :? Real &&  driveOn then
-                    stats.StartTracking(vertex)
+                    stats.StartTracking(vertex, 0.0)
                 )
        
     /// 태그별 시간 처리 로직
@@ -152,7 +155,7 @@ module DsTimeAnalysisMoudle =
         let stats = getOrCreateStats call.QualifiedName
         match tagKind with
         | VertexTag.startTag ->
-            stats.StartTracking(call) 
+            stats.StartTracking(call, 0.0) 
         | VertexTag.planStart ->
             stats.StartMoving() 
 
@@ -171,8 +174,11 @@ module DsTimeAnalysisMoudle =
                 stats.StartMoving()
             | VertexTag.endTag->
                 stats.EndTracking(real)    //work는 종료하고 바로 시작(실제Going을 Moving으로 처리)
-                stats.StartTracking(real)
-
+            | VertexTag.finish ->
+                async {
+                    do! Async.Sleep(_startDelay|>int) // 50ms 지연
+                    stats.StartTracking(real, _startDelay)
+                } |> Async.Start // 비동기로 처리
             | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 
         | None, Some flow -> processFlow flow

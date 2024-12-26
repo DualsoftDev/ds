@@ -17,10 +17,15 @@ module rec ToJsonGraphModule =
 
     /// Edge를 JSON으로 변환
     let edgeToJson (edge: Edge) = 
-        let srcName = i  f edge.Source :? Alias then edge.Source.QualifiedName else edge.Source.QualifiedName
+        let srcName = if edge.Source :? Alias 
+                        then $"{edge.Source.Parent.GetFlow().QualifiedName}.{edge.Source.Name.QuoteOnDemand()}"
+                        else edge.Source.QualifiedName
+        let tgtName = if edge.Target :? Alias 
+                        then $"{edge.Target.Parent.GetFlow().QualifiedName}.{edge.Target.Name.QuoteOnDemand()}"
+                        else edge.Target.QualifiedName
         createJson [
-            JProperty("source", JValue(edge.Source.QualifiedName))
-            JProperty("target", JValue(edge.Target.QualifiedName))
+            JProperty("source", JValue(srcName))
+            JProperty("target", JValue(tgtName))
             JProperty("symbol", JValue(edge.EdgeType.ToText()))
         ]
 

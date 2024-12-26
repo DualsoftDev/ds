@@ -93,6 +93,7 @@ module ConvertCpuCall =
                 vmc.ErrOnTimeUnder
                 vmc.ErrOffTimeOver
                 vmc.ErrOffTimeUnder
+                vmc.ErrInterlock
                 vmc.ErrShort
                 vmc.ErrOpen
             |]

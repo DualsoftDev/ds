@@ -93,6 +93,4 @@ type VertexTagManager with
 
     member v.E5_RealErrTotalMonitor() =
         let real = v.Vertex :?> Real
-        let rst = v._off.Expr
-         
-        (real.Errors.ToOrElseOff(), rst) --| (real.VR.ErrWork, getFuncName())
+        (real.Errors.ToOrElseOff(), v._off.Expr) --| (real.VR.ErrWork, getFuncName())

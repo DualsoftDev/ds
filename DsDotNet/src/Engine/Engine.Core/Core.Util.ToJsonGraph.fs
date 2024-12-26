@@ -50,6 +50,76 @@ module rec ToJsonGraphModule =
         )
         |> JArray
 
+        
+    /// system  ISafetyAutoPreRequisiteHolder JSON 변환 함수
+    let collectAndConvertToJson 
+        (system: DsSystem)
+        (predicate: ISafetyAutoPreRequisiteHolder -> bool) // 조건 필터
+        (getName: ISafetyAutoPreRequisiteHolder -> string) // 이름 추출
+        (getConditions: ISafetyAutoPreRequisiteHolder -> seq<string>) // 조건 추출
+        =
+        // Collect holders that match the predicate
+        let holders =
+            [
+                for f in system.Flows do
+                    yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
+                    for r in f.Graph.Vertices.OfType<Real>() do
+                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
+            ]
+            |> List.distinct
+            |> List.filter predicate
+
+        // Convert holders to JSON
+        JArray(
+            holders
+            |> Seq.map (fun holder ->
+                let name = getName holder
+                let conditions = getConditions holder |> Seq.toList
+                JObject(
+                    JProperty("Holder", name),
+                    JProperty("Conditions", JArray(conditions))
+                )
+            )
+        )
+
+
+    let callISafetyAutoPreConvertToJson (items:HashSet<SafetyAutoPreCondition>) (name:string)  =
+        JObject(
+            JProperty("Holder", name),
+            JProperty("Conditions", JArray(items.Select(fun s->s.GetCall().QualifiedName)))
+        )
+
+
+    let callToJson (call: Call) =
+        let taskDevs = 
+            call.TaskDefs
+            |> Seq.map (fun td ->
+                JObject(
+                    JProperty("name", td.QualifiedName),
+                    JProperty("type", "TaskDev")
+                )
+            )
+            |> JArray
+
+        JObject(
+            JProperty("name", getJsonName call),
+            JProperty("type", "Call"),
+            JProperty("taskDevs", taskDevs),
+            JProperty(
+                "autoPreConditions", 
+                callISafetyAutoPreConvertToJson 
+                    call.AutoPreConditions 
+                    call.QualifiedName 
+            ),
+            JProperty(
+                "safetyConditions", 
+                callISafetyAutoPreConvertToJson 
+                    call.SafetyConditions 
+                    call.QualifiedName
+            )
+        )
+
+
     /// Graph 데이터를 JSON으로 변환
     let graphToJson (graph: DsGraph) =
         let vertices = 
@@ -73,26 +143,7 @@ module rec ToJsonGraphModule =
             JProperty("vertices", vertices :> JToken)
             JProperty("edges", edges :> JToken)
         ]
-    /// Call 객체를 JSON으로 변환
-    let callToJson (call: Call) =
-        // TaskDefs를 JSON으로 변환
-        let taskDevs = 
-            call.TaskDefs
-            |> Seq.map (fun td ->
-                createJson [
-                    JProperty("name", JValue(td.QualifiedName))
-                    JProperty("type", JValue("TaskDev"))
-                ]
-            )
-            |> JArray
-
-        createJson [
-            JProperty("name", JValue(getJsonName call))
-            JProperty("type", JValue("Call"))
-            JProperty("taskDevs", taskDevs :> JToken) // Tasks 추가
-        ]
-
-
+   
     /// Vertex를 JSON으로 변환
     let vertexToJson (vertex: Vertex) =
         match vertex with
@@ -123,36 +174,6 @@ module rec ToJsonGraphModule =
         |> Seq.map flowToJson
         |> JArray
 
-    /// 공용 데이터 수집 및 JSON 변환 함수
-    let collectAndConvertToJson 
-        (system: DsSystem)
-        (predicate: ISafetyAutoPreRequisiteHolder -> bool) // 조건 필터
-        (getName: ISafetyAutoPreRequisiteHolder -> string) // 이름 추출
-        (getConditions: ISafetyAutoPreRequisiteHolder -> seq<string>) // 조건 추출
-        =
-        // Collect holders that match the predicate
-        let holders =
-            [
-                for f in system.Flows do
-                    yield! f.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
-                    for r in f.Graph.Vertices.OfType<Real>() do
-                        yield! r.Graph.Vertices.OfType<ISafetyAutoPreRequisiteHolder>()
-            ]
-            |> List.distinct
-            |> List.filter predicate
-
-        // Convert holders to JSON
-        JArray(
-            holders
-            |> Seq.map (fun holder ->
-                let name = getName holder
-                let conditions = getConditions holder |> Seq.toList
-                JObject(
-                    JProperty("Holder", name),
-                    JProperty("Conditions", JArray(conditions))
-                )
-            )
-        )
 
     /// 시스템의 Safety 데이터를 JSON으로 변환
     let safetyToJson (system: DsSystem) =

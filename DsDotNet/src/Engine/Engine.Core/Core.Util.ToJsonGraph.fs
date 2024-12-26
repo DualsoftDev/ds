@@ -14,18 +14,16 @@ module rec ToJsonGraphModule =
 
     /// 공통적으로 JProperty 배열에서 JObject를 생성하는 유틸리티 함수
     let createJson properties = JObject(properties |> Array.ofSeq)
+    let getJsonName(vertex:Vertex) = 
+            if vertex :? Alias 
+            then $"{vertex.Parent.GetFlow().QualifiedName}.{vertex.Name.QuoteOnDemand()}"
+            else vertex.QualifiedName
 
     /// Edge를 JSON으로 변환
     let edgeToJson (edge: Edge) = 
-        let srcName = if edge.Source :? Alias 
-                        then $"{edge.Source.Parent.GetFlow().QualifiedName}.{edge.Source.Name.QuoteOnDemand()}"
-                        else edge.Source.QualifiedName
-        let tgtName = if edge.Target :? Alias 
-                        then $"{edge.Target.Parent.GetFlow().QualifiedName}.{edge.Target.Name.QuoteOnDemand()}"
-                        else edge.Target.QualifiedName
         createJson [
-            JProperty("source", JValue(srcName))
-            JProperty("target", JValue(tgtName))
+            JProperty("source", JValue(getJsonName edge.Source))
+            JProperty("target", JValue(getJsonName edge.Target))
             JProperty("symbol", JValue(edge.EdgeType.ToText()))
         ]
 
@@ -70,7 +68,7 @@ module rec ToJsonGraphModule =
     let realToJson (real: Real) =
         let vertices, edges = graphToJson real.Graph
         createJson [
-            JProperty("name", JValue(real.QualifiedName))
+            JProperty("name", JValue(getJsonName real))
             JProperty("type", JValue("Real"))
             JProperty("vertices", vertices :> JToken)
             JProperty("edges", edges :> JToken)
@@ -89,7 +87,7 @@ module rec ToJsonGraphModule =
             |> JArray
 
         createJson [
-            JProperty("name", JValue(call.QualifiedName))
+            JProperty("name", JValue(getJsonName call))
             JProperty("type", JValue("Call"))
             JProperty("taskDevs", taskDevs :> JToken) // Tasks 추가
         ]

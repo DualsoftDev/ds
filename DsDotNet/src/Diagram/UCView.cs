@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Runtime.Versioning;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using static Engine.CodeGenCPU.TagManagerModule;
 using static Engine.CodeGenCPU.TaskDevManagerModule;
@@ -533,7 +534,13 @@ public partial class UcView : UserControl
 
     public void RefreshGraph()
     {
-        viewer.Do(viewer.Refresh);
+        //viewer.Do(() => viewer.Refresh());   // control.IsHandleCreated 여기서 조건 안맞음 
+        if (viewer.InvokeRequired)
+        {
+            viewer.Invoke(() => viewer.Refresh());
+        }
+        else
+            viewer.Refresh();
     }
 
     private Node findNode(ViewNode viewNode)

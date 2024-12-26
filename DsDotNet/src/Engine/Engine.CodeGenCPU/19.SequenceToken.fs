@@ -57,7 +57,9 @@ let applyVertexToken(sys: DsSystem) =
             let src = edge.Source.GetPureReal()
             let tgt = edge.Target.GetPureReal()
             let data = src.VR.RealTokenData
-            yield (src.VR.F.Expr <&&> tgt.VR.R.Expr, data.ToExpression()) --> (tgt.VR.RealTokenData, fn) 
+            let tempTokenTrans = getSM(sys).GetTempBoolTag($"tempTokenTrans{src.QualifiedName}")
+            yield! (src.VR.F.Expr <&&> tgt.VR.R.Expr, sys) --^ (tempTokenTrans, fn)
+            yield (tempTokenTrans.Expr, data.ToExpression()) --> (tgt.VR.RealTokenData, fn) 
 
         for edge in noTransEdges do
             let src = edge.Source.GetPureReal()

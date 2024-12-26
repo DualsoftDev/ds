@@ -106,13 +106,13 @@ module rec ToJsonGraphModule =
             JProperty("type", "Call"),
             JProperty("taskDevs", taskDevs),
             JProperty(
-                "autoPreConditions", 
+                "autoPre", 
                 callISafetyAutoPreConvertToJson 
                     call.AutoPreConditions 
                     call.QualifiedName 
             ),
             JProperty(
-                "safetyConditions", 
+                "safety", 
                 callISafetyAutoPreConvertToJson 
                     call.SafetyConditions 
                     call.QualifiedName

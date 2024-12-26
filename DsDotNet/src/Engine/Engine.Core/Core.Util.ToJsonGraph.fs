@@ -16,7 +16,7 @@ module rec ToJsonGraphModule =
     let createJson properties = JObject(properties |> Array.ofSeq)
     let getJsonName(vertex:Vertex) = 
             if vertex :? Alias 
-            then $"{vertex.Parent.GetFlow().QualifiedName}.{vertex.Name.QuoteOnDemand()}"
+            then vertex.NameComponents.CombineQuoteOnDemand()
             else vertex.QualifiedName
 
     /// Edge를 JSON으로 변환
@@ -44,7 +44,7 @@ module rec ToJsonGraphModule =
                 | None -> "ERROR"
 
             createJson [
-                JProperty("aliasKey", JValue(aliasTarget))
+                JProperty("aliasHolder", JValue(aliasTarget))
                 JProperty("texts", aliasTexts :> JToken)
             ]
         )

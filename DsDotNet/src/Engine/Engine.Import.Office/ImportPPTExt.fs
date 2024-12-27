@@ -296,16 +296,17 @@ module ImportU =
                 |> Seq.filter(fun node -> node.NodeType = CALL) //Call만 처리
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
-                    try
                         let parentWrapper =
-                            if dicChildParent.ContainsKey(node) then
-                                let a = dicChildParent[node]
-                                dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
+                            if dicChildParent.ContainsKey node then
+                                let parent = dicChildParent[node]
+                                if not (dicVertex.ContainsKey parent.Key)
+                                then 
+                                    node.Shape.ErrorName($"이름이 같은 다른페이지 Work 내부에 복수정의", node.PageNum)
+                                else 
+                                    dicVertex[parent.Key] :?> Real |> DuParentReal
                             else
                                 dicFlow[node.PageNum] |> DuParentFlow
                         createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
-                    with ex ->
-                        node.Shape.ErrorName($"이름이 같은 다른페이지 Work 내부에 복수정의", node.PageNum)
                 )
 
             

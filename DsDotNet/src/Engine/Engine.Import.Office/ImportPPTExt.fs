@@ -86,8 +86,6 @@ module ImportU =
         //MFlow 리스트 만들기
         [<Extension>]
         static member MakeFlows(doc: PptDoc, sys: DsSystem) =
-            let checkName = HashSet<string>()
-            let dicFlow = doc.DicFlow
 
             doc.Pages
             |> Seq.filter (fun page -> page.PageNum <> pptHeadPage)
@@ -98,9 +96,10 @@ module ImportU =
                 let sysName, flowName = GetSysNFlow(doc.Name, page.Title, page.PageNum)
                 let flowName = if page.PageNum = pptHeadPage then $"{sysName}_Page1" else flowName
 
-                dicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore)
-
-
+                match doc.DicFlow.TryFind(fun kv -> kv.Value.Name = flowName) with
+                | Some kv ->   doc.DicFlow.Add(pageNum, kv.Value) |> ignore
+                | None -> doc.DicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore
+                )
 
         //MakeButtons 리스트 만들기
         [<Extension>]

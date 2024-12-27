@@ -103,7 +103,7 @@ module ImportPptModule =
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)
-            SameFlowName(doc)
+            //SameFlowName(doc)  //중복 페이지는 같은 페이지로 해석
 
 
             doc.GetCopyPathNName()

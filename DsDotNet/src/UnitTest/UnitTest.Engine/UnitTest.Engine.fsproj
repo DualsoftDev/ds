@@ -130,4 +130,9 @@
 		<Exec Command="xcopy /s /e /y $(SolutionDir)Apps\PptAddIn\PptAddIn\dsLib\*.* $(TargetDir)dsLib\" />
 	</Target>
 
+
+	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+		<Exec Command="xcopy /s /e /y $(SolutionDir)Apps\PptAddIn\PptAddIn\dsLib\*.* $(TargetDir)dsLib\" />
+	</Target>
+	
 </Project>

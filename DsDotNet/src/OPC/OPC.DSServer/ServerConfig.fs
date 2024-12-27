@@ -58,9 +58,18 @@ module ServerConfigModule =
         | "StatisticsFilePath" -> resolvePath config.StatisticsConfig.StatisticsFilePath
         | _ -> failwithf "Key '%s' not found in configuration" key
 
+
     let fromServerConfig (key: string) : string =
-        let configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dualsoft/DSPilot/ServerConfig.json");
-        let config = loadConfig configPath
+        let appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+        let configDirectory = Path.Combine(appDataPath, "dualsoft/DSPilot")
+        let configFilePath = Path.Combine(configDirectory, "ServerConfig.json")
+            
+        // Ensure the directory exists
+        if not (Directory.Exists(configDirectory)) then
+            Directory.CreateDirectory(configDirectory) |> ignore
+
+        // Load configuration and get value
+        let config = loadConfig configFilePath
         getValueFromConfig key config
 
 

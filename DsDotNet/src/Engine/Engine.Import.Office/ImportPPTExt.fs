@@ -299,35 +299,14 @@ module ImportU =
                     try
                         let parentWrapper =
                             if dicChildParent.ContainsKey(node) then
+                                let a = dicChildParent[node]
                                 dicVertex[dicChildParent[node].Key] :?> Real |> DuParentReal
                             else
                                 dicFlow[node.PageNum] |> DuParentFlow
                         createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
                     with ex ->
-                        node.Shape.ErrorName(ex.Message, node.PageNum)
+                        node.Shape.ErrorName($"이름이 같은 다른페이지 Work 내부에 복수정의", node.PageNum)
                 )
-
-                //let calls = mySys.GetCallVertices().Where(fun f->f.IsJob)
-                //callNAutoPres
-                //|> Seq.filter(fun node -> node.NodeType = AUTOPRE) //AUTOPRE만 처리
-                //|> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
-                //|> Seq.iter (fun node ->
-                //    try
-                //        if not(dicChildParent.ContainsKey node) then
-                //            failWithLog $"{node.Name} 이름을 찾을 수 없습니다."
-                  
-                //        match calls.TryFind(fun c-> c.TargetJob.DequotedQualifiedName = node.Job.Combine()) with 
-                //        | Some call -> 
-                //                match dicVertex[dicChildParent[node].Key] with  //다른 Real에 연결된 Call은 예외 아님
-                //                | :? Real as r when not (r.Graph.Vertices.Contains(call))-> ()
-                //                | _-> failWithLog $"{node.Job.Combine()} AUTOPRE는 다른 Work 있는 Action만 연결할 수 있습니다."
-                                
-                //                doc.DicAutoPreCall.Add(node.Key, call)
-                //        | None -> failwithlog $"{node.Job.Combine()} AUTOPRE 조건을 찾을 수 없습니다."
-
-                //    with ex ->
-                //        node.Shape.ErrorName(ex.Message, node.PageNum)
-                //)
 
             
             let createAlias () =

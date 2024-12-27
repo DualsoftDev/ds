@@ -44,7 +44,8 @@ module PptDocModule =
         let dicFlowNodes =
             pages.Values
             |> Seq.filter (fun page -> page.IsUsing)
-            |> Seq.map (fun page -> page.PageNum, pptNodes |> Seq.filter (fun node -> node.PageNum = page.PageNum))
+            |> Seq.groupBy (fun page -> page.Title)
+            |> Seq.map (fun (groupTitle, _) -> groupTitle, pptNodes |> Seq.filter (fun node -> node.FlowName = groupTitle))
             |> dict
 
         let updateAlias (aliasCheckNodes: PptNode seq) (allNodes: PptNode seq) (nameNums: (string*int) seq) (isExFlow:bool) =
@@ -113,7 +114,7 @@ module PptDocModule =
             |> Seq.collect id
             |> Seq.filter parents.ContainsKey
             |> Seq.map (fun real ->
-                dicFlowNodes.[real.PageNum]
+                dicFlowNodes.[real.FlowName]
                 |> Seq.filter (fun node -> node.NodeType.IsCall)
                 |> Seq.filter (fun node -> parents.[real].Contains(node)))
 

@@ -128,7 +128,7 @@ module ImportType =
 
     let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, name:string) =
 
-        if not(nodeType.IsLoadSys) && name.Split(".").Length > 3 then
+        if not(nodeType.IsLoadSys) && name.Split(".").Length > 3 && nodeType <> NodeType.AUTOPRE then
                 failwithlog ErrID._73
 
         if name.Contains(";") then

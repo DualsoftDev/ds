@@ -17,7 +17,6 @@ open System.Configuration
 
 [<AutoOpen>]
 module DsTimeAnalysisMoudle =
-    let _startDelay = 50.0 //ms  Real만 endTag 후 바로 StartTracking 하므로 시작시간 지연 발생 시작시보정
 
     /// 통계 계산 클래스
     type CalcStats() =
@@ -70,8 +69,8 @@ module DsTimeAnalysisMoudle =
         //member x.StatsStart = statsStart
         //member val MovingStart = DateTime.MinValue with get, set
     
-        member this.StartTracking(vertex:Vertex, offset:float) =  
-            statsStart <- DateTime.UtcNow.AddMilliseconds(-offset)
+        member this.StartTracking(vertex:Vertex, startTime:DateTime) =  
+            statsStart <- startTime
             let tm = vertex.TagManager :?> VertexTagManager
             tm.CalcActiveStartTime.BoxedValue <- 
                 TimeZoneInfo.ConvertTime(statsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
@@ -147,7 +146,7 @@ module DsTimeAnalysisMoudle =
                 stats.DriveStateChaged(driveOn)
                 
                 if vertex :? Real &&  driveOn then
-                    stats.StartTracking(vertex, 0.0)
+                    stats.StartTracking(vertex, DateTime.UtcNow)
                 )
        
     /// 태그별 시간 처리 로직
@@ -155,7 +154,7 @@ module DsTimeAnalysisMoudle =
         let stats = getOrCreateStats call.QualifiedName
         match tagKind with
         | VertexTag.startTag ->
-            stats.StartTracking(call, 0.0) 
+            stats.StartTracking(call, DateTime.UtcNow) 
         | VertexTag.planStart ->
             stats.StartMoving() 
 
@@ -175,9 +174,10 @@ module DsTimeAnalysisMoudle =
             | VertexTag.endTag->
                 stats.EndTracking(real)    //work는 종료하고 바로 시작(실제Going을 Moving으로 처리)
             | VertexTag.finish ->
+                let startDelay = 50  
                 async {
-                    do! Async.Sleep(_startDelay|>int) // 50ms 지연
-                    stats.StartTracking(real, _startDelay)
+                    do! Async.Sleep(startDelay) // 50ms 지연  // work는 종료하고 바로 시작해서 다음 StartStat 시간이 처리됨 방지
+                    stats.StartTracking(real, DateTime.UtcNow.AddMilliseconds(-startDelay))
                 } |> Async.Start // 비동기로 처리
             | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 

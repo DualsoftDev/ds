@@ -32,7 +32,7 @@ module PptNodeModule =
         shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq
         , copySystems        : Dictionary<string, string> //copyName, orgiName
         , safeties           : HashSet<string>
-        , autoPres           : HashSet<string[]>  //callFqdn
+        , autoPres           : HashSet<string>  
         , jobInfos           : Dictionary<string, HashSet<string>> // jobBase, api SystemNames
         , btnHeadPageDefs    : Dictionary<string, BtnType>
         , btnDefs            : Dictionary<string, BtnType>
@@ -125,13 +125,11 @@ module PptNodeModule =
         member x.Job = 
             let jobPure =
             
-                if not (nodeType = CALL || nodeType = AUTOPRE) then
+                if nodeType <> CALL then
                     shape.ErrorName($"CallName not support {nodeType}({name}) type", iPage)
 
                 let parts = GetLastParenthesesRemoveName(name).Split('.')
-                if parts.Contains("")
-                then
-                    shape.ErrorName("이름 규격을 확인하세요", iPage)
+
 
                 match parts.Length with
                 | 2 ->
@@ -190,7 +188,7 @@ module PptNodeModule =
         static member Create(shape: Presentation.Shape, iPage: int, pageTitle: string, slieSize: int * int, isHeadPage: bool, macros:MasterPageMacro seq) =
             let copySystems       = Dictionary<string, string>() //copyName, orgiName
             let safeties          = HashSet<string>()
-            let autoPres          = HashSet<string[]>()  //jobFqdn
+            let autoPres          = HashSet<string>()  //jobFqdn
 
             let jobInfos           = Dictionary<string, HashSet<string>>() // jobBase, api SystemNames
             let btnHeadPageDefs    = Dictionary<string, BtnType>()
@@ -308,7 +306,11 @@ module PptNodeModule =
                 | (REALExF | LAYOUT | AUTOPRE | DUMMY) -> ()
 
                 let callNAutoPreName = nameNFunc(shape, macros, iPage)
-                if nodeType.IsOneOf(CALL, AUTOPRE) && callNAutoPreName.Contains('.') then
+
+                if nodeType.IsOneOf(AUTOPRE) && callNAutoPreName.Contains('[') then
+                    shape.ErrorShape(ErrID._85, iPage)
+
+                if nodeType.IsOneOf(CALL) && callNAutoPreName.Contains('.') then
                     //Dev1[3(3,3)].Api(!300, 200)[PUSH, MAX(1200ms), CHK(500ms)]
                     // names: e.g {"TT_CT"; "2ND_LATCH2[5(5,1)]"; "RET" }
                     let names = GetLastBracketRemoveName(callNAutoPreName).Split('.').ToFSharpList()
@@ -333,7 +335,6 @@ module PptNodeModule =
                             | "", _ -> failWithLog $"err: {name}MultiAction Count >= 1 : {cntPara}"
                             | _ , "" -> $"{TextJobMulti}{cntPara}"
                             | _ -> $"{TextJobMulti}{cntPara}({cntOptPara})"
-                            
                         if not (apiP.IsNullOrEmpty()) then
                             if apiP.Contains(TextInOutSplit) then
                                 let inV = createValueParam (apiP.Split(TextInOutSplit).Head().Trim() )
@@ -343,7 +344,8 @@ module PptNodeModule =
                                 failWithLog $"err: {name}(input, output) {TextInOutSplit} 로 구분되어 입력해야 합니다. "
 
                         if jobP.Contains(TextCallPush) 
-                        then callActionType <- CallActionType.Push 
+                        then 
+                            callActionType <- CallActionType.Push 
 
                         let callT = getCallTime jobP
                         if not(callT.IsDefault)
@@ -352,6 +354,8 @@ module PptNodeModule =
 
                         let items = [paraText].Where(fun f->not(f.IsNullOrEmpty()))
                         jobDevParam <- getParserJobType(String.Join(";", items))
+
+
             with ex ->
                 shape.ErrorShape(ex.Message, iPage)
 

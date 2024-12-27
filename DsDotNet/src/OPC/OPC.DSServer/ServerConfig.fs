@@ -59,7 +59,7 @@ module ServerConfigModule =
         | _ -> failwithf "Key '%s' not found in configuration" key
 
     let fromServerConfig (key: string) : string =
-        let configPath = "ServerConfig.json"
+        let configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "dualsoft/DSPilot/ServerConfig.json");
         let config = loadConfig configPath
         getValueFromConfig key config
 

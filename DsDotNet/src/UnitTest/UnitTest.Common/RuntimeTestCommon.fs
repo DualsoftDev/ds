@@ -39,6 +39,6 @@ module RuntimeTestCommon =
         let cleanExistingDb = true      //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
         let queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), Nullable<DateTime>());
         DbWriter.CreateAsync(queryCriteria, systems, cleanExistingDb).Wait()
-        DsSimulator.Do(runtimeModel.Cpu) |>ignore
+        let hasChangedVaules = DsSimulator.Do(runtimeModel.Cpu) 
 
-        runtimeModel, loggerDBSettings.ConnectionPath
+        runtimeModel, loggerDBSettings.ConnectionPath, hasChangedVaules

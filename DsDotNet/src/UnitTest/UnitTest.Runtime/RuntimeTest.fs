@@ -19,12 +19,12 @@ module RuntimeTest =
 
     [<Fact>]
     let ``Runtime Running Test`` () =
-        let runtimeModel, pathDB = 
+        let runtimeModel, pathDB, hasChangedVaules = 
             let testPpt =  @$"{__SOURCE_DIRECTORY__}../../../UnitTest/UnitTest.Model/ImportOfficeExample/sampleA/exportDS/testA/testMy/my.pptx"
             RuntimeTestCommon.getRuntimeModelForSim  testPpt
         
         (*시뮬레이션 구동 테스트*)
-        DsSimulator.Do(runtimeModel.Cpu) |> Assert.True //값변경있으면서 구동하면 true
+        hasChangedVaules |> Assert.True //값변경있으면서 구동하면 true
 
 
         (*DB 로깅 구동 테스트*)

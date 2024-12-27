@@ -25,7 +25,7 @@ module HelloDSDBTestModule =
 
     type HelloDSDBTest() =
         inherit EngineTestBaseClass()
-        let runtimeModel, pathDB = 
+        let runtimeModel, pathDB, hasChangedVaules = 
             let helloDSPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
             RuntimeTestCommon.getRuntimeModelForSim  helloDSPath
         let system = runtimeModel.System

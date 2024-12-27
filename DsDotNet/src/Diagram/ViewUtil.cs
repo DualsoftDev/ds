@@ -196,6 +196,7 @@ namespace Diagram.View.MSAGL
 
         private static void HandleVertexEvent(EventVertex ev)
         {
+
             if (DicNode.ContainsKey(ev.Target))
             {
                 var vv = DicNode[ev.Target];
@@ -274,7 +275,7 @@ namespace Diagram.View.MSAGL
                 }
             }
 
-            if (ev.IsVertexOriginTag())
+            if (ev.IsVertexOriginTag() && DicMemoryTag.ContainsKey(ev.Tag))
             {
                 var viewNodes = DicMemoryTag[ev.Tag];
 

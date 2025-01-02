@@ -11,6 +11,7 @@ open Engine.Core
 open Engine.Core.TagKindModule
 open Engine.Runtime
 open Dual.Common.Core.FS
+open System.Diagnostics
 
 
 [<AutoOpen>]
@@ -85,30 +86,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         
         folder.AddChild(variable)
         variable
-
-
-    //let createVariableTemp(folder: FolderState, name: string,  namespaceIndex: uint16, initialValue: Variant, typ: Type) =
-    //    let variable = 
-    //        new BaseDataVariableState(folder, 
-    //            SymbolicName = name, 
-    //            NodeId = NodeId(name, namespaceIndex),
-    //            BrowseName = QualifiedName(name, namespaceIndex),
-    //            Description = "",
-    //            DisplayName = name,
-    //            DataType = mapToDataTypeId(typ),
-    //            Value = initialValue.Value,
-    //            AccessLevel = AccessLevels.CurrentReadOrWrite,
-    //            UserAccessLevel = AccessLevels.CurrentReadOrWrite
-    //            )
-
-              
-
-    //    variable.OnWriteValue <- NodeValueEventHandler(fun context node indexRange dataEncoding value statusCode timestamp ->
-    //        handleWriteValue(context, node, indexRange, dataEncoding, &value, &statusCode, &timestamp)
-    //    )
-        
-    //    folder.AddChild(variable)
-    //    variable
 
 
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
@@ -277,6 +254,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         this.AddPredefinedNode(this.SystemContext, graphVariable)
         this.AddPredefinedNode(this.SystemContext, totalOpcItemFolder)
         this.AddPredefinedNode(this.SystemContext, totalOpcItemVariable)
+    
 
     member private this.SubscribeToTagEvents() =
         if _disposableTagDS.IsNone 
@@ -286,15 +264,15 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                     ValueSubject.Subscribe(fun (sys, stg, value) ->
                         if dsSys = (sys:?>DsSystem) // active만 처리
                         then
-                            if stg.IsVertexOpcDataTag() then 
-                                handleCalcTag (stg) |> ignore
+                            async {
+                                if stg.IsVertexOpcDataTag() then 
+                                    handleCalcTag (stg) |> ignore
 
-                            if _variables.ContainsKey(stg.Name) then
-                                let variable = _variables[stg.Name]
-                                variable.Value <- value
-                                variable.Timestamp <- DateTime.UtcNow
-                                variable.ClearChangeMasks(this.SystemContext, false)    
-
-                        
+                                if _variables.ContainsKey(stg.Name) then
+                                    let variable = _variables[stg.Name]
+                                    variable.Value <- value
+                                    variable.Timestamp <- DateTime.UtcNow
+                                    variable.ClearChangeMasks(this.SystemContext, false)    
+                            } |> Async.Start // 비동기로 처리
                     )
                 )

@@ -41,7 +41,7 @@ module DsTimeAnalysisMoudle =
             tm.CalcWaitingDuration.BoxedValue <- 0u
             tm.CalcActiveDuration.BoxedValue <-  0u
             tm.CalcMovingDuration.BoxedValue <-  0u
-            tm.CalcStatFinish.BoxedValue <- false  
+            tm.CalcStatWorkFinish.BoxedValue <- false  
 
         /// 데이터 추가 및 평균/분산 업데이트
         let updateStat(vertex:Vertex) =  
@@ -91,7 +91,7 @@ module DsTimeAnalysisMoudle =
             resetStat vertex  //opc rising 위해서 값 초기화
             updateStat vertex  
             
-            tm.CalcStatFinish.BoxedValue <- true //rising 처리
+            tm.CalcStatWorkFinish.BoxedValue <- true //rising 처리
 
             statsStart <- DateTime.MinValue
             movingStart <- DateTime.MinValue
@@ -158,7 +158,7 @@ module DsTimeAnalysisMoudle =
         | VertexTag.planStart ->
             stats.StartMoving() 
 
-        | VertexTag.endTag ->
+        | VertexTag.calcStatActionFinish ->
             stats.EndTracking(call)
         | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 

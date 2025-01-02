@@ -82,7 +82,7 @@ type VertexTagManager with
             let errRXInterlock = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock")
             [|
                 yield! (input <&&> !@iop, v.System) --^ (errRXInterlock, fn)
-                yield (errRXInterlock.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
+                yield (!@v.Flow.HomeExpr <&&>  errRXInterlock.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
             |]
         | _ -> [||]
 

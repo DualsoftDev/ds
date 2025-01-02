@@ -89,6 +89,8 @@ module ConvertCPU =
                 yield vc.C2_CallPlanEnd()
                 yield! vc.C3_InputDetected()
                 yield! vc.C4_OutputDetected()
+                yield vc.C5_StatActionFinish()
+                
                 
             if IsSpec (v, VertexAll, AliasNotCare) then
                 let vm = v.TagManager :?> VertexTagManager

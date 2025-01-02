@@ -113,9 +113,14 @@ module TagManagerModule =
             then createData(v, VertexTag.calcActiveStartTime, DuSTRING)
             else sysM.TempDataDuString
 
-        member val CalcStatFinish = 
+        member val CalcStatWorkFinish = 
             if isActive
-            then createData(v, VertexTag.calcStatFinish, DuBOOL)
+            then createData(v, VertexTag.calcStatWorkFinish, DuBOOL)
+            else sysM.TempDataDuBool
+       
+        member val CalcStatActionFinish = 
+            if isActive
+            then createData(v, VertexTag.calcStatActionFinish, DuBOOL)
             else sysM.TempDataDuBool
 
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
@@ -174,7 +179,8 @@ module TagManagerModule =
             | VertexTag.calcActiveDuration      -> x.CalcActiveDuration
             | VertexTag.calcMovingDuration      -> x.CalcMovingDuration
             | VertexTag.calcActiveStartTime     -> x.CalcActiveStartTime
-            | VertexTag.calcStatFinish          -> x.CalcStatFinish
+            | VertexTag.calcStatWorkFinish      -> x.CalcStatWorkFinish
+            | VertexTag.calcStatActionFinish    -> x.CalcStatActionFinish
             
             | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder     :> IStorage
             | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage

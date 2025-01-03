@@ -1,6 +1,5 @@
 namespace Engine.Parser.FS
 
-open Antlr4.Runtime
 open Dual.Common.Core.FS
 open Dual.Common.Base.FS
 

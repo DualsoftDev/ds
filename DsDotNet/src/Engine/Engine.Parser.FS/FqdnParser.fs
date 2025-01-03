@@ -17,7 +17,8 @@ module FqdnParserModule =
             with
             | :? ParserError as err ->
                 logError $"Failed to parse FQDN: '{text}'" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
-                Error err.Message
+                Ok [| text |]   // !!!! Not ERROR !!!
+                //Error err.Message
             | exn ->
                 Error $"ERROR: {exn}"
 

@@ -122,8 +122,9 @@ module ExportModule =
                     EnableXmlComment = enableXmlComment
 
                     RungCounter = counterGenerator 0
-                    //XGI 초기값 때문에 M 사용 XGK는 R 사용
-                    MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator (if plcType = XGI then "M" else "R") (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
+                    //XGI 초기값 때문에 M 사용 XGK는 R 사용 => M 영역으로 통일
+                    //MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator (if plcType = XGI then "M" else "R") (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
+                    MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                     TimerCounterGenerator = counterGeneratorWithExclusionList startTimer usedByteIndices
                     CounterCounterGenerator = counterGeneratorWithExclusionList startCounter usedByteIndices
                     AutoVariableCounter = counterGenerator 0
@@ -154,6 +155,7 @@ module ExportModule =
             mutable ExistingLSISprj: string
             mutable StartTimer: int
             mutable StartCounter: int
+            mutable StartMemory: int
             mutable EnableXmlComment: bool
             mutable MaxPouSplit: int
         }
@@ -161,6 +163,7 @@ module ExportModule =
             ExistingLSISprj = ""
             StartTimer = 0
             StartCounter = 0
+            StartMemory = 0
             EnableXmlComment = true
             MaxPouSplit = 0     // 사용한다면 2000 정도 권장
         }
@@ -173,6 +176,7 @@ module ExportModule =
                     ExistingLSISprj = existingLSISprj
                     StartTimer = startTimer
                     StartCounter = startCounter
+                    StartMemory = startMemory
                     EnableXmlComment = enableXmlComment
                     MaxPouSplit = maxPouSplit
                 } = xgxGenParams
@@ -185,7 +189,9 @@ module ExportModule =
                 let localStorage = new Storages()
                 let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
-                let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정
+
+                //삭제  => XgxGenerationParameters 사용
+                //let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정  
 
                 // Create a list to hold <C>ommented <S>tatement<S>
                 let css = [|

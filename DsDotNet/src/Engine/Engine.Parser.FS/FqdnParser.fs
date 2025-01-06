@@ -1,6 +1,5 @@
 namespace Engine.Parser.FS
 
-open Antlr4.Runtime
 open Dual.Common.Core.FS
 open Dual.Common.Base.FS
 
@@ -15,9 +14,10 @@ module FqdnParserModule =
                 let ncs = ctx.Descendants<fqdnParser.NameComponentContext>()
                 Ok [| for nc in ncs -> nc.GetText() |]
             with
-            | :? ParserError as err ->
+            | :? ParserError as _err ->
                 logError $"Failed to parse FQDN: '{text}'" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
-                Error err.Message
+                Ok [| text |]   // !!!! Not ERROR !!!
+                //Error _err.Message
             | exn ->
                 Error $"ERROR: {exn}"
 

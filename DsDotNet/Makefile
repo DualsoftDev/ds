@@ -50,7 +50,7 @@ TEMPLATES := ./Apps/CommonAppSettings.json.template \
 			 ./Apps/DSPilot/App.config.template \
 			 ./Apps/HMI.Obsolete/AppHMI/App.config.template \
 			 ./Apps/OfficeAddIn/PowerPointAddInHelper/App.config.template \
-			 ./Apps/PptAddIn/PptAddIn/appsettings.json.template \
+			 ./Apps/DSpa/DSpa/appsettings.json.template \
 			 ./src/IOHub/IO.Core/zmqsettings.json.template \
 			 ./src/IOHub/ThirdParty/LS/IOClient.Xgi/zmqhw.json.template \
 			 ./src/UnitTest/Engine.TestSimulator/App.config.template \

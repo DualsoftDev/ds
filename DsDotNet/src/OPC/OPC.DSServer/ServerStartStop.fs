@@ -12,14 +12,25 @@ module DsOpcUaServerManager =
 
     let mutable server: DsOPCServer option = None
     let IsRunning:bool= server.IsSome 
+        /// <summary>
+    /// OPC UA 서버 종료
+    /// </summary>
+    let Stop(dsSys: DsSystem) =
+        match server with
+        | Some s ->
+            SaveStatisticsToJson (dsSys.Name, DsTimeAnalysisMoudle.GetStatsJson())
+            s.Stop()
+            server <- None
+            printfn "OPC UA 서버가 종료되었습니다."
+        | None ->
+            printfn "서버가 실행 중이 아닙니다."
 
     /// <summary>
     /// OPC UA 서버 시작
     /// </summary>
     let Start(dsSys: DsSystem) =
         printfn "OPC UA 서버 초기화 중..."
-
-     
+        if server.IsSome  then Stop(dsSys);
         // 1. 애플리케이션 인스턴스 생성
         let application = 
             ApplicationInstance(
@@ -47,14 +58,3 @@ module DsOpcUaServerManager =
         opcServer.GetEndpoints()
         |> Seq.iter (fun endpoint -> printfn "%s" endpoint.EndpointUrl)
 
-    /// <summary>
-    /// OPC UA 서버 종료
-    /// </summary>
-    let Stop(dsSys: DsSystem) =
-        match server with
-        | Some s ->
-            SaveStatisticsToJson (dsSys.Name, DsTimeAnalysisMoudle.GetStatsJson())
-            s.Stop()
-            printfn "OPC UA 서버가 종료되었습니다."
-        | None ->
-            printfn "서버가 실행 중이 아닙니다."

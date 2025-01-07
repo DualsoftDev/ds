@@ -198,6 +198,24 @@ module rec ToJsonGraphModule =
             (fun holder -> holder.AutoPreConditions.Any()) // AutoPre 조건 필터
             (fun holder -> holder.GetCall().QualifiedName) // Holder 이름 추출
             (fun holder -> holder.AutoPreConditions |> Seq.map (fun v -> v.GetCall().QualifiedName)) // AutoPre 조건 추출
+    
+    /// 시스템의 Devices 데이터를 JSON으로 변환
+    let deviceToJson (system: DsSystem) =
+        let getDevTasks(device:Device) =
+            system.GetTaskDevs()
+                |> Seq.filter (fun (td, _c)-> td.DeviceName = device.Name)
+                |> Seq.map (fun (td, _c)-> JValue(td.QualifiedName))
+                |> JArray
+
+        system.Devices
+        |> Seq.map (fun dev ->
+            createJson [
+                JProperty("name", JValue(dev.Name))
+                JProperty("type", JValue("Device"))
+                JProperty("path", JValue(dev.AbsoluteFilePath))
+                JProperty("tasks", getDevTasks dev  :> JToken)
+            ] ) 
+        |> JArray
 
     /// 전체 시스템을 JSON으로 변환
     let systemToJsonGraph (system: DsSystem) =
@@ -207,6 +225,7 @@ module rec ToJsonGraphModule =
             JProperty("flows", flowsToJson system.Flows :> JToken)
             JProperty("autopre", autopreToJson system :> JToken)
             JProperty("safety", safetyToJson system :> JToken)
+            JProperty("devices", deviceToJson system :> JToken)
         ]
 
 [<Extension>]

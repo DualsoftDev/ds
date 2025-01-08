@@ -316,6 +316,7 @@ module DsDataType =
                     match ioType with
                     | "In" -> IOType.In
                     | "Out" -> IOType.Out
+                    | "NotUsed" -> IOType.NotUsed
                     | _ -> failwithf "Invalid IOType: %s" ioType
 
                 let dataType = getDataTypeFromName(dataTypeText.Trim('"'))

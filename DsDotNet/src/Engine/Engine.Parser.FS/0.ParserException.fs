@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 type ParserError(message: string) =
     inherit Exception(message)
 
-    static let CreatePositionInfo (ctx: obj) = // RuleContext or IErrorNode
+    static member CreatePositionInfo (ctx: obj):string * string = // RuleContext or IErrorNode
         let getPosition (ctx: obj) =
             let fromToken (token: IToken) = $"[line:{token.Line}, column:{token.Column}]"
 
@@ -32,8 +32,8 @@ type ParserError(message: string) =
 
         let posi = getPosition (ctx)
         let ambient = getAmbient (ctx)
-        $"\r\n{posi} near '{ambient}'"
+        posi, ambient
 
-    new(message: string, ctx: RuleContext) = ParserError($"{message} on \n\n{CreatePositionInfo(ctx)}")
-    new(message: string, errorNode: IErrorNode) = ParserError($"{message} on \n\n{CreatePositionInfo(errorNode)}")
-    new(message: string, line: int, column: int) = ParserError($"{message} \n\nCheck\n\n [line:{line}, column:{column}]")
+    new(message: string, ctx: RuleContext) = let posi, ambi = ParserError.CreatePositionInfo(ctx) in ParserError($"{message} on \n\n\n{posi} near '{ambi}'")
+    new(message: string, errorNode: IErrorNode) = let posi, ambi = ParserError.CreatePositionInfo(errorNode) in ParserError($"{message} on \n\n\n{posi} near '{ambi}'")
+    new(message: string, line: int, column: int) = ParserError($"{message} \n\nCheck near\n\n [line:{line}, column:{column}]")

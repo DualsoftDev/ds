@@ -14,9 +14,11 @@ open Antlr4.Runtime
 [<AutoOpen>]
 module ListnerCommonFunctionGeneratorUtil =
 
-    let errorLoadCore (ctx:RuleContext) =
-        let err = ParserError("", ctx).ToString()
-        failwithlog ($"""규칙확인{err.Split('\n').Skip(1).Combine("\n")}""")
+    type RuleContext with
+        member x.Error(?hint:string) =
+            let hint = hint |? ""
+            let posi, ambi = ParserError.CreatePositionInfo(x)
+            failwithlog ($"규칙확인:{hint}\r\n{posi} near '{ambi}'")
 
     // Helper function to find Real or Call
     let getSafetyAutoPreCall (curSystem: DsSystem) (ns: Fqdn) =
@@ -97,7 +99,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     Std           = parseUIntMSec timeParams TextSTD
                 }
                 TimeDefinition
-            with ex 
+            with ex
                 -> failWithLog $"{name} {timeParams} {ex.Message}"
 
 
@@ -126,7 +128,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     CheckDelayTime = parseUIntMSec errorParams TextCHK
                 }
                 errorDefinition
-            with ex 
+            with ex
                 -> failWithLog $"{name} {errorParams} {ex.Message}"
 
         seq {
@@ -140,7 +142,7 @@ module ListnerCommonFunctionGeneratorUtil =
                     yield fqdn, ErrorDef
         }
 
-        
+
 
     let getRepeats  (listRepeatCtx: List<dsParser.RepeatsBlockContext>) =
                 seq {
@@ -198,18 +200,18 @@ module ListnerCommonFunctionGeneratorUtil =
         | Some ctx ->
             match tryGetTaskDevParamInOut $"{ctx.GetText()}" with
             | Some v -> v
-            |_ -> errorLoadCore ctx
-        | _-> errorLoadCore devCtx
+            |_ -> ctx.Error()
+        | _-> devCtx.Error()
 
     let commonValueParamExtractor (devCtx: TaskDevParamInOutContext) : (string)*(string) =
         match devCtx.TryFindFirstChild<TaskDevParamInOutBodyContext>() with
         | Some ctx ->
             match tryGetHwSysValueParamInOut $"{ctx.GetText()}" with
             | Some v -> v
-            |_ -> errorLoadCore ctx
-        | _-> errorLoadCore devCtx
+            |_ -> ctx.Error()
+        | _-> devCtx.Error()
 
-        
+
     let commonCallParamExtractor (ctx: JobBlockContext) =
         let callListings = ctx.Descendants<CallListingContext>().ToArray()
         [

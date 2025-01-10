@@ -203,7 +203,7 @@ module DsAddressModule =
 
                     match Seq.tryHead slotSpares with
                     | Some (s) -> (s.SlotIndex, assigned (s.SlotIndex - 1))
-                    | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다."
+                    | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다.Add I/O table 세팅필요"
 
                 match driver with
                 | PAIX_IO ->

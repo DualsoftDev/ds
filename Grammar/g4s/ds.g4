@@ -414,7 +414,7 @@ causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF: causalToken (',' causalToken)* ;
     causalToken: causalTokenBase ('('causalInParam ':' causalOutParam')')? ;
-    causalTokenBase: identifier1234 | ('#'identifierOpCmd);
+    causalTokenBase: identifier123 | ('#'identifierOpCmd);
     causalInParam: content;
     causalOutParam: content;
     identifierOpCmd: identifier1;

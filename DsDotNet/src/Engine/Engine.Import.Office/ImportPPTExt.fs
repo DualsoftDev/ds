@@ -334,7 +334,11 @@ module ImportU =
                         elif dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
-                            ////node.UpdateRealProperty(real)
+
+                            if not(call.ValueParamIO.IsDefaultParam)
+                            then 
+                                node.Shape.ErrorName($"Alias는 ValueParam은 지원하지 않습니다.", node.PageNum)
+
                             let name = call.DeviceNApi.Combine("_")
                             Alias.Create(
                                 $"{name}_{node.AliasNumber}" ,
@@ -356,6 +360,11 @@ module ImportU =
                             | :? Call as ct ->
                                 let otherFlow  = flow.Name <> ct.TargetJob.NameComponents.Head()
                                 let name = if otherFlow then ct.TargetJob.NameComponents.Combine() else ct.Name
+
+                                if not(ct.ValueParamIO.IsDefaultParam)
+                                then 
+                                    node.Shape.ErrorName($"Alias는 ValueParam은 지원하지 않습니다.", node.PageNum)
+
                                 Alias.Create(
                                     $"{name}_{node.AliasNumber}" ,
                                     DuAliasTargetCall(ct),
@@ -392,9 +401,6 @@ module ImportU =
                 let srcNodes = mei.Sources.Select(fun s->s.GetPure().QualifiedName) |> Set.ofSeq
                 let tgtNodes = mei.Targets.Select(fun s->s.GetPure().QualifiedName) |> Set.ofSeq
                 let intersect = Set.intersect srcNodes tgtNodes
-                if not (Set.isEmpty intersect) then
-                    let conflictingNames = String.Join(", ", intersect)
-                    failWithLog $"Source and target nodes have conflicting names: {conflictingNames}"
 
 
                 match getParent (edge, parents, dicVertex) with

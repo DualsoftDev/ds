@@ -18,7 +18,7 @@ module ListnerCommonFunctionGeneratorUtil =
         member x.Error(?hint:string) =
             let hint = hint |? ""
             let posi, ambi = ParserError.CreatePositionInfo(x)
-            failwithlog ($"규칙확인:{hint}\r\n{posi} near '{ambi}'")
+            failwithlog ($"[규칙확인]: {hint}\r\n{posi} near '{ambi}'")
 
     // Helper function to find Real or Call
     let getSafetyAutoPreCall (curSystem: DsSystem) (ns: Fqdn) =

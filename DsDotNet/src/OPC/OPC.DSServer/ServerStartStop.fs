@@ -18,7 +18,7 @@ module DsOpcUaServerManager =
     let Stop(dsSys: DsSystem) =
         match server with
         | Some s ->
-            SaveStatisticsToJson (dsSys.Name, DsTimeAnalysisMoudle.GetStatsJson())
+            SaveStatisticsToJson (dsSys.Name, DsTimeAnalysisMoudle.getStatsJson())
             s.Stop()
             server <- None
             printfn "OPC UA 서버가 종료되었습니다."

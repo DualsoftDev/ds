@@ -119,7 +119,9 @@ type DsOPCServer(dsSys: DsSystem) =
     inherit StandardServer()
 
     do
-        LoadStatisticsFromJson (dsSys.Name) |> ignore
+        DsTimeAnalysisMoudle.statsMap.Clear()
+        LoadStatisticsFromJson (dsSys.Name) 
+        |> Seq.iter(fun kv -> DsTimeAnalysisMoudle.statsMap.Add(kv.Key, getCalcStats(kv.Value)))
 
     // NodeManager를 생성하여 주소 공간 관리
     override this.CreateMasterNodeManager(server: IServerInternal, configuration: ApplicationConfiguration) =

@@ -47,7 +47,7 @@ CLEAN: clean
 
 # copy-template if not exists:
 TEMPLATES := ./Apps/CommonAppSettings.json.template \
-			 ./Apps/DSPilot/App.config.template \
+			 ./Apps/DSPilot/DSPilot.Winform.Controller/App.config.template \
 			 ./Apps/HMI.Obsolete/AppHMI/App.config.template \
 			 ./Apps/OfficeAddIn/PowerPointAddInHelper/App.config.template \
 			 ./Apps/DSpa/DSpa/appsettings.json.template \

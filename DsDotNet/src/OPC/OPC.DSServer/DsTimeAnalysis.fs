@@ -121,6 +121,7 @@ module DsTimeAnalysisMoudle =
     let statsMap = Dictionary<string, CalcStats>()
     let GetStatsJson() = 
         statsMap
+        |> Seq.filter(fun kvp -> kvp.Key.IsNonNull()) //null이 아닌 것만 필터링 todo null 아예 안나게 처리필요
         |> Seq.map(fun kvp -> 
             let statJson =  
                 {   Count = kvp.Value.Count;

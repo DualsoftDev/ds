@@ -119,7 +119,7 @@ module DsTimeAnalysisMoudle =
 
     /// 태그별 통계 관리
     let statsMap = Dictionary<string, CalcStats>()
-    let GetStatsJson() = 
+    let getStatsJson() = 
         statsMap
         |> Seq.filter(fun kvp -> kvp.Key.IsNonNull()) //null이 아닌 것만 필터링 todo null 아예 안나게 처리필요
         |> Seq.map(fun kvp -> 
@@ -128,7 +128,14 @@ module DsTimeAnalysisMoudle =
                     Mean = kvp.Value.Mean; 
                     MeanTemp = kvp.Value.MeanTemp }
             kvp.Key, statJson) 
-        |> dict     
+        |> dict   
+        
+    let getCalcStats(statsDto:StatsDto) = 
+        let calcStats = CalcStats()
+        calcStats.Count <- statsDto.Count   
+        calcStats.Mean <- statsDto.Mean
+        calcStats.MeanTemp <- statsDto.MeanTemp
+        calcStats
 
     /// 통계 객체 가져오기 (없으면 생성)
     let getOrCreateStats (fqdn:string) =

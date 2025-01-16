@@ -172,7 +172,7 @@ module ModelParser =
             match Net48Path.Exists(dsFilePath), Net48Path.Exists(sysDsLibPath) with
             | true, _ -> ParseFromString(File.ReadAllText(dsFilePath), option), false
             | false, true -> ParseFromString(File.ReadAllText(sysDsLibPath), option), false
-            | false, false -> createDsSystem(loadedName), true
+            | false, false -> DsSystem.Create(loadedName), true
 
 
         let loadDevice (param: DeviceLoadParameters) =

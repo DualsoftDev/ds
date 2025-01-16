@@ -6,11 +6,6 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module CoreCreateModule =
-
-    let createDsSystem(systemName:string) =
-        let system = DsSystem.Create(systemName)
-        system
-
     let createTaskDevUsingApiName (sys: DsSystem)  (devName: string) (apiName: string): TaskDev =
         let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
 

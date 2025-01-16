@@ -94,13 +94,8 @@ module rec CoreModule =
         and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
             inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
-        type DsSystem private (name: string, fqdnVertexDic, vertexHandlers:GraphVertexAddRemoveHandlers option) =
+        type DsSystem private (name: string, vertexDic:Dictionary<string, FqdnObject>, vertexHandlers:GraphVertexAddRemoveHandlers option) =
             inherit FqdnObject(name, createFqdnObject([||]))
-
-            let loadedSystems = createNamedHashSet<LoadedSystem>()
-            let apiUsages = ResizeArray<ApiItem>()
-            let variables = ResizeArray<VariableData>()
-            let actionVariables = ResizeArray<ActionVariable>()
 
             static let assem = Assembly.GetExecutingAssembly()
             static let currentLangVersion = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion |> Version.Parse
@@ -114,51 +109,52 @@ module rec CoreModule =
                 DsSystem(name, null, None)
 
             static member Create(name) =
-                let fqdnVertexDic = Dictionary<string, FqdnObject>()
+                let vertexDic = Dictionary<string, FqdnObject>()
                 let vertexHandlers =
                     let onAdded (v:INamed) =
                         let q = v :?> FqdnObject
-                        fqdnVertexDic.TryAdd(q.DequotedQualifiedName, q)
+                        vertexDic.TryAdd(q.DequotedQualifiedName, q)
                     let onRemoved (v:INamed) =
                         let q = v :?> FqdnObject
-                        fqdnVertexDic.Remove(q.DequotedQualifiedName)
+                        vertexDic.Remove(q.DequotedQualifiedName)
 
                     GraphVertexAddRemoveHandlers(onAdded, onRemoved)
 
-                let system = DsSystem(name, fqdnVertexDic, Some vertexHandlers)
-                fqdnVertexDic.Add(name, system)
+                let system = DsSystem(name, vertexDic, Some vertexHandlers)
+                vertexDic.Add(name, system)
                 system
 
             member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
-            member _.AddFqdnVertex(fqdn, vertex) = fqdnVertexDic.Add(fqdn, vertex)
-            member _.TryFindFqdnVertex(fqdn) = fqdnVertexDic.TryFindValue(fqdn)
+            member _.AddFqdnVertex(fqdn, vertex) = vertexDic.Add(fqdn, vertex)
+            member _.TryFindFqdnVertex(fqdn) = vertexDic.TryFindValue(fqdn)
             // [NOTE] GraphVertex }
 
             /// System Loading (메모리 작업 중) 여부.  System 생성이 끝나는 순간에 false
             member val Loading = true with get, set
 
+            member val ApiUsages = ResizeArray<ApiItem>()
+            member val Jobs = ResizeArray<Job>()
+            member val Functions = ResizeArray<DsFunc>()
+            member val LoadedSystems = createNamedHashSet<LoadedSystem>()
+
             member x.AddLoadedSystem(childSys) =
-                loadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
+                x.LoadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
 
                 // loaded device 도 vertex dic 에 포함할지 말지 여부에 따라서
-                if isNull(fqdnVertexDic) then
+                if isNull(vertexDic) then
                     assert(isInUnitTest())
                 else
                     x.AddFqdnVertex(childSys.Name, childSys)
 
-                childSys.ReferenceSystem.ApiItems |> apiUsages.AddRange
+                childSys.ReferenceSystem.ApiItems |> x.ApiUsages.AddRange
 
-            member _.ReferenceSystems = loadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
-            member _.LoadedSystems = loadedSystems |> seq
-            member _.Devices = loadedSystems.OfType<Device>() |> Seq.toArray
-            member _.ExternalSystems = loadedSystems.OfType<ExternalSystem>()
+            member x.ReferenceSystems = x.LoadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
+            member x.Devices = x.LoadedSystems.OfType<Device>() |> Seq.toArray
+            member x.ExternalSystems = x.LoadedSystems.OfType<ExternalSystem>()
 
-            member _.ApiUsages = apiUsages |> seq
-            member val Jobs = ResizeArray<Job>()
-            member val Functions = ResizeArray<DsFunc>()
 
-            member _.Variables = variables |> seq
-            member _.ActionVariables = actionVariables |> seq
+            member val Variables = ResizeArray<VariableData>()
+            member val ActionVariables = ResizeArray<ActionVariable>()
 
             member val Flows = createNamedHashSet<Flow>()
 
@@ -177,17 +173,18 @@ module rec CoreModule =
             static member CurrentLangVersion = currentLangVersion
             static member CurrentEngineVersion = currentEngineVersion
 
+        type DsSystem with
             member x.AddVariables(variableData:VariableData) =
-                if variables.any(fun v-> v.Name = variableData.Name) then
+                if x.Variables.any(fun v-> v.Name = variableData.Name) then
                     failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
 
-                variables.Add(variableData)
+                x.Variables.Add(variableData)
 
             member x.AddActionVariables(actionVariable:ActionVariable) =
-                if actionVariables.any(fun v-> v.Name = actionVariable.Name) then
+                if x.ActionVariables.any(fun v-> v.Name = actionVariable.Name) then
                     failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
 
-                actionVariables.Add(actionVariable)
+                x.ActionVariables.Add(actionVariable)
 
     [<AutoOpen>]
     module WrapperSafetyModule =
@@ -400,14 +397,14 @@ module rec CoreModule =
             let isOperator = function
                 | OperatorFuncType _ -> true
                 | _ -> false
-            do 
+            do
                 match jobOrFunc with
                 | JobType job ->
                     if not(valueParamIO.IsDefaultParam) then
                         job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, valueParamIO, td.DequotedQualifiedName))
                 | _ -> ()
             interface IVertex
-         
+
             member x.TargetJob =
                 match jobOrFunc with
                 | JobType job -> job
@@ -594,7 +591,7 @@ module rec CoreModule =
         *)
         type TaskDev (apiItem:ApiItem, deviceName:string, parentSys:DsSystem) =
             inherit FqdnObject(apiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
-           
+
 
             //member x.ApiPureName = (x:>FqdnObject).QualifiedName
             member x.ApiSystemName = apiItem.ApiSystem.Name //needs test animation
@@ -605,7 +602,7 @@ module rec CoreModule =
             member x.ParentSystem = parentSys
             member x.ApiItem  = apiItem
 
-            member val TaskDevParamIO = defaultTaskDevParamIO() with get, set   
+            member val TaskDevParamIO = defaultTaskDevParamIO() with get, set
             member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
             member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
 
@@ -631,7 +628,7 @@ module rec CoreModule =
             member x.AddressOutCount  = tasks.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).length()
 
             member x.System = system
-            member x.TaskDefs = tasks 
+            member x.TaskDefs = tasks
             member x.ApiDefs = tasks |> Seq.map(fun t->t.ApiItem)
             member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
 
@@ -692,8 +689,5 @@ module rec CoreModule =
                 cmd.CommandCode <- excuteCode
                 cmd
 
-    type DsSystem = DeviceAndSystemModule.DsSystem
     type DsGraph = TDsGraph<Vertex, Edge>
     type Direct = Real
-
-type DsSystem = DeviceAndSystemModule.DsSystem

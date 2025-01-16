@@ -501,13 +501,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     match ctx.TryFindFirstChild<CausalInParamContext>() with
                     | Some inParam ->
                         createValueParam (inParam.TryFindFirstChild<ContentContext>().Value.GetText())
-                    |_-> defaultValueParam() 
+                    |_-> defaultValueParam()
 
                 let callOutput =
                     match ctx.TryFindFirstChild<CausalOutParamContext>() with
                     | Some outParam ->
                         createValueParam (outParam.TryFindFirstChild<ContentContext>().Value.GetText())
-                    |_-> defaultValueParam() 
+                    |_-> defaultValueParam()
 
                 let vp = ValueParamIO(callInput, callOutput)
                 job.TaskDefs.Iter(fun (td: TaskDev) ->
@@ -517,13 +517,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                         if not(callInput.IsDefaultValue) then
                             if inParam.DataType <> DuBOOL && inParam.DataType <> callInput.DataType then
                                 failWithLog $"Input DataType is not match {td.TaskDevParamIO.InParam.DataType} != {callInput.DataType}"
-                        
-                            td.TaskDevParamIO.InParam <- TaskDevParam(inParam.Address, callInput.DataType, inParam.Symbol)   
-                            
+
+                            td.TaskDevParamIO.InParam <- TaskDevParam(inParam.Address, callInput.DataType, inParam.Symbol)
+
                         if not(callOutput.IsDefaultValue) then
                             if outParam.DataType <> DuBOOL && outParam.DataType <> callOutput.DataType then
                                 failWithLog $"Output DataType is not match {td.TaskDevParamIO.OutParam.DataType} != {callOutput.DataType}"
-                        
+
                             td.TaskDevParamIO.OutParam <- TaskDevParam(outParam.Address, callOutput.DataType, outParam.Symbol)
                         )
 
@@ -556,19 +556,19 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                     if not <| isCallName (parent, ctxInfo.Names)  then
                                         Real.Create(real, flow) |> ignore
                                 |_ ->
-                                    errorLoadCore  ctx
+                                    ctx.Error()
 
 
                             | 1, _ when not <| (isAliasMnemonic (parent, name)) ->
                                 match tryFindJob system (getJobName (parent, ctxInfo.Names)) with
                                 | Some job ->
                                     createCall(parent, job, ctx)
-                                            
+
                                 | None ->
                                     match system.Flows.TryFind(fun f->f.Name = ctxInfo.Names.Head) with
                                     | Some _f -> ()  //exFlow alisas 면  | cycle 2, _x1 :: [ _x2 ] 에서 등록
                                     |_->
-                                        errorLoadCore  ctx
+                                        ctx.Error($"Job check: {name}")
 
                             | 2, _x1 :: [ _x2 ]  ->
                                   match parent.GetCore() with
@@ -578,7 +578,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                   |_ when isAliasMnemonic (parent, name) ->
                                         createAlias(parent, ctxInfo.Names.Combine("_"))
                                   |_ ->
-                                    errorLoadCore ctx
+                                    ctx.Error()
 
                             | 2, [ _ ]  when isAliasMnemonic (parent, name) ->
                                  createAlias(parent, ctxInfo.Names.Combine("_"))
@@ -588,7 +588,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | _, _ofn :: [ _ofrn; _jobExpr ] -> ()
                             | _, _ofn :: [ _otherFlow ;_ofrn; _jobExpr ] -> ()
                             | _ ->
-                                errorLoadCore ctx
+                                ctx.Error()
 
             loop
 
@@ -632,13 +632,13 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             |> ignore
 
         let createDeviceVariable (system: DsSystem)  (taskDevParam:TaskDevParam) (stgKey:string)  =
-            let tdp = taskDevParam 
+            let tdp = taskDevParam
             if tdp.Symbol <> ""
-            then 
+            then
                 let sym = tdp.Symbol
                 let variable = createVariableByType sym tdp.DataType
                 system.AddActionVariables (ActionVariable(sym, tdp.Address, stgKey, tdp.DataType)) |> ignore
-                options.Storages.Add(sym, variable) 
+                options.Storages.Add(sym, variable)
 
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
@@ -691,7 +691,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                         None
 
 
-                                                return createTaskDev  apiPoint  devName  taskDevParamIO 
+                                                return createTaskDev  apiPoint  devName  taskDevParamIO
                                             }
 
                                         match taskFromLoaded with
@@ -701,17 +701,17 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                             | Some dev->
                                                 match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with
                                                 | Some apiItem ->
-                                                    createTaskDev apiItem device  taskDevParamIO 
+                                                    createTaskDev apiItem device  taskDevParamIO
                                                 | None ->
-                                                    let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) device api 
-                                                    createTaskDev (taskDev.ApiItem) device  taskDevParamIO 
+                                                    let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) device api
+                                                    createTaskDev (taskDev.ApiItem) device  taskDevParamIO
 
                                             | None -> failwithlog $"device({device}) api({api}) is not exist"
 
                                     | _ ->
                                         let errText = String.Join(", ", apiFqnd)
                                         failwithlog $"loading type error ({errText})device"
-                                
+
                                 let devApiName = $"{devName}_{apiPure}"
                                 let plcName_I = getPlcTagAbleName (getInActionName(devApiName))  options.Storages
                                 let plcName_O = getPlcTagAbleName (getOutActionName(devApiName)) options.Storages
@@ -751,23 +751,23 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             | Some v ->
                                  match v with
                                  | :? Call as c -> c |> DuAliasTargetCall
-                                 | _ -> errorLoadCore  ctx
-                            | _ -> errorLoadCore  ctx
+                                 | _ -> ctx.Error()
+                            | _ -> ctx.Error()
 
                     | flowOrRealorDev :: [ rc ] -> //FlowEx.R or Real.C
                         match tryFindFlow system flowOrRealorDev with
                         | Some f ->
                             match f.Graph.TryFindVertex<Real>(rc) with
                             | Some v-> v |> DuAliasTargetReal
-                            | None -> errorLoadCore  ctx
+                            | None -> ctx.Error()
                         | None ->
                             match tryFindCall system ([ flow.Name ] @ ns.Select(fun f->f.QuoteOnDemand())) with
                             | Some v ->
                                 match v with
                                 | :? Call as c -> c |> DuAliasTargetCall
-                                | _ -> errorLoadCore  ctx
+                                | _ -> ctx.Error()
                             | None ->
-                                    errorLoadCore  ctx
+                                    ctx.Error()
 
                     | _flowOrReal :: [ _dev; _api ] ->
                             match tryFindCall system ([ flow.Name ] @ ns) with
@@ -776,9 +776,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             |_ ->
                                 match flow.GetVerticesOfFlow().OfType<Call>().TryFind(fun f->f.Name = ns.Combine())  with
                                 | Some call -> call|>  DuAliasTargetCall
-                                | _ -> errorLoadCore  ctx
+                                | _ -> ctx.Error()
 
-                    | _ -> errorLoadCore  ctx
+                    | _ -> ctx.Error()
 
 
                 flow.AliasDefs[aliasKeys].AliasTarget <- Some target
@@ -876,7 +876,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | Some r -> r.IsSourceToken <- true
                     | None -> failwith $"Couldn't find target real object name {getText (notrans)}"
 
-                    
+
 
         let fillDisabled (system: DsSystem) (listDisabledCtx: List<dsParser.DisableBlockContext>) =
             for disabledCtx in listDisabledCtx do
@@ -904,16 +904,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let fqdnErrors = getErrors listErrorsCtx
             for fqdn, t in fqdnErrors do
                 match tryFindSystemInner system fqdn with
-                | Some (:? Call as c) -> 
+                | Some (:? Call as c) ->
                     c.CallTime.TimeOut  <- t.TimeOutMaxTime
                     c.CallTime.DelayCheck  <- t.CheckDelayTime
                 | _ -> failWithLog $"Couldn't find Call object name {fqdn}"
-        
+
         let fillRepeats (system: DsSystem) (listRepeatCtx: List<dsParser.RepeatsBlockContext> ) =
             let fqdnRepeats = getRepeats listRepeatCtx
             for fqdn, t in fqdnRepeats do
                 match tryFindSystemInner system fqdn with
-                | Some (:? Real as r) -> 
+                | Some (:? Real as r) ->
                     match UInt32.TryParse t with
                     | true, count -> r.RepeatCount <- Some (count)
                     | _ -> failWithLog $"Repeat count must be a positive integer. {t} is not valid."
@@ -937,18 +937,18 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let theSystem = x.TheSystem
             //device, call에 layout xywh 채우기
             ctx.Descendants<LayoutBlockContext>() .ToList()      |> fillXywh     theSystem
-            //Real에 finished 채우기                             
+            //Real에 finished 채우기
             ctx.Descendants<FinishBlockContext>() .ToList()      |> fillFinished theSystem
-            //Real에 noTransData 채우기                          
+            //Real에 noTransData 채우기
             ctx.Descendants<NotransBlockContext>().ToList()      |> fillNoTrans  theSystem
-            //Real에 SourceToken  채우기                      
+            //Real에 SourceToken  채우기
             ctx.Descendants<SourcetokenBlockContext>().ToList()  |> fillSourceToken  theSystem
-            //Real에 MotionBlock 채우기                      
+            //Real에 MotionBlock 채우기
             ctx.Descendants<MotionBlockContext>() .ToList()      |> fillActions  theSystem
-            //Real에 scripts 채우기                              
+            //Real에 scripts 채우기
             ctx.Descendants<ScriptsBlockContext>().ToList()      |> fillScripts  theSystem
-            //Real에 times 채우기                                
-            ctx.Descendants<TimesBlockContext>()  .ToList()      |> fillTimes    theSystem  
+            //Real에 times 채우기
+            ctx.Descendants<TimesBlockContext>()  .ToList()      |> fillTimes    theSystem
             //Real에 Repeats 채우기
             ctx.Descendants<RepeatsBlockContext>() .ToList()     |> fillRepeats  theSystem
             //Job에 errors (CallTime)채우기

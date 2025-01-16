@@ -30,7 +30,6 @@
     </ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" />
 	</ItemGroup>
 
@@ -40,7 +39,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
 		<ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
     </ItemGroup>
 

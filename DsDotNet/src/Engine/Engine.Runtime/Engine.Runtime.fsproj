@@ -32,10 +32,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\IOHub\IO.Core\IO.Core.fsproj" />
-	  <ProjectReference Include="..\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
 	  <ProjectReference Include="..\Engine.Cpu\Engine.Cpu.fsproj" />
-	  <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
-	  <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
 	</ItemGroup>
 
 </Project>

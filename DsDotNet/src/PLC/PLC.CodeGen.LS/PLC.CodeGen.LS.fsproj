@@ -85,16 +85,11 @@
 
     </ItemGroup>
 
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
-	</ItemGroup>
-
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
 		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.5.1" />
 	</ItemGroup>
 
 	<ItemGroup>
-        <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
     </ItemGroup>
 

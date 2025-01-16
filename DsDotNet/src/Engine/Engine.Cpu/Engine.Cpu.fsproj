@@ -29,7 +29,6 @@
 	<ItemGroup>
         <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
         <ProjectReference Include="..\Engine.CodeGenHMI\Engine.CodeGenHMI.fsproj" />
-        <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 
 </Project>

@@ -174,12 +174,14 @@ module rec CoreModule =
                 |> tee(fun ai ->
                     system.ApiItems.Add(ai) |> verifyM $"중복 interface prototype name [{name}]")
 
+
             member x.CreateApiItem(name:string, tx, rx) =
                 let system = x
-                ApiItem(name, system)
+                system.CreateApiItem(name)
                 |> tee(fun ai ->
                     ai.TX <- tx
                     ai.RX <- rx)
+
 
             member x.CreateApiResetInfo(operand1, operator, operand2, autoGenByFlow) =
                 let system = x

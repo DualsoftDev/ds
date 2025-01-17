@@ -526,7 +526,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             td.TaskDevParamIO.OutParam <- TaskDevParam(outParam.Address, callOutput.DataType, outParam.Symbol)
                         )
 
-                Call.CreateWithValueParamIO(job, parent, vp)  |> ignore
+                parent.CreateCall(job, vp)  |> ignore
 
             let loop () =
                 for (optParent, ctxInfo, ctx) in candidates do
@@ -536,7 +536,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     then
                         let opCmd = ctxInfo.GetRawName().DeQuoteOnDemand()
                         match tryFindFunc system opCmd with
-                        | Some func -> Call.Create(func, parent) |> ignore
+                        | Some func -> parent.CreateCall(func) |> ignore
                         | _ ->
                             if ctxInfo.ContextType = typeof<IdentifierOpCmdContext> then
                                 failwithlog $"Operator or Command({opCmd}) is not exist"

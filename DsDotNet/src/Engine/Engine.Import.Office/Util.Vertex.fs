@@ -11,39 +11,39 @@ module ImportUtilVertex =
 
 
     let getOperatorFunc (sys: DsSystem) (node: PptNode) =
-        if sys.Functions.OfType<CommandFunction>().any(fun f->f.Name = node.OperatorName) 
-        then 
+        if sys.Functions.OfType<CommandFunction>().any(fun f->f.Name = node.OperatorName)
+        then
             failWithLog $"Function name ({node.OperatorName}) is already used as a command name"
-        else 
+        else
             sys.Functions.OfType<OperatorFunction>()
             |> Seq.tryFind (fun f -> f.Name = node.OperatorName)
             |> Option.defaultWith (fun () ->
-                let newFunc = OperatorFunction(node.OperatorName) 
+                let newFunc = OperatorFunction(node.OperatorName)
                 sys.Functions.Add newFunc |> ignore
                 newFunc
             )
 
     let getCommandFunc (sys: DsSystem) (node: PptNode) =
-        if sys.Functions.OfType<OperatorFunction>().any(fun f->f.Name = node.CommandName) 
-        then 
+        if sys.Functions.OfType<OperatorFunction>().any(fun f->f.Name = node.CommandName)
+        then
             failWithLog $"Function name ({node.CommandName}) is already used as an operator name"
-        else 
+        else
         sys.Functions.OfType<CommandFunction>()
         |> Seq.tryFind (fun f -> f.Name = node.CommandName)
         |> Option.defaultWith (fun () ->
-            let newFunc = CommandFunction(node.CommandName) 
+            let newFunc = CommandFunction(node.CommandName)
             sys.Functions.Add newFunc |> ignore
             newFunc
         )
 
-    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: PptNode) parentWrapper =
+    let getCallFromLoadedSys (sys: DsSystem) (device: LoadedSystem) (node: PptNode) (parentWrapper:ParentWrapper) =
         let loadSysName = device.Name
         let jobName = node.Job.Combine()
         let apiName = node.ApiName
 
         match sys.Jobs |> Seq.tryFind (fun job -> job.DequotedQualifiedName = jobName) with
         | Some job ->
-            Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
+            parentWrapper.CreateCall(job, node.ValueParamIO)
         | None ->
             match device.ReferenceSystem.ApiItems |> Seq.tryFind (fun a -> a.PureName = node.ApiName) with
             |Some api ->
@@ -57,22 +57,22 @@ module ImportUtilVertex =
                 let job = Job(node.Job, sys, [devTask])
                 updateAddressSkip( node.JobParam, job)
                 sys.Jobs.Add job |> ignore
-                Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
+                parentWrapper.CreateCall(job, node.ValueParamIO)
 
             | None ->
-                if device.AutoGenFromParentSystem 
+                if device.AutoGenFromParentSystem
                 then
-                    let autoTaskDev = getAutoGenTaskDev device loadSysName  apiName 
+                    let autoTaskDev = getAutoGenTaskDev device loadSysName  apiName
                     let job = Job(node.Job, sys, [autoTaskDev])
-                    updateAddressSkip( node.JobParam, job)  
+                    updateAddressSkip( node.JobParam, job)
                     sys.Jobs.Add job |> ignore
-                    Call.CreateWithValueParamIO(job, parentWrapper, node.ValueParamIO)
+                    parentWrapper.CreateCall(job, node.ValueParamIO)
                 else
                     let ableApis = String.Join(", ", device.ReferenceSystem.ApiItems.Select(fun a->a.Name))
                     failwithlog $"Loading system ({loadSysName}:{device.AbsoluteFilePath}) \r\napi ({apiName}) not found \r\nApi List : {ableApis}"
 
 
-        
+
     let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget) =
         match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
             |  Some dev ->
@@ -94,9 +94,9 @@ module ImportUtilVertex =
         let call =
             if node.IsFunction then
                 if node.IsRootNode.Value then
-                    Call.Create(getOperatorFunc mySys node, parentWrapper)
+                    parentWrapper.CreateCall(getOperatorFunc mySys node)
                 else
-                    Call.Create(getCommandFunc mySys node, parentWrapper)
+                    parentWrapper.CreateCall(getCommandFunc mySys node)
             else
                 match mySys.Flows.TryFind(fun f-> f.Name = node.Job.Head()) with
                 | Some _ ->

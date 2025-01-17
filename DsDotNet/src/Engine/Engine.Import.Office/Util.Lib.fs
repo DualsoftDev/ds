@@ -14,7 +14,7 @@ module ImportUtilForLib =
         JobName: string
         DevName: string
         ApiName: string
-        ValueParamIO: ValueParamIO 
+        ValueParamIO: ValueParamIO
         Parent: ParentWrapper
         PlatformTarget:PlatformTarget
     }
@@ -54,7 +54,7 @@ module ImportUtilForLib =
         let devOrg = getDeviceOrganization param.MySys libFilePath loadedName (param.PlatformTarget)
         let TaskDevParams = getProperty loadedName
 
-        let task = getTaskDev autoGenSys loadedName  param.ApiName  
+        let task = getTaskDev autoGenSys loadedName  param.ApiName
         addSingleTask tasks task
         if task.IsNone then
             processSingleTask tasks param devOrg loadedName param.ApiName TaskDevParams
@@ -88,6 +88,6 @@ module ImportUtilForLib =
                 param.MySys.Jobs.Add(job)
                 job
 
-        let call = Call.CreateWithValueParamIO(jobForCall, param.Parent, param.ValueParamIO)
+        let call = param.Parent.CreateCall(jobForCall, param.ValueParamIO)
         call.Name <- param.Node.Name
         call

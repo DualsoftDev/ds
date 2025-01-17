@@ -270,7 +270,7 @@ module rec CoreModule =
                 match x with
                 | DuParentFlow f -> f
                 | DuParentReal r -> r.Flow
-            member x.GetSystem() =
+            member x.GetSystem():DsSystem =
                 match x with
                 | DuParentFlow f -> f.System
                 | DuParentReal r -> r.Flow.System
@@ -282,6 +282,28 @@ module rec CoreModule =
                 match x with
                 | DuParentFlow f -> f.ModelingEdges
                 | DuParentReal r -> r.ModelingEdges
+
+            member x.AddVertex v = x.GetGraph().AddVertex(v)
+
+            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
+                let parent:ParentWrapper = x
+                let call = Call(JobType target, parent, valueParamIO)
+                let duplicated =
+                    parent.GetSystem().Flows
+                        .SelectMany(fun f -> f.Graph.Vertices.OfType<Call>())
+                        .Any(fun c -> c.QualifiedName = call.QualifiedName)
+                if duplicated then
+                    failwithlog $"중복 call name [{call.Name}]"
+
+                call |> tee(fun c -> c.OnCreated())
+            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+            member x.CreateCall(func:DsFunc) =
+                let callType =
+                    match func with
+                    | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
+                    | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
+                    | _ -> failwithlog "Error"
+                Call(callType, x, defaultValueParamIO()) |> tee(fun c -> c.OnCreated())
 
 
         and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, aliasTexts: string []) =
@@ -320,6 +342,12 @@ module rec CoreModule =
             /// see Real.CreateAlias
             member x.CreateAlias(name:string, target:Real, isExFlowReal) =
                 Alias.Create(name, DuAliasTargetReal target, DuParentFlow x, isExFlowReal)
+
+            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
+                let parent:ParentWrapper = DuParentFlow x
+                parent.CreateCall(target, valueParamIO)
+            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+
 
         /// leaf or stem(parenting)
         /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
@@ -405,13 +433,18 @@ module rec CoreModule =
             member x.CreateAlias(name:string, target:Call, isExFlowReal) =
                 Alias.Create(name, DuAliasTargetCall target, DuParentReal x, isExFlowReal)
 
+            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
+                let parent:ParentWrapper = DuParentReal x
+                parent.CreateCall(target, valueParamIO)
+            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+
 
         type CallType =
             | JobType of Job
             | CommadFuncType of CommandFunction
             | OperatorFuncType of OperatorFunction
 
-        type Call(jobOrFunc:CallType, parent:ParentWrapper, valueParamIO:ValueParamIO) =
+        type Call internal (jobOrFunc:CallType, parent:ParentWrapper, valueParamIO:ValueParamIO) =
             inherit Indirect (
                 // indirect 의 인자로 name, parent 를 제공
                 match jobOrFunc with
@@ -443,7 +476,12 @@ module rec CoreModule =
                     if not(valueParamIO.IsDefaultParam) then
                         job.TaskDefs.Iter(fun (td: TaskDev) -> updateTaskDevDatatype(td.TaskDevParamIO, valueParamIO, td.DequotedQualifiedName))
                 | _ -> ()
+
+
+
             interface IVertex
+
+            member internal x.OnCreated() = parent.AddVertex x |> verifyM $"중복 call name [{x.Name}]"
 
             member x.TargetJob =
                 match jobOrFunc with
@@ -478,34 +516,6 @@ module rec CoreModule =
                 member val AutoPreConditions = HashSet<SafetyAutoPreCondition>()
 
         type Call with
-            static member private addCallVertex(parent:ParentWrapper) call = parent.GetGraph().AddVertex(call) |> verifyM $"중복 call name [{call.Name}]"
-            static member CreateWithValueParamIO(target:Job, parent:ParentWrapper, valueParamIO:ValueParamIO) =
-                let call = Call(target|>JobType, parent, valueParamIO)
-                let duplicated =
-                    parent.GetSystem().Flows
-                        .SelectMany(fun f -> f.Graph.Vertices.OfType<Call>())
-                        .Any(fun c -> c.QualifiedName = call.QualifiedName)
-                if duplicated then
-                    failwithlog $"중복 call name [{call.Name}]"
-
-                Call.addCallVertex parent call
-                call
-
-            static member Create(target:Job, parent:ParentWrapper) =
-                Call.CreateWithValueParamIO(target, parent, defaultValueParamIO())
-
-            static member Create(func:DsFunc, parent:ParentWrapper) =
-                let callType =
-                    match func with
-                    | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
-                    | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
-                    | _ -> failwithlog "Error"
-
-                let call = Call(callType, parent, defaultValueParamIO())
-                Call.addCallVertex parent call
-                call
-
-
             member x.DeviceNApi = x.TargetJob.NameComponents.Skip(1)
             member x.GetAliasTargetToDs(aliasFlow:Flow) =
                     let orgFlowName = x.TargetJob.NameComponents.Head()

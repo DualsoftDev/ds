@@ -97,7 +97,7 @@ module ConvertCpuDsSystem =
                     match condi.ConditionType with
                     | DuReadyState -> (int HwSysTag.HwReadyConditionErr)
                     | DuDriveState -> (int HwSysTag.HwDriveConditionErr)
-                    
+
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true (Some(condi)) tagKind x
                 condi.ErrorCondition.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
 
@@ -133,7 +133,7 @@ module ConvertCpuDsSystem =
                     ErrorOffTimeUnder,  (cv.ErrOffTimeUnder    :> IStorage)
                     ErrorInterlock,     (cv.ErrInterlock       :> IStorage)
                 |]
-                |> Seq.iter(fun (k, v) ->call.ExternalTags.Add(k, v)) 
+                |> Seq.iter(fun (k, v) ->call.ExternalTags.Add(k, v))
 
         member private x.GenerationRealAlarmMemory()  =
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
@@ -160,15 +160,15 @@ module ConvertCpuDsSystem =
                     ScriptEnd,    (rm.ScriptEnd   :> IStorage)
                     MotionEnd,    (rm.MotionEnd   :> IStorage)
                 |]
-                |> Seq.iter(fun (k, v) ->real.ExternalTags.Add(k, v)) 
-               
+                |> Seq.iter(fun (k, v) ->real.ExternalTags.Add(k, v))
+
         member x.ClearExteralTags()  =
             let calls = x.GetAlarmCalls().Distinct()
             for call in calls do
-                call.ExternalTags.Clear()  
-                
+                call.ExternalTags.Clear()
+
             for real in x.GetRealVertices().Distinct()  do
-                real.ExternalTags.Clear()  
+                real.ExternalTags.Clear()
 
         member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do
@@ -228,9 +228,9 @@ module ConvertCpuDsSystem =
                     ||( dev.OutAddress <> TextNotUsed  &&  cv.SF.Address = TextAddrEmpty)
                 then
                     cv.SF.Address    <- getMemory  cv.SF (getTarget(x))
-                    dev.MaunualAddress  <- cv.SF.Address
+                    dev.ManualAddress  <- cv.SF.Address
                 else
-                    dev.MaunualAddress  <- TextNotUsed  //다중 작업은 수동 작업을 사용하지 않는다.
+                    dev.ManualAddress  <- TextNotUsed  //다중 작업은 수동 작업을 사용하지 않는다.
 
         member x.GenerationMemory() =
             //Step1)Emulation base + 1 bit

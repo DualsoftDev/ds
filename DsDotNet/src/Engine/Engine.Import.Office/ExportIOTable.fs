@@ -47,14 +47,14 @@ module ExportIOTable =
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
     let getFlowExportName(hw:HwSystemDef)  =
-        if hw.IsGlobalSystemHw 
-            then "ALL" 
+        if hw.IsGlobalSystemHw
+            then "ALL"
             else String.Join(";", hw.SettingFlows.Select(fun f->f.Name))
 
     let ToPanelIOTable(sys: DsSystem) (containSys:bool) target : DataTable =
 
         let dt = new System.Data.DataTable($"{sys.Name} Panel IO LIST")
-        
+
         addIOColumn dt
 
         let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
@@ -200,58 +200,55 @@ module ExportIOTable =
         let funcOperatorText (xs:Statement seq)=    String.Join(";", xs.Select(fun s->s.ToConditionText()))
 
         let operatorRows =
-
             sys.Functions
                 .OfType<OperatorFunction>()
-                                    .Map(fun func->
-                                    let _flow, name = splitNameForRow func.Name
-                                    let funcText =    funcOperatorText func.Statements
+                .Map(fun func->
+                    let _flow, name = splitNameForRow func.Name
+                    let funcText = funcOperatorText func.Statements
 
-
-                                    [ TextXlsOperator
-                                      TextXlsAllFlow
-                                      name
-                                      TextNotUsed
-                                      funcText
-                                      TextNotUsed
-                                      TextNotUsed
-                                      TextNotUsed
-                                      ]
-                                      )
+                    [
+                        TextXlsOperator
+                        TextXlsAllFlow
+                        name
+                        TextNotUsed
+                        funcText
+                        TextNotUsed
+                        TextNotUsed
+                        TextNotUsed
+                    ])
 
         let commandRows =
             sys.Functions
                 .OfType<CommandFunction>()
-                                    .Map(fun func->
-                                    let _flow, name = splitNameForRow func.Name
-                                    let funcText =    funcText func.Statements
+                .Map(fun func->
+                    let _flow, name = splitNameForRow func.Name
+                    let funcText =    funcText func.Statements
 
+                    [
+                        TextXlsCommand
+                        TextXlsAllFlow
+                        name
+                        TextNotUsed
+                        TextNotUsed
+                        funcText
+                        TextNotUsed
+                        TextNotUsed
+                    ])
 
-                                    [ TextXlsCommand
-                                      TextXlsAllFlow
-                                      name
-                                      TextNotUsed
-                                      TextNotUsed
-                                      funcText
-                                      TextNotUsed
-                                      TextNotUsed
-                                      ]
-                                      )
-
-        let variRows = sys.Variables.Map(fun vari->
+        let variRows =
+            sys.Variables.Map(fun vari->
                 [
-                  if vari.VariableType = Mutable then  TextXlsVariable else TextXlsConst
-                  TextXlsAllFlow
-                  vari.Name
-                  vari.Type.ToText()
-                  if vari.VariableType = Mutable then  TextNotUsed else vari.InitValue
-                  TextNotUsed
-                  TextNotUsed
-                  TextNotUsed
-                  ]
-                  )
+                    vari.VariableType = Mutable ?= (TextXlsVariable, TextXlsConst)
+                    TextXlsAllFlow
+                    vari.Name
+                    vari.Type.ToText()
+                    vari.VariableType = Mutable ?= (TextNotUsed, vari.InitValue)
+                    TextNotUsed
+                    TextNotUsed
+                    TextNotUsed
+                ])
 
-      
+
 
         let condiRows =
             let getXlsConditionLabel (conditionType:ConditionType) =
@@ -294,8 +291,8 @@ module ExportIOTable =
                     getPptHwDevDataTypeText action
                     action.InAddress
                     action.OutAddress
-                    action.TaskDevParamIO.InParam.Symbol 
-                    action.TaskDevParamIO.OutParam.Symbol 
+                    action.TaskDevParamIO.InParam.Symbol
+                    action.TaskDevParamIO.OutParam.Symbol
                 ]
             )
 
@@ -325,10 +322,10 @@ module ExportIOTable =
         let rowItems (name:string, address :string) =
             no <- no+1
             [
-              $"Alarm{no}"
-              name
-              address
-               ]
+                $"Alarm{no}"
+                name
+                address
+            ]
 
         let rows =
             let calls = sys.GetAlarmCalls()
@@ -396,15 +393,14 @@ module ExportIOTable =
               "Off"
               "Off"
               "On"
-               ]
+             ]
 
 
         let alarmList = getErrorRows(sys)
         let rows=
             alarmList
             |> Seq.map (fun err ->
-                                rowItems (err[ErrorColumn.Name|>int])
-                        )
+                rowItems (err[int ErrorColumn.Name]) )
 
         addRows rows dt
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<TextColumn>)) dt
@@ -448,7 +444,7 @@ module ExportIOTable =
             let devs =  sys.GetDevicesForHMI()
             devs.Select(fun (dev, _)->
                 let text =
-                    if dev.MaunualAddress = TextNotUsed then
+                    if dev.ManualAddress = TextNotUsed then
                         ""//"·"
                     else
                         "□"
@@ -607,7 +603,7 @@ module ExportIOTable =
 
                     match iomType with
                     | IOType.Memory ->
-                        yield rowItems (dev, if dev.IsMaunualAddressSkipOrEmpty then HMITempManualAction else dev.MaunualAddress)
+                        yield rowItems (dev, if dev.IsManualAddressSkipOrEmpty then HMITempManualAction else dev.ManualAddress)
                     | IOType.In->
                         yield rowItems (dev, if dev.IsInAddressSkipOrEmpty then HMITempMemory else dev.InAddress)
                     | IOType.Out ->

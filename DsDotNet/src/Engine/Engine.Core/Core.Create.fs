@@ -6,59 +6,61 @@ open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module CoreCreateModule =
-    let createTaskDevUsingApiName (sys: DsSystem)  (devName: string) (apiName: string): TaskDev =
-        let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
+    type DsSystem with
+        member x.CreateTaskDev(devName:string, apiName: string): TaskDev =
+            let sys:DsSystem = x
+            let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
 
-        let api =
-            // Check if the API already exists
-            match apis with
-            | [] ->
-                // Add a default flow if no flows exist
-                let flow =
-                    match sys.Flows.TryHead() with
-                    | Some h -> h
-                    | None -> sys.CreateFlow("genFlow")
+            let api:ApiItem =
+                // Check if the API already exists
+                match apis with
+                | api::[] -> api
+                | [] ->
+                    // Add a default flow if no flows exist
+                    let flow =
+                        match sys.Flows.TryHead() with
+                        | Some h -> h
+                        | None -> sys.CreateFlow("genFlow")
 
-                let realName = $"gen{apiName}"
-                let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
-                if reals.Any(fun w -> w.Name = realName) then
-                    failwithf $"real {realName} 중복 생성에러"
+                    let realName = $"gen{apiName}"
+                    let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
+                    if reals.Any(fun w -> w.Name = realName) then
+                        failwithf $"real {realName} 중복 생성에러"
 
-                // Create a new Real
-                let newReal = flow.CreateReal(realName)
-
-
-                flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
-                newReal.Finished <- true    //마지막 Real이 원위치
+                    // Create a new Real
+                    let newReal = flow.CreateReal(realName)
 
 
-                  // Create and add a new ApiItem
-                let newApi = sys.CreateApiItem(apiName, newReal, newReal)
-                sys.ApiItems.Add newApi |> ignore
+                    flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
+                    newReal.Finished <- true    //마지막 Real이 원위치
 
-                if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
-                    // Iterate over reals up to newReal
-                    reals
-                        .TakeWhile(fun r -> r <> newReal)
-                        .Iter(fun r ->
-                            let exAliasName = $"{r.Name}Alias_{newReal.Name}"
-                            let myAliasName = $"{newReal.Name}Alias_{r.Name}"
-                            let exAlias = flow.CreateAlias(exAliasName, r, false)
-                            let myAlias = flow.CreateAlias(myAliasName, newReal, false)
 
-                            // Create an edge between myAlias and exAlias
-                            flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
+                      // Create and add a new ApiItem
+                    let newApi = sys.CreateApiItem(apiName, newReal, newReal)
+                    sys.ApiItems.Add newApi |> ignore
 
-                    // Potentially update other ApiItems based on the new ApiItem
-                    //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
-                    //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
+                    if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
+                        // Iterate over reals up to newReal
+                        reals
+                            .TakeWhile(fun r -> r <> newReal)
+                            .Iter(fun r ->
+                                let exAliasName = $"{r.Name}Alias_{newReal.Name}"
+                                let myAliasName = $"{newReal.Name}Alias_{r.Name}"
+                                let exAlias = flow.CreateAlias(exAliasName, r, false)
+                                let myAlias = flow.CreateAlias(myAliasName, newReal, false)
 
-                newApi
-            | api::[] -> api
-            | _ ->
-                failwithf $"system {sys.Name} api {apiName} 중복 존재"
+                                // Create an edge between myAlias and exAlias
+                                flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
 
-        TaskDev(api, devName, sys)
+                        // Potentially update other ApiItems based on the new ApiItem
+                        //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
+                        //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
+
+                    newApi
+                | _ ->
+                    failwithf $"system {sys.Name} api {apiName} 중복 존재"
+
+            TaskDev(api, devName, sys)
 
 
     let updateSystemForSingleApi(sys:DsSystem) =

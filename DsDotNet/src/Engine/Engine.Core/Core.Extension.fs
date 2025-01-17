@@ -18,14 +18,14 @@ module CoreExtensionModule =
         match paramInOutText.Split(',') |> Seq.toList with
         | tx::rx when rx.Length = 1 -> Some (tx,  rx.Head)
         | _-> None
-        
+
 
     let checkHwSystem(system:DsSystem, targetFlow:Flow, itemName:string) =
         if system <> targetFlow.System then
             failwithf $"add item [{itemName}] in flow ({targetFlow.System.Name} != {system.Name}) is not same system"
         if itemName.Contains('.') then
             failwithf $"[{targetFlow}]{itemName} Error: \r\n이름 '.' 포함되서는 안됩니다."
-           
+
     let getButtons (sys:DsSystem, btnType:BtnType) = sys.HwSystemDefs.OfType<ButtonDef>().Where(fun f->f.ButtonType = btnType)
     let getLamps (sys:DsSystem, lampType:LampType) = sys.HwSystemDefs.OfType<LampDef>().Where(fun f->f.LampType = lampType)
     let getConditions (sys:DsSystem, cType:ConditionType) = sys.HwSystemDefs.OfType<ConditionDef>().Where(fun f->f.ConditionType = cType)
@@ -97,8 +97,8 @@ module CoreExtensionModule =
         member x.AddButtonDef(btnType:BtnType, btnName:string, valueParamIO:ValueParamIO,  addr:Addresses, flow:Flow option) =
             if flow.IsSome then
                 checkHwSystem(x, flow.Value, btnName)
-          
-         
+
+
             match x.HWButtons.TryFind(fun f -> f.Name = btnName) with
             | Some btn when flow.IsSome -> btn.SettingFlows.Add(flow.Value) |> verifyM $"중복 Button [flow:{flow.Value.Name} name:{btnName}]"
             | _ ->
@@ -108,7 +108,7 @@ module CoreExtensionModule =
 
         member x.AddLampDef(lmpType:LampType, lmpName: string, valueParamIO:ValueParamIO, addr:Addresses, flow:Flow option) =
             if not (valueParamIO.IsDefaultParam)
-            then 
+            then
                 failwithf $"LampDef [{lmpName}] Error: \r\nLamp는 타겟 Value 속성을 지정할 수 없습니다. 기본(true)"
 
             if flow.IsSome then
@@ -121,8 +121,8 @@ module CoreExtensionModule =
                 let flows = HashSet[match flow with | Some f -> f | None -> ()]
                 x.HwSystemDefs.Add(LampDef(lmpName, x,lmpType, valueParamIO, addr, flows))
                 |> verifyM $"중복 LampDef [name:{lmpName}]"
-        
-        
+
+
         // Method for adding actions, passing the ActionType and setting isCondition = false
         member x.AddAction(actionType: ActionType, actionName: string, valueParamIO:ValueParamIO, addr: Addresses, flow: Flow option) =
                         if addr.Out = TextNotUsed then
@@ -141,7 +141,7 @@ module CoreExtensionModule =
                 checkHwSystem(x, flow.Value, defName)
 
             let typeText = if isCondition then "Condition" else "Action"
-            
+
             let flows = HashSet[match flow with | Some f -> f | None -> ()]
             if isCondition
             then
@@ -158,7 +158,7 @@ module CoreExtensionModule =
                 | _ ->
                     x.HwSystemDefs.Add(ActionDef(defName, x, actionType.Value, valueParamIO, addr, flows))
                     |> verifyM $"중복 ActionDef [name:{defName}]"
-  
+
 
         member x.LayoutCCTVs = x.LayoutInfos  |> Seq.filter(fun f->f.ScreenType = ScreenType.CCTV)  |> Seq.map(fun f->f.ChannelName, f.Path)  |> distinct
         member x.LayoutImages = x.LayoutInfos |> Seq.filter(fun f->f.ScreenType = ScreenType.IMAGE) |> Seq.map(fun f->f.ChannelName) |> distinct
@@ -232,12 +232,12 @@ module CoreExtensionModule =
         member x.IsOutAddressSkipOrEmpty     = x.OutAddress = TextAddrEmpty || x.OutAddress = TextNotUsed
         member x.IsAddressEmpty              = x.IsInAddressEmpty  && x.IsOutAddressEmpty
         member x.IsAddressSkipOrEmpty        = x.IsOutAddressSkipOrEmpty  && x.IsInAddressSkipOrEmpty
-        member x.IsMaunualAddressEmpty       = x.MaunualAddress = TextAddrEmpty
-        member x.IsMaunualAddressSkipOrEmpty = x.MaunualAddress = TextAddrEmpty || x.MaunualAddress = TextNotUsed
+        member x.IsManualAddressEmpty       = x.ManualAddress = TextAddrEmpty
+        member x.IsManualAddressSkipOrEmpty = x.ManualAddress = TextAddrEmpty || x.ManualAddress = TextNotUsed
 
         member x.SetInSymbol(symName:string)  =  x.TaskDevParamIO.InParam.Symbol <- symName
         member x.SetOutSymbol(symName:string) =  x.TaskDevParamIO.OutParam.Symbol <- symName
-           
+
         member x.InDataType  = x.TaskDevParamIO.InParam.DataType
         member x.OutDataType  = x.TaskDevParamIO.OutParam.DataType
 
@@ -248,7 +248,7 @@ module CoreExtensionModule =
             x.TaskDefs
             |> Seq.mapi (fun i d ->
                 match x.AddressInCount, x.AddressOutCount with
-                | inCnt, outCnt when (inCnt =cnt && outCnt =cnt ) ->None 
+                | inCnt, outCnt when (inCnt =cnt && outCnt =cnt ) ->None
                 | inCnt, outCnt ->
                     let inNullAddr = i < inCnt && d.IsInAddressEmpty
                     let outNullAddr = i < outCnt && d.IsOutAddressEmpty
@@ -312,7 +312,7 @@ module CoreExtensionModule =
         match x.JobOrFunc with
         | JobType job ->
             let jobFqdn = job.NameComponents
-            let valueParamText =  
+            let valueParamText =
                 if x.ValueParamIO.IsDefaultParam
                 then ""
                 else $"({x.ValueParamIO.In.ToText()} {TextInOutSplit} {x.ValueParamIO.Out.ToText()})"

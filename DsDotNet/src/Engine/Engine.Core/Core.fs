@@ -630,28 +630,29 @@ module rec CoreModule =
             member x.ApiSystemName = apiItem.ApiSystem.Name //needs test animation
 
             member x.DeviceName = deviceName
-            member x.FullName = $"{deviceName}.{x.Name}"
-            member x.FullNameToDsText = $"{deviceName.QuoteOnDemand()}.{x.Name.QuoteOnDemand()}"
             member x.ParentSystem = parentSys
             member x.ApiItem  = apiItem
+            member x.FullName = $"{deviceName}.{x.Name}"
+            member x.FullNameToDsText = $"{deviceName.QuoteOnDemand()}.{x.Name.QuoteOnDemand()}"
 
+            member val IsRootOnlyDevice = false with get, set
             member val TaskDevParamIO = defaultTaskDevParamIO() with get, set
-            member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
-            member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
 
 
-            member val MaunualAddress = TextAddrEmpty with get, set
+            member val ManualAddress = TextAddrEmpty with get, set
 
             //CPU 생성시 할당됨 InTag
             member val InTag = getNull<ITag>() with get, set
             //CPU 생성시 할당됨 OutTag
             member val OutTag = getNull<ITag>() with get, set
 
+        type TaskDev with
+            member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
+            member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
             member x.IsAnalogSensor = x.InTag.IsNonNull() && x.InTag.DataType <> typedefof<bool>
             member x.IsAnalogActuator = x.OutTag.IsNonNull() && x.OutTag.DataType <> typedefof<bool>
             member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
 
-            member val IsRootOnlyDevice = false  with get, set
 
         /// Job 정의: Call 이 호출하는 Job 항목
         type Job (names:Fqdn, system:DsSystem, tasks:TaskDev list) =

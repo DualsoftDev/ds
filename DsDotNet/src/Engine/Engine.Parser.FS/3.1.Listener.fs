@@ -132,9 +132,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                     | _ -> ()
 
                 x.TheSystem <-
-                    let exSys = DsSystem.Create(name)
-                    registerSystem exSys
-                    exSys
+                    DsSystem.Create(name) |> tee registerSystem
+
             | _ -> x.TheSystem <- DsSystem.Create(name)
 
             RuntimeDS.System <- Some(x.TheSystem)
@@ -702,7 +701,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                 | Some apiItem ->
                                                     createTaskDev apiItem device  taskDevParamIO
                                                 | None ->
-                                                    let taskDev = createTaskDevUsingApiName (dev.ReferenceSystem) device api
+                                                    let taskDev = dev.ReferenceSystem.CreateTaskDev(device, api)
                                                     createTaskDev (taskDev.ApiItem) device  taskDevParamIO
 
                                             | None -> failwithlog $"device({device}) api({api}) is not exist"

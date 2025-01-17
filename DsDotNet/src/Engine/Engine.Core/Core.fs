@@ -98,10 +98,47 @@ module rec CoreModule =
             inherit FqdnObject(name, createFqdnObject([||]))
 
             static let assem = Assembly.GetExecutingAssembly()
-            static let currentLangVersion = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion |> Version.Parse
-            static let currentEngineVersion = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version |> Version.Parse
+            static let runtimeLangVersion = assem.GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion |> Version.Parse
+            static let runtimeEngineVersion = assem.GetCustomAttribute<AssemblyFileVersionAttribute>().Version |> Version.Parse
 
             interface ISystem
+
+            member val private _vertexDic = vertexDic
+            member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
+
+            /// System Loading (메모리 작업 중) 여부.  System 생성이 끝나는 순간에 false
+            member val Loading = true with get, set
+
+            member val ApiUsages = ResizeArray<ApiItem>()
+            member val Jobs = ResizeArray<Job>()
+            member val Functions = ResizeArray<DsFunc>()
+            member val LoadedSystems = createNamedHashSet<LoadedSystem>()
+
+            member val Variables = ResizeArray<VariableData>()
+            member val ActionVariables = ResizeArray<ActionVariable>()
+
+            member val Flows = createNamedHashSet<Flow>()
+
+            ///사용자 정의 API
+            member val ApiItems = createNamedHashSet<ApiItem>()
+
+
+            ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
+            member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
+            member val ApiResetInfos = HashSet<ApiResetInfo>()
+
+            member val LangVersion = runtimeLangVersion.Duplicate() with get, set
+            member val EngineVersion = runtimeEngineVersion.Duplicate() with get, set
+            static member RuntimeLangVersion = runtimeLangVersion
+            static member RuntimeEngineVersion = runtimeEngineVersion
+
+        type DsSystem with
+            ///내시스템이 사용한 interface
+            member x.TaskDevs = x.Jobs.SelectMany(fun j->j.TaskDefs)
+            member x.ReferenceSystems = x.LoadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
+            member x.Devices = x.LoadedSystems.OfType<Device>() |> Seq.toArray
+            member x.ExternalSystems = x.LoadedSystems.OfType<ExternalSystem>()
+
 
             // [NOTE] GraphVertex {
             static member Create4Test(name) =
@@ -124,56 +161,11 @@ module rec CoreModule =
                 vertexDic.Add(name, system)
                 system
 
-            member val VertexAddRemoveHandlers = vertexHandlers with get, set       // UnitTest 환경에서만 set 허용
-            member _.AddFqdnVertex(fqdn, vertex) = vertexDic.Add(fqdn, vertex)
-            member _.TryFindFqdnVertex(fqdn) = vertexDic.TryFindValue(fqdn)
+            member x.AddFqdnVertex(fqdn, vertex) = x._vertexDic.Add(fqdn, vertex)
+            member x.TryFindFqdnVertex(fqdn) = x._vertexDic.TryFindValue(fqdn)
             // [NOTE] GraphVertex }
 
-            /// System Loading (메모리 작업 중) 여부.  System 생성이 끝나는 순간에 false
-            member val Loading = true with get, set
 
-            member val ApiUsages = ResizeArray<ApiItem>()
-            member val Jobs = ResizeArray<Job>()
-            member val Functions = ResizeArray<DsFunc>()
-            member val LoadedSystems = createNamedHashSet<LoadedSystem>()
-
-            member x.AddLoadedSystem(childSys) =
-                x.LoadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
-
-                // loaded device 도 vertex dic 에 포함할지 말지 여부에 따라서
-                if isNull(vertexDic) then
-                    assert(isInUnitTest())
-                else
-                    x.AddFqdnVertex(childSys.Name, childSys)
-
-                childSys.ReferenceSystem.ApiItems |> x.ApiUsages.AddRange
-
-            member x.ReferenceSystems = x.LoadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
-            member x.Devices = x.LoadedSystems.OfType<Device>() |> Seq.toArray
-            member x.ExternalSystems = x.LoadedSystems.OfType<ExternalSystem>()
-
-
-            member val Variables = ResizeArray<VariableData>()
-            member val ActionVariables = ResizeArray<ActionVariable>()
-
-            member val Flows = createNamedHashSet<Flow>()
-
-            ///사용자 정의 API
-            member val ApiItems = createNamedHashSet<ApiItem>()
-
-            ///내시스템이 사용한 interface
-            member x.TaskDevs = x.Jobs.SelectMany(fun j->j.TaskDefs)
-
-            ///HW HMI 전용 API (물리 ButtonDef LampDef ConditionDef 정의에 따른 API)
-            member val HwSystemDefs = createNamedHashSet<HwSystemDef>()
-            member val ApiResetInfos = HashSet<ApiResetInfo>()
-
-            member val LangVersion = currentLangVersion.Duplicate() with get, set
-            member val EngineVersion = currentEngineVersion.Duplicate() with get, set
-            static member CurrentLangVersion = currentLangVersion
-            static member CurrentEngineVersion = currentEngineVersion
-
-        type DsSystem with
             member x.AddVariables(variableData:VariableData) =
                 if x.Variables.any(fun v-> v.Name = variableData.Name) then
                     failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
@@ -185,6 +177,18 @@ module rec CoreModule =
                     failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
 
                 x.ActionVariables.Add(actionVariable)
+
+            member x.AddLoadedSystem(childSys) =
+                x.LoadedSystems.Add(childSys) |> verifyM $"중복로드된 시스템 이름 [{childSys.Name}]"
+
+                // loaded device 도 vertex dic 에 포함할지 말지 여부에 따라서
+                if isNull(x._vertexDic) then
+                    assert(isInUnitTest())
+                else
+                    x.AddFqdnVertex(childSys.Name, childSys)
+
+                childSys.ReferenceSystem.ApiItems |> x.ApiUsages.AddRange
+
 
     [<AutoOpen>]
     module WrapperSafetyModule =

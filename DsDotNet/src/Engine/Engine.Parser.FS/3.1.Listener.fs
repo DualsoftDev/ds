@@ -280,12 +280,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterLangVersionDef(ctx: LangVersionDefContext) =
         let langVer = Version.Parse(ctx.version().GetText())
-        langVer.CheckCompatible(DsSystem.CurrentLangVersion, "Language")
+        langVer.CheckCompatible(DsSystem.RuntimeLangVersion, "Language")
         x.TheSystem.LangVersion <- langVer
 
     override x.EnterEngineVersionDef(ctx: EngineVersionDefContext) =
         let engineVer = Version.Parse(ctx.version().GetText())
-        engineVer.CheckCompatible(DsSystem.CurrentEngineVersion, "Engine")
+        engineVer.CheckCompatible(DsSystem.RuntimeEngineVersion, "Engine")
         x.TheSystem.EngineVersion <- engineVer
 
 

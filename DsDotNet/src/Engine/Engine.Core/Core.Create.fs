@@ -33,7 +33,7 @@ module CoreCreateModule =
 
 
                   // Create and add a new ApiItem
-                let newApi = ApiItem.Create(apiName, sys, newReal, newReal)
+                let newApi = sys.CreateApiItem(apiName, newReal, newReal)
                 sys.ApiItems.Add newApi |> ignore
 
                 if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리

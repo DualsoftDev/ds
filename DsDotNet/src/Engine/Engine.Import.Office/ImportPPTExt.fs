@@ -79,7 +79,7 @@ module ImportU =
                     node.Shape.ErrorName($"{ErrID._25} 위치 \n page:{dupNode.PageNum},  name:{dupNode.PageTitle}", node.PageNum)
 
                 let apiName = node.IfName
-                ApiItem.Create(apiName, sys) |> ignore)
+                sys.CreateApiItem(apiName) |> ignore)
 
             doc.MakeInterfaceResets sys
 

@@ -11,7 +11,8 @@ module rec CoreCloneModule =
     type ApiItem with
         member private x.Clone(newSys: DsSystem , dicVertex:Dictionary<Vertex, Vertex>) =
             // 향후 ApiItem 항목 추가시 깊은복사 구현
-            ApiItem.Create(x.Name, newSys, dicVertex[x.TX]:?>Real, dicVertex[x.RX]:?>Real)  |> ignore
+            let tx, rx = dicVertex[x.TX]:?>Real, dicVertex[x.RX]:?>Real
+            newSys.CreateApiItem(x.Name, tx, rx) |> ignore
 
     type ApiResetInfo with
         member private x.Clone(newSys: DsSystem) =

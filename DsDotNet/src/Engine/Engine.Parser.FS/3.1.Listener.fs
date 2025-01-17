@@ -163,8 +163,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         // 이번 stage 에서 일단 interface 이름만 이용해서 빈 interface 객체를 생성하고,
         // TXs, RXs, Resets 은 추후에 채움..
-        let api = ApiItem.Create(interfaceName, system)
-        system.ApiItems.Add(api) |> ignore
+        system.CreateApiItem(interfaceName) |> ignore
 
     override x.EnterInterfaceResetDef(ctx: InterfaceResetDefContext) =
         // I1 <|> I2 <|> I3;  ==> [| I1; <|>; I2; <|>; I3; |]

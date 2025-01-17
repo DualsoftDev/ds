@@ -168,6 +168,20 @@ module rec CoreModule =
                 system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{flowName}]"
                 flow
 
+            member x.CreateApiItem(name:string) =
+                let system = x
+                ApiItem(name, system)
+                |> tee(fun ai ->
+                    system.ApiItems.Add(ai) |> verifyM $"중복 interface prototype name [{name}]")
+
+            member x.CreateApiItem(name:string, tx, rx) =
+                let system = x
+                ApiItem(name, system)
+                |> tee(fun ai ->
+                    ai.TX <- tx
+                    ai.RX <- rx)
+
+
             member x.AddFqdnVertex(fqdn, vertex) = x._vertexDic.Add(fqdn, vertex)
             member x.TryFindFqdnVertex(fqdn) = x._vertexDic.TryFindValue(fqdn)
             // [NOTE] GraphVertex }
@@ -537,7 +551,7 @@ module rec CoreModule =
     module ApiItemsModule =
 
         /// 자신을 export 하는 관점에서 본 api's.  Interface 정의.   [interfaces] = { "+" = { F.Vp ~ F.Sp } }
-        type ApiItem private (name:string, dsSystem:DsSystem) =
+        type ApiItem internal (name:string, dsSystem:DsSystem) =
             (* createFqdnObject : system 이 다른 system 에 포함되더라도, name component 를 더 이상 확장하지 않도록 cut *)
             inherit FqdnObject(name, createFqdnObject([|dsSystem.Name|]))
             interface INamedVertex
@@ -550,19 +564,6 @@ module rec CoreModule =
             member val RX = getNull<Real>() with get, set
             override x.ToText() =
                 $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
-
-        type ApiItem with
-            static member Create(name, system) =
-                let cp = ApiItem(name, system)
-                system.ApiItems.Add(cp) |> verifyM $"중복 interface prototype name [{name}]"
-                cp
-            static member Create(name, system, tx, rx) =
-                let ai4e = ApiItem.Create(name, system)
-                ai4e.TX <- tx
-                ai4e.RX <- rx
-                ai4e
-
-
 
         /// API 의 reset 정보:  "+" <||> "-";
         and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =

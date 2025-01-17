@@ -5,6 +5,7 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System.Linq
 open Engine.Common
+open Dual.Common.Core.FS
 
 [<AutoOpen>]
 module TimeModule =
@@ -34,9 +35,8 @@ module TimeModule =
                 if maxTime.Value > -1.0 then Some maxTime.Value else None
 
         let getDummyTarget (vertex:Vertex) =
-            let real = Real.Create(Guid.NewGuid().ToString(), vertex.Parent.GetFlow())
-            real.Time <- Some 0u
-            real
+            let name, flow = Guid.NewGuid().ToString(), vertex.Parent.GetFlow()
+            flow.CreateReal(name) |> tee (fun real -> real.Time <- Some 0u)
 
         let dummySrc = getDummyTarget (srcs.First())
         let dummyTgt = getDummyTarget (tgts.First())
@@ -56,7 +56,7 @@ module TimeModule =
         dummySrc.Parent.GetGraph().RemoveVertex (dummySrc :> Vertex) |> ignore
         dummyTgt.Parent.GetGraph().RemoveVertex (dummyTgt :> Vertex) |> ignore
 
-        time 
+        time
 
     [<Extension>]
     type TimeExt() =

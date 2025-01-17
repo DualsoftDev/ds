@@ -27,8 +27,8 @@ module ModelBuildupTests1 =
         let createSimpleSystem() =
             ModelParser.ClearDicParsingText()
             let system = DsSystem.Create4Test("My")
-            let flow = Flow.Create("F", system)
-            let real = Real.Create("Main", flow)
+            let flow = system.CreateFlow("F")
+            let real = flow.CreateReal("Main")
             let dev = system.LoadDeviceAs(systemRepo, "A", @$"{libdir}/cylinder/double.ds", "./cylinder/double.ds")
 
             let apis = system.ApiUsages
@@ -69,7 +69,7 @@ module ModelBuildupTests1 =
         F.A.p = { A.ADV(%I1, %Q1); }
         F.A.m = { A.RET(%I2, %Q2); }
     }
-    [device file="./cylinder/double.ds"] A; 
+    [device file="./cylinder/double.ds"] A;
 }
 """
             logDebug $"{generated}"
@@ -109,7 +109,7 @@ module ModelBuildupTests1 =
         F.A.p = { A.ADV(%I1, %Q1); }
         F.A.m = { A.RET(%I2, %Q2); }
     }
-    [device file="./cylinder/double.ds"] A; 
+    [device file="./cylinder/double.ds"] A;
 }
 """
             logDebug $"{generated}"
@@ -120,10 +120,10 @@ module ModelBuildupTests1 =
         member __.``Model with other flow real call test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
 
-            let flow2 = Flow.Create("F2", system)
+            let flow2 = system.CreateFlow("F2")
 
             let real2 = Alias.Create(real.ParentNPureNames.Combine("_"), DuAliasTargetReal real, DuParentFlow flow2, false)
-            let real3 = Real.Create("R3", flow2)
+            let real3 = flow2.CreateReal("R3")
 
             flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real3)) |> ignore
             let generated = system.ToDsText(true, false)
@@ -152,7 +152,7 @@ module ModelBuildupTests1 =
         [<Test>]
         member __.``Model with export api test`` () =
             let system, flow, real, callAp, callAm = createSimpleSystem()
-            let real2 = Real.Create("Main2", flow)
+            let real2 = flow.CreateReal("Main2")
             let adv = ApiItem.Create("Adv", system, real, real)
             let ret = ApiItem.Create("Ret", system, real2, real2)
             [ adv; ret; ].Iter(system.ApiItems.Add >> ignore)
@@ -174,7 +174,7 @@ module ModelBuildupTests1 =
         Ret = { F.Main2 ~ F.Main2 }
         Adv <|> Ret;
     }
-    [device file="./cylinder/double.ds"] A; 
+    [device file="./cylinder/double.ds"] A;
 }
 """
             logDebug $"{generated}"
@@ -190,7 +190,7 @@ module ModelBuildupTests1 =
             system.AddButtonDef(BtnType.DuEmergencyBTN, "STOP",defParm , Addresses( "%I1","%Q1"),Some flow)
             system.AddButtonDef(BtnType.DuDriveBTN, "START",defParm,  Addresses("%I1","%Q1"),Some flow)
 
-            let flow2 = Flow.Create("F2", system)
+            let flow2 = system.CreateFlow("F2")
             system.AddButtonDef(BtnType.DuEmergencyBTN, "STOP2",defParm,  Addresses("%I1","%Q1"),Some flow2)
             system.AddButtonDef(BtnType.DuDriveBTN, "START2",defParm,  Addresses("%I1","%Q1"),Some flow2)
 
@@ -216,7 +216,7 @@ module ModelBuildupTests1 =
             STOP2(%I1, %Q1) = { F2; }
         }
     }
-    [device file="./cylinder/double.ds"] A; 
+    [device file="./cylinder/double.ds"] A;
 }
 """
             logDebug $"{generated}"

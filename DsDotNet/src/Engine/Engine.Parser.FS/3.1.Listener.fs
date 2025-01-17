@@ -146,14 +146,14 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
     override x.EnterFlowBlock(ctx: FlowBlockContext) =
         let flowName = ctx.identifier1().GetText().DeQuoteOnDemand()
-        Flow.Create(flowName, x.TheSystem) |> ignore
+        x.TheSystem.CreateFlow(flowName) |> ignore
 
     override x.EnterParentingBlock(ctx: ParentingBlockContext) =
         debugfn ($"Parenting: {ctx.GetText()}")
         let name = ctx.identifier1().TryGetName().Value
         let oci = x.GetObjectContextInformation(x.TheSystem, ctx)
         let flow = oci.Flow.Value
-        Real.Create(name, flow) |> ignore
+        flow.CreateReal(name) |> ignore
 
 
     override x.EnterInterfaceDef(ctx: InterfaceDefContext) =
@@ -554,7 +554,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 match parent.GetCore()  with
                                 | :? Flow as flow->
                                     if not <| isCallName (parent, ctxInfo.Names)  then
-                                        Real.Create(real, flow) |> ignore
+                                        flow.CreateReal(real) |> ignore
                                 |_ ->
                                     ctx.Error()
 

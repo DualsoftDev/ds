@@ -21,13 +21,13 @@ module rec CoreCloneModule =
 
     type Flow with
         member private x.Clone(newSystem: DsSystem) =
-            let newFlow = Flow.Create(x.Name, newSystem)
+            let newFlow = newSystem.CreateFlow(x.Name)
             // 향후 Flow 항목 추가시 깊은복사 구현
             newFlow
 
     type Real with
         member private x.Clone(newFlow: Flow) =
-            let newReal = Real.Create(x.Name, newFlow)
+            let newReal = newFlow.CreateReal(x.Name)
             // 향후 Real 항목 추가시 깊은복사 구현
             newReal.Motion <- x.Motion
             newReal.Script <- x.Script
@@ -35,7 +35,7 @@ module rec CoreCloneModule =
             newReal.Finished <- x.Finished
             newReal.NoTransData <- x.NoTransData
             newReal.IsSourceToken <- x.IsSourceToken
-            
+
             newReal
 
     type Alias with

@@ -98,7 +98,7 @@ module ImportU =
 
                 match doc.DicFlow.TryFind(fun kv -> kv.Value.Name = flowName) with
                 | Some kv ->   doc.DicFlow.Add(pageNum, kv.Value) |> ignore
-                | None -> doc.DicFlow.Add(pageNum, Flow.Create(flowName, sys)) |> ignore
+                | None -> doc.DicFlow.Add(pageNum, sys.CreateFlow(flowName)) |> ignore
                 )
 
         //MakeButtons 리스트 만들기
@@ -110,9 +110,9 @@ module ImportU =
             |> Seq.filter (fun node -> node.ButtonDefs.any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                
+
                 node.ButtonDefs.ForEach(fun b ->
-                    let fullName = b.Key    
+                    let fullName = b.Key
                     let pureName, devParamIO = getPureNValueParam(fullName, true)
                     mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), Some flow))
                     )
@@ -123,10 +123,10 @@ module ImportU =
 
                 if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
                 else
-                        node.ButtonHeadPageDefs.ForEach(fun b -> 
-                            let fullName = b.Key    
+                        node.ButtonHeadPageDefs.ForEach(fun b ->
+                            let fullName = b.Key
                             let pureName, devParamIO = getPureNValueParam(fullName, true)
-                            
+
                             mySys.AddButtonDef(b.Value, pureName, devParamIO, Addresses("", ""), None))
                 )
 
@@ -152,15 +152,15 @@ module ImportU =
             flowPageLamps
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
-                node.LampDefs.Iter(fun l -> 
-                    let fullName = l.Key    
+                node.LampDefs.Iter(fun l ->
+                    let fullName = l.Key
                     let pureName, devParamIO = getPureNValueParam(fullName, false)
                     mySys.AddLampDef(l.Value, pureName, devParamIO, Addresses("", ""), Some flow)))
 
             headPageLamps
             |> Seq.iter (fun node ->
                 node.LampHeadPageDefs.Iter(fun l ->
-                    let fullName = l.Key    
+                    let fullName = l.Key
                     let pureName, devParamIO = getPureNValueParam(fullName, false)
                     mySys.AddLampDef(l.Value, pureName, devParamIO, Addresses("", ""), None)))
 
@@ -236,7 +236,7 @@ module ImportU =
         static member MakeSegment(doc: PptDoc, mySys: DsSystem, target:HwTarget) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
-            
+
 
             let pptNodes = doc.Nodes
 
@@ -260,7 +260,7 @@ module ImportU =
                         dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine("_"), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
                         node.UpdateRealProperty(real)
                     | _ ->
-                        let real = Real.Create(node.Name, dicFlow.[node.PageNum])
+                        let real = dicFlow.[node.PageNum].CreateReal(node.Name)
                         dicVertex.Add(node.Key, real)
                         node.UpdateRealProperty(real)
                         )
@@ -296,20 +296,20 @@ module ImportU =
                 |> Seq.filter(fun node -> node.NodeType = CALL) //Call만 처리
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
                 |> Seq.iter (fun node ->
-                        let parentWrapper =
-                            if dicChildParent.ContainsKey node then
-                                let parent = dicChildParent[node]
-                                if not (dicVertex.ContainsKey parent.Key)
-                                then 
-                                    node.Shape.ErrorName($"이름이 같은 다른페이지 Work 내부에 복수정의", node.PageNum)
-                                else 
-                                    dicVertex[parent.Key] :?> Real |> DuParentReal
+                    let parentWrapper =
+                        if dicChildParent.ContainsKey node then
+                            let parent = dicChildParent[node]
+                            if not (dicVertex.ContainsKey parent.Key)
+                            then
+                                node.Shape.ErrorName($"이름이 같은 다른페이지 Work 내부에 복수정의", node.PageNum)
                             else
-                                dicFlow[node.PageNum] |> DuParentFlow
-                        createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
+                                dicVertex[parent.Key] :?> Real |> DuParentReal
+                        else
+                            dicFlow[node.PageNum] |> DuParentFlow
+                    createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
                 )
 
-            
+
             let createAlias () =
                 pptNodes
                 |> Seq.filter (fun node -> node.IsAlias)
@@ -336,7 +336,7 @@ module ImportU =
                             let call = dicVertex.[node.Alias.Value.Key] :?> Call
 
                             if not(call.ValueParamIO.IsDefaultParam)
-                            then 
+                            then
                                 node.Shape.ErrorName($"Alias는 ValueParam은 지원하지 않습니다.", node.PageNum)
 
                             let name = call.DeviceNApi.Combine("_")
@@ -362,7 +362,7 @@ module ImportU =
                                 let name = if otherFlow then ct.TargetJob.NameComponents.Combine() else ct.Name
 
                                 if not(ct.ValueParamIO.IsDefaultParam)
-                                then 
+                                then
                                     node.Shape.ErrorName($"Alias는 ValueParam은 지원하지 않습니다.", node.PageNum)
 
                                 Alias.Create(
@@ -524,7 +524,7 @@ module ImportU =
                    .OfType<Call>().Where(fun call -> call.IsJob)
                    .Select(fun call -> call.DequotedQualifiedName,  call) |> dict
 
-     
+
             let getCallName(condiName:string, holder:Call) =
                 let fqdn = condiName.Split('.').Select(fun s->s.Trim()).ToArray()
                 let sName = mySys.Name;

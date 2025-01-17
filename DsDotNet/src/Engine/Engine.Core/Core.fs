@@ -161,6 +161,13 @@ module rec CoreModule =
                 vertexDic.Add(name, system)
                 system
 
+
+            member x.CreateFlow(flowName:string) =
+                let system = x
+                let flow = Flow(flowName, system)
+                system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{flowName}]"
+                flow
+
             member x.AddFqdnVertex(fqdn, vertex) = x._vertexDic.Add(fqdn, vertex)
             member x.TryFindFqdnVertex(fqdn) = x._vertexDic.TryFindValue(fqdn)
             // [NOTE] GraphVertex }
@@ -264,7 +271,7 @@ module rec CoreModule =
 
     [<AutoOpen>]
     module GraphItemsModule =
-        type Flow private (name: string, system: DsSystem) =
+        type Flow internal (name: string, system: DsSystem) =
             inherit FqdnObject(name, system)
 
             do
@@ -275,10 +282,16 @@ module rec CoreModule =
             member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
             member x.System = system
 
-            static member Create(name: string, system: DsSystem) =
-                let flow = Flow(name, system)
-                system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{name}]"
-                flow
+        type Flow with
+            member x.CreateReal(name:string) =
+                let flow = x
+                if name.Contains "." then
+                    logWarn $"Suspicious segment name [{name}]. Check it."
+
+                let real = Real(name, flow)
+                flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
+                real
+
 
         /// leaf or stem(parenting)
         /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
@@ -317,7 +330,7 @@ module rec CoreModule =
 
         /// Segment (DS Basic Unit)
         [<DebuggerDisplay("{QualifiedName}")>]
-        type Real private (name:string, flow:Flow) =
+        type Real internal (name:string, flow:Flow) =
             inherit Vertex([|name|], DuParentFlow flow)
             let mutable motion:string option = None
             let mutable script:string option = None
@@ -354,14 +367,6 @@ module rec CoreModule =
             member val RepeatCount:UInt32 option = None with get, set
 
         type Real with
-            static member Create(name: string, flow) =
-                if (name.Contains ".")  then
-                    logWarn $"Suspicious segment name [{name}]. Check it."
-
-                let real = Real(name, flow)
-                flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
-                real
-
             member x.GetAliasTargetToDs(aliasFlow:Flow) =
                 [|
                     if x.Flow <> aliasFlow then

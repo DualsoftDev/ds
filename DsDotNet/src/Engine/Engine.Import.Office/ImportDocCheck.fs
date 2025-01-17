@@ -15,12 +15,12 @@ module ImportDocCheck =
 
     let GetDemoModel (sysName: string) =
         let sys = DsSystem.Create(sysName)
-        let flow = Flow.Create("P0", sys)
+        let flow = sys.CreateFlow("P0")
         let vertexs = HashSet<Real>()
         let find (name: string) = vertexs.First(fun f -> f.Name = name)
 
         for v in [ "START"; "시작인과"; "시작유지"; "RESET"; "복귀인과"; "복귀유지"; "ETC"; "상호행위간섭"; "시작후행리셋" ] do
-            vertexs.Add(Real.Create(v, flow)) |> ignore
+            vertexs.Add(flow.CreateReal(v)) |> ignore
 
         let fg = flow.Graph
         fg.AddVertices(vertexs.Cast<Vertex>()) |> ignore
@@ -108,4 +108,3 @@ module ImportDocCheck =
 
         duplicatePages.Iter(fun page ->
             Office.ErrorPpt(ErrorCase.Name, ErrID._2, $"중복이름 : {page.Title}", page.PageNum, 0u, $"중복페이지"))
-             

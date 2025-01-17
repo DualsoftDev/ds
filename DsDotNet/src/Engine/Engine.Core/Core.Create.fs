@@ -14,17 +14,18 @@ module CoreCreateModule =
             match apis with
             | [] ->
                 // Add a default flow if no flows exist
-                if sys.Flows.IsEmpty then
-                    sys.Flows.Add(Flow.Create("genFlow", sys)) |> ignore
+                let flow =
+                    match sys.Flows.TryHead() with
+                    | Some h -> h
+                    | None -> sys.CreateFlow("genFlow")
 
                 let realName = $"gen{apiName}"
-                let flow = sys.Flows.Head()
                 let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
                 if reals.Any(fun w -> w.Name = realName) then
                     failwithf $"real {realName} 중복 생성에러"
 
                 // Create a new Real
-                let newReal = Real.Create(realName, flow)
+                let newReal = flow.CreateReal(realName)
 
 
                 flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
@@ -65,7 +66,7 @@ module CoreCreateModule =
             let flow = refSys.Flows.Head()
             let oldReal = flow.Graph.Vertices.OfType<Real>().Head()
             let realName = $"genClearReal{api.Name}"
-            let clearReal = Real.Create(realName, flow)
+            let clearReal = flow.CreateReal(realName)
             oldReal.Finished <- false
             clearReal.Finished <- true
             flow.CreateEdge(ModelingEdgeInfo<Vertex>(oldReal , "<|>", clearReal)) |> ignore

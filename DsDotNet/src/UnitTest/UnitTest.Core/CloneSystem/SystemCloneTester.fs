@@ -10,15 +10,15 @@ type DsSystemCloneTests() =
 
     let createTestSystem() =
         let system = DsSystem.Create4Test("OriginalSystem")
-        let flow1 = Flow.Create("Flow1", system)
-        let flow2 = Flow.Create("Flow2", system)
+        let flow1 = system.CreateFlow("Flow1")
+        let flow2 = system.CreateFlow("Flow2")
         system.Flows.Add(flow1) |> ignore
         system.Flows.Add(flow2) |> ignore
 
-        let real1 = Real.Create("Real1", flow1)
-        let real2 = Real.Create("Real2", flow2)
-        let real3 = Real.Create("Real3", flow1)
-        let real4 = Real.Create("Real4", flow2)
+        let real1 = flow1.CreateReal("Real1")
+        let real2 = flow2.CreateReal("Real2")
+        let real3 = flow1.CreateReal("Real3")
+        let real4 = flow2.CreateReal("Real4")
 
         // Setting members for Real instances
         real1.Motion <- Some "Motion1"
@@ -38,7 +38,7 @@ type DsSystemCloneTests() =
         // Adding edges between vertices
         flow1.CreateEdge(ModelingEdgeInfo<Vertex>(real1, ">", real3)) |> ignore
         flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real4)) |> ignore
-        
+
         Alias.Create("Alias1", DuAliasTargetReal real1, DuParentFlow flow2, false) |> ignore
 
         system
@@ -101,7 +101,7 @@ type DsSystemCloneTests() =
         real1Clone.Finished |> should equal true
         real1Clone.NoTransData |> should equal true
         real1Clone.IsSourceToken |> should equal true
-        
+
         let real2Clone = clonedSystem.GetVertices().OfType<Real>().First(fun r -> r.Name = "Real2")
         real2Clone.Motion |> should equal (Some "Motion2")
         real2Clone.Script |> should equal (Some "Script2")
@@ -114,7 +114,7 @@ type DsSystemCloneTests() =
         let originalSystem = createTestSystem()
         let clonedSystem = originalSystem.Clone("ClonedSystem")
         let flow1 = clonedSystem.Flows.First(fun f -> f.Name = "Flow1")
-        
+
         // Verify vertices in Flow1
         let flow1Vertices = flow1.Graph.Vertices.OfType<Real>().ToList()
         flow1Vertices.Count |> should equal 2

@@ -12,10 +12,10 @@ module TimeTestModule =
     type TimeTest() =
 
         let system = DsSystem.Create4Test("My")
-        let flow = Flow.Create("F", system)
+        let flow = system.CreateFlow("F")
 
         let createVertex name time =
-            let r = Real.Create(name, flow)
+            let r = flow.CreateReal(name)
             r.Time <- Some time
             r :> Vertex
 

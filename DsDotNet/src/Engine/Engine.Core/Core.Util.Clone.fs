@@ -17,7 +17,7 @@ module rec CoreCloneModule =
     type ApiResetInfo with
         member private x.Clone(newSys: DsSystem) =
             // 향후 ApiResetInfo 항목 추가시 깊은복사 구현
-            ApiResetInfo.Create(newSys, x.Operand1, x.Operator, x.Operand2, x.AutoGenByFlow) |> ignore
+            newSys.CreateApiResetInfo(x.Operand1, x.Operator, x.Operand2, x.AutoGenByFlow) |> ignore
 
 
     type Flow with

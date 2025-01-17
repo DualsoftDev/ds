@@ -254,7 +254,7 @@ module ListnerCommonFunctionGeneratorUtil =
 
             // Create edges
             for (opnd1, op, opnd2) in edgesToCreate do
-                ApiResetInfo.Create(sys, opnd1, op |> toModelEdge, opnd2, false) |> ignore
+                sys.CreateApiResetInfo(opnd1, op |> toModelEdge, opnd2, false) |> ignore
 
         else
             // I1 <|> I2 와 I2 <|> I3 에 대해서 해석
@@ -267,4 +267,4 @@ module ListnerCommonFunctionGeneratorUtil =
 
             for (left, right) in resets do
                 let opnd1, op, opnd2 = left, "<|>", right
-                ApiResetInfo.Create(sys, opnd1, op |> toModelEdge, opnd2, false) |> ignore
+                sys.CreateApiResetInfo(opnd1, op |> toModelEdge, opnd2, false) |> ignore

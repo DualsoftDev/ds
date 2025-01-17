@@ -181,6 +181,11 @@ module rec CoreModule =
                     ai.TX <- tx
                     ai.RX <- rx)
 
+            member x.CreateApiResetInfo(operand1, operator, operand2, autoGenByFlow) =
+                let system = x
+                ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
+                |> tee(fun ri ->
+                    system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]")
 
             member x.AddFqdnVertex(fqdn, vertex) = x._vertexDic.Add(fqdn, vertex)
             member x.TryFindFqdnVertex(fqdn) = x._vertexDic.TryFindValue(fqdn)
@@ -566,7 +571,7 @@ module rec CoreModule =
                 $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
 
         /// API 의 reset 정보:  "+" <||> "-";
-        and ApiResetInfo private (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
+        and ApiResetInfo internal (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
             member _.AutoGenByFlow = autoGenByFlow
             member _.Operand1 = operand1  // "+"
             member _.Operand2 = operand2  // "-"
@@ -575,10 +580,6 @@ module rec CoreModule =
                 let src = operand1
                 let tgt = operand2
                 sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <|> "-"
-            static member Create(system:DsSystem, operand1, operator, operand2, autoGenByFlow) =
-                let ri = ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
-                system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]"
-                ri
 
 
         /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.

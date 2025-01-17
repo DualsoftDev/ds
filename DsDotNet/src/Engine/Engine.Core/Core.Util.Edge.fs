@@ -249,7 +249,7 @@ module EdgeModule =
             sys.ApiItems
                 .Where(fun f -> f <> api && resetAbleReals.Contains(f.RX))
                 .Iter (fun f ->
-                        ApiResetInfo.Create(sys, api.Name, "|>"|> toModelEdge ,f.Name, true) |> ignore
+                        sys.CreateApiResetInfo(api.Name, "|>"|> toModelEdge ,f.Name, true) |> ignore
             )
         )
 

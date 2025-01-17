@@ -39,7 +39,7 @@ module ImportU =
                     resets.Add(src.Name, tgt.Name) |> ignore
                 else
                     sys.ApiResetInfos.Add(
-                        ApiResetInfo.Create(sys, edge.StartNode.Name, edge.Causal, edge.EndNode.Name, false)
+                        sys.CreateApiResetInfo(edge.StartNode.Name, edge.Causal, edge.EndNode.Name, false)
                     )
                     |> ignore)
 
@@ -53,7 +53,7 @@ module ImportU =
                 | None -> dicIL.Add(dicIL.length (), [ src; tgt ] |> HashSet)
 
             let createInterlockInfos (src, tgt) =
-                let mei = ApiResetInfo.Create(sys, src, Interlock, tgt, false)
+                let mei = sys.CreateApiResetInfo(src, Interlock, tgt, false)
                 sys.ApiResetInfos.Add(mei) |> ignore
 
             resets.ForEach updateILInfo

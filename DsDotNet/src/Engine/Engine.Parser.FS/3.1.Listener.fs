@@ -571,9 +571,9 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
                             | 2, _x1 :: [ _x2 ]  ->
                                   match parent.GetCore() with
-                                  | :? Flow as _myflow ->
+                                  | :? Flow as myflow ->
                                         let otherFlowReal = tryFindReal system [ _x1; _x2 ] |> Option.get
-                                        Alias.Create(ctxInfo.Names.Combine("_"), DuAliasTargetReal otherFlowReal, parent, false) |> ignore
+                                        myflow.CreateAlias(ctxInfo.Names.Combine("_"), otherFlowReal, false) |> ignore
                                   |_ when isAliasMnemonic (parent, name) ->
                                         createAlias(parent, ctxInfo.Names.Combine("_"))
                                   |_ ->

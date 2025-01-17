@@ -39,7 +39,7 @@ type DsSystemCloneTests() =
         flow1.CreateEdge(ModelingEdgeInfo<Vertex>(real1, ">", real3)) |> ignore
         flow2.CreateEdge(ModelingEdgeInfo<Vertex>(real2, ">", real4)) |> ignore
 
-        Alias.Create("Alias1", DuAliasTargetReal real1, DuParentFlow flow2, false) |> ignore
+        flow2.CreateAlias("Alias1", real1, false) |> ignore
 
         system
 

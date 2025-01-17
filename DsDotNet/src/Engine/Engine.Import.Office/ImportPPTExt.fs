@@ -257,7 +257,8 @@ module ImportU =
                     match node.NodeType with
                     | REALExF -> // isOtherFlowRealAlias is false  (외부 플로우에 있을뿐 Or Alias가 아님)
                         let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
-                        dicVertex.Add(node.Key, Alias.Create(real.ParentNPureNames.Combine("_"), DuAliasTargetReal real, DuParentFlow dicFlow.[node.PageNum], false))
+                        let flow = dicFlow.[node.PageNum]
+                        dicVertex.Add(node.Key, flow.CreateAlias(real.ParentNPureNames.Combine("_"), real, false))
                         node.UpdateRealProperty(real)
                     | _ ->
                         let real = dicFlow.[node.PageNum].CreateReal(node.Name)
@@ -325,11 +326,7 @@ module ImportU =
                             let real = getOtherFlowReal (dicFlow.Values, node) :?> Real
                             node.UpdateRealProperty(real)
                             let name = real.ParentNPureNames.Combine("_")
-                            Alias.Create(
-                                $"{name}_{node.AliasNumber}" ,
-                                DuAliasTargetReal(real),
-                                DuParentFlow(flow), true
-                            )
+                            flow.CreateAlias( $"{name}_{node.AliasNumber}", real, true )
 
                         elif dicChildParent.ContainsKey(node) then
                             let real = dicVertex.[dicChildParent.[node].Key] :?> Real
@@ -340,11 +337,8 @@ module ImportU =
                                 node.Shape.ErrorName($"Alias는 ValueParam은 지원하지 않습니다.", node.PageNum)
 
                             let name = call.DeviceNApi.Combine("_")
-                            Alias.Create(
-                                $"{name}_{node.AliasNumber}" ,
-                                DuAliasTargetCall(segOrg :?> Call),
-                                DuParentReal(real), false
-                            )
+                            let call = segOrg :?> Call
+                            real.CreateAlias($"{name}_{node.AliasNumber}", call, false )
                         else
 
                             match segOrg with
@@ -352,11 +346,7 @@ module ImportU =
                                 node.UpdateRealProperty(rt)
                                 let otherFlow  =  flow <> rt.Flow
                                 let name = if otherFlow then $"{rt.Flow.Name}{rt.Name}"else rt.Name
-                                Alias.Create(
-                                    $"{name}_{node.AliasNumber}" ,
-                                    DuAliasTargetReal(rt),
-                                    DuParentFlow(flow) , otherFlow
-                                )
+                                flow.CreateAlias($"{name}_{node.AliasNumber}", rt, otherFlow)
                             | :? Call as ct ->
                                 let otherFlow  = flow.Name <> ct.TargetJob.NameComponents.Head()
                                 let name = if otherFlow then ct.TargetJob.NameComponents.Combine() else ct.Name
@@ -365,11 +355,7 @@ module ImportU =
                                 then
                                     node.Shape.ErrorName($"Alias는 ValueParam은 지원하지 않습니다.", node.PageNum)
 
-                                Alias.Create(
-                                    $"{name}_{node.AliasNumber}" ,
-                                    DuAliasTargetCall(ct),
-                                    DuParentFlow(flow) , otherFlow
-                                )
+                                flow.CreateAlias($"{name}_{node.AliasNumber}", ct, otherFlow)
                             | _ -> failwithf "Error type"
 
                     dicVertex.Add(node.Key, alias))

@@ -311,6 +311,13 @@ module rec CoreModule =
                 flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
                 real
 
+            /// see Real.CreateAlias
+            member x.CreateAlias(name:string, target:Call, isExFlowReal) =
+                Alias.Create(name, DuAliasTargetCall target, DuParentFlow x, isExFlowReal)
+
+            /// see Real.CreateAlias
+            member x.CreateAlias(name:string, target:Real, isExFlowReal) =
+                Alias.Create(name, DuAliasTargetReal target, DuParentFlow x, isExFlowReal)
 
         /// leaf or stem(parenting)
         /// Graph 상의 vertex 를 점유하는 named object : Real, Alias, Call
@@ -392,6 +399,9 @@ module rec CoreModule =
                         yield x.Flow.Name // other flow
                     yield x.Name  // my flow
                 |]
+            /// see Flow.CreateAlias
+            member x.CreateAlias(name:string, target:Call, isExFlowReal) =
+                Alias.Create(name, DuAliasTargetCall target, DuParentReal x, isExFlowReal)
 
 
         type CallType =
@@ -520,7 +530,7 @@ module rec CoreModule =
 
 
         type Alias with
-            static member Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isExFlowReal) =
+            static member internal Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isExFlowReal) =
                 let createAliasDefOnDemand() =
                     (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
                      * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.

@@ -25,3 +25,5 @@ module ModuleInitializer =
                 MemberVariable<uint32>(param) :> VariableBase<uint32>
             createUInt32Tag
 
+        fwdCreateEdgeOnFlow := (fun (flow: Flow) (mei: ModelingEdgeInfo<Vertex>) -> flow.CreateEdgeImpl(mei))
+        fwdCreateEdgeOnReal := (fun (real: Real) (mei: ModelingEdgeInfo<Vertex>) -> real.CreateEdgeImpl(mei))

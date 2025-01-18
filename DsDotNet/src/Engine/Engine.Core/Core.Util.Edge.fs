@@ -263,7 +263,7 @@ module EdgeModule =
                 )
 
     type Flow with
-        member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+        member internal x.CreateEdgeImpl(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =   // see Flow.CreateEdge
             let flow:Flow = x
             let mei = modelingEdgeInfo
             validateParentOfEdgeVertices mei flow
@@ -271,7 +271,7 @@ module EdgeModule =
             createEdge flow.Graph mei
 
     type Real with
-        member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =
+        member internal x.CreateEdgeImpl(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) =   // see Real.CreateEdge
             let segment:Real = x
             let mei = modelingEdgeInfo
             validateParentOfEdgeVertices mei segment
@@ -285,7 +285,7 @@ module EdgeModule =
 type EdgeExt =
     [<Extension>] static member ToText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (edge:'E) = toText edge
     [<Extension>] static member ToMermaidText<'V, 'E when 'V :> INamed and 'E :> DsEdgeBase<'V>> (edge:'E) = toMermaidText edge
-    
+
     [<Extension>] static member OfResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) = ofResetEdge edges
     [<Extension>] static member OfNotResetEdge<'V, 'E when 'E :> DsEdgeBase<'V>> (edges:'E seq) = ofNotResetEdge edges
 

@@ -497,7 +497,7 @@ module rec CoreModule =
             device: STN1__Device1
             system: HelloDS
         *)
-        type TaskDev (deviceName:string, apiItem:ApiItem, parentSys:DsSystem) =
+        type TaskDev internal (deviceName:string, apiItem:ApiItem, parentSys:DsSystem) =
             inherit FqdnObject(apiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
 
 
@@ -544,6 +544,9 @@ module rec CoreModule =
 
     [<AutoOpen>]
     module CreationModule =
+        let internal fwdCreateEdgeOnFlow = ref (fun (_flow:Flow) (_mei:ModelingEdgeInfo<Vertex>) -> failwithlog "Should be reimplemented." : Edge[])
+        let internal fwdCreateEdgeOnReal = ref (fun (_real:Real) (_mei:ModelingEdgeInfo<Vertex>) -> failwithlog "Should be reimplemented." : Edge[])
+
         type DsSystem with
             // [NOTE] GraphVertex {
             static member Create4Test(name) =
@@ -596,60 +599,62 @@ module rec CoreModule =
             // [NOTE] GraphVertex }
 
 
-            //member x.CreateTaskDev(devName:string, apiName: string): TaskDev =
-            //    let sys:DsSystem = x
-            //    let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
+            member x.CreateTaskDev(devName:string, apiItem: ApiItem): TaskDev = TaskDev(devName, apiItem, x)
+            member x.CreateTaskDev(devName:string, apiName: string): TaskDev =
+                let sys:DsSystem = x
+                let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
 
-            //    let api:ApiItem =
-            //        // Check if the API already exists
-            //        match apis with
-            //        | api::[] -> api
-            //        | [] ->
-            //            // Add a default flow if no flows exist
-            //            let flow =
-            //                match sys.Flows.TryHead() with
-            //                | Some h -> h
-            //                | None -> sys.CreateFlow("genFlow")
+                let api:ApiItem =
+                    // Check if the API already exists
+                    match apis with
+                    | api::[] -> api
+                    | [] ->
+                        // Add a default flow if no flows exist
+                        let flow =
+                            match sys.Flows.TryHead() with
+                            | Some h -> h
+                            | None -> sys.CreateFlow("genFlow")
 
-            //            let realName = $"gen{apiName}"
-            //            let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
-            //            if reals.Any(fun w -> w.Name = realName) then
-            //                failwithf $"real {realName} 중복 생성에러"
+                        let realName = $"gen{apiName}"
+                        let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
+                        if reals.Any(fun w -> w.Name = realName) then
+                            failwithf $"real {realName} 중복 생성에러"
 
-            //            // Create a new Real
-            //            let newReal:Real = flow.CreateReal(realName)
-
-
-            //            flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
-            //            newReal.Finished <- true    //마지막 Real이 원위치
+                        // Create a new Real
+                        let newReal:Real = flow.CreateReal(realName)
 
 
-            //              // Create and add a new ApiItem
-            //            let newApi = sys.CreateApiItem(apiName, newReal, newReal)
-            //            sys.ApiItems.Add newApi |> ignore
+                        flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
+                        newReal.Finished <- true    //마지막 Real이 원위치
 
-            //            if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
-            //                // Iterate over reals up to newReal
-            //                reals
-            //                    .TakeWhile(fun r -> r <> newReal)
-            //                    .Iter(fun r ->
-            //                        let exAliasName = $"{r.Name}Alias_{newReal.Name}"
-            //                        let myAliasName = $"{newReal.Name}Alias_{r.Name}"
-            //                        let exAlias = flow.CreateAlias(exAliasName, r, false)
-            //                        let myAlias = flow.CreateAlias(myAliasName, newReal, false)
 
-            //                        // Create an edge between myAlias and exAlias
-            //                        flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
+                          // Create and add a new ApiItem
+                        let newApi = sys.CreateApiItem(apiName, newReal, newReal)
+                        sys.ApiItems.Add newApi |> ignore
 
-            //                // Potentially update other ApiItems based on the new ApiItem
-            //                //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
-            //                //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
+                        if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
+                            // Iterate over reals up to newReal
+                            reals
+                                .TakeWhile(fun r -> r <> newReal)
+                                .Iter(fun r ->
+                                    let exAliasName = $"{r.Name}Alias_{newReal.Name}"
+                                    let myAliasName = $"{newReal.Name}Alias_{r.Name}"
+                                    let exAlias = flow.CreateAlias(exAliasName, r, false)
+                                    let myAlias:Alias = flow.CreateAlias(myAliasName, newReal, false)
 
-            //            newApi
-            //        | _ ->
-            //            failwithf $"system {sys.Name} api {apiName} 중복 존재"
+                                    // Create an edge between myAlias and exAlias
+                                    let mei = ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)
+                                    (!fwdCreateEdgeOnFlow) flow mei |> ignore )
 
-            //    TaskDev(devName, api, sys)
+                            // Potentially update other ApiItems based on the new ApiItem
+                            //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
+                            //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
+
+                        newApi
+                    | _ ->
+                        failwithf $"system {sys.Name} api {apiName} 중복 존재"
+
+                sys.CreateTaskDev(devName, api)
 
 
         type Flow with
@@ -674,6 +679,7 @@ module rec CoreModule =
                 let parent:ParentWrapper = DuParentFlow x
                 parent.CreateCall(target, valueParamIO)
             member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+            member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) = (!fwdCreateEdgeOnFlow) x modelingEdgeInfo      // fwdCreateEdgeOnFlow refers Flow.CreateEdgeImpl
 
         type Real with
             /// see Flow.CreateAlias
@@ -684,6 +690,7 @@ module rec CoreModule =
                 let parent:ParentWrapper = DuParentReal x
                 parent.CreateCall(target, valueParamIO)
             member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+            member x.CreateEdge(modelingEdgeInfo:ModelingEdgeInfo<Vertex>) = (!fwdCreateEdgeOnReal) x modelingEdgeInfo      // fwdCreateEdgeOnReal refers Real.CreateEdgeImpl
 
         type ParentWrapper with
             member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =

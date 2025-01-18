@@ -52,7 +52,7 @@ module ImportUtilVertex =
                     | Some (taskDev) ->
                         taskDev
                     | _ ->
-                        TaskDev(loadSysName, api, sys)
+                        sys.CreateTaskDev(loadSysName, api)
 
                 let job = Job(node.Job, sys, [devTask])
                 updateAddressSkip( node.JobParam, job)

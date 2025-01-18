@@ -641,8 +641,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
             let callListings = commonCallParamExtractor ctx
-            let createTaskDev (apiPoint:ApiItem) (device:string) (taskDevParamIO:TaskDevParamIO) =
-                let taskDev = TaskDev(device, apiPoint, system)
+            let createTaskDev (device:string) (apiPoint:ApiItem) (taskDevParamIO:TaskDevParamIO) =
+                let taskDev = system.CreateTaskDev(device, apiPoint)
                 taskDev.TaskDevParamIO <- taskDevParamIO
                 taskDev
 
@@ -675,12 +675,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                 let taskDevParamIO =  ad.TaskDevParamIO
                                 let task =
                                     match apiFqnd with
-                                    | device :: [ api ] ->
+                                    | device :: [ apiName ] ->
                                         let taskFromLoaded  =
                                             option {
                                                 let! apiPoint =
                                                     let allowAutoGenDevice = x.ParserOptions.AllowAutoGenDevice
-                                                    match tryFindCallingApiItem system device api allowAutoGenDevice with
+                                                    match tryFindCallingApiItem system device apiName allowAutoGenDevice with
                                                     | Some api -> Some api
                                                     | None ->
                                                         let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty
@@ -689,7 +689,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                         None
 
 
-                                                return createTaskDev  apiPoint  devName  taskDevParamIO
+                                                return createTaskDev devName apiPoint taskDevParamIO
                                             }
 
                                         match taskFromLoaded with
@@ -699,12 +699,12 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                             | Some dev->
                                                 match  dev.ReferenceSystem.ApiItems.TryFind(fun f->f.PureName = apiPure) with
                                                 | Some apiItem ->
-                                                    createTaskDev apiItem device  taskDevParamIO
+                                                    createTaskDev device apiItem taskDevParamIO
                                                 | None ->
-                                                    let taskDev = dev.ReferenceSystem.CreateTaskDev(device, api)
-                                                    createTaskDev (taskDev.ApiItem) device  taskDevParamIO
+                                                    let taskDev = dev.ReferenceSystem.CreateTaskDev(device, apiName)
+                                                    createTaskDev device taskDev.ApiItem taskDevParamIO
 
-                                            | None -> failwithlog $"device({device}) api({api}) is not exist"
+                                            | None -> failwithlog $"device({device}) api({apiName}) is not exist"
 
                                     | _ ->
                                         let errText = String.Join(", ", apiFqnd)

@@ -60,7 +60,7 @@ module CoreCreateModule =
                 | _ ->
                     failwithf $"system {sys.Name} api {apiName} 중복 존재"
 
-            TaskDev(api, devName, sys)
+            TaskDev(devName, api, sys)
 
 
     let updateSystemForSingleApi(sys:DsSystem) =

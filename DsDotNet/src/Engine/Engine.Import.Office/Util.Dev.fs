@@ -137,6 +137,6 @@ module ImportUtilForDev =
             match devOrg.ApiItems.TryFind(fun f -> f.Name = apiName) with
             | Some api ->
                 //let apiParam = {TaskDevParamIO =  taskDevParam; ApiItem = api}
-                TaskDev(api, newloadedName, mySys)
+                TaskDev(newloadedName, api, mySys)
             | None ->
                 failWithLog $"Api {apiName} not found in {newloadedName}"

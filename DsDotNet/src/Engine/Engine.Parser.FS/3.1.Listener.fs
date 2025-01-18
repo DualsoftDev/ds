@@ -642,7 +642,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
         let createTaskDevice (system: DsSystem) (ctx: JobBlockContext) =
             let callListings = commonCallParamExtractor ctx
             let createTaskDev (apiPoint:ApiItem) (device:string) (taskDevParamIO:TaskDevParamIO) =
-                let taskDev = TaskDev(apiPoint, device, system)
+                let taskDev = TaskDev(device, apiPoint, system)
                 taskDev.TaskDevParamIO <- taskDevParamIO
                 taskDev
 

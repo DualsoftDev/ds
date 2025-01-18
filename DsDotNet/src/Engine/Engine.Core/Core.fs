@@ -622,7 +622,7 @@ module rec CoreModule =
             device: STN1__Device1
             system: HelloDS
         *)
-        type TaskDev (apiItem:ApiItem, deviceName:string, parentSys:DsSystem) =
+        type TaskDev (deviceName:string, apiItem:ApiItem, parentSys:DsSystem) =
             inherit FqdnObject(apiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
 
 

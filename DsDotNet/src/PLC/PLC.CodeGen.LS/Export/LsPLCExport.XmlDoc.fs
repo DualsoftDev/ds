@@ -81,7 +81,7 @@ type XgxXmlExtension =
             let check (s:XmlNode) =
                 let name = s.Attributes.["Name"].Value
                 let devPos = s.Attributes["DevicePos"]
-                if devPos <> null && devPos.Value.any() && int devPos.Value < 0  then
+                if devPos <> null && devPos.Value.NonNullAny() && int devPos.Value < 0  then
                     failwith $"Symbol {name} has Invalid DevicePos attribute {devPos.Value}."
 
             for s in globalSymbols @ localSymbolss do

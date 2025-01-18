@@ -134,7 +134,7 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
             try
                 // client 에서 오는 모든 메시지는 client ID, requestId 와 command frame 을 기본 포함하므로,
                 // 이 3개의 frame 을 제외한 frame 의 갯수에 따라 message 를 처리한다.
-                match mms.length () - 3 with
+                match mms.Length - 3 with
                 | 0 ->
                     match command with
                     | "REGISTER" ->

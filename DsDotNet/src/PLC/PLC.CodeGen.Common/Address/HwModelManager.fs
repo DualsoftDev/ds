@@ -1,7 +1,7 @@
 [<AutoOpen>]
 module HwModelManagerImpl
 
-open System
+open System.Linq
 open System.IO
 open System.Collections.Generic
 open Dual.Common.Core.FS
@@ -14,9 +14,9 @@ type HwModelManager =
 
     static member GetCPUInfosByID(id: int) : DeviceCPUInfo seq option =
         let xs = getModelByID id
-        assert (xs.length () <= 1)
+        assert (xs.Count() <= 1)
 
-        if xs.length () = 0 then
+        if xs.IsEmpty() then
             Some(cpuDeviceMap.[xs.Head()].ToArray())
         else
             None

@@ -99,7 +99,7 @@ module ModelParser =
 
         let system = listener.TheSystem
         createMRIEdgesTransitiveClosure4System system
-        if system.ApiResetInfos.IsEmpty then
+        if system.ApiResetInfos.IsEmpty() then
             autoAppendInterfaceReset system
 
         updateDeviceRootInfo system
@@ -127,7 +127,7 @@ module ModelParser =
         let newParsing skipAddDict  =
             let sys = ParseFromString2(text, options).TheSystem
 
-            if sys.Jobs.IsEmpty && not(skipAddDict) then //하위 디바이스가 없어야 system Clone 등록 가능
+            if sys.Jobs.IsEmpty() && not(skipAddDict) then //하위 디바이스가 없어야 system Clone 등록 가능
                 _DicParsingSystem.Add(path, sys) |> ignore
             sys
 

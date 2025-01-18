@@ -71,7 +71,7 @@ module ConvertCpuDsSystem =
 
         member s._homeHW  =
             let homes = s.HomeHWButtons.Where(fun s-> s.InTag.IsNonNull())
-            if homes.any() then
+            if homes.Any() then
                 homes.Select(fun s->s.ActionINFunc).ToOrElseOn()
             else
                 s._off.Expr

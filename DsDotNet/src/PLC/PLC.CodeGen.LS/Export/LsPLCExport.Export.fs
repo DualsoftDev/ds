@@ -702,7 +702,7 @@ module XgiExportModule =
                         locals
                         |> groupBy (fun v -> v.Name)
                         |> filter (fun (_, v) -> v.Length > 1)
-                    assert duplicated.IsEmpty
+                    assert duplicated.IsEmpty()
                     locals |> map (fun v -> v.Name, v) |> dict
 
                 for g in xnGlobalVars do

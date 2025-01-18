@@ -11,7 +11,7 @@ module ImportUtilVertex =
 
 
     let getOperatorFunc (sys: DsSystem) (node: PptNode) =
-        if sys.Functions.OfType<CommandFunction>().any(fun f->f.Name = node.OperatorName)
+        if sys.Functions.OfType<CommandFunction>().Any(fun f->f.Name = node.OperatorName)
         then
             failWithLog $"Function name ({node.OperatorName}) is already used as a command name"
         else
@@ -24,7 +24,7 @@ module ImportUtilVertex =
             )
 
     let getCommandFunc (sys: DsSystem) (node: PptNode) =
-        if sys.Functions.OfType<OperatorFunction>().any(fun f->f.Name = node.CommandName)
+        if sys.Functions.OfType<OperatorFunction>().Any(fun f->f.Name = node.CommandName)
         then
             failWithLog $"Function name ({node.CommandName}) is already used as an operator name"
         else
@@ -120,7 +120,7 @@ module ImportUtilVertex =
             |> Seq.filter (fun group -> group.Value.Contains(edge.StartNode) && group.Value.Contains(edge.EndNode))
             |> Seq.map (fun group -> dicSeg.[group.Key.Key])
 
-        if (newParents.Any() && newParents.length () > 1) then
+        if (newParents.Any() && newParents.Count() > 1) then
             failwithlog "중복부모"
 
         if (newParents.Any()) then

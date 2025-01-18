@@ -2,6 +2,7 @@ namespace PLC.CodeGen.LS
 
 open System.Text.RegularExpressions
 open System.Security
+open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
@@ -68,7 +69,7 @@ module XgiPrologModule =
                         validateAddress x.Name x.Address targetType
                 return! Ok()
             }
-        member x.IsDirectAddress = x.AddressAlias.any()
+        member x.IsDirectAddress = x.AddressAlias.Any()
 
     let defaultSymbolInfo = {
         Name       = ""

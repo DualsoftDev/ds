@@ -34,7 +34,7 @@ type RealVertexTagManager with
                     endExpr <||> forceOn
 
             let rst = 
-                if real.Graph.Vertices.any() then
+                if real.Graph.Vertices.Any() then
                     v.RT.Expr <&&> real.CoinAlloffExpr  
                 else
                     v.RT.Expr 
@@ -71,7 +71,7 @@ type RealVertexTagManager with
         let fn = getFuncName()
         let real = v.Vertex :?> Real
         let rst = v._off.Expr
-        if real.Graph.Vertices.any()
+        if real.Graph.Vertices.Any()
         then
             [|
                 (real.CoinSTContacts.ToOrElseOff(), rst) --| (v.CoinAnyOnST, fn)     // S

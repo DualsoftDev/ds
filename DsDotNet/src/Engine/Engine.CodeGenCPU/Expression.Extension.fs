@@ -150,17 +150,17 @@ module ExpressionExtension =
 
     [<Extension>]
     type ExpressionExt =
-        [<Extension>] static member ToAnd        (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toAnd else failwithlog "error empty 'and' expression "
-        [<Extension>] static member ToAndElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toAnd else onExpr()
-        [<Extension>] static member ToAndElseOff (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toAnd else offExpr()
-        [<Extension>] static member ToAnd        (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else failwithlog "error empty 'and' expression "
-        [<Extension>] static member ToAndElseOn  (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else onExpr()
-        [<Extension>] static member ToAndElseOff (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<&&>) else offExpr()
+        [<Extension>] static member ToAnd        (xs:#TypedValueStorage<bool> seq) = if xs.Any() then xs |> toAnd else failwithlog "error empty 'and' expression "
+        [<Extension>] static member ToAndElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.Any() then xs |> toAnd else onExpr()
+        [<Extension>] static member ToAndElseOff (xs:#TypedValueStorage<bool> seq) = if xs.Any() then xs |> toAnd else offExpr()
+        [<Extension>] static member ToAnd        (xs:Expression<bool> seq) = if xs.Any() then xs.Reduce(<&&>) else failwithlog "error empty 'and' expression "
+        [<Extension>] static member ToAndElseOn  (xs:Expression<bool> seq) = if xs.Any() then xs.Reduce(<&&>) else onExpr()
+        [<Extension>] static member ToAndElseOff (xs:Expression<bool> seq) = if xs.Any() then xs.Reduce(<&&>) else offExpr()
 
-        [<Extension>] static member ToOr        (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else failwithlog "error empty 'or' expression "
-        [<Extension>] static member ToOrElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else onExpr()
-        [<Extension>] static member ToOrElseOff (xs:#TypedValueStorage<bool> seq) = if xs.any() then xs |> toOr else offExpr()
-        [<Extension>] static member ToOr        (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<||>) else failwithlog "error empty 'or' expression "
-        [<Extension>] static member ToOrElseOn  (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<||>) else onExpr()
-        [<Extension>] static member ToOrElseOff (xs:Expression<bool> seq) = if xs.any() then xs.Reduce(<||>) else offExpr()
+        [<Extension>] static member ToOr        (xs:#TypedValueStorage<bool> seq) = if xs.Any() then xs |> toOr else failwithlog "error empty 'or' expression "
+        [<Extension>] static member ToOrElseOn  (xs:#TypedValueStorage<bool> seq) = if xs.Any() then xs |> toOr else onExpr()
+        [<Extension>] static member ToOrElseOff (xs:#TypedValueStorage<bool> seq) = if xs.Any() then xs |> toOr else offExpr()
+        [<Extension>] static member ToOr        (xs:Expression<bool> seq) = if xs.Any() then xs.Reduce(<||>) else failwithlog "error empty 'or' expression "
+        [<Extension>] static member ToOrElseOn  (xs:Expression<bool> seq) = if xs.Any() then xs.Reduce(<||>) else onExpr()
+        [<Extension>] static member ToOrElseOff (xs:Expression<bool> seq) = if xs.Any() then xs.Reduce(<||>) else offExpr()
 

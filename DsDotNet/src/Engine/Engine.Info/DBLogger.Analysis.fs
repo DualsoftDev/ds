@@ -174,7 +174,7 @@ module DBLoggerAnalysisDTOModule =
                 | [] -> dummySpan
                 | _ ->
                     let ats = logAnalInfo.PerRealLogs.Values |> collect id |> collect id |> map(fun l -> l.At) |> toArray
-                    if ats.any() then
+                    if ats.Any() then
                         let s, e = ats |> Seq.min, ats |> Seq.max
                         (s, e)
                     else

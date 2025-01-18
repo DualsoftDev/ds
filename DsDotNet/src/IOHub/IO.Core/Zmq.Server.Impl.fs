@@ -165,7 +165,7 @@ module internal ZmqServerImplModule =
 
     /// NetMQ 의 ConvertToString() bug 대응 용 코드.  문자열의 맨 마지막에 '\0' 이 붙는 경우 강제 제거.
     let removeTrailingNullChar (str: string) =
-        if str.any () && str[str.Length - 1] = '\000' then
+        if str.NonNullAny() && str[str.Length - 1] = '\000' then
             str.Substring(0, str.Length - 1)
         else
             str

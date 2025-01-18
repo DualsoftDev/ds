@@ -389,7 +389,7 @@ module internal FB =
             FBtext.Split('\n')
             |> Seq.map (fun s -> s.Trim())
             |> Seq.filter (fun s -> not <| s.StartsWith("#"))
-            |> Seq.splitOn (fun s1 s2 -> s1.isEmpty() && not <| s2.isEmpty())
+            |> Seq.splitOn (fun s1 s2 -> s1.IsEmpty() && not <| s2.IsEmpty())
             |> Seq.map (Seq.filter (String.IsNullOrEmpty >> not) >> Array.ofSeq)
             |> Seq.map (fun fb ->
                 let fName =
@@ -457,7 +457,7 @@ module internal FB =
             lstIn
             |> Array.filter (fun f -> f.StartsWith("VAR_IN: "))
 
-        onlyIn.length(), lstIn.length()
+        onlyIn.Length, lstIn.Length
 
     /// getFBXML FB 이름 기준으로 index 가져옴
     let getFBIndex (functionName:string) =

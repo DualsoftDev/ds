@@ -1,6 +1,7 @@
 namespace Engine.Info
 
 open System
+open System.Linq
 open Dapper
 open Engine.Core
 open Dual.Common.Core.FS
@@ -67,9 +68,9 @@ module DBReaderModule =
                         {| ModelId = queryCriteria.ModelId; LastLogId = lastLogId; |}
                     )
                 // TODO: logSet.QuerySet.StartTime, logSet.QuerySet.EndTime 구간 내의 것만 필터
-                if newLogs.any () then
+                if newLogs.Any () then
                     let newLogs = newLogs |> map (ormLog2Log logSet) |> toList
-                    logDebug $"Feteched {newLogs.length ()} new logs."
+                    logDebug $"Feteched {newLogs.Length} new logs."
                     logSet.BuildIncremental newLogs
             }
 

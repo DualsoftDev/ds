@@ -13,7 +13,7 @@ module ConvertCpuFlow =
             btns
                 .Where(fun b -> b.IsGlobalSystemHw || b.SettingFlows.Contains(flow))
                 .Select(fun b ->b.ActionINFunc)
-        if tags.any() then tags.ToOrElseOn() else flow.System._off.Expr
+        if tags.Any() then tags.ToOrElseOn() else flow.System._off.Expr
 
     let getConditionsToAndElseOn(flow:Flow, condis:ConditionDef seq) : Expression<bool>  =
         let tags =

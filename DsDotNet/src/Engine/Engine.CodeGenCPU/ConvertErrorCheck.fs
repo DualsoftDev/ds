@@ -42,7 +42,7 @@ module ConvertErrorCheck =
                     failwithf $"interface 정의시 지시 Work가 없습니다. \n(error: {api.Name})"
 
                 if td.OutAddress <> TextNotUsed && coin.CallActionType =CallActionType.Push then
-                    if coin.MutualResetCoins.isEmpty() then
+                    if coin.MutualResetCoins.IsEmpty() then
                         failwithf $"Push type must be an interlock device \n(error: {coin.Name})"
 
 
@@ -56,7 +56,7 @@ module ConvertErrorCheck =
                     e.Source.TryGetPureCall().IsSome
                         || e.Target.TryGetPureCall().IsSome)
 
-        if not(exEdges.any()) then
+        if not(exEdges.Any()) then
             failwithf $"PLC 시스템은 외부시작 신호가 없으면 시작 불가 입니다. HelloDS 모델을 참고하세요"
 
 
@@ -90,7 +90,7 @@ module ConvertErrorCheck =
                     let f = if bStart then getStartEdgeSources else getResetEdgeSources
                     checkList |> Seq.collect(f)
 
-                if checks.IsEmpty then
+                if checks.IsEmpty() then
                     yield real
         |]
 
@@ -105,7 +105,7 @@ module ConvertErrorCheck =
         let nullTagJobs =
             sys.Jobs.SelectMany(fun j -> j.GetNullAddressDevTask()) |> toArray
 
-        if nullTagJobs.any() then
+        if nullTagJobs.Any() then
             let errJobs = String.Join ("\n", nullTagJobs.Select(fun s->s.QualifiedName))
             failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
 
@@ -135,4 +135,3 @@ module ConvertErrorCheck =
         for call in sys.GetCallVertices() do
             if call.CallActionType = CallActionType.Push && call.ValueParamIO.Out.DataType = DuBOOL then
                     failWithLog $"{call.Name} {call.CallActionType} 은 bool 타입만 지원합니다."
-                  

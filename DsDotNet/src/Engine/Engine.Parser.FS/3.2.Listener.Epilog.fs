@@ -18,11 +18,11 @@ module EtcListenerModule =
 
         let nameNAddr = hwItem.TryFindFirstChild<HwSysItemNameAddrContext>().Value
         let name = nameNAddr.TryFindFirstChild<HwSysItemNameContext>().Value.GetText()
-        let inParam =        
+        let inParam =
             match nameNAddr.TryFindFirstChild<HwSysValueInParamContext>() with
             | Some param ->  createValueParam(param.GetText())
             | None -> defaultValueParam()
-        let outParm =        
+        let outParm =
             match nameNAddr.TryFindFirstChild<HwSysValueOutParamContext>() with
             | Some param ->  createValueParam(param.GetText())
             | None -> defaultValueParam()
@@ -93,7 +93,7 @@ module EtcListenerModule =
 
                     for fbi in flowBtnInfo |> List.choose id do
                         let targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr = fbi
-                        if flows.IsEmpty then
+                        if flows.IsEmpty() then
                             system.AddButtonDef(targetBtnType, btnName, ValueParamIO( inParam,  outParam), Addresses(inAddr, outAddr), None)
                         for flow in flows do
                             system.AddButtonDef(targetBtnType, btnName, ValueParamIO( inParam,  outParam), Addresses(inAddr, outAddr), Some flow)
@@ -179,7 +179,7 @@ module EtcListenerModule =
 
                     for fci in flowConditionInfo |> List.choose id do
                         let cndName, inp, outp,  flows, inAddr, outAddr = fci
-                        if flows.any() then
+                        if flows.Any() then
                             for flow in flows do
                                 system.AddCondition(targetCndType, cndName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
                         else
@@ -204,10 +204,10 @@ module EtcListenerModule =
 
                     for fci in flowActionInfo |> List.choose id do
                         let actionName, inp, outp,  flows, inAddr, outAddr = fci
-                        if flows.any() then
+                        if flows.Any() then
                             for flow in flows do
                                 system.AddAction(targetActionType, actionName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), Some flow)
-                        else 
+                        else
                                 system.AddAction(targetActionType, actionName, ValueParamIO( inp,  outp), Addresses(inAddr, outAddr), None)
 
 

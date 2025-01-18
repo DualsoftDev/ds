@@ -441,7 +441,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let normalCausalContext =
                 let nonCausalsContext = sysctx.TryFindChildren<NonCausalsContext>()
                 [
-                    if nonCausalsContext.any() then
+                    if nonCausalsContext.Any() then
                         let nonCausalGroup = nonCausalsContext.Head()
                         yield!  nonCausalGroup.TryFindChildren<CausalTokenContext>().Cast<ParserRuleContext>()
                         //yield!  nonCausalGroup.TryFindChildren<Identifier1Context>().Cast<ParserRuleContext>()
@@ -483,7 +483,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let flow = parent.GetFlow()
                 let isRoot = parent.GetCore() :? Flow
                 let aliasDef = tryFindAliasDefWithMnemonic flow name |> Option.get
-                let aliasFqdnCnt = aliasDef.AliasKey.length()
+                let aliasFqdnCnt = aliasDef.AliasKey.Length
                                 //flow.Real     //flow.Call.Api     //Real.Call.Api
                 let exFlow = (aliasFqdnCnt = 2 || (aliasFqdnCnt = 3 && isRoot))
                 Alias.Create(name, aliasDef.AliasTarget.Value, parent, exFlow) |> ignore
@@ -649,7 +649,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             for jobNameFqdn, apiDefCtxs, callListingCtx in callListings do
 
                 let apiDefs =
-                    if apiDefCtxs.any() then
+                    if apiDefCtxs.Any() then
                         [
                             for apiDefCtx in apiDefCtxs do
                                 let apiPath = apiDefCtx.CollectNameComponents()
@@ -683,7 +683,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                                                     match tryFindCallingApiItem system device apiName allowAutoGenDevice with
                                                     | Some api -> Some api
                                                     | None ->
-                                                        let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty
+                                                        let createDevice = allowAutoGenDevice && x.TheSystem.LoadedSystems.Where(fun f->f.Name = device).IsEmpty()
                                                         if createDevice then
                                                             x.CreateLoadedDeivce(device) |> ignore
                                                         None
@@ -968,7 +968,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 let newFunc = OperatorFunction.Create(funcName, pureCode)
                 let code = $"${funcName} = {pureCode};"
                 let assignCode =
-                    match options.Storages.any(fun s->s.Key = funcName) with
+                    match options.Storages.Any(fun s->s.Key = funcName) with
                     | true ->   code // EnterJobBlock job Tag 에서 이미 만듬
                     | false ->  $"bool {funcName} = false;{code}" //op 결과 bool 변수를 임시로 만듬
 

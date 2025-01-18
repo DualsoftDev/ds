@@ -221,7 +221,7 @@ module PptNodeModule =
                     let copyRows = barckets.Split(';').Select(fun s -> s.Trim())
                     let copys = copyRows.Select(fun sys -> $"{pageTitle}{TextDeviceSplit}{sys}")
 
-                    if copys.Distinct().length() <> copys.length() then
+                    if copys.Distinct().Count() <> copys.Count() then
                         Office.ErrorName(shape, ErrID._33, iPage)
 
                     copys
@@ -239,7 +239,7 @@ module PptNodeModule =
                         let rx = (txrx.Split('~')[1]) |> trimSpace
 
                         let getRealName (apiReal: string) =
-                            if apiReal = "_" || apiReal.IsEmpty then
+                            if apiReal = "_" || apiReal.IsEmpty() then
                                 failWithLog $"{ErrID._43} {shape.InnerText}"
                             apiReal
 

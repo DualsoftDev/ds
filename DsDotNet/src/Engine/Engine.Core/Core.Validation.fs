@@ -16,7 +16,7 @@ module ValidateMoudle =
                 .OfType<Alias>()
                 .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
 
-        if invalidEdge.any() then
+        if invalidEdge.Any() then
             failwith $"Vertex {invalidEdge.First().Name} children type error"
 
     let private validateEdge(graph:TDsGraph<Vertex, Edge>, bRoot:bool) =

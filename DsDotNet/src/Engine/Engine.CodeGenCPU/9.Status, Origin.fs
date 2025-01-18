@@ -32,8 +32,8 @@ type VertexTagManager with
 
         let offs      = getOriginIOExprs     (v, InitialType.Off)
 
-        let onExpr    = if ons.any() then ons.ToAndElseOff() else v._on.Expr
-        let offExpr   = if offs.any() then offs.ToOrElseOn() else v._off.Expr
+        let onExpr    = if ons.Any() then ons.ToAndElseOff() else v._on.Expr
+        let offExpr   = if offs.Any() then offs.ToOrElseOn() else v._off.Expr
 
 
         let set =   onExpr <&&> (!@offExpr) <&&> v.Link.Expr

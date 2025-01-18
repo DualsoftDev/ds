@@ -872,7 +872,7 @@ module PptUtil =
                                                .Where(fun f -> f.InnerText.TrimStart().StartsWith("<#") && f.InnerText.TrimEnd().EndsWith(">"))
 
                 let errShapes = masterPlaceHolders.Where(fun s->s.InnerText.Split('#').Count() <> 2)
-                if errShapes.any()
+                if errShapes.Any()
                 then 
                     failWithLog $"{errShapes.First().InnerText} MasterPage PlaceHolder Error"
 

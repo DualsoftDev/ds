@@ -201,7 +201,7 @@ module XGITag = //IEC61131Tag =
             |> Seq.distinctBy (fun s -> s.Address)
             |> Seq.toList
         let xmls =
-            [   yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.length ()}{dq}>"
+            [   yield $"<{varType} Version=\"Ver 1.0\" Count={dq}{symbols.Length}{dq}>"
                 yield "<Symbols>"
                 let symbols = //xgk는 Symbols 규격에 directSymbols 을 넣는다.  xgi는 DirectVarComment 별도 구역에 생성
                     if prjParam.TargetType = XGK && varType = "GlobalVariable" then  //LocalVar 에는 DirectVarComment 없음
@@ -214,8 +214,8 @@ module XGITag = //IEC61131Tag =
 
                 yield "<TempVar Count=\"0\"></TempVar>"
 
-                if prjParam.TargetType = XGI && varType = "GlobalVariable" && directSymbols.length() > 0 then
-                    yield $"<DirectVarComment Count=\"{directSymbols.length()}\">"
+                if prjParam.TargetType = XGI && varType = "GlobalVariable" && directSymbols.Length > 0 then
+                    yield $"<DirectVarComment Count=\"{directSymbols.Length}\">"
                     yield! directSymbols |> map (fun s -> s.GenerateDirectAddressXml())
                     yield "</DirectVarComment>"
 

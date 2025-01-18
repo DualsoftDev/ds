@@ -83,7 +83,7 @@ module rec CoreModule =
             member _.LoadingType: ParserLoadingType = param.LoadingType
 
         /// *.ds 파일을 읽어 새로운 인스턴스를 만들어 삽입하는 구조입니다.
-        and Device (loadedDevice: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
+        type Device (loadedDevice: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
             inherit LoadedSystem(loadedDevice, param, autoGenFromParentSystem)
             static let mutable id = 0
             do
@@ -91,7 +91,7 @@ module rec CoreModule =
             member val Id = id with get
 
         /// 공유 인스턴스. *.ds 파일의 절대 경로를 기준으로 하나의 인스턴스만 생성하고 이를 참조하는 개념입니다.
-        and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
+        type ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
             inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
         type DsSystem internal (name: string, vertexDic:Dictionary<string, FqdnObject>, vertexHandlers:GraphVertexAddRemoveHandlers option) =
@@ -459,7 +459,6 @@ module rec CoreModule =
             interface INamedVertex
 
             member _.Name = name
-            member _.PureName = name.Split([|'(';')'|]).First()
             member _.ApiSystem = dsSystem
 
             member val TX = getNull<Real>() with get, set
@@ -468,15 +467,11 @@ module rec CoreModule =
                 $"{name}\r\n[{x.TX.Name} ~ {x.RX.Name}]"
 
         /// API 의 reset 정보:  "+" <||> "-";
-        and ApiResetInfo internal (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
+        type ApiResetInfo internal (operand1:string, operator:ModelingEdgeType, operand2:string, autoGenByFlow:bool) =
             member _.AutoGenByFlow = autoGenByFlow
             member _.Operand1 = operand1  // "+"
             member _.Operand2 = operand2  // "-"
             member _.Operator = operator  // "<|>", "|>", "<|"
-            member _.ToDsText() =
-                let src = operand1
-                let tgt = operand2
-                sprintf "%s %s %s"  src (operator |> toTextModelEdge) tgt  //"+" <|> "-"
 
 
         /// Main system 에서 loading 된 다른 device 의 API 를 바라보는 관점.
@@ -521,6 +516,27 @@ module rec CoreModule =
             //CPU 생성시 할당됨 OutTag
             member val OutTag = getNull<ITag>() with get, set
 
+        /// Job 정의: Call 이 호출하는 Job 항목
+        type Job (names:Fqdn, system:DsSystem, tasks:TaskDev list) =
+            inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
+            member x.System = system
+            member x.TaskDefs = tasks
+            member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
+
+
+
+
+
+        type ApiItem with
+            member x.PureName = x.Name.Split([|'(';')'|]).First()
+
+        type ApiResetInfo with
+            member x.ToDsText() =
+                let src = x.Operand1
+                let tgt = x.Operand2
+                sprintf "%s %s %s"  src (x.Operator |> toTextModelEdge) tgt  //"+" <|> "-"
+
+
         type TaskDev with
             member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
             member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
@@ -529,17 +545,13 @@ module rec CoreModule =
             member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
 
 
-        /// Job 정의: Call 이 호출하는 Job 항목
-        type Job (names:Fqdn, system:DsSystem, tasks:TaskDev list) =
-            inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
-            member x.TaskDevCount  = tasks.length()
-            member x.AddressInCount  = tasks.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).length()
-            member x.AddressOutCount  = tasks.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).length()
 
-            member x.System = system
-            member x.TaskDefs = tasks
-            member x.ApiDefs = tasks |> Seq.map(fun t->t.ApiItem)
-            member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
+        type Job with
+            member x.TaskDevCount     = x.TaskDefs.length()
+            member x.AddressInCount   = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).length()
+            member x.AddressOutCount  = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).length()
+
+            member x.ApiDefs = x.TaskDefs |> map _.ApiItem
 
 
     [<AutoOpen>]

@@ -32,14 +32,14 @@
         <Compile Include="DsEvent.fs" />
         <Compile Include="DsLog.fs" />
         <Compile Include="Prolog.fs" />
-        <Compile Include="PathManager.fs" />
-        <Compile Include="FileManager.fs" />
-        <Compile Include="Text.fs" />
-        <Compile Include="Fqdn.fs" />
-        <Compile Include="UniqueName.fs" />
-        <Compile Include="RuntimeGenerator.fs" />
-        <Compile Include="TypeConversion.fs" />
-        <Compile Include="Expression.Interfaces.fs" />
+        <Compile Include="Utils\PathManager.fs" />
+        <Compile Include="Utils\FileManager.fs" />
+		<Compile Include="Utils\TypeConversion.fs" />
+		<Compile Include="Text.fs" />
+		<Compile Include="Fqdn.fs" />
+		<Compile Include="UniqueName.fs" />
+		<Compile Include="RuntimeGenerator.fs" />
+		<Compile Include="Expression.Interfaces.fs" />
         <Compile Include="Tag, Variable.fs" />
         <Compile Include="TagKind.fs" />
         <Content Include="Timer.txt" />
@@ -108,6 +108,10 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Engine.Common\Engine.Common.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Utils\" />
 	</ItemGroup>
 
 

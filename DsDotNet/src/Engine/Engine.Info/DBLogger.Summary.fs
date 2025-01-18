@@ -57,7 +57,7 @@ module DBLoggerORM2 =
         member x.Count = x.Durations.Count
         member x.Sum = x.Durations |> Seq.sum
         /// 평균
-        member x.Average = x.Durations.ToOption().Map(Seq.average) |? 0.0
+        member x.Average = if x.Durations.IsEmpty() then 0.0 else x.Durations |> Seq.average
 
         /// 표본 분산
         member x.Variance =

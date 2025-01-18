@@ -94,7 +94,7 @@ module rec CoreModule =
         and ExternalSystem (loadedSystem: DsSystem, param: DeviceLoadParameters, autoGenFromParentSystem:bool) =
             inherit LoadedSystem(loadedSystem, param, autoGenFromParentSystem)
 
-        type DsSystem private (name: string, vertexDic:Dictionary<string, FqdnObject>, vertexHandlers:GraphVertexAddRemoveHandlers option) =
+        type DsSystem internal (name: string, vertexDic:Dictionary<string, FqdnObject>, vertexHandlers:GraphVertexAddRemoveHandlers option) =
             inherit FqdnObject(name, createFqdnObject([||]))
 
             static let assem = Assembly.GetExecutingAssembly()
@@ -133,6 +133,9 @@ module rec CoreModule =
             static member RuntimeEngineVersion = runtimeEngineVersion
 
         type DsSystem with
+            member x.AddFqdnVertex(fqdn, vertex) = x._vertexDic.Add(fqdn, vertex)
+            member x.TryFindFqdnVertex(fqdn) = x._vertexDic.TryFindValue(fqdn)
+
             ///내시스템이 사용한 interface
             member x.TaskDevs = x.Jobs.SelectMany(fun j->j.TaskDefs)
             member x.ReferenceSystems = x.LoadedSystems.Select(fun s -> s.ReferenceSystem) |> distinct
@@ -140,58 +143,7 @@ module rec CoreModule =
             member x.ExternalSystems = x.LoadedSystems.OfType<ExternalSystem>()
 
 
-            // [NOTE] GraphVertex {
-            static member Create4Test(name) =
-                assert (isInUnitTest())     // UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
-                DsSystem(name, null, None)
 
-            static member Create(name) =
-                let vertexDic = Dictionary<string, FqdnObject>()
-                let vertexHandlers =
-                    let onAdded (v:INamed) =
-                        let q = v :?> FqdnObject
-                        vertexDic.TryAdd(q.DequotedQualifiedName, q)
-                    let onRemoved (v:INamed) =
-                        let q = v :?> FqdnObject
-                        vertexDic.Remove(q.DequotedQualifiedName)
-
-                    GraphVertexAddRemoveHandlers(onAdded, onRemoved)
-
-                let system = DsSystem(name, vertexDic, Some vertexHandlers)
-                vertexDic.Add(name, system)
-                system
-
-
-            member x.CreateFlow(flowName:string) =
-                let system = x
-                let flow = Flow(flowName, system)
-                system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{flowName}]"
-                flow
-
-            member x.CreateApiItem(name:string) =
-                let system = x
-                ApiItem(name, system)
-                |> tee(fun ai ->
-                    system.ApiItems.Add(ai) |> verifyM $"중복 interface prototype name [{name}]")
-
-
-            member x.CreateApiItem(name:string, tx, rx) =
-                let system = x
-                system.CreateApiItem(name)
-                |> tee(fun ai ->
-                    ai.TX <- tx
-                    ai.RX <- rx)
-
-
-            member x.CreateApiResetInfo(operand1, operator, operand2, autoGenByFlow) =
-                let system = x
-                ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
-                |> tee(fun ri ->
-                    system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]")
-
-            member x.AddFqdnVertex(fqdn, vertex) = x._vertexDic.Add(fqdn, vertex)
-            member x.TryFindFqdnVertex(fqdn) = x._vertexDic.TryFindValue(fqdn)
-            // [NOTE] GraphVertex }
 
 
             member x.AddVariables(variableData:VariableData) =
@@ -285,25 +237,6 @@ module rec CoreModule =
 
             member x.AddVertex v = x.GetGraph().AddVertex(v)
 
-            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
-                let parent:ParentWrapper = x
-                let call = Call(JobType target, parent, valueParamIO)
-                let duplicated =
-                    parent.GetSystem().Flows
-                        .SelectMany(fun f -> f.Graph.Vertices.OfType<Call>())
-                        .Any(fun c -> c.QualifiedName = call.QualifiedName)
-                if duplicated then
-                    failwithlog $"중복 call name [{call.Name}]"
-
-                call |> tee(fun c -> c.OnCreated())
-            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
-            member x.CreateCall(func:DsFunc) =
-                let callType =
-                    match func with
-                    | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
-                    | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
-                    | _ -> failwithlog "Error"
-                Call(callType, x, defaultValueParamIO()) |> tee(fun c -> c.OnCreated())
 
 
         and AliasDef(aliasKey: Fqdn, target: AliasTargetWrapper option, aliasTexts: string []) =
@@ -325,28 +258,6 @@ module rec CoreModule =
             member val AliasDefs = Dictionary<Fqdn, AliasDef>(nameComponentsComparer())
             member x.System = system
 
-        type Flow with
-            member x.CreateReal(name:string) =
-                let flow = x
-                if name.Contains "." then
-                    logWarn $"Suspicious segment name [{name}]. Check it."
-
-                let real = Real(name, flow)
-                flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
-                real
-
-            /// see Real.CreateAlias
-            member x.CreateAlias(name:string, target:Call, isExFlowReal) =
-                Alias.Create(name, DuAliasTargetCall target, DuParentFlow x, isExFlowReal)
-
-            /// see Real.CreateAlias
-            member x.CreateAlias(name:string, target:Real, isExFlowReal) =
-                Alias.Create(name, DuAliasTargetReal target, DuParentFlow x, isExFlowReal)
-
-            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
-                let parent:ParentWrapper = DuParentFlow x
-                parent.CreateCall(target, valueParamIO)
-            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
 
 
         /// leaf or stem(parenting)
@@ -429,14 +340,6 @@ module rec CoreModule =
                         yield x.Flow.Name // other flow
                     yield x.Name  // my flow
                 |]
-            /// see Flow.CreateAlias
-            member x.CreateAlias(name:string, target:Call, isExFlowReal) =
-                Alias.Create(name, DuAliasTargetCall target, DuParentReal x, isExFlowReal)
-
-            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
-                let parent:ParentWrapper = DuParentReal x
-                parent.CreateCall(target, valueParamIO)
-            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
 
 
         type CallType =
@@ -531,7 +434,7 @@ module rec CoreModule =
             member x.AutoPreConditions = (x :> ISafetyAutoPreRequisiteHolder).AutoPreConditions
 
 
-        type Alias private (name:string , target:AliasTargetWrapper, parent, isExFlowReal:bool) = // target : Real or Call or OtherFlowReal
+        type Alias internal (name:string , target:AliasTargetWrapper, parent, isExFlowReal:bool) = // target : Real or Call or OtherFlowReal
             inherit Indirect([|name|], parent)
             member _.TargetWrapper = target
             member _.IsExFlowReal = isExFlowReal
@@ -540,34 +443,6 @@ module rec CoreModule =
 
 
 
-
-        type Alias with
-            static member internal Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isExFlowReal) =
-                let createAliasDefOnDemand() =
-                    (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
-                     * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
-                     *)
-                    let flow:Flow = parent.GetFlow()
-                    let aliasKey =
-                        match target with
-                        | DuAliasTargetCall c -> c.GetAliasTargetToDs(flow).ToArray()
-                        | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow).ToArray()
-
-                    match flow.AliasDefs.TryFindValue(aliasKey) with
-                    | Some ad -> ad.AliasTexts.AddIfNotContains(name) |> ignore
-                    | None -> flow.AliasDefs.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
-
-
-                createAliasDefOnDemand()
-
-
-                let alias = Alias(name, target, parent, isExFlowReal)
-                if parent.GetCore() :? Real then
-                    target.RealTarget().IsNone
-                    |> verifyM $"Vertex {name} children type error"
-
-                parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{name}]"
-                alias
 
 
 
@@ -665,6 +540,201 @@ module rec CoreModule =
             member x.TaskDefs = tasks
             member x.ApiDefs = tasks |> Seq.map(fun t->t.ApiItem)
             member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
+
+
+    [<AutoOpen>]
+    module CreationModule =
+        type DsSystem with
+            // [NOTE] GraphVertex {
+            static member Create4Test(name) =
+                assert (isInUnitTest())     // UnitTest 에서만 사용.  일반 코드에서는 DsSystem.Create(name) 을 사용할 것.
+                DsSystem(name, null, None)
+
+            static member Create(name) =
+                let vertexDic = Dictionary<string, FqdnObject>()
+                let vertexHandlers =
+                    let onAdded (v:INamed) =
+                        let q = v :?> FqdnObject
+                        vertexDic.TryAdd(q.DequotedQualifiedName, q)
+                    let onRemoved (v:INamed) =
+                        let q = v :?> FqdnObject
+                        vertexDic.Remove(q.DequotedQualifiedName)
+
+                    GraphVertexAddRemoveHandlers(onAdded, onRemoved)
+
+                let system = DsSystem(name, vertexDic, Some vertexHandlers)
+                vertexDic.Add(name, system)
+                system
+
+
+            member x.CreateFlow(flowName:string) =
+                let system = x
+                let flow = Flow(flowName, system)
+                system.Flows.Add(flow) |> verifyM $"중복된 플로우 이름 [{flowName}]"
+                flow
+
+            member x.CreateApiItem(name:string) =
+                let system = x
+                ApiItem(name, system)
+                |> tee(fun ai ->
+                    system.ApiItems.Add(ai) |> verifyM $"중복 interface prototype name [{name}]")
+
+
+            member x.CreateApiItem(name:string, tx, rx) =
+                let system = x
+                system.CreateApiItem(name)
+                |> tee(fun ai ->
+                    ai.TX <- tx
+                    ai.RX <- rx)
+
+
+            member x.CreateApiResetInfo(operand1, operator, operand2, autoGenByFlow) =
+                let system = x
+                ApiResetInfo(operand1, operator, operand2, autoGenByFlow)
+                |> tee(fun ri ->
+                    system.ApiResetInfos.Add(ri) |> verifyM $"중복 interface ResetInfo [{ri.ToDsText()}]")
+            // [NOTE] GraphVertex }
+
+
+            //member x.CreateTaskDev(devName:string, apiName: string): TaskDev =
+            //    let sys:DsSystem = x
+            //    let apis = sys.ApiItems.Where(fun w -> w.Name = apiName).ToFSharpList()
+
+            //    let api:ApiItem =
+            //        // Check if the API already exists
+            //        match apis with
+            //        | api::[] -> api
+            //        | [] ->
+            //            // Add a default flow if no flows exist
+            //            let flow =
+            //                match sys.Flows.TryHead() with
+            //                | Some h -> h
+            //                | None -> sys.CreateFlow("genFlow")
+
+            //            let realName = $"gen{apiName}"
+            //            let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
+            //            if reals.Any(fun w -> w.Name = realName) then
+            //                failwithf $"real {realName} 중복 생성에러"
+
+            //            // Create a new Real
+            //            let newReal:Real = flow.CreateReal(realName)
+
+
+            //            flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
+            //            newReal.Finished <- true    //마지막 Real이 원위치
+
+
+            //              // Create and add a new ApiItem
+            //            let newApi = sys.CreateApiItem(apiName, newReal, newReal)
+            //            sys.ApiItems.Add newApi |> ignore
+
+            //            if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
+            //                // Iterate over reals up to newReal
+            //                reals
+            //                    .TakeWhile(fun r -> r <> newReal)
+            //                    .Iter(fun r ->
+            //                        let exAliasName = $"{r.Name}Alias_{newReal.Name}"
+            //                        let myAliasName = $"{newReal.Name}Alias_{r.Name}"
+            //                        let exAlias = flow.CreateAlias(exAliasName, r, false)
+            //                        let myAlias = flow.CreateAlias(myAliasName, newReal, false)
+
+            //                        // Create an edge between myAlias and exAlias
+            //                        flow.CreateEdge(ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)) |> ignore)
+
+            //                // Potentially update other ApiItems based on the new ApiItem
+            //                //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
+            //                //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
+
+            //            newApi
+            //        | _ ->
+            //            failwithf $"system {sys.Name} api {apiName} 중복 존재"
+
+            //    TaskDev(devName, api, sys)
+
+
+        type Flow with
+            member x.CreateReal(name:string) =
+                let flow = x
+                if name.Contains "." then
+                    logWarn $"Suspicious segment name [{name}]. Check it."
+
+                let real = Real(name, flow)
+                flow.Graph.AddVertex(real) |> verifyM $"중복 segment name [{name}]"
+                real
+
+            /// see Real.CreateAlias
+            member x.CreateAlias(name:string, target:Call, isExFlowReal) =
+                Alias.Create(name, DuAliasTargetCall target, DuParentFlow x, isExFlowReal)
+
+            /// see Real.CreateAlias
+            member x.CreateAlias(name:string, target:Real, isExFlowReal) =
+                Alias.Create(name, DuAliasTargetReal target, DuParentFlow x, isExFlowReal)
+
+            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
+                let parent:ParentWrapper = DuParentFlow x
+                parent.CreateCall(target, valueParamIO)
+            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+
+        type Real with
+            /// see Flow.CreateAlias
+            member x.CreateAlias(name:string, target:Call, isExFlowReal) =
+                Alias.Create(name, DuAliasTargetCall target, DuParentReal x, isExFlowReal)
+
+            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
+                let parent:ParentWrapper = DuParentReal x
+                parent.CreateCall(target, valueParamIO)
+            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+
+        type ParentWrapper with
+            member x.CreateCall(target:Job, valueParamIO:ValueParamIO) =
+                let parent:ParentWrapper = x
+                let call = Call(JobType target, parent, valueParamIO)
+                let duplicated =
+                    parent.GetSystem().Flows
+                        .SelectMany(fun f -> f.Graph.Vertices.OfType<Call>())
+                        .Any(fun c -> c.QualifiedName = call.QualifiedName)
+                if duplicated then
+                    failwithlog $"중복 call name [{call.Name}]"
+
+                call |> tee(fun c -> c.OnCreated())
+            member x.CreateCall(target:Job) = x.CreateCall(target, defaultValueParamIO())
+            member x.CreateCall(func:DsFunc) =
+                let callType =
+                    match func with
+                    | :? CommandFunction -> CommadFuncType (func :?> CommandFunction)
+                    | :? OperatorFunction -> OperatorFuncType (func :?> OperatorFunction)
+                    | _ -> failwithlog "Error"
+                Call(callType, x, defaultValueParamIO()) |> tee(fun c -> c.OnCreated())
+
+        type Alias with
+            /// DsSystem.CreateAlias 를 사용할 것 (internal usage only)
+            static member internal Create(name:string, target:AliasTargetWrapper, parent:ParentWrapper, isExFlowReal) =
+                let createAliasDefOnDemand() =
+                    (* <*.ds> 파일에서 생성하는 경우는 alias 정의가 먼저 선행되지만,
+                     * 메모리에서 생성해 나가는 경우는 alias 정의가 없으므로 거꾸로 채워나가야 한다.
+                     *)
+                    let flow:Flow = parent.GetFlow()
+                    let aliasKey =
+                        match target with
+                        | DuAliasTargetCall c -> c.GetAliasTargetToDs(flow).ToArray()
+                        | DuAliasTargetReal r -> r.GetAliasTargetToDs(flow).ToArray()
+
+                    match flow.AliasDefs.TryFindValue(aliasKey) with
+                    | Some ad -> ad.AliasTexts.AddIfNotContains(name) |> ignore
+                    | None -> flow.AliasDefs.Add(aliasKey, AliasDef(aliasKey, Some target, [|name|]))
+
+
+                createAliasDefOnDemand()
+
+
+                let alias = Alias(name, target, parent, isExFlowReal)
+                if parent.GetCore() :? Real then
+                    target.RealTarget().IsNone
+                    |> verifyM $"Vertex {name} children type error"
+
+                parent.GetGraph().AddVertex(alias) |> verifyM $"중복 alias name [{name}]"
+                alias
+
 
     [<AutoOpen>]
     module HwDefModule =

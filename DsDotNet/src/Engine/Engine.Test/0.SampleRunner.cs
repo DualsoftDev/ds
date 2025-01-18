@@ -5,8 +5,10 @@ using Engine.Parser.FS;
 using Microsoft.FSharp.Core;
 
 using static Engine.Core.CoreModule;
-using static Engine.Core.CoreModule.DeviceAndSystemModule;
+using static Engine.Core.CoreDevicesModule;
+using static Engine.Core.CoreModule.SystemModule;
 using static Engine.Parser.FS.ParserOptionModule;
+using static Engine.Core.Interface;
 
 namespace Engine.Sample;
 
@@ -14,7 +16,7 @@ internal class SampleRunner
 {
     public static void Run(string text)
     {
-        var systemRepo = new Dictionary<string, DsSystem>();   // ShareableSystemRepository
+        var systemRepo = new Dictionary<string, ISystem>();   // ShareableSystemRepository
         var helper = ModelParser.ParseFromString2(text, ParserOptions.Create4Simulation(systemRepo, ".", "ActiveCpuName", FSharpOption<string>.None, ParserLoadingType.DuNone));
         var system = helper.TheSystem;
     }

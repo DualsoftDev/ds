@@ -6,7 +6,7 @@ using System.IO;
 using System.Threading.Tasks;
 
 using static Engine.Core.CoreModule;
-using static Engine.Core.CoreModule.DeviceAndSystemModule;
+using static Engine.Core.CoreModule.SystemModule;
 using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Import.Office.ImportPptModule;
 using static Engine.Info.DBLoggerORM;

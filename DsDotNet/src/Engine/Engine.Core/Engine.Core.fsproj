@@ -35,6 +35,7 @@
         <Compile Include="Utils\PathManager.fs" />
         <Compile Include="Utils\FileManager.fs" />
 		<Compile Include="Utils\TypeConversion.fs" />
+		<Compile Include="Utils\VersionExtension.fs" />
 		<Compile Include="Text.fs" />
 		<Compile Include="Fqdn.fs" />
 		<Compile Include="UniqueName.fs" />
@@ -53,6 +54,7 @@
         <Compile Include="Statement.Counter.fs" />
         <Compile Include="TimeElements.fs" />
         <Compile Include="CodeElements.fs" />
+        <Compile Include="Core.Devices.fs" />
         <Compile Include="Core.fs" />
         <Compile Include="Core.Extension.fs" />
         <Compile Include="Core.Util.Find.fs" />
@@ -77,6 +79,7 @@
         <Content Include="ValidSyntax.txt" />
         <Content Include="ProgramCodeSyntax.txt" />
         <Compile Include="EntryPoint.fs" />
+        <Compile Include="CoreExtensionForCSharp.fs" />
         <Compile Include="AssemblyInfo.fs" />
         <!--<Compile Include="Program.fs" />-->
     </ItemGroup>
@@ -108,10 +111,6 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Engine.Common\Engine.Common.fsproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Utils\" />
 	</ItemGroup>
 
 

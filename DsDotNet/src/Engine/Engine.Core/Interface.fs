@@ -43,6 +43,7 @@ module Interface =
 
     and ISystem =
         inherit IVertex
+        inherit IQualifiedNamed
 
     type ITerminal =
         abstract Variable: IStorage option

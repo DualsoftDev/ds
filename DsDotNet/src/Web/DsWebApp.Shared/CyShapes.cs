@@ -8,9 +8,9 @@ using static Engine.Core.DsConstants;
 using static Engine.Core.CoreModule;
 using static Engine.Common.GraphModule;
 using static DsWebApp.Shared.CyGraphEx;
-using static Engine.Core.CoreModule.DeviceAndSystemModule;
 using Dual.Common.Base.CS;
 using static Engine.Core.CoreModule.GraphItemsModule;
+using static Engine.Core.CoreModule.SystemModule;
 
 namespace DsWebApp.Shared;
 

@@ -33,10 +33,10 @@ using DocumentFormat.OpenXml.VariantTypes;
 using static Engine.Info.DBWriterModule;
 using System.Runtime.Versioning;
 using Dual.Common.Base.CS;
-using static Engine.Core.CoreModule.DeviceAndSystemModule;
 using static Engine.Core.CoreModule.GraphItemsModule;
 using static Engine.Core.CoreModule.ApiItemsModule;
 using Newtonsoft.Json;
+using static Engine.Core.CoreModule.SystemModule;
 
 namespace Diagram.View.MSAGL
 {
@@ -172,7 +172,7 @@ namespace Diagram.View.MSAGL
             }
 
 
-         
+
 
             void ViewChangeSubject()
             {
@@ -317,7 +317,7 @@ namespace Diagram.View.MSAGL
 
                                 break;
                             }
-                      
+
 
                     }
                 });

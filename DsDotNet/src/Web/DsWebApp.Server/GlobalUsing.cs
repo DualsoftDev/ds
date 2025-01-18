@@ -28,7 +28,7 @@ global using SystemTextJson = System.Text.Json.JsonSerializer;
 
 global using static Engine.Core.TagKindModule.TagEvent;
 global using static Engine.Core.CoreModule;
-global using static Engine.Core.CoreModule.DeviceAndSystemModule;
+global using static Engine.Core.CoreModule.SystemModule;
 global using static Engine.Core.CoreModule.GraphItemsModule;
 global using static Engine.Core.InfoPackageModule;
 global using static Engine.CodeGenCPU.ConvertCpuVertex;

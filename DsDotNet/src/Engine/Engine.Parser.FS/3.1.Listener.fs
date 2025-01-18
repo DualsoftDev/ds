@@ -124,7 +124,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
             let repo = options.ShareableSystemRepository
 
             match options.LoadingType, options.AbsoluteFilePath with
-            | DuExternal, Some fp when repo.ContainsKey(fp) -> x.TheSystem <- repo[fp]
+            | DuExternal, Some fp when repo.ContainsKey(fp) -> x.TheSystem <- repo[fp] :?> DsSystem
             | DuExternal, _ ->
                 let registerSystem (sys: DsSystem) =
                     match options.AbsoluteFilePath with

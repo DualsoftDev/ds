@@ -27,7 +27,6 @@ module RunTimeModule =
         let systems = [mySystem] @ loadedSystems |> toArray
         let mutable cts = new CancellationTokenSource()
         let mutable run:bool = false
-        let mutable scanSimDelay:int = 1
         let disposables = new CompositeDisposable()
 
         let tagWebChangedFromCpuSubject = new Subject<TagWeb>()
@@ -103,11 +102,8 @@ module RunTimeModule =
                 while run do
                     scanOnce() |> ignore
                     try
-                        if RuntimeDS.Package.IsPackageSIM() then
-                            do! Async.Sleep(scanSimDelay)
-                        else
-                            //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
-                            do! Async.AwaitTask(Task.Delay(10000, ctsScan.Token))
+                        //10초 딜레이 크게 의미없음 CpusEvent.ValueSubject 되면 빠져나옴
+                        do! Async.AwaitTask(Task.Delay(10000, ctsScan.Token))
                     with
                     | :? TaskCanceledException -> ctsScan <- new CancellationTokenSource()
             }
@@ -141,7 +137,6 @@ module RunTimeModule =
         member x.Storages = storages
         member x.LoadedSystems = loadedSystems
         member x.IsRunning = run
-        member x.ScanSimDelay  with get() = scanSimDelay and set(v) = scanSimDelay <- v
         member x.CommentedStatements = css
 
         member x.Dispose() =

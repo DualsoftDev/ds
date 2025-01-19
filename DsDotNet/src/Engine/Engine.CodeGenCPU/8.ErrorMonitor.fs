@@ -68,21 +68,26 @@ type VertexTagManager with
         let v= v :?> CoinVertexTagManager
         let fn = getFuncName()
         let call= v.Vertex.GetPure() :?> Call
+        let real  = call.Parent.GetCore() :?> Real
         let callMutualOns = call.MutualResetCoins
                                 .Choose(tryGetPureCall)
                                 .Choose(fun c->c.EndAction)
                                 .Distinct()
                                 .ToOrElseOff()
         
-        let iop = call.V.Flow.iop.Expr
+        let aop = call.V.Flow.aop.Expr
         let rst = v.Flow.ClearExpr
 
         match call.EndAction with
         | Some input ->
-            let errRXInterlock = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock")
-            [|
-                yield! (input <&&> !@iop, v.System) --^ (errRXInterlock, fn)
-                yield (!@v.Flow.HomeExpr <&&>  errRXInterlock.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
+            //let errRXInterlock = v.System.GetTempBoolTag($"{call.QualifiedName}errRXInterlock")
+            //[|
+            //    yield! (input <&&> !@iop, v.System) --^ (errRXInterlock, fn)
+            //    yield (!@v.Flow.HomeExpr <&&>  errRXInterlock.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
+            //|]
+
+            [| //자동일 때만 체크
+                yield (input <&&> aop  <&&> real.VR.F.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
             |]
         | _ -> [||]
 

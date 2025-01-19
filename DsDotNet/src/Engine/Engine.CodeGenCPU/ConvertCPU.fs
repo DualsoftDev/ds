@@ -228,7 +228,7 @@ module ConvertCPU =
     let private updateRealParentExpr(x:DsSystem) =
         for dev, call in x.GetTaskDevsCall() do
             let sensorExpr =
-                match call.GetEndAction() with
+                match call.ActionInExpr with
                 | Some e -> e
                 | _ -> call._on.Expr
 

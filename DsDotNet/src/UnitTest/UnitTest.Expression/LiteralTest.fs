@@ -34,8 +34,12 @@ module LiteralTestModule =
             let theTrueExpression = literal2expr true
             let theFalseExpression = literal2expr false
 
-            let xxx = [1..3].OrElse([2..5])
-            let yyy = [].OrElse([2..5])
+            [1..3].OrElse([2..5]) === [1..3]
+            [].OrElse([2..5]) === [2..5]
+            [1..3].OrElse([]) === [1..3]
+            [].OrElse([]) === []
+
+            (seq {1..3}).OrElse(seq {2..5}).SeqEq (seq {1..3})
             ()
 
         [<Test>]

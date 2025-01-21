@@ -85,7 +85,7 @@ module internal ToDsTextModule =
                 yield $"{tab}{rb}"
 
             let notMentioned = graph.Islands.Except(stems.Cast<Vertex>()).ToArray()
-            if notMentioned.any() then
+            if notMentioned.Any() then
                 let comment  = if pCooment then "// island"  else ""
                 let isLandCommas = sbs ", " { notMentioned.Select(fun i -> getName i) }
                 yield $"{getTab (indent)}{isLandCommas}; {comment}"
@@ -96,14 +96,14 @@ module internal ToDsTextModule =
         [
             yield $"{tab}[flow] {flow.Name.QuoteOnDemand()} = {lb}"
             yield! graphToDs (DuParentFlow flow) (indent+1)
-            let aliasDefExist = flow.AliasDefs.Values.any()
+            let aliasDefExist = flow.AliasDefs.Values.Any()
 
             if aliasDefExist then
                 let tab = getTab (indent+1)
                 yield $"{tab}[aliases] = {lb}"
                 for a in flow.AliasDefs.Values do
                     let toTextAlias = a.AliasTexts.Select(fun f->f.QuoteOnDemand())
-                    if toTextAlias.any() then
+                    if toTextAlias.Any() then
                         let aliasTexts = (sbs "; " { toTextAlias }) + ";"
                         let tab = getTab (indent+2)
                         let aliasKey =
@@ -141,7 +141,7 @@ module internal ToDsTextModule =
         let param = if hw.ValueParamIO.IsDefaultParam then "" else $"@({inParam}: {outParam})"
 
         $"{hw.Name.QuoteOnDemand()}({inAddr}, {outAddr}){param}"
-        
+
     let rec systemToDs (system:DsSystem) (indent:int) (printComment:bool) (printVersions:bool)=
         pCooment <- printComment
         let tab = getTab indent
@@ -178,13 +178,13 @@ module internal ToDsTextModule =
             let funcCodePrint funcName (code:string) =
                 let codeLines = code.Split([|"\r\n"; "\n"|], StringSplitOptions.None)
                 [
-                    if codeLines.length() > 1 then
+                    if codeLines.Length > 1 then
                         yield $"{tab2}{funcName} = {lbCode}"
                         for line in codeLines
                             do yield $"{tab3}{line}"
                         yield $"{tab2}{rbCode}"
                     elif code = TextNotUsed || code = ""
-                    then 
+                    then
                         yield $"{tab2}{funcName};"
                     else
                         yield $"{tab2}{funcName} = {lbCode}{code}{rbCode}"
@@ -243,11 +243,11 @@ module internal ToDsTextModule =
             let HwSystemToDs(category:string, hws:HwSystemDef seq) =
                 let getHwInfo(hw:HwSystemDef) =
                     let flows = hw.SettingFlows.Select(fun f -> f.NameComponents.Skip(1).CombineQuoteOnDemand())
-                    let itemText = if flows.any() then (flows |> String.concat "; ") + ";" else ""
+                    let itemText = if flows.Any() then (flows |> String.concat "; ") + ";" else ""
                     itemText
 
                 [
-                    match hws.length() with
+                    match hws.Count() with
                     | 0-> ()
                     | 1->
                         let itemText = getHwInfo (hws.Head())
@@ -289,13 +289,13 @@ module internal ToDsTextModule =
 
                 yield $"{tab}{rb}"
 
-    
+
             if system.HWConditions.Any() then
                 yield $"{tab}[conditions] = {lb}"
                 yield HwSystemToDs("r",  system.ReadyConditions.Cast<HwSystemDef>())
                 yield HwSystemToDs("d",  system.DriveConditions.Cast<HwSystemDef>())
                 yield $"{tab}{rb}"
-                    
+
             if system.HWActions.Any() then
                 yield $"{tab}[actions] = {lb}"
                 yield HwSystemToDs("e",  system.EmergencyActions.Cast<HwSystemDef>())
@@ -454,7 +454,7 @@ module internal ToDsTextModule =
                             yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
-            
+
             let sourceToken =
                 [
                     if sourceTokenReals.Any() then
@@ -463,7 +463,7 @@ module internal ToDsTextModule =
                             yield $"{tab3}{real.Flow.Name.QuoteOnDemand()}.{real.Name.QuoteOnDemand()};"
                         yield $"{tab2}{rb}"
                 ] |> combineLines
-                
+
 
             let disabledVertices =
                 [
@@ -553,8 +553,8 @@ type SystemToDsExt =
     [<Extension>]
     static member ToMermaidText (system:DsSystem) =
         let subgraphs = system.GetRealVertices()
-                            .Where(fun r-> r.Graph.Vertices.any())
-                            .Select(fun r-> 
+                            .Where(fun r-> r.Graph.Vertices.Any())
+                            .Select(fun r->
                                 let graphText = String.Join("\r\n\t\t", r.Graph.Edges.Select(fun e->e.ToMermaidText()))
                                 $"\tsubgraph {r.Name} [{r.QualifiedName}]\r\n\t\t{graphText}\r\n\t\tend"
                                 )

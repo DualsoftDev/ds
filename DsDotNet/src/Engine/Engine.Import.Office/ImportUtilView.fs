@@ -18,7 +18,7 @@ module ImportViewModule =
         let dicDummy = Dictionary<string, ViewNode>()
         let dummyMembers = dummys.GetDummyMembers()
 
-        if newNode.GetSingles().length () = 0 then
+        if newNode.GetSingles().IsEmpty() then
             lands
             |> Seq.filter (fun vertex -> dummyMembers.Contains(vertex) |> not)
             |> Seq.iter (fun vertex ->
@@ -27,7 +27,7 @@ module ImportViewModule =
                 | :? Alias -> newNode.AddSingles(dicV.[vertex]) |> ignore
                 | _ -> failwithf "vertex type ERROR")
 
-        if newNode.GetEdges().length () = 0 then
+        if newNode.GetEdges().IsEmpty() then
             edgeInfos
             |> Seq.filter (fun edge ->
                 (dummyMembers.Contains(edge.Sources[0]) || dummyMembers.Contains(edge.Targets[0]))
@@ -112,8 +112,8 @@ module ImportViewModule =
     let UpdateLampNodes (system: DsSystem, flow: Flow, node: ViewNode) =
         let newNode = ViewNode("Lamps", VLAMP)
         let addLamps (lamps: seq<LampDef>) (lampType:LampType) =
-            lamps 
-            |> Seq.filter (fun w -> w.SettingFlows.Contains(flow) || w.SettingFlows.IsEmpty)
+            lamps
+            |> Seq.filter (fun w -> w.SettingFlows.Contains(flow) || w.SettingFlows.IsEmpty())
             |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, lampType)) |> ignore)
 
         addLamps system.AutoHWLamps DuAutoModeLamp

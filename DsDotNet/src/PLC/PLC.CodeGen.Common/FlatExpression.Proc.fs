@@ -140,7 +140,7 @@ module FlatExpressionModule3 =
 
             if shortCircuited then
                 off
-            elif validTerms.isEmpty() then
+            elif validTerms.IsEmpty() then
                 on
             else
                 FlatNary(And, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)
@@ -161,7 +161,7 @@ module FlatExpressionModule3 =
 
             if shortCircuited then
                 on
-            elif validTerms.isEmpty() then
+            elif validTerms.IsEmpty() then
                 off
             else
                 FlatNary(Or, validTerms |> Seq.cast<FlatExpression> |> List.ofSeq)

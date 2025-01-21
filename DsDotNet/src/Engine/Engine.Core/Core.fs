@@ -76,13 +76,13 @@ module rec CoreModule =
 
 
             member x.AddVariables(variableData:VariableData) =
-                if x.Variables.any(fun v-> v.Name = variableData.Name) then
+                if x.Variables.Any(fun v-> v.Name = variableData.Name) then
                     failWithLog $"중복된 변수가 있습니다. {variableData.Name} "
 
                 x.Variables.Add(variableData)
 
             member x.AddActionVariables(actionVariable:ActionVariable) =
-                if x.ActionVariables.any(fun v-> v.Name = actionVariable.Name) then
+                if x.ActionVariables.Any(fun v-> v.Name = actionVariable.Name) then
                     failWithLog $"중복된 심볼이 있습니다. {actionVariable.Name}({actionVariable.Address})"
 
                 x.ActionVariables.Add(actionVariable)
@@ -476,9 +476,9 @@ module rec CoreModule =
 
 
         type Job with
-            member x.TaskDevCount     = x.TaskDefs.length()
-            member x.AddressInCount   = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).length()
-            member x.AddressOutCount  = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).length()
+            member x.TaskDevCount     = x.TaskDefs.Count()
+            member x.AddressInCount   = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).Count()
+            member x.AddressOutCount  = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).Count()
 
             member x.ApiDefs = x.TaskDefs |> map _.ApiItem
 
@@ -708,7 +708,7 @@ module rec CoreModule =
             member x.IsDefaultValueParamIO = x.ValueParamIO.IsDefaultParam
             member x.IsDefaultTaskDevParamIO = x.TaskDevParamIO.IsDefaultParam
             //SettingFlows 없으면 전역 시스템 설정
-            member x.IsGlobalSystemHw = x.SettingFlows.IsEmpty || (x.System.Flows |> forall x.SettingFlows.Contains)
+            member x.IsGlobalSystemHw = x.SettingFlows.IsEmpty() || (x.System.Flows |> forall x.SettingFlows.Contains)
             member x.InDataType  = x.ValueParamIO.InDataType
             member x.OutDataType  = x.ValueParamIO.OutDataType
 

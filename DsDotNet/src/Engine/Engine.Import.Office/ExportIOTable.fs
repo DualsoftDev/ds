@@ -101,7 +101,7 @@ module ExportIOTable =
             "", items.[0]
         else
             let head = items[0];
-            let tail = name[(head.Length+TextDeviceSplit.length())..]
+            let tail = name[(head.Length+TextDeviceSplit.Length)..]
             head, tail
 
     let rowIOItems (dev: TaskDev, job: Job) target =
@@ -296,7 +296,7 @@ module ExportIOTable =
                 ]
             )
 
-        if operatorRows.any() || commandRows.any()  || variRows.any()  || condiRows.any() || actionRows.any()
+        if operatorRows.Any() || commandRows.Any()  || variRows.Any()  || condiRows.Any() || actionRows.Any()
         then
             let dts =
                 condiRows

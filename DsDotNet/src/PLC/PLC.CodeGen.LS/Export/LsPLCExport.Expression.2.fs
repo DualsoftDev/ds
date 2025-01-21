@@ -329,7 +329,7 @@ module XgxExpressionConvertorModule =
                             let varExp = stg.ToExpression()
                             varExp, (lstgs @ rstgs @ [ stg ]), (lstmts @ rstmts @ [ stmt ])
                         | _ ->
-                            if lstgs.any() || rstgs.any() then
+                            if lstgs.Any() || rstgs.Any() then
                                 newExp, (lstgs @ rstgs), (lstmts @ rstmts)
                             else
                                 exp, [], []

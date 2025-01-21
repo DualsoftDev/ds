@@ -10,7 +10,7 @@ open Engine.Parser.FS
 
 type CoinVertexTagManager with
 
-  
+
     member v.C1_DoOperator() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
@@ -26,16 +26,16 @@ type CoinVertexTagManager with
             ]
         | _ ->
             failwithlog $"Operator({call.Name})에는 하나의 수식이 필요합니다. \r\n테이블 정의 수식 Count:({sts.Count})"
-         
+
 
     member v.C2_DoCommand() =
         let call = v.Vertex :?> Call
         let comment = getFuncName()
         let fn = comment
         [|
-            if call.TargetFunc.Value.Statements.any() then
+            if call.TargetFunc.Value.Statements.Any() then
                 let sets = v.CallCommandPulse.Expr :> IExpression<bool>
-                yield! (v.PS.Expr, v.System) --^ (v.CallCommandPulse, fn) 
+                yield! (v.PS.Expr, v.System) --^ (v.CallCommandPulse, fn)
 
                     ////test ahn
                 yield!
@@ -55,17 +55,17 @@ type CoinVertexTagManager with
     member v.C3_DoOperatorDevice() =
         let call = v.Vertex :?> Call
 
-        let inOps = 
+        let inOps =
             call.TaskDefs
                 .Select(fun d->
                     if d.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then //주소가 없으면 Plan 으로 처리
                         d.ApiItem.ApiItemEnd.Expr
                     else
                         d.GetInExpr(call)
-                ) 
+                )
 
-        if inOps.IsEmpty then
+        if inOps.IsEmpty() then
             failwithlog $"Device({call.Name})에는 입력이 필요합니다."
         else
-            let sets = inOps.ToAndElseOff()    
+            let sets = inOps.ToAndElseOff()
             (sets, call._off.Expr) --| (v.CallOperatorValue, getFuncName()) //그대로 복사

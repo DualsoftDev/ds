@@ -219,7 +219,7 @@ module TagManagerModule =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
         let real = v:?> Real
-        let hasChildren = real.Graph.Vertices.any()
+        let hasChildren = real.Graph.Vertices.Any()
         let useScript   = real.Script.IsSome
         let useMotion   = real.Motion.IsSome
         let useTime     = real.Time.IsSome
@@ -359,7 +359,7 @@ module TagManagerModule =
             |]
         member x.ErrorText   =
             let errors = x.ErrorList
-            if errors.any() then
+            if errors.Any() then
                 let errText = String.Join(",", errors)
                 $"{errText} 이상"
             else

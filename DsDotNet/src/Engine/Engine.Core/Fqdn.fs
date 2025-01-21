@@ -27,7 +27,7 @@ module FqdnImpl =
         | [n] when quoteOnSingle -> quoteOnDemand n
         | [n] -> n
         | _ ->
-            if fqdn.length() > 4
+            if fqdn.Count() > 4
             then
                 failwithlog (sprintf "Fqdn length is too long: %s" (fqdn.Combine()))
             else

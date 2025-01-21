@@ -6,7 +6,7 @@ open System.Linq
 open GraphUtilImpl
 
 module internal GraphSortImpl =
-    
+
     let topologicalSort(x:TDsGraph<_, _>) =
         let inDegree = new Dictionary<'V, int>(x.Vertices.Count)
         let queue = new Queue<'V>()
@@ -39,12 +39,12 @@ module internal GraphSortImpl =
         else
             [||]
 
-    
+
     let topologicalGroupSort (graph:TDsGraph<_, _>) =
         let vertices = topologicalSort graph
 
         let graphOrder = GraphPairwiseOrderImpl.isAncestorDescendant (graph, EdgeType.Start)
-         
+
 
         let dicVs = Dictionary<int, ResizeArray<IVertex>>()
         let addedV = ResizeArray<IVertex>()
@@ -59,34 +59,34 @@ module internal GraphSortImpl =
             else false
 
         //currV 기준으로 자식들 항목 추가
-        let addMultiSeq iSEQ currV= 
+        let addMultiSeq iSEQ currV=
             let notAddeds = vertices.Where(fun f-> not <| addedV.Contains(f))
             let outgoingVs = graph.GetOutgoingVertices(currV)
 
-            let multiSeqVs = 
-                let validoutgoingVs = 
-                    outgoingVs |> Seq.filter (fun o -> 
+            let multiSeqVs =
+                let validoutgoingVs =
+                    outgoingVs |> Seq.filter (fun o ->
                                 not <| notAddeds.Except([o])
-                                                .any(fun notAdded -> backwardExist o notAdded graphOrder)
+                                                .Any(fun notAdded -> backwardExist o notAdded graphOrder)
                                 ) //자신 o  뒤에 notAdded하나라도 존재하면 Skip
 
                 validoutgoingVs
                 |> Seq.filter (fun o ->
                     let targetIncomes = graph.GetIncomingVertices(o)
-                    if targetIncomes.length() = 1 
+                    if targetIncomes.Count() = 1
                     then true
-                    else 
+                    else
                         targetIncomes //currV 조건 앞에 income 있으면 추가 불가
                         |> Seq.filter (fun income -> income <> currV)
                         |> Seq.exists (fun income -> forwardExist currV income graphOrder)
                         |> not
                 )
-        
-            if multiSeqVs.length() > 1 
+
+            if multiSeqVs.Count() > 1
             then
-                multiSeqVs 
+                multiSeqVs
                 |> Seq.map (fun outV -> addSeq iSEQ outV) |> Seq.toArray  |> Seq.contains(true)
-            else 
+            else
                 false
 
 

@@ -93,8 +93,8 @@ module DBWriterModule =
             task {
                 let newLogs = drainQueueToArray (queue)
 
-                if newLogs.any () then
-                    logDebug $"{DateTime.Now}: Writing {newLogs.length ()} new logs."
+                if newLogs.Any () then
+                    logDebug $"{DateTime.Now}: Writing {newLogs.Count()} new logs."
                     use conn = x.CommonAppSettings.CreateConnection()
                     use tr = conn.BeginTransaction()      // use! tr = conn.BeginTransactionAsync() : net48 지원 안됨
 

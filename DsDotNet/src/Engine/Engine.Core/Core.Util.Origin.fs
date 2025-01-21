@@ -59,7 +59,7 @@ module OriginModule =
             | None -> InitialType.NotCare
 
         let getTypeForMuiltTarget (vs:bool option seq)=
-            if vs.any(fun d-> d.IsNone) then //하나라도 순서없으면
+            if vs.Any(fun d-> d.IsNone) then //하나라도 순서없으면
                 InitialType.NotCare
             else
                 if vs.Choose(id).AllEqual(true) then

@@ -16,7 +16,7 @@ type VertexTagManager with
 
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
-            if shareds.any() then
+            if shareds.Any() then
                 shareds.Select(fun s -> s.Vertex.GetStartRootAndCausals()).ToOrElseOn()
             else
                 v._off.Expr
@@ -26,7 +26,7 @@ type VertexTagManager with
                 <||> plans
                 <||> actionLinks
 
-        let rsts = if real.Graph.Vertices.any()
+        let rsts = if real.Graph.Vertices.Any()
                     then (real.V.RT.Expr <&&> real.CoinAlloffExpr)<||> real.V.F.Expr
                     else real.V.RT.Expr <||> real.V.F.Expr
 
@@ -39,12 +39,12 @@ type VertexTagManager with
 
         let shareds = v.Vertex.GetSharedReal().Select(getVM)
         let wsShareds =
-            if shareds.any() then
+            if shareds.Any() then
                 shareds.Select(fun s -> s.Vertex.GetResetRootAndCausals()).ToOrElseOn()
             else
                 v._off.Expr
-        let manualReset = if RuntimeDS.Package.IsPackageSIM() 
-                            then  v.RFP.Expr 
+        let manualReset = if RuntimeDS.Package.IsPackageSIM()
+                            then  v.RFP.Expr
                             else  v.RFP.Expr <&&> v.Flow.mop.Expr
         let sets =
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr)

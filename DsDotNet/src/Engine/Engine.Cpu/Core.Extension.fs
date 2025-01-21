@@ -63,7 +63,7 @@ module CpuExtensionsModule =
         [<Extension>]
         static member ClearChangedTags (xs:IStorage seq, systems:DsSystem seq) =
             xs
-            |> Seq.where(fun w ->  systems.any(fun s-> s:>ISystem = w.DsSystem))//자신 시스템에서만 TagChanged  <- false 가능
+            |> Seq.where(fun w ->  systems.Any(fun s-> s:>ISystem = w.DsSystem))//자신 시스템에서만 TagChanged  <- false 가능
             |> Seq.iter(fun w -> w.TagChanged <- false)
 
         [<Extension>]

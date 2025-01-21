@@ -79,7 +79,7 @@ module EdgeModule =
             (mei.Sources @ mei.Targets).OfType<Alias>()
                 .Where(fun a->a.TargetWrapper.RealTarget().IsSome)
 
-        if invalidEdge.any() then
+        if invalidEdge.Any() then
             failwith $"Vertex {invalidEdge.First().Name} children type error"
 
 
@@ -182,7 +182,7 @@ module EdgeModule =
         for edge in graph.Edges do
             if edge.Source.TryGetPureCall().IsNone then //flow에서 조건으로 Call은 제외
                 let isEdgeMatch =
-                    g.Edges.any(fun (e:Edge) ->
+                    g.Edges.Any(fun (e:Edge) ->
                         e.EdgeType = edge.EdgeType
                         && e.Source = edge.Source.GetPureReal()
                         && e.Target = edge.Target.GetPureReal())
@@ -259,7 +259,7 @@ module EdgeModule =
         calls.SelectMany(fun c-> c.TaskDefs.Select(fun dev-> dev, c))
              |> groupBy fst
              |> iter(fun (k, vs) ->
-                    k.IsRootOnlyDevice <- not(vs.any(fun (_, c)->c.Parent.GetCore() :? Real))
+                    k.IsRootOnlyDevice <- not(vs.Any(fun (_, c)->c.Parent.GetCore() :? Real))
                 )
 
     type Flow with

@@ -12,19 +12,19 @@ open System
 
 
 [<AutoOpen>]
-module ConvertCpuCall = 
-   
+module ConvertCpuCall =
+
     type Call with
         member c._on     = c.System._on
         member c._off    = c.System._off
 
-        member c.HasSensor  = c.TaskDefs.Where(fun d-> d.ExistInput).any()
+        member c.HasSensor  = c.TaskDefs.Where(fun d-> d.ExistInput).Any()
         member c.HasAnalogSensor  =
             if c.HasSensor
             then
                 c.TaskDefs
                     .Where(fun d-> d.ExistInput && d.InTag.DataType <> typedefof<bool>)
-                    .any()
+                    .Any()
             else
                 false
 
@@ -39,7 +39,7 @@ module ConvertCpuCall =
                 (c.TagManager :?> CoinVertexTagManager).CallOperatorValue.Expr
             else
                 c.VC.PE.Expr
-  
+
 
         member c.TimeOutMaxMSec     = c.CallTime.TimeOutMaxMSec
         member c.TimeDelayCheckMSec = c.CallTime.TimeDelayCheckMSec
@@ -47,7 +47,7 @@ module ConvertCpuCall =
 
         member c.EndAction = if c.IsJob then c.ActionInExpr else None
         member c.EndWithoutTimer = c.EndAction.DefaultValue(c.EndPlan)
-        member c.End = 
+        member c.End =
                 if c.UsingTimeDelayCheck then
                     (c.TagManager :?> CoinVertexTagManager).TimeCheck.DN.Expr
                 else
@@ -56,16 +56,26 @@ module ConvertCpuCall =
 
         member c.IsAnalog =
             c.TaskDefs
-                .any(fun td-> td.IsAnalogActuator || td.IsAnalogSensor)
+                .Any(fun td-> td.IsAnalogActuator || td.IsAnalogSensor)
 
 
+        member c.GetEndAction() =
+            let tds =
+                c.TaskDefs
+                    .Where(fun td->td.ExistInput)
+                    .Select(fun td->td.GetInExpr(c))
+
+            if tds.Any() then
+                Some(tds.ToAnd())
+            else
+                None
 
 
         member c.RealLinkExpr =
                  let rv = c.Parent.GetCore().TagManager :?>  RealVertexTagManager
                  !@rv.Link.Expr <&&> (rv.G.Expr <||> rv.OB.Expr<||> rv.OA.Expr)
 
-    
+
         member c.TXs =
             if c.IsJob
             then c.TaskDefs |>Seq.map(fun td -> td.ApiItem.TX)
@@ -114,25 +124,23 @@ module ConvertCpuCall =
             let inExprs =
                 c.TaskDefs.Where(fun d-> d.ExistInput)
                           .Select(fun d-> d.GetInExpr(c))
-     
-            if inExprs.any() 
+
+            if inExprs.Any()
             then inExprs.ToAnd() |>Some
-               
+
             else None
-               
-        
 
         member c.ActionOutExpr =
             let outExprs =
                 c.TaskDefs.Where(fun d-> d.ExistOutput)
                           .Select(fun d-> d.GetOutExpr(c))
-     
-            if outExprs.any()
+
+            if outExprs.Any()
             then outExprs.ToOr()|>Some
             else None
 
 
-           
+
 
 //[<Extension>]
 //type CallExt =

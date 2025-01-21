@@ -50,7 +50,7 @@ module ImportU =
                 | Some dic ->
                     dic.Value.Add(src) |> ignore
                     dic.Value.Add(tgt) |> ignore
-                | None -> dicIL.Add(dicIL.length (), [ src; tgt ] |> HashSet)
+                | None -> dicIL.Add(dicIL.Count, [ src; tgt ] |> HashSet)
 
             let createInterlockInfos (src, tgt) =
                 let mei = sys.CreateApiResetInfo(src, Interlock, tgt, false)
@@ -107,7 +107,7 @@ module ImportU =
             let dicFlow = doc.DicFlow
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.ButtonDefs.any ())
+            |> Seq.filter (fun node -> node.ButtonDefs.Any ())
             |> Seq.iter (fun node ->
                 let flow = dicFlow.[node.PageNum]
 
@@ -118,10 +118,10 @@ module ImportU =
                     )
 
             doc.NodesHeadPage
-            |> Seq.filter (fun node -> node.ButtonHeadPageDefs.any())
+            |> Seq.filter (fun node -> node.ButtonHeadPageDefs.Any())
             |> Seq.iter (fun node ->
 
-                if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
+                if dicFlow.IsEmpty() then Office.ErrorShape(node.Shape, ErrID._60, node.PageNum)
                 else
                         node.ButtonHeadPageDefs.ForEach(fun b ->
                             let fullName = b.Key
@@ -134,8 +134,8 @@ module ImportU =
         [<Extension>]
         static member MakeLamps(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
-            let headPageLamps=  doc.NodesHeadPage |> Seq.filter (fun node -> node.LampHeadPageDefs.any())
-            let flowPageLamps=  doc.Nodes |> Seq.filter (fun node -> node.LampDefs.any())
+            let headPageLamps=  doc.NodesHeadPage |> Seq.filter (fun node -> node.LampHeadPageDefs.Any())
+            let flowPageLamps=  doc.Nodes |> Seq.filter (fun node -> node.LampDefs.Any())
             let allLampNodes = headPageLamps @ flowPageLamps
 
             let duplicateNames =
@@ -181,7 +181,7 @@ module ImportU =
                 mySys.AddAction(aType, pureName, devParamIO, emptyAddr, settingflow)
 
             doc.Nodes
-            |> Seq.filter (fun node -> node.CondiDefs.any() || node.ActionDefs.any())
+            |> Seq.filter (fun node -> node.CondiDefs.Any() || node.ActionDefs.Any())
             |> Seq.iter (fun node ->
                 try
                     let flow = dicFlow.[node.PageNum]
@@ -192,9 +192,9 @@ module ImportU =
                     )
 
             doc.NodesHeadPage
-            |> Seq.filter (fun node -> node.CondiHeadPageDefs.any() || node.ActionHeadPageDefs.any())
+            |> Seq.filter (fun node -> node.CondiHeadPageDefs.Any() || node.ActionHeadPageDefs.Any())
             |> Seq.iter (fun node ->
-                if dicFlow.length() = 0 then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
+                if dicFlow.IsEmpty() then Office.ErrorShape(node.Shape, ErrID._67, node.PageNum)
                 else
                     node.CondiHeadPageDefs.ForEach(fun c ->  addCondition (c.Key, c.Value,  None))
                     node.ActionHeadPageDefs.ForEach(fun c ->  addActiontion (c.Key, c.Value, None))
@@ -286,7 +286,7 @@ module ImportU =
                                         .Select(fun d-> d.ApiName).Distinct()
                         let usedApis = kv.Select(fun d->d.ApiName).Distinct()
 
-                        if libApis.any() && libApis.Count() <> usedApis.Count()
+                        if libApis.Any() && libApis.Count() <> usedApis.Count()
                         then
                             let errApis = usedApis.Except(libApis).JoinWith(", ")
                             let libFilePath  =libInfos[libApis.First()]
@@ -392,7 +392,7 @@ module ImportU =
                 match getParent (edge, parents, dicVertex) with
                 | Some(real) -> (real :?> Real).CreateEdge(mei)
                 | None ->
-                    if (tgts.OfType<Call>().any ()) then
+                    if (tgts.OfType<Call>().Any ()) then
                         edge.ConnectionShape.ErrorConnect(ErrID._44, srcs.First().Name, tgts.First().Name, edge.PageNum)
 
                     flow.CreateEdge(mei)
@@ -514,7 +514,7 @@ module ImportU =
             let getCallName(condiName:string, holder:Call) =
                 let fqdn = condiName.Split('.').Select(fun s->s.Trim()).ToArray()
                 let sName = mySys.Name;
-                match fqdn.length() with
+                match fqdn.Length with
                 | 2 ->
                     [|sName;holder.Flow.Name;holder.Parent.GetCore().Name;fqdn[0];fqdn[1]|].Combine()// 자신Work 내부의 Call
                 | 3 ->
@@ -582,7 +582,7 @@ module ImportU =
                         else
                             flow.Name, trxName
 
-                    if dicFlow.Values.Where(fun w -> w.Name = flowName).IsEmpty then
+                    if dicFlow.Values.Where(fun w -> w.Name = flowName).IsEmpty() then
                         Office.ErrorPpt(
                             Name,
                             ErrID._42,
@@ -616,7 +616,7 @@ module ImportU =
             let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
             if not(autoIO)
                 && activeSys.IsSome && activeSys.Value = sys
-                && pageTables.isEmpty()
+                && pageTables.IsEmpty()
             then
                 failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
 
@@ -678,7 +678,7 @@ module ImportU =
                         libApisNSys.Add(api.Name, sys)
                     with ex ->
                         let errSystems =
-                            systems.Where(fun w -> w.ApiItems.Select(fun s -> s.Name = api.Name).any ())
+                            systems.Where(fun w -> w.ApiItems.Select(fun s -> s.Name = api.Name).Any())
 
                         let errText = (String.Join(", ", errSystems.Select(fun s -> s.Name)))
                         failwithf $"{api.Name} exists on the same system. [{errText}]"))

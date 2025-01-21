@@ -65,7 +65,7 @@ module RunTimeModule =
             let chTags = cpuStorages.GetChangedTags() |> toArray
 
             //Changed 있는것만 IO Hub로 전송
-            if chTags.any() then tagChangedForIOHub.OnNext chTags
+            if chTags.Any() then tagChangedForIOHub.OnNext chTags
             //ClearChangedTags 전에 exeStates 만들기
             let exeStates = chTags.ExecutableStatements(mapRungs)
             //ClearChangedTags
@@ -125,7 +125,7 @@ module RunTimeModule =
             let mutable endStepByStatus = false
             while not(endStepByStatus) do
                 let chTags = scanOnce()
-                endStepByStatus <- chTags.isEmpty()
+                endStepByStatus <- chTags.IsEmpty()
                                    || chTags |> Seq.exists (fun f -> f.DsSystem = activeSys && f.IsStatusTag())
 
         interface IDisposable with

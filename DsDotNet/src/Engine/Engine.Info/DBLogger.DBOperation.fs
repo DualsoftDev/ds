@@ -21,7 +21,7 @@ module internal DBLoggerImpl =
         task {
             let! newTagKindInfos = getNewTagKindInfosAsync (conn, tr)
 
-            if newTagKindInfos.any () then
+            if newTagKindInfos.Any () then
                 failwithlogf $"Database sync failed."
         }
 
@@ -148,7 +148,7 @@ module internal DBLoggerImpl =
                 r.Id <- dbRow.Id
                 r.MaintenanceId <- dbRow.MaintenanceId
 
-            if newStorageRows.any () && readerWriterType = DBLoggerType.Reader then
+            if newStorageRows.Any () && readerWriterType = DBLoggerType.Reader then
                 failwithlogf $"Database can't be sync'ed for {connStr}"
 
             for s in newStorageRows do

@@ -90,7 +90,7 @@ module internal GraphHelperModule =
 
                     let oges = g.GetOutgoingEdges(v).Where(fun e -> edges.Contains(e))
                     let ogvs = oges.Select(fun e -> e.Target).ToArray()
-                    if ogvs.IsEmpty then
+                    if ogvs.isEmpty() then
                         stack.Pop() |> ignore
                     else
                         for ogv in ogvs do

@@ -189,7 +189,6 @@ namespace Diagram.View.MSAGL
                     {
                         HandleTaskDevEvent(rx as EventTaskDev);
                     }
-
                 });
             }
         }
@@ -323,41 +322,6 @@ namespace Diagram.View.MSAGL
                 });
             });
         }
-        //private static void HandleJobEvent(EventJob jobEv)
-        //{
-        //    if (!DicJobTag.ContainsKey(jobEv.Tag)) return;
-
-        //    var viewNodes = DicJobTag[jobEv.Tag];
-
-        //    viewNodes.Iter(n =>
-        //    {
-        //        n.DisplayNodes.Iter(node =>
-        //        {
-        //            if (!IsThisSystem(node)) return;
-
-
-        //            switch (jobEv.Tag.TagKind)
-        //            {
-        //                case (int)JobTag.inDetected:
-        //                    {
-        //                        var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
-        //                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-        //                        n.LampInput = on;
-        //                        ucView?.UpdateInValue(node, on, true);
-        //                        break;
-        //                    }
-        //                case (int)JobTag.outDetected:
-        //                    {
-        //                        var on = Convert.ToBoolean(jobEv.Tag.BoxedValue);
-        //                        var ucView = UcViews.FirstOrDefault(w => w.MasterNode == n.FlowNode);
-        //                        n.LampOutput = on;
-        //                        ucView?.UpdateOutValue(node, on, true);
-        //                        break;
-        //                    }
-        //            }
-        //        });
-        //    });
-        //}
         private static bool IsThisSystem(ViewNode node)
         {
             if (!node.IsVertex

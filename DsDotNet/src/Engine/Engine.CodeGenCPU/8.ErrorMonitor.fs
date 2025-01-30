@@ -68,7 +68,7 @@ type VertexTagManager with
         let v= v :?> CoinVertexTagManager
         let fn = getFuncName()
         let call= v.Vertex.GetPure() :?> Call
-        let real  = call.Parent.GetCore() :?> Real
+        //let real  = call.Parent.GetCore() :?> Real
         let callMutualOns = call.MutualResetCoins
                                 .Choose(tryGetPureCall)
                                 .Choose(fun c->c.EndAction)
@@ -77,6 +77,7 @@ type VertexTagManager with
         
         let aop = call.V.Flow.aop.Expr
         let rst = v.Flow.ClearExpr
+        let tempErrInterlock = v.System.GetTempBoolTag("tempErrInterlock")
 
         match call.EndAction with
         | Some input ->
@@ -87,7 +88,8 @@ type VertexTagManager with
             //|]
 
             [| //자동일 때만 체크
-                yield (input <&&> aop  <&&> real.VR.F.Expr <&&> callMutualOns , rst) ==| (v.ErrInterlock , fn)
+                yield (input <&&> aop <&&> callMutualOns , v.System._off.Expr) --| (tempErrInterlock , fn)
+                yield (tempErrInterlock.Expr, rst) ==| (v.ErrInterlock , fn)
             |]
         | _ -> [||]
 

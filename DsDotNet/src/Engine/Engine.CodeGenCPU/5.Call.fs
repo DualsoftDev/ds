@@ -12,16 +12,16 @@ type VertexTagManager with
         let call = v.Vertex.GetPureCall()
        
         let dop, mop = v.Flow.d_st.Expr, v.Flow.mop.Expr
+        let parentReal = call.Parent.GetCore() :?> Vertex
         let sets =
             (
                      (mop <&&> call.StartPointExpr)
                 <||> (mop <&&> v.SFP.Expr)
-                <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr )
+                <||> (dop <&&> v.ST.Expr <&&> call.AutoPreExpr <&&> parentReal.V.G.Expr)
             )
             <&&> call.SafetyExpr
 
         let rst =  call.End
-        let parentReal = call.Parent.GetCore() :?> Vertex
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.PS)
 
         let sets = sets <&&> !@rstMemos.ToOrElseOff()

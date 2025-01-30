@@ -106,12 +106,10 @@ module ExpressionExtension =
     let (--^) (sets: Expression<bool>, sys:DsSystem) (rising: TypedValueStorage<bool>, comment:string) =
         let sm = sys.TagManager :?> SystemManager
         let risingRelay = sm.GetTempBoolTag("tempRisingRelay")
-        let risingHold = sm.GetTempBoolTag("tempRisingHold")
         [
         //순서 중요
-            risingHold  <== (sets  <&&> !@(var2expr risingRelay)) |> withExpressionComment comment
-            risingRelay <== (var2expr rising <||> var2expr risingRelay <&&>  sets ) |> withExpressionComment comment
-            rising      <== (risingHold.Expr) |> withExpressionComment comment
+            risingRelay <== ((rising.Expr <||> risingRelay.Expr) <&&> sets) |> withExpressionComment comment
+            rising  <== (sets <&&> !@risingRelay.Expr) |> withExpressionComment comment
         ]
 
     /// Create Timer Coil Statement

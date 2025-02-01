@@ -27,7 +27,6 @@ module ZmqTestClient =
 
         let testFile = Path.Combine(AppContext.BaseDirectory   , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.dsz");
         let jsonPath = unZip testFile
-        RuntimeDS.Package <- RuntimePackage.PCSIM;
         let model: Model = ParserLoader.LoadFromConfig(jsonPath) WINDOWS
         let dsCPU, _, _ = DsCpuExt.CreateRuntime (model.System) WINDOWS model.Config     
 

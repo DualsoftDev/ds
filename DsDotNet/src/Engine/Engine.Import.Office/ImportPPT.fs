@@ -285,8 +285,10 @@ module ImportPptModule =
                     if pptParams.CreateFromPpt then
                         model.System, model.LoadingPaths
                     else
-                        model.System.ExportToDS activePath
+                        LoaderExt.ExportToDS (model.System, activePath)
                         ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.Platform) false )
+
+
             forceTrace $"Elapsed time for reading2 {fullName}: {millisecond} ms"
 
             {
@@ -299,5 +301,5 @@ module ImportPptModule =
         static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams, cfg:ModelConfig)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams, cfg)
             DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
-            ModelLoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg), ret.System
+            LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg), ret.System
 

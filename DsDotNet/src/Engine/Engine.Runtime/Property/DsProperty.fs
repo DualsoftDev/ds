@@ -329,7 +329,7 @@ module rec DsPropertyModule =
             x.UpdateField(&dsFilePath, config.DsFilePath, nameof dsFilePath)
             x.UpdateField(&hwIP, config.HwIP, nameof hwIP)
             x.UpdateField(&runtimePackage, config.RuntimePackage, nameof runtimePackage)
-            x.UpdateField(&hwDriver, config.HwDriver, nameof hwDriver)
+            x.UpdateField(&hwDriver, config.HwDriver.ToString(), nameof hwDriver)
             x.UpdateField(&runtimeMotionMode, config.RuntimeMotionMode, nameof runtimeMotionMode)
             x.UpdateField(&timeSimutionMode, config.TimeSimutionMode, nameof timeSimutionMode)
             x.UpdateField(&timeoutCall, config.TimeoutCall, nameof timeoutCall)

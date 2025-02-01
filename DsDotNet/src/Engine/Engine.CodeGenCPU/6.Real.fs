@@ -28,7 +28,7 @@ type RealVertexTagManager with
                     <&&> if v.Real.Motion.IsSome then   v.MotionRelay.Expr else v._on.Expr
 
                 let forceOn = v.ONP.Expr <&&> v.Flow.mop.Expr
-                if v.IsFinished && (RuntimeDS.Package.IsPackageSIM()) then
+                if v.IsFinished && (RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM()) then
                     endExpr <||> forceOn <||> !@v.Link.Expr
                 else                          
                     endExpr <||> forceOn
@@ -95,7 +95,7 @@ type RealVertexTagManager with
                 let order = order |> uint32 |> literal2expr
                 let totalSrcToken = v.System.GetSourceTokenCount() |> uint32 |>literal2expr
 
-                if RuntimeDS.Package.IsPLCorPLCSIM()
+                if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM()
                 then
                     //처음에는 자기 순서로 시작
                     yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vr.SourceTokenData, fn)
@@ -159,7 +159,7 @@ type RealVertexTagManager with
         let dop = v.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
         [|
-            if not(RuntimeDS.Package.IsPackageSIM()) then 
+            if not(RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM()) then 
                 let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
                 yield (checking, rst) ==| (v.ErrGoingOrigin , fn)
         |]
@@ -182,10 +182,10 @@ type RealVertexTagManager with
                 yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
                 yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
                 
-                if RuntimeDS.Package.IsPackageSIM() && v.Real.TimeAvgExist  then
-                    if RuntimeDS.RuntimeMotionMode = MotionAsync then
+                if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() && v.Real.TimeAvgExist  then
+                    if RuntimeDS.ModelConfig.RuntimeMotionMode = MotionAsync then
                         yield! getTimeStatement() 
-                    elif RuntimeDS.RuntimeMotionMode = MotionSync then
+                    elif RuntimeDS.ModelConfig.RuntimeMotionMode = MotionSync then
                         if v.Real.Motion.IsSome then
                             yield (v.MotionEnd.Expr  , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
                         else 
@@ -203,8 +203,8 @@ type RealVertexTagManager with
                 yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,   v.F.Expr) ==| (v.MotionRelay, fn)
                 yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, fn)
 
-                if RuntimeDS.Package.IsPackageSIM() then
-                    if RuntimeDS.RuntimeMotionMode = MotionAsync then
+                if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
+                    if RuntimeDS.ModelConfig.RuntimeMotionMode = MotionAsync then
                         if v.Real.TimeAvg.IsSome then
                             yield (v.TimeEnd.Expr    , v._off.Expr) --| (v.MotionEnd, fn)   
                         else 

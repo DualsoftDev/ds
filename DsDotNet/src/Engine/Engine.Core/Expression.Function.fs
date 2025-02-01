@@ -289,15 +289,15 @@ module ExpressionFunctionModule =
         let _logicalOr  (args:Args) = args.ExpectGteN(2).Select(evalArg).Cast<bool>()  .Reduce( || )
         let _logicalNot (args:Args) = args.Select(evalArg).Cast<bool>().Expect1() |> not
 
-        let errorPCRunmode(_args:Args, funName:string) =
-            if RuntimeDS.Package.IsPCorPCSIM() then
-                failwithlog $"""Error: {funName} is a PLC-only formula. ({String.Join(", ", _args.Map(fun a->a.ToText()))})"""
-            else false
+        //let errorPCRunmode(_args:Args, funName:string) =  //PC 모드일때만 예외 (위치 수정 필요)
+        //    if RuntimeDS.Package.IsPCorPCSIM() then
+        //        failwithlog $"""Error: {funName} is a PLC-only formula. ({String.Join(", ", _args.Map(fun a->a.ToText()))})"""
+        //    else false
 
-        let _rising (_args:Args) : bool =  errorPCRunmode(_args, "rising")
-        let _falling (_args:Args) : bool = errorPCRunmode(_args, "falling")
-        let _risingAfter (_args:Args) : bool = errorPCRunmode(_args, "risingAfter")
-        let _fallingAfter (_args:Args) : bool= errorPCRunmode(_args, "fallingAfter")
+        let _rising (_args:Args) : bool =       false//    errorPCRunmode(_args, "rising")
+        let _falling (_args:Args) : bool =      false//    errorPCRunmode(_args, "falling")
+        let _risingAfter (_args:Args) : bool =  false//    errorPCRunmode(_args, "risingAfter")
+        let _fallingAfter (_args:Args) : bool=  false//    errorPCRunmode(_args, "fallingAfter")
 
 
         let _sin (args:Args) = args.Select(evalArg >> toFloat64).Expect1() |> Math.Sin

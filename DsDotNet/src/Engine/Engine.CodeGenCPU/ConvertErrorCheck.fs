@@ -22,7 +22,7 @@ module ConvertErrorCheck =
                 if not(hwAutoFlows.Contains flow) then
                     failwithf $"{flow.Name} auto btn not exist"
 
-        if RuntimeDS.Package.IsPLCorPLCSIM() then
+        if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM() then
             for btn in sys.HWButtons do
                 if btn.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
                     failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."

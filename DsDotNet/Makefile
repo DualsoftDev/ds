@@ -102,6 +102,12 @@ linux:
 	@(cd src/Engine/Engine.Parser; ln -s ../../../../Grammar/g4s)
 	@dotnet build Ds.linux.sln
 
+node:
+	# @choco install wget
+	# @wget https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi
+	# @https://nodejs.org/dist/v18.17.1/node-v18.17.1-x64.msi
+	npm install xml-formatter
+
 # -- 다음 project 에서 net48 target 제거
 # src/Engine/Engine.Parser/Engine.Parser.csproj
 # src/Engine/Engine.Parser.FS/Engine.Parser.FS.fsproj

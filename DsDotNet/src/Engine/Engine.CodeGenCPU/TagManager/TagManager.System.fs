@@ -74,7 +74,7 @@ module SystemManagerModule =
 
         let tout     =
             let tout = dsSysUint32   true sys SystemTag.timeout  false
-            tout.Value <- RuntimeDS.TimeoutCall
+            tout.Value <- RuntimeDS.ModelConfig.TimeoutCall
             tout
 
         let pauseMonitor     = dsSysBit true sys SystemTag.pauseMonitor     false

@@ -7,7 +7,6 @@ using static Engine.Core.InfoPackageModule;
 using static Engine.Core.Interface;
 using RestResultString = Dual.Web.Blazor.Shared.RestResult<string>;
 using FlatSpans = System.Tuple<string, Engine.Info.DBLoggerAnalysisDTOModule.Span[]>[];
-using static Engine.Core.ModelLoaderModule;
 using static Engine.Info.LoggerDB;
 
 namespace DsWebApp.Server.Controllers;

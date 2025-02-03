@@ -130,7 +130,7 @@ namespace DSModeler
         {
             treeView1.Nodes.Clear();
             treeView1.Nodes.Add(ConvertToTreeViewNode(rootTree));
-            var lst = ConvertToINotifyProperty(rootTree, new List<INotifyPropertyChanged>());   
+            var lst = ConvertToINotifyProperty(rootTree, new List<INotifyPropertyChanged>());
             foreach (var item in lst)
             {
                 item.PropertyChanged += (s, e) =>
@@ -155,26 +155,25 @@ namespace DSModeler
                 };
             }
             treeView1.ExpandAll();
-        }
-
-        private List<INotifyPropertyChanged> ConvertToINotifyProperty(DsTreeNode tree, List<INotifyPropertyChanged> lst)
-        {
-            lst.Add(tree.Node as INotifyPropertyChanged);   
-            foreach (var child in tree.Children)
+            List<INotifyPropertyChanged> ConvertToINotifyProperty(DsTreeNode tree, List<INotifyPropertyChanged> lst)
             {
-                ConvertToINotifyProperty(child, lst);
+                lst.Add(tree.Node as INotifyPropertyChanged);
+                foreach (var child in tree.Children)
+                {
+                    ConvertToINotifyProperty(child, lst);
+                }
+                return lst;
             }
-            return lst;
-        }
 
-        private TreeNode ConvertToTreeViewNode(DsTreeNode tree)
-        {
-            var node = new TreeNode(tree.Node.Name) { Tag = tree.Node };
-            foreach (var child in tree.Children)
+            TreeNode ConvertToTreeViewNode(DsTreeNode tree)
             {
-                node.Nodes.Add(ConvertToTreeViewNode(child));
+                var node = new TreeNode(tree.Node.Name) { Tag = tree.Node };
+                foreach (var child in tree.Children)
+                {
+                    node.Nodes.Add(ConvertToTreeViewNode(child));
+                }
+                return node;
             }
-            return node;
         }
 
 

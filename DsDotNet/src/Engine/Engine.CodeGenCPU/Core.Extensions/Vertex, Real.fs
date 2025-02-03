@@ -9,6 +9,31 @@ open System
 [<AutoOpen>]
 module ConvertCpuVertex =
 
+    let getTime  (time:uint32 option, nameFqdn:string)=
+        let maxShortSpeedMSec =TimerModule.MinTickInterval|>float
+        let v =
+            time |> bind(fun t ->
+                if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
+                    match RuntimeDS.ModelConfig.TimeSimutionMode  with
+                    | TimeSimutionMode.TimeNone -> None
+                    | TimeSimutionMode.TimeX1 ->   Some ((t|>float)* 1.0/1.0 )
+                    | TimeSimutionMode.TimeX2 ->   Some ((t|>float)* 1.0/2.0 )
+                    | TimeSimutionMode.TimeX4 ->   Some ((t|>float)* 1.0/4.0 )
+                    | TimeSimutionMode.TimeX8 ->   Some ((t|>float)* 1.0/8.0 )
+                    | TimeSimutionMode.TimeX16 ->  Some ((t|>float)* 1.0/16.0 )
+                    | TimeSimutionMode.TimeX100 -> Some ((t|>float)* 1.0/100.0 )
+                    | TimeSimutionMode.TimeX0_1 -> Some ((t|>float)* 1.0/0.1 )
+                    | TimeSimutionMode.TimeX0_5 -> Some ((t|>float)* 1.0/0.5 )
+                else
+                    Some (t|>float)
+                    )
+
+        if v.IsSome && v.Value < maxShortSpeedMSec then
+            failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.ModelConfig.TimeSimutionMode}) {nameFqdn}
+                        \r\n[최소동작시간 : {maxShortSpeedMSec}, 배속반영 동작 시간 : {v.Value}]"
+        else
+            v
+
     type Vertex with
         member v.V  = v.TagManager :?> VertexTagManager
         member v.VC = v.TagManager :?> CoinVertexTagManager
@@ -33,6 +58,15 @@ module ConvertCpuVertex =
 
     type Real with
         member r.V = r.TagManager :?> RealVertexTagManager
+
+        member x.TimeAvg = getTime (x.DsTime.AVG, x.QualifiedName)
+        member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0
+        member x.TimeSimMsec =
+            if x.TimeAvg.IsNone then
+                failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
+            else
+                x.TimeAvg.Value|>uint32
+
 
         /// 실제 Token >= 1.   Token 없을 경우, 0 return.
         // 원래 token 없으면 null 을 반환해야 함!!

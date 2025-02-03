@@ -19,7 +19,7 @@ type XgxConvertDsCPU(target:PlatformTarget) =
 
 
     member __.``Test DS Case`` () =
-        RuntimeDS.Package <- RuntimePackage.PLC
+        RuntimeDS.ChangeRuntimePackage(RuntimePackage.PLC)
 
         let f = getFuncName()
 

@@ -19,7 +19,7 @@ module OriginTestModule =
         let genConfig (filePath:string) =
             let mConfig = createDefaultModelConfig()
             let cfg = createModelConfigReplacePath(mConfig, $@"{libdir}/MultipleJobdefCallExample/{filePath}" )
-            ModelLoader.SaveConfig configFile cfg
+            SaveConfig configFile cfg
 
         let answerChecker
                 (filePath:string)

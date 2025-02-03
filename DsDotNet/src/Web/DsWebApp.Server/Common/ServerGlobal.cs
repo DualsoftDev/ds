@@ -80,7 +80,7 @@ public class ServerGlobal
             Debug.Assert(dsZipPath.IsNullOrEmpty() || dsZipPath == path);
             dsZipPath = path;
 
-            RuntimeDS.Package = serverSettings.GetRuntimePackage();
+            RuntimeDS.ChangeRuntimePackage(serverSettings.GetRuntimePackage());
             //test ahn 추후 HW driver 설정에서 받아온 값으로 수정 필요 => HwDriveTarget.LS_XGK_IO
             RuntimeModel = new RuntimeModel(dsZipPath, PlatformTarget.WINDOWS);
 

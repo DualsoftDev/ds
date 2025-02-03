@@ -69,9 +69,8 @@
         <Compile Include="Expression.TagKind.fs" />
         <Compile Include="Expression.Tag.fs" />
         <Compile Include="FqdnExplorer.fs" />
-        <Compile Include="ModelLoader.fs" />
-        <Compile Include="LibraryLoader.fs" />
         <Compile Include="ExportConfigs.fs" />
+        <Compile Include="Loader.fs" />
         <Compile Include="Info\Expression.TagWeb.fs" />
         <Compile Include="Info\HmiPackage.fs" />
         <Compile Include="Info\InfoPackage.fs" />

@@ -33,7 +33,7 @@ module DsPropertyBaseModule =
 
         [<Browsable(false)>] // 속성 창에서 숨기기
         member x._ClassType = x.GetType().Name
-
+        [<Browsable(false)>] // 속성 창에서 숨기기
         member val FqdnObject = fqdnObject with get, set
 
         override x.ToString() = ""//x._ClassType

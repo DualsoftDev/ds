@@ -634,6 +634,9 @@ module ExportIOTable =
                     .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
                     |>dict
 
+
+        let emulatorAddress = (sys.TagManager:?>SystemManager).GetSystemTag(SystemTag.emulation)
+
         //HMI TAG와 맞춰야 해서 순서  중요
         addRows [[ "AutoSelect"; "bool"; hws["AutoSelect"] ]] dt
         addRows [[ "ManualSelect"; "bool"; hws["ManualSelect"] ]] dt
@@ -648,7 +651,7 @@ module ExportIOTable =
         addRows [[ "OriginStateLamp"; "bool"; hws["OriginStateLamp"] ]] dt
         addRows [[ "ReadyStateLamp"; "bool"; hws["ReadyStateLamp"] ]] dt
         addRows [[ "DriveLamp"; "bool"; hws["DriveLamp"] ]] dt
-        addRows [[ "SimulationLamp"; "bool"; RuntimeDS.EmulationAddress ]] dt
+        addRows [[ "SimulationLamp"; "bool"; emulatorAddress.Address ]] dt
 
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
 

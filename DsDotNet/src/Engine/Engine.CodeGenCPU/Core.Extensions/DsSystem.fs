@@ -108,7 +108,6 @@ module ConvertCpuDsSystem =
 
         member private x.GenerationEmulationMemory()  =
             x._emulation.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
-            RuntimeDS.EmulationAddress <- x._emulation.Address
 
 
         member private x.GenerationCallAlarmMemory()  =

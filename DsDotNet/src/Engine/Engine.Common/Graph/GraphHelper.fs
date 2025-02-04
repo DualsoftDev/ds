@@ -19,7 +19,7 @@ module internal GraphHelperModule =
                 for i in g.Islands do
                     match box i with
                     | :? IQualifiedNamed as v -> v.QualifiedName
-                    | _ -> i.Name
+                    | _ -> i.VertexKey
             ] |> String.concat "\r\n"
 
         if text.Any() then
@@ -119,7 +119,7 @@ module internal GraphHelperModule =
         if sccs.Any() && not(allowCyclicGraph) then
             let msg =
                 [ for vs in sccs do
-                    vs.Select(fun v -> v.Name).JoinWith(", ").EncloseWith2("[", "]")
+                    vs.Select(fun v -> v.VertexKey).JoinWith(", ").EncloseWith2("[", "]")
                 ].JoinWith("\r\n")
             failwithlogf $"ERROR: Cyclic graph on {msg}"
         true

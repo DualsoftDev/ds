@@ -12,6 +12,8 @@ open Engine.Common
 // 테스트용 더미 클래스 정의
 type DummyVertex(name:string) =
     inherit Named(name)
+    interface IVertexKey with
+        member x.VertexKey with get() = x.Name and set(v) = x.Name <- v
 
 type DummyEdge(source, target) =
     inherit DsEdgeBase<DummyVertex>(source, target, EdgeType.Start)

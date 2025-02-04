@@ -13,6 +13,9 @@ open Engine.Parser.FS
 module ModelGrapTests =
     type V(name:string) =
         inherit Named(name)
+        interface IVertexKey with
+            member x.VertexKey with get() = x.Name and set(v) = x.Name <- v
+
     type E(source, target) =
         inherit DsEdgeBase<V>(source, target, EdgeType.Start)
 

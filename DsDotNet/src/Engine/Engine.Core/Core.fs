@@ -497,10 +497,10 @@ module rec CoreModule =
             static member Create(name) =
                 let vertexDic = Dictionary<string, FqdnObject>()
                 let vertexHandlers =
-                    let onAdded (v:INamed) =
+                    let onAdded (v:IVertexKey) =
                         let q = v :?> FqdnObject
                         vertexDic.TryAdd(q.DequotedQualifiedName, q)
-                    let onRemoved (v:INamed) =
+                    let onRemoved (v:IVertexKey) =
                         let q = v :?> FqdnObject
                         vertexDic.Remove(q.DequotedQualifiedName)
 

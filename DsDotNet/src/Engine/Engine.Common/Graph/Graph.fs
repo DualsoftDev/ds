@@ -37,7 +37,7 @@ module GraphModule =
 
     /// Template class for DS Graph<'V, 'E>
     type TDsGraph<'V, 'E
-            when 'V :> INamed and 'V : equality
+            when 'V :> IVertexKey and 'V : equality
             and 'E :> DsEdgeBase<'V> and 'E: equality> (
             vertices_:'V seq,
             edges_:'E seq,

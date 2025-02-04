@@ -10,6 +10,7 @@ open Dual.Common.Core.FS
 open Engine.Common
 open Engine.Core
 open type Engine.Parser.dsParser
+open System.Collections.Generic
 
 [<AutoOpen>]
 module EtcListenerModule =
@@ -85,7 +86,7 @@ module EtcListenerModule =
                                                     $"Flow [{flowName}] not exists!"
                                                     (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
                                             .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
-                                            .ToHashSet()
+                                            |> HashSet
 
                                     return targetBtnType, btnName, inParam, outParam, flows, inAddr, outAddr
                                 }
@@ -154,7 +155,7 @@ module EtcListenerModule =
                                         $"Flow [{flowName}] not exists!"
                                         (system.Flows.Any(fun f -> f.Name = flowName.DeQuoteOnDemand())))
                                 .Select(fun flowName -> system.Flows.First(fun f -> f.Name = flowName.DeQuoteOnDemand()))
-                                .ToHashSet()
+                                |> HashSet
 
                         return cndName, inParam, outParam, flows, inAddr, outAddr
                     }

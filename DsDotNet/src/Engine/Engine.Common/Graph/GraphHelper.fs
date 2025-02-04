@@ -72,7 +72,7 @@ module internal GraphHelperModule =
             let sccs:ResizeArray<'V[]> = ResizeArray()
             let visited = new HashSet<'V>()
             let stack = new Stack<'V>()
-            let edges = edges.ToHashSet();
+            let edges = HashSet edges
 
             let rec visit(v:'V) =
                 if visited.Contains(v) then

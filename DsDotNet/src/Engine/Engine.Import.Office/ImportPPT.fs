@@ -29,9 +29,9 @@ module ImportPptModule =
         OpMemory: int
     }
 
-    let defaultPptParams() = 
+    let defaultPptParams() =
         {
-            HwTarget = getDefaltHwTarget() 
+            HwTarget = getDefaltHwTarget()
             AutoIOM = true
             CreateFromPpt = false
             CreateBtnLamp = true
@@ -43,8 +43,7 @@ module ImportPptModule =
     let getHashKeys (skipCnt: int, path: string, loadedParentStack:Stack<DsSystem>) =
         String.Join(
             ",",
-            loadedParentStack
-                .ToHashSet()
+            (HashSet loadedParentStack)
                 .Skip(skipCnt)
                 .Reverse()
                 .Select(fun s -> s.GetHashCode().ToString())
@@ -138,7 +137,7 @@ module ImportPptModule =
                     loadSystem (pptReop, newSys, paras, isLib, pptParams, dicLoaded, dicPptDoc, pathStack, loadedParentStack, layoutImgPaths) |> ignore
                     currentFileName <- pathStack.Peek()
 
-                    let parents = loadedParentStack.ToHashSet().Skip(1).Reverse() //자신 제외
+                    let parents = HashSet(loadedParentStack).Skip(1).Reverse() //자신 제외
 
                     let newLoad =
                         if bExtSys then
@@ -232,7 +231,7 @@ module ImportPptModule =
         Copylibrary.Clear()
         let dicPptDoc = Dictionary<string, PresentationDocument>()
         let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
-        
+
         try
             try
                 let cfg =  createModelConfigReplacePath (modelCnf, path)

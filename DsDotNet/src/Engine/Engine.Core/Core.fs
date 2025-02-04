@@ -692,7 +692,7 @@ module rec CoreModule =
             inherit FqdnObject(name, system)
             member x.Name = name
             member x.System = system
-            member val SettingFlows = flows.ToHashSet()
+            member val SettingFlows = HashSet flows
             member val ValueParamIO = valueParamIO
             member val TaskDevParamIO = taskDevParamIO
             member val InAddress = addr.In with get, set

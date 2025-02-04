@@ -17,8 +17,8 @@ ramdisk:
 	@rm -rf /r/bin /r/build /r/packages /r/tmp /r/vs ./bin ./packages .vs
 	# SOLUTIONS 정의 바탕으로 /r/build/{solution name}  폴더 생성
 
-	@mkdir -p /r/bin /r/packages /r/tmp /r/vs
-	@ln -s /r/vs ./.vs
+	@mkdir -p /r/bin /r/packages /r/tmp /r/vs_ds
+	@ln -s /r/vs_ds ./.vs
 	#@$(foreach sol, $(SOLUTIONS), mkdir -p /r/build/$(sol)/output /r/build/$(sol)/bin /r/vs/${sol}/.vs;  ln -s /r/vs/${sol}/.vs .vs/${sol})
 	@$(foreach sol, $(SOLUTIONS), \
 		( \
@@ -38,7 +38,7 @@ tmp-link:
 
 clean:
 	@echo "Removing all subdriectory named [bin] or [obj] or [.vs] on [`pwd`].."
-	-@rm -rf .vs *.idea
+	-@rm -rf .vs/* *.idea
 	-@rm -rf /c/Users/kwak/.nuget/packages/dual*
 	-@find . -type d \( -name "bin" -o -name "obj" \) -exec rm -rf {} +
 	make dotnet-restore

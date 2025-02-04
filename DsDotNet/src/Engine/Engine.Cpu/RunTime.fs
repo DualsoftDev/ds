@@ -47,7 +47,7 @@ module RunTimeModule =
 
 
 
-            if RuntimeDS.Package.IsPackageSIM() then
+            if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
                 systems.Iter(fun sys-> cpuSimOn(sys))
 
 
@@ -176,14 +176,7 @@ type DsCpuExt  =
     [<Extension>]
     static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig): Runtime =
 
-        RuntimeDS.HwIP <- modelCnf.HwIP 
-        RuntimeDS.HwDriver <- HwDriveTargetExtensions.fromString modelCnf.HwDriver
-        RuntimeDS.RuntimeMotionMode <- modelCnf.RuntimeMotionMode
-        RuntimeDS.TimeSimutionMode <- modelCnf.TimeSimutionMode
-        RuntimeDS.TimeoutCall <- modelCnf.TimeoutCall
-        RuntimeDS.Package <- modelCnf.RuntimePackage
-
-
+        RuntimeDS.ModelConfig <- modelCnf
         dsSys.GetCallVertices()
              .Where(fun f-> f.CallTime.IsDefault)
              .Iter(fun f-> f.CallTime.TimeOut <- Some modelCnf.TimeoutCall)

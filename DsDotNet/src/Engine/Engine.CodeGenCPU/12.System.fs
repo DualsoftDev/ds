@@ -21,7 +21,7 @@ type DsSystem with
                 yield (activeSys._emg_btn.Expr   , aOff) --| (flow.emg_btn,    fn)
                 yield (activeSys._test_btn.Expr  , aOff) --| (flow.test_btn,   fn)
 
-                if RuntimeDS.Package.IsPCorPCSIM() then //PLC는  E2_PLCOnly 에서 처리중
+                if RuntimeDS.ModelConfig.RuntimePackage.IsPCorPCSIM() then //PLC는  E2_PLCOnly 에서 처리중
                     yield (activeSys._home_btn.Expr  , aOff) --| (flow.home_btn,   fn)
                     yield (activeSys._clear_btn.Expr , aOff) --| (flow.clear_btn,  fn)
                     yield (activeSys._ready_btn.Expr , aOff) --| (flow.ready_btn,  fn)

@@ -250,7 +250,7 @@ module ConvertCPU =
 
                 updateSourceTokenOrder sys
 
-                if not(RuntimeDS.Package.IsPackageSIM())
+                if not(RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM())
                 then
                     checkNullAddress sys
                     checkErrHWItem(sys)
@@ -274,10 +274,10 @@ module ConvertCPU =
                     yield! sys.B2_SWButtonOutput()
                     yield! sys.B4_SWModeLamp()
 
-                    if RuntimeDS.Package.IsPLCorPLCSIM() then
+                    if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM() then
                         yield! sys.E2_PLCOnly()
 
-                    if RuntimeDS.Package.IsPackageSIM() then
+                    if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
                         yield! emulationDevice sys
 
                     yield! sys.Y1_SystemBtnForFlow(sys)

@@ -15,7 +15,7 @@ namespace OPC.DSClient
     {
         #region Private Fields
         private readonly ApplicationConfiguration m_configuration;
-        private Session m_session;
+        private Session? m_session;
         private bool m_connectedOnce;
         #endregion
 
@@ -40,7 +40,7 @@ namespace OPC.DSClient
             ConnectServerCTRL.Connect();
         }
 
-    
+
         #endregion
 
         #region Event Handlers
@@ -108,14 +108,22 @@ namespace OPC.DSClient
         {
             SafeExecute(() =>
             {
-                var helpPath = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "WebHelp", "overview_-_reference_client.htm");
-                System.Diagnostics.Process.Start(helpPath);
+                var executablePath = Path.GetDirectoryName(Application.ExecutablePath);
+                if (executablePath != null)
+                {
+                    var helpPath = Path.Combine(executablePath, "WebHelp", "overview_-_reference_client.htm");
+                    System.Diagnostics.Process.Start(helpPath);
+                }
+                else
+                {
+                    throw new InvalidOperationException("Executable path is null.");
+                }
             });
         }
         #endregion
 
         #region Private Fields
-        
+
         private void SafeExecute(Action action)
         {
             try

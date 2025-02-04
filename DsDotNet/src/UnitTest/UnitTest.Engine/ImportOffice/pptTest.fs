@@ -29,7 +29,7 @@ module PptTestModule =
         inherit EngineTestBaseClass()
 
         do
-            RuntimeDS.Package <- PCSIM
+            RuntimeDS.ChangeRuntimePackage(PCSIM)
 
         [<Test>] member __.``System  test``    () = check (ImportPpt.GetDSFromPptWithLib ($"{testpptPath}/T1_System.pptx",false, pptParms, modelConfig))
         [<Test>] member __.``Flow  test``      () = check (ImportPpt.GetDSFromPptWithLib ($"{testpptPath}/T2_Flow.pptx",false, pptParms, modelConfig))

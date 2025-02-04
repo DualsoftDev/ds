@@ -17,11 +17,11 @@ open System.Text.Json.Serialization
 module RuntimeTestCommon =
 
     let getRuntimeModelForSim(pptPath) =
-        RuntimeDS.Package <- PCSIM
+        RuntimeDS.ChangeRuntimePackage(PCSIM)
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
         let modelConfig = createDefaultModelConfig() 
-        let newCng = { modelConfig with HwDriver = pptParms.HwTarget.HwDrive.ToString()}
+        let newCng = { modelConfig with HwDriver = pptParms.HwTarget.HwDrive}
 
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms, newCng)
         let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.Platform)

@@ -109,33 +109,107 @@ module RuntimeGeneratorModule =
         | WINDOWS-> ExternalTempMemory+($"{index/8}.{index%8}")
         | _ -> failwithlog $"{target} not support"
 
+    //type RuntimeDS() =
+    //    static let mutable runtimePackage = PCSIM
+    //    static let packageChangedSubject = new Subject<RuntimePackage>()
+    //    static let mutable dsSystem: ISystem option = None
+    //    static let mutable runtimeMotionMode = RuntimeMotionMode.MotionSync
+    //    static let mutable timeSimutionMode = TimeSimutionMode.TimeX1
+    //    static let mutable callTimeout = 15000u
+    //    static let mutable emulationAddress = ""
+
+    //    static member val HwIP = "192.168.9.100" with get, set
+    //    static member val HwDriver = HwDriveTarget.LS_XGK_IO with get, set //PC 제어시 Hw maker 별 이름 (지금은 LS 태그타입 구분용)
+
+    //    static member val TimeoutCall = callTimeout  with get, set
+    //    static member val EmulationAddress = emulationAddress  with get, set
+    //    static member val RuntimeMotionMode = runtimeMotionMode  with get, set
+    //    static member val TimeSimutionMode = timeSimutionMode  with get, set
+
+    //    static member Package
+    //        with get() = runtimePackage
+    //        and set v =
+    //            runtimePackage <- v
+    //            packageChangedSubject.OnNext(v)
+
+    //    static member PackageChangedSubject = packageChangedSubject
+
+    //    static member val System = dsSystem with get, set
+    
+    //type ConfigDS = {
+    //    Package: RuntimePackage
+    //    HwIP: string
+    //    HwDriver: HwDriveTarget
+    //    TimeoutCall: uint32
+    //    EmulationAddress: string
+    //    RuntimeMotionMode: RuntimeMotionMode
+    //    TimeSimutionMode: TimeSimutionMode
+    //}
+    //let defaultConfigDS = { 
+    //    Package = PCSIM
+    //    HwIP = "192.168.9.100"
+    //    HwDriver = HwDriveTarget.LS_XGK_IO
+    //    TimeoutCall = 15000u
+    //    EmulationAddress = ""
+    //    RuntimeMotionMode = RuntimeMotionMode.MotionSync
+    //    TimeSimutionMode = TimeSimutionMode.TimeX1
+    //}
+    type ModelConfig = {
+        DsFilePath: string
+        HwIP: string
+        RuntimePackage: RuntimePackage
+        PlatformTarget: PlatformTarget
+        HwDriver: HwDriveTarget //LS-XGI, LS-XGK, Paix hw drive 이름
+        RuntimeMotionMode: RuntimeMotionMode
+        TimeSimutionMode : TimeSimutionMode
+        TimeoutCall : uint32
+    }
+
+
+
+    let createDefaultModelConfig() =
+        { 
+            DsFilePath = ""
+            HwIP = "127.0.0.1"
+            RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
+            PlatformTarget = WINDOWS
+            HwDriver = HwDriveTarget.LS_XGK_IO
+            RuntimeMotionMode = MotionAsync
+            TimeSimutionMode = TimeX1
+            TimeoutCall = 15000u
+        }
+    let createDefaultModelConfigWithHwDriver(hwDriver: HwDriveTarget) =
+        { createDefaultModelConfig() with HwDriver = hwDriver }
+    let createModelConfigWithSimMode(config: ModelConfig, package:RuntimePackage) =
+        { config with RuntimePackage = package }
+
+    let createModelConfig(path:string, hwIP:string, runtimePackage:RuntimePackage,
+            platformTarget:PlatformTarget, 
+            hwDriver:HwDriveTarget, 
+            runtimeMotionMode:RuntimeMotionMode, 
+            timeSimutionMode:TimeSimutionMode, 
+            timeoutCall:uint32) =
+        { 
+            DsFilePath = path
+            HwIP = hwIP
+            RuntimePackage = runtimePackage
+            PlatformTarget = platformTarget
+            HwDriver = hwDriver
+            RuntimeMotionMode = runtimeMotionMode
+            TimeSimutionMode = timeSimutionMode
+            TimeoutCall = timeoutCall
+        }
+    let createModelConfigReplacePath (cfg:ModelConfig, path:string) =
+        { cfg with DsFilePath = path }
+    let createModelConfigReplacePackage (cfg:ModelConfig, runtimePackage:RuntimePackage) =
+        { cfg with RuntimePackage = runtimePackage }
+
     type RuntimeDS() =
-        static let mutable runtimePackage = PCSIM
-        static let packageChangedSubject = new Subject<RuntimePackage>()
-        static let mutable dsSystem: ISystem option = None
-        static let mutable runtimeMotionMode = RuntimeMotionMode.MotionSync
-        static let mutable timeSimutionMode = TimeSimutionMode.TimeX1
-        static let mutable callTimeout = 15000u
-        static let mutable emulationAddress = ""
-
-        static member val HwIP = "192.168.9.100" with get, set
-        static member val HwDriver = HwDriveTarget.LS_XGK_IO with get, set //PC 제어시 Hw maker 별 이름 (지금은 LS 태그타입 구분용)
-
-        static member val TimeoutCall = callTimeout  with get, set
-        static member val EmulationAddress = emulationAddress  with get, set
-        static member val RuntimeMotionMode = runtimeMotionMode  with get, set
-        static member val TimeSimutionMode = timeSimutionMode  with get, set
-
-        static member Package
-            with get() = runtimePackage
-            and set v =
-                runtimePackage <- v
-                packageChangedSubject.OnNext(v)
-
-        static member PackageChangedSubject = packageChangedSubject
-
-        static member val System = dsSystem with get, set
-
+        static member val System : ISystem option = None with get, set
+        static member val ModelConfig : ModelConfig = createDefaultModelConfig() with get, set
+        static member val EmulationAddress : string = "" with get, set
+        static member ChangeRuntimePackage(package:RuntimePackage) =
+            RuntimeDS.ModelConfig <- createModelConfigWithSimMode(RuntimeDS.ModelConfig, package) 
 
     let getFullSlotHwSlotDataTypes() =
         let hw =

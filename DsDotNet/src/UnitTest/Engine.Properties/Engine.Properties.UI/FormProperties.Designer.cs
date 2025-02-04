@@ -33,9 +33,9 @@ namespace DSModeler
             menuStrip1 = new MenuStrip();
             fileToolStripMenuItem = new ToolStripMenuItem();
             openToolStripMenuItem = new ToolStripMenuItem();
-            propertyGrid1 = new PropertyGrid();
             exportJsonToolStripMenuItem = new ToolStripMenuItem();
             importJsonToolStripMenuItem = new ToolStripMenuItem();
+            propertyGrid1 = new PropertyGrid();
             ((System.ComponentModel.ISupportInitialize)splitContainer1).BeginInit();
             splitContainer1.Panel1.SuspendLayout();
             splitContainer1.Panel2.SuspendLayout();
@@ -57,16 +57,15 @@ namespace DSModeler
             // splitContainer1.Panel2
             // 
             splitContainer1.Panel2.Controls.Add(propertyGrid1);
-            splitContainer1.Size = new Size(800, 450);
+            splitContainer1.Size = new Size(800, 397);
             splitContainer1.SplitterDistance = 266;
             splitContainer1.TabIndex = 0;
             // 
             // treeView1
             // 
-            treeView1.Dock = DockStyle.Fill;
-            treeView1.Location = new Point(0, 25);
+            treeView1.Location = new Point(0, 21);
             treeView1.Name = "treeView1";
-            treeView1.Size = new Size(266, 425);
+            treeView1.Size = new Size(266, 376);
             treeView1.TabIndex = 0;
             // 
             // menuStrip1
@@ -75,7 +74,7 @@ namespace DSModeler
             menuStrip1.Items.AddRange(new ToolStripItem[] { fileToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(266, 25);
+            menuStrip1.Size = new Size(266, 24);
             menuStrip1.TabIndex = 1;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -83,43 +82,43 @@ namespace DSModeler
             // 
             fileToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { openToolStripMenuItem, exportJsonToolStripMenuItem, importJsonToolStripMenuItem });
             fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            fileToolStripMenuItem.Size = new Size(39, 21);
+            fileToolStripMenuItem.Size = new Size(37, 20);
             fileToolStripMenuItem.Text = "File";
             // 
             // openToolStripMenuItem
             // 
             openToolStripMenuItem.Name = "openToolStripMenuItem";
-            openToolStripMenuItem.Size = new Size(198, 24);
+            openToolStripMenuItem.Size = new Size(137, 22);
             openToolStripMenuItem.Text = "Open (F4)";
             openToolStripMenuItem.Click += OpenToolStripMenuItem_Click;
-            // 
-            // propertyGrid1
-            // 
-            propertyGrid1.Dock = DockStyle.Fill;
-            propertyGrid1.Location = new Point(0, 0);
-            propertyGrid1.Name = "propertyGrid1";
-            propertyGrid1.Size = new Size(530, 450);
-            propertyGrid1.TabIndex = 0;
             // 
             // exportJsonToolStripMenuItem
             // 
             exportJsonToolStripMenuItem.Name = "exportJsonToolStripMenuItem";
-            exportJsonToolStripMenuItem.Size = new Size(198, 24);
+            exportJsonToolStripMenuItem.Size = new Size(137, 22);
             exportJsonToolStripMenuItem.Text = "Export Json";
             exportJsonToolStripMenuItem.Click += exportJsonToolStripMenuItem_Click;
             // 
             // importJsonToolStripMenuItem
             // 
             importJsonToolStripMenuItem.Name = "importJsonToolStripMenuItem";
-            importJsonToolStripMenuItem.Size = new Size(198, 24);
+            importJsonToolStripMenuItem.Size = new Size(137, 22);
             importJsonToolStripMenuItem.Text = "Import Json";
             importJsonToolStripMenuItem.Click += importJsonToolStripMenuItem_Click;
             // 
+            // propertyGrid1
+            // 
+            propertyGrid1.Dock = DockStyle.Fill;
+            propertyGrid1.Location = new Point(0, 0);
+            propertyGrid1.Name = "propertyGrid1";
+            propertyGrid1.Size = new Size(530, 397);
+            propertyGrid1.TabIndex = 0;
+            // 
             // FormProperties
             // 
-            AutoScaleDimensions = new SizeF(7F, 17F);
+            AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(800, 397);
             Controls.Add(splitContainer1);
             MainMenuStrip = menuStrip1;
             Name = "FormProperties";

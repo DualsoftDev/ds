@@ -54,7 +54,7 @@ module MSG_TEST =
     let ``MSG_XGT`` () =
         let testXGT() =
             MSG_GENIOLIST.Do(testPath, false)|> Assert.True
-            MSG_GENLSPLC.Do(testPath, "", false)|> Assert.True
+            MSG_GENLSPLC.Do(testPath, false)|> Assert.True
             MSG_TIMECHART.Do(testPath, false)|> Assert.True
 
             //test ahn simulation 로딩 테스트 다른방식 사용필요

@@ -201,7 +201,7 @@ module XgxFixtures =
         [<SetUp>]
         member x.Setup () =
             RuntimeDS.System <- Some sys
-            RuntimeDS.Package <- RuntimePackage.PLCSIM
+            RuntimeDS.ChangeRuntimePackage(RuntimePackage.PLCSIM)
 
 
         [<TearDown>]

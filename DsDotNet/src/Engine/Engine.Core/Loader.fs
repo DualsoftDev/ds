@@ -1,62 +1,34 @@
-namespace rec Engine.Core
+namespace Engine.Core
 
 open System.IO
 open System.Linq
 open Newtonsoft.Json
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
+open System.Collections.Generic
+
 
 [<AutoOpen>]
-module ModelLoaderModule =
-    type ModelConfig = {
-        DsFilePath: string
-        HwIP: string
-        RuntimePackage: RuntimePackage
-        HwDriver: string //LS-XGI, LS-XGK, Paix hw drive 이름
-        RuntimeMotionMode: RuntimeMotionMode
-        TimeSimutionMode : TimeSimutionMode
-        TimeoutCall : uint32
+module LoaderModule =
+
+
+    type LibraryConfig = {
+        ///parent 시스템에서 사용한 Lib버전과 현재 설치된 Lib 버전은 항상 같아야 한다
+        Version: string
+        ///Api 이름 중복을 막기위해 Dictionary 처리
+        LibraryInfos: Dictionary<string, string> //Api, filePath
     }
 
-    type Model = {
-        Config: ModelConfig
-        System : DsSystem
-        LoadingPaths : string list
-    }
-
-    let createDefaultModelConfig() =
-        { 
-            DsFilePath = ""
-            HwIP = "127.0.0.1"
-            RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
-            HwDriver = "LS_XGK_IO"
-            RuntimeMotionMode = MotionAsync
-            TimeSimutionMode = TimeX1
-            TimeoutCall = 15000u
-        }
-    let createModelConfig(path:string, hwIP:string, runtimePackage:RuntimePackage,
-            hwDriver:string, 
-            runtimeMotionMode:RuntimeMotionMode, 
-            timeSimutionMode:TimeSimutionMode, 
-            timeoutCall:uint32) =
-        { 
-            DsFilePath = path
-            HwIP = hwIP
-            RuntimePackage = runtimePackage
-            HwDriver = hwDriver
-            RuntimeMotionMode = runtimeMotionMode
-            TimeSimutionMode = timeSimutionMode
-            TimeoutCall = timeoutCall
-        }
-    let createModelConfigReplacePath (cfg:ModelConfig, path:string) =
-        { cfg with DsFilePath = path }
-    let createModelConfigReplacePackage (cfg:ModelConfig, runtimePackage:RuntimePackage) =
-        { cfg with RuntimePackage = runtimePackage }
-
-[<AutoOpen>]
-[<RequireQualifiedAccess>]
-module ModelLoader =
     let private jsonSettings = JsonSerializerSettings()
+
+    let LoadLibraryConfig (path: string) =
+        let json = File.ReadAllText(path)
+        JsonConvert.DeserializeObject<LibraryConfig>(json, jsonSettings)
+
+    let SaveLibraryConfig (path: string) (libraryConfig:LibraryConfig) =
+        let json = JsonConvert.SerializeObject(libraryConfig, Formatting.Indented, jsonSettings)
+        File.WriteAllText(path, json)
+
 
     let LoadConfig (path: string) =
         let json = File.ReadAllText(path)
@@ -66,11 +38,12 @@ module ModelLoader =
         let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
         File.WriteAllText(path, json)
 
+
     let SaveConfigWithPath (path: string) (cfg: ModelConfig) =
         SaveConfig path cfg
         path
 
-    let exportLoadedSystem (s: LoadedSystem) =
+    let ExportLoadedSystem (s: LoadedSystem) =
 
         let absFilePath =  PathManager.changeExtension (s.AbsoluteFilePath.ToFile())  "ds"
         let dsFile = absFilePath.ToFile()
@@ -86,11 +59,18 @@ module ModelLoader =
 
         absFilePath
 
+    type Model = {
+        Config: ModelConfig
+        System : DsSystem
+        LoadingPaths : string list
+    }
+        
 
 [<AutoOpen>]
 [<Extension>]
-type ModelLoaderExt =
+type LoaderExt =
 
+  
 
     [<Extension>]
     static member ExportToDS (sys:DsSystem, dsFilePath:string) =
@@ -98,8 +78,8 @@ type ModelLoaderExt =
 
         for s in sys.GetRecursiveLoadeds() do
             match s with
-            | :? Device -> exportLoadedSystem s |> ignore
-            | :? ExternalSystem -> exportLoadedSystem s |> ignore
+            | :? Device -> ExportLoadedSystem s |> ignore
+            | :? ExternalSystem -> ExportLoadedSystem s |> ignore
             | _ -> ()
 
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))

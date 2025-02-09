@@ -112,6 +112,7 @@ module RuntimeGeneratorModule =
     type ModelConfig = {
         DsFilePath: string
         HwIP: string
+        UsingOPC: bool
         RuntimePackage: RuntimePackage
         PlatformTarget: PlatformTarget
         HwDriver: HwDriveTarget //LS-XGI, LS-XGK, Paix hw drive 이름
@@ -124,6 +125,7 @@ module RuntimeGeneratorModule =
         { 
             DsFilePath = ""
             HwIP = "127.0.0.1"
+            UsingOPC = false
             RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
             PlatformTarget = WINDOWS
             HwDriver = HwDriveTarget.LS_XGK_IO
@@ -136,7 +138,10 @@ module RuntimeGeneratorModule =
     let createModelConfigWithSimMode(config: ModelConfig, package:RuntimePackage) =
         { config with RuntimePackage = package }
 
-    let createModelConfig(path:string, hwIP:string, runtimePackage:RuntimePackage,
+    let createModelConfig(path:string,
+            hwIP:string, 
+            usingOPC:bool, 
+            runtimePackage:RuntimePackage,
             platformTarget:PlatformTarget, 
             hwDriver:HwDriveTarget, 
             runtimeMotionMode:RuntimeMotionMode, 
@@ -145,6 +150,7 @@ module RuntimeGeneratorModule =
         { 
             DsFilePath = path
             HwIP = hwIP
+            UsingOPC = usingOPC
             RuntimePackage = runtimePackage
             PlatformTarget = platformTarget
             HwDriver = hwDriver

@@ -136,3 +136,16 @@ module ObjectHolderTestModule =
             |> JsonConvert.DeserializeObject<ObjectHolder>
             |> (fun x -> x.GetValue().GetType())
              === typeof<uint64>
+
+        [<Test>]
+        member _.ObjectHolderTypeTest() =
+            ObjectHolder.Create(typedefof<uint64>,  null).Type.ToSystemType() === typeof<uint64>
+            ObjectHolder.Create(typedefof<int64>,   null).Type.ToSystemType() === typeof<int64>
+            ObjectHolder.Create(typedefof<uint32>,  null).Type.ToSystemType() === typeof<uint32>
+            ObjectHolder.Create(typedefof<int32>,   null).Type.ToSystemType() === typeof<int32>
+            ObjectHolder.Create(typedefof<uint16>,  null).Type.ToSystemType() === typeof<uint16>
+            ObjectHolder.Create(typedefof<int16>,   null).Type.ToSystemType() === typeof<int16>
+            ObjectHolder.Create(typedefof<bool>,    null).Type.ToSystemType() === typeof<bool>
+            ObjectHolder.Create(typedefof<char>,    null).Type.ToSystemType() === typeof<char>
+            ObjectHolder.Create(typedefof<byte>,    null).Type.ToSystemType() === typeof<byte>
+

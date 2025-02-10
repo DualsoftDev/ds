@@ -16,29 +16,36 @@
                 "file": "Others/Powerpoint Addin's.md",
                 "mode": "source",
                 "source": false
-              }
+              },
+              "icon": "lucide-file",
+              "title": "Powerpoint Addin's"
             }
           },
           {
             "id": "4da6d47efee0d28b",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "Engine.Core/DsSystem.md",
-                "mode": "source",
-                "source": false
-              }
+              "type": "empty",
+              "state": {},
+              "icon": "lucide-file",
+              "title": "New tab"
             }
           },
           {
             "id": "b21145a5e7e0785a",
             "type": "leaf",
             "state": {
-              "type": "release-notes",
+              "type": "canvas",
               "state": {
-                "currentVersion": "1.6.3"
-              }
+                "file": "Engine/Engine.Core/FQDN.canvas",
+                "viewState": {
+                  "x": -162.03887276690944,
+                  "y": 133.06638522742975,
+                  "zoom": -0.12332071660761079
+                }
+              },
+              "icon": "lucide-layout-dashboard",
+              "title": "FQDN"
             }
           }
         ],
@@ -61,8 +68,11 @@
             "state": {
               "type": "file-explorer",
               "state": {
-                "sortOrder": "alphabetical"
-              }
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
             }
           },
           {
@@ -77,7 +87,9 @@
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical"
-              }
+              },
+              "icon": "lucide-search",
+              "title": "Search"
             }
           },
           {
@@ -85,7 +97,9 @@
             "type": "leaf",
             "state": {
               "type": "bookmarks",
-              "state": {}
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
             }
           }
         ]
@@ -108,7 +122,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "Engine.Core/DsSystem.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -116,7 +129,9 @@
                 "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks"
             }
           },
           {
@@ -125,10 +140,11 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "Engine.Core/DsSystem.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
-              }
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links"
             }
           },
           {
@@ -138,8 +154,12 @@
               "type": "tag",
               "state": {
                 "sortOrder": "frequency",
-                "useHierarchy": true
-              }
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
             }
           },
           {
@@ -148,8 +168,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Engine.Core/DsSystem.md"
-              }
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline"
             }
           }
         ]
@@ -171,6 +195,10 @@
   },
   "active": "b21145a5e7e0785a",
   "lastOpenFiles": [
+    "Engine/Engine.Core/DsSystem.md",
+    "Engine/Engine.Core/DsCPU.md",
+    "Engine/Engine.Core/Core Dll hierarchy.canvas",
+    "Engine/Engine.Core/Core 자료 구조.md",
     "Engine.Core/Untitled.canvas",
     "Engine.Core/DsSystem.md",
     "Engine.Core/DsCPU.md",
@@ -204,12 +232,9 @@
     "IOHub/PLC, Field IO.md",
     "IOHub/Notification.md",
     "IOHub/IOHub.md",
-    "IOHub/IO Spec/IO Spec.md",
-    "IOHub/IO Spec/IO settings json.md",
     "Engine.Core",
     "DsWebServer",
     "Stat/Database/Schema.canvas",
-    "Stat/Architecture.canvas",
     "QuerySet",
     "Stat/개발 concepts",
     "Stat/Database/Tables",

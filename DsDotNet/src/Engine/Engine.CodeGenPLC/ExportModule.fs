@@ -122,8 +122,6 @@ module ExportModule =
                     EnableXmlComment = enableXmlComment
 
                     RungCounter = counterGenerator 0
-                    //XGI 초기값 때문에 M 사용 XGK는 R 사용 => M 영역으로 통일
-                    //MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator (if plcType = XGI then "M" else "R") (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                     MemoryAllocatorSpec = AllocatorFunctions(createMemoryAllocator "M" (startMemory, 640 * 1024) usedByteIndices  plcType) // 640K M memory 영역
                     TimerCounterGenerator = counterGeneratorWithExclusionList startTimer usedByteIndices
                     CounterCounterGenerator = counterGeneratorWithExclusionList startCounter usedByteIndices
@@ -187,11 +185,11 @@ module ExportModule =
                 //use _ = DcLogger.CreateTraceEnabler()
                 let globalStorage = new Storages()
                 let localStorage = new Storages()
-                let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray() //startMemory 구하기 위해 ToArray로 미리 처리
 
-
-                //삭제  => XgxGenerationParameters 사용
-                //let startMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정  
+                DsAddressModule.setMemoryIndex(startMemory)
+                let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray()
+                // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정  
+                let currentMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  
 
                 // Create a list to hold <C>ommented <S>tatement<S>
                 let css = [|
@@ -212,7 +210,7 @@ module ExportModule =
                     )
 
                 let xml, millisecond = duration (fun () ->
-                    generateXmlXGX platformTarget system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (startMemory, startTimer, startCounter) enableXmlComment )
+                    generateXmlXGX platformTarget system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (currentMemory, startTimer, startCounter) enableXmlComment )
 
                 forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 

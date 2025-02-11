@@ -311,8 +311,7 @@ module DsAddressModule =
             | _ -> failwithf $"Error ToPlatformTarget: {platformTarget}"
 
         getValidAddress(addr, dataType, name, isSkip, ioType, hwTarget)
-
-
+     
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) (target:HwTarget)=
         let inAddr  = getValidAddress(hwItem.InAddress,  hwItem.InDataType,  hwItem.Name, skipIn,  IOType.Memory, target)
         let outAddr = getValidAddress(hwItem.OutAddress, hwItem.OutDataType, hwItem.Name, skipOut, IOType.Memory, target)

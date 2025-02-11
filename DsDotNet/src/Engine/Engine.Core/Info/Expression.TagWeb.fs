@@ -12,7 +12,7 @@ module TagWebModule =
     [<AllowNullLiteral>]
     [<DebuggerDisplay("{Name}")>]
     type TagWeb(name:Name, value:obj, kind:int, kindDescription:string, message:string) =
-        let serializedObject = ObjectHolder.Create(value).Serialize()
+        let serializedObject = ObjectHolder.CreateFromObject(value).Serialize()
 
         new() = TagWeb("", "", 0, "", "")
         new(name, object, kind, kindDescription) = TagWeb(name, object, kind, kindDescription, "")
@@ -57,7 +57,7 @@ type TagWebExt =
     static member SetValue(x:TagWeb, value:obj) =
         if value = true then    // obj 이므로 '= true' 생략 못함
             debugfn $"Found true set value for {x.Name}"
-        x._SerializedObject <- ObjectHolder.Create(value).Serialize()
+        x._SerializedObject <- ObjectHolder.CreateFromObject(value).Serialize()
     [<Extension>]
     static member IsEqual(x:TagWeb, y:TagWeb) =
         x <> null && y <> null &&

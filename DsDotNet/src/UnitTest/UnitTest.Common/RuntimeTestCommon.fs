@@ -20,7 +20,7 @@ module RuntimeTestCommon =
         RuntimeDS.ChangeRuntimePackage(PCSIM)
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
-        let modelConfig = createDefaultModelConfig() 
+        let modelConfig = createDefaultModelConfig()
         let newCng = { modelConfig with HwDriver = pptParms.HwTarget.HwDrive}
 
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms, newCng)
@@ -39,6 +39,6 @@ module RuntimeTestCommon =
         let cleanExistingDb = true      //DB TAGKind 코드변경 반영하기 위해 이전 DB 있으면 삭제
         let queryCriteria = new QueryCriteria(commonAppSettings, -1, DateTime.Now.Date.AddDays(-1), Nullable<DateTime>());
         DbWriter.CreateAsync(queryCriteria, systems, cleanExistingDb).Wait()
-        let hasChangedVaules = DsSimulator.Do(runtimeModel.Cpu) 
+        let hasChangedVaules = DsSimulator.Do(runtimeModel.Cpu)
 
         runtimeModel, loggerDBSettings.ConnectionPath, hasChangedVaules

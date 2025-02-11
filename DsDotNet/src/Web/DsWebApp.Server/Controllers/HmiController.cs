@@ -85,7 +85,7 @@ public class HmiController(ServerGlobal global) : ControllerBaseWithLogger(globa
 
         // serializedObject : e.g "{\"RawValue\":false,\"Type\":1}"
         var objHolder = ObjectHolder.Deserialize(serializedObject);
-        var tagWeb = new TagWeb(fqdn, objHolder.RawValue, tagKind, kindDescriptions[tagKind]);
+        var tagWeb = new TagWeb(fqdn, objHolder.Value, tagKind, kindDescriptions[tagKind]);
 
         return await onTagWebChangedByClientBrowserAsync(tagWeb);
     }

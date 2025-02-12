@@ -102,6 +102,7 @@ module ErrID =
     let [<Literal>] _83 = "AutoPre 는 자신을 조건으로 사용불가 입니다."
     let [<Literal>] _84 = "Work 반복설정이 중복 정의 되었습니다."
     let [<Literal>] _85 = "AutoPre 전제조건은 디바이스 수량 및 속성 입력이 안됩니다."
+    let [<Literal>] _86 = "Work 외부에 있는 Action은 Start 타겟으로 연결이 불가능합니다.(조건으로만사용)"
 
     // IO Mapping Error (1001 ~ )
     let [<Literal>] _1001 = "시스템에 버튼 이름이 없습니다."

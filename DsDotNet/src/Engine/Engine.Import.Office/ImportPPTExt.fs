@@ -384,16 +384,23 @@ module ImportU =
 
                 let mei = ModelingEdgeInfo<Vertex>(srcs, edge.Causal.ToText(), tgts)
 
-                let srcNodes = mei.Sources.Select(fun s->s.GetPure().QualifiedName) |> Set.ofSeq
-                let tgtNodes = mei.Targets.Select(fun s->s.GetPure().QualifiedName) |> Set.ofSeq
-                let intersect = Set.intersect srcNodes tgtNodes
-
-
+    
                 match getParent (edge, parents, dicVertex) with
                 | Some(real) -> (real :?> Real).CreateEdge(mei)
                 | None ->
-                    if (tgts.OfType<Call>().Any ()) then
-                        edge.ConnectionShape.ErrorConnect(ErrID._44, srcs.First().Name, tgts.First().Name, edge.PageNum)
+                    //Action이 타겟으로 사용되었는지 체크
+                    let tryActionTargetErrorCheck () =
+                        match srcs |> Seq.tryHead, tgts |> Seq.tryHead with
+                        | Some src, Some tgt -> edge.ConnectionShape.ErrorConnect(ErrID._86, src.Name, tgt.Name, edge.PageNum)
+                        | _ -> ()
+
+                    match edge.IsStartEdge, tgts |> Seq.exists (fun tgt -> tgt :? Call), srcs |> Seq.exists (fun src -> src :? Call) with
+                    | true, true, _ -> tryActionTargetErrorCheck()
+                    | false, _, true -> tryActionTargetErrorCheck ()
+                    | _ -> 
+                        if (tgts.OfType<Call>().Any ()) then
+                            edge.ConnectionShape.ErrorConnect(ErrID._44, srcs.First().Name, tgts.First().Name, edge.PageNum)
+                
 
                     flow.CreateEdge(mei)
 

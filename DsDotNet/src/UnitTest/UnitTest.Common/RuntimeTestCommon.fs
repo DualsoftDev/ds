@@ -21,7 +21,7 @@ module RuntimeTestCommon =
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
         let modelConfig = createDefaultModelConfig() 
-        let newCng = { modelConfig with HwDriver = pptParms.HwTarget.HwDrive}
+        let newCng = { modelConfig with HwDriver = pptParms.HwTarget.HwDrive.ToString()}
 
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms, newCng)
         let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.Platform)

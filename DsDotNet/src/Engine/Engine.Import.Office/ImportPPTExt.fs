@@ -394,7 +394,7 @@ module ImportU =
                         | Some src, Some tgt -> edge.ConnectionShape.ErrorConnect(ErrID._86, src.Name, tgt.Name, edge.PageNum)
                         | _ -> ()
 
-                    match edge.IsStartEdge, tgts |> Seq.exists (fun tgt -> tgt :? Call), srcs |> Seq.exists (fun src -> src :? Call) with
+                    match not(edge.IsReverseEdge), tgts |> Seq.exists (fun tgt -> tgt :? Call), srcs |> Seq.exists (fun src -> src :? Call) with
                     | true, true, _ -> tryActionTargetErrorCheck()
                     | false, _, true -> tryActionTargetErrorCheck ()
                     | _ -> 

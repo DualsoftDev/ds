@@ -1,3 +1,6 @@
 [submodule "Submodules/nuget"]
 	path = Submodules/nuget
 	url = http://dualsoft.co.kr:8081/dualsoft/nuget.git
+	branch = bDS
+[submodule "Submodule/nuget"]
+	branch = bDS

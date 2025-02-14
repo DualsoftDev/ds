@@ -15,21 +15,13 @@
 		<Compile Include="..\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
     </ItemGroup>
 
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-		<ProjectReference Include="..\..\..\Submodules\nuget\Windows\Dual.Common.Winform\Dual.Common.Winform.csproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Core" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Winform" Version="0.5.1" />
-	</ItemGroup>
-
     <ItemGroup>
         <PackageReference Include="Microsoft.Msagl.GraphViewerGDI" Version="1.1.7" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+        <ProjectReference Include="..\..\nuget\Windows\Dual.Common.Winform\Dual.Common.Winform.csproj" />
         <ProjectReference Include="..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
         <ProjectReference Include="..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\Engine\Engine.Import.Office\Engine.Import.Office.fsproj" />

@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework Condition="'$(TargetFramework)' == ''">net7.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<NoWarn>$(NoWarn);CS1591</NoWarn> <!--Missing XML comment for publicly visible type or member-->
+
+		<PackageId>DualSoft-Web-Blazor-Server</PackageId>
+		<PackageTags>Server, Blazor, Web,Dual</PackageTags>
+		<Description>Dual.Web.Blazor.Server</Description>
+		<Title>Dual.Web.Blazor.Server</Title>
+		<Version>0.2.1</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+	</PropertyGroup>
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\Dual.Web.Blazor.Server.xml" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+	<ItemGroup>
+		<None Include="$(OutputPath)\Dual.Web.Blazor.Server.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+
+</Project>

@@ -1,0 +1,277 @@
+﻿@* CompChartJsPieBase *@
+@* https://www.youtube.com/watch?v=AoaR-mT4FTw *@
+
+@* 부모 container 가 반드시 position: relative; 이어야 한다. *@
+
+
+@code {
+        // Do not use property for _canvasId. It will be changed when re-rendering.
+    protected string CanvasId = "myChart" + Guid.NewGuid().ToString();
+    protected string TopLevelDivId = "myDiv" + Guid.NewGuid().ToString();
+
+    [Parameter] public string ChartType { get; set; } = "bar";    // 'bar', 'pie', ...
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string TitleColor { get; set; }
+    [Parameter] public string CenterText { get; set; } = String.Empty;
+    [Parameter] public string CenterTextColor { get; set; } = "#FF6384";
+    [Parameter] public string Cutout { get; set; } = "40%";     // % 없이 쓰면, 단순 pixel
+
+    [Parameter] public double Top { get; set; }    // px 단위
+    [Parameter] public double Left { get; set; }
+    [Parameter] public double Width { get; set; } = 200;
+    [Parameter] public double Height { get; set; } = 400;
+    [Parameter] public double Opacity { get; set; } = 1; // 투명도 (0.0 완전 투명 ~ 1.0 완전 불투명)
+
+
+    [Parameter] public string LegendPosition { get; set; }
+    [Parameter] public string[] Labels { get; set; }
+    [Parameter] public string[] BackgroundColor { get; set; }   // new string[] { "rgb(255, 99, 132)", "rgb(54, 162, 235)", "rgb(255, 205, 86)" }
+    [Parameter] public double[] Data { get; set; }
+
+    /// <summary>
+    /// Header 사용시, chart 의 위치가 header 사용분만큼 아래로 내려간다.
+    /// </summary>
+    [Parameter] public RenderFragment Header { get; set; }
+    [Parameter] public RenderFragment Footer { get; set; }
+
+
+    [Parameter] public EventCallback OnClick { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.Eval(_snippet);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            object options = new
+            {
+                MaintainAspectRation = true,
+                Cutout = Cutout,
+                Elements = new
+                {
+                    Center =
+                        Data.Any()
+                        ? new {
+                            Text = CenterText,
+                            Color = CenterTextColor,
+                            FontStyle = "Arial",
+                            SidePadding = 20,
+                            MinFontSize = 10,
+                            LineHeight = 25,}
+                        : null,
+                },
+                Plugins = new
+                {
+                    Title = new
+                    {
+                        Display = Title.NonNullAny(),
+                        Color = TitleColor ?? "black",
+                        Text = Title,
+                        Font = new { Size = 20, Weight = "bold", },
+                        // Padding = {Top = 20, Left}
+                    },
+                    Legend = new
+                    {
+                        Display = LegendPosition.NonNullAny(),
+                        Position = LegendPosition,
+                    },
+                },
+            };
+
+
+            await JsRuntime.InvokeVoidAsync("initChart", CanvasId, ChartType, Data, BackgroundColor, options, Labels);
+        }
+    }
+
+    string _snippet = @"
+        // Chart.register(ChartDataLabels);
+
+        window.initChart = function (chartId, chartType, data, backgroundColor, options, labels) {
+            const ctx = document.getElementById(chartId);
+            const myChart = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: backgroundColor,
+                        hoverOffset: 4,
+                        datalabels: {
+                            labels: {
+                                // index: {
+                                //     align: 'end',
+                                //     anchor: 'end',
+                                //     color: function (ctx) {
+                                //         return ctx.dataset.backgroundColor;
+                                //     },
+                                //     font: { size: 18 },
+                                //     formatter: function (value, ctx) {
+                                //         return ctx.active
+                                //             ? 'index'
+                                //             : '#' + (ctx.dataIndex + 1);
+                                //     },
+                                //     offset: 8,
+                                //     opacity: function (ctx) {
+                                //         return ctx.active ? 1 : 0.5;
+                                //     }
+                                // },
+                                name: {
+                                    align: 'top',
+                                    font: { size: 16 },
+                                    formatter: function (value, ctx) {
+                                        return ctx.active
+                                            ? 'name'
+                                            : ctx.chart.data.labels[ctx.dataIndex];
+                                    },
+                                    margin: 2,
+                                },
+                                value: {
+                                    align: 'center',    // left, top, right, bottom, center
+                                    backgroundColor: function (ctx) {
+                                        var value = ctx.dataset.data[ctx.dataIndex];
+                                        return value > 50 ? 'white' : null;
+                                    },
+                                    borderColor: 'white',
+                                    borderWidth: 2,
+                                    borderRadius: 4,
+                                    color: 'navy',
+                                    // color: function (ctx) {
+                                    //     var value = ctx.dataset.data[ctx.dataIndex];
+                                    //     return value > 50
+                                    //         ? ctx.dataset.backgroundColor
+                                    //         : 'white';
+                                    // },
+                                    formatter: function (value, ctx) {
+                                        return ctx.active
+                                            ? 'value'
+                                            : Math.round(value * 1000) / 1000;
+                                    },
+                                    padding: 2,
+                                    margin: 2,
+                                }
+                            },
+                        },
+                    }],
+                },
+                options: options,
+                plugins: [
+                    ChartDataLabels,
+                    {
+                        id: 'customPlugin',
+                        beforeDraw: beforeDraw,
+                    }],
+            });
+        };
+
+        window.beforeDraw = function (chart) {
+            if (chart.config.options.elements.center) {
+                // Get ctx from string
+                var ctx = chart.ctx;
+
+                // Get options from the center object in options
+                var centerConfig = chart.config.options.elements.center;
+                var fontStyle = centerConfig.fontStyle || 'Arial';
+                var txt = centerConfig.text;
+                var color = centerConfig.color || '#000';
+                var maxFontSize = centerConfig.maxFontSize || 75;
+                var sidePadding = centerConfig.sidePadding || 20;
+                var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2)
+                // Start with a base font of 30px
+                ctx.font = '30px ' + fontStyle;
+
+                // Get the width of the string and also the width of the element minus 10 to give it 5px side padding
+                var stringWidth = ctx.measureText(txt).width;
+                var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
+
+                // Find out how much the font can grow in width.
+                var widthRatio = elementWidth / stringWidth;
+                var newFontSize = Math.floor(30 * widthRatio);
+                var elementHeight = (chart.innerRadius * 2);
+
+                // Pick a new font size so it will not be larger than the height of label.
+                var fontSizeToUse = Math.min(newFontSize, elementHeight, maxFontSize);
+                var minFontSize = centerConfig.minFontSize;
+                var lineHeight = centerConfig.lineHeight || 25;
+                var wrapText = false;
+
+                if (minFontSize === undefined) {
+                    minFontSize = 20;
+                }
+
+                if (minFontSize && fontSizeToUse < minFontSize) {
+                    fontSizeToUse = minFontSize;
+                    wrapText = true;
+                }
+
+
+                // Set font settings to draw it correctly.
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
+                var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+                ctx.font = fontSizeToUse + 'px ' + fontStyle;
+                ctx.fillStyle = color;
+
+                if (!wrapText) {
+                    ctx.fillText(txt, centerX, centerY);
+                    return;
+                }
+
+                var words = txt.split(' ');
+                var line = '';
+                var lines = [];
+
+                // Break words up into multiple lines if necessary
+                for (var n = 0; n < words.length; n++) {
+                    var testLine = line + words[n] + ' ';
+                    var metrics = ctx.measureText(testLine);
+                    var testWidth = metrics.width;
+                    if (testWidth > elementWidth && n > 0) {
+                        lines.push(line);
+                        line = words[n] + ' ';
+                    } else {
+                        line = testLine;
+                    }
+                }
+
+                // Move the center up depending on line height and number of lines
+                centerY -= (lines.length / 2) * lineHeight;
+
+                for (var n = 0; n < lines.length; n++) {
+                    ctx.fillText(lines[n], centerX, centerY);
+                    centerY += lineHeight;
+                }
+                //Draw text in center
+                ctx.fillText(line, centerX, centerY);
+            }
+        };
+    ";
+}
+
+
+
+
+@*
+Samples
+<div style="position: relative;">
+    <CompChartJsPieStatic ChartType="pie"
+                 LegendPosition="right"
+                 DataSets="@([[200, 150, 150]])"
+                 Labels="@(["red", "blue", "green"])"
+                 BackgroundColor="@(["rgb(255, 99, 132)", "rgb(54, 162, 235)", "rgb(255, 205, 86)"])"
+                 Left="0" Width="150" Height="150" Opacity="0.5">
+    </CompChartJsPieStatic>
+
+    <CompChartJsPieStatic DataSets="@([[200, 150, 150]])"
+                 Labels="@(["red", "blue", "green"])"
+                 BackgroundColor="@(["rgb(255, 99, 132)", "rgb(54, 162, 235)", "rgb(255, 205, 86)"])"
+                 Left="300" Width="400" Height="400" Opacity="0.5">
+    </CompChartJsPieStatic>
+
+</div>
+
+*@

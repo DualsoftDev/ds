@@ -1,0 +1,53 @@
+@using System.Net
+@using Dual.Web.Blazor.Auth;
+@using Dual.Web.Blazor.Client.Auth
+@using Dual.Web.Blazor.ClientSide
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Net.Http.Json
+
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <div class="mb-3 text-center">
+            <h3>Add User</h3>
+        </div>
+        <div class="mb-3">
+            <label>User Name</label>
+            <input @bind="_userInfo.UserName" class="form-control" placeholder="User Name" />
+        </div>
+        <div class="mb-3">
+            <label>Password</label>
+            <input @bind="_userInfo.Password" type="password" class="form-control" placeholder="Password" />
+        </div>
+        <div class="mb-3 form-check">
+            <input type="checkbox" @bind="_userInfo.IsAdmin" class="form-check-input" />
+            <label class="form-check-label">Is Admin</label>
+        </div>
+        <div class="mb-3 d-grid gap-2">
+            <button @onclick="AddUser" class="btn btn-primary">Add User</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private UserAuthInfo _userInfo = new();
+
+    private async Task AddUser()
+    {
+        if (await AuthenticationStateProvider.SetAuthHeaderAsync(Http))
+        {
+            var response = await Http.PostAsJsonAsync<UserAuthInfo>("/api/auth/adduser", _userInfo);
+            Console.WriteLine($"Requesting Login: {_userInfo.UserName}/{_userInfo.Password} : {response.IsSuccessStatusCode}");
+
+            if (response.IsSuccessStatusCode)
+                await JsRuntime.InvokeVoidAsync("alert", "Succeeded add/update user.");
+            else
+            {
+                var anyError = await response.Content.ReadAsStringAsync();
+                var message = $"Failed to add/update user.\r\n{anyError}\r\nStatus code: {response.StatusCode}";
+                await JsRuntime.InvokeVoidAsync("alert", message);
+            }
+        }
+        else
+            await JsRuntime.InvokeVoidAsync("alert", "Not authorized!");
+    }
+}

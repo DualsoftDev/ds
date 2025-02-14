@@ -19,13 +19,9 @@
 		<Compile Include="LseXgt.fs" />
 	</ItemGroup>
 
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.5.1" />
-	</ItemGroup>
-
 	<ItemGroup>
+	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	  <ProjectReference Include="..\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
 	</ItemGroup>
 

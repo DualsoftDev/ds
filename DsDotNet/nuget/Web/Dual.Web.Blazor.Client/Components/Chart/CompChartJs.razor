@@ -1,0 +1,102 @@
+﻿@* CompChartJs *@
+
+@code {
+    [Parameter] public string ChartType { get; set; } = "bar";    // 'bar', 'pie', ...
+
+    [EditorRequired][Parameter] public object Data { get; set; }
+    [Parameter] public object Options { get; set; }
+    [Parameter] public object Plugins { get; set; } = new object[] {};
+    [Parameter] public string CanvasId { get; set; }
+    [Parameter] public ChartJsClickHandler ClickHandler { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.Eval(_snippet);
+        if (CanvasId.IsNullOrEmpty())
+            Console.Error.WriteLine("No CanvasId specified for ChartJS.");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("initializeChart", CanvasId, ChartType, Data, Options, Plugins, ClickHandler?.DotNetObjectReference);
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        Console.WriteLine($"------ CompChartJs.OnParametersSetAsync: updating chart");
+        await JsRuntime.InvokeVoidAsync("updateChart", CanvasId, ChartType, Data, Options, Plugins);
+    }
+
+
+    string _snippet = @"
+        if (window.chartJsObjects == null) {
+
+            console.log('-------- Initializing ChartJS objects');
+
+            /* 다음은 global scope 로, 모든 chart 에 적용된다.  개별 chart 에 적용하려면 chart plugin 에 추가.
+             * https://chartjs-plugin-datalabels.netlify.app/guide/getting-started.html#registration
+             */
+            //Chart.register(ChartDataLabels);
+
+            window.chartJsObjects = {};
+        };
+
+        window.initializeChart = function (chartId, chartType, data, options, plugins, dotNetHelper) {
+            const ctx = document.getElementById(chartId);
+            if (options?.enableDataLabel)
+                plugins.push(ChartDataLabels);
+
+            const myChart = new Chart(ctx, {
+                type: chartType,
+                data: data,
+                options: options,
+                plugins: plugins,
+            });
+
+            if (dotNetHelper != null)
+            {
+                console.log(`---- installing click handler with dotNetHelper: ${dotNetHelper}`);
+                ctx.onclick = function (evt) {
+                    console.log('---- Click detected');
+                    const item = myChart.getElementsAtEventForMode(
+                        evt,
+                        'nearest',
+                        { intersect: true },
+                        true
+                    );
+
+                    if (item.length > 0) {
+                        const idx = item[0].index;
+                        const datasetIndex = item[0].datasetIndex;
+                        const label = myChart.data.labels[idx];
+                        const value = myChart.data.datasets[datasetIndex].data[idx];
+                        dotNetHelper.invokeMethodAsync('Clicked', label, datasetIndex, idx, value);
+                    }
+                };
+            }
+            console.log('--------- ChartJS object initialized: ' + chartId);
+			window.chartJsObjects[chartId] = myChart;
+        };
+
+        window.updateChart = function (chartId, chartType, data, options, plugins) {
+            console.log(`---- ChartJS updating chart: ${chartId}`);
+            const chart = window.chartJsObjects[chartId];
+            if (chart == null) {
+                console.error(`---- ChartJS object not found: ${chartId}`);
+                return;
+            }
+            chart.type = chartType;
+            chart.data = data;
+            chart.options = options;
+            chart.plugins = plugins;
+			chart.update();
+        };
+    ";
+}
+

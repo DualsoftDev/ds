@@ -1,0 +1,19 @@
+﻿DONE - 연속 읽기(Block read) 구현
+
+DONE - 연속 읽기(Block read) 최적화 구현 : Clustering
+
+DONE - 개별 읽기(Random read) 최적화 구현
+	Tag set 에 bit, byte 등이 존재하고, 연속 읽기는 불가능하나,
+	최대 size 인 LWord 로 통합할 수 있는 경우의 최적화
+
+- 개별 쓰기 (Random write) 최적화 구현
+	현재 data 크기가 같은 것으로 16개씩 모아서 write
+	최적화는 구현되어 있지 않음.  최적화는 구현하지 않을 계획임.
+	Block write 시 중간에 빠지는 부분 있으면, 의미가 없음
+	LWord 로 모아 쓰기시에도 중간에 빠지는 부분 있으면, 의미가 없음.
+	
+- Timer/Counter 읽기 구현
+	* Timer/Counter 에서 Bit 지정은 접점값을 의미하고, Byte, word 값 지정은 현재값을 의미합니다.
+	* TW0 가 TX0 의 결과를 포함하지 않는다.  완전히 다른 값.
+		- TW0 는 Timer T0 의 word 현재값이고, TX0 는 Timer T0 의 ON/OFF 값이다.
+	* Scan/Clustering 시에 TX 나 CX 가 포함된 것이 있으면 완전히 따로 다루어야 한다.

@@ -1,0 +1,71 @@
+@page "/base/theme-switcher"
+
+@using Dual.Web.Blazor.Client.Theme
+<h3>PageThemeTest</h3>
+
+@* <CompThemeSwitcher Theme="@(Theme.BootstrapLumen)" @ref="_themeSwitcherRef" /> *@
+<CompThemeSwitcher @ref="_themeSwitcherRef" />
+
+<style>
+    .nav-pills .nav-link {
+        background: none;
+        border: 0;
+        border-radius: 0.25rem;
+    }
+
+        .nav-pills .nav-link.active,
+        .nav-pills .show > .nav-link {
+            color: #fff;
+            background-color: #0d6efd;
+        }
+
+    .nav-fill > .nav-link,
+    .nav-fill .nav-item {
+        flex: 1 1 auto;
+        text-align: center;
+    }
+</style>
+
+@if (_activeTheme != Theme.Undefined)
+{
+    <div id="settingsbar">
+        <nav id="themesMenu">
+            <ul class="nav nav-pills">
+                @foreach (var theme in Enum.GetValues(typeof(Theme)).Cast<Theme>().Except(new[] { Theme.Undefined }))
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(_activeTheme == theme ? "active" : "")"
+                           href="#"
+                           @onclick=@(async(e) => await changeTheme(theme))
+                        @onclick:preventDefault>
+                            <span class="image @theme.GetThemeName().ToLower().Replace(" ", "-")"
+                                  aria-hidden="true"></span>
+                            <span class="theme-name">@theme</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    </div>
+}
+
+
+
+@code {
+    CompThemeSwitcher _themeSwitcherRef;
+    Theme _activeTheme = Theme.Undefined;
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _activeTheme = await LocalStorage.GetItemAsync<Theme>("Theme");
+        if (_activeTheme == Theme.Undefined)
+            _activeTheme = Theme.DevExpressDark;
+        Console.WriteLine($"Active theme is {_activeTheme}");
+    }
+
+    async Task changeTheme(Theme theme)
+    {
+        await LocalStorage.SetItemAsync("Theme", theme);
+        await _themeSwitcherRef.ChangeTheme(theme);
+    }
+}

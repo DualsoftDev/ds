@@ -1,0 +1,62 @@
+@* <script>
+    function appendLink(href, id) {
+        const newThemeLink = document.createElement('link');
+        newThemeLink.id = id;
+        newThemeLink.href = href;
+        newThemeLink.rel = 'stylesheet';
+        document.head.appendChild(newThemeLink);
+    }
+    export function changeTheme(themeName) {
+
+        // 먼저 현재 테마를 제거합니다.
+        const themesToRemove = ['theme-style', 'theme-style2'];
+        themesToRemove.forEach(themeId => {
+            const existingThemeLink = document.getElementById(themeId);
+            if (existingThemeLink)
+                existingThemeLink.remove();
+        });
+
+        // 선택한 테마를 로드합니다.
+        const devExpressThemes = ['blazing-dark', 'blazing-berry', 'purple', 'office-white'];
+        // fix me!!!
+        if (devExpressThemes.includes(themeName))
+        {
+            const href = `_content/DevExpress.Blazor.Themes/${themeName}.bs5.css`
+            appendLink(href, 'theme-style');
+        }
+        else
+        {
+            const href1 = '_content/DevExpress.Blazor.Themes/bootstrap-external.bs5.min.css';
+            appendLink(href1, 'theme-style');
+
+            const href2 = `css/switcher-resources/themes/${themeName}/bootstrap.min.css`;
+            appendLink(href2, 'theme-style2');
+        }
+    }
+</script>
+ *@
+
+@inject DualWebBlazorJsInterop JsDual
+@inject ILocalStorageService localStorage
+
+@code {
+    [Parameter] public Theme Theme { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        if (Theme == Theme.Undefined)
+            Theme = await localStorage.GetItemAsync<Theme>("Theme");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+            await ChangeTheme(Theme);
+    }
+
+    public async Task ChangeTheme(Theme theme)
+    {
+        await JsDual.ChangeTheme(theme.GetThemeName());
+    }
+}

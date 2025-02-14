@@ -1,0 +1,2 @@
+- Dual.Common.Winform.DevX.24.1.4 를 Nuget packaging 실패
+  - 성공 할 때까지, Dual.Common.Winform* project 에서는 다른 Dual.Common 등의 Nuget packagge 를 참조하지 말 것.

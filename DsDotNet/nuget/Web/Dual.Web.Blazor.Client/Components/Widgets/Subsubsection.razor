@@ -1,0 +1,27 @@
+﻿@* Subsubsection *@
+
+<div class="subsubsection">
+    <h5>· @Title</h5>
+    @ChildContent
+</div>
+
+@code {
+    [Parameter]
+    public string Title { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+}
+
+
+<style>
+    .subsubsection {
+        margin-top: 5px;
+        margin-left: 40px;
+        padding: 5px;
+    }
+
+        .subsubsection h5 {
+            margin-top: 0;
+        }
+</style>

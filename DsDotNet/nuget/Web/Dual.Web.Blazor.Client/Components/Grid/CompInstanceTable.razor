@@ -1,0 +1,50 @@
+﻿@* 
+다음 구현과 비교해서 수정 필요
+https://youtu.be/jsWVIV5ykQM?list=PLgRlicSxjeMOwJyqendhcntDqEjCBncci&t=592
+ *@
+@using System.Reflection
+@typeparam TItem
+
+@if (_kvs != null)
+{
+    @* DxxGridBase 를 이용할 수 없음!! *@
+    <DxGrid Data="@_kvs">
+        <Columns>
+            <DxGridDataColumn FieldName="Key" />
+            <DxGridDataColumn FieldName="Value" />
+        </Columns>
+    </DxGrid>
+}
+
+@code {
+    public class KVItem
+    {
+        public string Key { get; set; }
+        public object Value { get; set; }
+    }
+    [EditorRequired][Parameter] public TItem Instance { get; set; }
+    KVItem[] _kvs { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+        await base.OnParametersSetAsync();
+        if (Instance == null)
+            return;
+        PropertyInfo[] propertyInfo = typeof(TItem).GetProperties();
+        var propertyNames = propertyInfo.Select(pi => pi.Name).ToArray();
+        _kvs = 
+            propertyInfo
+            .Select(pi => (pi.Name, pi.GetValue(Instance)))
+            .Where(kv => kv.Item2 != null)
+            .Select(kv => new KVItem() { Key = kv.Item1, Value = kv.Item2})
+            .ToArray();
+        Console.WriteLine("Done!!");
+    }
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     await base.OnInitializedAsync();
+    //     PropertyInfo[] propertyInfo = typeof(TItem).GetProperties();
+    //     var propertyNames = propertyInfo.Select(pi => pi.Name).ToArray();
+    //     _kvs = propertyInfo.Select(pi => new KVItem() { Key = pi.Name, Value = pi.GetValue(Instance) }).ToArray();
+    //     Console.WriteLine("Done!!");
+    // }
+}

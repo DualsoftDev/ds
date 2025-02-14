@@ -1,0 +1,53 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.8</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+
+    <RootNamespace>UnitTest.Nuget.Common.Net48</RootNamespace>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  	<NoWarn>NU1702</NoWarn>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+  	<NoWarn>NU1702</NoWarn>
+  </PropertyGroup>
+
+	<ItemGroup>
+    <Compile Include="PLCXGComm\LsXgx.XgComm.Common.fs" />
+    <Compile Include="PLCXGComm\LsXgi.XgComm.Test.fs" />
+    <Compile Include="PLCXGComm\LsXgk.XgComm.Test.fs" />
+  </ItemGroup>
+
+	<ItemGroup>
+	  <COMReference Include="XGCommLib">
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <VersionMinor>0</VersionMinor>
+	    <VersionMajor>1</VersionMajor>
+	    <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+	    <Lcid>0</Lcid>
+	    <Isolated>false</Isolated>
+	    <EmbedInteropTypes>true</EmbedInteropTypes>
+	  </COMReference>
+	</ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="NUnit" Version="4.2.2" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\PLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Interop.XGCommLib">
+      <HintPath>..\..\PLC\Dual.PLC.LS.XgCOM.FS\Interop.XGCommLib.dll</HintPath>
+      <Private></Private>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </Reference>
+  </ItemGroup>
+</Project>

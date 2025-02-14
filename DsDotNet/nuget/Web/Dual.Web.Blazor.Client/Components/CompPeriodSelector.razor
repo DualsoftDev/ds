@@ -1,0 +1,71 @@
+@* CompPeriodSelector *@
+
+@using System.ComponentModel
+
+@implements INotifyPropertyChanged
+
+<div style="display: flex; align-items: center;">
+    <span>
+        <DxCheckBox @bind-Checked="ShowTime">Show Time</DxCheckBox>
+    </span>
+    <span>&nbsp; ~ &nbsp;</span>
+    <span>
+        <label for="startDate" class="demo-text cw-320 mb-1">
+            &nbsp;시작:&nbsp;
+        </label>
+    </span>
+    <span>
+        <DxDateEdit @bind-Date="@StartDate"
+                    MinDate=MinDate
+                    TimeSectionVisible="@ShowTime"
+                    CssClass="@(ShowTime ? "cw-200": "cw-150")"
+                    InputId="startDate" />
+
+    </span>
+    <span>&nbsp; ~ &nbsp;</span>
+
+    <span>
+        <label for="finishDate" class="demo-text cw-320 mb-1">
+            종료:&nbsp;
+        </label>
+    </span>
+    <span>
+        <DxDateEdit @bind-Date="@EndDate"
+                    MaxDate=MaxDate
+                    TimeSectionVisible="@ShowTime"
+                    CssClass="@(ShowTime ? "cw-200": "cw-150")"
+                    InputId="finishDate" />
+    </span>
+    <span>&nbsp;&nbsp;&nbsp;</span>
+
+
+</div>
+
+
+@code {
+    #pragma warning disable 0067       // warning CS0067: The event 'PageDashboardMain.PropertyChanged' is never used                                                                                      
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    [Parameter] public bool ShowTime { get; set; }
+    [Parameter] public DateTime MinDate { get; set; } = DateTime.MinValue;
+    [Parameter] public DateTime MaxDate { get; set; } = DateTime.MaxValue;
+    [Parameter] public DateTime StartDate { get; set; }
+    [Parameter] public DateTime EndDate { get; set; }
+
+
+    [Parameter] public EventCallback<DateTime> StartDateChanged { get; set; }
+    [Parameter] public EventCallback<DateTime> EndDateChanged { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        PropertyChanged += async (s, e) =>
+        {
+            if (e.PropertyName == nameof(StartDate))
+                await StartDateChanged.InvokeAsync(StartDate);
+            else if (e.PropertyName == nameof(EndDate))
+                await EndDateChanged.InvokeAsync(EndDate);
+        };
+    }
+}

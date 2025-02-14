@@ -33,7 +33,7 @@ namespace OPC.DSClient
                 application.LoadApplicationConfiguration(false).Wait();
 
                 // check the application certificate.
-                var certOK = application.CheckApplicationInstanceCertificate(false, 0).Result;
+                var certOK = application.CheckApplicationInstanceCertificates(false, 0).Result;
                 if (!certOK)
                 {
                     throw new Exception("Application instance certificate invalid!");

@@ -1,0 +1,32 @@
+﻿// https://www.youtube.com/watch?v=6NoUo9Eq6lM
+@typeparam TElement
+
+@if (Elements == null)
+{
+    if (NullTemplate == null)
+    {
+        <text>Loading...</text>
+    }
+    else
+    {
+        @NullTemplate
+    }
+}
+else if (Elements.Count == 0)
+{
+    <text>No elements</text>
+}
+else
+{
+    @ChildContent
+}
+
+<div class="generic-list">
+@ChildContent
+</div>
+
+@code {
+    [Parameter] public List<TElement> Elements { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public RenderFragment NullTemplate { get; set; }
+}

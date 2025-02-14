@@ -1,0 +1,14 @@
+﻿XGK 로 읽기 (Block 읽기 1K 번 반복 평균 값)
+
+라즈베리파이3 / 2021-01-14
+	Average time for reading 2K bytes: 32.83007812 (ms)
+
+라즈베리파이4 유선 / 2021-01-16
+	Average time for reading 2K bytes:24.5703125 (ms)
+
+라즈베리파이4 무선 / 2021-01-16
+	Average time for reading 2K bytes:26.40527344 (ms)
+
+Desktop Ryzen-7 / 2021-01-16
+	Average time for reading 2K bytes:19.60839844 (ms)
+

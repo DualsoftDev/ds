@@ -1,0 +1,88 @@
+﻿@* Section *@
+
+<section class="section" id="@_sectionId">
+    <h3>■ @Title</h3>
+    @ChildContent
+    <br/><br/>
+</section>
+
+@code {
+    string _sectionId = $"section-{Guid.NewGuid()}";
+    [Parameter] public string Title { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        await JsDual.Eval(_snippet);
+        await JsRuntime.InvokeVoidAsync("addSectionToSidebar", _sectionId, Title);
+    }
+
+    string _snippet = @"
+        window.addSectionToSidebar = function(id, title) {
+            if (!window.sections) return;
+
+            window.sections.push({ id, title });
+            console.log(`current sections: ${window.sections}`); // 현재 섹션 정보 배열 상태 확인
+            updateSidebar();
+        };
+
+        window.updateSidebar = function () {
+            const sidebar = document.getElementById('sectionSidebar');
+            if (!sidebar) return;
+            if (!window.sections) return;
+
+            // 'X' 닫기 버튼이 사라지지 않도록, 기존 목록만 클리어합니다.
+            let list = sidebar.querySelector('ul');
+            list.innerHTML = '';
+
+            window.sections.forEach(section => {
+                const li = document.createElement('li');
+                const button = document.createElement('button'); // 버튼 요소 사용
+                button.textContent = section.title;
+                button.style.textDecoration = 'underline';
+                button.style.background = 'none';
+                button.style.border = 'none';
+                button.style.color = 'blue';
+                button.style.cursor = 'pointer';
+
+                // 마우스 오버 시 배경색 변경
+                button.addEventListener('mouseover', function() {
+                    button.style.color = 'var(--bs-body-bg)';
+                    button.style.backgroundColor = 'var(--bs-primary)';
+                });
+
+                // 마우스 아웃 시 배경색 원래대로
+                button.addEventListener('mouseout', function() {
+                    button.style.color = 'blue';
+                    button.style.background = 'none';
+                });
+
+                button.onclick = () => {
+                    const sectionElement = document.querySelector(`#${section.id}`);
+                    if (sectionElement) {
+                        sectionElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                };
+
+                li.appendChild(button);
+                list.appendChild(li);
+            });
+        };
+";
+}
+
+<style>
+    .section {
+        margin-bottom: 20px;
+        margin-left: 20px;
+        padding: 10px;
+    }
+
+        .section h3 {
+            margin-left: -20px;
+
+            font-weight: bold;
+            margin-top: 0;
+        }
+</style>

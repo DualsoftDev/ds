@@ -7,7 +7,7 @@
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
-		<OtherFlags>--warnon:1182</OtherFlags>
+		<NoWarn>$(NoWarn);NU1701;NU1702;CS8618;CS8601;CS8600;CS8602</NoWarn>
 	</PropertyGroup>
     <ItemGroup>
       <Compile Include="IoEventDS.fs" />

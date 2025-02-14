@@ -2,16 +2,15 @@ namespace IO.Core
 open System
 open IO.Core
 
-
-// { C# 에서 소화하기 쉬운 형태로 변환.  C# Result<'T, string> 형태로..
-
 [<AutoOpen>]
 module internal ZmqCsClient =
-    type CsResult<'T> = Dual.Common.Core.Result<'T, ErrorMessage>
-    let toResultCs (fsResult:TypedIOResult<'T>) =
+    type CsResult<'T> = Result<'T, ErrorMessage>
+
+    let toResultCs (fsResult: TypedIOResult<'T>) : CsResult<'T> =
         match fsResult with
-        | Ok r -> Dual.Common.Core.Result.Ok r
-        | Error e -> Dual.Common.Core.Result.Err e
+        | Ok r -> Ok r
+        | Error e -> Error e
+
 
 type CSharpClient(serverAddress:string) =
     inherit Client(serverAddress)

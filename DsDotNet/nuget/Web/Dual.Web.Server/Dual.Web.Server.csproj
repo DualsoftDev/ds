@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+	<PropertyGroup>
+		<TargetFramework Condition="'$(TargetFramework)' == ''">net7.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<!--<Nullable>enable</Nullable>-->
+		<NoWarn>$(NoWarn);CS1591</NoWarn> <!--Missing XML comment for publicly visible type or member-->
+		<OutputType>Library</OutputType>
+
+		<IsPackable>true</IsPackable>
+
+		<PackageId>DualSoft-Web-Server</PackageId>
+		<PackageTags>Server, Web,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Dual.Web.Server</Description>
+		<Title>Dual.Web.Server</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\Dual.Web.Server.xml" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="" />
+		<None Include="$(OutputPath)\Dual.Web.Server.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Readme.md" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.20" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Dual.Web.Blazor\Dual.Web.Blazor.csproj" />
+	</ItemGroup>
+
+</Project>

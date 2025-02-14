@@ -1,0 +1,20 @@
+﻿@* CompLegendItem *@
+
+@* <div class="dx-chart-legend-item" data-point="5953064a-fed0-4484-b4bb-c93825ddf3c8" data-series="0" tabindex="-1" data-dispose-id="63838743292947360"> *@
+<span class="dx-chart-legend-item">
+    <svg class="dx-chart-legend-icon">
+        <rect class="dx-chart-def-icon" width="100%" height="100%" style="fill: @Color; color: @Color;"></rect>
+    </svg>
+    <span class="dx-chart-legend-text">@Legend</span>
+</span>
+
+@code {
+    [Parameter] public string Color { get; set; }   // e.g "rgb(128, 0, 128)"
+    [Parameter] public string Legend { get; set; }
+
+    override protected void OnInitialized()
+    {
+        base.OnInitialized();
+        Color ??= "var(--bs-primary)";
+    }
+}

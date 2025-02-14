@@ -1,0 +1,96 @@
+﻿@* CompPeriodSelectorEx *@
+@using System.Diagnostics
+@implements INotifyPropertyChanged
+
+
+@* 
+<button @onclick=@(() => {
+    Console.WriteLine($"Current unit = {Unit}");
+})>Show current unit
+</button>
+ *@
+
+
+
+@if (!_loading)
+{
+    <div class="flex-container">
+        <CompPeriodSelector MinDate=@MinDate MaxDate=@MaxDate ShowTime=@ShowTime @bind-StartDate=@StartDate @bind-EndDate=@EndDate />
+        <div style="display: flex; align-items: center;">
+            <span>기간 조회 구분:</span>
+            <span>
+                <CompEnumSelector TEnum="PeriodUnit" @bind-Value="Unit" />
+            </span>
+        </div>
+    </div>
+}
+
+@code {
+    bool _loading = true;
+
+    [Parameter] public bool ShowTime { get; set; }
+    [Parameter] public DateTime StartDate { get; set; } = DateTime.Now.AddDays(-7);
+    [Parameter] public DateTime EndDate { get; set; } = DateTime.Now.AddDays(1);
+    [Parameter] public DateTime MinDate { get; set; } = DateTime.Now.AddMonths(-1);
+    [Parameter] public DateTime MaxDate { get; set; } = DateTime.Now.AddDays(1);
+
+
+    [Parameter] public EventCallback<DateTime> StartDateChanged { get; set; }
+    [Parameter] public EventCallback<DateTime> EndDateChanged { get; set; }
+    [Parameter] public PeriodUnit Unit { get; set; }
+    [Parameter] public EventCallback<PeriodUnit> UnitChanged { get; set; }
+
+#pragma warning disable 0067       // warning CS0067: The event 'PageDashboardMain.PropertyChanged' is never used
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        PropertyChanged += async (s, e) =>
+        {
+            Console.WriteLine($"--------- PropertyChanged for {e.PropertyName}");
+
+            switch(e.PropertyName)
+            {
+                case nameof(StartDate):
+                    await StartDateChanged.InvokeAsync(StartDate);
+                    break;
+                case nameof(EndDate):
+                    await EndDateChanged.InvokeAsync(EndDate);
+                    break;
+                case nameof(Unit):
+                    await UnitChanged.InvokeAsync(Unit);
+                    break;                
+            }
+        };
+
+
+        _loading = false;
+    }
+
+
+    public enum PeriodUnit
+    {
+        DontCare,
+        Hour,
+        Day,
+        Week,
+        Month,
+        // Quarter,
+        // Year
+    }
+}
+
+<style>
+    .flex-container {
+        display: flex;
+        justify-content: space-between; /* 요소들 사이에 공간 추가 */
+        align-items: center; /* 요소들을 세로 방향으로 중앙 정렬 */
+        flex-wrap: wrap;
+    }
+    @@media (max-width: 600px) { /* 화면 너비가 600px 이하일 때 적용될 스타일 */
+        .flex-container {
+            flex-direction: column; /* 요소들을 수직으로 쌓음 */
+        }
+    }
+</style>

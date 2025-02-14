@@ -1,0 +1,81 @@
+﻿@using System.ComponentModel
+@* CompClientSettingsSelector *@
+
+@implements INotifyPropertyChanged
+
+@if (! _loading)
+{
+    <DxCheckBox @bind-Checked="ShowGroupPanel">Show group panel</DxCheckBox>
+    <DxCheckBox @bind-Checked="ShowFilterRow">Show filter row</DxCheckBox>
+    <DxCheckBox @bind-Checked="PageSizeSelectorVisible">Show page size selector</DxCheckBox>
+    <DxCheckBox @bind-Checked="TextWrapEnabled">Enable text wrap</DxCheckBox>
+    <DxCheckBox @bind-Checked="ShowAllRows">Show all rows in one page</DxCheckBox>
+    <CompEnumSelector Title="Column resize mode: " TEnum="GridColumnResizeMode" @bind-Value="ColumnResizeMode" />
+    <br />
+    <CompEnumSelector Title="Footer: " TEnum="GridFooterDisplayMode" @bind-Value="FooterDisplayMode" />
+    <br />
+}
+
+@code {
+    bool _loading = true;
+    bool ShowAllRows { get; set; }
+    bool ShowGroupPanel { get; set; }
+    bool ShowFilterRow { get; set; }
+    bool TextWrapEnabled { get; set; } = false;
+    bool PageSizeSelectorVisible { get; set; } = true;
+    GridColumnResizeMode ColumnResizeMode { get; set; }
+    GridFooterDisplayMode FooterDisplayMode { get; set; }
+
+    [Parameter] public ClientSettings ClientSettings { get; set; }
+    [Parameter] public EventCallback<ClientSettings> ClientSettingsChanged { get; set; }
+
+#pragma warning disable 0067       // warning CS0067: The event 'PageDashboardMain.PropertyChanged' is never used
+    public event PropertyChangedEventHandler PropertyChanged;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ShowAllRows = ClientSettings.ShowAllRows;
+        ShowGroupPanel          = ClientSettings.ShowGroupPanel;
+        ShowFilterRow           = ClientSettings.ShowFilterRow;
+        TextWrapEnabled         = ClientSettings.TextWrapEnabled;
+        PageSizeSelectorVisible = ClientSettings.PageSizeSelectorVisible;
+        ColumnResizeMode        = ClientSettings.ColumnResizeMode;
+        FooterDisplayMode = ClientSettings.FooterDisplayMode;
+
+
+        PropertyChanged += (s, e) =>
+        {
+            Console.WriteLine($"--------- PropertyChanged for {e.PropertyName}");
+            switch (e.PropertyName)
+            {
+                case nameof(ShowAllRows):
+                    ClientSettings.ShowAllRows = ShowAllRows;
+                    break;
+                case nameof(ShowGroupPanel):
+                    ClientSettings.ShowGroupPanel = ShowGroupPanel;
+                    break;
+                case nameof(ShowFilterRow):
+                    ClientSettings.ShowFilterRow = ShowFilterRow;
+                    break;
+                case nameof(TextWrapEnabled):
+                    ClientSettings.TextWrapEnabled = TextWrapEnabled;
+                    break;
+                case nameof(PageSizeSelectorVisible):
+                    ClientSettings.PageSizeSelectorVisible = PageSizeSelectorVisible;
+                    break;
+                case nameof(ColumnResizeMode):
+                    ClientSettings.ColumnResizeMode = ColumnResizeMode;
+                    break;
+                case nameof(FooterDisplayMode):
+                    ClientSettings.FooterDisplayMode = FooterDisplayMode;
+                    break;
+            };
+
+            ClientSettingsChanged.InvokeAsync(ClientSettings);
+        };
+
+        _loading = false;
+    }
+
+}

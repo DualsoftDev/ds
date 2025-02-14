@@ -1,0 +1,58 @@
+﻿@* CompAbsolutePositioner *@
+
+@* 절대 위치에 floating 으로 표시되는 컨테이너 *@
+
+@* class="ds-bordered-red-3" *@
+
+<div class="@CssClass" style="@getStyle()" id="@DivId" @onclick=OnClick>
+    @ChildContent
+</div>
+
+@code {
+    string getStyle()
+    {
+        var style = get().JoinString("; ");
+        // Console.WriteLine($"------------------- Style: {style}");
+        return style;
+        IEnumerable<string> get()
+        {
+            yield return $"position: absolute; top: {Top}px; left: {Left}px";
+
+            if (Width != null)
+                yield return $"width: {Width}px";
+
+            if (Height != null)
+                yield return $"height: {Height}px";
+
+            if (BackgroundColor != null)
+                yield return $"background-color: {BackgroundColor}";
+
+            if (BorderColor != null)
+                yield return $"border: 2px solid {BorderColor}";
+
+            yield return $"opacity: {Opacity}";
+
+            yield return AdditionalStyles;
+        }
+    }
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+
+    [EditorRequired] [Parameter] public double Top { get; set; }    // px 단위
+    [EditorRequired] [Parameter] public double Left { get; set; }
+    [Parameter] public double? Width { get; set; }      // 미 정의시, contents width
+    [Parameter] public double? Height { get; set; }
+    [Parameter] public double Opacity { get; set; } = 1; // 투명도 (0.0 완전 투명 ~ 1.0 완전 불투명)
+    [Parameter] public string BackgroundColor { get; set; }
+    [Parameter] public string BorderColor { get; set; }
+    [Parameter] public string CssClass { get; set; }
+    [Parameter] public string AdditionalStyles { get; set; }
+    [Parameter] public string DivId { get; set; }
+    [Parameter] public EventCallback OnClick { get; set; }
+}
+
+@* 사용 예
+<CompAbsolutePositioner Left=100 Top=300 BackgroundColor="orange" AdditionalStyles="border: green solid; padding: 1px">
+    <h4>안녕하세요???? </h4>
+</CompAbsolutePositioner>
+ *@

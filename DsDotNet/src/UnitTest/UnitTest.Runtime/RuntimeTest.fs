@@ -35,4 +35,3 @@ module RuntimeTest =
         let data = JsonSerializer.Deserialize(json, options)
         info.Name = runtimeModel.System.Name |> Assert.True
 
-

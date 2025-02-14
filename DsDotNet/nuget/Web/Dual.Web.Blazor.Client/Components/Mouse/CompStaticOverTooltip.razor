@@ -1,0 +1,12 @@
+﻿@code {
+    [Parameter] public string TargetElementId { get; set; }
+    [Parameter] public string Message { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsDual.AttachTheTooltipEvents(TargetElementId, Message);
+        }
+    }
+}

@@ -1,0 +1,100 @@
+﻿@using Radzen.Blazor
+
+@typeparam TItem
+@typeparam TCategory
+
+@if (UpperTitleText.NonNullAny())
+{
+    <div class="mb-3 d-flex justify-content-center ds-medium">
+        <CompLegendItem Legend="@UpperTitleText" />
+    </div>        
+}
+
+<RadzenChart>
+    <RadzenDonutSeries
+        Data="@_data"
+        CategoryProperty="@nameof(CategoryItem.Category)"
+        ValueProperty="@nameof(CategoryItem.Count)"
+        Fills="@FillColors">
+        <TitleTemplate>
+            <div class="rz-donut-content">
+                @InnerTitleContent
+            </div>
+        </TitleTemplate>
+        <TooltipTemplate Context="data">
+            <div>
+                <span>@data.Category</span>:
+                <strong>@data.Count</strong>
+                @if (DetailClicked != null)
+                {
+                    <div class="text-black">
+                        <a class="link-with-underline" onclick="@(() => DetailClicked?.Invoke(this, @data.Category))">Show details</a>
+                    </div>
+                }
+            </div>
+        </TooltipTemplate>
+
+    </RadzenDonutSeries>
+    <RadzenLegend Visible="@LegendVisible" />
+</RadzenChart>
+
+
+@code {
+    class CategoryItem
+    {
+        public TCategory Category { get; set; }
+        public int Count { get; set; }
+        public CategoryItem(TCategory category, int count)
+        {
+            Category = category;
+            Count = count;
+        }
+    }
+    CategoryItem[] _data;
+    [Parameter] public TItem[] RawData { get; set; }
+    [Parameter] public Func<TItem, TCategory> Grouper { get; set; }
+    [Parameter] public string[] FillColors { get; set; }
+    [Parameter] public string UpperTitleText { get; set; }
+    [Parameter] public bool LegendVisible { get; set; }
+    [Parameter] public RenderFragment InnerTitleContent { get; set; }
+    [Parameter] public RenderFragment PoPTooltipContent { get; set; }
+    [Parameter] public Action<CompPieChartRadzen<TItem, TCategory>, TCategory> DetailClicked { get; set; }
+
+    void initializeData()
+    {
+        List<CategoryItem> data =
+            RawData
+            .GroupBy(d => Grouper(d))
+            .OrderBy(gr => gr.Key)
+            .Select(gr => new CategoryItem(gr.Key, gr.Count()))
+            .ToList()
+            ;
+
+        _data = getOrderedCategories().ToArray();
+
+        IEnumerable<CategoryItem> getOrderedCategories()
+        {
+            var categories = typeof(TCategory).GetEnumValues().Cast<TCategory>().Order().ToArray();
+            foreach (var category in categories)
+            {
+                CategoryItem found = data.FirstOrDefault(d => d.Category.Equals(category));
+                if (found != null)
+                    yield return found;
+                else
+                    yield return new CategoryItem(category, 0);
+            }
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        initializeData();
+    }
+
+    public void Redraw(TItem[] rawData)
+    {
+        RawData = rawData;
+        initializeData();
+        StateHasChanged();
+    }
+}

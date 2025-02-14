@@ -1,0 +1,13 @@
+﻿@* DxxRightGridDataColumn *@
+
+<DxGridDataColumn VisibleIndex=VisibleIndex FieldName=@FieldName Caption=@(Caption ?? FieldName) CaptionAlignment=GridTextAlignment.Right TextAlignment=GridTextAlignment.Right>
+    <CellDisplayTemplate>
+        @(context?.GetRowValue(FieldName)?.ToStringBrief())
+    </CellDisplayTemplate>
+</DxGridDataColumn>
+
+@code {
+    [EditorRequired][Parameter] public string FieldName { get; set; }
+    [Parameter] public string Caption { get; set; }
+    [Parameter] public int VisibleIndex { get; set; } = -1;
+}

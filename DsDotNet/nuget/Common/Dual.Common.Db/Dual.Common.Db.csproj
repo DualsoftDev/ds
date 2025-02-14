@@ -1,0 +1,68 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>12.0</LangVersion>
+		<!--<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>-->
+		<Platforms>AnyCPU;x86</Platforms>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587;CS8002</NoWarn>
+		<!--XML comment 관련 경고-->
+
+		<PackageId>DualSoft-Common-Db</PackageId>
+		<PackageTags>Common,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Dual.Common.Db</Description>
+		<Title>Dual.Common.Db</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\$(TargetFramework)\Dual.Common.Db.xml" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="" />
+		<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.Db.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Include="Readme.md" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="System.Data.SQLite" Version="1.0.119" />
+		<PackageReference Include="Dapper" Version="2.1.35" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.6" />
+		<!--<PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
+		<PackageReference Include="Serilog.Settings.Configuration" Version="7.0.0" />
+		<PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+		-->
+		<!--
+		-->
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<ProjectReference Include="..\Dual.Common.Core\Dual.Common.Core.csproj" />
+	</ItemGroup>
+
+
+</Project>

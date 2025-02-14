@@ -1,0 +1,136 @@
+@* DxxGridBase *@
+
+@if (!_loading)
+{
+
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+        <span class="ds-left message">Σ Total @(Grid?.GetVisibleRowCount() == null? _count : Grid.GetVisibleRowCount()) items</span>
+        <CompShowHide CssClass="ds-absolute-centered" @ref="_refCompShowHide">
+            <div class="ds-reversed-color ds-bordered" style="padding: 20px">
+                <DxxGridOptionSelector DxGrid="Grid" />
+                <br />
+                <br />
+                <br />
+                <div style="display: flex; justify-content: center; align-items: center;">
+                    <DxButton RenderStyle="ButtonRenderStyle.Secondary"
+                              Click="@(() => _refCompShowHide.Hide())">
+                        <span class="bi-x-square">&nbsp;&nbsp;</span>
+                        Close
+                    </DxButton>
+                </div>
+            </div>
+        </CompShowHide>
+        <a @onclick="@(() => _refCompShowHide.Show())" @onclick:preventDefault href="#">
+            <span class="oi oi-cog" />
+        </a>
+    </div>
+
+
+    <DxGrid @ref="Grid"
+            Data="Data"
+            AutoExpandAllGroupRows="AutoExpandAllGroupRows"
+            ColumnResizeMode="ColumnResizeMode"
+            CustomizeElement="CustomizeElement"
+            DataItemDeleting="DataItemDeleting"
+            DetailRowDisplayMode="DetailRowDisplayMode"
+            DetailRowTemplate="DetailRowTemplate"
+            EditMode="EditMode"
+            EditModelSaving="EditModelSaving"
+            FooterDisplayMode="FooterDisplayMode"
+            KeyFieldName="@KeyFieldName"
+            PageSizeSelectorVisible="PageSizeSelectorVisible "
+            PageSize="PageSize "
+            ShowAllRows="ShowAllRows"
+            ShowFilterRow="ShowFilterRow"
+            ShowGroupPanel="ShowGroupPanel"
+            SearchTextChanged="searchTextChanged"
+            FilterCriteriaChanged="filterCriteriaChanged"
+            TextWrapEnabled="TextWrapEnabled"
+            ColumnCaptionAlignment="ColumnCaptionAlignment"
+            KeyboardNavigationEnabled="KeyboardNavigationEnabled">
+        <Columns>@Columns</Columns>
+        <TotalSummary>@TotalSummary</TotalSummary>
+        <GroupSummary>@GroupSummary</GroupSummary>
+        <EditFormTemplate>@EditFormTemplate</EditFormTemplate>
+    </DxGrid>
+}
+@code {
+    bool _loading = true;
+
+    // razor 에서 @ref=RefGrid 설정이 OnAfterRenderAsync() 함수에서도 참조시 null 이 되는 이상한 문제가 있어서
+    // property setter 에서 set 되는 시점에 grid 객체를 인지할 수 있도록 변경
+    IGrid _grid;
+    public IGrid Grid
+    {
+        get => _grid;
+        set
+        {
+            _grid = value;
+            StateHasChanged();
+            OnGridPrepared?.Invoke(_grid);
+        }
+    }
+
+
+    CompShowHide _refCompShowHide;
+    int _count = 0;
+    [Parameter] public object Data { get; set; }
+    [Parameter] public RenderFragment Columns { get; set; }
+    [Parameter] public RenderFragment TotalSummary { get; set; }
+    [Parameter] public RenderFragment GroupSummary { get; set; }
+    [Parameter] public RenderFragment<GridEditFormTemplateContext> EditFormTemplate { get; set; }
+    [Parameter] public RenderFragment<GridDetailRowTemplateContext> DetailRowTemplate { get; set; }
+
+    [Parameter] public int PageSize { get; set; } = 20;
+    [Parameter] public bool ShowAllRows { get; set; }
+    [Parameter] public Action<GridCustomizeElementEventArgs> CustomizeElement { get; set; }
+    [Parameter] public bool AutoExpandAllGroupRows { get; set; }
+    [Parameter] public GridDetailRowDisplayMode DetailRowDisplayMode { get; set; }
+    [Parameter] public string KeyFieldName { get; set; }
+
+    [Parameter] public ClientSettings ClientSettings { get; set; }
+    [Parameter] public bool ShowGroupPanel { get; set; }
+    [Parameter] public bool ShowFilterRow { get; set; }
+    [Parameter] public bool TextWrapEnabled { get; set; }
+    [Parameter] public bool PageSizeSelectorVisible { get; set; }
+    [Parameter] public bool KeyboardNavigationEnabled { get; set; }
+    [Parameter] public GridColumnResizeMode ColumnResizeMode { get; set; } = GridColumnResizeMode.NextColumn;
+    [Parameter] public GridTextAlignment? ColumnCaptionAlignment { get; set; }
+
+    [Parameter] public GridEditMode EditMode { get; set; }
+    [Parameter] public GridFooterDisplayMode FooterDisplayMode { get; set; }
+    [Parameter] public EventCallback<GridEditModelSavingEventArgs> EditModelSaving { get; set; }
+    [Parameter] public EventCallback<GridDataItemDeletingEventArgs> DataItemDeleting { get; set; }
+    [Parameter]
+    public ToolbarRenderStyleMode ToolbarRenderStyleMode { get; set; }
+    [Parameter] public Action<IGrid> OnGridPrepared { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        ClientSettings ??= await GetClientSettings();
+        var cs = ClientSettings;
+        // var cs = await ClientSettings.ReadAsync(LocalStorage);
+        FooterDisplayMode = cs.FooterDisplayMode;
+        ShowAllRows = cs.ShowAllRows;
+        ShowGroupPanel = cs.ShowGroupPanel;
+        ShowFilterRow = cs.ShowFilterRow;
+
+        TextWrapEnabled = cs.TextWrapEnabled;
+        PageSizeSelectorVisible = cs.PageSizeSelectorVisible;
+        ColumnResizeMode = cs.ColumnResizeMode;
+
+        _loading = false;
+    }
+
+    protected virtual Task<ClientSettings> GetClientSettings() => throw new Exception("Should be overridden.");
+    protected override void OnParametersSet()
+    {
+        base.OnParametersSet();
+        if (Data is System.Collections.IEnumerable items)
+            _count = items.Cast<object>().Count();
+    }
+
+    void searchTextChanged(string text) => _count = Grid.GetVisibleRowCount();
+    void filterCriteriaChanged(GridFilterCriteriaChangedEventArgs e) => _count = Grid.GetVisibleRowCount();
+}

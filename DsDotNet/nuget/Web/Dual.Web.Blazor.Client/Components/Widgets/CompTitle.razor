@@ -1,0 +1,54 @@
+﻿@* CompTitle *@
+<style>
+    .ds-title-bar {
+        background-color: var(--bs-primary);
+        text-align: center;
+        padding: 10px
+    }
+</style>
+
+<PageTitle>Twms:@Title</PageTitle>
+
+@if (ClientGlobalBase.TheInstance?.IsMobileLayout ?? false)
+{
+    <h5 class="ds-title-bar" style="@_style">
+        @if (Icon.NonNullAny())
+        {
+            <CompIcon IconClass="@Icon" Color="@IconColor" />
+            <span>&nbsp;</span>
+        }
+        @Title
+        @ChildContent
+    </h5>
+}
+else
+{
+    <h3 class="ds-title-bar" style="@_style">
+        @if (Icon.NonNullAny())
+        {
+            <CompIcon IconClass="@Icon" Color="@IconColor" />
+            <span>&nbsp;</span>
+        }
+        @Title
+        @ChildContent
+    </h3>
+}
+
+@code {
+    string _style => $"color: {ForegroundColor}; background-color: {BackgroundColor};";
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string Icon { get; set; }
+    [Parameter] public string IconColor { get; set; }
+
+    [Parameter] public string ForegroundColor { get; set; }
+    [Parameter] public string BackgroundColor { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    override protected void OnInitialized()
+    {
+        base.OnInitialized();
+
+        ForegroundColor ??= "white";    // "var(--bs-secondary)";
+        BackgroundColor ??= "var(--bs-primary)";
+        IconColor ??= "white";
+    }
+}

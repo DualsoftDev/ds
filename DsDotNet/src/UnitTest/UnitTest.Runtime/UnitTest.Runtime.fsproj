@@ -5,9 +5,11 @@
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<IsPackable>false</IsPackable>
+		<NoWarn>$(NoWarn)FS0988</NoWarn>
 		<GenerateProgramFile>false</GenerateProgramFile>
 		<GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
 		<IsTestProject>true</IsTestProject>
+		<OutputType>Library</OutputType>
 	</PropertyGroup>
 
     <ItemGroup>

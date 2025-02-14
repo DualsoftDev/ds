@@ -1,0 +1,19 @@
+﻿@using System.ComponentModel
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Web
+@using DevExpress.Blazor
+@using Microsoft.JSInterop
+@using Blazored.LocalStorage
+@using Blazored.SessionStorage
+
+@using Dual.Common.Core
+@using Dual.Web.Blazor.Client.Components
+@using Dual.Web.Blazor.Client.Components.Widgets
+
+@inject IJSRuntime JsRuntime
+@inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+@inject ILocalStorageService LocalStorage
+@inject DualWebBlazorJsInterop JsDual
+

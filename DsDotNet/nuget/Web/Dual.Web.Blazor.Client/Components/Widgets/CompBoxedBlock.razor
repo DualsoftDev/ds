@@ -1,0 +1,78 @@
+@* CompBoxedBlock *@
+<style>
+    .boxed-block {
+        /* border: 3px solid var(--bs-primary); */
+        padding: 3px;
+        border-radius: 5px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .title {
+        font-weight: bold;
+        /* background-color: var(--bs-primary); */
+        color: white;
+        padding: 5px;
+        padding-left: 10px;
+        border-top-left-radius: 5px;
+        border-top-right-radius: 5px;
+    }
+
+    .content {
+        padding: 10px;
+    }
+</style>
+
+<div class="boxed-block">
+    @if (Title.NonNullAny())
+    {
+        <div class="title" style="@_titleStyle">@Title</div>
+    }
+    <div class="content" style="@_boxStyle">
+        @ChildContent
+    </div>
+
+</div>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public string Title { get; set; }
+    [Parameter] public string BoxForegroundColor { get; set; }
+    [Parameter] public string BoxBackgroundColor { get; set; }
+    [Parameter] public string TitleForegroundColor { get; set; }
+    [Parameter] public string TitleBackgroundColor { get; set; }
+    [Parameter] public int? BorderWidth { get; set; }
+
+
+    string _titleStyle;
+    string _boxStyle;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        BoxForegroundColor ??= "var(--bs-primary)";
+        TitleForegroundColor ??= "var(--bs-secondary)";
+        TitleBackgroundColor ??= "var(--bs-primary)";
+        BoxBackgroundColor ??= "var(--bs-secondary)";
+        BoxForegroundColor ??= "var(--bs-primary)";
+        BorderWidth ??= 1;
+
+        _titleStyle = $"color: {TitleForegroundColor}; background-color: {TitleBackgroundColor};";
+        _boxStyle = $"border: {BorderWidth}px solid {BoxForegroundColor}; background-color: {BoxBackgroundColor}; color: {BoxForegroundColor};";
+    }
+}
+
+
+@* Sample
+<CompBoxedBlock
+    Title="테이블 보기 설정"
+    BoxForegroundColor="@(Color.Firebrick)"
+    BoxBackgroundColor="@(Color.LightGoldenrodYellow)"
+    TextColor="@(Color.Black)"
+    BorderWidth="1">
+
+    <HxSwitch Text="Show group panel" @bind-Value="@_cs.ShowGroupPanel" />
+    <HxSwitch Text="Show filter row" @bind-Value="@_cs.ShowFilterRow" />
+    <HxSwitch Text="Show page size selector" @bind-Value="@_cs.PageSizeSelectorVisible" />
+    <HxSwitch Text="Enable text wrap" @bind-Value="@_cs.TextWrapEnabled" />
+</CompBoxedBlock>
+ *@

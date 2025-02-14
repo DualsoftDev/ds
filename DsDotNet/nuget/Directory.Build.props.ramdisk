@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup>
+    <UseSharedCompilation>true</UseSharedCompilation>
+    
+    <BaseIntermediateOutputPath>R:\build\$(MSBuildProjectName)\</BaseIntermediateOutputPath>    
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)obj\</IntermediateOutputPath>
+    <OutputPath>R:\build\Output\</OutputPath>
+
+  </PropertyGroup>
+</Project>

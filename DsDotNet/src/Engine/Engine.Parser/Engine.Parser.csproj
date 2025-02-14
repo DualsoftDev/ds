@@ -28,22 +28,33 @@
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
     <ItemGroup>
-        <!--<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />-->
+      <Compile Remove="%2a%2a\**" />
+      <EmbeddedResource Remove="%2a%2a\**" />
+      <None Remove="%2a%2a\**" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="%2a%2a/%2a.cs" />
+    </ItemGroup>
+    <ItemGroup>
+      <EmbeddedResource Remove="%2a%2a/%2a.resx" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Remove="%2a%2a/%2a" />
+    </ItemGroup>
+	<ItemGroup>
+
+		<!--<Antlr4 Include="..\..\..\..\Grammar\g4s\dsLexer.g4" Link="g4s\dsLexer.g4" />-->
         <!-- <Antlr4 Include="..\..\..\..\Grammar\g4s\ds.g4" Link="g4s\ds.g4"> -->
-        <Antlr4 Include="g4s/ds.g4" Link="g4s/ds.g4">
+        <Antlr4 Include="Grammar/g4s/ds.g4" Link="g4s/ds.g4">
             <Visitor>true</Visitor>
             <Package>Engine.Parser</Package>
         </Antlr4>
-        <Antlr4 Include="g4s/fqdn.g4" Link="g4s/fqdn.g4" />
-        <Antlr4 Include="g4s/expr.g4" Link="g4s/expr.g4" />
-    </ItemGroup>
-    <ItemGroup>
+        <Antlr4 Include="Grammar/g4s/fqdn.g4" Link="g4s/fqdn.g4" />
+        <Antlr4 Include="Grammar/g4s/expr.g4" Link="g4s/expr.g4" />
+	</ItemGroup>
+	<ItemGroup>
         <PackageReference Include="Antlr4.Runtime.Standard" Version="4.13.1" />
         <PackageReference Include="Antlr4BuildTasks" Version="12.8.0" PrivateAssets="all" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <Folder Include="Obsolete\" />
     </ItemGroup>
 
     <ItemGroup>

@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>12.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>
+		<!--XML comment 관련 경고-->
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+		<RootNamespace>Dual.Common.Base.CS</RootNamespace>
+		<PackageId>DualSoft-Common-Base-CS</PackageId>
+		<PackageTags>F#,Common,Base,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Dual.Common.Base.CS</Description>
+		<Title>Dual.Common.Base.CS</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\$(TargetFramework)\Dual.Common.Base.CS.xml" />
+		</ItemGroup>
+
+		<!--<Message Text="SolutionDir\bin\TargetFramework: $(SolutionDir)\bin\$(TargetFramework)" Importance="high" />
+		<Message Text="Current TargetFramework: $(TargetFramework)" Importance="high" />
+		<Message Text="OutputPath: $(OutputPath)" Importance="high" />-->
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+
+	<ItemGroup>
+	  <None Remove="Readme.md" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath=""/>
+		<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.Base.CS.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Include="Readme.md" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+		<PackageReference Include="System.Reactive" Version="6.0.1" />
+		<PackageReference Include="log4net" Version="2.0.17" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Fody" Version="6.8.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ModuleInit.Fody" Version="2.1.1">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+
+	</ItemGroup>
+</Project>

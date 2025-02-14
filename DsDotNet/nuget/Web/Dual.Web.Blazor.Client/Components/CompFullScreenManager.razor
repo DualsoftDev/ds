@@ -1,0 +1,52 @@
+﻿@using Microsoft.JSInterop
+@implements IAsyncDisposable
+
+@if (!IsFullScreen)
+{
+    <button class="btn btn-primary" @onclick="fullScreen">Full screen</button>
+}
+
+@code {
+    bool _oldState;
+    public bool IsFullScreen { get; private set; }
+    [Parameter] public string FullScreenElementId { get; set; }
+    [Parameter] public EventCallback<bool> FullScreenStateChanged { get; set; }
+
+    string _callbackFunctionKey;
+    protected override async Task OnInitializedAsync()
+    {
+        var me = DotNetObjectReference.Create(this);
+        _callbackFunctionKey = await JsDual.CreateMemberCallFunction(me, "OnWindowResize", "fullscreen");
+        Console.WriteLine(_callbackFunctionKey?.ToString() ?? "Null value");
+
+        _oldState = IsFullScreen = await JsDual.IsFullScreen();
+        await JsDual.AddEventHandler("resize", _callbackFunctionKey);
+    }
+    async Task checkStateChange(bool newState)
+    {
+        if (_oldState != newState)
+        {
+            await InvokeAsync(StateHasChanged);
+            await FullScreenStateChanged.InvokeSafeAsync(IsFullScreen);
+            _oldState = newState;
+        }
+    }
+    async void fullScreen()
+    {
+        var newState = IsFullScreen = await JsDual.OpenFullscreen(FullScreenElementId);
+        await checkStateChange(newState);
+    }
+
+    [JSInvokable]
+    public async Task OnWindowResize()
+    {
+        Console.WriteLine("CompFullScreenManager::OnWindowResize() called.");
+        var newState = IsFullScreen = await JsDual.IsFullScreen();
+        await checkStateChange(newState);
+    }
+
+    public async ValueTask DisposeAsync()       // IAsyncDisposable
+    {
+        await JsDual.RemoveEventHandler("resize", _callbackFunctionKey);
+    }
+}

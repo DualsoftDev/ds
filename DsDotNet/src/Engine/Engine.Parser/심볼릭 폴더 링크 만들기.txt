@@ -1,1 +1,0 @@
-mklink /j g4s ..\..\..\..\Grammar\g4s

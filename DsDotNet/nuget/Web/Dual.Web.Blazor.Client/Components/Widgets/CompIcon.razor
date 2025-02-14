@@ -1,0 +1,30 @@
+﻿@* CompIcon *@
+
+<i class="@IconClass" style="@_style"></i>
+
+@code {
+    [Parameter] public string IconClass { get; set; }
+    [Parameter] public string Color { get; set; }
+    /// <summary>
+    /// e.g "font-size: 2rem;" or "font-size: 2rem; margin-left: 10px;"
+    /// </summary>
+    [Parameter] public string AdditionalStyles { get; set; }
+
+
+    string _style = "color: var(--bs-primary);";
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        if (Color.NonNullAny())
+            _style = $"color: {Color};";
+        if (AdditionalStyles.NonNullAny())
+            _style += AdditionalStyles;
+    }
+}
+
+@* 
+사용 예
+<i class="bi-alarm" style="font-size: 2rem; color: cornflowerblue;"></i>
+<CompIcon IconClass="bi-alarm" />
+<CompIcon IconClass="oi oi-cog" />
+*@

@@ -1,0 +1,19 @@
+﻿@* DxxRatioGridDataColumn *@
+
+<DxGridDataColumn FieldName=@FieldName Caption=@(Caption ?? FieldName) CaptionAlignment=GridTextAlignment.Right VisibleIndex=VisibleIndex>
+    <CellDisplayTemplate>
+        @{
+            string text = null;
+            var value = context?.GetRowValue(FieldName);
+            if (value != null)
+                text = ((double)value).ToString("P2");
+        }
+        @text
+    </CellDisplayTemplate>
+</DxGridDataColumn>
+
+@code {
+    [EditorRequired][Parameter] public string FieldName { get; set; }
+    [Parameter] public string Caption { get; set; }
+    [Parameter] public int VisibleIndex { get; set; } = -1;
+}

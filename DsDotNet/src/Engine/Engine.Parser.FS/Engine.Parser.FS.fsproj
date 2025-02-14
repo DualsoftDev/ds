@@ -53,16 +53,9 @@
         </PackageReference>
     </ItemGroup>
 
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.5.1" />
-	</ItemGroup>
-
 
 	<ItemGroup>
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
         <ProjectReference Include="..\Engine.Parser\Engine.Parser.csproj" />
     </ItemGroup>
 

@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0</TargetFrameworks>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>12.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>
+		<!--XML comment 관련 경고-->
+		<RootNamespace>Dual.Common.FSharpInterop</RootNamespace>
+		<PackageId>DualSoft-Common-FSharpInterop</PackageId>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Description>Dual.Common.FSharpInterop</Description>
+		<Title>Dual.Common.FSharpInterop</Title>
+		<Version>0.3.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath=""/>
+		<!--<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.FSharpInterop.xml" Pack="true" PackagePath="" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<Content Include="Readme.md" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+
+</Project>

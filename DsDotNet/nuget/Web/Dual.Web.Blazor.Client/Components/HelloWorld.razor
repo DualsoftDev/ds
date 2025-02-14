@@ -1,0 +1,12 @@
+﻿@using Microsoft.AspNetCore.Components.Rendering
+
+
+<h3>HelloWorld</h3>
+@ChildContent
+
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}
+
+

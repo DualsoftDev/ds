@@ -1,0 +1,77 @@
+@using System.ComponentModel
+@* DxxGridOption *@
+@implements INotifyPropertyChanged
+
+<DxCheckBox @bind-Checked="@ShowGroupPanel">Show group panel</DxCheckBox>
+<DxCheckBox @bind-Checked="@ShowFilterRow">Show filter row</DxCheckBox>
+<DxCheckBox @bind-Checked="@PageSizeSelectorVisible">Show page size selector</DxCheckBox>
+<DxCheckBox @bind-Checked="@TextWrapEnabled">Enable text wrap</DxCheckBox>
+<DxCheckBox @bind-Checked="@ShowAllRows">Show all rows in one page</DxCheckBox>
+<CompEnumSelector Title="Column resize mode: " TEnum="GridColumnResizeMode" @bind-Value="ColumnResizeMode" /><br/>
+<CompEnumSelector Title="Footer: " TEnum="GridFooterDisplayMode" @bind-Value="FooterDisplayMode" /><br/>
+<DxButton Text="Column chooser" Click="@(() => DxGrid.ShowColumnChooser())"/>
+@code {
+    [EditorRequired][Parameter] public IGrid DxGrid { get; set; }
+
+    bool ShowAllRows { get; set; }
+    bool ShowGroupPanel { get; set; }
+    bool ShowFilterRow { get; set; }
+    bool TextWrapEnabled { get; set; }
+    bool PageSizeSelectorVisible { get; set; }
+
+    int PageSize { get; set; }
+    GridColumnResizeMode ColumnResizeMode { get; set; }
+    GridFooterDisplayMode FooterDisplayMode { get; set; }
+
+
+#pragma warning disable 0067       // warning CS0067: The event 'PageDashboardMain.PropertyChanged' is never used                                                                                      
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        ShowAllRows = DxGrid.ShowAllRows;
+        ShowGroupPanel = DxGrid.ShowGroupPanel;
+        ShowFilterRow = DxGrid.ShowFilterRow;
+        TextWrapEnabled = DxGrid.TextWrapEnabled;
+        PageSizeSelectorVisible = DxGrid.PageSizeSelectorVisible;
+
+        PageSize = DxGrid.PageSize;
+        ColumnResizeMode = DxGrid.ColumnResizeMode;
+
+        PropertyChanged += (s, e) =>
+        {
+            Console.WriteLine($"--------- PropertyChanged for {e.PropertyName}");
+            DxGrid.BeginUpdate();
+
+            switch (e.PropertyName)
+            {
+                case nameof(ShowAllRows):
+                    DxGrid.ShowAllRows = ShowAllRows;
+                    break;
+                case nameof(ShowGroupPanel):
+                    DxGrid.ShowGroupPanel = ShowGroupPanel;
+                    break;
+                case nameof(ShowFilterRow):
+                    DxGrid.ShowFilterRow = ShowFilterRow;
+                    break;
+                case nameof(TextWrapEnabled):
+                    DxGrid.TextWrapEnabled = TextWrapEnabled;
+                    break;
+                case nameof(PageSizeSelectorVisible):
+                    DxGrid.PageSizeSelectorVisible = PageSizeSelectorVisible;
+                    break;
+                case nameof(ColumnResizeMode):
+                    DxGrid.ColumnResizeMode = ColumnResizeMode;
+                    break;
+                case nameof(FooterDisplayMode):
+                    DxGrid.FooterDisplayMode = FooterDisplayMode;
+                    break;
+            };
+
+            DxGrid.EndUpdate();
+
+        };
+    }
+}

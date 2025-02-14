@@ -1,0 +1,24 @@
+﻿FormMain 에 UcLog 추가하고 해당 instance 를 public 으로 접근가능하게 속성 지정
+    public UcLog LogPane => ucLog1;
+    public static ILog Logger { get; set; }
+
+Program.cs 의 Main 에 다음 추가 (logger 이름, form 이름 등은 알맞게 수정)
+    var logger = LogManager.GetLogger("PCControlTest");
+    Log4NetWrapper.gLogger = logger;
+    FormApp.Logger = logger;
+
+    // Configure log4net
+    XmlConfigurator.Configure(new FileInfo(AppDomain.CurrentDomain.SetupInformation.ConfigurationFile));
+
+    Application.EnableVisualStyles();
+    Application.SetCompatibleTextRenderingDefault(false);
+
+    var root = ((log4net.Repository.Hierarchy.Hierarchy)log4net.LogManager.GetRepository()).Root;
+    var form = new FormApp();
+    root.AddAppender(form.LogPane);
+
+    Application.Run(form);
+
+App.config 에 log4net 추가
+
+

@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <UseSharedCompilation>true</UseSharedCompilation>
+    <Optimize>true</Optimize>
+    
+    <!-- Target framework 지정 -->
+    <NetCoreTarget>net7.0</NetCoreTarget>
+    <UseNet80>true</UseNet80>
+
+    <!-- 임시 빌드 파일 경로 설정 -->
+    <BaseIntermediateOutputPath>R:\TEMP\$(MSBuildProjectName)\</BaseIntermediateOutputPath>    
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)obj\</IntermediateOutputPath>
+    <!-- 최종 빌드 출력 경로 설정 (필요시) -->
+    <OutputPath>R:\TEMP\Output\</OutputPath>
+
+    <!-- UseNugetProjectReference 속성을 여기에서 정의 -->
+    <!-- 
+    <UseNugetProjectReference>false</UseNugetProjectReference>
+    <PublishNugetPackage>true</PublishNugetPackage>
+     -->
+
+  </PropertyGroup>
+</Project>

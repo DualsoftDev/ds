@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<!--<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>-->
+		<RootNamespace>Dual.Common.AppSettings</RootNamespace>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>	  <!--XML comment 관련 경고-->
+
+
+		<PackageId>DualSoft-Common-AppSettings</PackageId>
+		<PackageTags>AppSettings,Common,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Description>Dual.Common.AppSettings</Description>
+		<Title>Dual.Common.AppSettings</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="" />
+		<!--<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.AppSettings.xml" Pack="true" PackagePath="" />-->
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+</Project>

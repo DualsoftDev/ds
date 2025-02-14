@@ -274,7 +274,7 @@ type Client(serverAddress: string) =
             let values = JsonConvert.DeserializeObject<string[]>(jsonValues)
 
             let keys =
-                if keys.IsEmpty () then
+                if keys.isEmpty() then
                     let jsonKeys = mqMessage[Keys].ConvertToString()
                     JsonConvert.DeserializeObject<string[]>(jsonKeys)
                 else

@@ -115,7 +115,7 @@ module RuntimeGeneratorModule =
         UsingOPC: bool
         RuntimePackage: RuntimePackage
         PlatformTarget: PlatformTarget
-        HwDriver: string //LS-XGI, LS-XGK, Paix hw drive 이름
+        HwDriver: HwDriveTarget //LS-XGI, LS-XGK, Paix hw drive 이름
         RuntimeMotionMode: RuntimeMotionMode
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
@@ -128,13 +128,13 @@ module RuntimeGeneratorModule =
             UsingOPC = false
             RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
             PlatformTarget = WINDOWS
-            HwDriver = HwDriveTarget.LS_XGK_IO.ToString()
+            HwDriver = HwDriveTarget.LS_XGK_IO
             RuntimeMotionMode = MotionAsync
             TimeSimutionMode = TimeX1
             TimeoutCall = 15000u
         }
     let createDefaultModelConfigWithHwDriver(hwDriver: HwDriveTarget) =
-        { createDefaultModelConfig() with HwDriver = hwDriver.ToString() }
+        { createDefaultModelConfig() with HwDriver = hwDriver }
     let createModelConfigWithSimMode(config: ModelConfig, package:RuntimePackage) =
         { config with RuntimePackage = package }
 
@@ -153,7 +153,7 @@ module RuntimeGeneratorModule =
             UsingOPC = usingOPC
             RuntimePackage = runtimePackage
             PlatformTarget = platformTarget
-            HwDriver = hwDriver.ToString()
+            HwDriver = hwDriver
             RuntimeMotionMode = runtimeMotionMode
             TimeSimutionMode = timeSimutionMode
             TimeoutCall = timeoutCall

@@ -1,0 +1,74 @@
+﻿@using Microsoft.JSInterop;
+@code {
+    /// <summary>
+    /// Mouse event detect target element id
+    /// </summary>
+    [Parameter] public string TargetElementId { get; set; }
+    /// <summary>
+    /// Detect 대상 mouse event name
+    /// </summary>
+    [Parameter] public string[] MouseEventNames { get; set; } = new[] { "mouseover", "mouseout", "mousedown", "mouseup", "mousemove" };
+    /// <summary>
+    /// Mouse event 발생 시 호출될 callback : event name 과 mouse event args 를 묶은 JSMouseEventArgs 를 전달
+    /// </summary>
+    [Parameter] public EventCallback<IMouseEventArgs> OnMouseEvent { get; set; }
+
+    DotNetObjectReference<CompMouseEventDetector> dotNetReference;
+
+    //private Timer hoverTimer;
+    //[Parameter] public int HoverTriggerDurationMS { get; set; } = 1000;
+    //[Parameter] public EventCallback<MouseEventArgs> OnMouseHover { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            dotNetReference = DotNetObjectReference.Create(this);
+            await JsDual.AddEventHandlersWithElementId(dotNetReference, TargetElementId, MouseEventNames);
+        }
+    }
+
+    public void Dispose()
+    {
+        dotNetReference?.Dispose();
+    }
+
+    protected virtual async Task onMouseEvent(IMouseEventArgs args)
+    {
+        if (OnMouseEvent.HasDelegate)
+            await OnMouseEvent.InvokeSafeAsync(args);
+        else
+            DefaultOnMouse(args);
+    }
+
+    [JSInvokable]
+    public async Task OnMouse(JSMouseArgs args)
+    {
+        await onMouseEvent(args);
+    }
+
+    public string MouseStatus { get; set; }
+    public string MouseHoverExitStatus { get; private set; }
+    public void DefaultOnMouse(IMouseEventArgs args)
+    {
+        if (args is null)
+            MouseStatus = "NULL";
+        else
+        {
+            MouseStatus = $"{args.EventName}:({args.ClientX}, {args.ClientY})";
+            switch (args.EventName)
+            {
+                case "hoverexit":
+                    MouseHoverExitStatus = $"{args.EventName}:({args.ClientX}, {args.ClientY})";
+                    break;
+                case "hoverenter":
+                    MouseHoverExitStatus = "";
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        StateHasChanged();
+    }
+}

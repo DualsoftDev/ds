@@ -1,0 +1,12 @@
+﻿@* CompChartJsPieOverlay *@
+@inherits CompChartJsPieBase
+
+<div id="@TopLevelDivId" style="@_style" class="ds-bordered-red-3">
+    @Header
+    <canvas id="@CanvasId" @onclick=OnClick></canvas>
+    @Footer
+</div>
+
+@code {
+    string _style => $"position: absolute; top: {Top}px; left: {Left}px; width:{Width}px; height:{Height}px; opacity: {Opacity}";
+}

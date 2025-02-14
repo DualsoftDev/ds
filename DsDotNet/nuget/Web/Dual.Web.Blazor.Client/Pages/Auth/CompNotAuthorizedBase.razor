@@ -1,0 +1,12 @@
+@page "/notauthorized"
+
+<div class="container">
+    <h1>Not Authorized</h1>
+    <p>You are not authorized to access this page. Please login to continue.</p>
+
+    <a href=@LoginPageUrl>Login</a>
+</div>
+
+@code {
+    [EditorRequired] [Parameter] public string LoginPageUrl { get; set; }
+}

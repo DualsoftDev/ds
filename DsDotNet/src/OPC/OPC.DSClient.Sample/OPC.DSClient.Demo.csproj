@@ -11,12 +11,12 @@
 
   <ItemGroup>
     <PackageReference Include="DevExpress.Win.Design" Version="23.1.5" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.374.126" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Bindings.Https.Debug" Version="1.5.374.126" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.374.126" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client.ComplexTypes.Debug" Version="1.5.374.126" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.374.126" />
-    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.374.126" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.375.443" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Bindings.Https.Debug" Version="1.5.375.443" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.375.443" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client.ComplexTypes.Debug" Version="1.5.375.443" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.375.443" />
+    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.375.443" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,0 +1,168 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>8.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>	  <!--XML comment 관련 경고-->
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+		<RootNamespace>Dual.Common.Core.FS</RootNamespace>
+		<PackageId>DualSoft-Common-Core-FS</PackageId>
+		<PackageTags>F#,Common,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Description>Dual.Common.Core.FS</Description>
+		<Title>Dual.Common.Core.FS</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
+
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+
+	</PropertyGroup>
+	
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+        <ItemGroup>
+            <DocFile Include="$(SolutionDir)\bin\$(TargetFramework)\Dual.Common.Core.FS.xml" />
+        </ItemGroup>
+
+		<!--<Message Text="SolutionDir\bin\TargetFramework: $(SolutionDir)\bin\$(TargetFramework)" Importance="high" />
+		<Message Text="Current TargetFramework: $(TargetFramework)" Importance="high" />
+		<Message Text="OutputPath: $(OutputPath)" Importance="high" />-->
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+    </Target>
+
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+		<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.Core.FS.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
+		<Compile Include="AssemblyInfo.fs" />
+		<Compile Include="Interfaces.fs" />
+		<Compile Include="Prelude.fs" />
+		<Compile Include="Prelude.AdhocPolymorphism.fs" />
+		<Compile Include="ActivePattern.fs" />
+		<Compile Include="ForwardDecl.fs" />
+		<Compile Include="FSharpJson.fs" />
+		<None Include="FSharpFSIs\array.fsi" />
+		<None Include="FSharpFSIs\array2.fsi" />
+		<None Include="FSharpFSIs\array3.fsi" />
+		<None Include="FSharpFSIs\async.fsi" />
+		<None Include="FSharpFSIs\collections.fsi" />
+		<None Include="FSharpFSIs\event.fsi" />
+		<None Include="FSharpFSIs\eventmodule.fsi" />
+		<None Include="FSharpFSIs\fslib-extra-pervasives.fsi" />
+		<None Include="FSharpFSIs\Linq.fsi" />
+		<None Include="FSharpFSIs\list.fsi" />
+		<None Include="FSharpFSIs\local.fsi" />
+		<None Include="FSharpFSIs\mailbox.fsi" />
+		<None Include="FSharpFSIs\map.fsi" />
+		<None Include="FSharpFSIs\nativeptr.fsi" />
+		<None Include="FSharpFSIs\observable.fsi" />
+		<None Include="FSharpFSIs\option.fsi" />
+		<None Include="FSharpFSIs\prim-types.fsi" />
+		<None Include="FSharpFSIs\prim-types-prelude.fsi" />
+		<None Include="FSharpFSIs\printf.fsi" />
+		<None Include="FSharpFSIs\Query.fsi" />
+		<None Include="FSharpFSIs\quotations.fsi" />
+		<None Include="FSharpFSIs\reflect.fsi" />
+		<None Include="FSharpFSIs\result.fsi" />
+		<None Include="FSharpFSIs\seq.fsi" />
+		<None Include="FSharpFSIs\seqcore.fsi" />
+		<None Include="FSharpFSIs\set.fsi" />
+		<None Include="FSharpFSIs\string.fsi" />
+		<Compile Include="ComputationExpressions\ImperativeBuilder.fs" />
+		<Compile Include="ComputationExpressions\DisposableBuilder.fs" />
+		<Compile Include="ComputationExpressions\OptionBuilder.fs" />
+		<Compile Include="ComputationExpressions\ChooseSeqBuilder.fs" />
+		<Compile Include="ComputationExpressions\ResultBuilder.fs" />
+		<Compile Include="ComputationExpressions\AsyncOptionBuilder.fs" />
+		<Compile Include="ComputationExpressions\StateBuilder.fs" />
+		<Compile Include="ComputationExpressions\StringBufferBuilder.fs" />
+		<Compile Include="Module\App.Config.fs" />
+		<Compile Include="Module\Log4NetWrapper.fs" />
+		<Compile Include="Module\Functions.fs" />
+		<Compile Include="Module\Collection.Algo.fs" />
+		<Compile Include="Module\String.fs" />
+		<Compile Include="Module\QualifiedAccess\Task.fs" />
+		<Compile Include="Module\QualifiedAccess\Async.fs" />
+		<Compile Include="Module\QualifiedAccess\Seq.fs" />
+		<Compile Include="Module\QualifiedAccess\Tuple.fs" />
+		<Compile Include="Module\QualifiedAccess\Option.fs" />
+		<!--<Compile Include="Module\QualifiedAccess\Option.fs" />-->
+		<Compile Include="Module\QualifiedAccess\Array.fs" />
+		<Compile Include="Module\QualifiedAccess\Bytes.fs" />
+		<Compile Include="Module\QualifiedAccess\List.fs" />
+		<Compile Include="Module\QualifiedAccess\DiscriminatedUnions.fs" />
+		<Compile Include="Module\QualifiedAccess\Generic.fs" />
+		<Compile Include="Module\QualifiedAccess\ResizeArray.fs" />
+		<Compile Include="Module\QualifiedAccess\Map.fs" />
+		<Compile Include="Module\QualifiedAccess\Nullable.fs" />
+		<Compile Include="Module\QualifiedAccess\Result.fs" />
+		<Compile Include="Module\QualifiedAccess\String.fs" />
+		<Compile Include="Module\QualifiedAccess\Collection.fs" />
+		<Compile Include="Module\Print.fs" />
+		<Compile Include="Module\TcpIp.fs" />
+		<Compile Include="Module\Reflection.fs" />
+		<Compile Include="TypeExtensions\ObjectHolder.fs" />
+		<Compile Include="TypeExtensions\ObjectHolderV2.fs" />
+		<Compile Include="TypeExtensions\Xml.fs" />
+		<Compile Include="TypeExtensions\Em.Option.fs" />
+		<Compile Include="TypeExtensions\Em.Result.fs" />
+		<Compile Include="TypeExtensions\Em.Collection.fs" />
+		<Compile Include="TypeExtensions\Em.Dictionary.fs" />
+		<Compile Include="TypeExtensions\DynamicDictionary.fs" />
+		<Compile Include="TypeExtensions\Em.FSharp.Collection.fs" />
+		<Compile Include="Graph\Graph.fs" />
+		<Compile Include="Graph\QuickGraph.fsx" />
+		<Compile Include="FeatureTest\OptionalArgumentTest.fs" />
+		<None Include="FSX\loadlib.fsx" />
+		<None Include="fsx\OperatorOverloading.fsx" />
+		<None Include="fsx\monad\list.fsx" />
+		<None Include="fsx\monad\Car.fsx" />
+		<None Include="fsx\monad\StringBuilder.fsx" />
+		<None Include="fsx\monad\LogBuidler.fsx" />
+		<None Include="FSX\Monad\Monad.fsx" />
+		<None Include="fsx\Monad\Monad_custom_operator.fsx" />
+		<None Include="FSX\Monad\IoMonad.fsx" />
+		<Folder Include="fsx\HighOrderFunctions\" />
+		<None Include="fsx\highorderfunctions\fold.fsx" />
+		<None Include="FSX\FSharp6.0.fsx" />
+		<None Include="FSX\FSharp8.0.fsx" />
+		<None Include="FSX\BleedingEdges.fsx" />
+		<Compile Include="EntryPoint.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+		<PackageReference Include="System.Reactive" Version="6.0.1" />
+		<PackageReference Include="log4net" Version="2.0.17" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="FSharp.Json" Version="0.4.1" />
+		<PackageReference Include="Fody" Version="6.8.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="ModuleInit.Fody" Version="2.1.1">
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
+	  <ProjectReference Include="..\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup />
+</Project>

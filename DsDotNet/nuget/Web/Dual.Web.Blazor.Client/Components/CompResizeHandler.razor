@@ -1,0 +1,80 @@
+﻿@* CompResizeHandler *@
+@implements IAsyncDisposable
+
+
+<div id="@_divId">
+    @ChildContent
+</div>
+
+@code {
+    string _divId = "myResizeHandler" + Guid.NewGuid().ToString();
+    DotNetObjectReference<CompResizeHandler> _dotNetObjRef;
+
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public Func<double, double, Task> OnResizedAsync { get; set; }   // Action<double, double> 대신, 비동기 처리를 위해 Func<double, double, Task> 사용
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotNetObjRef = DotNetObjectReference.Create(this);
+            await JsDual.Eval(_snippet);
+            await JsRuntime.InvokeVoidAsync("initializeResizeObserver", _divId, _dotNetObjRef);
+        }
+    }
+
+    [JSInvokable]
+    public void OnResize(double width, double height)
+    {
+        //Console.WriteLine($"+++++++++++++++++++++++++++ Div resized: {width}x{height}");
+        OnResizedAsync?.Invoke(width, height);
+        // 크기 변경에 따른 로직 처리
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_dotNetObjRef != null)
+        {
+            await JsRuntime.InvokeVoidAsync("disposeResizeObserver", _divId); // JavaScript 함수 호출
+            _dotNetObjRef.Dispose();
+        }
+    }
+
+    string _snippet = @"
+        window.resizeObservers = {}; // resizeObserver 인스턴스를 저장할 객체
+
+        window.initializeResizeObserver = function (divId, dotNetRef) {
+            const div = document.getElementById(divId);
+            const resizeObserver = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    const { width, height } = entry.contentRect;
+
+                    try {
+                        dotNetRef.invokeMethodAsync('OnResize', width, height)
+                            .catch(e => {
+                                console.error('Error: JS 에서 C# 메소드 호출 시 오류 발생:', e);
+                                // 여기서 필요한 경우 리소스를 정리하거나 추가 조치를 취합니다.
+                                resizeObserver.disconnect(); // 오류 발생 시 관찰 중지
+                            });
+                    } catch (error) {
+                        console.error('Error interacting with the dotNetRef:', error);
+                        // 오류 처리 로직 (예: 리소스 정리)
+                        resizeObserver.disconnect(); // 예외 발생 시 관찰 중지
+                        break; // 더 이상의 처리를 중단
+                    }
+                }
+            });
+
+            resizeObserver.observe(div);
+            window.resizeObservers[divId] = resizeObserver; // divId를 키로 사용하여 저장
+        };
+        window.disposeResizeObserver = function (divId) {
+            const resizeObserver = window.resizeObservers[divId];
+            if (resizeObserver) {
+                resizeObserver.disconnect(); // 등록 해제
+                delete window.resizeObservers[divId]; // 객체에서 해당 항목 제거
+            }
+        };
+    ";
+}
+

@@ -1,0 +1,49 @@
+@using System.Net
+@using Dual.Web.Blazor.Auth;
+@using System.Net.Http.Json
+@using Dual.Web.Blazor.Client.Auth
+
+<div class="row">
+    <div class="col-lg-4 offset-lg-4 pt-4 pb-4 border">
+        <div class="mb-3 text-center">
+            <h3>LOGIN</h3>
+        </div>
+        <form class="mb-3" @onsubmit="@Enter">
+            <label>User Name</label>
+            <input @bind="_loginRequest.UserName" class="form-control" placeholder="User Name"/>
+        </form>
+        <form class="mb-3" @onsubmit="@Enter">
+            <label>Password</label>
+            <input @bind="_loginRequest.Password" type="password" class="form-control" placeholder="Password"/>
+        </form>
+        <div class="mb-3 d-grid gap-2">
+            <button @onclick="Authenticate" class="btn btn-primary">Login</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginRequest _loginRequest = new();
+
+    private async void Enter() => await Authenticate();
+
+    private async Task Authenticate()
+    {
+        var loginResponse = await Http.PostAsJsonAsync<LoginRequest>("/api/auth/login", _loginRequest);
+        Console.WriteLine($"Requesting Login: {_loginRequest.UserName} : {loginResponse.IsSuccessStatusCode}");
+
+        if (loginResponse.IsSuccessStatusCode)
+        {
+            var userSession = await loginResponse.Content.ReadFromJsonAsync<UserSession>();
+            var customAuthStateProvider = (CustomAuthenticationStateProvider)AuthenticationStateProvider;
+            await customAuthStateProvider.UpdateAuthenticationState(userSession);
+            NavigationManager.NavigateTo("/", true);
+            return;
+        }
+        
+        if (loginResponse.StatusCode == HttpStatusCode.Unauthorized)
+            await JsRuntime.InvokeVoidAsync("alert", "Invalid User Name or Password");
+        else
+            await JsRuntime.InvokeVoidAsync("alert", $"Login failed with code: {loginResponse.StatusCode}");
+    }
+}

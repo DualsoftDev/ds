@@ -1,0 +1,83 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<!-- <TargetFrameworks>net48;net8.0;net8.0-windows</TargetFrameworks> -->
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>8.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<RootNamespace>Dual.PLC.XGComm.FS</RootNamespace>
+		<PackageId>DualSoft-PLC-LS-XgCOM-FS</PackageId>
+		<PackageTags>XgCOM,PLC,LS.FS,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Dual.PLC.LS.XgCOM.FS</Description>
+		<Title>Dual.PLC.LS.XgCOM.FS</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>false</SignAssembly> <!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+
+
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\$(TargetFramework)\Dual.PLC.LS.XgCOM.FS.xml" />
+		</ItemGroup>
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+
+
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+		<None Include="$(OutputPath)\$(TargetFramework)\Dual.PLC.LS.XgCOM.FS.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="AssemblyInfo.fs" />
+		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
+		<Compile Include="Utilities.fs" />
+		<Compile Include="XGTConnection.fs" />
+		<Compile Include="XGTTagInfo.fs" />
+		<Compile Include="XGTReadBatch.fs" />
+		<Compile Include="XGTScan.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <COMReference Include="XGCommLib">
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <VersionMinor>0</VersionMinor>
+	    <VersionMajor>1</VersionMajor>
+	    <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+	    <Lcid>0</Lcid>
+	    <Isolated>false</Isolated>
+	    <EmbedInteropTypes>true</EmbedInteropTypes>
+	  </COMReference>
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+		<PackageReference Include="System.Reactive" Version="6.0.1" />
+		<PackageReference Include="log4net" Version="2.0.17" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+		<ProjectReference Include="..\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Interop.XGCommLib">
+	    <HintPath>Interop.XGCommLib.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
+
+</Project>

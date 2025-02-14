@@ -1,0 +1,85 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<TargetFramework Condition="'$(TargetFramework)' == ''">net7.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<!--<Nullable>enable</Nullable>-->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<StaticWebAssetBasePath>_content/Dual.Web.Blazor.Client</StaticWebAssetBasePath>
+		<NoWarn>$(NoWarn);CS1591;CS8002</NoWarn>	<!--Missing XML comment for publicly visible type or member-->
+		<BlazorWebAssemblyEnableLinking>true</BlazorWebAssemblyEnableLinking>
+
+
+		<PackageId>DualSoft-Web-Blazor-Client</PackageId>
+		<PackageTags>Client, Blazor, Web,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Dual.Web.Blazor.Client</Description>
+		<Title>Dual.Web.Blazor.Client</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\Dual.Web.Blazor.Client.xml" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="" />
+		<None Include="$(OutputPath)\Dual.Web.Blazor.Client.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+
+
+
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="9.0.1" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="9.0.1" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="8.0.12" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.12" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="7.0.20" />
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.20" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="DevExpress.Blazor" Version="23.2.3" />
+		<PackageReference Include="Blazored.SessionStorage" Version="2.4.0" />
+		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
+		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="All" />
+		<PackageReference Include="Radzen.Blazor" Version="5.1.2" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Dual.Web.Blazor\Dual.Web.Blazor.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="wwwroot\css\" />
+	  <Folder Include="wwwroot\js\" />
+	</ItemGroup>
+
+</Project>

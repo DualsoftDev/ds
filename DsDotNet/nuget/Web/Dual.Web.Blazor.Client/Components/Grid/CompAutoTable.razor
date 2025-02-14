@@ -1,0 +1,51 @@
+﻿@* ComAutoTable *@
+@* https://www.youtube.com/watch?v=jsWVIV5ykQM&list=PLgRlicSxjeMOwJyqendhcntDqEjCBncci&index=14 *@
+
+@using System.Reflection
+@typeparam TItem
+
+<table class="@($"table custom-table {CssClass}")">
+<thead>
+        <tr>
+            @foreach (var prop in _props)
+            {
+                string columnName = prop.Name;
+                if (RenameColumns.ContainsKey(prop.Name))
+                    columnName = RenameColumns[prop.Name];
+                <th><b>@columnName</b></th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Items)
+        {
+            <tr>
+                @foreach (var prop in _props)
+                {
+                    <td>@prop.GetValue(item)</td>
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+@code {
+    PropertyInfo[] _props;
+    [EditorRequired][Parameter] public TItem[] Items { get; set; }
+    [Parameter] public string CssClass { get; set; }
+    [Parameter] public string[] ExcludeColumns { get; set; } = [];
+    [Parameter] public Dictionary<string, string> RenameColumns { get; set; } = new();
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        _props =
+            typeof(TItem).GetProperties()
+            .Where(pi => !ExcludeColumns.Contains(pi.Name))
+            .ToArray();
+    }
+}
+
+<style>
+    .custom-table th {
+        font-size: 1.1em; /* 폰트 크기를 조정 */
+    }
+</style>

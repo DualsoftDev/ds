@@ -1,0 +1,18 @@
+﻿@* CompTooltipCentered.razor *@
+
+@code {
+    CompShowHide _refCompShowHide;
+    [Parameter] public RenderFragment NormalContent { get; set; }
+    [Parameter] public RenderFragment TooltipContent { get; set; }
+}
+
+<div class="tooltip-container">
+    <div onmouseover=@(async () => await _refCompShowHide.Show())
+         onmouseout=@(async () => await _refCompShowHide.Hide())>
+        @NormalContent
+        <CompShowHide CssClass="ds-absolute-centered" @ref="_refCompShowHide">
+            @TooltipContent
+        </CompShowHide>
+    </div>
+</div>
+

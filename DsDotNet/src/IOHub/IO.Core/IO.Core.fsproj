@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net48;net8.0</TargetFrameworks>
+        <TargetFrameworks>netstandard2.0</TargetFrameworks>
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
@@ -36,20 +36,10 @@
         <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>
 
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Core" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Db" Version="0.5.1" />
-	</ItemGroup>
-
 
 	<ItemGroup>
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" />
         <ProjectReference Include="..\IO.Spec\IO.Spec.csproj" />
     </ItemGroup>
 

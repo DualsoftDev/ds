@@ -1,0 +1,74 @@
+<Project Sdk="Microsoft.NET.Sdk.Razor">
+	<PropertyGroup>
+		<TargetFramework Condition="'$(TargetFramework)' == ''">net7.0</TargetFramework>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<LangVersion>12.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<!--<Nullable>enable</Nullable>-->
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Platforms>AnyCPU;x86</Platforms>
+		<StaticWebAssetBasePath>_content/Dual.Web.Blazor.Client.Canvas2d</StaticWebAssetBasePath>
+		<NoWarn>$(NoWarn);CS1591;CS1587;CS1572;CS8002</NoWarn>	<!--Missing XML comment for publicly visible type or member-->
+
+		<PackageId>DualSoft-Web-Blazor-Client-Canvas2d</PackageId>
+		<PackageTags>Canvas2d, Web,Dual</PackageTags>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<Description>Dual.Web.Blazor.Client.Canvas2d</Description>
+		<Title>Dual.Web.Blazor.Client.Canvas2d</Title>
+		<Version>0.5.5</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+	</PropertyGroup>
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\Dual.Web.Blazor.Client.Canvas2d.xml" />
+		</ItemGroup>
+
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath=""/>
+		<None Include="$(OutputPath)\Dual.Web.Blazor.Client.Canvas2d.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<SupportedPlatform Include="browser" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="8.0.12" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+		<PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="7.0.20" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="Blazor.Extensions.Canvas" Version="1.1.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+	  <ProjectReference Include="..\Dual.Web.Blazor.Client\Dual.Web.Blazor.Client.csproj" />
+	  <ProjectReference Include="..\Dual.Web.Blazor\Dual.Web.Blazor.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Mouse\" />
+	</ItemGroup>
+
+</Project>

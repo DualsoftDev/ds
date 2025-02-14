@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0;net8.0-windows</TargetFrameworks>
+		<OutputType>Exe</OutputType>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>false</WarningsAsErrors>
+	</PropertyGroup>
+	
+	<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Akka" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-AppSettings" Version="0.5.5" />
+
+		<PackageReference Include="DualSoft-Common-Base-CS" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.5.5" />
+		
+		<PackageReference Include="DualSoft-Common-Core" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.5.5" />
+		<PackageReference Include="DualSoft-PLC-LS-XgCOM-FS" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-Db" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-IonicZip" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-Utils" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-Winform" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Common-UnitTest-FS" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Web-Blazor" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Web-Blazor-Client" Version="0.5.5" />
+		<PackageReference Include="DualSoft-Web-Blazor-Client-Canvas2d" Version="0.5.5" />
+		<!--<PackageReference Include="DualSoft-Web-Blazor-Server" Version="0.4.1"/>-->
+		<PackageReference Include="DualSoft-Web-Server" Version="0.5.5" />
+
+		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.5.5" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="Radzen.Blazor" Version="0.5.5" />
+	</ItemGroup>
+
+
+	<!--<ItemGroup>
+		<PackageReference Include="DualSoft-Common-Winform" Version="0.4.1" />
+		<PackageReference Include="DualSoft-Common-Resources" Version="0.4.1" />
+	</ItemGroup>-->
+
+</Project>

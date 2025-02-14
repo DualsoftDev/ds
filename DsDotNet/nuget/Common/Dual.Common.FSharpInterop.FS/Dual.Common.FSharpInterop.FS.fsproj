@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFrameworks>net48;net8.0</TargetFrameworks>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<LangVersion>8.0</LangVersion>
+		<OutputType>Library</OutputType>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>
+		<RootNamespace>Dual.Common.FSharpInterop.FS</RootNamespace>
+		<PackageId>DualSoft-Common-FSharpInterop-FS</PackageId>
+		<PackageReadmeFile>Readme.md</PackageReadmeFile>
+		<GenerateDocumentationFile>True</GenerateDocumentationFile>
+		<Description>Dual.Common.FSharpInterop.FS</Description>
+		<Title>Dual.Common.FSharpInterop.FS</Title>
+		<Version>0.3.3</Version>
+		<Company>Dual Inc.</Company>
+		<Authors>Dual Inc.</Authors>
+		<OutputPath>$(SolutionDir)\bin</OutputPath>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+	</PropertyGroup>
+
+	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">
+		<ItemGroup>
+			<DocFile Include="$(SolutionDir)\bin\$(TargetFramework)\Dual.Common.FSharpInterop.FS.xml" />
+		</ItemGroup>
+		<Copy SourceFiles="@(DocFile)" DestinationFolder="$(SolutionDir)\bin" />
+	</Target>
+
+	<ItemGroup>
+		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
+		<Compile Include="AssemblyInfo.fs" />
+		<Compile Include="EmOption.fs" />
+		<Compile Include="EmCollection.fs" />
+		<Compile Include="EmAsync.fs" />
+	</ItemGroup>
+
+
+
+	<ItemGroup>
+		<!--지우지 마세요!! Packaing 을 위해 필요 -->
+		<None Include="Readme.md" Pack="true" PackagePath="\" />
+		<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.FSharpInterop.FS.xml" Pack="true" PackagePath="" />
+	</ItemGroup>
+
+
+	
+	
+	
+</Project>

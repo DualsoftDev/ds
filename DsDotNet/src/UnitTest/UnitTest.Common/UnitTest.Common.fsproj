@@ -24,20 +24,6 @@
         <PackageReference Include="xunit" Version="2.9.0" />
     </ItemGroup>
 
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.UnitTest.FS\Dual.Common.UnitTest.FS.fsproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-Common-Base-FS" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Core-FS" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-Core" Version="0.5.1" />
-		<PackageReference Include="DualSoft-Common-UnitTest-FS" Version="0.5.1" />
-	</ItemGroup>
-
 
 	<ItemGroup>
         <Compile Include="CommonTest\DiscriminatedUnionTest.fs" />
@@ -47,6 +33,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj" />
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
+        <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.UnitTest.FS\Dual.Common.UnitTest.FS.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Cpu\Engine.Cpu.fsproj" />

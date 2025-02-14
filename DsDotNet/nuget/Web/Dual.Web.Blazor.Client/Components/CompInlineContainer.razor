@@ -1,0 +1,48 @@
+﻿@* CompInlineContainer *@
+
+
+<div class="inline-container" @ref="_div">
+    @ChildContent
+</div>
+
+@code {
+    ElementReference _div;
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public int MarginRight { get; set; }
+
+    // @note: 블레이저의 <script> 사용 법:
+    // 1. window function 으로 등록해야 한다.
+    // 2. 최 외곽 client.exe 에서는 잘 동작하지만, library 로 등록된 dll 에서는 <script> 가 동작하지 않는다.
+    //    JsDual 등에 등록하거나 eval 을 이용해서 필요시 함수를 등록하도록 한다.
+    string _snippet = @"
+window.setMarginRight = (element, marginRight) => {
+    for ( const child of element.children) {
+        child.style.marginRight = marginRight + 'px';
+    };
+};
+";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await base.OnAfterRenderAsync(firstRender);
+        if (firstRender)
+        {
+            await JsDual.Eval(_snippet);
+
+            // _div 요소의 모든 child 요소들의 margin-right를 MarginRight 값으로 설정
+            await JsRuntime.InvokeVoidAsync("setMarginRight", new object[] { _div, MarginRight });
+        }
+    }
+}
+
+<style>
+    .inline-container {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+
+        .inline-container > * {
+            margin-right: 10px; /* 자식 요소들 사이의 간격 조정 */
+        }
+</style>

@@ -10,7 +10,6 @@ open NetMQ
 open NetMQ.Sockets
 open Dual.Common.Core.FS
 open System.IO
-open System.Runtime.Remoting
 open System.Reactive.Subjects
 open IO.Spec
 open Newtonsoft.Json
@@ -70,36 +69,36 @@ type Server(ioSpec_: IOSpec, cancellationToken: CancellationToken) =
         notifyToClients ()
         memoryChangedSubject.OnNext memChange
 
-    do
-        ioSpec <- ioSpec_
+    //do
+        //ioSpec <- ioSpec_
 
-        for v in ioSpec.Vendors do
-            v.AddressResolver <-
-                let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll)
-                let oh: ObjectHandle = Activator.CreateInstanceFrom(dllPath, v.ClassName)
-                let obj: obj = oh.Unwrap()
-                obj :?> IAddressInfoProvider
+        //for v in ioSpec.Vendors do
+        //    v.AddressResolver <-
+        //        let dllPath = if File.Exists(v.Dll) then v.Dll else Path.Combine(AppContext.BaseDirectory, v.Dll)
+        //        let oh: ObjectHandle = Activator.CreateInstanceFrom(dllPath, v.ClassName)
+        //        let obj: obj = oh.Unwrap()
+        //        obj :?> IAddressInfoProvider
 
-            //showSamples v v.AddressResolver
+        //    //showSamples v v.AddressResolver
 
-            for f in v.Files do
-                f.Vendor <- v
-                let dir, key =
-                    match v.Location with
-                    | ""
-                    | null -> ioSpec.TopLevelLocation, f.Name
-                    | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
+        //    for f in v.Files do
+        //        f.Vendor <- v
+        //        let dir, key =
+        //            match v.Location with
+        //            | ""
+        //            | null -> ioSpec.TopLevelLocation, f.Name
+        //            | _ -> Path.Combine(ioSpec.TopLevelLocation, v.Location), $"{v.Location}/{f.Name}"
 
-                f.InitiaizeFile(dir)
-                let streamManager = new StreamManager(f)
+        //        f.InitiaizeFile(dir)
+        //        let streamManager = new StreamManager(f)
 
-                let key =
-                    if v.Location.NonNullAny() then
-                        $"{v.Location}/{f.Name}"
-                    else
-                        f.Name
-                //경로가 있어서 항상 소문자로 관리
-                streamManagers.Add(key.ToLower(), streamManager)
+        //        let key =
+        //            if v.Location.NonNullAny() then
+        //                $"{v.Location}/{f.Name}"
+        //            else
+        //                f.Name
+        //        //경로가 있어서 항상 소문자로 관리
+        //        streamManagers.Add(key.ToLower(), streamManager)
 
     let mutable terminated = false
 

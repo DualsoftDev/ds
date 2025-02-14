@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>  
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<RootNamespace>OPC.DSServer</RootNamespace>
         <LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
@@ -33,12 +33,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.374.126" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.375.443" />
 	  <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\..\Submodules\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 	  <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
 	</ItemGroup>
 

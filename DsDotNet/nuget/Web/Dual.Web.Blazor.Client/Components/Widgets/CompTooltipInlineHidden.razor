@@ -1,0 +1,34 @@
+﻿@* CompTooltipInlineHidden *@
+<!-- CompTooltipInlineHidden.razor -->
+
+@code {
+    CompShowHide _refCompShowHide;
+    [Parameter] public RenderFragment NormalContent { get; set; }
+    [Parameter] public RenderFragment TooltipContent { get; set; }
+    [Parameter] public bool UseSpan { get; set; } = false;
+}
+
+@if (UseSpan)
+{
+    <span class="tooltip-container">
+        <span onmouseover=@(async () => await _refCompShowHide.Show())
+              onmouseout=@(async () => await _refCompShowHide.Hide())>
+            @NormalContent
+            <CompShowHide UseSpan="true" @ref="_refCompShowHide">
+                @TooltipContent
+            </CompShowHide>
+        </span>
+    </span>
+}
+else
+{
+    <div class="tooltip-container">
+        <div onmouseover=@(async () => await _refCompShowHide.Show())
+             onmouseout=@(async () => await _refCompShowHide.Hide())>
+            @NormalContent
+            <CompShowHide UseSpan="true" @ref="_refCompShowHide">
+                @TooltipContent
+            </CompShowHide>
+        </div>
+    </div>
+}

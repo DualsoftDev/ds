@@ -43,7 +43,7 @@ module DsOpcUaServerManager =
         application.ApplicationConfiguration <- config
 
         // 3. 인증서  확인
-        let isCertValid  = application.CheckApplicationInstanceCertificate(false, 2048us).Result
+        let isCertValid  = application.CheckApplicationInstanceCertificates(false, 2048us).Result
         if not(isCertValid)
         then
             failwith("Failed to validate or generate the application certificate.")

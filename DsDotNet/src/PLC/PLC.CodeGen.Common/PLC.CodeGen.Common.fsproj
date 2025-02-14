@@ -39,16 +39,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
-		<ProjectReference Include="..\..\..\..\Submodules\nuget\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
-	</ItemGroup>
-
-	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
-		<PackageReference Include="DualSoft-PLC-TagParser-FS" Version="0.5.1" />
-	</ItemGroup>
 
 
 	<ItemGroup>

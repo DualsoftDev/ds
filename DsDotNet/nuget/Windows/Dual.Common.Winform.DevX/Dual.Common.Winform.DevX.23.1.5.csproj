@@ -1,0 +1,249 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <RootNamespace>Dual.Common.Winform.DevX2414</RootNamespace>
+    <LangVersion>8.0</LangVersion>
+    <SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9844813A-CCAC-43CF-928F-0EF95935837D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Dual.Common.Winform.DevX</RootNamespace>
+    <AssemblyName>Dual.Common.Winform.DevX.23.1.5</AssemblyName>
+    <SignAssembly>True</SignAssembly>
+    <AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+    <TargetFrameworkVersion>v4.8.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <PackageId>DualSoft-Common-Winform-DevX-23.1.5</PackageId>
+    <PackageTags>Common,Dual,Winform,DevExpress</PackageTags>
+    <PackageReadmeFile>Readme.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>Dual.Common.Core</Description>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject />
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DevExpress.BonusSkins.v23.1" />
+    <Reference Include="DevExpress.Data.Desktop.v23.1" />
+    <Reference Include="DevExpress.Data.v23.1" />
+    <Reference Include="DevExpress.Utils.v23.1" />
+    <Reference Include="DevExpress.Sparkline.v23.1.Core" />
+    <Reference Include="DevExpress.XtraEditors.v23.1" />
+    <Reference Include="DevExpress.Printing.v23.1.Core" />
+    <Reference Include="DevExpress.Drawing.v23.1" />
+    <Reference Include="DevExpress.XtraGrid.v23.1, Version=23.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v23.1, Version=23.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPrinting.v23.1, Version=23.1.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="Dual.Common.Core.FS">
+      <HintPath>..\..\..\..\DsDotNet\bin\net48\Dual.Common.Core.FS.dll</HintPath>
+    </Reference>
+    <Reference Include="FSharp.Core, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\DsDotNet\packages\FSharp.Core.8.0.401\lib\netstandard2.0\FSharp.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Reactive, Version=6.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\DsDotNet\packages\System.Reactive.6.0.1\lib\net472\System.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\DsDotNet\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\DsDotNet\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ButtonExtension.cs" />
+    <Compile Include="ComboSelector.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DxFormOkCancelSample.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DxFormOkCancelSample.Designer.cs">
+      <DependentUpon>DxFormOkCancelSample.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DxFormWithPanel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DxFormWithPanel.Designer.cs">
+      <DependentUpon>DxFormWithPanel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormCloseSample.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormCloseSample.Designer.cs">
+      <DependentUpon>FormCloseSample.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormEditableList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormEditableList.Designer.cs">
+      <DependentUpon>FormEditableList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormSelectableList.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\FormSelectableList.Designer.cs">
+      <DependentUpon>FormSelectableList.cs</DependentUpon>
+    </Compile>
+    <Compile Include="GridControl\EmGrid.cs" />
+    <Compile Include="GridControl\EmGrid.MultiValueEditColumn.cs" />
+    <Compile Include="GridControl\EmGridColumn.ComboWithMoreOption.cs" />
+    <Compile Include="GridControl\EmGridColumn.cs" />
+    <Compile Include="GridControl\EmGridControl.cs" />
+    <Compile Include="GridControl\EmGridView.cs" />
+    <Compile Include="MBox.cs" />
+    <Compile Include="TextEditExtensions.cs" />
+    <Compile Include="UserControls\UcEditableStringList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcRadioSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcRadioSelector.Designer.cs">
+      <DependentUpon>UcRadioSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcSelectableStringList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcTypedValueEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcTypedValueEditor.Designer.cs">
+      <DependentUpon>UcTypedValueEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\UcValuePredicate.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\UcValuePredicate.Designer.cs">
+      <DependentUpon>UcValuePredicate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="VFormGridBase.cs" />
+    <Compile Include="VFormWith.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="GridControl\UcDxGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="GridControl\UcDxGrid.Designer.cs">
+      <DependentUpon>UcDxGrid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="DcWaitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="DcWaitForm.Designer.cs">
+      <DependentUpon>DcWaitForm.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="DxFormOkCancelSample.resx">
+      <DependentUpon>DxFormOkCancelSample.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DxFormWithPanel.resx">
+      <DependentUpon>DxFormWithPanel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormCloseSample.resx">
+      <DependentUpon>FormCloseSample.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormEditableList.resx">
+      <DependentUpon>FormEditableList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\FormSelectableList.resx">
+      <DependentUpon>FormSelectableList.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="GridControl\UcDxGrid.resx">
+      <DependentUpon>UcDxGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\UcRadioSelector.resx">
+      <DependentUpon>UcRadioSelector.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\UcTypedValueEditor.resx">
+      <DependentUpon>UcTypedValueEditor.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\UcValuePredicate.resx">
+      <DependentUpon>UcValuePredicate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="DcWaitForm.resx">
+      <DependentUpon>DcWaitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="Readme.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\DsDotNet\Apps\PptAddIn\PptToDs.FS\PptToDs.FS.fsproj">
+      <Project>{e1a39ef5-9699-4bd2-a413-48f7381870a2}</Project>
+      <Name>PptToDs.FS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Dual.Common.Base.CS\Dual.Common.Base.CS.csproj">
+      <Project>{8BABBF8C-273A-44CB-8BC3-3B3BAA80166A}</Project>
+      <Name>Dual.Common.Base.CS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj">
+      <Project>{20abe5fa-c497-4905-aff8-cbb1d5a33ef5}</Project>
+      <Name>Dual.Common.Base.FS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Dual.Common.Winform\Dual.Common.Winform.csproj">
+      <Project>{d0457e88-a3b9-4fc8-861e-ed149d288f24}</Project>
+      <Name>Dual.Common.Winform</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

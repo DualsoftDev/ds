@@ -55,7 +55,7 @@ module ImportUtilForDev =
             if Net48Path.Exists (Path.Combine(runDir, "dsLib")) then
                 runDir
             else
-                @$"{__SOURCE_DIRECTORY__}../../../../Apps/DSpa/DSpa/"
+                @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils"
 
         let curDir = currentFileName |> Path.GetDirectoryName
 

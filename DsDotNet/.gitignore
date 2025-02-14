@@ -188,16 +188,8 @@ docsrc/tools/FSharp.Formatting.svclog
 
 Ds.linux.sln
 
-Apps/DSModeler/App.config
-Apps/HMI/AppHMI/App.config
-Apps/INFO/AppINFO/App.config
-
-Apps/DSModeler/App.config
-Apps/HMI.Obsolete/AppHMI/App.config
-Apps/INFO/AppINFO/App.config
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.xml
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.ds
-Apps/CommonAppSettings.json
 Experimental/
 src/UnitTest/dualsoft.json
 packages

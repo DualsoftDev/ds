@@ -186,25 +186,18 @@ docsrc/content/release-notes.md
 .fake
 docsrc/tools/FSharp.Formatting.svclog
 
-src/Engine/Engine.Parser/g4s
 Ds.linux.sln
 
 Apps/DSModeler/App.config
 Apps/HMI/AppHMI/App.config
 Apps/INFO/AppINFO/App.config
 
-
 Apps/DSModeler/App.config
 Apps/HMI.Obsolete/AppHMI/App.config
 Apps/INFO/AppINFO/App.config
-Apps/OfficeAddIn/PowerPointAddInHelper/App.config
-src/IOHub/IO.Core/zmqsettings.json
-src/Web/DsWebApp.Server/appsettings.json
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.xml
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.ds
 Apps/CommonAppSettings.json
-Directory.Build.props
-Directory.Packages.props
 Experimental/
 src/UnitTest/dualsoft.json
 packages

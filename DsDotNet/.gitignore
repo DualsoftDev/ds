@@ -189,7 +189,6 @@ docsrc/tools/FSharp.Formatting.svclog
 Ds.linux.sln
 
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.xml
-Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.ds
 Experimental/
 src/UnitTest/dualsoft.json
 packages

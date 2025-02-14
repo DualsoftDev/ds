@@ -77,8 +77,8 @@ module XgxGenerationTestModule =
         let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
         File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", xml)
         let answerXml = File.ReadAllText($"{xmlAnswerDir}/{testFunctionName}.xml")
-        //System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
-        answerXml === xml
+        System.String.Compare(answerXml, xml, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase ||| CompareOptions.IgnoreSymbols) === 0
+        //answerXml === xml
 
 
 [<AutoOpen>]

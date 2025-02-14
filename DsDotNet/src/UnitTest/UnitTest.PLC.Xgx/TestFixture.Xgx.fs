@@ -148,43 +148,43 @@ module XgxFixtures =
         /// - NPM package 설치
         ///
         ///   $ npm install xml-formatter
-        let formatXml (xml:string): string =
-            let cwd = __SOURCE_DIRECTORY__
-            // Node.js 실행 파일과 스크립트 경로를 설정
-            let nodePath = "node.exe"
-            let scriptPath = Path.Combine(cwd, "formatXml.mjs")
+        let formatXml (xml:string): string = xml
+            //let cwd = __SOURCE_DIRECTORY__
+            //// Node.js 실행 파일과 스크립트 경로를 설정
+            //let nodePath = "node.exe"
+            //let scriptPath = Path.Combine(cwd, "formatXml.mjs")
 
-            // 프로세스 시작 정보 설정
-            let psi = ProcessStartInfo(nodePath, $"\"{scriptPath}\"")
-            psi.WorkingDirectory <- cwd
-            psi.RedirectStandardInput <- true
-            psi.RedirectStandardOutput <- true
-            psi.RedirectStandardError <- true
-            psi.UseShellExecute <- false
-            psi.StandardOutputEncoding <- Encoding.UTF8  // 출력 인코딩을 UTF-8로 설정
-            psi.StandardErrorEncoding <- Encoding.UTF8   // 에러 인코딩을 UTF-8로 설정
-            psi.StandardInputEncoding <- Encoding.UTF8   // 입력 인코딩을 UTF-8로 설정
+            //// 프로세스 시작 정보 설정
+            //let psi = ProcessStartInfo(nodePath, $"\"{scriptPath}\"")
+            //psi.WorkingDirectory <- cwd
+            //psi.RedirectStandardInput <- true
+            //psi.RedirectStandardOutput <- true
+            //psi.RedirectStandardError <- true
+            //psi.UseShellExecute <- false
+            //psi.StandardOutputEncoding <- Encoding.UTF8  // 출력 인코딩을 UTF-8로 설정
+            //psi.StandardErrorEncoding <- Encoding.UTF8   // 에러 인코딩을 UTF-8로 설정
+            //psi.StandardInputEncoding <- Encoding.UTF8   // 입력 인코딩을 UTF-8로 설정
 
-            // 프로세스 시작
-            use proc = Process.Start(psi)
+            //// 프로세스 시작
+            //use proc = Process.Start(psi)
 
-            // XML 입력 전달
-            proc.StandardInput.WriteLine(xml)
-            proc.StandardInput.Close() // 입력 스트림 종료
+            //// XML 입력 전달
+            //proc.StandardInput.WriteLine(xml)
+            //proc.StandardInput.Close() // 입력 스트림 종료
 
-            // 출력과 에러 읽기
-            let output = proc.StandardOutput.ReadToEnd()
-            let errors = proc.StandardError.ReadToEnd()
+            //// 출력과 에러 읽기
+            //let output = proc.StandardOutput.ReadToEnd()
+            //let errors = proc.StandardError.ReadToEnd()
 
-            // 프로세스 종료 대기
-            proc.WaitForExit()
+            //// 프로세스 종료 대기
+            //proc.WaitForExit()
 
-            // 에러가 있으면 예외 발생
-            if errors.NonNullAny() then
-                failwith $"ERROR while formatting xml: {errors}"
+            //// 에러가 있으면 예외 발생
+            //if errors.NonNullAny() then
+            //    failwith $"ERROR while formatting xml: {errors}"
 
-            // 포맷된 XML 반환
-            output.Replace("\r\n", "\n").Replace("\n", "\r\n")
+            //// 포맷된 XML 반환
+            //output.Replace("\r\n", "\n").Replace("\n", "\r\n")
 
 
 

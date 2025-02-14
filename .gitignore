@@ -39,6 +39,13 @@ Grammar/CsParser/bin/
 *.dsz
 
 /.vs
+
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.json
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.xlsx
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.state
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.xml
+/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.xlsx
+
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/demo/ppt/kit_DS_autogen/*
 
 /DsDotNet/Apps/OfficeAddOn/PowerPointAddInSetup/PowerPointAddIn
@@ -54,27 +61,21 @@ Grammar/CsParser/bin/
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/PowerPointAddIn/Application Files/*.*
 
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/SetupRelease/PowerPointAddIn For Dualsoft Setup.msi
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.xml
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.xlsx
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.ds
+
 /DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/**/*.xlsx
 /DsDotNet/src/UnitTest/UnitTest.PowerPointAddIn/**/*.xml
 
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.zip
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.ds
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/**/*.json
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/*.json
 /DsDotNet/src/UnitTest/UnitTest.Model/dualsoft.json
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.xlsx
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.ds
+
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/Sample.7z
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip
 /DsDotNet/src/IOHub/ThirdParty/LS/IOClient.Xgi/zmqhw.json
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/*.state
 /DsDotNet/*.lnk
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/SetupRelease/data/Data.msi
 
-/DsDotNet/Apps/OfficeAddIn/PowerPointAddInHelper/Utils/dsLib/Cylinder/DoubleCylinder.ds
 Logger.sqlite3
 Tmp/
 **/Unused/

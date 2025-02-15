@@ -14,6 +14,7 @@ open Dual.Common.Core.FS
 open Engine.CodeGenCPU
 open Newtonsoft.Json
 open System.Configuration
+open System.Collections.Concurrent
 
 [<AutoOpen>]
 module DsTimeAnalysisMoudle =
@@ -118,7 +119,7 @@ module DsTimeAnalysisMoudle =
 
 
     /// 태그별 통계 관리
-    let statsMap = Dictionary<string, CalcStats>()
+    let statsMap = ConcurrentDictionary<string, CalcStats>()
     let getStatsJson() = 
         statsMap
         |> Seq.filter(fun kvp -> kvp.Key.IsNonNull()) //null이 아닌 것만 필터링 todo null 아예 안나게 처리필요

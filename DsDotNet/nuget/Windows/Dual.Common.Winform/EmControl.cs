@@ -91,6 +91,13 @@ namespace Dual.Common.Winform
                 Trace.WriteLine($"Exception on Control.Do(): {ex}");
             }
         }
+        public static void DoInvoke(this Control control, Action action)
+        {
+            if (control.IsHandleCreated && control.InvokeRequired)
+                control.Invoke(action);
+            else
+                action();
+        }
 
         /*
          * 다음과 같은 형태로 사용

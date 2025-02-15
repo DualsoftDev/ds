@@ -535,12 +535,7 @@ public partial class UcView : UserControl
     public void RefreshGraph()
     {
         //viewer.Do(() => viewer.Refresh());   // control.IsHandleCreated 여기서 조건 안맞음 
-        if (viewer.InvokeRequired)
-        {
-            viewer.Invoke(() => viewer.Refresh());
-        }
-        else
-            viewer.Refresh();
+        viewer.DoInvoke(() => viewer.Refresh());
     }
 
     private Node findNode(ViewNode viewNode)

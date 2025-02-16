@@ -14,9 +14,9 @@ class Program
         // 테스트 케이스 정의
         var tagsPerPLC = new Dictionary<string, List<string>>
         {
-            { "127.0.0.1", new List<string> { "P0", "P1" } },
-            { "192.168.9.103", new List<string> { "M0000", "M0001" } },
-            { "192.168.9.100", new List<string> { "%MX0000", "%MW0001" } }
+            { "127.0.0.1", new List<string> { "%MX0000", "%MW0001"  } },
+            //{ "192.168.9.103", new List<string> { "P0", "P1" } },
+            //{ "192.168.9.100", new List<string> { "%MX0000", "%MW0001" } }
         };
         // 유효 수집 주소로 변경
         var tagsValidPerPLC = tagsPerPLC.ToDictionary(
@@ -47,7 +47,7 @@ class Program
         // 2️ **특정 PLC의 태그 업데이트 (`ScanUpdate1`)**
         Console.WriteLine("\n############## Updating Tags for 192.168.9.100...");
         var updatedTags1 = new List<string> { "%IX0010", "%IW0011" };
-        scanModule.ScanUpdate("192.168.9.100", updatedTags1);
+        scanModule.ScanUpdate("127.0.0.1", updatedTags1);
 
         // 3 **전체 PLC 모니터링 중지 (`Disconnect`)**
         Console.WriteLine("\n############## Stopping all PLC monitoring...");

@@ -160,11 +160,8 @@ module XGTScanModule =
                     )
 
                     if conn.CommObject.WriteRandomDevice(writeBuff[..iWrite-1]) <> 1 then
-                         if conn.IsConnected then
-                            let errMsg = String.Join(", ", tags.Select(fun f->f.TagName))
-                            failwith $"WriteRandomDevice Failed. {errMsg}"
-                        else 
-                            conn.ReConnect() |> ignore
+                         let errMsg = String.Join(", ", tags.Select(fun f->f.TagName))
+                         failwith $"WriteRandomDevice Failed. {errMsg}"
 
                     batch |> Array.iter (fun t -> t.ClearWriteValue())
 

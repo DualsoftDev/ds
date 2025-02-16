@@ -73,11 +73,5 @@
 		<ProjectReference Include="..\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Reference Include="Interop.XGCommLib">
-	    <HintPath>Interop.XGCommLib.dll</HintPath>
-	  </Reference>
-	</ItemGroup>
-
 
 </Project>

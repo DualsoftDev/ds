@@ -14,10 +14,16 @@ open Dual.Common.Core.FS
 module PptNodeModule =
 
     type PptPage(slidePart: SlidePart, iPage: int, bShow: bool) =
+        let title = slidePart.PageTitle()
+        do 
+            if title.Contains("_")
+            then 
+                Office.ErrorPpt(ErrorCase.Name, "페이지 이름에 '_' 사용을 금지합니다.", $"이름 : {title}", iPage, 0u, $"페이지이름오류")
+
         member x.PageNum = iPage
         member x.SlidePart = slidePart
         member x.IsUsing = bShow
-        member x.Title = slidePart.PageTitle()
+        member x.Title = title
 
     let private nameNFunc(shape:Shape, macros:MasterPageMacro seq, iPage: int) =
         let mutable macroUpdateName =

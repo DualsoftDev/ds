@@ -85,8 +85,8 @@ module TextImpl =
         else
             processedName
 
-    ///  "/";"\\ 경로기호 금지, '__' Flow 구분자 금지, '.' Quatation 구분자 금지
-    let invalidCharsSystem = [|"/"; "\\"; "__"; "."|]
+    ///  "/";"\\ 경로기호 금지, '.' Quatation 구분자 금지
+    let invalidCharsSystem = [|"/"; "\\"; "."|]
 
     let internal checkFlowName (name: string) =
         if invalidCharsSystem |> Seq.exists (fun f -> name.Contains(f)) then

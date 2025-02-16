@@ -26,10 +26,10 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
                 }}
                 [prop] = {{
                     [layouts] = {{
-                        f1__Device1 = (979, 460, 220, 80);
+                        f1_Device1 = (979, 460, 220, 80);
                     }}
                 }}
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] f1__Device1;
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] f1_Device1;
                 [versions] = {{
                     DS-Langugage-Version = 1.0.0.1;
                     DS-Engine-Version = 0.9.9.6;

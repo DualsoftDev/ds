@@ -60,7 +60,6 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	  <ProjectReference Include="..\..\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-	  <ProjectReference Include="..\..\PLC\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>

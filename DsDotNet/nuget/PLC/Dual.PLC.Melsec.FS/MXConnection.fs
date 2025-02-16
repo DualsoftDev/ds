@@ -1,4 +1,4 @@
-namespace DsXgComm
+namespace DsMxComm
 
 open System
 open Dual.Common.Core.FS
@@ -8,7 +8,6 @@ open Dual.PLC.Common.FS
 
 [<AutoOpen>]
 module DsXgConnect =
-
     type DsXgConnection(ip: string, port: int, onConnectChanged: ConnectChangedEventArgs -> unit) =
         let ipPort = $"{ip}:{port}"
 

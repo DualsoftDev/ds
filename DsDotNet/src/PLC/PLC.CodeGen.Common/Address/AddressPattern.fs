@@ -4,8 +4,8 @@ open Dual.Common.Base.FS
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
-open Dual.PLC.TagParser.FS
 open System
+open DsXgComm
 
 
 [<AutoOpen>]

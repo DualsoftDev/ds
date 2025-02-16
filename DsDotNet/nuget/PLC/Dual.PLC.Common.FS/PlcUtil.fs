@@ -1,10 +1,10 @@
-namespace DsXgComm
+namespace Dual.PLC.Common.FS
 
 open System
 open System.Runtime.CompilerServices
 
 [<AutoOpen>]
-module internal MonitorUtil =
+module PlcUtil =
     let getDiffBitPositions(n1: UInt64, n2: UInt64) =
         let xor = n1 ^^^ n2
         [ for i in 0..63 do

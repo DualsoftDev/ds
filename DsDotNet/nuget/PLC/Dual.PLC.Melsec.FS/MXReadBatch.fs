@@ -1,4 +1,4 @@
-namespace DsXgComm
+namespace DsMxComm
 
 open System
 open System.Collections.Generic
@@ -11,7 +11,7 @@ open XGCommLib
 [<AutoOpen>]
 module XGTReadBatchModule =
 
-    type LWBatch(buffer: byte[], deviceInfos: DeviceInfo[], tags: XGTTag[]) =
+    type LWBatch(buffer: byte[], deviceInfos: DeviceInfo[], tags: MelsecTag[]) =
         let mutable tags = tags
         member val Buffer = buffer with get, set
         member val DeviceInfos = deviceInfos with get
@@ -29,7 +29,7 @@ module XGTReadBatchModule =
             |> String.concat "\n"
 
     // Prepare batches for communication with PLC
-    let prepareReadBatches(conn: DsXgConnection, tagInfos: XGTTag[]) : LWBatch[] =
+    let prepareReadBatches(conn: DsXgConnection, tagInfos: MelsecTag[]) : LWBatch[] =
         let chunkInfos = tagInfos |> Array.groupBy(fun ti -> ti.LWordTag) |> Array.chunkBySize 64
 
         chunkInfos 

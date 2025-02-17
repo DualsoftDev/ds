@@ -77,7 +77,7 @@ module MelsecScanModule =
             |> Seq.toArray
             |> Array.map (fun tag ->
                 match tryParseMxTag tag with
-                | Some (devHead, size, offset) -> tag, MelsecTag(tag, size, offset)
+                | Some (_, size, offset) -> tag, MelsecTag(tag, size, offset)
                 | None -> 
                     if ['P';'M';'K';'F';'L'].Contains tag.[0] then
                         failwithlog $"Unknown device {tag} (P, M, K, F, L device length > 4)"

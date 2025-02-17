@@ -1,24 +1,17 @@
 <Project Sdk="Microsoft.NET.Sdk">
+	
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
-		<LangVersion>8.0</LangVersion>
-		<OutputType>Library</OutputType>
-		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<RootNamespace>Dual.PLC.XGComm.FS</RootNamespace>
-		<PackageId>DualSoft-PLC-LS-XgCOM-FS</PackageId>
-		<PackageTags>XgCOM,PLC,LS.FS,Dual</PackageTags>
-		<PackageReadmeFile>Readme.md</PackageReadmeFile>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<Description>Dual.PLC.LS.XgCOM.FS</Description>
-		<Title>Dual.PLC.LS.XgCOM.FS</Title>
-		<Version>0.5.5</Version>
-		<Company>Dual Inc.</Company>
-		<Authors>Dual Inc.</Authors>
-		<OutputPath>$(SolutionDir)\bin</OutputPath>
-		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<SignAssembly>false</SignAssembly> <!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
+		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>false</SignAssembly>
+		<!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 

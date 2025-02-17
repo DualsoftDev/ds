@@ -7,11 +7,12 @@ open System.Threading
 open Dual.PLC.Common.FS
 
 [<AutoOpen>]
-module DsXgConnect =
-    type DsXgConnection(ip: string, port: int, onConnectChanged: ConnectChangedEventArgs -> unit) =
+module DsMxConnect =
+
+    type DsMxConnection(ip: string, port: int, onConnectChanged: ConnectChangedEventArgs -> unit) =
         let ipPort = $"{ip}:{port}"
 
-        new (ip, onConnectChanged) = DsXgConnection(ip, 2004, onConnectChanged)
+        new (ip, onConnectChanged) = DsMxConnection(ip, 2004, onConnectChanged)
 
         member val CommObject: CommObject20 = null with get, set
         member val Factory: CommObjectFactory20 = null with get, set

@@ -9,16 +9,15 @@ open XGCommLib
 open Dual.PLC.Common.FS
 
 [<AutoOpen>]
-module XGTScanModule =
-    type MelsecTagValueChangedEventArgs = { Ip: string; Tag: MelsecTag }
+module MelsecScanModule =
 
-    type XGTScan(plcIps: seq<string>, scanDelay: int) =
+    type MelsecScan(plcIps: seq<string>, scanDelay: int) =
         let notifiedOnce = HashSet<LWBatch>()
         let writeBuff = Array.zeroCreate<byte> (512)
         let _scanDelay = scanDelay
 
      
-        let tagValueChangedNotify = new Event<MelsecTagValueChangedEventArgs>()
+        let tagValueChangedNotify = new Event<TagPLCValueChangedEventArgs>()
         let connectChangedNotify = new Event<ConnectChangedEventArgs>()
         // PLC별 개별 `CancellationTokenSource` 생성
         let cancelScanIps =  Dictionary<string, CancellationTokenSource>()
@@ -28,7 +27,7 @@ module XGTScanModule =
             plcIps
             |> Seq.map (fun ip ->
                 ip,
-                DsXgConnection(ip, 2004, fun args ->
+                DsMxConnection(ip, 2004, fun args ->
                     connectChangedNotify.Trigger(args) // ScanModule에서 이벤트를 처리
                 )
             )
@@ -47,9 +46,7 @@ module XGTScanModule =
                     while cancelScanIps.[plcIp].IsCancellationRequested do
                         do! Async.Sleep 50
                 } |> Async.RunSynchronously
-        
-        let tryParseTag(address:string) = 
-            failwith "Not implemented"
+
                 
         let checkExistIp(plcIp) = 
             if not (connections.ContainsKey(plcIp)) then
@@ -63,8 +60,8 @@ module XGTScanModule =
             plcIps 
             |> Seq.iter (fun ip -> cancelScanIps.Add(ip, new CancellationTokenSource()))
 
-        new (plcIps) = XGTScan(plcIps, 10)
-        new (plcIp) = XGTScan([plcIp])
+        new (plcIps) = MelsecScan(plcIps, 10)
+        new (plcIp) = MelsecScan([plcIp])
 
         [<CLIEvent>]
         member x.TagValueChangedNotify = tagValueChangedNotify.Publish
@@ -79,7 +76,7 @@ module XGTScanModule =
             |> Seq.distinct
             |> Seq.toArray
             |> Array.map (fun tag ->
-                match tryParseTag tag  with
+                match tryParseMxTag tag with
                 | Some (devHead, size, offset) -> tag, MelsecTag(tag, size, offset)
                 | None -> 
                     if ['P';'M';'K';'F';'L'].Contains tag.[0] then
@@ -91,7 +88,7 @@ module XGTScanModule =
 
 
         /// 태그 변경을 감지하고 알림을 발송하는 함수
-        member private x.NotifyTagChanges(conn: DsXgConnection, buffer: byte[], batch: LWBatch, firstRead: bool) =
+        member private x.NotifyTagChanges(conn: DsMxConnection, buffer: byte[], batch: LWBatch, firstRead: bool) =
             let oldBuffer = batch.Buffer
             let lwsOld = Array.init (oldBuffer.Length / 8) (fun n -> oldBuffer.GetLWord(n))
             let lwsNew = Array.init (buffer.Length / 8) (fun n -> buffer.GetLWord(n))
@@ -116,7 +113,7 @@ module XGTScanModule =
             Array.blit buffer 0 batch.Buffer 0 (min buffer.Length oldBuffer.Length)
 
         /// PLC 데이터를 읽는 함수
-        member private x.ReadFromPLC(conn: DsXgConnection, buffer: byte[], batches: LWBatch[]) =
+        member private x.ReadFromPLC(conn: DsMxConnection, buffer: byte[], batches: LWBatch[]) =
             for batch in batches do
                 conn.CommObject.RemoveAll()
                 batch.DeviceInfos |> Seq.iter conn.CommObject.AddDeviceInfo
@@ -133,20 +130,22 @@ module XGTScanModule =
                 x.NotifyTagChanges(conn, buffer, batch, isFirstRead)
 
         /// PLC 데이터를 쓰는 함수
-        member private x.WriteToPLC(conn: DsXgConnection, tags: MelsecTag array) =
+        member private x.WriteToPLC(conn: DsMxConnection, tags: ITagPLC array) =
             let writingTags = tags |> Array.filter (fun t -> t.GetWriteValue().IsSome)
 
             if writingTags.Length > 0 then
                 let batches = writingTags.ChunkBySize(64)
                 for batch in batches do
                     conn.CommObject.RemoveAll()
-                    batch |> Seq.map (fun t -> conn.CreateDevice(t.Device, t.MemType, t.Size, t.BitOffset / 8))
+                    batch |> Seq.map (fun t -> t :?> MelsecTag)
+                          |> Seq.map (fun t -> conn.CreateDevice(t.Device, t.MemType, t.Size, t.BitOffset / 8))
                           |> Seq.iter conn.CommObject.AddDeviceInfo
 
                     let mutable iWrite = 0
 
                     batch |> Array.iter (fun item ->
-                        match item.DataType with
+                        let MelsecDataType = (item :?> MelsecTag).DataType
+                        match MelsecDataType with
                         | 1 | 8 -> writeBuff.[iWrite] <- Convert.ToByte(item.GetWriteValue().Value); iWrite <- iWrite + 1
                         | 16 -> let wordBytes = BitConverter.GetBytes(Convert.ToUInt16(item.GetWriteValue().Value))
                                 Array.blit wordBytes 0 writeBuff iWrite wordBytes.Length
@@ -157,11 +156,11 @@ module XGTScanModule =
                         | 64 -> let lwordBytes = BitConverter.GetBytes(Convert.ToUInt64(item.GetWriteValue().Value))
                                 Array.blit lwordBytes 0 writeBuff iWrite lwordBytes.Length
                                 iWrite <- iWrite + 8
-                        | _ -> failwith $"Unsupported DataType {item.DataType} for tag {item.TagName}"
+                        | _ -> failwith $"Unsupported DataType {MelsecDataType} for tag {item.Address}"
                     )
 
                     if conn.CommObject.WriteRandomDevice(writeBuff[..iWrite-1]) <> 1 then
-                         let errMsg = String.Join(", ", tags.Select(fun f->f.TagName))
+                         let errMsg = String.Join(", ", tags.Select(fun f->f.Address))
                          failwith $"WriteRandomDevice Failed. {errMsg}"
 
                     batch |> Array.iter (fun t -> t.ClearWriteValue())
@@ -172,7 +171,6 @@ module XGTScanModule =
             let conn = connections.[plcIp]
 
             // XGI/XGK 태그 구분 및 변환
-            let isXGI = isXGI(tags)
             let MelsecTags = x.ParseTags(tags) |> dict
 
             if MelsecTags.Count > 0 then
@@ -184,7 +182,7 @@ module XGTScanModule =
                     try
                         while not cancelScanIps.[plcIp].IsCancellationRequested do
                             do! Async.Sleep _scanDelay
-                            x.WriteToPLC(conn, MelsecTags.Values.ToArray())
+                            x.WriteToPLC(conn, MelsecTags.Values.Select(fun f->f :> ITagPLC).ToArray())
                             let readBuff = Array.zeroCreate<byte> (512)
                             x.ReadFromPLC(conn, readBuff, batches)
                     with
@@ -198,11 +196,11 @@ module XGTScanModule =
             else
                 logWarn $"No valid monitoring tags provided for PLC {plcIp}."
 
-            MelsecTags
+            MelsecTags |> Seq.map (fun kv -> kv.Key, kv.Value:> ITagPLC) |> dict
 
         /// PLC 모니터링을 시작하는 다중 스켄 함수
         member x.Scan(tagsPerPLC: IDictionary<string, string seq>) =
-            let totalTags = Dictionary<string, IDictionary<string, MelsecTag>>()   
+            let totalTags = Dictionary<string, IDictionary<string, ITagPLC>>()   
             tagsPerPLC |> Seq.iter (fun kv ->
                 let plcIp, tags = kv.Key, kv.Value  
 
@@ -223,7 +221,7 @@ module XGTScanModule =
 
 
         /// PLC 모니터링 대상을 업데이트하는 함수
-        member x.ScanUpdate(plcIp: string, tags: List<string>) : IDictionary<string, MelsecTag> =
+        member x.ScanUpdate(plcIp: string, tags: List<string>) : IDictionary<string, ITagPLC> =
             checkExistIp plcIp
             scanCancel(plcIp) // 기존 모니터링 취소
             let MelsecTags = x.StartMonitoring(plcIp, tags)

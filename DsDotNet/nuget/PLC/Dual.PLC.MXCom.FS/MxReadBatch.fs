@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 open XGCommLib
 
 [<AutoOpen>]
-module XGTReadBatchModule =
+module MelsecReadBatchModule =
 
     type LWBatch(buffer: byte[], deviceInfos: DeviceInfo[], tags: MelsecTag[]) =
         let mutable tags = tags
@@ -29,7 +29,7 @@ module XGTReadBatchModule =
             |> String.concat "\n"
 
     // Prepare batches for communication with PLC
-    let prepareReadBatches(conn: DsXgConnection, tagInfos: MelsecTag[]) : LWBatch[] =
+    let prepareReadBatches(conn: DsMxConnection, tagInfos: MelsecTag[]) : LWBatch[] =
         let chunkInfos = tagInfos |> Array.groupBy(fun ti -> ti.LWordTag) |> Array.chunkBySize 64
 
         chunkInfos 

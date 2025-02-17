@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
@@ -7,9 +6,9 @@
 		<OutputType>Library</OutputType>
 		<NoWarn>$(NoWarn);CS1591;CS1570;CS1572;CS1573;CS1587</NoWarn>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<RootNamespace>Dual.PLC.XGComm.FS</RootNamespace>
+		<RootNamespace>Dual.PLC.Melsec.MxCOM.FS</RootNamespace>
 		<PackageId>DualSoft-PLC-Melsec-MxCOM-FS</PackageId>
-		<PackageTags>MxCOM,PLC,Melsec.FS,Dual</PackageTags>
+		<PackageTags>MxCOM,PLC,Melsec,MX.FS,Dual</PackageTags>
 		<PackageReadmeFile>Readme.md</PackageReadmeFile>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<Description>Dual.PLC.Melsec.MxCOM.FS</Description>
@@ -19,34 +18,48 @@
 		<Authors>Dual Inc.</Authors>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
-		<SignAssembly>false</SignAssembly>
-		<!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
+		<SignAssembly>false</SignAssembly> <!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
+
+
+
+
+
 	<ItemGroup>
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
-		<Compile Include="MXConnection.fs" />
-		<Compile Include="MXTagInfo.fs" />
-		<Compile Include="MXReadBatch.fs" />
-		<Compile Include="MXScan.fs" />
-	</ItemGroup>
-	<ItemGroup>
-		<COMReference Include="XGCommLib">
-			<WrapperTool>tlbimp</WrapperTool>
-			<VersionMinor>0</VersionMinor>
-			<VersionMajor>1</VersionMajor>
-			<Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
-			<Lcid>0</Lcid>
-			<Isolated>false</Isolated>
-			<EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
+		<Compile Include="MxTagParser.fs" />
+		<Compile Include="MxConnection.fs" />
+		<Compile Include="MxTagInfo.fs" />
+		<Compile Include="MxReadBatch.fs" />
+		<Compile Include="MxScan.fs" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
-	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
-	  <ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
+	  <COMReference Include="XGCommLib">
+	    <WrapperTool>tlbimp</WrapperTool>
+	    <VersionMinor>0</VersionMinor>
+	    <VersionMajor>1</VersionMajor>
+	    <Guid>2cff650c-6df0-48ae-9b06-c8dd467e0cd3</Guid>
+	    <Lcid>0</Lcid>
+	    <Isolated>false</Isolated>
+	    <EmbedInteropTypes>true</EmbedInteropTypes>
+	  </COMReference>
 	</ItemGroup>
+
+
+	<ItemGroup>
+		<PackageReference Include="System.Reactive" Version="6.0.1" />
+		<PackageReference Include="log4net" Version="2.0.17" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+		<ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
+	</ItemGroup>
+
+
 
 </Project>

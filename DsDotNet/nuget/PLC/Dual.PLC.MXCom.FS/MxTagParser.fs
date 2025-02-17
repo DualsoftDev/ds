@@ -1,4 +1,4 @@
-namespace DsXgComm
+namespace DsMxComm
 
 open Dual.Common.Core.FS
 open System
@@ -6,18 +6,22 @@ open System.Runtime.CompilerServices
 
 
 [<AutoOpen>]
-module LsXgkTagParserModule =
-    
-    /// 표준 XGK tag 문자열을 parsing 해서 정보 tuple 반환
-    ///
-    /// - device type, data size, total bit offset
-    ///
-    /// - 표준 tag 이므로, "P1" 등과 같은 약식은 지원되지 않음.  (bit type 인지 word type 인지 알 수 없음)
-    ///
-    /// - e.g "P0001A" -> Some("P", 1, 26)
-    ///
-    /// - e.g "P0002" -> Some("P", 16, 32)
-    let tryParseXgkTag(tag:string): (string * int * int) option =
+module MxTagParserModule =
+    let WORD, BIT = 16, 1
+
+    /// returns dataBitSize * totalBitOffset
+    /// - ("." 으로 시작할 수도 있고, empty 일 수도 있는) Hex string 에서 정보 추출
+    /// - empty 이면 WORD type, 0 으로 취급
+    let getInfoFromHexaBitString(hexaBit:string) : int * int =
+        if hexaBit.IsNullOrEmpty() then
+            WORD, 0
+        else
+            let hexaBit = if hexaBit.StartsWith(".") then hexaBit.Substring(1) else hexaBit
+            match (|HexPattern|_|) hexaBit with
+            | Some hexaBit -> BIT, hexaBit
+            | None -> WORD, 0
+
+    let tryParseMxTag(tag:string): (string * int * int) option =
         if tag.IsNullOrEmpty() || tag.Length < 2 then       // tag.Length < 5 ???
             None
         else
@@ -107,12 +111,12 @@ module LsXgkTagParserModule =
                     if tag.Length <= maxLength then
                         return! standardizeTag device remaining 5
                 | _ -> 
-                    return! tryParseXgkTag tag |> Option.map (fun (_) ->  tag)
+                    return! tryParseMxTag tag |> Option.map (fun (_) ->  tag)
         }
 
     let tryParseXgkTagAbbreviated (tag: string) (isBit: bool): (string * int * int) option =
         match tryParseXgkValidText tag isBit with
-        | Some standardText -> tryParseXgkTag standardText
+        | Some standardText -> tryParseMxTag standardText
         | None -> None
             
 
@@ -131,13 +135,13 @@ type LsXgkTagParser =
     /// - e.g "P1" -> null
     [<Extension>]
     static member Parse(tag:string): string * int * int =
-        tryParseXgkTag tag |? (getNull<string * int * int>())
+        tryParseMxTag tag |? (getNull<string * int * int>())
     
     ///// 약식 tag 이므로, "P1" 등도 지원.  bit type 인지 word type 인지 isBit 에 지정
     [<Extension>]
     static member Parse(tag:string, isBit:bool): string * int * int =
         match tryParseXgkValidText tag isBit with
-        | Some standardText -> tryParseXgkTag standardText |? (getNull<string * int * int>())
+        | Some standardText -> tryParseMxTag standardText |? (getNull<string * int * int>())
         | None -> getNull<string * int * int>()
 
     ///// (약식 표기, BIT Type) XGK tag 문자열을 parsing 해서 StandardText 반환

@@ -17,8 +17,8 @@ type PlcMxComponent(hostAddress: string, portNumber: int) =
     let mutable errorCode = 0
     let mutable errorMessage = ""
     let mutable connected = false
-    let actProgType = ActUtlType64Lib.ActUtlType64Class()
-    //let actProgType = ActProgType64Lib.ActProgType64Class()
+    //let actProgType = ActUtlType64Lib.ActUtlType64Class()
+    let actProgType = ActProgType64Lib.ActProgType64Class()
 
 
      /// 오류 코드에 대한 메시지 매핑
@@ -31,9 +31,8 @@ type PlcMxComponent(hostAddress: string, portNumber: int) =
         0xF0000006, "메모리 확보 에러: MX Component 내부 메모리 확보에 실패하였습니다. 프로그램을 종료하고 PC를 재기동하거나, 다른 프로그램을 종료하여 사용 가능한 메모리를 확보하십시오."
     ]
     do 
-        //actProgType.ActHostAddress <- "1.1.1.1"
-
-        actProgType.ActLogicalStationNumber <- 1
+        actProgType.ActHostAddress <- "1.1.1.1"
+        //actProgType.ActLogicalStationNumber <- 1
         //actProgType.
 
             /// PLC 연결 설정 및 초기화

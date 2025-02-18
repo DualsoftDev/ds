@@ -33,7 +33,7 @@ class Program
                 //else
                     //devices[i] = $"W{i:X}";
 
-                values[i] = 0; // 테스트용 값 (0, 1, 2, ..., cnt-1)
+                values[i] = Convert.ToInt16( i); // 테스트용 값 (0, 1, 2, ..., cnt-1)
             }
 
             plc.WriteDeviceRandom(devices, values);

@@ -52,10 +52,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-        <PackageReference Include="DocumentFormat.OpenXml" Version="3.1.0" />
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+		<PackageReference Include="DocumentFormat.OpenXml" Version="3.1.0" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup>
       <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
       <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
     </ItemGroup>

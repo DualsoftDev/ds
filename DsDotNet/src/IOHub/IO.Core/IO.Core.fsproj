@@ -36,7 +36,9 @@
         <PackageReference Include="Dapper" Version="2.1.35" />
     </ItemGroup>
 
-
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
 	<ItemGroup>
         <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
         <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Db\Dual.Common.Db.csproj" />

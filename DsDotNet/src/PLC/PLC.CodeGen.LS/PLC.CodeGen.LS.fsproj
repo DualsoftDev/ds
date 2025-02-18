@@ -73,7 +73,9 @@
         <None Include="Scripts\Script1.fsx" />
         <Compile Include="EntryPoint.fs" />
     </ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
     <ItemGroup>
         <PackageReference Include="Fody" Version="6.8.1">
             <PrivateAssets>all</PrivateAssets>

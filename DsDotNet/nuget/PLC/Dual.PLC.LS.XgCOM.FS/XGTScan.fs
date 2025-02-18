@@ -77,7 +77,7 @@ module XGTScanModule =
             |> Seq.toArray
             |> Array.map (fun tag ->
                 match if isXGI then tryParseXgiTag tag else tryParseXgkTag tag with
-                | Some (devHead, size, offset) -> tag, XGTTag(tag, size, offset)
+                | Some (_, size, offset) -> tag, XGTTag(tag, size, offset)
                 | None -> 
                     if ['P';'M';'K';'F';'L'].Contains tag.[0] then
                         failwithlog $"Unknown device {tag} (P, M, K, F, L device length > 4)"

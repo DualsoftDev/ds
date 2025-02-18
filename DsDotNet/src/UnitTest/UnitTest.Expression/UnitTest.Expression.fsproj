@@ -49,8 +49,6 @@
         <ProjectReference Include="..\UnitTest.Common\UnitTest.Common.fsproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Update="FSharp.Core" Version="8.*" />
-    </ItemGroup>
+
 
 </Project>

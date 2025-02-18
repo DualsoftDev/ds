@@ -19,6 +19,11 @@
 		<Compile Include="Graph\Graph.Sort.Topological.fs" />
 		<Compile Include="Graph/GraphHelper.fs" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	</ItemGroup>

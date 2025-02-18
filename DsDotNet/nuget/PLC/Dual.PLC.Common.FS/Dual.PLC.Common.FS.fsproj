@@ -29,7 +29,9 @@
 		<Compile Include="TagPLC.fs" />
 		<Compile Include="Connect.fs" />
 	</ItemGroup>
-
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Base.FS\Dual.Common.Base.FS.fsproj" />
 	  <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />

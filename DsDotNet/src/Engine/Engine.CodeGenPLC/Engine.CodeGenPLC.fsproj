@@ -32,7 +32,11 @@
         <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 
-    <ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+
+	<ItemGroup>
         <PackageReference Include="Fody" Version="6.8.1">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

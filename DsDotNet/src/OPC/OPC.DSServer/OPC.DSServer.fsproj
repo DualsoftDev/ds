@@ -33,7 +33,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.375.443" />
+		<PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.375.443" />
 	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.375.443" />
 	</ItemGroup>
 

@@ -25,6 +25,11 @@
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+
 	<ItemGroup>
       <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
       <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />

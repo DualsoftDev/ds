@@ -48,8 +48,5 @@
         <ProjectReference Include="..\Engine.TestSimulator\Engine.TestSimulator.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <PackageReference Update="FSharp.Core" Version="8.*" />
-    </ItemGroup>
 
 </Project>

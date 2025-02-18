@@ -84,6 +84,10 @@
     </ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="System.IO.Compression" Version="4.3.0" />
 		<PackageReference Include="System.Reactive" Version="6.0.1" />
         <PackageReference Include="Microsoft.Data.Sqlite" Version="8.0.8" />

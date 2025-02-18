@@ -67,6 +67,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+
+	<ItemGroup>
         <ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
         <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />

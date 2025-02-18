@@ -54,7 +54,7 @@ namespace Dual.Common.Winform
         /// </summary>
         /// <param name="control"></param>
         /// <param name="action"></param>
-        public static void Do(this Control control, Action action, bool ignoreError=false)
+        public static void Do1(this Control control, Action action, bool ignoreError=false)
         {
             try
             {
@@ -153,7 +153,7 @@ namespace Dual.Common.Winform
         public static SynchronizationContext GetSynchronizationContext(this Control control)
         {
             SynchronizationContext context = null;
-            control.Do(() =>
+            control.DoInvoke(() =>
             {
                 context = SynchronizationContext.Current;
             });
@@ -164,7 +164,7 @@ namespace Dual.Common.Winform
         public static TaskScheduler GetTaskScheduler(this Control control)
         {
             TaskScheduler scheduler = null;
-            control.Do(() =>
+            control.DoInvoke(() =>
             {
                 scheduler = TaskScheduler.FromCurrentSynchronizationContext();
             });

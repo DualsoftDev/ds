@@ -5,7 +5,7 @@ class Program
     static void Main()
     {
         // ActUtlType64 객체 생성
-        var plc = new PlcMxComponent("1.1.1.1", 5006);
+        var plc = new PlcMxComponent("1.1.1.1", 5006, "R04CPU");
 
         try
         {

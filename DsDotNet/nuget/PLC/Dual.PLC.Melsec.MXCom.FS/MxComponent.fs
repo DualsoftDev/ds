@@ -8,12 +8,9 @@ open System.Timers
 open ActUtlType64Lib
 open ActProgType64Lib
 
-type CpuStsType =
-    | RUN = 0
-    | STOP = 1
-    | PAUSE = 2
 
-type PlcMxComponent(hostAddress: string, portNumber: int) =
+
+type PlcMxComponent(hostAddress: string, portNumber: int, cpuName:string) =
     let mutable errorCode = 0
     let mutable errorMessage = ""
     let mutable connected = false
@@ -31,9 +28,45 @@ type PlcMxComponent(hostAddress: string, portNumber: int) =
         0xF0000006, "메모리 확보 에러: MX Component 내부 메모리 확보에 실패하였습니다. 프로그램을 종료하고 PC를 재기동하거나, 다른 프로그램을 종료하여 사용 가능한 메모리를 확보하십시오."
     ]
     do 
-        actProgType.ActHostAddress <- "1.1.1.1"
-        //actProgType.ActLogicalStationNumber <- 1
+        //actProgType.ActHostAddress <- "1.1.1.1"
+        //actProgType.ActLogicalStationNumber <- 0
         //actProgType.
+        //actProgType.ActCpuType <- MxTypeModule.CpuTypeMap[cpuName]   // CPU 타입 설정 (예: Q03UDVCPU = 209)
+        //actProgType.ActHostAddress <- "1.1.1.1"
+        actProgType.ActDestinationPortNumber <- portNumber
+
+        let a = actProgType.ActBaudRate
+        let a =  actProgType.ActConnectUnitNumber
+        let a =  actProgType.ActControl
+        let a =  actProgType.ActCpuTimeOut
+        let a =  actProgType.ActCpuType
+        let a =  actProgType.ActDataBits
+        let a =  actProgType.ActDestinationIONumber
+        let a =  actProgType.ActDestinationPortNumber
+        let a =  actProgType.ActDidPropertyBit
+        let a =  actProgType.ActDsidPropertyBit
+        let a =  actProgType.ActHostAddress: string
+        let a =  actProgType.ActIONumber
+        let a =  actProgType.ActIntelligentPreferenceBit
+        let a =  actProgType.ActMultiDropChannelNumber
+        let a =  actProgType.ActNetworkNumber
+        let a =  actProgType.ActPacketType
+        let a =  actProgType.ActParity
+        let a =  actProgType.ActPassword: string
+        let a =  actProgType.ActPortNumber
+        let a =  actProgType.ActProtocolType
+        let a =  actProgType.ActSourceNetworkNumber
+        let a =  actProgType.ActSourceStationNumber
+        let a =  actProgType.ActStationNumber
+        let a =  actProgType.ActStopBits
+        let a =  actProgType.ActSumCheck
+        let a =  actProgType.ActTargetSimulator
+        let a =  actProgType.ActThroughNetworkType
+        let a =  actProgType.ActTimeOut
+        let a =  actProgType.ActUnitNumber
+        let a =  actProgType.ActUnitType
+
+        ()
 
             /// PLC 연결 설정 및 초기화
     //member x.Configure(cpuType: int, protocolType: byte, unitType: byte) =

@@ -8,8 +8,8 @@ open Dual.PLC.Common.FS
 module DsMxConnect =
 
   
-    type DsMxConnection(hostAddress: string, portNumber: int, onConnectChanged: ConnectChangedEventArgs -> unit) =
-        let plc = PlcMxComponent(hostAddress, portNumber)
+    type DsMxConnection(hostAddress: string, portNumber: int, cpuName:string, onConnectChanged: ConnectChangedEventArgs -> unit) =
+        let plc = PlcMxComponent(hostAddress, portNumber, cpuName)
 
         member val IsConnected = false with get, set
         member x.IpPort = $"{hostAddress}:{portNumber}"

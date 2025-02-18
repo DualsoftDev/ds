@@ -18,6 +18,7 @@
 
 	<ItemGroup>
 		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
+		<Compile Include="MxType.fs" />
 		<Compile Include="MxComponent.fs" />
 		<Compile Include="MxTagParser.fs" />
 		<Compile Include="MxConnection.fs" />
@@ -77,15 +78,6 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 		<ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Reference Include="Interop.ActProgType64Lib">
-	    <HintPath>Interop.ActProgType64Lib.dll</HintPath>
-	  </Reference>
-	  <Reference Include="Interop.ActUtlType64Lib">
-	    <HintPath>Interop.ActUtlType64Lib.dll</HintPath>
-	  </Reference>
 	</ItemGroup>
 
 

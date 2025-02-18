@@ -8,14 +8,15 @@ open Dual.PLC.Common.FS
 module DsMxConnect =
 
   
-    type DsMxConnection(stationNumber: int, onConnectChanged: ConnectChangedEventArgs -> unit) =
-        let plc = PlcMxComponent(stationNumber)
+    type DsMxConnection(hostAddress: string, portNumber: int, onConnectChanged: ConnectChangedEventArgs -> unit) =
+        let plc = PlcMxComponent(hostAddress, portNumber)
 
         member val IsConnected = false with get, set
-        member x.StationNumber = stationNumber
+        member x.IpPort = $"{hostAddress}:{portNumber}"
+
         // 연결 상태 변경 시 콜백 호출
         member private x.TriggerConnectChanged(state: ConnectState) =
-            onConnectChanged({ Ip = $"Station: {stationNumber}"; State = state })
+            onConnectChanged({ Ip = $"Station: {x.IpPort}"; State = state })
 
         member x.Connect() =
             if plc.Open() then

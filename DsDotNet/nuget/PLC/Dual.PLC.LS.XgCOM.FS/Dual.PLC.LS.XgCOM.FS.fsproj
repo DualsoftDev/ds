@@ -52,6 +52,12 @@
 		<ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="Interop.XGCommLib">
+	    <HintPath>Interop.XGCommLib.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 
 
 </Project>

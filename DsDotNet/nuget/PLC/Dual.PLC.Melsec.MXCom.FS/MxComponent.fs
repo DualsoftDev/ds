@@ -5,20 +5,20 @@ open System.Diagnostics
 open System.Text
 open System.Threading
 open System.Timers
-open ActUtlType64Lib
+open ActProgType64Lib
 
 type CpuStsType =
     | RUN = 0
     | STOP = 1
     | PAUSE = 2
 
-type PlcMxComponent(logicalStationNumber: int)  =
+type PlcMxComponent(hostAddress: string, portNumber: int) =
     let mutable errorCode = 0
     let mutable errorMessage = ""
     let mutable connected = false
-    let mutable logicalStation = logicalStationNumber
-    let actUtlType = new ActUtlType64Class()
-    let timer = new Timer(1000.0)
+    let actProgType = ActProgType64Lib.ActProgType64Class()
+
+
      /// 오류 코드에 대한 메시지 매핑
     let errorMessages = dict [
         0xF0000001, "라이선스 없음 에러: PC에 라이선스가 부여되지 않았습니다. 라이선스 키 FD에서 PC에 라이선스를 부여하십시오."
@@ -29,7 +29,19 @@ type PlcMxComponent(logicalStationNumber: int)  =
         0xF0000006, "메모리 확보 에러: MX Component 내부 메모리 확보에 실패하였습니다. 프로그램을 종료하고 PC를 재기동하거나, 다른 프로그램을 종료하여 사용 가능한 메모리를 확보하십시오."
     ]
     do 
-        actUtlType.ActLogicalStationNumber <- logicalStation
+        actProgType.ActHostAddress <- "1.1.1.1"
+
+        //actProgType.ActLogicalStationNumber <- logicalStation
+        //actProgType.
+
+            /// PLC 연결 설정 및 초기화
+    member x.Configure(cpuType: int, protocolType: byte, unitType: byte) =
+        actProgType.ActCpuType <- cpuType   // CPU 타입 설정 (예: Q03UDVCPU = 209)
+        actProgType.ActHostAddress <- hostAddress
+        actProgType.ActDestinationPortNumber <- portNumber
+        //actProgType.ActProtocolType <- protocolType  // 예: PROTOCOL_TCPIP(0x05)
+        //actProgType.ActUnitType <- unitType          // 예: UNIT_QNETHER(0x2C)
+
 
     member x.IsConnected = connected
     member x.ErrorCode = errorCode
@@ -47,8 +59,8 @@ type PlcMxComponent(logicalStationNumber: int)  =
 
     member x.Open() =
         try
-            actUtlType.Close() |> ignore
-            let result = actUtlType.Open()
+            actProgType.Close() |> ignore
+            let result = actProgType.Open()
             if result = 0 then
                 connected <- true
                 printfn "PLC 연결 성공!"
@@ -61,10 +73,9 @@ type PlcMxComponent(logicalStationNumber: int)  =
             false
 
     member x.Close() =
-        timer.Stop()
         if not connected then true
         else
-            let result = actUtlType.Close()
+            let result = actProgType.Close()
             if result = 0 then
                 connected <- false
                 true
@@ -77,7 +88,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
     member x.ReadDevice(device: string) =
         try
             let mutable value = 0
-            let result = actUtlType.GetDevice(device, &value)
+            let result = actProgType.GetDevice(device, &value)
             if result = 0 then Some value else None
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -85,7 +96,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
 
     member x.WriteDevice(device: string, value: int) =
         try
-            let result = actUtlType.SetDevice(device, value)
+            let result = actProgType.SetDevice(device, value)
             result = 0
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -94,7 +105,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
     member x.ReadDeviceBlock(device: string, size: int) =
         try
             let values = Array.zeroCreate<int> size
-            let result = actUtlType.ReadDeviceBlock(device, size, &values.[0])
+            let result = actProgType.ReadDeviceBlock(device, size, &values.[0])
             if result = 0 then Some values else None
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -102,7 +113,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
 
     member x.WriteDeviceBlock(device: string, values: int[]) =
         try
-            let result = actUtlType.WriteDeviceBlock(device, values.Length, ref values.[0])
+            let result = actProgType.WriteDeviceBlock(device, values.Length, ref values.[0])
             result = 0
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -111,7 +122,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
     member x.ReadDeviceBlock2(device: string, size: int) =
         try
             let values = Array.zeroCreate<int16> size
-            let result = actUtlType.ReadDeviceBlock2(device, size, &values.[0])
+            let result = actProgType.ReadDeviceBlock2(device, size, &values.[0])
             if result = 0 then Some values else None
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -119,7 +130,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
 
     member x.WriteDeviceBlock2(device: string, values: int16[]) =
         try
-            let result = actUtlType.WriteDeviceBlock2(device, values.Length, ref values.[0])
+            let result = actProgType.WriteDeviceBlock2(device, values.Length, ref values.[0])
             result = 0
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -130,7 +141,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
             let values = Array.zeroCreate<int16> devices.Length
             let deviceList = String.Join("\n", devices)
 
-            let result = actUtlType.ReadDeviceRandom2(deviceList, devices.Length, &values[0])
+            let result = actProgType.ReadDeviceRandom2(deviceList, devices.Length, &values[0])
             if result = 0 then  values else failwith $"ReadDeviceRandom Failed: {deviceList}"
         with ex ->
             failwithf "예외 발생: %s" ex.Message
@@ -138,7 +149,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
     member x.WriteDeviceRandom(devices: string[], values: int16[]) =
         try
             let deviceList = String.Join("\n", devices)
-            let result = actUtlType.WriteDeviceRandom2(deviceList, values.Length, &values[0])
+            let result = actProgType.WriteDeviceRandom2(deviceList, values.Length, &values[0])
             result = 0
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -146,7 +157,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
 
     member x.SetCpuStatus(status: CpuStsType) =
         try
-            let result = actUtlType.SetCpuStatus(int status)
+            let result = actProgType.SetCpuStatus(int status)
             result = 0
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -155,7 +166,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
     member x.IsOnline() =
         try
             let mutable data = 0
-            let result = actUtlType.GetDevice("SM400", &data)
+            let result = actProgType.GetDevice("SM400", &data)
             if result = 0 && data = 1 then
                 connected <- true
                 true
@@ -169,7 +180,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
     member x.ReadBuffer(startIO: int, address: int, size: int) =
         try
             let mutable value = 0s
-            let result = actUtlType.ReadBuffer(startIO, address, size, &value)
+            let result = actProgType.ReadBuffer(startIO, address, size, &value)
             if result = 0 then Some value else None
         with ex ->
             printfn "예외 발생: %s" ex.Message
@@ -177,7 +188,7 @@ type PlcMxComponent(logicalStationNumber: int)  =
 
     member x.WriteBuffer(startIO: int, address: int, size: int, value: int16) =
         try
-            let result = actUtlType.WriteBuffer(startIO, address, size, ref value)
+            let result = actProgType.WriteBuffer(startIO, address, size, ref value)
             result = 0
         with ex ->
             printfn "예외 발생: %s" ex.Message

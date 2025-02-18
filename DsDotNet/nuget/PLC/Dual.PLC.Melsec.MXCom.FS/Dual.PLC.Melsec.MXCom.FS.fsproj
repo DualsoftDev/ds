@@ -27,45 +27,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<COMReference Include="ActUtlType64Lib">
-		  <WrapperTool>tlbimp</WrapperTool>
-		  <VersionMinor>0</VersionMinor>
-		  <VersionMajor>5</VersionMajor>
-		  <Guid>719a5fab-eb1c-4b52-98bc-f8c9f6912d04</Guid>
-		  <Lcid>0</Lcid>
-		  <Isolated>false</Isolated>
-		  <EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-		<COMReference Include="ActUtlDataLogging64Lib">
-		  <WrapperTool>tlbimp</WrapperTool>
-		  <VersionMinor>0</VersionMinor>
-		  <VersionMajor>5</VersionMajor>
-		  <Guid>e27b7abd-bddb-4763-a886-321860281e73</Guid>
-		  <Lcid>0</Lcid>
-		  <Isolated>false</Isolated>
-		  <EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-		<COMReference Include="ActSupportMsg64Lib">
-		  <WrapperTool>tlbimp</WrapperTool>
-		  <VersionMinor>0</VersionMinor>
-		  <VersionMajor>5</VersionMajor>
-		  <Guid>8aec3708-0f66-4a95-b874-bac98b09ad9b</Guid>
-		  <Lcid>0</Lcid>
-		  <Isolated>false</Isolated>
-		  <EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-		<COMReference Include="ActProgType64Lib">
-		  <WrapperTool>tlbimp</WrapperTool>
-		  <VersionMinor>0</VersionMinor>
-		  <VersionMajor>5</VersionMajor>
-		  <Guid>aa10efd9-9442-4be0-aeaf-a64e133ebfd1</Guid>
-		  <Lcid>0</Lcid>
-		  <Isolated>false</Isolated>
-		  <EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-	</ItemGroup>
-
-	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />
 	</ItemGroup>
 	<ItemGroup>
@@ -77,6 +38,15 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 		<ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Reference Include="Interop.ActProgType64Lib">
+	    <HintPath>Interop.ActProgType64Lib.dll</HintPath>
+	  </Reference>
+	  <Reference Include="Interop.ActUtlType64Lib">
+	    <HintPath>Interop.ActUtlType64Lib.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 

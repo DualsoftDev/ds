@@ -38,6 +38,14 @@ Grammar/CsParser/bin/
 *.dsz
 *.dll
 !Interop.*.dll
+!ActProgDataLogging64PS.dll
+!ActProgType64PS.dll
+!ActSupportMsg64.dll
+!ActSupportMsg64PS.dll
+!ActUtlDataLogging64PS.dll
+!ActUtlType64PS.dll
+!DotUtlType64.dll
+!DotUtlType64_Contract.dll
 
 /.vs
 

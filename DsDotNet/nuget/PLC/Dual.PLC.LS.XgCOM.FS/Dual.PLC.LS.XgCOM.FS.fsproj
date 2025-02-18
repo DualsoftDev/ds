@@ -17,7 +17,6 @@
 
 
 	<ItemGroup>
-		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
 		<Compile Include="LS.XGI.TagParser.fs" />
 		<Compile Include="LS.XGK.TagParser.fs" />

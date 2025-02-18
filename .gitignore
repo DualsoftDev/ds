@@ -28,7 +28,6 @@ Grammar/CsParser/bin/
 
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/**/*.xlsx
 *.zip
-*.dll
 *.xgwx
 *.xgdb
 *.xgwx_bkx0
@@ -37,6 +36,8 @@ Grammar/CsParser/bin/
 *.bak2
 *.osts
 *.dsz
+*.dll
+!Interop.*.dll
 
 /.vs
 
@@ -73,12 +74,12 @@ Grammar/CsParser/bin/
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/Sample/Sample.7z
 /DsDotNet/src/UnitTest/UnitTest.Model/ImportOfficeExample/exportDS.Zip
 /DsDotNet/src/IOHub/ThirdParty/LS/IOClient.Xgi/zmqhw.json
-/DsDotNet/*.lnk
 /DsDotNet/Apps/OfficeAddIn/PowerPointAddIn For Dualsoft Setup/SetupRelease/data/Data.msi
+/DsDotNet/Apps/DSPilot/DSPilot.Setup/SetupRelease/DS Pilot Setup.msi
+/DsDotNet/*.lnk
 
 Logger.sqlite3
 Tmp/
 **/Unused/
 **/unused/
 **/bak/
-/DsDotNet/Apps/DSPilot/DSPilot.Setup/SetupRelease/DS Pilot Setup.msi

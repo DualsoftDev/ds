@@ -11,6 +11,60 @@ module MxTypeModule =
         | STOP = 1
         | PAUSE = 2
 
+        /// MELSEC 통신 포트 번호 (ActPortNumber 값)
+    type PortNumber =
+        | PORT_1 = 1
+        | PORT_2 = 2
+        | PORT_3 = 3
+        | PORT_4 = 4
+        | PORT_5 = 5
+        | PORT_6 = 6
+        | PORT_7 = 7
+        | PORT_8 = 8
+        | PORT_9 = 9
+        | PORT_10 = 10
+
+    /// MELSEC 제어 설정 (ActControl 값)
+    type ControlSetting =
+        | TRC_DTR = 1
+        | TRC_RTS = 2
+        | TRC_DRT_AND_RTS = 7
+        | TRC_DTR_OR_RTS = 8
+
+    /// MELSEC 유닛 타입 (ActUnitType 값)
+    type UnitType =
+        | UNIT_RJ71C24 = 0x1000
+        | UNIT_QJ71C24 = 0x19
+        | UNIT_LJ71C24 = 0x54
+        | UNIT_RJ71EN71 = 0x1001
+        | UNIT_QJ71E71 = 0x1A
+        | UNIT_LJ71E71 = 0x5C
+        | UNIT_RETHER = 0x1002
+        | UNIT_QNETHER = 0x2C
+        | UNIT_LNETHER = 0x52
+        | UNIT_FXETHER = 0x4A
+        | UNIT_FXVENET = 0x2004
+        | UNIT_QNCPU = 0x13
+        | UNIT_LNCPU = 0x50
+        | UNIT_QNMOTION = 0x1C
+        | UNIT_FXCPU = 0x0F
+        | UNIT_RUSB = 0x1004
+        | UNIT_QNUSB = 0x16
+        | UNIT_LNUSB = 0x51
+        | UNIT_SIMULATOR2 = 0x30
+        | UNIT_SIMULATOR3 = 0x31
+
+    /// MELSEC 통신 프로토콜 (ActProtocolType 값)
+    type ProtocolType =
+        | PROTOCOL_SERIAL = 0x04
+        | PROTOCOL_USB = 0x0D
+        | PROTOCOL_TCPIP = 0x05
+        | PROTOCOL_UDPIP = 0x08
+        | PROTOCOL_MNETH = 0x0F
+        | PROTOCOL_MNETG = 0x14
+        | PROTOCOL_CCIETSN = 0x1C
+        | PROTOCOL_CCIEF = 0x15
+
     /// MELSEC CPU 타입 Dictionary (Key: CPU 이름, Value: Decimal 값)
     let CpuTypeMap = dict [
         "R00CPU", 4609

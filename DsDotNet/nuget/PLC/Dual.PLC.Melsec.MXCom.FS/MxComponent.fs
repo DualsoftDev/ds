@@ -26,20 +26,16 @@ type PlcMxComponent(hostAddress: string, portNumber: int, cpuName:string) =
         0xF0000004, "미오픈 에러: Open 메소드를 실행하지 않았습니다. Open 메소드 실행 후 해당 메소드를 실행하십시오."
         0xF0000005, "초기화 에러: MX Component 내부 유지 오브젝트의 초기화에 실패하였습니다. 프로그램을 종료하고 PC를 재기동하거나, MX Component를 재설치하십시오."
         0xF0000006, "메모리 확보 에러: MX Component 내부 메모리 확보에 실패하였습니다. 프로그램을 종료하고 PC를 재기동하거나, 다른 프로그램을 종료하여 사용 가능한 메모리를 확보하십시오."
+        0x01801006, "Specified module error"
+        0xF1000020, "GX Simulator3 did not start error"
+        
     ]
     do 
-        //actProgType.ActHostAddress <- "1.1.1.1"
-        //actProgType.ActLogicalStationNumber <- 0
-        //actProgType.
-        //actProgType.ActCpuType <- MxTypeModule.CpuTypeMap[cpuName]   // CPU 타입 설정 (예: Q03UDVCPU = 209)
-        //actProgType.ActHostAddress <- "1.1.1.1"
-        actProgType.ActDestinationPortNumber <- portNumber
-
+        
         let a = actProgType.ActBaudRate
         let a =  actProgType.ActConnectUnitNumber
         let a =  actProgType.ActControl
         let a =  actProgType.ActCpuTimeOut
-        let a =  actProgType.ActCpuType
         let a =  actProgType.ActDataBits
         let a =  actProgType.ActDestinationIONumber
         let a =  actProgType.ActDestinationPortNumber
@@ -66,6 +62,46 @@ type PlcMxComponent(hostAddress: string, portNumber: int, cpuName:string) =
         let a =  actProgType.ActUnitNumber
         let a =  actProgType.ActUnitType
 
+            // MX Component version4 プログラミングマニュアル
+        // 4.3.7 接続局がEthernet ポート内蔵QCPU のEthernet 通信（TCP）
+        //ActCpuType := $90;          // Q03UDECPU
+        //ActDestinationIONumber := 0;// 固定
+        //ActDestinationPortNumber := 5007; // TCP
+        //ActDidPropertyBit := 1;
+        //ActDsidPropertyBit := 1;
+        //ActHostAddress := '169.254.251.71';
+        //ActIntelligentPreferenceBit := 0; //固定
+        //ActIONumber := 1023; //シングルＣＰＵ時固定
+        //ActMultiDropChannelNumber := 0; //固定
+        //ActNetworkNumber := 0;  // 固定（自局）
+        //ActPassword := '';
+        //ActProtocolType := 5;   // PROTOCOL_TCPIP
+ 
+        //ActStationNumber := 255;// 固定（自局）
+        //ActThroughNetworkType := 0;
+        //ActTimeOut := 500;      // ms単位でユーザ任意
+        //ActUnitNumber := 0;//
+        //ActUnitType := $2C;      // UNIT_QNETHER
+
+        //PortNumber=5500+ System No. x 10+ PLC No
+        //<Example> For System No. = 1, PLC No = 1
+        //5511=5500+1 x 10+1
+        //actProgType.ActHostAddress <- "127.0.0.1"
+        //actProgType.ActLogicalStationNumber <- 0
+        //actProgType.
+        actProgType.ActCpuType <- MxTypeModule.CpuTypeMap[cpuName]   // CPU 타입 설정 (예: Q03UDVCPU = 209)
+        //actProgType.ActPortNumber <- 5511
+        //actProgType.ActStationNumber <- 0
+        actProgType.ActUnitType <- (int)UnitType.UNIT_SIMULATOR3
+        actProgType.ActNetworkNumber<- 0;  // 固定（自局）
+        actProgType.ActProtocolType <-6;   // PROTOCOL_SHAREDMEMORY
+        actProgType.ActStationNumber <-255;// 固定（自局）
+        actProgType.ActTimeOut <- 500;      // ms単位でユーザ任意
+
+        //actProgType.ActTargetSimulator <- 0//0x01
+        //actProgType.ActHostAddress <- hostAddress
+        //actProgType.ActPortNumber <- portNumber
+        //actProgType.ActControl <- 1
         ()
 
             /// PLC 연결 설정 및 초기화

@@ -3,7 +3,8 @@ cd /d "%~dp0"
 
 rem 현재 실행된 bat 파일의 디렉터리 내 Control\Wrapper 폴더 경로를 변수에 저장
 set CONTROL_PATH=%~dp0Control\
-set WRAPPER_PATH=%CONTROL_PATH%Wrapper\
+set WRAPPER_PATH=%~dp0Control\Wrapper\
+
 set CLSID_PATH1=HKEY_CLASSES_ROOT\WOW6432Node\CLSID\{F0B1A112-BFCB-4DA3-9535-C296D69A17E0}
 set CLSID_PATH2=HKEY_CLASSES_ROOT\WOW6432Node\CLSID\{174DD3F4-961E-4833-A4D2-6BFFE5DDFC6C}
 
@@ -45,14 +46,17 @@ for %%F in (
     ActUtlDataLogging64PS.dll
     ActUtlType64PS.dll
 ) do (
-
-    regsvr32 /s /i "%WRAPPER_PATH%%%F"
-    if %errorlevel% neq 0 (
-        echo [ERR] %%F regsvr32 fail!
+    if exist "%WRAPPER_PATH%%%F" (
+        regsvr32 /s /i "%WRAPPER_PATH%%%F"
+        if %errorlevel% neq 0 (
+            echo [ERR] %%F regsvr32 fail!
+        ) else (
+            echo [OK] %%F regsvr32 ok.
+        )
     ) else (
-        echo [OK] %%F regsvr32 ok.
+        echo [NG] %%F not found!
     )
 )
 
-echo regsvr32 OK
+echo regsvr32 process complete.
 pause

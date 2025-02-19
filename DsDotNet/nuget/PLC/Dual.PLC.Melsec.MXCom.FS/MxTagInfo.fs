@@ -6,7 +6,8 @@ open Dual.PLC.Common.FS
 
 [<AutoOpen>]
 // MxTag 클래스
-type MxTag(deviceAddress: string, dataTypeSize: MxDeviceType, bitOffset: int) =
+
+type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     let mutable currentValue: obj = null
     let mutable address: string = deviceAddress
     let mutable writeValue: obj option = None
@@ -20,32 +21,24 @@ type MxTag(deviceAddress: string, dataTypeSize: MxDeviceType, bitOffset: int) =
 
     member x.Value = currentValue
     member x.Address = address
-    member x.DataType = dataTypeSize
-    member x.Device = 
-        match tryParseMxTag deviceAddress with
-        | Some (dev, _, _) -> dev
-        | None -> failwith "Invalid device address"
+    member x.DataType = mxTagInfo.DataTypeSize
+    member x.Device = mxTagInfo.Device
 
-    member x.BitOffset = bitOffset
     member x.WordTag =
         let offset = 
             if x.Device.IsHexa 
-            then $"{(x.BitOffset / 16):X}" 
-            else $"{(x.BitOffset / 16)}" 
+            then $"{(mxTagInfo.BitOffset / 16):X}" 
+            else $"{(mxTagInfo.BitOffset / 16)}" 
 
         if x.DataType = MxBit then
             $"K4{x.Device}{offset}"
         else
             $"{x.Device}{offset}"
 
-
-    member x.MemType = if dataTypeSize = MxBit then 'X' else 'B'
-    member x.Size = if dataTypeSize = MxBit then x.BitOffset % 8 else dataTypeSize.Size / 8
-
     member x.UpdateValue(data: int16) : bool =
         let newValue =
             match x.DataType with
-            | MxBit -> (data &&& (1s <<< x.BitOffset % 16) <> 0s) :> obj
+            | MxBit -> (data &&& (1s <<< mxTagInfo.BitOffset % 16) <> 0s) :> obj
             | MxWord -> data :> obj
 
         if currentValue <> newValue then

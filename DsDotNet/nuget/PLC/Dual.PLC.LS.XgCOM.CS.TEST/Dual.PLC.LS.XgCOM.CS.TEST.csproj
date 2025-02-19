@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
-    <ProjectReference Include="..\Dual.PLC.TagParser.FS\Dual.PLC.TagParser.FS.fsproj" />
   </ItemGroup>
 
 </Project>

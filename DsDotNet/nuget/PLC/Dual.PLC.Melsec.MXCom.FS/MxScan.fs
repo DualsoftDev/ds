@@ -1,0 +1,152 @@
+namespace DsMxComm
+
+open System
+open System.Collections.Generic
+open System.Threading
+open Dual.Common.Core.FS
+open Dual.PLC.Common.FS
+open MelsecReadBatchModule
+open System.Threading.Tasks
+
+[<AutoOpen>]
+module MelsecScanModule =
+
+    type MelsecScan(channels: seq<int>, scanDelay: int) =
+
+        let tagValueChangedNotify = new Event<TagPLCValueChangedEventArgs>()
+        let connectChangedNotify = new Event<ConnectChangedEventArgs>()
+        let cancelScanChannels = Dictionary<int,  CancellationTokenSource>()
+
+        let connections =
+            channels
+            |> Seq.map (fun channel ->
+                channel,
+                DsMxConnection(channel, fun args -> connectChangedNotify.Trigger(args))
+            )
+            |> dict
+
+        let checkExistChannel(ch) = 
+            if not (connections.ContainsKey(ch)) then
+                failwithlog $"PLC {ch} is not managed in the current connections."
+
+        let scanCancel(channel: int) = 
+            if cancelScanChannels.ContainsKey(channel) then
+                cancelScanChannels.[channel].Cancel()
+                async {
+                    while cancelScanChannels.[channel].IsCancellationRequested do
+                        do! Async.Sleep 50
+                } |> Async.RunSynchronously
+        do 
+            if Seq.isEmpty channels then failwithlog "MxComponent channels are not set"
+            else channels |> Seq.iter (fun ip -> logInfo $"MxComponent channels is set to {ip}")
+            
+            channels 
+            |> Seq.iter (fun ip -> cancelScanChannels.Add(ip, new CancellationTokenSource()))
+
+        new (channels) = MelsecScan(channels, 5)
+        new (channel) = MelsecScan([channel])
+        [<CLIEvent>]
+        member x.TagValueChangedNotify = tagValueChangedNotify.Publish
+        [<CLIEvent>]
+        member x.ConnectChangedNotify = connectChangedNotify.Publish
+
+        /// PLC 데이터를 읽는 함수 (최대 512 Word 읽기)
+        member private x.ReadFromPLC(conn: DsMxConnection, batches: WordBatch[]) =
+            for batch in batches do
+                let batchKeys = batch.Buffer.Keys |> Seq.toArray
+                let readWords = conn.ReadDeviceRandom(batchKeys) 
+
+                for i in 0..(readWords.Length-1) do
+                    let word = readWords.[i]
+                    let tagWord = batchKeys.[i]
+                    batch.Tags
+                    |> Seq.filter (fun t -> t.WordTag = tagWord)
+                    |> Seq.iter (fun t -> 
+                        if t.UpdateValue(word) then
+                            tagValueChangedNotify.Trigger({ Ip = conn.LogicalStationNumber.ToString(); Tag = t })
+                    )
+
+        /// PLC 데이터를 쓰는 함수 (최대 512 Word 쓰기)
+        member private x.WriteToPLC(conn: DsMxConnection, batches: WordBatch[]) =
+            for batch in batches do
+                let writingTags = batch.Tags |> Seq.filter (fun t -> (t:>ITagPLC).GetWriteValue().IsSome)
+                let keys = writingTags |> Seq.map (fun t -> t.Address) |> Seq.toArray
+                let values = writingTags 
+                             |> Seq.map (fun t -> Convert.ToInt16((t:>ITagPLC).GetWriteValue().Value))
+                             |> Seq.toArray
+
+                if keys.any()
+                then
+                    try
+                        conn.WriteDeviceRandom(keys, values) |> ignore
+                    with
+                    | ex -> logError $"WriteToPLC error: {ex}"
+
+        /// PLC 모니터링을 시작하는 함수
+        member private x.StartMonitoring(ch: int, tags: string seq) =
+            checkExistChannel ch
+            let conn = connections.[ch]
+            let batches = prepareReadBatches tags
+
+            if batches.Length > 0 then
+                logInfo $"Starting monitoring for ch {ch}."
+                async {
+                    try
+                        while not cancelScanChannels[ch].IsCancellationRequested do
+                            x.WriteToPLC(conn, batches) // 반드시 실행
+                            x.ReadFromPLC(conn, batches) // 반드시 실행
+                          //  do! Async.Sleep scanDelay // test  Async.StartImmediate 동작 안함
+                            logInfo $"Write/Read finished for ch {ch}."
+                    with
+                    | :? OperationCanceledException ->
+                        logInfo $"Monitoring for PLC {ch} was cancelled."
+                    | ex ->
+                        logError $"Error in Write/Read operation for PLC {ch}: {ex}"
+                
+                    logInfo $"Stopped monitoring for PLC {ch}."
+                    cancelScanChannels.Remove(ch) |> ignore // 기존 항목 제거
+                    cancelScanChannels[ch] <- new CancellationTokenSource()
+                } |> Async.StartImmediate
+            else
+                logWarn $"No valid monitoring tags provided for PLC {ch}."
+
+
+            batches |> Seq.collect (fun batch -> batch.Tags) 
+                    |> Seq.map (fun t -> t.Address, t :> ITagPLC)
+                    |> dict
+
+        /// PLC 모니터링을 시작하는 다중 스켄 함수
+        member x.Scan(tagsPerPLC: IDictionary<int, string seq>) =
+            let totalTags = Dictionary<int, IDictionary<string, ITagPLC>>()   
+            tagsPerPLC |> Seq.iter (fun kv ->
+                let ch, tags = kv.Key, kv.Value  
+
+                if connections.ContainsKey(ch) then
+                    let conn = connections.[ch]
+                    if not conn.IsConnected then
+                        conn.Connect()
+
+                    // 공용 함수 호출
+                    let mxTags = x.StartMonitoring(ch, tags)
+                    totalTags.[ch] <- mxTags
+            )
+            totalTags
+
+        /// PLC 모니터링을 시작하는 싱글 스켄 함수
+        member x.ScanSingle(channel:int, tags: string seq) =
+            x.Scan([(channel, tags)]|> dict)
+
+
+        /// PLC 모니터링 대상을 업데이트하는 함수
+        member x.ScanUpdate(channel: int, tags: List<string>) : IDictionary<string, ITagPLC> =
+            checkExistChannel channel
+            scanCancel(channel) // 기존 모니터링 취소
+            let xgtTags = x.StartMonitoring(channel, tags)
+            xgtTags
+
+        member x.Disconnect(channel: int) =
+            checkExistChannel channel
+            if connections.[channel].IsConnected
+            then 
+                scanCancel channel
+                connections.[channel].Disconnect()

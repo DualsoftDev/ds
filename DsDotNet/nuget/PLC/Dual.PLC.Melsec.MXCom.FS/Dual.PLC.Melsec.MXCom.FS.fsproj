@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<RootNamespace>Dual.PLC.Melsec.MxCOM.FS</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
@@ -24,8 +24,8 @@
 		<Compile Include="MxTagParser.fs" />
 		<Compile Include="MxConnection.fs" />
 		<Compile Include="MxTagInfo.fs" />
-		<None Include="MxReadBatch.fs" />
-		<None Include="MxScan.fsx" />
+		<Compile Include="MxReadBatch.fs" />
+		<Compile Include="MxScan.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -15,6 +15,7 @@ module MxTagParserModule =
                 | MxBit -> 1
                 | MxWord -> 16
 
+ 
     /// Mitsubishi PLC의 다양한 장치 유형을 정의하는 타입
     [<AutoOpen>]
     type MxDevice =
@@ -25,17 +26,33 @@ module MxTagParserModule =
             member x.ToText = x.ToString()
             static member Create s =
                 match s with
-                | "DX" -> X
-                | "DY" -> Y
-                | _ -> Enum.Parse(typeof<MxDevice>, s) :?> MxDevice
+                | "X" -> X | "Y" -> Y | "M" -> M | "L" -> L | "B" -> B
+                | "F" -> F | "Z" -> Z | "V" -> V | "D" -> D
+                | "W" -> W | "R" -> R | "C" -> C | "T" -> T
+                | "ZR" -> ZR 
+                | "ST" -> ST
+                | "SM" -> SM
+                | "SD" -> SD
+                | "SW" -> SW
+                | "SB" -> SB
+                | "DX" -> DX
+                | "DY" -> DY
+                | _ -> failwith $"Invalid MxDevice value: {s}"
+
             member x.IsHexa = 
                 match x with
                 | X | Y | B | W | SW | SB | SW -> true
                 | _ -> false
 
+    type MxTagInfo = 
+        {
+            Device: MxDevice
+            DataTypeSize: MxDeviceType
+            BitOffset: int
+        }
             
     /// 주소에서 MxDevice와 인덱스를 추출하는 함수
-    let tryParseMxTag (address: string) : (MxDevice * MxDeviceType * int) option =
+    let tryParseMxTag (address: string) : MxTagInfo option =
         let getMxDeviceType(melsecHead: MxDevice) (bit: string option) = 
             match bit with
             | Some _ -> MxBit
@@ -49,15 +66,37 @@ module MxTagParserModule =
         | RegexPattern @"^([A-Z]+)(\d+)(?:\.(\d+))?$" [device; d1; d2] -> 
             try
                 let parsedDevice = MxDevice.Create device
-                let devType = getMxDeviceType parsedDevice  (if d2 = null then None else Some d2)
-                Some (parsedDevice, devType, Convert.ToInt32(d1))
+                let devType = getMxDeviceType parsedDevice  (if d2 = "" then None else Some d2)
+                Some
+                    {
+                        Device = parsedDevice
+                        DataTypeSize = devType
+                        BitOffset =
+                            match devType  with
+                            | MxBit ->
+                                if d2 = "" 
+                                then //XFFF
+                                    if parsedDevice.IsHexa
+                                    then Convert.ToInt32(d1, 16)
+                                    else Convert.ToInt32(d1)
+                                else //D100.F
+                                    if parsedDevice.IsHexa
+                                    then Convert.ToInt32(d1, 16) + Convert.ToInt32(d2, 16)
+                                    else Convert.ToInt32(d1) + Convert.ToInt32(d2, 16)
+                            | MxWord -> 
+                                    if parsedDevice.IsHexa
+                                    then Convert.ToInt32(d1, 16) * 16
+                                    else Convert.ToInt32(d1) * 16
+                        
+                    }
             with
             | :? ArgumentException -> None
         | _ -> None
 
+        
 [<Extension>]   // For C#
 type MxTagParser =
    
     [<Extension>]
-    static member Parse(tag:string): MxDevice * MxDeviceType * int =
-        tryParseMxTag tag |? (getNull<MxDevice * MxDeviceType * int>())
+    static member Parse(tag:string): MxTagInfo =
+        tryParseMxTag tag |? (getNull<MxTagInfo>())

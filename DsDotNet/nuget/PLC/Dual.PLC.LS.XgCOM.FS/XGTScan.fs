@@ -60,7 +60,7 @@ module XGTScanModule =
             plcIps 
             |> Seq.iter (fun ip -> cancelScanIps.Add(ip, new CancellationTokenSource()))
 
-        new (plcIps) = XGTScan(plcIps, 10)
+        new (plcIps) = XGTScan(plcIps, 5)
         new (plcIp) = XGTScan([plcIp])
 
         [<CLIEvent>]

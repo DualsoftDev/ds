@@ -13,6 +13,7 @@
 		<SignAssembly>false</SignAssembly>
 		<!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
+		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 
@@ -23,24 +24,6 @@
 		<Compile Include="MxTagParser.fs" />
 		<Compile Include="MxConnection.fs" />
 		<Compile Include="MxTagInfo.fs" />
-		<COMReference Include="ActProgType64Lib">
-		  <WrapperTool>tlbimp</WrapperTool>
-		  <VersionMinor>0</VersionMinor>
-		  <VersionMajor>5</VersionMajor>
-		  <Guid>aa10efd9-9442-4be0-aeaf-a64e133ebfd1</Guid>
-		  <Lcid>0</Lcid>
-		  <Isolated>false</Isolated>
-		  <EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
-		<COMReference Include="ActUtlType64Lib">
-		  <WrapperTool>tlbimp</WrapperTool>
-		  <VersionMinor>0</VersionMinor>
-		  <VersionMajor>5</VersionMajor>
-		  <Guid>719a5fab-eb1c-4b52-98bc-f8c9f6912d04</Guid>
-		  <Lcid>0</Lcid>
-		  <Isolated>false</Isolated>
-		  <EmbedInteropTypes>true</EmbedInteropTypes>
-		</COMReference>
 		<None Include="MxReadBatch.fsx" />
 		<None Include="MxScan.fsx" />
 	</ItemGroup>

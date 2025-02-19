@@ -1,18 +1,21 @@
 using DsMxComm;
+using static DsMxComm.MxComponentModule;
 
 class Program
 {
     static void Main()
     {
-        // ActUtlType64 객체 생성
-        var plc = new PlcMxComponent("1.1.1.1", 5006, "R04CPU");
+        //ActUtlType64Class  mx component communication setting utility 사용하여 설정번호만 받음
+        var plc = new PlcMxComponent(0);
+        //ActUtlType64Class  mx component communication setting utility 미 사용 직접 코딩
+        //var plc = new PlcMxComponent("192.168.9.109", 6000, "Q02CPU");
 
         try
         {
             // PLC 연결
             if (!plc.Open())
             {
-                Console.WriteLine($"MX Simulator 연결 실패!");
+                Console.WriteLine($"MX 연결 실패!");
                 return;
             }
             //var dataSet = new Dictionary<string, int>
@@ -31,7 +34,7 @@ class Program
                 //if (i % 2 == 0)
                     devices[i] = $"K4X{i * 16:X}";
                 //else
-                    //devices[i] = $"W{i:X}";
+                //devices[i] = $"W{i:X}";
 
                 values[i] = Convert.ToInt16( i); // 테스트용 값 (0, 1, 2, ..., cnt-1)
             }
@@ -61,7 +64,7 @@ class Program
         {
             // PLC 연결 종료
             plc.Close();
-            Console.WriteLine("MX Simulator 연결 종료");
+            Console.WriteLine("MX  연결 종료");
         }
     }
 

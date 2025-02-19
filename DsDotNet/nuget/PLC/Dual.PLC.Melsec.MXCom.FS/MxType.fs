@@ -64,6 +64,8 @@ module MxTypeModule =
         | PROTOCOL_MNETG = 0x14
         | PROTOCOL_CCIETSN = 0x1C
         | PROTOCOL_CCIEF = 0x15
+        | PROTOCOL_SHAREDMEMORY = 0x06
+        
 
     /// MELSEC CPU 타입 Dictionary (Key: CPU 이름, Value: Decimal 값)
     let CpuTypeMap = dict [

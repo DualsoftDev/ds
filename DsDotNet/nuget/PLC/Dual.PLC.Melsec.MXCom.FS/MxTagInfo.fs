@@ -25,23 +25,24 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     member x.Device = mxTagInfo.Device
 
     member x.WordTag =
-        let offset = 
-            if x.Device.IsHexa 
-            then $"{(mxTagInfo.BitOffset / 16):X}" 
-            else $"{(mxTagInfo.BitOffset / 16)}" 
-
+        let offset = mxTagInfo.BitOffset / 16
+           
         if x.DataType = MxBit then
-            $"K4{x.Device}{offset}"
+            if x.Device.IsHexa 
+            then $"K4{x.Device}{(offset*16):X}" 
+            else $"K4{x.Device}{offset*16}"
         else
-            $"{x.Device}{offset}"
+             if x.Device.IsHexa 
+             then $"{x.Device}{(offset):X}" 
+             else $"{x.Device}{(offset)}" 
 
     member x.UpdateValue(data: int16) : bool =
         let newValue =
             match x.DataType with
             | MxBit -> (data &&& (1s <<< mxTagInfo.BitOffset % 16) <> 0s) :> obj
-            | MxWord -> data :> obj
+            | MxWord -> data :> obj 
 
-        if currentValue <> newValue then
+        if currentValue = null || currentValue <> newValue then
             currentValue <- newValue
             true
         else false

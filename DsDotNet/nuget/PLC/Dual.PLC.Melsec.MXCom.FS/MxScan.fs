@@ -95,11 +95,8 @@ module MelsecScanModule =
                         while not cancelScanChannels[ch].IsCancellationRequested do
                             x.WriteToPLC(conn, batches) // 반드시 실행
                             x.ReadFromPLC(conn, batches) // 반드시 실행
-                          //  do! Async.Sleep scanDelay // test  Async.StartImmediate 동작 안함
-                            logInfo $"Write/Read finished for ch {ch}."
+                            do! Async.Sleep scanDelay
                     with
-                    | :? OperationCanceledException ->
-                        logInfo $"Monitoring for PLC {ch} was cancelled."
                     | ex ->
                         logError $"Error in Write/Read operation for PLC {ch}: {ex}"
                 

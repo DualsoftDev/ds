@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
+		<TargetFramework>netstandard2.0</TargetFramework>
 		<RootNamespace>Dual.PLC.Melsec.MxCOM.FS</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
@@ -13,7 +13,6 @@
 		<SignAssembly>false</SignAssembly>
 		<!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
-		<PlatformTarget>AnyCPU</PlatformTarget>
 	</PropertyGroup>
 
 
@@ -38,6 +37,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\..\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 		<ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
 	</ItemGroup>
 

@@ -62,35 +62,36 @@ module MxTagParserModule =
                 | MxDevice.M | MxDevice.L | MxDevice.B | MxDevice.F | MxDevice.SB | MxDevice.SM -> MxBit
                 | _ -> MxWord
 
-        match address with
-        | RegexPattern @"^([A-Z]+)(\d+)(?:\.(\d+))?$" [device; d1; d2] -> 
-            try
-                let parsedDevice = MxDevice.Create device
-                let devType = getMxDeviceType parsedDevice  (if d2 = "" then None else Some d2)
-                Some
-                    {
-                        Device = parsedDevice
-                        DataTypeSize = devType
-                        BitOffset =
-                            match devType  with
-                            | MxBit ->
-                                if d2 = "" 
-                                then //XFFF
-                                    if parsedDevice.IsHexa
-                                    then Convert.ToInt32(d1, 16)
-                                    else Convert.ToInt32(d1)
-                                else //D100.F
-                                    if parsedDevice.IsHexa
-                                    then Convert.ToInt32(d1, 16) + Convert.ToInt32(d2, 16)
-                                    else Convert.ToInt32(d1) + Convert.ToInt32(d2, 16)
-                            | MxWord -> 
-                                    if parsedDevice.IsHexa
-                                    then Convert.ToInt32(d1, 16) * 16
-                                    else Convert.ToInt32(d1) * 16
+
+        let getRecord (device, d1, d2)= 
+            let parsedDevice = MxDevice.Create device
+            let devType = getMxDeviceType parsedDevice  (if d2 = "" then None else Some d2)
+            Some
+                {
+                    Device = parsedDevice
+                    DataTypeSize = devType
+                    BitOffset =
+                        match devType  with
+                        | MxBit ->
+                            if d2 = "" 
+                            then //XFFF
+                                if parsedDevice.IsHexa
+                                then Convert.ToInt32(d1, 16)
+                                else Convert.ToInt32(d1)
+                            else //D100.F
+                                if parsedDevice.IsHexa
+                                then Convert.ToInt32(d1, 16) + Convert.ToInt32(d2, 16)
+                                else Convert.ToInt32(d1) + Convert.ToInt32(d2, 16)
+                        | MxWord -> 
+                                if parsedDevice.IsHexa
+                                then Convert.ToInt32(d1, 16) * 16
+                                else Convert.ToInt32(d1) * 16
                         
-                    }
-            with
-            | :? ArgumentException -> None
+                }
+
+        match address with
+        | RegexPattern @"^([A-Z]+)(\d+)(?:\.(\d+))?$" [device; d1; d2] -> getRecord(device, d1, d2)
+        | RegexPattern @"^([A-Z]+)([0-9A-F]+)(?:\.(\d+))?$" [device; d1; d2] -> getRecord(device, d1, d2)
         | _ -> None
 
         

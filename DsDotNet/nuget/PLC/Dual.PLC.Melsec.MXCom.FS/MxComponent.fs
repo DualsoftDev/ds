@@ -163,7 +163,7 @@ module MxComponentModule  =
                 let deviceList = String.Join("\n", devices)
 
                 let result = mx.ReadDeviceRandom2(deviceList, devices.Length, &values[0])
-                if result = 0 then  values else failwith $"ReadDeviceRandom Failed: {deviceList}"
+                if result = 0 then  values else failwith $"ReadDeviceRandom Failed: \n{deviceList}"
             with ex ->
                 failwithf "예외 발생: %s" ex.Message
                 ///512개의 Word 디바이스를 한번에 쓰기

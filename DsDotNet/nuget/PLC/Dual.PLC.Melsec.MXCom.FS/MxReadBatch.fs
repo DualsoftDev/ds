@@ -41,7 +41,11 @@ module MelsecReadBatchModule =
       // MxTag를 생성하고 WordBatch에 그룹화
         let groupTags = 
             tags 
-            |> Seq.map (fun tag -> MxTagParser.Parse(tag) |> fun f -> MxTag(tag, f))
+            |> Seq.map (fun tag -> 
+                    match tryParseMxTag(tag) with
+                    | Some tagInfo -> MxTag(tag, tagInfo)
+                    | None -> failwith $"Invalid tag: {tag}"
+                )
             |> Seq.groupBy(fun tag -> tag.WordTag)
 
             // 512개 단위로 WordBatch 배열을 생성

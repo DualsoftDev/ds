@@ -17,9 +17,12 @@ class Program
             var scanModule = new MelsecScan(logicalStationNumber);
             var dataSet = new Dictionary<string, int>
             {
-                { "D100", 1 },
-                { "D102", 1 },
-                { "D104", 1 },
+                { "D1000", 1 },
+                { "L102F", 1 },
+                { "L104", 1 },
+                { "X0FF", 1 },
+                { "X1F", 1 },
+                { "X000F", 1 },
             };
 
             // Connect 값 변경 이벤트 구독
@@ -36,7 +39,9 @@ class Program
 
             var mxDicTags = scanModule.ScanSingle(logicalStationNumber, dataSet.Keys);
             mxDicTags.First().Value.Values.First().SetWriteValue(100);
-
+            Thread.Sleep(1000);
+            Console.WriteLine("Press any key to exit...");
+            Console.ReadKey();
             // PLC 연결
             //if (!plc.Open())
             //{

@@ -58,6 +58,14 @@
 		<ProjectReference Include="..\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
 	</ItemGroup>
 
+	<ItemGroup>
+		<Reference Include="Interop.ActProgType64Lib">
+			<HintPath>Interop.ActProgType64Lib.dll</HintPath>
+		</Reference>
+		<Reference Include="Interop.ActUtlType64Lib">
+			<HintPath>Interop.ActUtlType64Lib.dll</HintPath>
+		</Reference>
+	</ItemGroup>
 
 
 </Project>

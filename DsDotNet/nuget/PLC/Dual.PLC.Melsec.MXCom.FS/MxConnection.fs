@@ -1,7 +1,6 @@
 namespace DsMxComm
 
 open System
-open ActUtlType64Lib
 open Dual.PLC.Common.FS
 
 [<AutoOpen>]

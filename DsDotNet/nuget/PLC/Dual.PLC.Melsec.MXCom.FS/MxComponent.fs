@@ -5,7 +5,6 @@ open System.Diagnostics
 open System.Text
 open System.Threading
 open System.Timers
-open ActUtlType64Lib
 open ActProgType64Lib
 
 
@@ -14,8 +13,8 @@ type PlcMxComponent(hostAddress: string, portNumber: int, cpuName:string) =
     let mutable errorCode = 0
     let mutable errorMessage = ""
     let mutable connected = false
-    //let actProgType = ActUtlType64Lib.ActUtlType64Class()
-    let actProgType = ActProgType64Lib.ActProgType64Class()
+    let actProgType = ActUtlType64Lib.ActUtlType64Class()
+    //let actProgType = ActProgType64Lib.ActProgType64Class()
 
 
      /// 오류 코드에 대한 메시지 매핑
@@ -32,35 +31,35 @@ type PlcMxComponent(hostAddress: string, portNumber: int, cpuName:string) =
     ]
     do 
         
-        let a = actProgType.ActBaudRate
-        let a =  actProgType.ActConnectUnitNumber
-        let a =  actProgType.ActControl
-        let a =  actProgType.ActCpuTimeOut
-        let a =  actProgType.ActDataBits
-        let a =  actProgType.ActDestinationIONumber
-        let a =  actProgType.ActDestinationPortNumber
-        let a =  actProgType.ActDidPropertyBit
-        let a =  actProgType.ActDsidPropertyBit
-        let a =  actProgType.ActHostAddress: string
-        let a =  actProgType.ActIONumber
-        let a =  actProgType.ActIntelligentPreferenceBit
-        let a =  actProgType.ActMultiDropChannelNumber
-        let a =  actProgType.ActNetworkNumber
-        let a =  actProgType.ActPacketType
-        let a =  actProgType.ActParity
-        let a =  actProgType.ActPassword: string
-        let a =  actProgType.ActPortNumber
-        let a =  actProgType.ActProtocolType
-        let a =  actProgType.ActSourceNetworkNumber
-        let a =  actProgType.ActSourceStationNumber
-        let a =  actProgType.ActStationNumber
-        let a =  actProgType.ActStopBits
-        let a =  actProgType.ActSumCheck
-        let a =  actProgType.ActTargetSimulator
-        let a =  actProgType.ActThroughNetworkType
-        let a =  actProgType.ActTimeOut
-        let a =  actProgType.ActUnitNumber
-        let a =  actProgType.ActUnitType
+        //let a = actProgType.ActBaudRate
+        //let a =  actProgType.ActConnectUnitNumber
+        //let a =  actProgType.ActControl
+        //let a =  actProgType.ActCpuTimeOut
+        //let a =  actProgType.ActDataBits
+        //let a =  actProgType.ActDestinationIONumber
+        //let a =  actProgType.ActDestinationPortNumber
+        //let a =  actProgType.ActDidPropertyBit
+        //let a =  actProgType.ActDsidPropertyBit
+        //let a =  actProgType.ActHostAddress: string
+        //let a =  actProgType.ActIONumber
+        //let a =  actProgType.ActIntelligentPreferenceBit
+        //let a =  actProgType.ActMultiDropChannelNumber
+        //let a =  actProgType.ActNetworkNumber
+        //let a =  actProgType.ActPacketType
+        //let a =  actProgType.ActParity
+        //let a =  actProgType.ActPassword: string
+        //let a =  actProgType.ActPortNumber
+        //let a =  actProgType.ActProtocolType
+        //let a =  actProgType.ActSourceNetworkNumber
+        //let a =  actProgType.ActSourceStationNumber
+        //let a =  actProgType.ActStationNumber
+        //let a =  actProgType.ActStopBits
+        //let a =  actProgType.ActSumCheck
+        //let a =  actProgType.ActTargetSimulator
+        //let a =  actProgType.ActThroughNetworkType
+        //let a =  actProgType.ActTimeOut
+        //let a =  actProgType.ActUnitNumber
+        //let a =  actProgType.ActUnitType
 
             // MX Component version4 プログラミングマニュアル
         // 4.3.7 接続局がEthernet ポート内蔵QCPU のEthernet 通信（TCP）
@@ -89,14 +88,14 @@ type PlcMxComponent(hostAddress: string, portNumber: int, cpuName:string) =
         //actProgType.ActHostAddress <- "127.0.0.1"
         //actProgType.ActLogicalStationNumber <- 0
         //actProgType.
-        actProgType.ActCpuType <- MxTypeModule.CpuTypeMap[cpuName]   // CPU 타입 설정 (예: Q03UDVCPU = 209)
-        //actProgType.ActPortNumber <- 5511
-        //actProgType.ActStationNumber <- 0
-        actProgType.ActUnitType <- (int)UnitType.UNIT_SIMULATOR3
-        actProgType.ActNetworkNumber<- 0;  // 固定（自局）
-        actProgType.ActProtocolType <-6;   // PROTOCOL_SHAREDMEMORY
-        actProgType.ActStationNumber <-255;// 固定（自局）
-        actProgType.ActTimeOut <- 500;      // ms単位でユーザ任意
+        //actProgType.ActCpuType <- MxTypeModule.CpuTypeMap[cpuName]   // CPU 타입 설정 (예: Q03UDVCPU = 209)
+        ////actProgType.ActPortNumber <- 5511
+        ////actProgType.ActStationNumber <- 0
+        //actProgType.ActUnitType <- (int)UnitType.UNIT_SIMULATOR3
+        //actProgType.ActNetworkNumber<- 0;  // 固定（自局）
+        //actProgType.ActProtocolType <-6;   // PROTOCOL_SHAREDMEMORY
+        //actProgType.ActStationNumber <-255;// 固定（自局）
+        //actProgType.ActTimeOut <- 500;      // ms単位でユーザ任意
 
         //actProgType.ActTargetSimulator <- 0//0x01
         //actProgType.ActHostAddress <- hostAddress

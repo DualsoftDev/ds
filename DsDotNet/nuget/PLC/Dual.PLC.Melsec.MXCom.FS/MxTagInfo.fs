@@ -27,14 +27,17 @@ type MxTag(deviceAddress: string, dataTypeSize: MxDeviceType, bitOffset: int) =
         | None -> failwith "Invalid device address"
 
     member x.BitOffset = bitOffset
-    
     member x.WordTag =
-        if x.DataType = MxBit then
-            $"K4{x.Device}{(x.BitOffset / 16):X}"
-        else
-            $"{x.Device}{x.BitOffset / 16}"
+        let offset = 
+            if x.Device.IsHexa 
+            then $"{(x.BitOffset / 16):X}" 
+            else $"{(x.BitOffset / 16)}" 
 
-    member val WordOffset = -1 with get, set
+        if x.DataType = MxBit then
+            $"K4{x.Device}{offset}"
+        else
+            $"{x.Device}{offset}"
+
 
     member x.MemType = if dataTypeSize = MxBit then 'X' else 'B'
     member x.Size = if dataTypeSize = MxBit then x.BitOffset % 8 else dataTypeSize.Size / 8

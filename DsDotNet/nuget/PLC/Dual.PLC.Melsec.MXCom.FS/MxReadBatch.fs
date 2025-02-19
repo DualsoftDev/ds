@@ -16,14 +16,7 @@ module MelsecReadBatchModule =
         member this.Tags = tags
         member this.SetTags(newTags) = tags <- newTags
 
-        member x.BatchToText() = 
-            tags 
-            |> Seq.groupBy(fun t -> t.Device) 
-            |> Seq.map (fun (device, tagGroup) -> 
-                let maxBitOffset = tagGroup |> Seq.map(fun t -> t.BitOffset) |> Seq.max
-                sprintf "Device: %s, Read BitOffset: %d" (device.ToText) maxBitOffset
-            )
-            |> String.concat "\n"
+
 
     // Prepare batches for communication with PLC
     let prepareReadBatches(conn: DsMxConnection, tagInfos: MxTag[]) : WordBatch[] =

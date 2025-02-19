@@ -24,7 +24,7 @@
 		<Compile Include="MxTagParser.fs" />
 		<Compile Include="MxConnection.fs" />
 		<Compile Include="MxTagInfo.fs" />
-		<None Include="MxReadBatch.fsx" />
+		<None Include="MxReadBatch.fs" />
 		<None Include="MxScan.fsx" />
 	</ItemGroup>
 

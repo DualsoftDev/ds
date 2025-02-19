@@ -28,8 +28,12 @@ module MxTagParserModule =
                 | "DX" -> X
                 | "DY" -> Y
                 | _ -> Enum.Parse(typeof<MxDevice>, s) :?> MxDevice
+            member x.IsHexa = 
+                match x with
+                | X | Y | B | W | SW | SB | SW -> true
+                | _ -> false
 
-    
+            
     /// 주소에서 MxDevice와 인덱스를 추출하는 함수
     let tryParseMxTag (address: string) : (MxDevice * MxDeviceType * int) option =
         let getMxDeviceType(melsecHead: MxDevice) (bit: string option) = 

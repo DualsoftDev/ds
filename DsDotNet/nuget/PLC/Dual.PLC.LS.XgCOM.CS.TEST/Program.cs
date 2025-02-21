@@ -13,7 +13,7 @@ class Program
 
         // 테스트 케이스 정의
         var tagsPerPLC = new Dictionary<string, List<string>>
-        {
+        {   
             //{ "127.0.0.1", new List<string> { "%MX0000", "%MW0001"  } },
             //{ "192.168.9.103", new List<string> { "P0", "P1" } },
             { "192.168.9.100", new List<string> { "%MX0000", "%MW0001" } }

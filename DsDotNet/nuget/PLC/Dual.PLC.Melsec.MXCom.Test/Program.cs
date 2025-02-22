@@ -17,8 +17,8 @@ class Program
             var scanModule = new MelsecScan(logicalStationNumber);
             var dataSet = new Dictionary<string, int>
             {
-                { "D1000", 1 },
-                { "L102F", 1 },
+                { "D1000.F", 1 },
+                { "R1002", 1 },
                 { "L104", 1 },
                 { "X0FF", 1 },
                 { "X1F", 1 },
@@ -42,6 +42,16 @@ class Program
             Thread.Sleep(1000);
             Console.WriteLine("Press any key to exit...");
             Console.ReadKey();
+
+
+
+
+
+
+
+
+
+
             // PLC 연결
             //if (!plc.Open())
             //{

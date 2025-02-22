@@ -82,6 +82,9 @@ module MelsecScanModule =
                     with
                     | ex -> logError $"WriteToPLC error: {ex}"
 
+                writingTags |> Seq.cast<ITagPLC> |> Seq.iter (fun t -> t.ClearWriteValue())
+
+
         /// PLC 모니터링을 시작하는 함수
         member private x.StartMonitoring(ch: int, tags: string seq) =
             checkExistChannel ch

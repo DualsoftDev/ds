@@ -8,40 +8,35 @@ open System.Runtime.CompilerServices
 module MxTagParserModule =
 
     type MxDeviceType =
-        | MxBit | MxWord 
-        with
-            member x.Size =
-                match x with
-                | MxBit -> 1
-                | MxWord -> 16
+        | MxBit 
+        | MxWord 
 
- 
     /// Mitsubishi PLC의 다양한 장치 유형을 정의하는 타입
     [<AutoOpen>]
     type MxDevice =
         | X | Y | M | L | B | F | Z | V
-        | D | W | R | ZR | T | ST | C    
+        | D | W | R | ZR | T | C    
         | SM | SD | SW | SB | DX | DY
         with
             member x.ToText = x.ToString()
+            member x.DevType =
+                match x with
+                | X | Y | DX | DY | M | L | B | F | SB | SM -> MxBit
+                | _ -> MxWord
+
             static member Create s =
                 match s with
-                | "X" -> X | "Y" -> Y | "M" -> M | "L" -> L | "B" -> B
-                | "F" -> F | "Z" -> Z | "V" -> V | "D" -> D
-                | "W" -> W | "R" -> R | "C" -> C | "T" -> T
-                | "ZR" -> ZR 
-                | "ST" -> ST
-                | "SM" -> SM
-                | "SD" -> SD
-                | "SW" -> SW
-                | "SB" -> SB
-                | "DX" -> DX
-                | "DY" -> DY
-                | _ -> failwith $"Invalid MxDevice value: {s}"
+                | "X" -> Some X | "Y" -> Some Y | "M" -> Some M | "L" -> Some L
+                | "B" -> Some B | "F" -> Some F | "Z" -> Some Z | "V" -> Some V
+                | "D" -> Some D | "W" -> Some W | "R" -> Some R | "C" -> Some C
+                | "T" -> Some T | "ZR" -> Some ZR  | "SM" -> Some SM
+                | "SD" -> Some SD | "SW" -> Some SW | "SB" -> Some SB | "DX" -> Some DX
+                | "DY" -> Some DY
+                | _ -> None
 
             member x.IsHexa = 
                 match x with
-                | X | Y | B | W | SW | SB | SW -> true
+                | X | Y | B | W | SW | SB | DX | DY -> true
                 | _ -> false
 
     type MxTagInfo = 
@@ -50,54 +45,82 @@ module MxTagParserModule =
             DataTypeSize: MxDeviceType
             BitOffset: int
         }
-            
+
+    /// 안전한 숫자 변환 함수
+    let tryParseInt (value: string) (isHex: bool) =
+        try
+            if isHex then Convert.ToInt32(value, 16) else Convert.ToInt32(value)
+        with
+        | :? FormatException -> -1
+        | :? OverflowException -> -1
+
     /// 주소에서 MxDevice와 인덱스를 추출하는 함수
     let tryParseMxTag (address: string) : MxTagInfo option =
-        let getMxDeviceType(melsecHead: MxDevice) (bit: string option) = 
-            match bit with
-            | Some _ -> MxBit
-            | None -> // 단순 주소 형식 (예: X12, Y232, D122)
-                match melsecHead with
-                | MxDevice.DX | MxDevice.X | MxDevice.DY | MxDevice.Y 
-                | MxDevice.M | MxDevice.L | MxDevice.B | MxDevice.F | MxDevice.SB | MxDevice.SM -> MxBit
-                | _ -> MxWord
+        let getBitOffset (parsedDevice: MxDevice) (d1: string) (d2: string option) =
+            let baseOffset = tryParseInt d1 parsedDevice.IsHexa
+            if baseOffset = -1 then None
+            else
+                match d2 with
+                | Some bit when parsedDevice.DevType = MxWord -> 
+                    let bitOffset = tryParseInt bit true
+                    if bitOffset = -1 then None else Some (baseOffset * 16 + bitOffset)
+                | None -> if parsedDevice.DevType = MxBit
+                            then Some baseOffset
+                            else Some (baseOffset*16)
+                | _ -> None
+
+        let getRecord (device: string, d1: string, d2: string option) =
+            match MxDevice.Create device with
+            | Some parsedDevice ->
+                getBitOffset parsedDevice d1 d2
+                |> Option.map (fun bitOffset -> 
+                    { Device = parsedDevice
+                      DataTypeSize = if d2.IsSome then MxBit else  parsedDevice.DevType
+                      BitOffset = bitOffset })
+            | None -> None
 
 
-        let getRecord (device, d1, d2)= 
-            let parsedDevice = MxDevice.Create device
-            let devType = getMxDeviceType parsedDevice  (if d2 = "" then None else Some d2)
-            Some
-                {
-                    Device = parsedDevice
-                    DataTypeSize = devType
-                    BitOffset =
-                        match devType  with
-                        | MxBit ->
-                            if d2 = "" 
-                            then //XFFF
-                                if parsedDevice.IsHexa
-                                then Convert.ToInt32(d1, 16)
-                                else Convert.ToInt32(d1)
-                            else //D100.F
-                                if parsedDevice.IsHexa
-                                then Convert.ToInt32(d1, 16) + Convert.ToInt32(d2, 16)
-                                else Convert.ToInt32(d1) + Convert.ToInt32(d2, 16)
-                        | MxWord -> 
-                                if parsedDevice.IsHexa
-                                then Convert.ToInt32(d1, 16) * 16
-                                else Convert.ToInt32(d1) * 16
-                        
-                }
+//X, Y, B, W, SW, SB는 16진수 기반으로 변환
+        match address.ToUpper() with
+            // ✅ 1글자 장치 (Z, D, R) - 비트 포함 
+            | RegexPattern @"^(Z|D|R)(\d+)(?:\.([0-9A-F]))$" [device; d1; d2] ->
+                getRecord(device, d1, Some d2)
 
-        match address with
-        | RegexPattern @"^([A-Z]+)(\d+)(?:\.(\d+))?$" [device; d1; d2] -> getRecord(device, d1, d2)
-        | RegexPattern @"^([A-Z]+)([0-9A-F]+)(?:\.(\d+))?$" [device; d1; d2] -> getRecord(device, d1, d2)
-        | _ -> None
+            // ✅ 16진수 기반 주소 (W) - 비트 포함 
+            | RegexPattern @"^(W)([0-9A-F]+)(?:\.([0-9A-F]))$" [device; d1; d2] ->
+                getRecord(device, d1, Some d2)
 
-        
+            // ✅ 2글자 장치 (ZR,  SD) - 비트 포함 
+            | RegexPattern @"^(ZR|SD)(\d+)(?:\.([0-9A-F]))$" [device; d1; d2] ->
+                getRecord(device, d1, Some d2)
+
+            // ✅ 16진수 기반 주소 (SW) - 비트 포함 
+            | RegexPattern @"^(SW)([0-9A-F]+)(?:\.([0-9A-F]))$" [device; d1; d2] ->
+                getRecord(device, d1, Some d2)
+
+            // ✅ 비트 정보 없는 경우 (Hexa 타입 장치: X, Y, B, W)
+            | RegexPattern @"^(X|Y|B|W)([0-9A-F]+)$" [device; d1] ->
+                getRecord(device, d1, None)
+
+            // ✅ 비트 정보 없는 경우 (일반 장치: M, L, F, Z, V, D, R, T, C, S)
+            | RegexPattern @"^(M|L|F|Z|V|D|R|T|C)(\d+)$" [device; d1] ->
+                getRecord(device, d1, None)
+
+            // ✅ 비트 정보 없는 경우 (ZR, ST, SM, SD, DX, DY)
+            | RegexPattern @"^(ZR|ST|SM|SD)(\d+)$" [device; d1] ->
+                getRecord(device, d1, None)
+
+            // ✅ 비트 정보 없는 경우 (Hexa 타입 장치: SW, SB, DX, DY)
+            | RegexPattern @"^(SW|SB|DX|DY)([0-9A-F]+)$" [device; d1] ->
+                getRecord(device, d1, None)
+
+            // ❌ 매칭되지 않으면 None 반환
+            | _ -> None
+
+
+
 [<Extension>]   // For C#
 type MxTagParser =
-   
     [<Extension>]
-    static member Parse(tag:string): MxTagInfo =
+    static member Parse(tag: string): MxTagInfo =
         tryParseMxTag tag |? (getNull<MxTagInfo>())

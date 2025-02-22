@@ -6,6 +6,11 @@ open System.Text
 open System.Threading
 open System.Timers
 
+     //ActUtlType64Class  mx component communication setting utility 사용하여 설정번호만 받음
+        //var plc = new PlcMxComponent(0);
+        //ActUtlType64Class  mx component communication setting utility 미 사용 직접 코딩
+        //var plc = new PlcMxComponent("192.168.9.109", 6000, "Q02CPU");
+
 [<AutoOpen>]
 module MxComponentModule  =
     let errorMessages = dict [

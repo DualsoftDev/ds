@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <Compile Include="MxTagParserTests.fs" />
+        <Compile Include="Program.fs" />
     </ItemGroup>
 
     <ItemGroup>

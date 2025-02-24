@@ -187,7 +187,6 @@ type TagKindExt =
         | EventTaskDev (_, _, kind) ->
             kind.IsOneOf(
                 TaskDevTag.actionOut
-                , TaskDevTag.actionMemory
             )
         | _ -> false
 
@@ -281,8 +280,7 @@ type TagKindExt =
     [<Extension>]
     static member IsActionOutTag(x:IStorage) =
         x.TagKind.IsOneOf(
-                int TaskDevTag.actionMemory
-              , int TaskDevTag.actionOut
+               int TaskDevTag.actionOut
               )
 
     [<Extension>]
@@ -333,7 +331,6 @@ type TagKindExt =
                 kind.IsOneOf(
                       TaskDevTag.actionIn
                     , TaskDevTag.actionOut
-                    , TaskDevTag.actionMemory
                     )
             | EventHwSys (_, _, _) -> false
             | EventVariable (_, _, _) -> true

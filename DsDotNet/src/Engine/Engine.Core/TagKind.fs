@@ -231,7 +231,6 @@ module TagKindList =
     type TaskDevTag =
     | actionIn                 = 14010
     | actionOut                = 14011
-    | actionMemory             = 14012
 
 
     /// 15000 ~ 14999

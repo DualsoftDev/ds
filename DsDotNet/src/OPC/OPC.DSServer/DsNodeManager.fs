@@ -41,6 +41,11 @@ module DsNodeManagerExt =
             |> Seq.map(fun tag -> tag.Value)
     
 
+    let getIOTags(sys:DsSystem) =
+        sys.TagManager.Storages.Values
+            |> Seq.filter(fun tag -> tag.TagKind = (int)TaskDevTag.actionIn || tag.TagKind = (int)TaskDevTag.actionOut)
+    
+
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem) =
     inherit CustomNodeManager2(server, configuration, "ds")
     let _variables = Dictionary<string, BaseDataVariableState>()
@@ -95,7 +100,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         for tag in tags do
             if (tag.ObjValue.GetType().IsValueType || tag.ObjValue :? string)
                 && not(_variables.ContainsKey tag.Name) then
-                let variable =
+                //actionIn, actionOut 태그는 별도 처리
+                let newVariable =
                     createVariable(
                         parentNode,
                         tag.Name,
@@ -104,8 +110,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         Variant(tag.ObjValue),
                         tag.ObjValue.GetType()
                     )
-                this.AddPredefinedNode(this.SystemContext, variable)
-                _variables.Add(tag.Name, variable)
+                _variables.Add (tag.Name, newVariable)
+                this.AddPredefinedNode(this.SystemContext, newVariable)
 
     /// <summary>
     /// Create a new folder node and add it to the parent folder.
@@ -154,11 +160,15 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         // Dualsoft root folder under Objects
         let rootNode = this.CreateFolder("Dualsoft", "Dualsoft", "", nIndex, None)
         objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootNode.NodeId))
-        
-        let rootTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name} tags",  $"{dsSys.GetType().Name}", nIndex, Some rootNode)
+        let rootTagNode = this.CreateFolder("Tag", "Tag", "", nIndex, None)
+        objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootTagNode.NodeId))
 
-        let sysTags = getTags dsSys
-        this.CreateOpcNodes sysTags rootTagfolder nIndex
+        let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
+        this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
+        
+        
+        let rootSysTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name}_System",  $"{dsSys.GetType().Name}", nIndex, Some rootNode)
+        this.CreateOpcNodes (getTags dsSys) rootSysTagfolder nIndex
 
         // Create Tree Structure
         let treeFlows = DsPropertyTreeExt.GetPropertyTreeFromSystem(dsSys)
@@ -202,7 +212,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
 
                         // 자식 노드를 큐에 추가
                         for child in treeNode.Children do
-                            queue.Enqueue((folder, child))
+                            queue.Enqueue(folder, child)
 
         processTreeLevels rootNode treeFlows 
         this.processTextAdd rootNode dsSys

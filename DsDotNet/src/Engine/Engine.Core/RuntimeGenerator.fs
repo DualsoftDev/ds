@@ -67,6 +67,11 @@ module RuntimeGeneratorModule =
         | PCSIM
         | PLC
         | PLCSIM
+        | Simulation
+        | ActiveControl
+        | Monitoring
+        | VirtualPlant
+        | VirtualLogic
     with
         member x.IsPCorPCSIM() =
             match x with
@@ -83,7 +88,6 @@ module RuntimeGeneratorModule =
             | PCSIM | PLCSIM -> true
             | _ -> false
 
-    let RuntimePackageList = [ PC; PCSIM; PLC; PLCSIM;  ]
 
     let ToRuntimePackage s =
         match s with

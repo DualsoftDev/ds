@@ -45,6 +45,13 @@ module DsNodeManagerExt =
         sys.TagManager.Storages.Values
             |> Seq.filter(fun tag -> tag.TagKind = (int)TaskDevTag.actionIn || tag.TagKind = (int)TaskDevTag.actionOut)
     
+    let getActionTags(sys:DsSystem) =
+        sys.TagManager.Storages.Values
+            |> Seq.filter(fun tag -> tag.TagKind = (int)VertexTag.motionStart || tag.TagKind = (int)VertexTag.motionEnd)
+
+    let getScriptTags(sys:DsSystem) =
+        sys.TagManager.Storages.Values
+            |> Seq.filter(fun tag -> tag.TagKind = (int)VertexTag.scriptStart || tag.TagKind = (int)VertexTag.scriptEnd)
 
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem) =
     inherit CustomNodeManager2(server, configuration, "ds")
@@ -57,16 +64,14 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         _: ISystemContext, node: NodeState, _: NumericRange, 
         _: QualifiedName, value: byref<obj>, statusCode: byref<StatusCode>, timestamp: byref<DateTime>
     ) =
-        printfn "Write Value: %A, Node: %s" value node.BrowseName.Name
-
-        if dsStorages.ContainsKey(node.BrowseName.Name) then
-            dsStorages[node.BrowseName.Name].BoxedValue <- value
-            printfn "DS Tag '%s' updated to: %A" node.BrowseName.Name value
-        else
-            printfn "DS Tag '%s' not found!" node.BrowseName.Name
-
         timestamp <- DateTime.UtcNow
-        ServiceResult.Good
+        if dsStorages.ContainsKey(node.DisplayName.Text) then
+            dsStorages[node.DisplayName.Text].BoxedValue <- value
+            printfn "DS Tag '%s' updated to: %A from OPC Client" node.BrowseName.Name value
+            ServiceResult.Good
+        else 
+            printfn "DS Tag '%s' not found" node.DisplayName.Text
+            ServiceResult.Good
     
 
     let createVariable(folder: FolderState, name: string, tagKind: string , namespaceIndex: uint16, initialValue: Variant, typ: Type) =
@@ -99,7 +104,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         // Create Variables for storages
         for tag in tags do
             if (tag.ObjValue.GetType().IsValueType || tag.ObjValue :? string)
-                && not(_variables.ContainsKey tag.Name) then
+              (*  && not(_variables.ContainsKey tag.Name)*) then
                 //actionIn, actionOut 태그는 별도 처리
                 let newVariable =
                     createVariable(
@@ -163,9 +168,16 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         let rootTagNode = this.CreateFolder("Tag", "Tag", "", nIndex, None)
         objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootTagNode.NodeId))
 
-        let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
-        this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
+
+        // IO 추후 오픈 Runtime Active 모드에서 사용
+        //let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
+        //this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
         
+        let nodeAction = this.CreateFolder("Action", "Action", "", nIndex, Some rootTagNode)
+        this.CreateOpcNodes (getActionTags dsSys) nodeAction nIndex
+                
+        let nodeScript = this.CreateFolder("Script", "Script", "", nIndex, Some rootTagNode)
+        this.CreateOpcNodes (getScriptTags dsSys) nodeScript nIndex
         
         let rootSysTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name}_System",  $"{dsSys.GetType().Name}", nIndex, Some rootNode)
         this.CreateOpcNodes (getTags dsSys) rootSysTagfolder nIndex
@@ -188,8 +200,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                     // 현재 노드에 해당하는 폴더 생성
                     let target = treeNode.Node.FqdnObject
                     let isJob = target.IsSome && (target.Value :? Job)
+                    let isTaskDev = target.IsSome && (target.Value :? TaskDev)
                     let folderName = $"[{treeNode.Node.FqdnObject.Value.QualifiedName}]"
-                    let fqdnName = $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
 
                     //OP, CMD   FqdnObject 없는 요소도 추후 추가 필요 ?
                     if  _folders.ContainsKey folderName then
@@ -201,12 +213,20 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                                 parentNode
                             else 
                                 let folderDisplayName = $"[{treeNode.Node.Name}]"
+                                let fqdnName = 
+                                    if isTaskDev 
+                                    then
+                                        let tagIONames = String.Join(";", (getTags target.Value).Select(fun f->f.Name))
+                                        $"TaskDev;{tagIONames}"
+                                    else 
+                                        $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
+                                  
                                 this.CreateFolder(folderName, folderDisplayName, fqdnName, nIndex, Some parentNode)
 
                         // 태그가 있는 경우 OPC 노드 생성
-                        if target.IsSome && not (isJob) then
+                        if target.IsSome && not(isJob) && not(isTaskDev) then
                             let tags = getTags target.Value
-                            this.CreateOpcNodes tags folder nIndex
+                            this.CreateOpcNodes tags folder nIndex    
 
                         printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
 
@@ -217,8 +237,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         processTreeLevels rootNode treeFlows 
         this.processTextAdd rootNode dsSys
 
-        // Subscribe to tag events
-        this.SubscribeToTagEvents()
+        // Subscribe to DS tag events
+        this.SubscribeToDsTagEvents()
 
     /// JSON 데이터를 추가하는 함수
     member private this.processTextAdd(rootNode: FolderState)(dsSys: DsSystem) =
@@ -266,23 +286,21 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         this.AddPredefinedNode(this.SystemContext, totalOpcItemVariable)
     
 
-    member private this.SubscribeToTagEvents() =
+    member private this.SubscribeToDsTagEvents() =
         if _disposableTagDS.IsNone 
         then 
             _disposableTagDS <- 
                 Some(
                     ValueSubject.Subscribe(fun (sys, stg, value) ->
-                        if dsSys = (sys:?>DsSystem) // active만 처리
-                        then
-                            async {
-                                if stg.IsVertexOpcDataTag() then 
-                                    handleCalcTag (stg) |> ignore
+                        async {
+                            if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
+                                handleCalcTag (stg) |> ignore  // active만 처리
 
-                                if _variables.ContainsKey(stg.Name) then
-                                    let variable = _variables[stg.Name]
-                                    variable.Value <- value
-                                    variable.Timestamp <- DateTime.UtcNow
-                                    variable.ClearChangeMasks(this.SystemContext, false)    
-                            } |> Async.Start // 비동기로 처리
+                            if _variables.ContainsKey(stg.Name) then
+                                let variable = _variables[stg.Name]
+                                variable.Value <- value
+                                variable.Timestamp <- DateTime.UtcNow
+                                variable.ClearChangeMasks(this.SystemContext, false)    
+                        } |> Async.Start // 비동기로 처리
                     )
-                )
+                )   

@@ -206,9 +206,9 @@ type RealVertexTagManager with
                 if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
                     if RuntimeDS.ModelConfig.RuntimeMotionMode = MotionAsync then
                         if v.Real.TimeAvg.IsSome then
-                            yield (v.TimeEnd.Expr    , v._off.Expr) --| (v.MotionEnd, fn)   
+                            yield (v.TimeEnd.Expr    , v.R.Expr) ==| (v.MotionEnd, fn)   
                         else 
-                            yield (v.MotionStart.Expr, v._off.Expr) --| (v.MotionEnd, fn)   
+                            yield (v.MotionStart.Expr, v.R.Expr) ==| (v.MotionEnd, fn)   
 
                 else
                     let realSensor  = v.Real.ParentApiSensorExpr

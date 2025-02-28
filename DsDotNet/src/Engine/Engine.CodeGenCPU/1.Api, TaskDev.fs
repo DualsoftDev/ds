@@ -34,7 +34,6 @@ type TaskDevManager with
                     <&&>
                         (   (input <&&> a.ApiItemEnd.Expr)
                             <||> (!@input <&&> !@a.ApiItemEnd.Expr)
-                            //<||> call.System._sim.Expr //ahn!!
                         )
 
                 yield (sets, off) ==| (a.SensorLinked, fn)

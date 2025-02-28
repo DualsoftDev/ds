@@ -100,7 +100,7 @@ module ConvertCpuDsSystem =
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true (Some(condi)) tagKind x
                 condi.ErrorCondition.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
 
-        member private x.GenerationButtonEmergencyMemory()  =
+        member x.GenerationButtonEmergencyMemory()  =
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true (Some(emg)) (int HwSysTag.HwStopEmergencyErrLamp) x
                 emg.ErrorEmergency.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))

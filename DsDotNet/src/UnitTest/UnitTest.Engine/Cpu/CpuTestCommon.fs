@@ -77,8 +77,6 @@ module CpuTestUtil =
     let doCheck (commentedStatement:CommentedStatement) =
         let st = commentedStatement.Statement
 
-        System.Diagnostics.Debug.WriteLine(st.ToText())
-
         st.GetSourceStorages()
         |> Seq.filter(fun f-> not <| f.Name.StartsWith("_"))
         |> Seq.iter(fun f->f.BoxedValue <- true)

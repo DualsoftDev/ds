@@ -12,6 +12,7 @@ module ConvertErrorCheck =
     let internal checkErrHWItem(sys:DsSystem) =
         let hwManuFlows = sys.ManualHWButtons |> Seq.collect(fun f -> f.SettingFlows)
         let hwAutoFlows = sys.AutoHWButtons   |> Seq.collect(fun f -> f.SettingFlows)
+
         for btn in sys.AutoHWButtons do
             for flow in btn.SettingFlows do
                 if not(hwManuFlows.Contains flow) then
@@ -22,14 +23,21 @@ module ConvertErrorCheck =
                 if not(hwAutoFlows.Contains flow) then
                     failwithf $"{flow.Name} auto btn not exist"
 
-        if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM() then
-            for btn in sys.HWButtons do
-                if btn.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
-                    failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
+        for btn in sys.HWButtons do
+            if btn.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
 
-            for lamp in sys.HWLamps do
-                if lamp.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
-                    failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
+        for lamp in sys.HWLamps do
+            if lamp.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
+
+        for condi in sys.HWConditions do
+            if condi.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                failwithf $"HW Button : {condi.Name} InAddress 값이 없습니다."
+
+        for action in sys.HWActions do
+            if action.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                failwithf $"HW Lamp : {action.Name} OutAddress 값이 없습니다."
 
 
     let internal checkErrApi(sys:DsSystem) =

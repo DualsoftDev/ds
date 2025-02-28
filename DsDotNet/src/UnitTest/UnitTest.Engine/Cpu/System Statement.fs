@@ -15,15 +15,25 @@ type Spec13_SystemStatement() =
 
     let t = CpuTestSample(WINDOWS)
     [<Test>]
-    member __.``Y1 System Bit Set Flow`` () =
-        t.Sys.Y1_SystemBtnForFlow(t.Sys) |> doChecks
+    member __.``Y1 System ActiveBtn For PassiveFlow`` () =
+        t.Sys.Y1_SystemActiveBtnForPassiveFlow(t.Sys) |> doChecks
 
-    //[<Test>]
-    //member __.``Y2 System Condition Ready`` () =
-    //    t.Sys.Y2_SystemConditionReady() |> doChecks
+    [<Test>]
+    member __.``Y2 SystemPause`` () =
+        t.Sys.Y2_SystemPause() |> doCheck
 
-    //[<Test>]
-    //member __.``Y3 System Condition Drive`` () =
-    //    t.Sys.Y3_SystemConditionDrive() |> doChecks
+    [<Test>]
+    member __.``Y3 SystemState`` () =
+        t.Sys.Y3_SystemState() |> doChecks
 
+    [<Test>]
+    member __.``Y4 SystemConditionError`` () =
+        t.Sys.Y4_SystemConditionError() |> doChecks
 
+    [<Test>]
+    member __.``Y5 SystemEmgAlramError`` () =
+        t.Sys.Y5_SystemEmgAlramError() |> doChecks
+
+    [<Test>]
+    member __.``Y6 SystemClearBtnForFlow`` () =
+        t.Sys.Y6_SystemClearBtnForFlow() |> doChecks

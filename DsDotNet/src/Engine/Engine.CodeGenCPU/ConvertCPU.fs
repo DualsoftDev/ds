@@ -249,7 +249,6 @@ module ConvertCPU =
                 sys.GenerationIO()
 
                 updateSourceTokenOrder sys
-
                 if not(RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM())
                 then
                     checkNullAddress sys
@@ -274,8 +273,8 @@ module ConvertCPU =
                     yield! sys.B2_SWButtonOutput()
                     yield! sys.B4_SWModeLamp()
 
-                    if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM() then
-                        yield! sys.E2_PLCOnly()
+                    //if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM() then
+                    yield! sys.E2_ButtonExtend()
 
                     if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
                         yield! emulationDevice sys

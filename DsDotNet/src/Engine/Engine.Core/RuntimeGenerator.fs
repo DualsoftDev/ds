@@ -78,10 +78,10 @@ module RuntimeGeneratorModule =
             | PC | PCSIM  -> true
             | _ -> false
 
-        member x.IsPLCorPLCSIM() =
-            match x with
-            | PLC | PLCSIM -> true
-            | _ -> false
+        //member x.IsPLCorPLCSIM() =
+        //    match x with
+        //    | PLC | PLCSIM -> true
+        //    | _ -> false
 
         member x.IsPackageSIM() =
             match x with

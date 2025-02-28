@@ -9,7 +9,7 @@ open Dual.Common.Core.FS
 type DsSystem with
 
 
-    member s.E2_PLCOnly() =
+    member s.E2_ButtonExtend() =
         let fn = getFuncName()
         let rst = s._off.Expr
             (*clear btn  => _ready_btn  동시 동작   /  누름 유지시 _home_btn 동작*)

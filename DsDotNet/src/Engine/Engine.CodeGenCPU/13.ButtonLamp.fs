@@ -73,7 +73,12 @@ type DsSystem with
                     else
                         modeBit <||> sysLamp.ActionINFunc //강제 체크 비트
 
+                if sysLamp.OutTag.IsNull()
+                then
+                    failwithf "Lamp OutTag is Empty : %s" sysLamp.Name
+
                 let out = sysLamp.OutTag :?> Tag<bool>
+
                 yield (sets, s._off.Expr) --| (out, fn)
 
 

@@ -97,7 +97,6 @@ module SystemManagerModule =
         let flicker2sec    = dsSysBit true sys SystemTag._T2S    true
 
 
-        let sim            = dsSysBit true sys SystemTag.sim       true
         let emulation      = dsSysBit true sys SystemTag.emulation true
         let tempDataDuUINT32  = createPlanVar  stg "temp_DuUINT32" DuUINT32 true None (int SystemTag.tempData) sys 
         let tempDataDuString  = createPlanVar  stg "temp_DuString" DuSTRING true None (int SystemTag.tempData) sys
@@ -192,7 +191,6 @@ module SystemManagerModule =
 
 
             | SystemTag.emulation -> emulation
-            | SystemTag.sim       -> sim
             | _ -> failwithlog $"Error : GetSystemTag {st} type not support!!"
 
     [<Extension>]

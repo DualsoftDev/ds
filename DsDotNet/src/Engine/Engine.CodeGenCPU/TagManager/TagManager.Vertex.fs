@@ -86,7 +86,6 @@ module TagManagerModule =
 
         member x._on  = sysM.GetSystemTag(SystemTag._ON)  :?> PlanVar<bool>
         member x._off = sysM.GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
-        member x._sim = sysM.GetSystemTag(SystemTag.sim)  :?> PlanVar<bool>
 
         ///Segment Start Tag
         member val ST = createTag  true  VertexTag.startTag

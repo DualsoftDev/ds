@@ -65,9 +65,8 @@ module ConvertCpuFlow =
         member f.readyCondition= getFM(f).GetFlowTag(FlowTag.flowReadyCondition )
         member f.driveCondition= getFM(f).GetFlowTag(FlowTag.flowDriveCondition )
         member f.F = f |> getFM
-        member f._on     = f.System._on
-        member f._off    = f.System._off
-        member f._sim    = f.System._sim
+        member f._on           = f.System._on
+        member f._off          = f.System._off
         //select 버튼은 없을경우 항상 _on
         member f.HwAutoSelects =  f.System.AutoHWButtons.Where(fun b->b.SettingFlows.Contains(f))
         member f.HwManuSelects =  f.System.ManualHWButtons.Where(fun b->b.SettingFlows.Contains(f))

@@ -20,7 +20,6 @@ module ConvertCpuDsSystem =
 
         member s._on          = s.GetPv<bool>(SystemTag._ON)
         member s._off         = s.GetPv<bool>(SystemTag._OFF)
-        member s._sim         = s.GetPv<bool>(SystemTag.sim)
         member s._emulation   = s.GetPv<bool>(SystemTag.emulation)
         member s._auto_btn    = s.GetPv<bool>(SystemTag.auto_btn)
         member s._manual_btn  = s.GetPv<bool>(SystemTag.manual_btn)

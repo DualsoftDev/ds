@@ -94,26 +94,27 @@ module CpuLoader =
 
     type DsSystem with
         /// DsSystem 으로부터 PouGen seq 생성
-        member system.GeneratePOUs (storages:Storages, target:PlatformTarget) : PouGen seq =
+        member sys.GeneratePOUs (storages:Storages, target:PlatformTarget) : PouGen seq =
             UniqueName.resetAll()
 
-            applyTagManager (system, storages, target)
+            applyTagManager (sys, storages, target)
 
             let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
-                let systems = system.GetRecursiveLoadeds()
-                systems
+                let passiveSystems = sys.GetRecursiveLoadeds()
+                let activeSys = sys
+                passiveSystems
                 |> Seq.distinctBy(fun f->f.ReferenceSystem)
                 |> Seq.map(fun s ->
                     try
                         match s with
-                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(false))
-                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(false))
+                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys))
+                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys))
                         | _ -> failwithlog (getFuncName())
                     with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
                     )
                 //자신(Acitve) system을  CPU 변환
-                |> Seq.append [ActivePou (system, system.GenerateStatements(true))]
+                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys))]
 
             pous
 

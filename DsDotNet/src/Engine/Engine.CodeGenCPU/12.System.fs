@@ -9,25 +9,21 @@ open Dual.Common.Core.FS
 type DsSystem with
 
 
-    member s.Y1_SystemBtnForFlow(activeSys:DsSystem) =
+    member s.Y1_SystemActiveBtnForPassiveFlow(activeSys:DsSystem) =
         let fn = getFuncName()
-        let aOff = activeSys._off.Expr
-        [|
-            for flow in s.Flows do
-                yield (activeSys._auto_btn.Expr  , aOff) --| (flow.auto_btn,   fn)
-                yield (activeSys._manual_btn.Expr, aOff) --| (flow.manual_btn, fn)
-                yield (activeSys._drive_btn.Expr , aOff) --| (flow.drive_btn,  fn)
-                yield (activeSys._pause_btn.Expr , aOff) --| (flow.pause_btn,  fn)
-                yield (activeSys._emg_btn.Expr   , aOff) --| (flow.emg_btn,    fn)
-                yield (activeSys._test_btn.Expr  , aOff) --| (flow.test_btn,   fn)
-
-                if RuntimeDS.ModelConfig.RuntimePackage.IsPCorPCSIM() then //PLC는  E2_PLCOnly 에서 처리중
-                    yield (activeSys._home_btn.Expr  , aOff) --| (flow.home_btn,   fn)
-                    yield (activeSys._clear_btn.Expr , aOff) --| (flow.clear_btn,  fn)
-                    yield (activeSys._ready_btn.Expr , aOff) --| (flow.ready_btn,  fn)
+        let rst = s._off.Expr
+        [| 
+           for flow in s.Flows do
+                yield (activeSys._auto_btn.Expr  , rst) --| (flow.auto_btn,   fn)
+                yield (activeSys._manual_btn.Expr, rst) --| (flow.manual_btn, fn)
+                yield (activeSys._drive_btn.Expr , rst) --| (flow.drive_btn,  fn)
+                yield (activeSys._pause_btn.Expr , rst) --| (flow.pause_btn,  fn)
+                yield (activeSys._emg_btn.Expr   , rst) --| (flow.emg_btn,    fn)
+                yield (activeSys._test_btn.Expr  , rst) --| (flow.test_btn,   fn)
+                yield (activeSys._home_btn.Expr  , rst) --| (flow.home_btn,   fn)
+                yield (activeSys._clear_btn.Expr , rst) --| (flow.clear_btn,  fn)
+                yield (activeSys._ready_btn.Expr , rst) --| (flow.ready_btn,  fn)
         |]
-
-
 
     member s.Y2_SystemPause() =
         let sets =  s.Flows.Select(fun f -> f.p_st).ToOrElseOff()
@@ -65,6 +61,30 @@ type DsSystem with
             for emg in s.HWButtons.Where(fun f -> f.ButtonType = DuEmergencyBTN) do
                 yield (emg.ActionINFunc, s._off.Expr) --| (emg.ErrorEmergency, fn)
         ]
+
+    member s.Y6_SystemClearBtnForFlow() =
+        let fn = getFuncName()
+        let rst = s._off.Expr
+        [|
+            for btn in s.ClearHWButtons do
+                let set = btn.ActionINFunc
+                let tm = s.GetTempTimer(btn)
+                yield set --@ (tm, 2000u, fn)
+                yield (set , rst) --| (s._clear_btn, fn)  //flow.clear_btn 은 drive에 처리
+                yield (set , rst) --| (s._ready_btn, fn)  //flow.ready_btn 은 drive에 처리
+                //누름 2초 유지시 _home_btn 동시 동작
+                if btn.IsGlobalSystemHw then
+                    for f in s.Flows do
+                    yield (tm.DN.Expr , rst) --| (f.home_btn, fn)
+                else
+                    for f in btn.SettingFlows do
+                        yield (tm.DN.Expr , rst) --| (f.home_btn, fn)
+
+            for flow in s.Flows do
+                let set = flow.drive_btn.Expr
+                yield (set, rst) --| (flow.clear_btn, fn)
+                yield (set, rst) --| (flow.ready_btn, fn)
+        |]
 
     //// 외부신호 초기값 변화를 연산하기 위해 강제로 수식 추가
     //member s.Y6_SystemDeviceTrigger() =

@@ -95,7 +95,7 @@ namespace Dual.Common.Winform
         {
             if (control.IsHandleCreated && control.InvokeRequired)
                 control.Invoke(action);
-            else
+            else if (control.IsHandleCreated)
                 action();
         }
 

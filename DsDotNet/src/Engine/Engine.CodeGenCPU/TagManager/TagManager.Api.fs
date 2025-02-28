@@ -40,5 +40,5 @@ module ApiTagManagerModule =
 
         member val ApiItemSet           = apiItemDic[ApiItemTag.apiItemSet]
         member val ApiItemEnd           = apiItemDic[ApiItemTag.apiItemEnd]
-        member val SL1                  = apiItemDic[ApiItemTag.sensorLinking]
-        member val SL2                  = apiItemDic[ApiItemTag.sensorLinked]
+        member val SensorLinking                  = apiItemDic[ApiItemTag.sensorLinking]
+        member val SensorLinked                  = apiItemDic[ApiItemTag.sensorLinked]

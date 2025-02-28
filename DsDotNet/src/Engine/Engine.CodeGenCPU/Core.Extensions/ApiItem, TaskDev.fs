@@ -17,9 +17,9 @@ module ConvertCpuApiItem =
         member a.ApiItemEnd     = getAM(a).ApiItemEnd
 
         ///sensorLinking
-        member a.SL1     = getAM(a).SL1
+        member a.SensorLinking     = getAM(a).SensorLinking
         ///sensorLinked
-        member a.SL2     = getAM(a).SL2
+        member a.SensorLinked     = getAM(a).SensorLinked
 
         member a.RxET    = getVMReal(a.RX).ET
         member a.TxET    = getVMReal(a.TX).ET

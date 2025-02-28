@@ -17,9 +17,9 @@ type TaskDevManager with
             let a = d.TaskDev.ApiItem 
             let sets =
                 call.RealLinkExpr <&&>
-                (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SL2.Expr)
+                (input <&&> !@a.ApiItemEnd.Expr <&&> !@a.SensorLinked.Expr)
 
-            yield (sets, off) --| (a.SL1, fn)
+            yield (sets, off) --| (a.SensorLinking, fn)
         |]
 
     member d.TD2_SensorLinked(call:Call) =
@@ -34,10 +34,10 @@ type TaskDevManager with
                     <&&>
                         (   (input <&&> a.ApiItemEnd.Expr)
                             <||> (!@input <&&> !@a.ApiItemEnd.Expr)
-                            <||> call.System._sim.Expr
+                            //<||> call.System._sim.Expr //ahn!!
                         )
 
-                yield (sets, off) ==| (a.SL2, fn)
+                yield (sets, off) ==| (a.SensorLinked, fn)
         |]
 
 

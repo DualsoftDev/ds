@@ -23,9 +23,13 @@ type DsSystem with
                 yield (set , rst) --| (s._ready_btn, fn)  //flow.ready_btn 은 drive에 처리
 
 
-                    //누름 2초 유지시 _home_btn 동시 동작
-                for f in btn.SettingFlows do
+                //누름 2초 유지시 _home_btn 동시 동작
+                if btn.IsGlobalSystemHw then
+                    for f in s.Flows do
                     yield (tm.DN.Expr , rst) --| (f.home_btn, fn)
+                else
+                    for f in btn.SettingFlows do
+                        yield (tm.DN.Expr , rst) --| (f.home_btn, fn)
 
             for flow in s.Flows do
                 let set = flow.drive_btn.Expr

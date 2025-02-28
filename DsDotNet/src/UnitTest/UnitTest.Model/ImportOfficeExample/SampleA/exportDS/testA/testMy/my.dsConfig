@@ -1,0 +1,36 @@
+{
+  "SystemName": "my",
+  "HwName": "LS_XGK_IO",
+  "HwIP": "127.0.0.1",
+  "DsPlanInterfaces": [],
+  "DsActionInterfaces": [
+    {
+      "Id": 0,
+      "Name": "STN01_Pin_DN_I",
+      "Address": "P00000",
+      "DataType": "bool",
+      "DeviceType": "input"
+    },
+    {
+      "Id": 1,
+      "Name": "STN01_Pin_DN_O",
+      "Address": "P00040",
+      "DataType": "bool",
+      "DeviceType": "output"
+    },
+    {
+      "Id": 2,
+      "Name": "STN01_Pin_UP_I",
+      "Address": "P00001",
+      "DataType": "bool",
+      "DeviceType": "input"
+    },
+    {
+      "Id": 3,
+      "Name": "STN01_Pin_UP_O",
+      "Address": "P00041",
+      "DataType": "bool",
+      "DeviceType": "output"
+    }
+  ]
+}

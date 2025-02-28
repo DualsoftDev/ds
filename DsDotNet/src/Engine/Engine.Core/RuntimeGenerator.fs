@@ -62,7 +62,7 @@ module RuntimeGeneratorModule =
         | PLC
         | PLCSIM
         | Simulation
-        | ActiveControl
+        | Control
         | Monitoring
         | VirtualPlant
         | VirtualLogic

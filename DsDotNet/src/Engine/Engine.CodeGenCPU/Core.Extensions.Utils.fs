@@ -40,9 +40,9 @@ module ConvertCoreExtUtils =
         |> iter (fun t -> x.OutTag  <- t)
 
     let getAddressTaskDevParamExpr (x:ValueParam , devTag:ITag, sys:DsSystem) =
-        let sysOff = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._OFF) :?> PlanVar<bool>
+        let sysOn = (sys.TagManager :?> SystemManager).GetSystemTag(SystemTag._ON) :?> PlanVar<bool>
         if devTag.IsNull() then
-            sysOff.Expr  :> IExpression
+            sysOn.Expr  :> IExpression
         else
             if x.IsDefaultValue 
             then 

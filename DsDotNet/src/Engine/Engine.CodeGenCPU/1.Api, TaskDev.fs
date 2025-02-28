@@ -30,11 +30,11 @@ type TaskDevManager with
             let a = d.TaskDev.ApiItem 
             if not(call.IsFlowCall) then
                 let sets =
-                    call.RealLinkExpr
-                    <&&>
-                        (   (input <&&> a.ApiItemEnd.Expr)
-                            <||> (!@input <&&> !@a.ApiItemEnd.Expr)
-                        )
+                        call.RealLinkExpr
+                        <&&>
+                            (   (input <&&> a.ApiItemEnd.Expr)
+                                <||> (!@input <&&> !@a.ApiItemEnd.Expr)
+                            )
 
                 yield (sets, off) ==| (a.SensorLinked, fn)
         |]

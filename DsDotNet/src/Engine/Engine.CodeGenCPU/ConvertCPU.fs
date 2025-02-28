@@ -99,18 +99,6 @@ module ConvertCPU =
                 
         ]
 
-    let private applySystemSpec(s:DsSystem) =
-        [
-            yield! s.B1_HWButtonOutput()
-            yield! s.B3_HWModeLamp()
-
-            yield  s.Y2_SystemPause()
-            yield! s.Y3_SystemState()
-            yield! s.Y4_SystemConditionError()
-            yield! s.Y5_SystemEmgAlramError()
-
-        ]
-
 
 
     ///flow 별 운영모드 적용
@@ -237,9 +225,10 @@ module ConvertCPU =
 
     type DsSystem with
         /// DsSystem 으로부터 CommentedStatement list 생성.
-        member sys.GenerateStatements(isActive:bool) : CommentedStatement list =
+        member sys.GenerateStatements(activeSys:DsSystem) : CommentedStatement list =
             RuntimeDS.System <- Some sys
 
+            let isActive = activeSys = sys
             sys.GenerationOrigins()
             sys.ClearExteralTags()
 
@@ -269,18 +258,27 @@ module ConvertCPU =
             [
                 //Active 시스템 적용
                 if isActive then
-                    yield! applySystemSpec sys
+                    yield! sys.B1_HWButtonOutput()
+                    yield! sys.B3_HWModeLamp()
+
+                    yield! [sys.Y2_SystemPause()]
+                    yield! sys.Y3_SystemState()
+                    yield! sys.Y4_SystemConditionError()
+                    yield! sys.Y5_SystemEmgAlramError()
                     yield! sys.B2_SWButtonOutput()
                     yield! sys.B4_SWModeLamp()
-
-                    //if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM() then
-                    yield! sys.E2_ButtonExtend()
 
                     if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
                         yield! emulationDevice sys
 
-                    yield! sys.Y1_SystemBtnForFlow(sys)
                     yield! applyVertexToken sys
+
+                else 
+                    yield! sys.Y1_SystemActiveBtnForPassiveFlow(activeSys)
+                    
+
+                if RuntimeDS.ModelConfig.PlatformTarget.IsPLC then 
+                    yield! sys.Y6_SystemClearBtnForFlow()
 
                 //Variables  적용
                 yield! applyVariables sys

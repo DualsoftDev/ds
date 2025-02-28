@@ -556,14 +556,14 @@ module rec CoreModule =
                             | Some h -> h
                             | None -> sys.CreateFlow("genFlow")
 
-                        let realName = $"gen{apiName}"
+                        let realName = $"{apiName}"
                         let reals = flow.Graph.Vertices.OfType<Real>().ToArray()
                         if reals.Any(fun w -> w.Name = realName) then
                             failwithf $"real {realName} 중복 생성에러"
 
                         // Create a new Real
                         let newReal:Real = flow.CreateReal(realName)
-
+                        newReal.Motion <- Some($"genMotion_{apiName}")
 
                         flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
                         newReal.Finished <- true    //마지막 Real이 원위치

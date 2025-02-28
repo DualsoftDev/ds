@@ -4,6 +4,7 @@
         <TargetFramework>netstandard2.0</TargetFramework>
 		<OutputType>Library</OutputType>
 		<LangVersion>8.0</LangVersion>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>

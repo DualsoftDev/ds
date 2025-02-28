@@ -72,7 +72,6 @@ module TagManagerUtil =
                         match DU.tryGetEnumValue<TaskDevTag>(tagKind).Value with
                         | TaskDevTag.actionIn     -> name |> getInActionName
                         | TaskDevTag.actionOut    -> name |> getOutActionName
-                        | TaskDevTag.actionMemory -> name |> getMemoryActionName
                         | _ -> failwithlog "error: TaskDevTag create "
 
                     | (Button | Lamp | Condition | Action) ->

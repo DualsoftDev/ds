@@ -86,26 +86,20 @@ module DsOPCServerConfig =
 
         // Server Configuration
         let serverConfig = ServerConfiguration()
-        let serverPort = ServerConfigModule.GetServerPort()    
-        serverConfig.BaseAddresses.Add($"https://ahn:{serverPort}")
-        serverConfig.BaseAddresses.Add($"https://localhost:{serverPort}")
-        serverConfig.BaseAddresses.Add($"opc.tcp://localhost:{serverPort}/ds")
-        serverConfig.AlternateBaseAddresses.Add($"opc.tcp://ahn:{serverPort}")
+        let serverPort = ServerConfigModule.GetServerPort()   
+
+        serverConfig.BaseAddresses.Add($"opc.tcp://localhost:{serverPort}")
+        serverConfig.AlternateBaseAddresses.Add($"https://ds:{serverPort}")
+        serverConfig.AlternateBaseAddresses.Add($"https://localhost:{serverPort}")
+        serverConfig.AlternateBaseAddresses.Add($"opc.tcp://ds:{serverPort}")
         serverConfig.AlternateBaseAddresses.Add($"opc.tcp://127.0.0.1:{serverPort}")
+
         serverConfig.MinRequestThreadCount <- 5
         serverConfig.MaxRequestThreadCount <- 100
         serverConfig.MaxQueuedRequestCount <- 2000
-
-
-        //serverConfig.BaseAddresses.Add("https://localhost:2747")
-        //serverConfig.AlternateBaseAddresses.Add("opc.tcp://127.0.0.1:55555")
-        //serverConfig.AlternateBaseAddresses.Add("https://127.0.0.1:55555")
-        serverConfig.MinRequestThreadCount <- 5
-        serverConfig.MaxRequestThreadCount <- 100
-        serverConfig.MaxQueuedRequestCount <- 2000
-
-   
-
+        
+        
+        
         config.ServerConfiguration <- serverConfig
 
         // 적용된 보안 정책 추가

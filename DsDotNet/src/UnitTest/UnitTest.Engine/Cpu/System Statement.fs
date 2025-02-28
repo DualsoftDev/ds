@@ -32,6 +32,7 @@ type Spec13_SystemStatement() =
 
     [<Test>]
     member __.``Y5 SystemEmgAlramError`` () =
+        t.Sys.GenerationButtonEmergencyMemory()
         t.Sys.Y5_SystemEmgAlramError() |> doChecks
 
     [<Test>]

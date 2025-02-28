@@ -62,7 +62,7 @@ type RealVertexTagManager with
                 .OfType<Call>()
                 .Where(fun call -> call.IsJob)
                 .SelectMany(fun call -> call.ApiDefs)
-                .Select(fun api-> api.SL2).ToAndElseOn()
+                .Select(fun api-> api.SensorLinked).ToAndElseOn()
 
         let rst = v._off.Expr
         (set, rst) --| (v.Link, getFuncName())

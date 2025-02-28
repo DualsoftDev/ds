@@ -161,7 +161,7 @@ module ImportViewModule =
 
         if newNode.GetSingles().Count() > 0 then
             node.AddSingles(newNode) |> ignore
-
+            
     let UpdateConditionNodes (system: DsSystem, flow: Flow, node: ViewNode) =
         let newNode = ViewNode("Condition", VCONDITION)
 
@@ -170,6 +170,13 @@ module ImportViewModule =
 
         system.DriveConditions.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuDriveState)) |> ignore)
+
+        if newNode.GetSingles().Count() > 0 then
+            node.AddSingles(newNode) |> ignore
+
+
+    let UpdateActionNodes (system: DsSystem, flow: Flow, node: ViewNode) =
+        let newNode = ViewNode("Action", VACTION)
 
         system.EmergencyActions.Where(fun w -> w.SettingFlows.Contains(flow))
         |> Seq.iter (fun b -> newNode.AddSingles(ViewNode(b.Name, DuEmergencyAction)) |> ignore)
@@ -213,6 +220,7 @@ module ImportViewModule =
                     UpdateLampNodes(flow.System, flow, flowNode)
                     UpdateBtnNodes(flow.System, flow, flowNode)
                     UpdateConditionNodes(flow.System, flow, flowNode)
+                    UpdateActionNodes(flow.System, flow, flowNode)
 
                     UpdateApi(flow.System, flowNode)
 

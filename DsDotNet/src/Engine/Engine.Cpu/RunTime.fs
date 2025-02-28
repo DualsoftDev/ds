@@ -45,13 +45,6 @@ module RunTimeModule =
                 )
             disposables.Add subscription
 
-
-
-            if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
-                systems.Iter(fun sys-> cpuSimOn(sys))
-
-
-
             let subscription =
                 tagWebChangedFromWebSubject.Subscribe(fun tagWeb->
                         logDebug $"Server Updating TagWeb from Web: {tagWeb.Name}:{tagWeb.KindDescription}={tagWeb.Value}"

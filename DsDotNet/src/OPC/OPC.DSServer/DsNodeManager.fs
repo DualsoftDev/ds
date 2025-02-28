@@ -292,7 +292,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             _disposableTagDS <- 
                 Some(
                     ValueSubject.Subscribe(fun (sys, stg, value) ->
-                        async {
+                        //async {
                             if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
                                 handleCalcTag (stg) |> ignore  // active만 처리
 
@@ -301,6 +301,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                                 variable.Value <- value
                                 variable.Timestamp <- DateTime.UtcNow
                                 variable.ClearChangeMasks(this.SystemContext, false)    
-                        } |> Async.Start // 비동기로 처리
+                        //} |> Async.Start // 비동기로 처리 하면 빠른 신호는 Client 까지 신호 안감
                     )
                 )   

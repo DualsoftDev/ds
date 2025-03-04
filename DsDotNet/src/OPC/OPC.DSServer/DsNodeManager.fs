@@ -55,6 +55,11 @@ module DsNodeManagerExt =
 
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem) =
     inherit CustomNodeManager2(server, configuration, "ds")
+    //start TagName, end Tag
+    let _motionDic = dsSys |> getDsPlanInterfaces 
+                           |> Seq.map(fun tag -> tag.MotionStartTag|>fst, tag.MotionEndTag|>fst) 
+                           |> dict
+
     let _variables = Dictionary<string, BaseDataVariableState>()
     let _folders = Dictionary<string, FolderState>()
     let mutable _disposableTagDS: IDisposable option = None
@@ -64,15 +69,25 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         _: ISystemContext, node: NodeState, _: NumericRange, 
         _: QualifiedName, value: byref<obj>, statusCode: byref<StatusCode>, timestamp: byref<DateTime>
     ) =
-        timestamp <- DateTime.UtcNow
-        if dsStorages.ContainsKey(node.DisplayName.Text) then
-            dsStorages[node.DisplayName.Text].BoxedValue <- value
-            printfn "DS Tag '%s' updated to: %A from OPC Client" node.BrowseName.Name value
+        try
+            match node with
+            | :? BaseVariableState as _variable ->
+                // 클라이언트가 제공한 값을 노드에 설정 안함 (dsStorages SubscribeToDsTagEvents 여기서 처리함)
+                //variable.Value <- value  
+                //variable.Timestamp <- timestamp
+                //variable.StatusCode <- statusCode
+
+                if dsStorages.ContainsKey(node.DisplayName.Text) then
+                    let dsTag = dsStorages[node.DisplayName.Text]
+                    dsTag.BoxedValue <- value
+
+                ServiceResult.Good
+            | _ ->
+                printfn "Unsupported node type for write operation."
+                ServiceResult.Good
+        with ex ->
+            printfn "Exception in handleWriteValue: %s" ex.Message
             ServiceResult.Good
-        else 
-            printfn "DS Tag '%s' not found" node.DisplayName.Text
-            ServiceResult.Good
-    
 
     let createVariable(folder: FolderState, name: string, tagKind: string , namespaceIndex: uint16, initialValue: Variant, typ: Type) =
         let variable = 
@@ -175,7 +190,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         
         let nodeAction = this.CreateFolder("Action", "Action", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getActionTags dsSys) nodeAction nIndex
-                
+
         let nodeScript = this.CreateFolder("Script", "Script", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getScriptTags dsSys) nodeScript nIndex
         
@@ -301,6 +316,13 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                                 variable.Value <- value
                                 variable.Timestamp <- DateTime.UtcNow
                                 variable.ClearChangeMasks(this.SystemContext, false)    
+
+                                //opc 모션 motionStart  신호가 꺼지면 자동으로  motionEnd OFF 처리
+                                if _motionDic.ContainsKey(stg.Name) && not(Convert.ToBoolean(value))
+                                then
+                                    let endTagName = _motionDic.[stg.Name]
+                                    dsStorages[endTagName].BoxedValue <- false
+
                         //} |> Async.Start // 비동기로 처리 하면 빠른 신호는 Client 까지 신호 안감
                     )
                 )   

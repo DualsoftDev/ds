@@ -35,6 +35,12 @@ module RuntimeGeneratorModule =
         | SIEMENS_IO
         | PAIX_IO
 
+    //제어 Driver IO 기기 타입
+    type ExternalApi =
+        | NONE_API
+        | OPC
+        | REDIS
+
     //HW CPU,  Driver IO, Slot 정보 조합
     type HwTarget(platformTarget:PlatformTarget, hwDriveTarget:HwDriveTarget, slots:SlotDataType[]) =
         member x.Platform = platformTarget
@@ -116,7 +122,7 @@ module RuntimeGeneratorModule =
     type ModelConfig = {
         DsFilePath: string
         HwIP: string
-        UsingOPC: bool
+        ExternalApi: ExternalApi
         RuntimePackage: RuntimePackage
         PlatformTarget: PlatformTarget
         HwDriver: HwDriveTarget //LS-XGI, LS-XGK, Paix hw drive 이름
@@ -129,7 +135,7 @@ module RuntimeGeneratorModule =
         { 
             DsFilePath = ""
             HwIP = "127.0.0.1"
-            UsingOPC = false
+            ExternalApi = ExternalApi.NONE_API
             RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
             PlatformTarget = WINDOWS
             HwDriver = HwDriveTarget.LS_XGK_IO
@@ -144,7 +150,7 @@ module RuntimeGeneratorModule =
 
     let createModelConfig(path:string,
             hwIP:string, 
-            usingOPC:bool, 
+            externalApi:ExternalApi, 
             runtimePackage:RuntimePackage,
             platformTarget:PlatformTarget, 
             hwDriver:HwDriveTarget, 
@@ -154,7 +160,7 @@ module RuntimeGeneratorModule =
         { 
             DsFilePath = path
             HwIP = hwIP
-            UsingOPC = usingOPC
+            ExternalApi = externalApi
             RuntimePackage = runtimePackage
             PlatformTarget = platformTarget
             HwDriver = hwDriver
@@ -200,6 +206,16 @@ module PlatformTargetExtensions =
         let allPlatforms =
             [ WINDOWS; XGI; XGK; AB; MELSEC]
 
+
+module ExternalApiExtensions =
+    let fromString s =
+            match s with
+            | "OPC"  -> ExternalApi.OPC
+            | "REDIS"  -> ExternalApi.REDIS
+            | _ -> ExternalApi.NONE_API
+
+    let allExternalApi =
+        [ OPC; REDIS; NONE_API;]
 
 module HwDriveTargetExtensions =
     let fromString s =

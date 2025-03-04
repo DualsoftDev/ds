@@ -58,7 +58,18 @@ module DsOpcUaServerManager =
         // 4. 서버 시작
         let opcServer = new DsOPCServer(dsSys)
         server <- Some opcServer
-        application.Start(opcServer).Wait()
+        try
+            application.Start(opcServer).Wait()
+        with
+        | :? AggregateException as aggEx ->
+            aggEx.InnerExceptions
+            |> Seq.iter (fun ex -> 
+                match ex with
+                | :? ServiceResultException as sre when sre.InnerResult <> null -> failwith sre.InnerResult.AdditionalInfo
+                | _ -> failwith ex.Message)
+        | _ ->
+            failwith "Error starting OPCServer"
+
 
         printfn "OPC UA 서버가 시작되었습니다."
         printfn "엔드포인트:"

@@ -919,14 +919,23 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
 
         let fillActions (system: DsSystem) (listMotionCtx: List<dsParser.MotionBlockContext> ) =
             let fqdnPath = getMotions listMotionCtx
+
             for fqdn, path in fqdnPath do
+                if system.GetRealVertices().Choose(fun r -> r.Motion).Contains path then
+                    failWithLog $"Motion path {path} is already assigned to {fqdn.Combine()} Real object."
+
                 match tryFindSystemInner system fqdn with
                 | Some (:? Real as r) -> r.Motion <- path|>Some
                 | _ -> failWithLog $"Couldn't find Real object name {fqdn}"
 
         let fillScripts (system: DsSystem) (listScriptCtx: List<dsParser.ScriptsBlockContext>) =
             let fqdnPath = getScripts listScriptCtx
+
             for fqdn, script in fqdnPath do
+                
+                if system.GetRealVertices().Choose(fun r -> r.Script).Contains script then
+                    failWithLog $"Script Name {script} is already assigned to {fqdn.Combine()} Real object."
+
                 match tryFindSystemInner system fqdn with
                 | Some (:? Real as r) ->r.Script <- script|>Some
                 | _ -> failWithLog $"Couldn't find Real object name {fqdn}"

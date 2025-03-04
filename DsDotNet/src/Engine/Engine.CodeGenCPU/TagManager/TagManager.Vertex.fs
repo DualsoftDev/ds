@@ -26,6 +26,22 @@ module TagManagerModule =
         let t = createPlanVar  s name DuBOOL autoAddr (Some(v)) vertexTag sys
         t :?> PlanVar<bool>
 
+    let private createTagMotionNScript (v:Real) (vertexTag:VertexTag)  =
+        let sys =  v.Parent.GetSystem()
+        let s =  sys.TagManager.Storages
+        let optName =
+            match vertexTag with
+            | VertexTag.scriptStart 
+            | VertexTag.scriptEnd -> v.Script.Value
+            | VertexTag.motionStart 
+            | VertexTag.motionEnd -> v.Motion.Value
+            | _ -> failwithlog $"Error : createTagMotionNScript {vertexTag} not support!!"
+
+        let name = $"{sys.Name}_{optName}_{TagKindModule.allTagKinds[vertexTag |> int]}" |> validStorageName
+
+        let t = createPlanVar  s name DuBOOL true (Some(v)) (vertexTag |> int) sys
+        t :?> PlanVar<bool>
+
     let createData(v:Vertex, vertexTag:VertexTag, dataType :DataType)  =
         let vertexTagInt = vertexTag |> int
         let name = $"{v.QualifiedName}_{getTagKindName(vertexTagInt)}" |> validStorageName
@@ -291,12 +307,12 @@ module TagManagerModule =
         member x.IsSourceToken = x.Real.IsSourceToken
         
 
-        member val ScriptStart  = if useScript then createTag true VertexTag.scriptStart else off
-        member val MotionStart  = if useMotion then createTag true VertexTag.motionStart else off
+        member val ScriptStart  = if useScript then createTagMotionNScript real VertexTag.scriptStart else off
+        member val MotionStart  = if useMotion then createTagMotionNScript real VertexTag.motionStart else off
         member val TimeStart    = if useTime   then createTag true VertexTag.timeStart   else off
 
-        member val ScriptEnd    = if useScript then createTag true VertexTag.scriptEnd   else off
-        member val MotionEnd    = if useMotion then createTag true VertexTag.motionEnd   else off
+        member val ScriptEnd    = if useScript then createTagMotionNScript real VertexTag.scriptEnd   else off
+        member val MotionEnd    = if useMotion then createTagMotionNScript real VertexTag.motionEnd   else off
         member val TimeEnd      = if useTime   then createTag true VertexTag.timeEnd     else off
 
         member val ScriptRelay  = if useScript then createTag true VertexTag.scriptRelay else off

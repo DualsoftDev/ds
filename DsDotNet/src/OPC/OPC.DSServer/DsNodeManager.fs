@@ -35,9 +35,19 @@ module DsNodeManagerExt =
         | _ -> failwithf "Unsupported data type"
 
 
+    let listExternalTagKinds = [
+        TaskDevTag.actionIn|>int
+        TaskDevTag.actionOut|>int
+        VertexTag.motionStart|>int
+        VertexTag.motionEnd|>int
+        VertexTag.scriptStart|>int
+        VertexTag.scriptEnd|>int
+        ]
+
     let getTags(fqdn:FqdnObject) =
         fqdn.TagManager.Storages
             |> Seq.filter(fun tag -> tag.Value.Target.IsSome && tag.Value.Target.Value = fqdn)
+            |> Seq.filter(fun tag -> not(listExternalTagKinds.Contains tag.Value.TagKind))
             |> Seq.map(fun tag -> tag.Value)
     
 

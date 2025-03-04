@@ -233,7 +233,7 @@ module rec CoreModule =
 
             let setIfNotAlreadySet field value fieldName =
                 match field with
-                | Some _ -> failWithLog $"{fieldName} is already set {flow}.{name}"
+                | Some _ -> failWithLog $"{fieldName} is already set {flow.Name}.{name}"
                 | None -> value
 
             member x.Motion

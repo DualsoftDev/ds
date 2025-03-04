@@ -201,8 +201,8 @@ type RealVertexTagManager with
         [|
             if v.Real.Motion.IsSome then
                 yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,   v.F.Expr) ==| (v.MotionRelay, fn)
-                yield (v.G.Expr,  v.MotionEnd.Expr <||>  v.MotionRelay.Expr) --| (v.MotionStart, fn)
-
+                yield (v.G.Expr,  (*v.MotionEnd.Expr <||>*)  v.MotionRelay.Expr) --| (v.MotionStart, fn)
+                //MotionEnd.Expr 미리 켜져 있더라도 MotionStart가 수행 (미리 위치해 있으면 3D에서 이벤트 안줌)
                 if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
                     if RuntimeDS.ModelConfig.RuntimeMotionMode = MotionAsync then
                         if v.Real.TimeAvg.IsSome then

@@ -11,7 +11,7 @@ open Engine.Core
 module DsOpcUaServerManager =
 
     let mutable server: DsOPCServer option = None
-    let IsRunning:bool= server.IsSome 
+    let IsRunning():bool = server.IsSome 
         /// <summary>
     /// OPC UA 서버 종료
     /// </summary>
@@ -24,6 +24,13 @@ module DsOpcUaServerManager =
             printfn "OPC UA 서버가 종료되었습니다."
         | None ->
             printfn "서버가 실행 중이 아닙니다."
+
+    //let Reset() =
+    //    match server with
+    //    | Some s ->
+    //        s.ResetVariable()
+    //    | None ->
+    //        printfn "서버가 실행 중이 아닙니다."
 
     /// <summary>
     /// OPC UA 서버 시작

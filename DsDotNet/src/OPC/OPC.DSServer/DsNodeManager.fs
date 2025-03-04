@@ -113,6 +113,9 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         variable
 
 
+    //member x.ResetVariable() =  ()
+        //_variables.Values |> Seq.iter(fun v -> v.Value <- false)
+
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
 
       

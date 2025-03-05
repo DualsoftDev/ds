@@ -1,4 +1,4 @@
-﻿// Copyright (c) Dualsoft  All Rights Reserved.
+// Copyright (c) Dualsoft  All Rights Reserved.
 namespace Engine.Import.Office
 
 open System.Linq
@@ -15,12 +15,22 @@ open System.Reflection
 module LibraryLoaderModule =
     
    
-    type LibraryConfig = {
-        ///parent 시스템에서 사용한 Lib버전과 현재 설치된 Lib 버전은 항상 같아야 한다
-        Version: string         
-        ///Api 이름 중복을 막기위해 Dictionary 처리
-        LibraryInfos: Dictionary<string, string> //Api, filePath 
-    }
+    type LibraryConfig(version: string, libraryInfos: Dictionary<string, string>) =
+        member val Version = version with get, set
+        member val LibraryInfos = libraryInfos with get, set
+    
+        override this.ToString() =
+            // 경로별로 API 이름을 그룹화
+            let grouped =
+                this.LibraryInfos
+                |> Seq.groupBy (fun kvp -> kvp.Value)  // 경로 기준 그룹화
+                |> Seq.map (fun (path, apis) -> 
+                    let apiNames = apis |> Seq.map (fun kvp -> kvp.Key) |> String.concat ", "
+                    sprintf "%s\r\n[%s]" path apiNames
+                )
+                |> String.concat "\r\n\r\n"
+
+            sprintf "Version: %s\r\n\r\n%s" this.Version grouped
 
     let private jsonSettings = JsonSerializerSettings()
 

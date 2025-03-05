@@ -275,7 +275,8 @@ module ImportU =
 
 
             let createCallNAutoPre () =
-                let libInfos, _ = getLibraryInfos()
+                let libConfig, _ = getLibraryConfig()
+                let libInfos = libConfig.LibraryInfos
                 callNAutoPres
                     .Filter(fun node -> not(node.IsFunction) && node.NodeType <> AUTOPRE)
                     .Filter(fun node -> not(mySys.LoadedSystems.Select(fun d->d.Name).Contains(node.DevName)))
@@ -290,7 +291,7 @@ module ImportU =
                         then
                             let errApis = usedApis.Except(libApis).JoinWith(", ")
                             let libFilePath  =libInfos[libApis.First()]
-                            failWithLog $"{kv.Key} ({libFilePath}) 디바이스에\r\n{errApis} 인터페이스가 없습니다."
+                            failWithLog $"{kv.Key}은 시스템 Libaray Api를 사용하였습니다.\r\n{libFilePath}에 {errApis}가 없습니다. \r\n\r\n {libConfig} \r\n\r\n시스템 Libaray는 지정된 이름만 사용가능합니다."
                      )
                 let platformTarget = target.Platform
                 callNAutoPres

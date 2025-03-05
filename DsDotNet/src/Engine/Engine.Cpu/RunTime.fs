@@ -159,7 +159,6 @@ module RunTimeModule =
 
         member x.Reset() =
             doScanStop()
-            loadedSystems |> Seq.iter syncReset
             syncReset(mySystem)
             
             scanOnce() |> ignore

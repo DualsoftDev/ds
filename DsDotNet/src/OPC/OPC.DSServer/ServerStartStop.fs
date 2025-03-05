@@ -25,13 +25,6 @@ module DsOpcUaServerManager =
         | None ->
             printfn "서버가 실행 중이 아닙니다."
 
-    //let Reset() =
-    //    match server with
-    //    | Some s ->
-    //        s.ResetVariable()
-    //    | None ->
-    //        printfn "서버가 실행 중이 아닙니다."
-
     /// <summary>
     /// OPC UA 서버 시작
     /// </summary>
@@ -76,3 +69,10 @@ module DsOpcUaServerManager =
         opcServer.GetEndpoints()
         |> Seq.iter (fun endpoint -> printfn "%s" endpoint.EndpointUrl)
 
+        
+    let UpdateDSTagFromOPC() =
+        match server with
+        | Some s ->
+            s.UpdateDSTagFromOPC()
+        | None ->
+            printfn "서버가 실행 중이 아닙니다."

@@ -123,8 +123,13 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         variable
 
 
-    //member x.ResetVariable() =  ()
-        //_variables.Values |> Seq.iter(fun v -> v.Value <- false)
+    member x.UpdateDSTagFromOPC() =   () //사용 안하고 항상 DSTAG랑 동기 되게 작성중
+        //_variables.Values 
+        //    |> Seq.iter(fun v ->
+        //        if dsStorages.ContainsKey(v.DisplayName.Text) then
+        //            let dsTag = dsStorages[v.DisplayName.Text]
+        //            dsTag.BoxedValue <- v.Value
+        //    )
 
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
 
@@ -320,22 +325,23 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             _disposableTagDS <- 
                 Some(
                     ValueSubject.Subscribe(fun (sys, stg, value) ->
-                        //async {
-                            if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
-                                handleCalcTag (stg) |> ignore  // active만 처리
+                        
+                        if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
+                            handleCalcTag (stg) |> ignore  // active만 처리
 
-                            if _variables.ContainsKey(stg.Name) then
-                                let variable = _variables[stg.Name]
-                                variable.Value <- value
-                                variable.Timestamp <- DateTime.UtcNow
-                                variable.ClearChangeMasks(this.SystemContext, false)    
+                        if _variables.ContainsKey(stg.Name) then
+                            let variable = _variables[stg.Name]
+                            variable.Value <- value
+                            variable.Timestamp <- DateTime.UtcNow
+                            variable.ClearChangeMasks(this.SystemContext, false)    
 
-                                //opc 모션 motionStart  신호가 꺼지면 자동으로  motionEnd OFF 처리
-                                if _motionDic.ContainsKey(stg.Name) && not(Convert.ToBoolean(value))
-                                then
-                                    let endTagName = _motionDic.[stg.Name]
-                                    dsStorages[endTagName].BoxedValue <- false
+                            //opc 모션 motionStart  신호가 꺼지면 자동으로  motionEnd OFF 처리
+                            if _motionDic.ContainsKey(stg.Name) && not(Convert.ToBoolean(value))
+                            then
+                                let endTagName = _motionDic.[stg.Name]
+                                dsStorages[endTagName].BoxedValue <- false
 
+                        //async { ...
                         //} |> Async.Start // 비동기로 처리 하면 빠른 신호는 Client 까지 신호 안감
                     )
                 )   

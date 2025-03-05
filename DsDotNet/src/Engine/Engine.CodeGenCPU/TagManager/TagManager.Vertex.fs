@@ -32,8 +32,10 @@ module TagManagerModule =
         let optName =
             match vertexTag with
             | VertexTag.scriptStart 
+            | VertexTag.scriptRelay 
             | VertexTag.scriptEnd -> v.Script.Value
             | VertexTag.motionStart 
+            | VertexTag.motionRelay 
             | VertexTag.motionEnd -> v.Motion.Value
             | _ -> failwithlog $"Error : createTagMotionNScript {vertexTag} not support!!"
 
@@ -315,8 +317,8 @@ module TagManagerModule =
         member val MotionEnd    = if useMotion then createTagMotionNScript real VertexTag.motionEnd   else off
         member val TimeEnd      = if useTime   then createTag true VertexTag.timeEnd     else off
 
-        member val ScriptRelay  = if useScript then createTag true VertexTag.scriptRelay else off
-        member val MotionRelay  = if useMotion then createTag true VertexTag.motionRelay else off
+        member val ScriptRelay  = if useScript then createTagMotionNScript real VertexTag.scriptRelay else off
+        member val MotionRelay  = if useMotion then createTagMotionNScript real VertexTag.motionRelay else off
         member val TimeRelay    = if useTime   then createTag true VertexTag.timeRelay   else off
 
     and CoinVertexTagManager(v:Vertex, isActive:bool) =

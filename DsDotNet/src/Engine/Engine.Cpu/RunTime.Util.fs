@@ -32,11 +32,6 @@ module internal RunTimeUtil =
                          ] |> Seq.cast<int>
 
         let stgs = stgs.Where(fun w-> not(skipList.Contains(w.Value.TagKind)))
-        let stgs1 = stgs.Where(fun w-> 
-                                  w.Value.TagKind = (int) VertexTag.motionStart
-                                ||w.Value.TagKind = (int) VertexTag.motionEnd
-                                ||w.Value.TagKind = (int) VertexTag.motionRelay)
-
         for tag in stgs do
             let stg = tag.Value
             match stg with
@@ -44,5 +39,3 @@ module internal RunTimeUtil =
                 tc.ResetStruct()  // 타이머 카운터 리셋
             | _ ->
                 stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
-
-        ()

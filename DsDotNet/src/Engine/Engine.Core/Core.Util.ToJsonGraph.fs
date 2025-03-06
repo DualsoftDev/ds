@@ -22,9 +22,9 @@ module rec ToJsonGraphModule =
     /// Edge를 JSON으로 변환
     let edgeToJson (edge: Edge) = 
         createJson [
-            JProperty("source", JValue(getJsonName edge.Source))
-            JProperty("target", JValue(getJsonName edge.Target))
-            JProperty("symbol", JValue(edge.EdgeType.ToText()))
+            JProperty("Source", JValue(getJsonName edge.Source))
+            JProperty("Target", JValue(getJsonName edge.Target))
+            JProperty("Symbol", JValue(edge.EdgeType.ToText()))
         ]
 
     /// AliasDefs를 JSON으로 변환
@@ -44,8 +44,8 @@ module rec ToJsonGraphModule =
                 | None -> "ERROR"
 
             createJson [
-                JProperty("aliasHolder", JValue(aliasTarget))
-                JProperty("texts", aliasTexts :> JToken)
+                JProperty("AliasHolder", JValue(aliasTarget))
+                JProperty("Texts", aliasTexts :> JToken)
             ]
         )
         |> JArray
@@ -76,7 +76,7 @@ module rec ToJsonGraphModule =
                 let name = getName holder
                 let conditions = getConditions holder |> Seq.toList
                 JObject(
-                    JProperty("Holder", name),
+                    JProperty("Holder", JValue(name)),
                     JProperty("Conditions", JArray(conditions))
                 )
             )
@@ -85,7 +85,7 @@ module rec ToJsonGraphModule =
 
     let callISafetyAutoPreConvertToJson (items:HashSet<SafetyAutoPreCondition>) (name:string)  =
         JObject(
-            JProperty("Holder", name),
+            JProperty("Holder", JValue(name)),
             JProperty("Conditions"
                 , JArray(items
                             .SelectMany(fun s->
@@ -99,22 +99,16 @@ module rec ToJsonGraphModule =
             )
 
     let callToJson (call: Call) =
-        let taskDevs = 
-            call.TaskDefs
-            |> Seq.map (fun td ->
-                JObject(
-                    JProperty("name", td.QualifiedName),
-                    JProperty("type", "TaskDev")
-                )
-            )
-            |> JArray
+        let taskDevCalls = call.System.GetTaskDevCalls() |> dict
+        let taskDevs = call.TaskDefs |> Seq.collect (fun td -> taskDevCalls[td].Select(fun c->c.QualifiedName))
+          
 
         JObject(
-            JProperty("name", getJsonName call),
-            JProperty("type", "Call"),
-            JProperty("taskDevs", taskDevs),
+            JProperty("Name", JValue(getJsonName call)),
+            JProperty("Type", JValue("Call")),
+            JProperty("TaskDevNames", taskDevs),
             JProperty(
-                "autoPre", 
+                "AutoPre", 
                 if call.AutoPreConditions.any() 
                 then 
                     callISafetyAutoPreConvertToJson 
@@ -123,7 +117,7 @@ module rec ToJsonGraphModule =
                 else null
             ),
             JProperty(
-                "safety", 
+                "Safety", 
                 if call.SafetyConditions.any() 
                 then 
                     callISafetyAutoPreConvertToJson 
@@ -152,10 +146,10 @@ module rec ToJsonGraphModule =
     let realToJson (real: Real) =
         let vertices, edges = graphToJson real.Graph
         createJson [
-            JProperty("name", JValue(getJsonName real))
-            JProperty("type", JValue("Real"))
-            JProperty("vertices", vertices :> JToken)
-            JProperty("edges", edges :> JToken)
+            JProperty("Name", JValue(getJsonName real))
+            JProperty("Type", JValue("Real"))
+            JProperty("Vertices", vertices :> JToken)
+            JProperty("Edges", edges :> JToken)
         ]
    
     /// Vertex를 JSON으로 변환
@@ -165,8 +159,8 @@ module rec ToJsonGraphModule =
         | :? Call as call -> callToJson call
         | _ ->
             createJson [
-                JProperty("name", JValue(vertex.QualifiedName))
-                JProperty("type", JValue("Vertex"))
+                JProperty("Name", JValue(vertex.QualifiedName))
+                JProperty("Type", JValue("Vertex"))
             ]
 
     /// Flow를 JSON으로 변환
@@ -175,11 +169,11 @@ module rec ToJsonGraphModule =
         let aliases = aliasDefsToJson flow
 
         createJson [
-            JProperty("name", JValue(flow.QualifiedName))
-            JProperty("type", JValue("Flow"))
-            JProperty("vertices", vertices :> JToken)
-            JProperty("edges", edges :> JToken)
-            JProperty("aliases", aliases :> JToken)
+            JProperty("Name", JValue(flow.QualifiedName))
+            JProperty("Type", JValue("Flow"))
+            JProperty("Vertices", vertices :> JToken)
+            JProperty("Edges", edges :> JToken)
+            JProperty("Aliases", aliases :> JToken)
         ]
 
     /// 모든 Flow를 JSON으로 변환
@@ -207,10 +201,17 @@ module rec ToJsonGraphModule =
     
     /// 시스템의 Devices 데이터를 JSON으로 변환
     let deviceToJson (system: DsSystem) =
+        let taskDevCalls = system.GetTaskDevCalls() |> dict
         let getDevTasks(device:Device) =
             system.GetTaskDevs()
                 |> Seq.filter (fun (td, _c)-> td.DeviceName = device.Name)
-                |> Seq.map (fun (td, _c)->  JValue(td.QualifiedName))
+                |> Seq.map (fun (td, _c)-> 
+                    let calls = taskDevCalls[td].Select(fun c->c.QualifiedName)|> JArray
+                    createJson [
+                         JProperty("Name", JValue(td.QualifiedName))
+                         JProperty("Type", JValue("TaskDev"))
+                         JProperty("Calls", calls :> JToken)
+                    ] ) 
                 |> JArray
 
         let getContainFlows(device:Device) =
@@ -229,23 +230,23 @@ module rec ToJsonGraphModule =
         system.Devices
         |> Seq.map (fun dev ->
             createJson [
-                JProperty("name", JValue(dev.Name))
-                JProperty("type", JValue("Device"))
-                JProperty("path", JValue(dev.AbsoluteFilePath))
-                JProperty("taskDevs", getDevTasks dev  :> JToken)
-                JProperty("flows", getContainFlows dev  :> JToken)
+                JProperty("Name", JValue(dev.Name))
+                JProperty("Type", JValue("Device"))
+                JProperty("Path", JValue(dev.AbsoluteFilePath))
+                JProperty("TaskDevs", getDevTasks dev  :> JToken)
+                JProperty("Flows", getContainFlows dev  :> JToken)
             ] ) 
         |> JArray
 
     /// 전체 시스템을 JSON으로 변환
     let systemToJsonGraph (system: DsSystem) =
         createJson [
-            JProperty("name", JValue(system.QualifiedName))
-            JProperty("type", JValue("DsSystem"))
-            JProperty("flows", flowsToJson system.Flows :> JToken)
-            JProperty("autopre", autopreToJson system :> JToken)
-            JProperty("safety", safetyToJson system :> JToken)
-            JProperty("devices", deviceToJson system :> JToken)
+            JProperty("Name", JValue(system.QualifiedName))
+            JProperty("Type", JValue("DsSystem"))
+            JProperty("Flows", flowsToJson system.Flows :> JToken)
+            JProperty("Autopre", autopreToJson system :> JToken)
+            JProperty("Safety", safetyToJson system :> JToken)
+            JProperty("Devices", deviceToJson system :> JToken)
         ]
 
 [<Extension>]

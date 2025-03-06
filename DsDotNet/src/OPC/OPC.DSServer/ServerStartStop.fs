@@ -69,10 +69,3 @@ module DsOpcUaServerManager =
         opcServer.GetEndpoints()
         |> Seq.iter (fun endpoint -> printfn "%s" endpoint.EndpointUrl)
 
-        
-    let UpdateDSTagFromOPC() =
-        match server with
-        | Some s ->
-            s.UpdateDSTagFromOPC()
-        | None ->
-            printfn "서버가 실행 중이 아닙니다."

@@ -49,7 +49,7 @@ module DsNodeManagerExt =
             |> Seq.filter(fun tag -> tag.Value.Target.IsSome && tag.Value.Target.Value = fqdn)
             |> Seq.filter(fun tag -> not(listExternalTagKinds.Contains tag.Value.TagKind))
             |> Seq.map(fun tag -> tag.Value)
-    
+
 
     let getIOTags(sys:DsSystem) =
         sys.TagManager.Storages.Values
@@ -123,13 +123,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         variable
 
 
-    member x.UpdateDSTagFromOPC() =   () //사용 안하고 항상 DSTAG랑 동기 되게 작성중
-        //_variables.Values 
-        //    |> Seq.iter(fun v ->
-        //        if dsStorages.ContainsKey(v.DisplayName.Text) then
-        //            let dsTag = dsStorages[v.DisplayName.Text]
-        //            dsTag.BoxedValue <- v.Value
-        //    )
 
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
 
@@ -203,8 +196,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
 
 
         // IO 추후 오픈 Runtime Active 모드에서 사용
-        //let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
-        //this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
+        let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
+        this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
         
         let nodeAction = this.CreateFolder("Action", "Action", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getActionTags dsSys) nodeAction nIndex
@@ -249,8 +242,12 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                                 let fqdnName = 
                                     if isTaskDev 
                                     then
-                                        let tagIONames = String.Join(";", (getTags target.Value).Select(fun f->f.Name))
-                                        $"TaskDev;{tagIONames}"
+                                        let inTag =  (target.Value :?> TaskDev).InTag
+                                        let outTag=  (target.Value :?> TaskDev).OutTag
+                                        let tagIONames = String.Join(";", [inTag; outTag]
+                                                            .Where(fun f->f.IsNonNull())
+                                                            .Select(fun f->f.Name))
+                                        if tagIONames = "" then $"TaskDev" else $"TaskDev;{tagIONames}"
                                     else 
                                         $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
                                   

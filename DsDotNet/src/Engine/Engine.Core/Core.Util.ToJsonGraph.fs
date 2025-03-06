@@ -115,15 +115,21 @@ module rec ToJsonGraphModule =
             JProperty("taskDevs", taskDevs),
             JProperty(
                 "autoPre", 
-                callISafetyAutoPreConvertToJson 
-                    call.AutoPreConditions 
-                    call.QualifiedName 
+                if call.AutoPreConditions.any() 
+                then 
+                    callISafetyAutoPreConvertToJson 
+                        call.AutoPreConditions 
+                        call.QualifiedName 
+                else null
             ),
             JProperty(
                 "safety", 
-                callISafetyAutoPreConvertToJson 
-                    call.SafetyConditions 
-                    call.QualifiedName
+                if call.SafetyConditions.any() 
+                then 
+                    callISafetyAutoPreConvertToJson 
+                        call.SafetyConditions 
+                        call.QualifiedName 
+                else null
             )
         )
 
@@ -204,7 +210,20 @@ module rec ToJsonGraphModule =
         let getDevTasks(device:Device) =
             system.GetTaskDevs()
                 |> Seq.filter (fun (td, _c)-> td.DeviceName = device.Name)
-                |> Seq.map (fun (td, _c)-> JValue(td.QualifiedName))
+                |> Seq.map (fun (td, _c)->  JValue(td.QualifiedName))
+                |> JArray
+
+        let getContainFlows(device:Device) =
+            let calls = system.GetTaskDevCalls()
+            let taskDevs = system.GetTaskDevs() |> Seq.filter (fun (td, _c)-> td.DeviceName = device.Name)
+                                                |> Seq.map fst
+            let containCalls =
+                calls |> Seq.filter (fun (td, _call)-> taskDevs.Contains(td))
+                      |> Seq.collect snd
+
+            containCalls
+                |> Seq.map (fun v -> JValue(v.Parent.GetFlow().Name))
+                |> Seq.distinct 
                 |> JArray
 
         system.Devices
@@ -213,7 +232,8 @@ module rec ToJsonGraphModule =
                 JProperty("name", JValue(dev.Name))
                 JProperty("type", JValue("Device"))
                 JProperty("path", JValue(dev.AbsoluteFilePath))
-                JProperty("tasks", getDevTasks dev  :> JToken)
+                JProperty("taskDevs", getDevTasks dev  :> JToken)
+                JProperty("flows", getContainFlows dev  :> JToken)
             ] ) 
         |> JArray
 

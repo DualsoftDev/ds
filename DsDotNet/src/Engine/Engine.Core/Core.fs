@@ -563,7 +563,7 @@ module rec CoreModule =
 
                         // Create a new Real
                         let newReal:Real = flow.CreateReal(realName)
-                        newReal.Motion <- Some($"genMotion_{apiName}")
+                        newReal.Motion <- Some($"{apiName}")
 
                         flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
                         newReal.Finished <- true    //마지막 Real이 원위치

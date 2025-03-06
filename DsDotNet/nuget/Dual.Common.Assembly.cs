@@ -33,6 +33,7 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyInformationalVersion("0.9.1.0")]   // 제품 버젼 (탐색기 속성에서 볼 때)
+[assembly: AssemblyFileVersion("0.9.10.50")]    //설치시 제거안하고 덮어서 패치 할때 기존버전 대체 구분  
 //[assembly: AssemblyVersion("개별 따로 지정할 것")]    // 파일 버젼 : Nuget version 과 동일하게 유지
 //[assembly: AssemblyFileVersion("0.9.1.0")]
 

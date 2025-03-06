@@ -34,7 +34,7 @@
 		<!--<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.Winform.xml" Pack="true" PackagePath="" />-->
 	</ItemGroup>
 	<ItemGroup>
-		<Compile Include="..\..\Dual.Common.Assembly.cs" Link="Dual.Common.Assembly.cs" />
+		<Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
 	</ItemGroup>
 	<ItemGroup>
 		<Content Include="Readme.md" />

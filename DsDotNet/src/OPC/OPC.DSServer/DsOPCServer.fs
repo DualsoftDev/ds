@@ -63,9 +63,11 @@ module DsOPCServerConfig =
 
         // Security Configuration
         let securityConfig = SecurityConfiguration()
+        let dt = $"{DateTime.Now:yyMMdd_HH_mm_ss}"
+        let storePath = "%CommonApplicationData%\\OPC Foundation\\pki\\own\\"+dt
         securityConfig.ApplicationCertificate <- CertificateIdentifier(
             StoreType = "Directory",
-            StorePath = "%CommonApplicationData%\\OPC Foundation\\pki\\own",
+            StorePath = storePath,
             SubjectName = "CN=OPC UA Server, C=US, S=Arizona, O=OPC Foundation, DC=localhost"
         )
 

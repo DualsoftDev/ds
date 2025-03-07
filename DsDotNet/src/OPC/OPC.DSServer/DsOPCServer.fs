@@ -120,6 +120,8 @@ module DsOPCServerConfig =
 
 type DsOPCServer(dsSys: DsSystem) =
     inherit StandardServer()
+    let mutable dsNodeManager = Unchecked.defaultof<DsNodeManager>
+
     do
         DsTimeAnalysisMoudle.statsMap.Clear()
         LoadStatisticsFromJson (dsSys.Name) 
@@ -127,6 +129,9 @@ type DsOPCServer(dsSys: DsSystem) =
 
     // NodeManager를 생성하여 주소 공간 관리
     override this.CreateMasterNodeManager(server: IServerInternal, configuration: ApplicationConfiguration) =
-        let nodeManager = new DsNodeManager(server, configuration, dsSys)
-        new MasterNodeManager(server, configuration, null, [|nodeManager:> INodeManager|])
+        dsNodeManager <- new DsNodeManager(server, configuration, dsSys)
+        new MasterNodeManager(server, configuration, null, [|dsNodeManager:> INodeManager|])
+
+    member this.ChangeDSStorage (stg:Storages) = 
+        dsNodeManager.ChangeDSStorage stg
 

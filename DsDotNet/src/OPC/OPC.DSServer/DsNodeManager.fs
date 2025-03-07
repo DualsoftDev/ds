@@ -73,7 +73,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
     let _variables = Dictionary<string, BaseDataVariableState>()
     let _folders = Dictionary<string, FolderState>()
     let mutable _disposableTagDS: IDisposable option = None
-    let dsStorages = dsSys.TagManager.Storages
+    let mutable _dsStorages = dsSys.TagManager.Storages
 
     let handleWriteValue(
         _: ISystemContext, node: NodeState, _: NumericRange, 
@@ -87,8 +87,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 //variable.Timestamp <- timestamp
                 //variable.StatusCode <- statusCode
 
-                if dsStorages.ContainsKey(node.DisplayName.Text) then
-                    let dsTag = dsStorages[node.DisplayName.Text]
+                if _dsStorages.ContainsKey(node.DisplayName.Text) then
+                    let dsTag = _dsStorages[node.DisplayName.Text]
                     dsTag.BoxedValue <- value
 
                 ServiceResult.Good
@@ -122,7 +122,11 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         folder.AddChild(variable)
         variable
 
-
+    let locker = obj()  // dsStorages locker 객체
+    member this.ChangeDSStorage (stg:Storages) = 
+                 lock locker (fun () ->
+                _dsStorages <- stg
+            )
 
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
 
@@ -336,7 +340,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                             if _motionDic.ContainsKey(stg.Name) && not(Convert.ToBoolean(value))
                             then
                                 let endTagName = _motionDic.[stg.Name]
-                                dsStorages[endTagName].BoxedValue <- false
+                                _dsStorages[endTagName].BoxedValue <- false
 
                         //async { ...
                         //} |> Async.Start // 비동기로 처리 하면 빠른 신호는 Client 까지 신호 안감

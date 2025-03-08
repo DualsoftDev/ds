@@ -23,7 +23,6 @@ module internal RunTimeUtil =
                          SystemTag._T1S
                          SystemTag._T2S
                          SystemTag.emulation
-                         SystemTag.sim
                          SystemTag.timeout
                          ] |> Seq.cast<int>
 

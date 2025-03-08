@@ -274,7 +274,7 @@ namespace Diagram.View.MSAGL
                 }
             }
 
-            if (ev.IsVertexOriginTag() && DicMemoryTag.ContainsKey(ev.Tag))
+            if (ev.TagKind == VertexTag.origin && DicMemoryTag.ContainsKey(ev.Tag))
             {
                 var viewNodes = DicMemoryTag[ev.Tag];
 

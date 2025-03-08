@@ -190,12 +190,7 @@ type TagKindExt =
             )
         | _ -> false
 
-    [<Extension>]
-    static member IsVertexOriginTag(x:TagEvent) =
-        match x with
-        | EventVertex (_, _, kind) ->  kind.IsOneOf(   VertexTag.origin
-                                                    )
-        | _ -> false
+
 
     [<Extension>]
     static member IsVertexTokenTag(x:TagEvent) =
@@ -288,6 +283,29 @@ type TagKindExt =
         x.TagKind.IsOneOf(
                 int VertexTag.planEnd
               )
+
+    [<Extension>]
+    static member IsNeedGraphUI(x:TagEvent) =
+        if x.IsVertexErrTag() then
+            true
+        else
+            match x with
+            | EventVertex (_, _, kind) ->
+                kind.IsOneOf(
+                      VertexTag.ready
+                    , VertexTag.going
+                    , VertexTag.finish
+                    , VertexTag.homing
+                    , VertexTag.pause
+                    , VertexTag.origin
+                    , VertexTag.callIn
+                    , VertexTag.callOut
+                    , VertexTag.planEnd
+                    )
+
+            | EventApiItem (_, _, _) -> true
+            | EventTaskDev (_, _, _) -> true
+            | _ -> false
 
 
 

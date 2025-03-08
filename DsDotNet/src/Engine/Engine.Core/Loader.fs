@@ -87,11 +87,11 @@ type LoaderExt =
     [<Extension>]
     static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq, cfg:ModelConfig) =
         let targetPaths = (loadingPaths @ [activeFilePath])
-        let zipPathDS  = targetPaths.ToDsZip(changeExtension (activeFilePath|> DsFile)  ".dsz")
+        let zipPathDS  = targetPaths.ToDsZip(changeExtension (activeFilePath|> DsFile)  "dsz")
 
         let zipPathPpt = targetPaths.Where(fun f-> f <> $"{TextLibrary}.ds")
-                              .Select(fun f-> changeExtension (f|> DsFile)  ".pptx")
-                              .ToDsZip(changeExtension (activeFilePath|> DsFile)  ".7z")
+                              .Select(fun f-> changeExtension (f|> DsFile)  "pptx")
+                              .ToDsZip(changeExtension (activeFilePath|> DsFile)  "7z")
 
         let zipDir    = PathManager.getDirectoryName (zipPathDS|>DsFile)
 

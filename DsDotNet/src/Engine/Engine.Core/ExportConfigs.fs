@@ -7,6 +7,7 @@ open System.Collections.Generic
 open System.Runtime.CompilerServices
 open Dual.Common.Core.FS
 open Dual.Common.Base.FS
+open System
 
 
 [<AutoOpen>]
@@ -142,6 +143,9 @@ module ExportConfigsMoudle =
             SystemName = sys.Name
         }
 
+
+
+
 [<AutoOpen>]
 type ExportConfigsExt =
 
@@ -162,3 +166,47 @@ type ExportConfigsExt =
     static member LoadInterfaceConfig (path:string) = loadInterfaceConfig path
     [<Extension>]
     static member getSimplePlanInterface (jsonText:string) = JsonConvert.DeserializeObject<DsSimplePlanInterface>(jsonText)
+    
+    ///Process simulator 변수 csv 파일로 저장
+    [<Extension>]
+    static member ExportSiemensPSMotionCSV (sys: DsSystem, exportPath: string) =
+        let config = sys |> getDsPlanInterfaces 
+        let configStarts = 
+            config 
+            |> Seq.map (fun tag -> 
+                (tag.MotionStartTag |> fst, "BOOL", tag.MotionStartTag |> snd, "Q", "TRUE", "ds", "", "FALSE"))
+    
+        let configEnds = 
+            config 
+            |> Seq.map (fun tag -> 
+                (tag.MotionEndTag |> fst, "BOOL", tag.MotionEndTag |> snd, "I", "TRUE", "ds", "", "FALSE"))
+    
+        let combinedConfig = Seq.append configStarts configEnds |> Seq.toList
+
+        // CSV 저장 함수
+        let saveInterfaceCSV (filePath: string) (data: string list) =
+            try
+                let csvContent = String.Join("\n", data)
+                File.WriteAllText(filePath, csvContent, System.Text.Encoding.UTF8)
+                printfn "CSV 파일이 성공적으로 저장되었습니다: %s" filePath
+            with
+            | ex -> printfn "CSV 저장 중 오류 발생: %s" ex.Message
+
+        // CSV 헤더 정의
+        let PSMotionCSVCol = "Signal Name,Type,Robot Signal Name,Address,IEC Format,PLC Connection,External Connection,Resource,Comment,Memory"
+
+        // CSV 저장 경로 설정
+        let exportSimplePath = PathManager.changeExtension (DsFile(exportPath)) "PS_OPC.csv"
+
+        // 데이터를 CSV 형식으로 변환
+        let csvData =
+            combinedConfig
+            |> Seq.map (fun (signalName, signalType, address, iecFormat, plcConnection, externalConnection, resource, memory) -> 
+                sprintf "%s,%s,%s,%s,%s,%s,%s,%s,%s" signalName signalType "" address iecFormat plcConnection externalConnection resource memory)
+            |> Seq.toList
+
+        // 헤더를 첫 번째 행으로 추가
+        let finalCsvData = PSMotionCSVCol :: csvData  
+
+        // CSV 파일로 저장
+        saveInterfaceCSV exportSimplePath finalCsvData

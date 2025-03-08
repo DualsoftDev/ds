@@ -15,8 +15,19 @@ module internal RunTimeUtil =
     ///HMI Reset
     let syncReset(system:DsSystem ) =
         let stgs = system.TagManager.Storages
-        let stgs = stgs.Where(fun w-> w.Value.TagKind <> (int)SystemTag._ON)
+        let skipList =  [SystemTag._ON
+                         SystemTag._OFF
+                         SystemTag._T20MS
+                         SystemTag._T100MS
+                         SystemTag._T200MS
+                         SystemTag._T1S
+                         SystemTag._T2S
+                         SystemTag.emulation
+                         SystemTag.sim
+                         SystemTag.timeout
+                         ] |> Seq.cast<int>
 
+        let stgs = stgs.Where(fun w-> not(skipList.Contains(w.Value.TagKind)))
         for tag in stgs do
             let stg = tag.Value
             match stg with
@@ -24,4 +35,3 @@ module internal RunTimeUtil =
                 tc.ResetStruct()  // 타이머 카운터 리셋
             | _ ->
                 stg.BoxedValue <- textToDataType(stg.DataType.Name).DefaultValue()
-

@@ -16,9 +16,9 @@ module PptNodeModule =
     type PptPage(slidePart: SlidePart, iPage: int, bShow: bool) =
         let title = slidePart.PageTitle()
         do 
-            if title.Contains("_") && iPage > 1
+            if title.Contains(TextDeviceSplit) && iPage > 1
             then 
-                Office.ErrorPpt(ErrorCase.Name, "페이지 이름에 '_' 사용을 금지합니다.", $"이름 : {title}", iPage, 0u, $"페이지이름오류")
+                Office.ErrorPpt(ErrorCase.Name, $"페이지 이름에 {TextDeviceSplit} 사용을 금지합니다.", $"이름 : {title}", iPage, 0u, $"페이지이름오류")
 
         member x.PageNum = iPage
         member x.SlidePart = slidePart

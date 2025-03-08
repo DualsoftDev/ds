@@ -11,7 +11,7 @@ open Engine.Core
 module DsOpcUaServerManager =
 
     let mutable server: DsOPCServer option = None
-    let IsRunning:bool= server.IsSome 
+    let IsRunning():bool = server.IsSome 
         /// <summary>
     /// OPC UA 서버 종료
     /// </summary>
@@ -22,6 +22,13 @@ module DsOpcUaServerManager =
             s.Stop()
             server <- None
             printfn "OPC UA 서버가 종료되었습니다."
+        | None ->
+            printfn "서버가 실행 중이 아닙니다."
+
+    let ChangeDSStorage(dsSys: DsSystem) =
+        match server with
+        | Some s ->
+            s.ChangeDSStorage(dsSys.TagManager.Storages)
         | None ->
             printfn "서버가 실행 중이 아닙니다."
 
@@ -51,7 +58,18 @@ module DsOpcUaServerManager =
         // 4. 서버 시작
         let opcServer = new DsOPCServer(dsSys)
         server <- Some opcServer
-        application.Start(opcServer).Wait()
+        try
+            application.Start(opcServer).Wait()
+        with
+        | :? AggregateException as aggEx ->
+            aggEx.InnerExceptions
+            |> Seq.iter (fun ex -> 
+                match ex with
+                | :? ServiceResultException as sre when sre.InnerResult <> null -> failwith sre.InnerResult.AdditionalInfo
+                | _ -> failwith ex.Message)
+        | _ ->
+            failwith "Error starting OPCServer"
+
 
         printfn "OPC UA 서버가 시작되었습니다."
         printfn "엔드포인트:"

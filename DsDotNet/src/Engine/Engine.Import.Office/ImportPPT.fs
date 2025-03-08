@@ -277,7 +277,7 @@ module ImportPptModule =
             let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths cfg|> Tuple.first)
             forceTrace $"Elapsed time for reading1 {fullName}: {millisecond} ms"
 
-            let activePath = PathManager.changeExtension (fullName.ToFile()) ".ds"
+            let activePath = PathManager.changeExtension (fullName.ToFile()) "ds"
 
             let (system, loadingPaths), millisecond =
                 duration(fun () ->

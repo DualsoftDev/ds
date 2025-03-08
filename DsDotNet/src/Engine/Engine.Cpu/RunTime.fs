@@ -153,6 +153,7 @@ module RunTimeModule =
         member x.Reset() =
             doScanStop()
             syncReset(mySystem)
+            
             scanOnce() |> ignore
 
 

@@ -35,11 +35,21 @@ module DsNodeManagerExt =
         | _ -> failwithf "Unsupported data type"
 
 
+    let listExternalTagKinds = [
+        TaskDevTag.actionIn|>int
+        TaskDevTag.actionOut|>int
+        VertexTag.motionStart|>int
+        VertexTag.motionEnd|>int
+        VertexTag.scriptStart|>int
+        VertexTag.scriptEnd|>int
+        ]
+
     let getTags(fqdn:FqdnObject) =
         fqdn.TagManager.Storages
             |> Seq.filter(fun tag -> tag.Value.Target.IsSome && tag.Value.Target.Value = fqdn)
+            |> Seq.filter(fun tag -> not(listExternalTagKinds.Contains tag.Value.TagKind))
             |> Seq.map(fun tag -> tag.Value)
-    
+
 
     let getIOTags(sys:DsSystem) =
         sys.TagManager.Storages.Values
@@ -63,7 +73,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
     let _variables = Dictionary<string, BaseDataVariableState>()
     let _folders = Dictionary<string, FolderState>()
     let mutable _disposableTagDS: IDisposable option = None
-    let dsStorages = dsSys.TagManager.Storages
+    let mutable _dsStorages = dsSys.TagManager.Storages
 
     let handleWriteValue(
         _: ISystemContext, node: NodeState, _: NumericRange, 
@@ -77,8 +87,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 //variable.Timestamp <- timestamp
                 //variable.StatusCode <- statusCode
 
-                if dsStorages.ContainsKey(node.DisplayName.Text) then
-                    let dsTag = dsStorages[node.DisplayName.Text]
+                if _dsStorages.ContainsKey(node.DisplayName.Text) then
+                    let dsTag = _dsStorages[node.DisplayName.Text]
                     dsTag.BoxedValue <- value
 
                 ServiceResult.Good
@@ -112,6 +122,11 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         folder.AddChild(variable)
         variable
 
+    let locker = obj()  // dsStorages locker 객체
+    member this.ChangeDSStorage (stg:Storages) = 
+                 lock locker (fun () ->
+                _dsStorages <- stg
+            )
 
     member private this.CreateOpcNodes (tags:IStorage seq) parentNode namespaceIndex= 
 
@@ -185,8 +200,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
 
 
         // IO 추후 오픈 Runtime Active 모드에서 사용
-        //let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
-        //this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
+        let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
+        this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
         
         let nodeAction = this.CreateFolder("Action", "Action", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getActionTags dsSys) nodeAction nIndex
@@ -231,8 +246,12 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                                 let fqdnName = 
                                     if isTaskDev 
                                     then
-                                        let tagIONames = String.Join(";", (getTags target.Value).Select(fun f->f.Name))
-                                        $"TaskDev;{tagIONames}"
+                                        let inTag =  (target.Value :?> TaskDev).InTag
+                                        let outTag=  (target.Value :?> TaskDev).OutTag
+                                        let tagIONames = String.Join(";", [inTag; outTag]
+                                                            .Where(fun f->f.IsNonNull())
+                                                            .Select(fun f->f.Name))
+                                        if tagIONames = "" then $"TaskDev" else $"TaskDev;{tagIONames}"
                                     else 
                                         $"{treeNode.Node.FqdnObject.Value.GetType().Name}"
                                   
@@ -307,22 +326,23 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             _disposableTagDS <- 
                 Some(
                     ValueSubject.Subscribe(fun (sys, stg, value) ->
-                        //async {
-                            if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
-                                handleCalcTag (stg) |> ignore  // active만 처리
+                        
+                        if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
+                            handleCalcTag (stg) |> ignore  // active만 처리
 
-                            if _variables.ContainsKey(stg.Name) then
-                                let variable = _variables[stg.Name]
-                                variable.Value <- value
-                                variable.Timestamp <- DateTime.UtcNow
-                                variable.ClearChangeMasks(this.SystemContext, false)    
+                        if _variables.ContainsKey(stg.Name) then
+                            let variable = _variables[stg.Name]
+                            variable.Value <- value
+                            variable.Timestamp <- DateTime.UtcNow
+                            variable.ClearChangeMasks(this.SystemContext, false)    
 
-                                //opc 모션 motionStart  신호가 꺼지면 자동으로  motionEnd OFF 처리
-                                if _motionDic.ContainsKey(stg.Name) && not(Convert.ToBoolean(value))
-                                then
-                                    let endTagName = _motionDic.[stg.Name]
-                                    dsStorages[endTagName].BoxedValue <- false
+                            //opc 모션 motionStart  신호가 꺼지면 자동으로  motionEnd OFF 처리
+                            if _motionDic.ContainsKey(stg.Name) && not(Convert.ToBoolean(value))
+                            then
+                                let endTagName = _motionDic.[stg.Name]
+                                _dsStorages[endTagName].BoxedValue <- false
 
+                        //async { ...
                         //} |> Async.Start // 비동기로 처리 하면 빠른 신호는 Client 까지 신호 안감
                     )
                 )   

@@ -26,7 +26,7 @@ module ImportUtilForDev =
       =
         {   ContainerSystem = containerSystem
             AbsoluteFilePath = absoluteFilePath
-            RelativeFilePath = PathManager.changeExtension (relativeFilePath.ToFile()) ".ds" //pptx로 부터 .ds로 생성
+            RelativeFilePath = PathManager.changeExtension (relativeFilePath.ToFile()) "ds" //pptx로 부터 .ds로 생성
             LoadedName = loadedName
             ShareableSystemRepository = sRepo
             LoadingType = loadingType }
@@ -49,7 +49,7 @@ module ImportUtilForDev =
             mySys.AddLoadedSystem(dev)
             dev
 
-    let getLibraryInfos()=
+    let getLibraryConfig()=
         let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
         let runDir =
             if Net48Path.Exists (Path.Combine(runDir, "dsLib")) then
@@ -68,7 +68,13 @@ module ImportUtilForDev =
             libConfigPath
 
         let libConfig = LoadLibraryConfig(libPath)
-        libConfig.LibraryInfos, runDir
+        libConfig, runDir
+
+    let getLibraryInfos()= 
+        getLibraryConfig() 
+        |> fun (f, path)-> f.LibraryInfos, path
+        
+
 
     // Call Graph
     // {

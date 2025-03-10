@@ -24,6 +24,7 @@
 		<Compile Include="OPCClientConfig.fs" />
 		<Compile Include="OPCClient.fs" />
 		<Compile Include="OPCClientManager.fs" />
+		<Compile Include="OPCClientEvent.fs" />
 	</ItemGroup>
 
 	<ItemGroup>

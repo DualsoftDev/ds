@@ -44,7 +44,8 @@ namespace Diagram.View.MSAGL
     public static class ViewUtil
     {
         public static List<UcView> UcViews { get; set; } = new();
-        public static Subject<TagEvent> VertexChangeSubject = new();
+        public static Subject<TagEvent> VertexEventSubject = new();
+
         public static Dictionary<Vertex, ViewVertex> DicNode = new();
 
         static IDisposable _Disposable;
@@ -177,7 +178,7 @@ namespace Diagram.View.MSAGL
             void ViewChangeSubject()
             {
                 _Disposable?.Dispose();
-                _Disposable = VertexChangeSubject.Subscribe(rx =>
+                _Disposable = VertexEventSubject.Subscribe(rx =>
                 {
                     EventVertex eventVertex = null;
                     if (rx is EventVertex ev)

@@ -4,6 +4,8 @@ open Dual.Common.Core.FS
 open System
 open System.Runtime.CompilerServices
 open System.Reactive.Subjects
+open System.Diagnostics
+open System.ComponentModel
 
 [<AutoOpen>]
 module TagKindModule =
@@ -62,6 +64,7 @@ module TagKindModule =
 [<AutoOpen>]
 [<Extension>]
 type TagKindExt =
+
     [<Extension>] static member OnChanged (tagDS:TagEvent) = TagEventSubject.OnNext(tagDS)
     [<Extension>] static member GetSystemTagKind    (x:IStorage) = DU.getEnumValue<SystemTag>    (x.TagKind)
     [<Extension>] static member GetFlowTagKind      (x:IStorage) = DU.getEnumValue<FlowTag>      (x.TagKind)

@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+		<RootNamespace>OPC.DSClient</RootNamespace>
+		<OutputType>Library</OutputType>
+		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Remove="C:\Users\ahn\.nuget\packages\system.diagnostics.diagnosticsource\9.0.0\contentFiles\any\netstandard2.0\ILLink\ILLink.Descriptors.LibraryBuild.xml" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+		<Compile Include="OPCClientTagKind.fs" />
+		<Compile Include="OPCClientTag.fs" />
+		<Compile Include="OPCClientConfig.fs" />
+		<Compile Include="OPCClient.fs" />
+		<Compile Include="OPCClientManager.fs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+   	  <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="9.0.0" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua" Version="1.5.375.443" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.375.443" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.375.443" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.375.443" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.375.443" />
+	  <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Security.Certificates" Version="1.5.375.443" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+	</ItemGroup>
+
+</Project>

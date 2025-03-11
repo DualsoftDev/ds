@@ -86,7 +86,8 @@ module RuntimeGeneratorModule =
         | "Monitoring" -> Monitoring
         | "VirtualPlant" -> VirtualPlant
         | "VirtualLogic" -> VirtualLogic
-        | _ -> failwithlogf $"Error {getFuncName()}"
+        | _ -> Simulation//ahn!!
+        //| _ -> failwithlogf $"Error ToRuntimePackage"
 
     let InitStartMemory = 1000
     let BufferAlramSize = 9999

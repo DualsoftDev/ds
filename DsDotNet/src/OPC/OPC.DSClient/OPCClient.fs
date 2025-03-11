@@ -12,6 +12,7 @@ module OPCClientModule =
     /// OPC 클라이언트 모듈 정의
     type OPCDsClient() =
         let mutable session: Session option = None
+        let mutable isReconnecting = false
         let connectionReadyEvent = Event<unit>()
         let connectionClosedEvent = Event<unit>()
         let connectionLostEvent = Event<unit>()
@@ -49,6 +50,15 @@ module OPCClientModule =
             printfn "OPC UA connection lost."
             connectionLostEvent.Trigger()
 
+        member this.CreateKeepAliveEventHandler() =
+            KeepAliveEventHandler(fun _sender args ->
+                    if not (ServiceResult.IsGood(args.Status)) then
+                        printfn "OPC UA session lost. Attempting reconnection..."
+                        if not isReconnecting then
+                            isReconnecting <- true
+                            this.ReconnectSession()
+                )
+
         member this.InitializeOPC(url: string, timeout: int) =
             _endpointUrl <- url
             _timeout <- timeout
@@ -81,6 +91,7 @@ module OPCClientModule =
                     ).Result
 
                 // KeepAlive 이벤트 핸들러
+                keepAliveHandler <- this.CreateKeepAliveEventHandler()
                 newSession.add_KeepAlive(keepAliveHandler)
 
                 session <- Some newSession
@@ -92,6 +103,33 @@ module OPCClientModule =
                 printfn "Failed to create session: %s" ex.Message
                 this.TriggerConnectionClosed()
                 raise ex
+
+                         /// 세션 재연결
+        member private this.ReconnectSession() =
+            match session with
+            | Some oldSession ->
+                try
+                    printfn "Reconnecting to OPC UA server..."
+                    oldSession.remove_KeepAlive(keepAliveHandler)    
+                    // 기존 세션을 기반으로 재생성
+                    let newSession = Session.Recreate(oldSession)
+                    // 새 세션에 KeepAlive 이벤트를 다시 연결
+                    keepAliveHandler <- this.CreateKeepAliveEventHandler()
+                    newSession.add_KeepAlive(keepAliveHandler)
+
+                    // 새 세션으로 교체
+                    session <- Some newSession
+                    isReconnecting <- false
+                    printfn "Reconnection successful."
+                    this.TriggerConnectionReady()
+                with ex ->
+                    printfn "Reconnection failed: %s" ex.Message
+                    isReconnecting <- false
+                    this.TriggerConnectionLost()
+                    this.Disconnect()
+                    this.InitializeOPC(_endpointUrl, _timeout)
+            | None ->
+                printfn "No active session to reconnect."
 
         /// 연결 종료
         member this.Disconnect() =

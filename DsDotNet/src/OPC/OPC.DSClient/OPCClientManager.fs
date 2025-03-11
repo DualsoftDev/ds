@@ -42,12 +42,14 @@ type OPCClientManager(dsSys:DsSystem) =
         try
             if session.DefaultSubscription.MonitoredItemCount = 0u then
                 session.AddSubscription(session.DefaultSubscription) |> ignore
-                session.DefaultSubscription.PublishingInterval <- 20
+                session.DefaultSubscription.PublishingInterval <- 1
                 session.DefaultSubscription.Create()
 
             let monitoredItem = MonitoredItem(session.DefaultSubscription.DefaultItem, DisplayName = tag.Name, StartNodeId = tag.NodeId, AttributeId = Attributes.Value)
             monitoredItem.add_Notification(
                 MonitoredItemNotificationEventHandler(fun item _ ->
+                    item.MonitoringMode <- MonitoringMode.Reporting
+                    item.SamplingInterval <- 1
                     item.DequeueValues() |> Seq.iter (fun value ->
                         tag.Value <- value.Value
                         tag.Timestamp <- TimeZoneInfo.ConvertTime(value.SourceTimestamp, TimeZoneInfo.Utc, TimeZoneInfo.Local)

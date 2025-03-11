@@ -111,7 +111,11 @@ module DsOPCServerConfig =
         let traceConfig = TraceConfiguration()
         traceConfig.OutputFilePath <- "%CommonApplicationData%\\OPC Foundation\\Logs\\DualsoftServer.log.txt"
         traceConfig.DeleteOnLoad <- true
+#if DEBUG
         traceConfig.TraceMasks <- 519     
+#else
+        traceConfig.TraceMasks <- 0
+#endif
         //traceConfig.TraceMasks <- 0xFFFFFFFF  // 디버그 출력 활성화
         config.TraceConfiguration <- traceConfig
 

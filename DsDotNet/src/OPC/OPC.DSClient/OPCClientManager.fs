@@ -9,12 +9,11 @@ open System.ComponentModel
 open Engine.Core
 
 type OPCClientManager(dsSys:DsSystem) =
-    let opcClientTags = ResizeArray<OPCClientTag>()
+    let opcClientTags = Dictionary<string, OPCClientTag>()
     let addMonitoredItemEvent, addVariablesEvent = Event<unit>(), Event<unit>()
 
     [<CLIEvent>] member _.AddMonitoredItemEvent = addMonitoredItemEvent.Publish
     [<CLIEvent>] member _.AddVariablesEvent = addVariablesEvent.Publish
-    member _.OPCClientTags = opcClientTags
     member _.DsSystem = dsSys
     
     member this.LoadTags(session: Session) =
@@ -26,8 +25,8 @@ type OPCClientManager(dsSys:DsSystem) =
 
 
         browseAndProcess "Dualsoft"
-        opcClientTags |> Seq.iter (fun tag -> this.AddMonitoredItem(session, tag))
-        opcClientTags
+        opcClientTags.Values |> Seq.iter (fun tag -> this.AddMonitoredItem(session, tag))
+        opcClientTags.Values
 
     member private this.FindNodeIdByName(session: Session, parentNodeId: NodeId, name: string) =
         session.Browse(null, null, parentNodeId, 0u, BrowseDirection.Forward,
@@ -105,5 +104,5 @@ type OPCClientManager(dsSys:DsSystem) =
                     tag.NodeId <- nodeId;
                 
                     addVariablesEvent.Trigger()
-                    opcClientTags.Add(tag) |> ignore
+                    opcClientTags.Add(tag.Name, tag) |> ignore
         )

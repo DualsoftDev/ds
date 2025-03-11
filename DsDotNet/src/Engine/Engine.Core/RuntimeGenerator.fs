@@ -73,16 +73,6 @@ module RuntimeGeneratorModule =
         | VirtualPlant
         | VirtualLogic
     with
-        member x.IsPCorPCSIM() =
-            match x with
-            | PC | PCSIM  -> true
-            | _ -> false
-
-        //member x.IsPLCorPLCSIM() =
-        //    match x with
-        //    | PLC | PLCSIM -> true
-        //    | _ -> false
-
         member x.IsPackageSIM() =
             match x with
             | PCSIM | PLCSIM -> true
@@ -91,10 +81,11 @@ module RuntimeGeneratorModule =
 
     let ToRuntimePackage s =
         match s with
-        | "PC" -> PC
-        | "PCSIM" -> PCSIM
-        | "PLC" -> PLC
-        | "PLCSIM" -> PLCSIM
+        | "Simulation" -> Simulation
+        | "Control" -> Control
+        | "Monitoring" -> Monitoring
+        | "VirtualPlant" -> VirtualPlant
+        | "VirtualLogic" -> VirtualLogic
         | _ -> failwithlogf $"Error {getFuncName()}"
 
     let InitStartMemory = 1000

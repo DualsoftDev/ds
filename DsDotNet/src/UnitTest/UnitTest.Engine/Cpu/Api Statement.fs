@@ -13,22 +13,24 @@ type Spec01_PortStatement() =
     let t = CpuTestSample(WINDOWS)
 
     [<Test>]
-    member __.``A1_ApiSet`` () = () //test ahn
-        //for td, coins in t.TaskDevCallSet do
-        //    if coins.Any() then
-        //        getAM(td.ApiItem).A1_ApiSet(td) |> doChecks
-    [<Test>]
-    member __.``A2_ApiEnd`` () = () //test ahn
-        //for api, coins in t.ApiCallSet do
-        //    api.A2_ApiEnd(t.Sys) |> doCheck
-    [<Test>]
-    member __.``A3_SensorLinking`` () = () //test ahn
-        //for api, coins in t.ApiCallSet do
-        //    if coins.Any() then
-        //        api.A3_SensorLinking(t.Sys, coins.OfType<Call>()) |> doCheck
-    [<Test>]
-    member __.``A4_SensorLinked`` () = () //test ahn
-        //for api, coins in t.ApiCallSet do
-        //    if coins.Any() then
-        //        api.A4_SensorLinked(t.Sys, coins.OfType<Call>()) |> doCheck
+    member __.``A1_ApiSet`` () =
+        let apiDevSet = t.Sys.GetDistinctApisWithDeviceCall()
+        for (api, td, calls) in apiDevSet do
+            getAM(api).A1_ApiSet(td, calls) |> doChecks
 
+    [<Test>]
+    member __.``A2_ApiEnd`` () = 
+        let apiDevSet = t.Sys.GetDistinctApisWithDeviceCall()
+        for (api, td, calls) in apiDevSet do
+            getAM(api).A2_ApiEnd() |> doCheck
+
+    [<Test>]
+    member __.``TD1 SensorLinking`` () =
+         let devCallSet =  t.Sys.GetTaskDevsCoin()
+         for (td, call) in devCallSet do
+                getDM(td).TD1_SensorLinking(call) |> doChecks
+    [<Test>]
+    member __.``TD2 SensorLinked`` () = 
+         let devCallSet =  t.Sys.GetTaskDevsCoin()
+         for (td, call) in devCallSet do
+                getDM(td).TD2_SensorLinked(call) |> doChecks

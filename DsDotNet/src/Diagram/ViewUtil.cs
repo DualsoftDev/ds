@@ -242,6 +242,7 @@ namespace Diagram.View.MSAGL
 
             if (ev.IsStatusTag() && (bool)ev.Tag.BoxedValue)
             {
+
                 Status4 status = ev.TagKind switch
                 {
                     VertexTag.ready => Status4.Ready,
@@ -258,7 +259,11 @@ namespace Diagram.View.MSAGL
                     if (status == Status4.Going) node.UpdateGoingCnt();
 
                     var ucView = UcViews.FirstOrDefault(w => w.MasterNode == DicNode[node.CoreVertex.Value].FlowNode);
-                    if (ucView != null) ucView.UpdateStatus(node);
+                    if (ucView != null)
+                    {
+                        ucView.UpdateStatus(node);
+                        ucView.ForceUpdateLabelText();
+                    }
                 });
             }
 

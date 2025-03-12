@@ -165,7 +165,7 @@ module rec ViewModule =
 
         member x.Name = name
         member x.UpdateGoingCnt() = goingCont <- goingCont+1u
-        member x.GoingCnt = 
+        member x.GetGoingCnt() = 
             if coreVertex.IsNull()
             then 0u
             else 

@@ -22,6 +22,7 @@
         <PackageReference Include="FsUnit" Version="6.0.0" />
         <PackageReference Include="FsUnit.xUnit" Version="6.0.0" />
         <PackageReference Include="NUnit3TestAdapter" Version="4.6.0" />
+        <PackageReference Include="System.Formats.Asn1" Version="8.0.1" />
         <PackageReference Include="xunit" Version="2.9.0" />
     </ItemGroup>
 

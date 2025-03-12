@@ -147,7 +147,7 @@ public partial class UcView : UserControl
 
     private void UpdateLabelText(Node nNode, ViewNode viewNode)
     {
-        var goingCnt = viewNode.GoingCnt;
+        var goingCnt = viewNode.GetGoingCnt();
         var org = viewNode.DisplayName;
         if (goingCnt > 0)
             nNode.LabelText = $"{org}\v\r\n({goingCnt})";
@@ -628,6 +628,11 @@ public partial class UcView : UserControl
         Node node = findNode(viewNode);
         if (node != null)
         {
+            if (viewNode.CoreVertex?.Value is Real)
+            {
+
+            }
+
             UpdateLabelText(node, viewNode);
             UpdateBackColor(viewNode.Status4, node);
             if (vRefresh) RefreshGraph();

@@ -1,7 +1,6 @@
 namespace Engine.Runtime
 open System
 open System.Linq
-open IO.Core
 open Engine.Cpu
 open Engine.Core
 open Engine.Parser.FS
@@ -37,14 +36,3 @@ type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
     member x.System = model.System
     member x.Dispose() = dsCPU.Dispose()
 
-type IoHub(zmqSettingsJson:FilePath) =
-    let zmqInfo = Zmq.InitializeServer zmqSettingsJson
-
-    interface IDisposable with
-        member x.Dispose() = x.Dispose()
-
-    member x.Server = zmqInfo.Server
-    member x.Spec   = zmqInfo.IOSpec
-    //member x.IoHubInfo = zmqInfo
-
-    member x.Dispose() = zmqInfo.Dispose()

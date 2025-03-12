@@ -53,6 +53,7 @@ module OPCClientModule =
         member this.CreateKeepAliveEventHandler() =
             KeepAliveEventHandler(fun _sender args ->
                     if not (ServiceResult.IsGood(args.Status)) then
+                        failwithf "KeepAlive failed: %s" (args.Status.ToLongString())    
                         printfn "OPC UA session lost. Attempting reconnection..."
                         if not isReconnecting then
                             isReconnecting <- true

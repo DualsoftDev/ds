@@ -10,15 +10,16 @@ open Engine.Core
 
 type OPCClientEvent(sys: DsSystem) =
     let tagOPCEventSubject = new Subject<TagEvent>()
+    let opcClientManager = OPCClientManager(sys)
     let opcClient = OPCDsClient()
 
     do
-        let opcClientManager = OPCClientManager(sys)
         opcClient.ConnectionReady.Add(fun _ ->
+            opcClientManager.DisposeTags()  
             let tags = opcClientManager.LoadTags(opcClient.Session.Value)
 
             tags |> Seq.iter (fun tag ->
-                tag.PropertyChanged.AddHandler(fun _ _ ->  
+                tag.AddHandler(fun _ _ ->  
                         match TagKindExt.GetTagInfo(tag.DsStorage) with
                         | Some dstag -> tagOPCEventSubject.OnNext(dstag)
                         | None -> ()

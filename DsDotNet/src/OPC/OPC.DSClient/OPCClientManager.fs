@@ -16,6 +16,10 @@ type OPCClientManager(dsSys:DsSystem) =
     [<CLIEvent>] member _.AddVariablesEvent = addVariablesEvent.Publish
     member _.DsSystem = dsSys
     
+    member this.DisposeTags() = 
+                    opcClientTags.Values |> Seq.iter (fun tag -> tag.RemoveHandler())
+                    opcClientTags.Clear() 
+
     member this.LoadTags(session: Session) =
         if session = null || not session.Connected then invalidOp "Session is not connected."
 

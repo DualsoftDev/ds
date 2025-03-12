@@ -83,7 +83,7 @@ module DsOPCServerConfig =
         transportQuotas.MaxMessageSize <- 4194304
         transportQuotas.MaxBufferSize <- 65535
         transportQuotas.ChannelLifetime <- 30000
-        transportQuotas.SecurityTokenLifetime <- 3600000
+        transportQuotas.SecurityTokenLifetime <- 0xFFFFFFF
         config.TransportQuotas <- transportQuotas
 
         // Server Configuration

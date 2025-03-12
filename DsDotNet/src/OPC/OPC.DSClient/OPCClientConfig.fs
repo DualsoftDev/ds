@@ -45,7 +45,7 @@ module OPCClientConfig =
         transportQuotas.MaxMessageSize <- 4194304
         transportQuotas.MaxBufferSize <- 65535
         transportQuotas.ChannelLifetime <- 300000
-        transportQuotas.SecurityTokenLifetime <- 3600000
+        transportQuotas.SecurityTokenLifetime <- 0xFFFFFFF
         config.TransportQuotas <- transportQuotas
 
         // 클라이언트 구성

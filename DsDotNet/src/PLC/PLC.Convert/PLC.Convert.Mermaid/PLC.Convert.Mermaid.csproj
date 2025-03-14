@@ -16,4 +16,10 @@
     <ProjectReference Include="..\PLC.Convert.FS\PLC.Convert.FS.fsproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="FormMermaid.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
+
 </Project>

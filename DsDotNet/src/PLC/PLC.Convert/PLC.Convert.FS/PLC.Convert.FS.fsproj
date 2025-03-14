@@ -2,7 +2,7 @@
 
     <PropertyGroup>
         <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>net8.0-windows</TargetFramework>
         <RootNamespace>PLC.CodeGen.Common</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
@@ -16,14 +16,18 @@
 	</PropertyGroup>
 
     <ItemGroup>
-        <Content Include="fiters.json" />
+        <Content Include="filters.json" />
         <Compile Include="ConvertPLC.fs" />
+        <Compile Include="MermaidExport.fs" />
     </ItemGroup>
-
-    <ItemGroup />
 
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\PLC.Convert.LS\PLC.Convert.LSCore\PLC.Convert.LSCore.csproj" />
+      <ProjectReference Include="..\PLC.Convert.LS\PLC.Convert.LSParser\PLC.Convert.LSParser.csproj" />
     </ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

@@ -28,12 +28,31 @@ namespace PLC.Convert.Mermaid
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            button_openPLC = new Button();
+            SuspendLayout();
+            // 
+            // button_openPLC
+            // 
+            button_openPLC.Location = new Point(14, 4);
+            button_openPLC.Name = "button_openPLC";
+            button_openPLC.Size = new Size(75, 23);
+            button_openPLC.TabIndex = 0;
+            button_openPLC.Text = "Open";
+            button_openPLC.UseVisualStyleBackColor = true;
+            // 
+            // FormMermaid
+            // 
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(button_openPLC);
+            Name = "FormMermaid";
+            Text = "Form1";
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private Button button_openPLC;
     }
 }

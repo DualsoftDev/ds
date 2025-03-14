@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -25,10 +25,10 @@ public static class ImportFile
         try
         {
             int euckrCodePage = 51949;  // euc-kr 코드 번호
-            //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-            //System.Text.Encoding eucKr = System.Text.Encoding.GetEncoding(euckrCodePage);
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            System.Text.Encoding eucKr = System.Text.Encoding.GetEncoding(euckrCodePage);
 
-            Encoding eucKr = Encoding.GetEncoding(euckrCodePage);
+            //Encoding eucKr = Encoding.GetEncoding(euckrCodePage);
             using StreamReader reader = new(filePath, eucKr); // Reading the file with EUC-KR encoding
             string line;
             while ((line = reader.ReadLine()) != null) // Reading the file until the end

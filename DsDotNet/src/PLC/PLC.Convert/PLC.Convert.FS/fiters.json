@@ -1,0 +1,25 @@
+{
+  "autoKeywords": [ "_A_", "_AUTO_", "_IN_OK" ],
+  "safetyKeywords": [ "_C_", "_COM_" ],
+  "targetReplacements": {
+    "_A_XXX_AUX": "XXX",
+    "_AUTO_XXX_AUX": "XXX",
+    "_C_XXX_AUX": "XXX",
+    "_COM_XXX_AUX": "XXX",
+    "_1ST_IN_OK": "_1ST_IN",
+    "_2ND_IN_OK": "_2ND_IN",
+    "_3RD_IN_OK": "_3RD_IN",
+    "_4TH_IN_OK": "_4TH_IN",
+    "_5TH_IN_OK": "_5TH_IN",
+    "_6TH_IN_OK": "_6TH_IN"
+  },
+  "sourceReplacements": {
+    "_XXX_END": "XXX",
+    "_1_COMP": "_1ST_IN",
+    "_2_COMP": "_2ND_IN",
+    "_3_COMP": "_3RD_IN",
+    "_4_COMP": "_4TH_IN",
+    "_5_COMP": "_5TH_IN",
+    "_6_COMP": "_6TH_IN"
+  }
+}

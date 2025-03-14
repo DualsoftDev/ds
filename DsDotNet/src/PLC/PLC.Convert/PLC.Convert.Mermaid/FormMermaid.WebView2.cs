@@ -46,7 +46,6 @@ namespace PLC.Convert.Mermaid
         public void LoadMermaidGraph(string mermaidText)
         {
 
-
             string htmlContent = GenerateMermaidHtml(mermaidText);
             string tempPath = Path.Combine(Path.GetTempPath(), "mermaid_graph.html");
             File.WriteAllText(tempPath, htmlContent, Encoding.UTF8);

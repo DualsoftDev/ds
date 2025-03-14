@@ -29,22 +29,33 @@ namespace PLC.Convert.Mermaid
         private void InitializeComponent()
         {
             button_openPLC = new Button();
+            button_openDir = new Button();
             SuspendLayout();
             // 
             // button_openPLC
             // 
-            button_openPLC.Location = new Point(14, 4);
+            button_openPLC.Location = new Point(108, 12);
             button_openPLC.Name = "button_openPLC";
-            button_openPLC.Size = new Size(75, 23);
+            button_openPLC.Size = new Size(112, 23);
             button_openPLC.TabIndex = 0;
-            button_openPLC.Text = "Open";
+            button_openPLC.Text = "Open File";
             button_openPLC.UseVisualStyleBackColor = true;
+            // 
+            // button_openDir
+            // 
+            button_openDir.Location = new Point(226, 12);
+            button_openDir.Name = "button_openDir";
+            button_openDir.Size = new Size(112, 23);
+            button_openDir.TabIndex = 0;
+            button_openDir.Text = "Open Dir";
+            button_openDir.UseVisualStyleBackColor = true;
             // 
             // FormMermaid
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(800, 450);
+            Controls.Add(button_openDir);
             Controls.Add(button_openPLC);
             Name = "FormMermaid";
             Text = "Form1";
@@ -54,5 +65,6 @@ namespace PLC.Convert.Mermaid
         #endregion
 
         private Button button_openPLC;
+        private Button button_openDir;
     }
 }

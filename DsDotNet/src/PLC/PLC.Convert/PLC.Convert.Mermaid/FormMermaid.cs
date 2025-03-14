@@ -22,15 +22,13 @@ namespace PLC.Convert.Mermaid
 
             this.Load += async (s, e) => await OpenPLCAsync();
             button_openPLC.Click += async (s, e) => await OpenPLCAsync();
+            button_openDir.Click += async (s, e) => await OpenPLCDirAsync();
         }
 
         /// **PLC 프로그램을 불러와 Mermaid 변환**
-        private async Task<Tuple<string, string>> ImportProgramXG5K()
+        private async Task<Tuple<string, string>> ImportProgramXG5K(string file, bool bExportEdges)
         {
-            var files = FileOpenSave.OpenFiles();
-            if (files == null || files.Length == 0) return null;
 
-            string file = files.First();
             this.Text = "XG5000 load: " + file;
 
             Tuple<List<Rung>, ProgramInfo> result = await ImportXG5kPath.LoadAsync(file);
@@ -41,72 +39,64 @@ namespace PLC.Convert.Mermaid
                 $"LLM/{Path.GetFileNameWithoutExtension(file)}.mmd");
 
             // **Rung 데이터를 Dictionary<string, List<string>> 형태로 변환**
-            var coilDictionary = rungs
+            var coils = rungs
                 .SelectMany(rung => rung.RungExprs.OfType<Terminal>())
-                .Where(terminal => terminal.HasInnerExpr)
-                .DistinctBy(terminal => terminal.Name)
-                .ToDictionary(
-                    coil => coil.Name,
-                    coil => GetContactPositiveNames(coil)
-                        .Select(t => t.Name)
-                        .ToList()
-                );
+                .Where(terminal => terminal.HasInnerExpr);
+
+            if (bExportEdges)
+            {
+                var mermaidEdges  = MermaidExportModule.ConvertEdges(coils);
+                File.WriteAllText(path.Replace(".mmd", ".mermaid"), mermaidEdges, Encoding.UTF8);
+            }
 
             // **Mermaid 변환 실행**
-            var mermaidText = MermaidExportModule.Convert(coilDictionary);
+            var mermaidText = MermaidExportModule.Convert(coils);
+
             return Tuple.Create(mermaidText, path);
         }
 
-        /// **양극성(Positive) Contact 추출**
-        public List<Terminal> GetContactPositiveNames(Terminal terminal)
-        {
-            var contactTerminals = terminal.InnerExpr.GetTerminals().ToList();
-            var expressionText = terminal.InnerExpr.ToText();
-            return ConvertPLCModule.getContactNamesForCSharp(contactTerminals, new List<Terminal>(), expressionText, 0, 3, true);
-        }
-            
 
-        ///// **Contact 탐색 (재귀적으로 내부 Expression 검사)**
-        //public List<Terminal> GetContactNames(List<Terminal> contactTerminals, List<Terminal> contactUnits, string expressionText, int depth, int maxDepth, bool bPositive = true)
-        //{
-        //    if (depth >= maxDepth) return contactUnits;  // **최대 깊이 도달 시 종료**
-
-        //    foreach (var terminal in contactTerminals)
-        //    {
-        //        if (contactUnits.Any(c => c.Name == terminal.Name)) continue; // **중복 방지**
-
-        //        bool isPositive = !expressionText.Contains($"!{terminal.Name}");
-
-        //        if (isPositive == bPositive && !LLMKey.KeySkipName.Any(terminal.Name.Contains))
-        //        {
-        //            contactUnits.Add(terminal);  // **유효한 터미널 추가**
-
-        //            // **재귀적으로 내부 터미널 탐색**
-        //            if (terminal.InnerExpr != null)
-        //            {
-        //                GetContactNames(terminal.InnerExpr.GetTerminals().ToList(), contactUnits, terminal.InnerExpr.ToText(), depth + 1, maxDepth);
-        //            }
-        //        }
-        //    }
-
-        //    return contactUnits;
-        //}
 
         /// **PLC 데이터 불러오기 및 Mermaid 변환 실행**
-        private async Task OpenPLCAsync()
+        private async Task OpenPLCDirAsync()
         {
             try
             {
-                var (mermaidText, path) = await ImportProgramXG5K();
-                // ✅ **Mermaid 파일 저장 (.mmd)**
-                File.WriteAllText(path, mermaidText, Encoding.UTF8);
-
-                LoadMermaidGraph(mermaidText);
+                webView.Source = new Uri("https://dualsoft.com");  // 빈 페이지 로드   
+                var files = FileOpenSave.OpenDirFiles();
+                if (files == null || files.Count == 0) return;
+                foreach (var file in files)
+                    await exportMermaid(file, true);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private async Task OpenPLCAsync()
+        {
+            try
+            {
+                webView.Source = new Uri("https://dualsoft.com");  // 빈 페이지 로드   
+                var files = FileOpenSave.OpenFiles();
+                if (files == null || files.Length == 0) return;
+
+                string file = files.First();
+                await exportMermaid(file);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async Task exportMermaid(string file, bool exportEdges = false)
+        {
+            var (mermaidText, path) = await ImportProgramXG5K(file, exportEdges);
+            // ✅ **Mermaid 파일 저장 (.mmd)**
+            File.WriteAllText(path, mermaidText, Encoding.UTF8);
+
+            LoadMermaidGraph(mermaidText);
         }
     }
 }

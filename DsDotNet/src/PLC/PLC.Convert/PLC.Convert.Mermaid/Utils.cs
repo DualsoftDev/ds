@@ -5,10 +5,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.Window;
 
 namespace PLC.Convert.Mermaid
 {
-    
+
     public static class FileOpenSave
     {
         /// <summary>
@@ -31,6 +32,40 @@ namespace PLC.Convert.Mermaid
 
             return openFileDialog.FileNames;
         }
+
+        public static List<string> OpenDirFiles()
+        {
+            using (FolderBrowserDialog dialog = new FolderBrowserDialog())
+            {
+                dialog.Description = "폴더를 선택하세요.";
+                if (dialog.ShowDialog() == DialogResult.OK)
+                {
+                    string selectedPath = dialog.SelectedPath;
+                    return GetAllXgwxFiles(selectedPath);
+
+                }
+
+                return null;    
+            }
+
+            List<string> GetAllXgwxFiles(string folderPath)
+            {
+                List<string> files = new List<string>();
+
+                try
+                {
+                    // 현재 폴더 내 .xgwx 파일 추가
+                    files.AddRange(Directory.GetFiles(folderPath, "*.xgwx", SearchOption.AllDirectories));
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"파일 검색 중 오류 발생: {ex.Message}", "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+
+                return files;
+            }
+        }
+               
 
         /// <summary>
         /// Sets the last opened file paths in the registry.
@@ -56,6 +91,6 @@ namespace PLC.Convert.Mermaid
             return Path.Combine(excelDirectory, excelName);
         }
     }
-  
-    
+
+
 }

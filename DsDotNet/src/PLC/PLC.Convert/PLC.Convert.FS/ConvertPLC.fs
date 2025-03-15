@@ -45,10 +45,13 @@ module ConvertPLCModule =
                         | _ -> updatedUnits
                     else acc
             ) contactUnits  // **초기 값 contactUnits 설정**
+    let getSymName(coil:Terminal) (bUsingComment:bool) =
+        if bUsingComment then coil.Symbol.Comment else coil.Name
 
-    let getContactNamesFromCoil(coil: Terminal) =
+    let getContactNamesFromCoil(coil: Terminal) (bUsingComment:bool) =
         let terminals =List.ofSeq (coil.GetTerminals()) 
         let expressionText = coil.InnerExpr.ToText()  
 
         getContactNames (terminals) [] expressionText 0 3 true
-        |> List.map (fun c -> c.Name)
+        |> List.map (fun c -> getSymName c bUsingComment)
+        |> List.filter (fun c -> String.IsNullOrEmpty c |> not)

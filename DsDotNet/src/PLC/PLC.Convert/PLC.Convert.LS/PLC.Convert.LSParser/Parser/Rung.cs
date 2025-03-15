@@ -176,7 +176,9 @@ public class Rung
             OpType opType = OpType.None;
             if (!Enum.TryParse(tokens[0].Replace(' ', '_'), out opType))
             {
-                DoFunc(line, exprOuts, exprStack);
+                if(line != "ERR")
+                    DoFunc(line, exprOuts, exprStack);
+
                 continue;
             }
 

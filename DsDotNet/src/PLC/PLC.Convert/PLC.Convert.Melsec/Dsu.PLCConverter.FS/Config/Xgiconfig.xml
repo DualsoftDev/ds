@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<XgiConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <SelectCPU>5</SelectCPU>
+  <TimerLowSpeed>100</TimerLowSpeed>
+  <TimerHighSpeed>10</TimerHighSpeed>
+  <ListMappingIO />
+	<ListSystemAdd>
+		<string>SM400;FX153</string>
+		<string>SM401;FX154</string>
+		<string>SM402;FX155</string>
+		<string>SM403;FX156</string>
+		<string>SM60500;FX154</string>
+	</ListSystemAdd>
+  <LAreaCount>1024</LAreaCount>
+  <MSmartAreaStart>1000</MSmartAreaStart>
+  <BAreaStart>0</BAreaStart>
+  <MAreaStart>625</MAreaStart>
+  <LAreaStart>5000</LAreaStart>
+  <FAreaStart>8000</FAreaStart>
+  <VAreaStart>8100</VAreaStart>
+  <SAreaStart>8200</SAreaStart>
+  <SBAreaStart>8300</SBAreaStart>
+  <SMAreaStart>0</SMAreaStart>
+  <FXAreaStart>9000</FXAreaStart>
+  <FYAreaStart>9500</FYAreaStart>
+  <WAreaStart>0</WAreaStart>
+  <DAreaStart>20000</DAreaStart>
+  <SWAreaStart>40000</SWAreaStart>
+  <FDAreaStart>41000</FDAreaStart>
+  <SDAreaStart>0</SDAreaStart>
+  <ZAreaStart>44000</ZAreaStart>
+  <RAreaStart>10000</RAreaStart>
+  <ZRAreaStart>10000</ZRAreaStart>
+  <MSmartAreaType>M</MSmartAreaType>
+  <WAreaType>R</WAreaType>
+  <FAreaType>M</FAreaType>
+  <MAreaType>M</MAreaType>
+  <LAreaType>M</LAreaType>
+  <VAreaType>M</VAreaType>
+  <SAreaType>M</SAreaType>
+  <SBAreaType>M</SBAreaType>
+  <BAreaType>M</BAreaType>
+  <FXAreaType>M</FXAreaType>
+  <FYAreaType>M</FYAreaType>
+  <SMAreaType>M</SMAreaType>
+  <DAreaType>M</DAreaType>
+  <SWAreaType>M</SWAreaType>
+  <FDAreaType>M</FDAreaType>
+  <SDAreaType>M</SDAreaType>
+  <ZAreaType>M</ZAreaType>
+  <RAreaType>R</RAreaType>
+  <ZRAreaType>W</ZRAreaType>
+</XgiConfig>

@@ -1,0 +1,616 @@
+﻿Part,Category,Melsec,Xgi,EtcXgi,Etc
+시퀀스명령,contact,LD,LOAD,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,LDI,LOAD NOT,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,AND,AND,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,ANI,AND NOT,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,OR,OR,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,ORI,OR NOT,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,LDP,LOADP,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,LDF,LOADN,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,ANDP,ANDP,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,ANDF,ANDN,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,ORP,ORP,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,contact,ORF,ORN,, 1.1 Contact Instruction ( 접점명령 )
+시퀀스명령,connection,ANB,AND LOAD,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,ORB,OR LOAD,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,MPS,MPUSH,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,MRD,MLOAD,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,MPP,MPOP,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,INV,NOT,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,MEP,X,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,MEF,X,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,EGP,X,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,connection,EGF,X,, 1.2 Connection Instructions ( 결합명령 )
+시퀀스명령,output,OUT,OUT,, 1.3 Output instructions
+시퀀스명령,output,OUT,TON,OUT T1 K100, 1.3 Output instructions
+시퀀스명령,output,OUT,CTU,OUT C1 K100, 1.3 Output instructions
+시퀀스명령,output,OUTH,TON,OUTH T100 K123, 1.3 Output instructions
+시퀀스명령,output,SET,SET,, 1.3 Output instructions
+시퀀스명령,output,RST,RST,"1. Bit Device 사용한 경우 예)RST X0 ==> RST P0", 1.3 Output instructions
+시퀀스명령,output,PLS,OUTP,, 1.3 Output instructions
+시퀀스명령,output,PLF,OUTN,, 1.3 Output instructions
+시퀀스명령,output,FF,FF,, 1.3 Output instructions
+시퀀스명령,output,DELTA,X,, 1.3 Output instructions
+시퀀스명령,output,DELTAP,X,, 1.3 Output instructions
+시퀀스명령,output,SFT,X,, 1.4 Shift instructions
+시퀀스명령,output,SFTP,X,, 1.4 Shift instructions
+시퀀스명령,Master control,MC,MCS,, 1.5 Master control instructions
+시퀀스명령,Master control,MCR,MCSCLR,, 1.5 Master control instructions
+시퀀스명령,Program end,FEND,,생략가능, 1.6 Termination instruection
+시퀀스명령,Program end,END,END,, 1.6 Termination instruection
+시퀀스명령,Stop,STOP,STOP,, 1.7 Other instructions
+시퀀스명령,ignored,NOP,NOP,, 1.7 Other instructions
+시퀀스명령,ignored,NOPLF,X,, 1.7 Other instructions
+시퀀스명령,ignored,PAGE,X,, 1.7 Other instructions
+기본명령,16-bit data comparisons,LD=,LOAD=EQ2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,AND=,AND=EQ2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,OR=,OR=EQ2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,LD<>,LOAD=NE:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,AND<>,AND=NE:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,OR<>,OR=NE:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,LD>,LOAD=GT2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,AND>,AND=GT2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,OR>,OR=GT2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,LD<=,LOAD=LE2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,AND<=,AND=LE2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,OR<=,OR=LE2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,LD<,LOAD=LT2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,AND<,AND=LT2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,OR<,OR=LT2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,LD>=,LOAD=GE2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,AND>=,AND=GE2:INT,, 2.1 Comparision operation Instruction
+기본명령,16-bit data comparisons,OR>=,OR=GE2:INT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,LDD=,LOAD=EQ2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ANDD=,AND=EQ2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ORD=,OR=EQ2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,LDD<>,LOAD=NE:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ANDD<>,AND=NE:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ORD<>,OR=NE:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,LDD>,LOAD=GT2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ANDD>,AND=GT2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ORD>,OR=GT2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,LDD<=,LOAD=LE2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ANDD<=,AND=LE2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ORD<=,OR=LE2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,LDD<,LOAD=LT2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ANDD<,AND=LT2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ORD<,OR=LT2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,LDD>=,LOAD=GE2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ANDD>=,AND=GE2:DINT,, 2.1 Comparision operation Instruction
+기본명령,32-bit data comparisons,ORD>=,OR=GE2:DINT,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,LDE=,LOAD=EQ2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ANDE=,AND=EQ2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ORE=,OR=EQ2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,LDE<>,LOAD=NE:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ANDE<>,AND=NE:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ORE<>,OR=NE:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,LDE>,LOAD=GT2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ANDE>,AND=GT2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ORE>,OR=GT2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,LDE<=,LOAD=LE2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ANDE<=,AND=LE2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ORE<=,OR=LE2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,LDE<,LOAD=LT2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ANDE<,AND=LT2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ORE<,OR=LT2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,LDE>=,LOAD=GE2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ANDE>=,AND=GE2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Real number data comparisons,ORE>=,OR=GE2:REAL,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,LD$=,LOAD=EQ2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,AND$=,AND=EQ2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,OR$=,OR=EQ2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,LD$<>,LOAD=NE:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,AND$<>,AND=NE:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,OR$<>,OR=NE:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,LD$>,LOAD=GT2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,AND$>,AND=GT2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,OR$>,OR=GT2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,LD$<=,LOAD=LE2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,AND$<=,AND=LE2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,OR$<=,OR=LE2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,LD$<,LOAD=LT2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,AND$<,AND=LT2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,OR$<,OR=LT2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,LD$>=,LOAD=GE2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,AND$>=,AND=GE2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Character string data comparisons,OR$>=,OR=GE2:STRING,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP=,ARY_CMP_EQ,Array로 변수 설정 필요, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP<>,ARY_CMP_NE,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP>,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP<=,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP<,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP>=,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP=P,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP<>P,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP>P,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP<=P,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP<P,X,, 2.1 Comparision operation Instruction
+기본명령,Block data comparisons,BKCMP>=P,X,, 2.1 Comparision operation Instruction
+기본명령,BIN 16-bit addition and subtraction  operations,+,ADD:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit addition and subtraction  operations,+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit addition and subtraction  operations,-,SUB:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit addition and subtraction  operations,-P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit addition and subtraction  operations,D+,ADD:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit addition and subtraction  operations,D+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit addition and subtraction  operations,D-,SUB:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit addition and subtraction  operations,D-P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit multiplication and division operations,*,MUL:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit multiplication and division operations,*P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit multiplication and division operations,/,DIV:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 16-bit multiplication and division operations,/P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit multiplication and division operations,D*,MUL:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit multiplication and division operations,D*P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit multiplication and division operations,D/,DIV:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BIN 32-bit multiplication and division operations,D/P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit addition and subtraction operations,B+,ADD:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit addition and subtraction operations,B+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit addition and subtraction operations,B-,SUB:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit addition and subtraction operations,B-P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit addition and subtraction operations,DB+,ADD:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit addition and subtraction operations,DB+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit addition and subtraction operations,DB-,SUB:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit addition and subtraction operations,DB-P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit multiplication and division operations,B*,MUL:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit multiplication and division operations,B*P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit multiplication and division operations,B/,DIV:INT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 4-digit multiplication and division operations,B/P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit multiplication and division operations,DB*,MUL:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit multiplication and division operations,DB*P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit multiplication and division operations,DB/,DIV:DINT,, 2.2 Arithmetic operation Instruction
+기본명령,BCD 8-digit multiplication and division operations,DB/P,X,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data addition and subtraction operations,E+,ADD:REAL,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data addition and subtraction operations,E+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data addition and subtraction operations,E-,SUB:REAL,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data addition and subtraction operations,E-P,X,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data mul and div operation,E*,MUL:REAL,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data mul and div operation,E*P,X,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data mul and div operation,E/,DIV:REAL,, 2.2 Arithmetic operation Instruction
+기본명령,Floating decimal point data mul and div operation,E/P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN block addition and subtraction operations,BK+,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN block addition and subtraction operations,BK+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN block addition and subtraction operations,BK-,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN block addition and subtraction operations,BK-P,X,, 2.2 Arithmetic operation Instruction
+기본명령,Character string data combinations,$+,X,, 2.2 Arithmetic operation Instruction
+기본명령,Character string data combinations,$+P,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,INC,INC:WORD,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,INCP,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,DINC,INC:DWORD,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,DINCP,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,DEC,DEC:WORD,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,DECP,X,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,DDEC,DEC:DWORD,, 2.2 Arithmetic operation Instruction
+기본명령,BIN data   increment,DDECP,X,, 2.2 Arithmetic operation Instruction
+기본명령,BCD conversions,BCD,BCD_TO_***:WORD,, 2.3 Data conversion instructions
+기본명령,BCD conversions,BCDP,X,, 2.3 Data conversion instructions
+기본명령,BCD conversions,DBCD,BCD_TO_***:DWORD,, 2.3 Data conversion instructions
+기본명령,BCD conversions,DBCDP,X,, 2.3 Data conversion instructions
+기본명령,BIN conversions,BIN,***_TO_BCD:INT,, 2.3 Data conversion instructions
+기본명령,BIN conversions,BINP,X,, 2.3 Data conversion instructions
+기본명령,BIN conversions,DBIN,***_TO_BCD:DINT,, 2.3 Data conversion instructions
+기본명령,BIN conversions,DBINP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to floating decimal point,FLT,INT_TO_REAL,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to floating decimal point,FLTP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to floating decimal point,DFLT,DINT_TO_REAL,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to floating decimal point,DFLTP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from floating decimal point to BIN,INT,REAL_TO_INT,, 2.3 Data conversion instructions
+기본명령,Conversion from floating decimal point to BIN,INTP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from floating decimal point to BIN,DINT,REAL_TO_DINT,, 2.3 Data conversion instructions
+기본명령,Conversion from floating decimal point to BIN,DINTP,X,, 2.3 Data conversion instructions
+기본명령,Conversion between   BIN 16-bit   and 32-bit,DBL,INT_TO_DINT,, 2.3 Data conversion instructions
+기본명령,Conversion between   BIN 16-bit   and 32-bit,DBLP,X,, 2.3 Data conversion instructions
+기본명령,Conversion between   BIN 16-bit   and 32-bit,WORD,DINT_TO_INT,, 2.3 Data conversion instructions
+기본명령,Conversion between   BIN 16-bit   and 32-bit,WORDP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to gray code,GRY,X,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to gray code,GRYP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to gray code,DGRY,X,, 2.3 Data conversion instructions
+기본명령,Conversion from BIN to gray code,DGRYP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from gray code to BIN,GBIN,X,, 2.3 Data conversion instructions
+기본명령,Conversion from gray code to BIN,GBINP,X,, 2.3 Data conversion instructions
+기본명령,Conversion from gray code to BIN,DGBIN,X,, 2.3 Data conversion instructions
+기본명령,Conversion from gray code to BIN,DGBINP,X,, 2.3 Data conversion instructions
+기본명령,Complement to 2,NEG,X,, 2.3 Data conversion instructions
+기본명령,Complement to 2,NEGP,X,, 2.3 Data conversion instructions
+기본명령,Complement to 2,DNEG,X,, 2.3 Data conversion instructions
+기본명령,Complement to 2,DNEGP,X,, 2.3 Data conversion instructions
+기본명령,Complement to 2,ENEG,X,, 2.3 Data conversion instructions
+기본명령,Complement to 2,ENEGP,X,, 2.3 Data conversion instructions
+기본명령,Block conversions,BKBCD,X,, 2.3 Data conversion instructions
+기본명령,Block conversions,BKBCDP,X,, 2.3 Data conversion instructions
+기본명령,Block conversions,BKBIN,X,, 2.3 Data conversion instructions
+기본명령,Block conversions,BKBINP,X,, 2.3 Data conversion instructions
+기본명령,16-bit data transfer,MOV,MOVE:WORD,, 2.4 Data transfer instructions
+기본명령,16-bit data transfer,MOVP,X,, 2.4 Data transfer instructions
+기본명령,32-bit data transfer,DMOV,MOVE:DWORD,, 2.4 Data transfer instructions
+기본명령,32-bit data transfer,DMOVP,X,, 2.4 Data transfer instructions
+기본명령,Floating decimal point,EMOV,MOVE:REAL,, 2.4 Data transfer instructions
+기본명령,Floating decimal point,EMOVP,X,, 2.4 Data transfer instructions
+기본명령,Character string,$MOV,MOVE:STRING,, 2.4 Data transfer instructions
+기본명령,Character string,$MOVP,X,, 2.4 Data transfer instructions
+기본명령,16-bit data negation,CML,X,, 2.4 Data transfer instructions
+기본명령,16-bit data negation,CMLP,X,, 2.4 Data transfer instructions
+기본명령,16-bit data negation,DCML,X,, 2.4 Data transfer instructions
+기본명령,16-bit data negation,DCMLP,X,, 2.4 Data transfer instructions
+기본명령,Block transfer,BMOV,GROUP_MOVE,, 2.4 Data transfer instructions
+기본명령,Block transfer,BMOVP,X,, 2.4 Data transfer instructions
+기본명령,Multiple transfers,FMOV,ARY_FLL,, 2.4 Data transfer instructions
+기본명령,Multiple transfers,FMOVP,X,, 2.4 Data transfer instructions
+기본명령,Multiple transfers,DFMOV,ARY_FLL,, 2.4 Data transfer instructions
+기본명령,Multiple transfers,DFMOVP,X,, 2.4 Data transfer instructions
+기본명령,16-bit data exchange,XCH,SWAP:WORD,, 2.4 Data transfer instructions
+기본명령,16-bit data exchange,XCHP,X,, 2.4 Data transfer instructions
+기본명령,32-bit data exchange,DXCH,SWAP:DWORD,, 2.4 Data transfer instructions
+기본명령,32-bit data exchange,DXCHP,X,, 2.4 Data transfer instructions
+기본명령,Block data exchange,BXCH,ARY_SWAP:WORD,, 2.4 Data transfer instructions
+기본명령,Block data exchange,BXCHP,X,, 2.4 Data transfer instructions
+기본명령,Exch. of upper & lower bytes,SWAP,SWAP:BYTE,, 2.4 Data transfer instructions
+기본명령,Exch. of upper & lower bytes,SWAPP,X,, 2.4 Data transfer instructions
+기본명령,Jump,CJ,JMP,, 2.5 Program branch 
+기본명령,Jump,SCJ,X,, 2.5 Program branch 
+기본명령,Jump,JMP,JMP,, 2.5 Program branch 
+기본명령,Jump,GOEND,X,, 2.5 Program branch 
+기본명령,Jump,P,LABLE,, 2.5 Program branch 
+기본명령,Disable int.,DI,DI,, 2.6 Program execution control instructions
+기본명령,Enable interrupts,EI,EI,, 2.6 Program execution control instructions
+기본명령,Interrupt setting,IMASK,X,, 2.6 Program execution control instructions
+기본명령,Return,IRET,X,, 2.6 Program execution control instructions
+기본명령,interrupt pointer,I,X,, 2.6 Program execution control instructions
+기본명령,I/O   Refresh,RFS/RFSP,"DIREC_IN, DIREC_OUT",, 2.7 I/O refresh instructions
+기본명령,Up/Down  Counter,UDCNT1,"CTU, CTD, CTUD",,2.4.8 Other convenient instructions
+기본명령,Up/Down  Counter,UDCNT2,X,,2.4.8 Other convenient instructions
+기본명령,Ring Counter,,CTR,,2.4.8 Other convenient instructions
+기본명령,Teaching  timer,TTMR,X,,2.4.8 Other convenient instructions
+기본명령,Special timer,STMR,X,,2.4.8 Other convenient instructions
+기본명령,Nearest  path   control,ROTC,X,,2.4.8 Other convenient instructions
+기본명령,Ramp  signal,RAMP,F_RAMP,,2.4.8 Other convenient instructions
+기본명령,Pulse density,SPD,X,,2.4.8 Other convenient instructions
+기본명령,Pulse  output,PLSY,X,,2.4.8 Other convenient instructions
+기본명령,Pulse width  modulation,PWM,X,,2.4.8 Other convenient instructions
+기본명령,Matrix input,MTR,X,,2.4.8 Other convenient instructions
+응용명령,Logical  product,WAND,AND:WORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,Logical  product,WANDP,X,, 3.1 Logical operation instructions
+응용명령,Logical  product,DAND,AND:DWORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,Logical  product,DANDP,X,, 3.1 Logical operation instructions
+응용명령,Logical  product,BKAND,X,"XGI는 ARRAY 사용해야하나, ARY_로 시작하는 관련 펑션 없음", 3.1 Logical operation instructions
+응용명령,Logical  product,BKANDP,X,, 3.1 Logical operation instructions
+응용명령,Logical  sum,WOR,OR:WORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,Logical  sum,WORP,X,, 3.1 Logical operation instructions
+응용명령,Logical  sum,DOR,OR:DWORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,Logical  sum,DORP,X,, 3.1 Logical operation instructions
+응용명령,Logical  sum,BKOR,X,"XGI는 ARRAY 사용해야하나, ARY_로 시작하는 관련 펑션 없음", 3.1 Logical operation instructions
+응용명령,Logical  sum,BKORP,X,, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,WXOR,XOR:WORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,WXORP,X,, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,DXOR,XOR:DWORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,DXORP,X,, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,BKXOR,X,"XGI는 ARRAY 사용해야하나, ARY_로 시작하는 관련 펑션 없음", 3.1 Logical operation instructions
+응용명령,Exclusive  OR,BKXORP,X,, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,BKXNR,X,, 3.1 Logical operation instructions
+응용명령,Exclusive  OR,BKXNRP,X,, 3.1 Logical operation instructions
+응용명령,NON exclusive logical sum,WXNR,XNR:WORD,LWORD (64 BIT) 까지 가능, 3.1 Logical operation instructions
+응용명령,NON exclusive logical sum,WXNRP,X,, 3.1 Logical operation instructions
+응용명령,NON exclusive logical sum,DXNR,XNR:DWORD,, 3.1 Logical operation instructions
+응용명령,NON exclusive logical sum,DXNRP,X,, 3.1 Logical operation instructions
+응용명령,NON exclusive logical sum,BKXNOR,X,"XGI는 ARRAY 사용해야하나, ARY_로 시작하는 관련 펑션 없음", 3.1 Logical operation instructions
+응용명령,NON exclusive logical sum,BKXNORP,X,, 3.1 Logical operation instructions
+응용명령,Right rotation,ROR,ROR,LWORD (64 BIT) 까지 가능, 3.2 Rotation instructions
+응용명령,Right rotation,RORP,X,, 3.2 Rotation instructions
+응용명령,Right rotation,RCR,ROTATE_C,START 와 END 설정에 따라 회전 방향 바뀜, 3.2 Rotation instructions
+응용명령,Right rotation,RCRP,X,, 3.2 Rotation instructions
+응용명령,Left rotation,ROL,ROL,LWORD (64 BIT) 까지 가능, 3.2 Rotation instructions
+응용명령,Left rotation,ROLP,X,, 3.2 Rotation instructions
+응용명령,Left rotation,RCL,ROTATE_C,START 와 END 설정에 따라 회전 방향 바뀜, 3.2 Rotation instructions
+응용명령,Left rotation,RCLP,X,, 3.2 Rotation instructions
+응용명령,Right rotation,DROR,ROR,LWORD (64 BIT) 까지 가능, 3.2 Rotation instructions
+응용명령,Right rotation,DRORP,X,, 3.2 Rotation instructions
+응용명령,Right rotation,DRCR,ROTATE_C,LWORD (64 BIT) 까지 가능, 3.2 Rotation instructions
+응용명령,Right rotation,DRCRP,X,, 3.2 Rotation instructions
+응용명령,Left rotation,DROL,ROL,LWORD (64 BIT) 까지 가능, 3.2 Rotation instructions
+응용명령,Left rotation,DROLP,X,, 3.2 Rotation instructions
+응용명령,Left rotation,DRCL,ROTATE_C,LWORD (64 BIT) 까지 가능, 3.2 Rotation instructions
+응용명령,Left rotation,DRCLP,X,, 3.2 Rotation instructions
+응용명령,n-bit shift,SFR,SHR,"N에 N을 넣으면 N비트 우측으로 이동, LWORD (64 BIT) 까지 가능(BOOL 제외)", 3.3 Shift instructions
+응용명령,n-bit shift,SFRP,X,, 3.3 Shift instructions
+응용명령,n-bit shift,SFL,SHL,"N에 N을 넣으면 N비트 좌측으로 이동, LWORD (64 BIT) 까지 가능(BOOL 제외)", 3.3 Shift instructions
+응용명령,n-bit shift,SFLP,X,, 3.3 Shift instructions
+응용명령,1-bit shift,BSFR,SHR,"N에 N을 넣으면 N비트 우측으로 이동, LWORD (64 BIT) 까지 가능(BOOL 제외)", 3.3 Shift instructions
+응용명령,1-bit shift,BSFRP,X,, 3.3 Shift instructions
+응용명령,1-bit shift,BSFL,SHL,"N에 N을 넣으면 N비트 좌측으로 이동, LWORD (64 BIT) 까지 가능(BOOL 제외)", 3.3 Shift instructions
+응용명령,1-bit shift,BSFLP,X,, 3.3 Shift instructions
+응용명령,1-word  shift,DSFR,SHR,N에 16을 넣으면 16비트 우측으로 이동, 3.3 Shift instructions
+응용명령,1-word  shift,DSFRP,X,, 3.3 Shift instructions
+응용명령,1-word  shift,DSFL,SHL,N에 16을 넣으면 16비트 좌측으로 이동, 3.3 Shift instructions
+응용명령,1-word  shift,DSFLP,X,, 3.3 Shift instructions
+응용명령,Bit set and reset,BSET,SR,Set 우선 Bistable(BOOL 타입 만 존재), 3.4 Bit processing instructions
+응용명령,Bit set and reset,BSETP,X,, 3.4 Bit processing instructions
+응용명령,Bit set and reset,BRST,RS,Reset 우선 Bistable(BOOL 타입 만 존재), 3.4 Bit processing instructions
+응용명령,Bit set and reset,BRSTP,X,, 3.4 Bit processing instructions
+응용명령,Bit tests,TEST,X,, 3.4 Bit processing instructions
+응용명령,Bit tests,TESTP,X,, 3.4 Bit processing instructions
+응용명령,Bit tests,DTEST,X,, 3.4 Bit processing instructions
+응용명령,Bit tests,DTESTP,X,, 3.4 Bit processing instructions
+응용명령,Batch reset of bit devices,BKRST,X,, 3.4 Bit processing instructions
+응용명령,Batch reset of bit devices,BKRSTP,X,, 3.4 Bit processing instructions
+응용명령,Data searches,SER,X,"ARRAY (배열)로 지정을 한 후, 배열 내에서 SEARCHING 함, TYPE은 모두 가능", 3.5 Data processing instructions
+응용명령,Data searches,SERP,X,, 3.5 Data processing instructions
+응용명령,Data searches,DSER,X,"ARRAY (배열)로 지정을 한 후, 배열 내에서 SEARCHING 함, TYPE은 모두 가능", 3.5 Data processing instructions
+응용명령,Data searches,DSERP,X,, 3.5 Data processing instructions
+응용명령,Bit checks,SUM,BSUM,LWORD (64 BIT) 까지 가능, 3.5 Data processing instructions
+응용명령,Bit checks,SUMP,X,, 3.5 Data processing instructions
+응용명령,Bit checks,SUM,BSUM,"LWORD (64 BIT) 까지 가능, INT 가능, BOOL 제외 ", 3.5 Data processing instructions
+응용명령,Bit checks,SUMP,X,, 3.5 Data processing instructions
+응용명령,Bit checks,DSUM,BSUM,"LWORD (64 BIT) 까지 가능, BOOL 제외 ", 3.5 Data processing instructions
+응용명령,Bit checks,DSUMP,X,, 3.5 Data processing instructions
+응용명령,Decode,DECO,DECO:WORD,"LWORD (64 BIT) 까지 가능, BOOL 제외 ", 3.5 Data processing instructions
+응용명령,Decode,DECOP,X,, 3.5 Data processing instructions
+응용명령,Encode,ENCO,ENCO:WORD,"LWORD (64 BIT) 까지 가능, INT 가능, BOOL 제외 ", 3.5 Data processing instructions
+응용명령,Encode,ENCOP,X,, 3.5 Data processing instructions
+응용명령,7-segment decode,SEG,SEG_WORD,BCD 또는 HEX 숫자를 변경, 3.5 Data processing instructions
+응용명령,7-segment decode,SEGP,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,DIS,DIS,"LWORD (64 BIT) 까지 가능, BOOL 제외 ", 3.5 Data processing instructions
+응용명령,Separating and linking,DISP,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,UNI,UNI,"LWORD (64 BIT) 까지 가능, BOOL 제외 ", 3.5 Data processing instructions
+응용명령,Separating and linking,UNIP,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,NDIS,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,NDISP,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,NUNI,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,NUNIP,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,WTOB,WORD_TO_BYTE,"또는 WORD_TO_***, WORD, REAL, LREAL, TIME, TOD, DR 제외", 3.5 Data processing instructions
+응용명령,Separating and linking,WTOBP,X,, 3.5 Data processing instructions
+응용명령,Separating and linking,BTOW,BYTE_TO_WORD,"또는 BYTE_TO_***, BOOL, REAL, LREAL, TIME, TOD, DR 제외 ", 3.5 Data processing instructions
+응용명령,Separating and linking,BTOWP,X,, 3.5 Data processing instructions
+응용명령,Search,MAX,MAX,"모든 타입이 가능하나, 8개 까지만 가능", 3.5 Data processing instructions
+응용명령,Search,MAXP,X,, 3.5 Data processing instructions
+응용명령,Search,MIN,MIN,"모든 타입이 가능하나, 8개 까지만 가능", 3.5 Data processing instructions
+응용명령,Search,MINP,X,, 3.5 Data processing instructions
+응용명령,Search,DMAX,MAX,"모든 타입이 가능하나, 8개 까지만 가능", 3.5 Data processing instructions
+응용명령,Search,DMAXP,X,, 3.5 Data processing instructions
+응용명령,Search,DMIN,MIN,"모든 타입이 가능하나, 8개 까지만 가능", 3.5 Data processing instructions
+응용명령,Search,DMINP,X,, 3.5 Data processing instructions
+응용명령,Sort,SORT,X,, 3.5 Data processing instructions
+응용명령,Sort,DSORT,X,, 3.5 Data processing instructions
+응용명령,Total value calculations,WSUM,X,, 3.5 Data processing instructions
+응용명령,Total value calculations,WSUMP,X,, 3.5 Data processing instructions
+응용명령,Total value calculations,DWSUM,X,, 3.5 Data processing instructions
+응용명령,Total value calculations,DWSUMP,X,, 3.5 Data processing instructions
+응용명령,Number of  repeats,FOR,FOR,"NESTING 개수는 16, WDT 설정치 주의 필요", 3.6 Structure creation instructions
+응용명령,Number of  repeats,NEXT,NEXT,, 3.6 Structure creation instructions
+응용명령,Number of  repeats,BREAK,BREAK,FOR ~ NEXT 구간 빠져나옴, 3.6 Structure creation instructions
+응용명령,Number of  repeats,BREAKP,X,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,CALL,CALL,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,CALLP,X,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,,SBRT,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,RET,RET,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,FCALL,X,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,FCALLP,X,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,ECALL,X,, 3.6 Structure creation instructions
+응용명령,Subroutine program calls,ECALLP,X,, 3.6 Structure creation instructions
+응용명령,,EFCALL,X,, 3.6 Structure creation instructions
+응용명령,,EFCALLP,X,, 3.6 Structure creation instructions
+응용명령,,COM,X,, 3.6 Structure creation instructions
+응용명령,Fixed index qualification,IX,X,, 3.6 Structure creation instructions
+응용명령,Fixed index qualification,IXEND,X,, 3.6 Structure creation instructions
+응용명령,Fixed index qualification,IXDEV,X,, 3.6 Structure creation instructions
+응용명령,Fixed index qualification,IXSET,X,, 3.6 Structure creation instructions
+응용명령,Table processing,FIFW,FIFO_***:WORD,"선입 선출 활용, STRING 제외", 3.7 Table operation instructions
+응용명령,Table processing,FIFWP,X,, 3.7 Table operation instructions
+응용명령,Table processing,FIFR,FIFO_***:WORD,"선입 선출 활용, STRING 제외", 3.7 Table operation instructions
+응용명령,Table processing,FIFRP,X,, 3.7 Table operation instructions
+응용명령,Table processing,FPOP,LIFO_***:WORD,후입 선출 활용, 3.7 Table operation instructions
+응용명령,Table processing,FPOPP,X,, 3.7 Table operation instructions
+응용명령,Table processing,FINS,X,, 3.7 Table operation instructions
+응용명령,Table processing,FINSP,X,, 3.7 Table operation instructions
+응용명령,Table processing,FDEL,X,, 3.7 Table operation instructions
+응용명령,Table processing,FDELP,X,, 3.7 Table operation instructions
+응용명령,Data read,FROM,GET:WORD,"특수 모듈 데이터 읽기, WORD, DWORD, INT, DINT, UDINT 타입만 가능", 3.8 Buffer memory access instructions
+응용명령,Data read,FROMP,X,, 3.8 Buffer memory access instructions
+응용명령,Data read,DFRO,X,, 3.8 Buffer memory access instructions
+응용명령,Data read,DFROP,X,, 3.8 Buffer memory access instructions
+응용명령,Data write,TO,PUT:WORD,"특수 모듈 데이터 쓰기, WORD, DWORD, INT, DINT, UDINT 타입만 가능", 3.8 Buffer memory access instructions
+응용명령,Data write,TOP,X,, 3.8 Buffer memory access instructions
+응용명령,Data write,DTO,X,, 3.8 Buffer memory access instructions
+응용명령,Data write,DTOP,X,, 3.8 Buffer memory access instructions
+응용명령,ASCII print,PR,X,, 3.9 Display instructions
+응용명령,ASCII print,PR,X,, 3.9 Display instructions
+응용명령,ASCII print,PRC,X,, 3.9 Display instructions
+응용명령,Display,LED,X,, 3.9 Display instructions
+응용명령,Display,LEDC,X,, 3.9 Display instructions
+응용명령,Reset,LEDR,X,, 3.9 Display instructions
+응용명령,Checks,CHKST,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Checks,CHK,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Checks,CHKCIR,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Checks,CHKEND,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Status latch,SLT,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Status latch,SLTR,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Sampling  trace,STRA,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Sampling  trace,STRAR,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Program  trace,PTRA,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Program  trace,PTRAR,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Program  trace,PTRAEXE,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,Program  trace,PTRAEXEP,X,, 3.10 Debugging and failure diagnosis instructions
+응용명령,From BIN   to decimal ASCII,BINDA,INT_TO_STRING,"INT 타입 변환, INT, TIME, DATE, TOD, DT 제외", 3.11 Character string processing instructions
+응용명령,From BIN   to decimal ASCII,BINDAP,X,, 3.11 Character string processing instructions
+응용명령,From BIN   to decimal ASCII,DBINDA,DINT_TO_STRING,"DINT 타입 변환, INT, TIME, DATE, TOD, DT 제외", 3.11 Character string processing instructions
+응용명령,From BIN   to decimal ASCII,DBINDAP,X,, 3.11 Character string processing instructions
+응용명령,From BIN   to hexa-decimal ASCII,BINHA,WORD_TO_STRING,"WORD 타입 변환, WORD, REAL, LREAL, TIME, TOD, DT 제외", 3.11 Character string processing instructions
+응용명령,From BIN   to hexa-decimal ASCII,BINHAP,X,, 3.11 Character string processing instructions
+응용명령,From BIN   to hexa-decimal ASCII,DBINHA,DWORD_TO_STRING,"DWORD 타입 변환, DWORD, LREAL, DATE 제외", 3.11 Character string processing instructions
+응용명령,From BIN   to hexa-decimal ASCII,DBINHAP,X,, 3.11 Character string processing instructions
+응용명령,From BCD to decimal ASCII,BCDDA,BCD_TO_ASC,BCD를 ASCII로 변환, 3.11 Character string processing instructions
+응용명령,From BCD to decimal ASCII,BCDDAP,X,, 3.11 Character string processing instructions
+응용명령,From BCD to decimal ASCII,DBCDDA,ARY_BCD_TO_ASC,BCD Array를 ASCII Array로 변환, 3.11 Character string processing instructions
+응용명령,From BCD to decimal ASCII,DBCDDAP,X,, 3.11 Character string processing instructions
+응용명령,From decimal ASCII to  BIN,DABIN,STRING_TO_INT,"STRING을 INT 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,From decimal ASCII to  BIN,DABINP,X,X, 3.11 Character string processing instructions
+응용명령,From decimal ASCII to  BIN,DDABIN,STRING_TO_DINT,"STRING을 DINT 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,From decimal ASCII to  BIN,DDABINP,X,, 3.11 Character string processing instructions
+응용명령,From   hexa- decimal  ASCII to  BIN,HABIN,STRING_TO_WORD,"STRING을 WORD 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,From   hexa- decimal  ASCII to  BIN,HABINP,X,, 3.11 Character string processing instructions
+응용명령,From   hexa- decimal  ASCII to  BIN,DHABIN,STRING_TO_DWORD,"STRING을 DWORD 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,From   hexa- decimal  ASCII to  BIN,DHABINP,X,, 3.11 Character string processing instructions
+응용명령,From  decimal ASCII to BCD,DABCD,ASC_TO_BCD,ASCII를 BCD로 변환, 3.11 Character string processing instructions
+응용명령,From  decimal ASCII to BCD,DABCDP,X,, 3.11 Character string processing instructions
+응용명령,From  decimal ASCII to BCD,DDABCD,ARY_ASC_TO_BCD,입력 ASCII Array를 출력 BCD Array로 변환, 3.11 Character string processing instructions
+응용명령,From  decimal ASCII to BCD,DDABCDP,X,, 3.11 Character string processing instructions
+응용명령,Device comment read,COMRD,X,, 3.11 Character string processing instructions
+응용명령,Device comment read,COMRDP,X,, 3.11 Character string processing instructions
+응용명령,Character string length,LEN,LEN,문자열 길이 출력, 3.11 Character string processing instructions
+응용명령,Character string length,LENP,X,, 3.11 Character string processing instructions
+응용명령,BIN to decimal character  string,STR,INT_TO_STRING,"INT을 STRING타입으로 변환, INT, TIME, DATE, TOD, DT 제외", 3.11 Character string processing instructions
+응용명령,BIN to decimal character  string,STRP,X,, 3.11 Character string processing instructions
+응용명령,BIN to decimal character  string,DSTR,DINT_TO_STRING,"DINT을 STRING타입으로 변환, DINT, TIME, DATE 제외", 3.11 Character string processing instructions
+응용명령,BIN to decimal character  string,DSTRP,X,, 3.11 Character string processing instructions
+응용명령,Decimal  character string to BIN,VAL,STRING_TO_INT,"STRING을 INT 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,Decimal  character string to BIN,VALP,X,, 3.11 Character string processing instructions
+응용명령,Decimal  character string to BIN,DVAL,STRING_TO_DINT,"STRING을 DINT 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,Decimal  character string to BIN,DVALP,X,, 3.11 Character string processing instructions
+응용명령,Floating to string,ESTR,REAL_TO_STRING,REAL 타입을 STRING타입으로 변환, 3.11 Character string processing instructions
+응용명령,Floating to string,ESTRP,X,, 3.11 Character string processing instructions
+응용명령,String to floating,EVAL,STRING_TO_REAL,"STRING 타입을 REAL 타입으로 변환, STRING 제외", 3.11 Character string processing instructions
+응용명령,String to floating,EVALP,X,, 3.11 Character string processing instructions
+응용명령,Hexa BIN to ASCII,ASC,ARY_BYTE_TO_ASC,"입력 BYTE Array를 출력 ASCII Array로 변환, 입,출력단 Array 개수가 같아야 함", 3.11 Character string processing instructions
+응용명령,Hexa BIN to ASCII,ASCP,X,, 3.11 Character string processing instructions
+응용명령,ASCII to hexa BIN,HEX,ARY_ASC_TO_BYTE,"입력 ASCII Array  출력을 BYTE Array로 변환, 입,출력단 Array 개수가 같아야 함", 3.11 Character string processing instructions
+응용명령,ASCII to hexa BIN,HEXP,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,RIGHT,RIGHT,문자열의 오른쪽을 출력, 3.11 Character string processing instructions
+응용명령,Character string   processing,RIGHTP,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,LEFT,LEFT,문자열의 왼쪽을 출력, 3.11 Character string processing instructions
+응용명령,Character string   processing,LEFTP,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,MIDR,MID,문자열의 중간 출력, 3.11 Character string processing instructions
+응용명령,Character string   processing,MIDRP,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,MIDW,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,MIDWP,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,INSTR,X,, 3.11 Character string processing instructions
+응용명령,Character string   processing,INSTRP,X,, 3.11 Character string processing instructions
+응용명령,Floating to  BCD,EMOD,X,, 3.11 Character string processing instructions
+응용명령,Floating to  BCD,EMODP,X,, 3.11 Character string processing instructions
+응용명령,BCD to floating,EREXP,X,, 3.11 Character string processing instructions
+응용명령,BCD to floating,EREXPP,X,, 3.11 Character string processing instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),SIN,SIN,"Sine 연산, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),SINP,X,, 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),COS,COS,"Cosine 연산실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),COSP,X,, 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),TAN,TAN,"Tangent 연산, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),TANP,X,, 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),ASIN,ASIN,"Arc sine 연산,실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),ASINP,X,, 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),ACOS,ACOS,"Arc Cosine 연산실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),ACOSP,X,, 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),ATAN,ATAN,"Arc tangent 연산,실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Trigono- metric   functions (Floating decimal point data),ATANP,X,, 3.12 Special function instructions
+응용명령,Conversion between angles and radians,RAD,RAD,"각도를 Radian 값으로 변경, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Conversion between angles and radians,RADP,X,, 3.12 Special function instructions
+응용명령,Conversion between angles and radians,DEG,DEG,"Radian값을 각도로 변경, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Conversion between angles and radians,DEGP,X,, 3.12 Special function instructions
+응용명령,Square   root,SQR,SQRT,"제곱근 연산, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Square   root,SQRP,X,, 3.12 Special function instructions
+응용명령,Exponent operations,EXP,EXP,"지수연산, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Exponent operations,EXPP,X,, 3.12 Special function instructions
+응용명령,Natural  logarithms,LOG,LOG,"LOG 연산, 실수만 가능 (REAL, LREAL)", 3.12 Special function instructions
+응용명령,Natural  logarithms,LOGP,X,, 3.12 Special function instructions
+응용명령,Random number generation,RND,X,, 3.12 Special function instructions
+응용명령,Random number generation,RNDP,X,, 3.12 Special function instructions
+응용명령,Random  number  series update,SRND,X,, 3.12 Special function instructions
+응용명령,Random  number  series update,SRNDP,X,, 3.12 Special function instructions
+응용명령,Square root,BSQR,X,, 3.12 Special function instructions
+응용명령,Square root,BSQRP,X,, 3.12 Special function instructions
+응용명령,Square root,BDSQR,X,, 3.12 Special function instructions
+응용명령,Square root,BDSQRP,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BSIN,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BSINP,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BCOS,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BCOSP,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BTAN,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BTANP,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BASIN,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BASINP,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BACOS,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BACOSP,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BATAN,X,, 3.12 Special function instructions
+응용명령,Trigonometric function,BATANP,X,, 3.12 Special function instructions
+응용명령,Upper and lower limit controls,LIMIT,LIMIT,"상하한 제한, 모든 타입 가능", 3.13 Data control instructions
+응용명령,Upper and lower limit controls,LIMITP,X,, 3.13 Data control instructions
+응용명령,Upper and lower limit controls,DLIMIT,LIMIT,"상하한 제한, 모든 타입 가능", 3.13 Data control instructions
+응용명령,Upper and lower limit controls,DLIMITP,X,, 3.13 Data control instructions
+응용명령,Dead band controls,BAND,D_BAND(_R),불감대 적용 출력, 3.13 Data control instructions
+응용명령,Dead band controls,BANDP,X,, 3.13 Data control instructions
+응용명령,Dead band controls,DBAND,D_BAND(_R),불감대 적용 출력, 3.13 Data control instructions
+응용명령,Dead band controls,DBANDP,X,, 3.13 Data control instructions
+응용명령,Zone controls,ZONE,X,, 3.13 Data control instructions
+응용명령,Zone controls,ZONEP,X,, 3.13 Data control instructions
+응용명령,Zone controls,DZONE,X,, 3.13 Data control instructions
+응용명령,Zone controls,DZONEP,X,, 3.13 Data control instructions
+응용명령,Block number designations,RSET,RSET,설정된 블록 번호를 지정된 블록 번호 전환, 3.14 Switching instructions
+응용명령,Block number designations,RSETP,X,, 3.14 Switching instructions
+응용명령,File set,QDRSET,X,, 3.14 Switching instructions
+응용명령,File set,QDRSETP,X,, 3.14 Switching instructions
+응용명령,File set,QCDSET,X,, 3.14 Switching instructions
+응용명령,File set,QCDSETP,X,, 3.14 Switching instructions
+응용명령,Read/write  clock data,DATERD,X,, 3.15 Clock instructions
+응용명령,Read/write  clock data,DATERDP,X,, 3.15 Clock instructions
+응용명령,Read/write  clock data,DATEWR,RTC_SET,시간 데이터 쓰기, 3.15 Clock instructions
+응용명령,Read/write  clock data,DATEWRP,X,, 3.15 Clock instructions
+응용명령,Clock data addition/ subtraction,DATE+,X,, 3.15 Clock instructions
+응용명령,Clock data addition/ subtraction,DATE+P,X,, 3.15 Clock instructions
+응용명령,Clock data addition/ subtraction,DATE-,X,, 3.15 Clock instructions
+응용명령,Clock data addition/ subtraction,DATE-P,X,, 3.15 Clock instructions
+응용명령,Clock data translation,SECOND,TIME_DE,TIME형 데이터를 1/1000초로 분리, 3.15 Clock instructions
+응용명령,Clock data translation,SECONDP,X,, 3.15 Clock instructions
+응용명령,Clock data translation,HOUR,TIME_DE,TIME형 데이터를 1/1000초로 분리, 3.15 Clock instructions
+응용명령,Clock data translation,HOURP,X,, 3.15 Clock instructions
+응용명령,Input/output to peripheral devices,MSG,X,, 3.16 Peripheral device instructions
+응용명령,Input/output to peripheral devices,PKEY,X,, 3.16 Peripheral device instructions
+응용명령,Input/output to peripheral devices,PSTOP,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,PSTOPP,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,POFF,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,POFFP,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,PSCAN,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,PSCANP,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,PLOW,X,, 3.17 Program instructions
+응용명령,Input/output to peripheral devices,PLOWP,X,, 3.17 Program instructions
+응용명령,WDT reset,WDT,WDT_RST,Watch dog 타이머 초기화, 3.18 Other instructions
+응용명령,WDT reset,WDTP,X,, 3.18 Other instructions
+응용명령,Timing  clock,DUTY,DUTY,스캔 지정 on/off, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,ZRRDB,X,, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,ZRRDBP,X,, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,ZRWRB,X,, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,ZRWRBP,X,, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,ADRSET,X,, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,ADRSETP,X,, 3.18 Other instructions
+응용명령,Direct read/write operations  in 1-byte units,KEY,X,, 3.18 Other instructions
+응용명령,Batch save of index register,ZPUSH,X,, 3.18 Other instructions
+응용명령,Batch save of index register,ZPUSHP,X,, 3.18 Other instructions
+응용명령,Batch  recovery,ZPOP,X,, 3.18 Other instructions
+응용명령,Batch  recovery,ZPOPP,X,, 3.18 Other instructions
+응용명령,Batch write operation,EROMWR,X,, 3.18 Other instructions
+응용명령,Batch write operation,EROMWRP,X,, 3.18 Other instructions
+응용명령,Network refresh,ZCOM,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,READ,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,SREAD,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,WRITE,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,SWRITE,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,SEND,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,RECV,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,REQ,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,ZNFR,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,ZNTO,X,, 3.19 Instructions for data link
+응용명령,QnA link  instruction,ZNWR,X,, 3.19 Instructions for data link
+응용명령,A-series compatible link    instruction,ZNRD,X,, 3.19 Instructions for data link
+응용명령,A-series compatible link    instruction,RFRP,X,, 3.19 Instructions for data link
+응용명령,A-series compatible link instruction,RTOP,X,, 3.19 Instructions for data link
+응용명령,Reading  routing  information,RTREAD,X,, 3.19 Instructions for data link
+응용명령,Registering routing  information,RTWTITE,X,, 3.19 Instructions for data link
+응용명령,Reading module information,UNIRD,X,, 3.20 QCPU instructions
+응용명령,Reading module information,UNIRDP,X,, 3.20 QCPU instructions
+응용명령,Trace set,TRACE,X,, 3.20 QCPU instructions
+응용명령,Trace reset,TRACER,X,, 3.20 QCPU instructions
+응용명령,Writing data to designated file,SP.FWRITE,EBWRITE,R 영역 데이터를 플래시 영역에 쓰기, 3.20 QCPU instructions
+응용명령,Reading data from designated file,SP.FREAD,EBREAD,R 영역 데이터를 플래시 영역에서 읽어오기, 3.20 QCPU instructions
+응용명령,Loading program from memory,PLOADP,X,, 3.20 QCPU instructions
+응용명령,Unloading program from program memory,PULNLOADP,X,, 3.20 QCPU instructions
+응용명령,Load+ unload,PSWAPP,X,, 3.20 QCPU instructions
+응용명령,High-speed block transfer of file register,RBMOV,X,, 3.20 QCPU instructions
+응용명령,High-speed block transfer of file register,RBMOVP,X,, 3.20 QCPU instructions
+응용명령,Operation mode  setting during CPU start up,S.STMODE,X,, 3.21 Redundant system instructions (For Q4ARCPU)
+응용명령,Operation mode  setting instructions during   CPU      switch,S.CGMODE,X,, 3.21 Redundant system instructions (For Q4ARCPU)
+응용명령,Data   tracking,S.TRUCK,X,, 3.21 Redundant system instructions (For Q4ARCPU)
+응용명령,Buffer   memory   batch    refresh,S.SPREF,X,, 3.21 Redundant system instructions (For Q4ARCPU)

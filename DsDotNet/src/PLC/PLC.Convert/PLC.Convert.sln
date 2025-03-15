@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PLC.Convert.LSCore", "PLC.C
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PLC.Convert.LSParser", "PLC.Convert.LS\PLC.Convert.LSParser\PLC.Convert.LSParser.csproj", "{71BDA340-5BE2-35BF-CE72-241F0F16E217}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Melsec", "Melsec", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Dsu.PLCConverter.FS", "PLC.Convert.Melsec\Dsu.PLCConverter.FS\Dsu.PLCConverter.FS.fsproj", "{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,9 +37,16 @@ Global
 		{71BDA340-5BE2-35BF-CE72-241F0F16E217}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{71BDA340-5BE2-35BF-CE72-241F0F16E217}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{71BDA340-5BE2-35BF-CE72-241F0F16E217}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5BDA126C-A903-4DC1-82AA-B70A9C51506A}

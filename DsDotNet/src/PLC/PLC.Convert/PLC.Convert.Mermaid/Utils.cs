@@ -16,13 +16,13 @@ namespace PLC.Convert.Mermaid
         /// Opens a file dialog to select files.
         /// </summary>
         /// <returns>An array of file paths of the selected files or null if no file is selected.</returns>
-        public static string[] OpenFiles()
+        public static string[]? OpenFiles(bool multiselect = false, bool isCSV = false)
         {
             using OpenFileDialog openFileDialog = new();
             openFileDialog.Filter =
-            "xg50000 file (*.xgwx)|*.xgwx|" +
+            (isCSV ? "csv file (*.csv)|*.csv|" : "xg50000 file (*.xgwx)|*.xgwx|") +
             "All files (*.*)|*.*";
-            openFileDialog.Multiselect = false;
+            openFileDialog.Multiselect = multiselect;
             if (openFileDialog.ShowDialog() != DialogResult.OK)
             {
                 return null;
@@ -90,6 +90,18 @@ namespace PLC.Convert.Mermaid
 
             return Path.Combine(excelDirectory, excelName);
         }
+    }
+
+    public static partial class EmLinq
+    {
+        /// <summary>
+        /// Create IEnumerable from element
+        /// http://stackoverflow.com/questions/1577822/passing-a-single-item-as-ienumerablet
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="item"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> ToEnumerable<T>(this T item) { yield return item; }
     }
 
 

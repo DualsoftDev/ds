@@ -5,6 +5,7 @@ open ConvertPLCModule
 open SegmentModule
 open PLC.Convert.LSCore.Expression
 open FilterJsonModule
+open System
 
 module MermaidExportModule =
 
@@ -59,15 +60,16 @@ module MermaidExportModule =
 
 
     /// **Rung 데이터를 Mermaid 다이어그램으로 변환하여 저장하는 함수**
-    let Convert (coils: Terminal seq) =
-
+ 
+    let Convert (coils: Terminal seq, bComment:bool) =
         let rungMap = 
             coils 
             //|> Seq.take 20
-            |> Seq.filter (fun coil -> (splitSegment coil.Name ).Area <> "" )  
-            |> Seq.filter (fun coil -> isTargetOfType (autoKeywords@safetyKeywords) coil.Name)  
-            |> Seq.filter (fun coil -> not(isTargetOfType (skipKeywords) coil.Name)) 
-            |> Seq.map (fun coil -> coil.Name, getContactNamesFromCoil coil )  
+            |> Seq.filter (fun coil -> String.IsNullOrEmpty (getSymName coil bComment) |> not)  
+            |> Seq.filter (fun coil -> (splitSegment (getSymName coil bComment)).Area <> "" )  
+            |> Seq.filter (fun coil -> isTargetOfType (autoKeywords@safetyKeywords) (getSymName coil bComment)) 
+            |> Seq.filter (fun coil -> not(isTargetOfType (skipKeywords) (getSymName coil bComment)) )
+            |> Seq.map (fun coil -> (getSymName coil bComment), getContactNamesFromCoil coil bComment)  
             |> Map.ofSeq
 
         // ✅ **Mermaid 다이어그램 변환**
@@ -75,12 +77,16 @@ module MermaidExportModule =
         mermaidText    /// **Rung 데이터를 Mermaid 다이어그램으로 변환하여 저장하는 함수**
 
 
-    let ConvertEdges (coils: Terminal seq) =
+    let ConvertEdges (coils: Terminal seq, bComment:bool) =
 
         let rungMap = 
             coils 
+            |> Seq.filter (fun coil -> String.IsNullOrEmpty (getSymName coil bComment) |> not)  
             |> Seq.filter (fun coil -> not(isTargetOfType (skipKeywords) coil.Name)) 
-            |> Seq.map (fun coil -> coil.Name, getContactNamesFromCoil coil )  
+            |> Seq.map (fun coil -> 
+            
+                (getSymName coil bComment)
+                , getContactNamesFromCoil coil bComment)  
             |> Map.ofSeq
 
         // ✅ **Mermaid 다이어그램 변환**

@@ -1,5 +1,6 @@
-using PLC.Convert.LSCore;
 using Microsoft.VisualBasic.FileIO;
+using PLC.Convert.LSCore;
+using PLC.Convert.LSCore.XGTTag;
 using System;
 using System.CodeDom;
 using System.Collections.Generic;
@@ -10,11 +11,11 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection.Emit;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks.Sources;
 using System.Xml.Linq;
-using static System.Windows.Forms.LinkLabel;
 using static PLC.Convert.LSCore.XGTTag.XGTDevice;
-using PLC.Convert.LSCore.XGTTag;
+using static System.Windows.Forms.LinkLabel;
 
 /// <summary>
 /// A class providing methods for importing, storing, and managing symbols used in a program.
@@ -214,6 +215,7 @@ public static class ImportSymbol
                 {
 
                     Symbol symbol = ParseLineToSymbol(line, "");
+                    if (symbol == null) continue;
 
                     symbol.IsGlobal = true;
                     symbol.UpdateKeyName(symbol.SymbolDataType, true);
@@ -249,6 +251,8 @@ public static class ImportSymbol
                 foreach (string line in ImportFile.ReadFileByLine(file).Skip(1))
                 {
                     Symbol symbol = ParseLineToSymbol(line, taskName);
+                    if (symbol == null) continue;
+
                     var key = SymbolUtil.GetUserOrFBDataKey(taskName, symbol.Name);
 
                     if (!symbols.ContainsKey(key))
@@ -286,6 +290,8 @@ public static class ImportSymbol
                 foreach (string line in ImportFile.ReadFileByLine(file).Skip(1))
                 {
                     Symbol symbol = ParseLineToSymbol(line, taskName);
+                    if (symbol == null) continue;
+
                     var key = SymbolUtil.GetKey(taskName, symbol.Name, symbol.SymbolDataType, symbol.IsGlobal);
 
                     if (!symbols.ContainsKey(key))
@@ -323,19 +329,56 @@ public static class ImportSymbol
     //Device BitStartOffset  BitEndOffset BitSize Address VarKind VarName Type    Comment
     //M	    100	            100	            1	    %MX100 VAR_GLOBAL  A  BOOL    TEST1
     //M	    101	            101	            1	    %MX101 VAR_GLOBAL  A0 BOOL    TEST2
-
+    //M,00601408,00601423,16,%MW37588,VAR_GLOBAL,ZR37588,"WORD","#303.   RB01사양"3803"  용접기준"
     private static Symbol ParseLineToSymbol(string line, string taskName)
     {
         string[] split;
-        using (TextFieldParser parser = new TextFieldParser(new StringReader(line)))
+        var fixLine = FixMalformedQuotes(line);
+        static string FixMalformedQuotes(string input)
         {
-            parser.TextFieldType = FieldType.Delimited;
-            parser.SetDelimiters(",");
-            split = parser.ReadFields();
-            if (split[0] is null or "")
+            // 1. 필드 내부의 잘못된 이중 큰따옴표를 제거 ("" → ")
+            string result = Regex.Replace(input, "\"\"([^\"]+?)\"", "\"$1\"");
+
+            // 2. CSV 필드 개수 확인 (9개 필드인지 확인)
+            string pattern = "^(.*?,.*?,.*?,.*?,.*?,.*?,.*?,.*?,)(\".*\")$"; // 9번째 열을 정확히 추출하는 정규식
+            Match match = Regex.Match(result, pattern);
+
+            if (match.Success)
             {
-                throw new Exception($"line is empty {line}");
+                string firstPart = match.Groups[1].Value; // 앞의 8개 필드
+                string lastField = match.Groups[2].Value; // 9번째 필드 (따옴표 포함)
+
+                // 내부 큰따옴표만 공백으로 변환하고, 맨 끝의 큰따옴표는 유지
+                lastField = "\"" + lastField.Substring(1, lastField.Length - 2).Replace("\"", " ") + "\"";
+
+                // 다시 합쳐서 반환
+                result = firstPart + lastField;
             }
+
+            return result;
+        }
+        using (TextFieldParser parser = new TextFieldParser(new StringReader(fixLine)))
+        {
+             try
+            {
+                parser.TextFieldType = FieldType.Delimited;
+                parser.SetDelimiters(",");
+                parser.HasFieldsEnclosedInQuotes = true; // 큰따옴표 포함된 필드 처리
+
+                split = parser.ReadFields();
+
+                if (split == null || split.Length == 0)
+                {
+                    throw new Exception($"line is empty {line}");
+                }
+
+              
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+           
         }
 
 

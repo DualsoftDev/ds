@@ -16,11 +16,11 @@ namespace PLC.Convert.Mermaid
         /// Opens a file dialog to select files.
         /// </summary>
         /// <returns>An array of file paths of the selected files or null if no file is selected.</returns>
-        public static string[]? OpenFiles(bool multiselect = false, bool isCSV = false)
+        public static string[]? OpenFiles(bool multiselect = false, string fileType = "xgwx")
         {
             using OpenFileDialog openFileDialog = new();
             openFileDialog.Filter =
-            (isCSV ? "csv file (*.csv)|*.csv|" : "xg50000 file (*.xgwx)|*.xgwx|") +
+            $"{fileType} file (*.{fileType})|*.{fileType}|" +
             "All files (*.*)|*.*";
             openFileDialog.Multiselect = multiselect;
             if (openFileDialog.ShowDialog() != DialogResult.OK)

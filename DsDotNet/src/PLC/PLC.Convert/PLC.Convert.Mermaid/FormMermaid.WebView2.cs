@@ -1,7 +1,9 @@
 using Microsoft.Web.WebView2.WinForms;
+using Microsoft.Web.WebView2.Core;
 using System;
-using System.IO;
+using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace PLC.Convert.Mermaid
@@ -9,48 +11,107 @@ namespace PLC.Convert.Mermaid
     public partial class FormMermaid : Form
     {
         private WebView2 webView;
+        private TreeView treeView;
+        private string fullMermaidCode; // 전체 Mermaid 코드 저장
 
-       
+        public FormMermaid()
+        {
+            InitializeComponent();
+            InitializeTreeView();
+            InitializeWebView();
+            InitializeEvent();
+        }
+
+        private void InitializeTreeView()
+        {
+            treeView = new TreeView
+            {
+                Dock = DockStyle.Left,
+                Width = 200
+            };
+            this.Controls.Add(treeView);
+            treeView.AfterSelect += TreeView_AfterSelect;
+            treeView.NodeMouseDoubleClick += TreeView_NodeMouseDoubleClick;
+        }
+        private void TreeView_NodeMouseDoubleClick(object sender, TreeNodeMouseClickEventArgs e)
+        {
+            string selectedSubgraph = ExtractSubgraph(fullMermaidCode, e.Node.Text);
+
+            // 🟢 편집 폼(EditForm) 열기
+            EditForm editForm = new EditForm(selectedSubgraph);
+            if (editForm.ShowDialog() == DialogResult.OK)
+            {
+                // 🟢 변경된 내용 다시 적용 가능
+                string updatedText = editForm.EditedText;
+                DrawMermaidGraph(updatedText);
+            }
+        }
+
+
         private void InitializeWebView()
         {
-            // WebView2 컨트롤 생성
             webView = new WebView2
             {
                 Dock = DockStyle.Fill
             };
             this.Controls.Add(webView);
-            webView.Source = new Uri("about:blank");  // 빈 페이지 로드
-
-
-
-            //string mermaidText = @"
-            //    graph TD;
-            //    A[Start] --> B{Decision};
-            //    B -- Yes --> C[Process 1];
-            //    B -- No --> D[Process 2];
-            //    C --> E[End];
-            //    D --> E;
-            //";
+            webView.CoreWebView2InitializationCompleted += (s, e) =>
+            {
+                webView.CoreWebView2.NavigateToString("<html><body><h2>Loading...</h2></body></html>");
+            };
             webView.EnsureCoreWebView2Async();
-
-         
-
-            //// Mermaid.js 다이어그램 로드
-            //webView.NavigationCompleted += async (s, e) =>
-            //{
-              
-            //};
-
         }
 
         public void LoadMermaidGraph(string mermaidText)
         {
+            fullMermaidCode = mermaidText;
+            ParseSubgraphs(mermaidText); // 트리뷰 업데이트
+            DrawMermaidGraph(mermaidText);
+        }
 
+        public void DrawMermaidGraph(string mermaidText)
+        {
             string htmlContent = GenerateMermaidHtml(mermaidText);
-            string tempPath = Path.Combine(Path.GetTempPath(), "mermaid_graph.html");
-            File.WriteAllText(tempPath, htmlContent, Encoding.UTF8);
+            if (webView.CoreWebView2 != null)
+            {
+                webView.CoreWebView2.NavigateToString(htmlContent);
+            }
+        }
 
-            webView.Source = new Uri(tempPath);
+        private void TreeView_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            string selectedSubgraph = e.Node.Text;
+            if (selectedSubgraph == "전체 보기")
+            {
+                DrawMermaidGraph(fullMermaidCode);
+            }
+            else
+            {
+                string extractedCode = ExtractSubgraph(fullMermaidCode, selectedSubgraph);
+                DrawMermaidGraph(extractedCode);
+            }
+        }
+
+        private void ParseSubgraphs(string mermaidCode)
+        {
+            treeView.Nodes.Clear();
+            treeView.Nodes.Add("전체 보기");
+
+            var matches = Regex.Matches(mermaidCode, @"subgraph\s+([\w_]+)");
+            foreach (Match match in matches)
+            {
+                treeView.Nodes.Add(match.Groups[1].Value);
+            }
+        }
+
+        private string ExtractSubgraph(string mermaidCode, string subgraphName)
+        {
+            var match = Regex.Match(mermaidCode, @$"subgraph\s+{subgraphName}([\s\S]*?)end");
+            if (match.Success)
+            {
+                return $"graph TB;\nsubgraph {subgraphName}\n{match.Groups[1].Value}\nend";
+            }
+            return "graph TB;\n";
         }
 
         private string GenerateMermaidHtml(string mermaidCode)
@@ -66,7 +127,8 @@ namespace PLC.Convert.Mermaid
             import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
             mermaid.initialize({{
                 startOnLoad: true,
-                maxTextSize: Infinity  // ✅ 무제한 텍스트 크기 설정
+                theme: 'dark',  // 🟢 다크 테마 적용
+                maxTextSize: Infinity
             }});
         </script>
         <style>
@@ -77,17 +139,24 @@ namespace PLC.Convert.Mermaid
                 align-items: center;
                 height: 100vh;
                 margin: 0;
-                background-color: #f4f4f4;
+                background-color: #1e1e1e; /* 🟢 다크 모드 배경 */
+                color: #ffffff; /* 🟢 밝은 텍스트 */
             }}
+           
         </style>
     </head>
     <body>
         <div class='mermaid'>
             {mermaidCode}
         </div>
+        <script>
+            mermaid.run();
+        </script>
     </body>
     </html>";
         }
+
+
 
     }
 }

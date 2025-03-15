@@ -15,6 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Melsec", "Melsec", "{C8D527
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Dsu.PLCConverter.FS", "PLC.Convert.Melsec\Dsu.PLCConverter.FS\Dsu.PLCConverter.FS.fsproj", "{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Siemens", "Siemens", "{D1526A2C-AD02-4C77-8621-9969E015C2DE}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PLC.Convert.Siemens", "PLC.Convert.Siemens\PLC.Convert.Siemens.fsproj", "{9DCDCB2A-EE75-2298-76B8-F556A0664568}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,12 +45,17 @@ Global
 		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9DCDCB2A-EE75-2298-76B8-F556A0664568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9DCDCB2A-EE75-2298-76B8-F556A0664568}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9DCDCB2A-EE75-2298-76B8-F556A0664568}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9DCDCB2A-EE75-2298-76B8-F556A0664568}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{B2D2AEE7-9A23-545E-CB86-9BDA059AF2C3} = {C8D5274F-AC00-46C7-1F8D-E88E81087A52}
+		{9DCDCB2A-EE75-2298-76B8-F556A0664568} = {D1526A2C-AD02-4C77-8621-9969E015C2DE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5BDA126C-A903-4DC1-82AA-B70A9C51506A}

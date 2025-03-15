@@ -44,7 +44,9 @@ module FilterJsonModule =
     let autoKeywords = loadJsonList config.["autoKeywords"]
     let safetyKeywords = loadJsonList config.["safetyKeywords"]
     let areaExtenstionKeywords = loadJsonList config.["areaExtenstionKeywords"]
+    let devicePostKeywords = loadJsonList config.["devicePostKeywords"]
     let splitAreaKeywords = loadJsonList config.["splitAreaKeywords"]
     let targetReplacements = loadJsonMap config.["targetReplacements"]
     let sourceReplacements = loadJsonMap config.["sourceReplacements"]
 
+    

@@ -35,7 +35,7 @@ public class Rung
     public string ConfigName { get; set; }
     public int RungNum { get; set; }
     public int LineNum { get; set; }
-    
+
     public List<CallPara> CallParas { get; set; }
     public IEnumerable<string> RungLines { get; set; }
 
@@ -70,6 +70,61 @@ public class Rung
             RungExprs = ConvertToExpression(rungLines.Where(w => w != ""));
         else
             RungExprs = Enumerable.Empty<Expr>().ToList();
+    }
+
+
+    public Rung(string coil, IEnumerable<string> contactAs, IEnumerable<string> contactBs, Dictionary<string, Terminal> dictRung)
+    {
+        RungLines = contactAs.Concat(contactBs).Append(coil);
+        Terminal getTerminal(string name)
+        {
+            if (dictRung.ContainsKey(name) && dictRung[name].HasInnerExpr)
+            {
+                var a = dictRung[name];
+
+            }
+
+            return dictRung.ContainsKey(name) ?
+                dictRung[name] 
+                : new Terminal(new Symbol(name));
+        }       
+
+        var coilExpr = getTerminal(coil);
+        Expr baseExpr = new TerminalDummy("");
+        if (contactAs.Count() > 0)
+        {
+            baseExpr = getTerminal (contactAs.First());
+            contactAs = contactAs.Skip(1);
+        }
+        else
+        {
+            baseExpr = getTerminal (contactBs.First());
+            contactBs = contactBs.Skip(1);
+        }
+
+        foreach (var item in contactAs)
+        {
+            var contact = getTerminal(item); 
+            if (coilExpr.InnerExpr == null)
+                coilExpr.InnerExpr = new And(baseExpr, contact);
+            else
+                coilExpr.InnerExpr = new And(coilExpr.InnerExpr, contact);
+
+            coilExpr.Type = TerminalType.CONTACT;                      
+        }
+
+        foreach (var item in contactBs)
+        {
+            var contact = getTerminal(item); 
+            if (coilExpr.InnerExpr == null)
+                coilExpr.InnerExpr = new And(baseExpr, new Not(contact));
+            else
+                coilExpr.InnerExpr = new And(baseExpr, new Not(contact));
+
+            coilExpr.Type = TerminalType.CONTACT;
+        }
+
+        RungExprs = [coilExpr];
     }
 
 

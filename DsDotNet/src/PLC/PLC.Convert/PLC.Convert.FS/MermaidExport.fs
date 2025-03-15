@@ -19,7 +19,6 @@ module MermaidExportModule =
         let groupedTargets = targets |> Seq.groupBy (fun kv ->  (splitSegment kv.Key).Area)
         let mutable index = 0
         for (targetArea, nodes) in groupedTargets do
-            //if (targetArea = "S204") then
                 let targetArea = if targetArea = "" 
                                   then
                                         index <- index+1
@@ -35,6 +34,7 @@ module MermaidExportModule =
                         let safetyItemText =
                             kvp.Value 
                             |> List.map (fun s ->  (replaceWords sourceReplacements s) |> splitSegment)
+                            |> List.filter (fun s -> s <> target)
                             |> List.filter (fun s -> s.Area <> "" || nofilter)
                             |> List.map (fun s ->  s.FullNameSkipArea(targetArea))
                             |> String.concat "\r\n\t\t\t" 
@@ -46,6 +46,7 @@ module MermaidExportModule =
                     let sourcesText = 
                         kvp.Value 
                         |> List.map (fun source ->  (replaceWords sourceReplacements source) |> splitSegment)
+                        |> List.filter (fun s -> s <> target)
                         |> List.filter (fun seg -> seg.Area <> "" || nofilter)
                         |> List.map  (fun seg-> seg.FullNameSkipArea(targetArea))
                         |> String.concat " & " 
@@ -82,6 +83,7 @@ module MermaidExportModule =
         let rungMap = 
             coils 
             |> Seq.filter (fun coil -> String.IsNullOrEmpty (getSymName coil bComment) |> not)  
+            |> Seq.filter (fun coil -> (splitSegment (getSymName coil bComment)).Area <> "" )  
             |> Seq.filter (fun coil -> not(isTargetOfType (skipKeywords) coil.Name)) 
             |> Seq.map (fun coil -> 
             
@@ -89,8 +91,8 @@ module MermaidExportModule =
                 , getContactNamesFromCoil coil bComment)  
             |> Map.ofSeq
 
-        // ✅ **Mermaid 다이어그램 변환**
-        let mermaidText = generateMermaid rungMap  true
+        // **Mermaid 다이어그램 변환**
+        let mermaidText = generateMermaid rungMap  false
         mermaidText
       
 

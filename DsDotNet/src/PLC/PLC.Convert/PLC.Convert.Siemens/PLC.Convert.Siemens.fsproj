@@ -16,14 +16,9 @@
 	</PropertyGroup>
 
     <ItemGroup>
-        <Content Include="filters.json" />
-        <Compile Include="FilterJson.fs" />
-        <Compile Include="Segment.fs" />
-        <Compile Include="ConvertPLC.fs" />
-        <Compile Include="MermaidExport.fs" />
+        <Compile Include="ConvertSiemens.fs" />
+        <Compile Include="ConvertSiemensCoil.fs" />
     </ItemGroup>
-
-    <ItemGroup />
 
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="8.0.5" />

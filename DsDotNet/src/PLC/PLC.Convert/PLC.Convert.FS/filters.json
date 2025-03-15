@@ -1,8 +1,9 @@
 {
   "splitAreaKeywords": [ "_M_" ],
-  "autoKeywords": [ "_A_.*_AUX", "_AUTO_.*_AUX", "_IN_OK" ],
-  "safetyKeywords": [ "_C_.*_AUX", "_COM_.*_AUX" ],
+  "autoKeywords": [ "_A_.*_AUX", "_AUTO_.*_AUX", "_A_.*_X", "_IN_OK" ],
+  "safetyKeywords": [ "_C_.*_AUX", "_COM_.*_AUX", "_C_.*_X" ],
   "areaExtenstionKeywords": [ "RBT\\d+", "TT", "LH", "RH" ],
+  "devicePostKeywords": [ "UN" ],
   "skipKeywords": [
     "5000TH",
     "MANUAL_MODE",
@@ -30,6 +31,7 @@
     "PRG",
     "RESTART",
     "AUTO_MODE",
+    "RUNNING",
     "PLS",
     "GATE",
     "HMI",
@@ -38,6 +40,12 @@
     "AUTO_START"
   ],
   "targetReplacements": {
+    "_A_X": "",
+    "_C_X": "",
+    "_A_AX": "",
+    "_C_AX": "",
+    "_A_AUX": "",
+    "_C_AUX": "",
     "_A_XXX_AUX": "_XXX",
     "_AUTO_XXX_AUX": "_XXX",
     "_C_XXX_AUX": "_XXX",
@@ -50,6 +58,12 @@
     "_6TH_IN_OK": "_6TH_IN"
   },
   "sourceReplacements": {
+    "_A_X": "",
+    "_C_X": "",
+    "_A_AX": "",
+    "_C_AX": "",
+    "_A_AUX": "",
+    "_C_AUX": "",
     "_XXX_END": "_XXX",
     "_1_COMP": "_1ST_IN",
     "_2_COMP": "_2ND_IN",

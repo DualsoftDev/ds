@@ -25,11 +25,12 @@ module SegmentModule =
         member x.DeviceApi =
                             if x.Device = "" 
                             then x.SourceName
-                            else $"{x.Device}.{x.Api}"
+                            //else $"{x.Device}.{x.Api}"
+                            else $"{x.Device}.{x.Api}[{x.Area}.{x.Device}.{x.Api}\r\n{x.SourceName}]"
 
         member x.FullName = if x.Area = "" 
                             then x.DeviceApi
-                            else $"{x.Area}.{x.Device}.{x.Api}"
+                            else $"{x.Area}.{x.Device}.{x.Api}[{x.Area}.{x.Device}.{x.Api}\r\n{x.SourceName}]"
                           
         member x.FullNameSkipArea(targetArea: string) =
             if targetArea = x.Area then x.DeviceApi else x.FullName
@@ -42,30 +43,42 @@ module SegmentModule =
 
         // `이름#숫자` 패턴을 찾기 위한 정규식
         let nameNumberPattern = @"^[A-Za-z]+\d+$"
-        let numberOnlyPattern = @"^\d+$"
+        //let numberOnlyPattern = @"^\d+$"
 
         // 가장 먼저 등장하는 `이름#숫자` 패턴을 찾음 (단, 마지막 요소가 숫자면 무시)
         let matched =
             parts
             |> List.tryFind (fun part -> 
                 Regex.IsMatch(part, nameNumberPattern) && 
-                not (Regex.IsMatch(List.last parts, numberOnlyPattern))
+                not (Regex.IsMatch(List.last parts, nameNumberPattern))
             )
 
         match matched with
         | Some dev -> 
             let api = parts |> List.skipWhile ((<>) dev) |> List.tail |> String.concat "_"  // `dev` 이후의 값들을 API로 설정
-            { Area = head; Device = dev; Api = api; SourceName = sourceName}
+            let device = parts |> List.takeWhile ((=) dev)  |> String.concat "_"  // `dev` 이후의 값들을 API로 설정
+            { Area = head; Device = device; Api = api; SourceName = sourceName}
 
         | None ->
             match List.rev parts with
-            | api :: mid :: devParts when Regex.IsMatch(api, numberOnlyPattern) -> 
-                { Area = head; Device = String.concat "_" (List.rev devParts); Api = mid + "_" + api; SourceName = sourceName }  // 마지막 숫자 처리
-
-            | api :: devParts -> 
-                { Area = head; Device = String.concat "_" (List.rev devParts); Api = api; SourceName = sourceName }  // `_` 기준 일반 분리
-
-            | [] -> { Area = head; Device = tail; Api = "" ; SourceName = sourceName} // tail이 비어있을 경우 기본값
+            | api :: mid :: devParts  -> 
+                if api.Length > 2
+                then
+                    { Area = head; Device = String.concat "_" ((List.rev devParts)@[mid]); Api = api; SourceName = sourceName }  // `_` 기준 일반 분리
+                else
+                    { Area = head; Device = String.concat "_" (List.rev devParts); Api = mid + "_" + api; SourceName = sourceName }  // `_` 기준 일반 분리
+         
+           // **특정 키워드 (devicePostKeywords) 포함 여부 확인**
+            | _ -> 
+                let dev = 
+                    match devicePostKeywords |> List.tryFind (fun prefix -> tail.StartsWith(prefix)) with
+                    | Some prefix -> tail.Substring(prefix.Length)  // 접두어 제거
+                    | None -> tail  
+                
+                {     Area = head
+                      Device = dev
+                      Api = tail
+                      SourceName = sourceName }
 
 
     /// **Step 1: `_M_`을 기준으로 Area와 Body 분리 (정규식 대응)**
@@ -77,9 +90,12 @@ module SegmentModule =
                 let m = Regex.Match(body, pattern)
                 if m.Success then
                       let ext = m.Groups.[0].Value
-                      getSegment $"{area}_{ext}" body input
+                      getSegment $"{area}{ext}" body input
                 else
                       getSegment area body input
             | None -> getSegment area body input
 
-        | _ -> getSegment "" input input // Area가 없으면 전체를 Body로 간주
+        | _ -> 
+            let head = input.Split('_')[0]
+            let tail = String.Join ("_", input.Split('_')[1..])
+            getSegment head tail input 

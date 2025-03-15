@@ -3,30 +3,32 @@ using Microsoft.Web.WebView2.WinForms;
 using PLC.Convert.FS;
 using PLC.Convert.LSCore;
 using PLC.Convert.LSCore.Expression;
+using PLC.Convert.Siemens;
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static PLC.Convert.Siemens.ConvertSiemensModule.ContentType;
 
 namespace PLC.Convert.Mermaid
 {
     public partial class FormMermaid : Form
     {
-        public FormMermaid()
-        {
-            InitializeComponent();
-            InitializeWebView();
+     
 
-            //this.Load += async (s, e) => await OpenPLCAsync();
+        private void InitializeEvent()
+        {
+
             button_openPLC.Click += async (s, e) => await OpenPLCAsync();
             button_openDir.Click += async (s, e) => await OpenPLCDirAsync();
             button_MelsecConvert.Click += async (s, e) => await OpenPLCMelsecAsync();
-
-            
+            button_SiemensConvert.Click += async (s, e) => await OpenPLCSiemensAsync();
         }
 
         /// **PLC 프로그램을 불러와 Mermaid 변환**
@@ -102,7 +104,7 @@ namespace PLC.Convert.Mermaid
             try
             {
                 OpenInitSetting();
-                var files = FileOpenSave.OpenFiles(true, true);
+                var files = FileOpenSave.OpenFiles(true, "csv");
                 if (files == null || files.Length == 0) return;
 
                 await ConvertXGI(files);
@@ -113,6 +115,32 @@ namespace PLC.Convert.Mermaid
             }
         }
 
+        private async Task OpenPLCSiemensAsync()
+        {
+            await Task.Delay(0);
+            try
+            {
+                OpenInitSetting();
+                var files = FileOpenSave.OpenFiles(false, "AWL");
+                if (files == null || files.Length == 0) return;
+                var file = files.First();
+
+                ConvertSiemensModule.Network[] networks = ConvertSiemensModule.parseSiemensFile(file);
+                IEnumerable<Terminal> coils = ConvertSiemensCoilModule.getCoils(networks);
+
+                var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
+                File.WriteAllText(file.Replace(".AWL", ".mermaid"), mermaidText, Encoding.UTF8);
+                LoadMermaidGraph(mermaidText);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+         
+
+        }
+        
 
         private async Task exportMermaid(string file, bool exportEdges = false, bool usingComment = false)
         {

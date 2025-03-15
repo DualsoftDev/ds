@@ -31,6 +31,7 @@ namespace PLC.Convert.Mermaid
             button_openPLC = new Button();
             button_openDir = new Button();
             button_MelsecConvert = new Button();
+            button_SiemensConvert = new Button();
             SuspendLayout();
             // 
             // button_openPLC
@@ -53,18 +54,28 @@ namespace PLC.Convert.Mermaid
             // 
             // button_MelsecConvert
             // 
-            button_MelsecConvert.Location = new Point(108, 41);
+            button_MelsecConvert.Location = new Point(344, 12);
             button_MelsecConvert.Name = "button_MelsecConvert";
             button_MelsecConvert.Size = new Size(112, 23);
             button_MelsecConvert.TabIndex = 0;
             button_MelsecConvert.Text = "Open Melsec";
             button_MelsecConvert.UseVisualStyleBackColor = true;
             // 
+            // button_SiemensConvert
+            // 
+            button_SiemensConvert.Location = new Point(462, 12);
+            button_SiemensConvert.Name = "button_SiemensConvert";
+            button_SiemensConvert.Size = new Size(112, 23);
+            button_SiemensConvert.TabIndex = 0;
+            button_SiemensConvert.Text = "Open Siemens";
+            button_SiemensConvert.UseVisualStyleBackColor = true;
+            // 
             // FormMermaid
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(1493, 1009);
+            Controls.Add(button_SiemensConvert);
             Controls.Add(button_MelsecConvert);
             Controls.Add(button_openDir);
             Controls.Add(button_openPLC);
@@ -78,5 +89,6 @@ namespace PLC.Convert.Mermaid
         private Button button_openPLC;
         private Button button_openDir;
         private Button button_MelsecConvert;
+        private Button button_SiemensConvert;
     }
 }

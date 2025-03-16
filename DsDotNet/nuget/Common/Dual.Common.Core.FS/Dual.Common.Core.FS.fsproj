@@ -24,7 +24,6 @@
 		<!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
 
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 
 	</PropertyGroup>
 	

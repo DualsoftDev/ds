@@ -26,15 +26,14 @@ module SegmentModule =
                             if x.Device = "" 
                             then x.SourceName
                             //else $"{x.Device}.{x.Api}"
-                            else $"{x.Device}.{x.Api}[{x.Area}.{x.Device}.{x.Api}\r\n{x.SourceName}]"
+                            else $"{x.Area}.{x.Device}.{x.Api}\r\n{x.SourceName}"
 
         member x.FullName = if x.Area = "" 
                             then x.DeviceApi
-                            else $"{x.Area}.{x.Device}.{x.Api}[{x.Area}.{x.Device}.{x.Api}\r\n{x.SourceName}]"
+                            else $"{x.Area}.{x.Device}.{x.Api}\r\n{x.SourceName}"
                           
         member x.FullNameSkipArea(targetArea: string) =
             if targetArea = x.Area then x.DeviceApi else x.FullName
-
     
 
     /// **Device와 API를 `_` 기준으로 분리하여 Segment 생성**

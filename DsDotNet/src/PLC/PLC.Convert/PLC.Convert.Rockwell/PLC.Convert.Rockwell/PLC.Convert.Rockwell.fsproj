@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
         <TargetFramework>net8.0-windows</TargetFramework>
-        <RootNamespace>PLC.CodeGen.Common</RootNamespace>
+        <RootNamespace>PLC.Convert.Rockwell</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
@@ -16,21 +16,17 @@
 	</PropertyGroup>
 
     <ItemGroup>
-        <Content Include="filters.json" />
-        <Compile Include="FilterJson.fs" />
-        <Compile Include="Segment.fs" />
-        <Compile Include="ConvertPLC.fs" />
-        <Compile Include="ConvertCoil.fs" />
-        <Compile Include="MermaidExport.fs" />
+      <Compile Include="ConvertRockwell.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="8.0.5" />
-    </ItemGroup>
+      <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
+	</ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\PLC.Convert.LSElectric\PLC.Convert.LSCore\PLC.Convert.LSCore.csproj" />
-      <ProjectReference Include="..\PLC.Convert.LSElectric\PLC.Convert.LSParser\PLC.Convert.LSParser.csproj" />
+      <ProjectReference Include="..\..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+      <ProjectReference Include="..\..\PLC.Convert.FS\PLC.Convert.FS.fsproj" />
     </ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

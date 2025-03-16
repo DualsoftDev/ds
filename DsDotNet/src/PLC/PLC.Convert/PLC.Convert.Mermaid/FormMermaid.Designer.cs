@@ -32,6 +32,7 @@ namespace PLC.Convert.Mermaid
             button_openDir = new Button();
             button_MelsecConvert = new Button();
             button_SiemensConvert = new Button();
+            button_LSEConvert = new Button();
             SuspendLayout();
             // 
             // button_openPLC
@@ -70,11 +71,21 @@ namespace PLC.Convert.Mermaid
             button_SiemensConvert.Text = "Open Siemens";
             button_SiemensConvert.UseVisualStyleBackColor = true;
             // 
+            // button_LSEConvert
+            // 
+            button_LSEConvert.Location = new Point(580, 12);
+            button_LSEConvert.Name = "button_LSEConvert";
+            button_LSEConvert.Size = new Size(112, 23);
+            button_LSEConvert.TabIndex = 0;
+            button_LSEConvert.Text = "Open LSE(*.xml)";
+            button_LSEConvert.UseVisualStyleBackColor = true;
+            // 
             // FormMermaid
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1493, 1009);
+            Controls.Add(button_LSEConvert);
             Controls.Add(button_SiemensConvert);
             Controls.Add(button_MelsecConvert);
             Controls.Add(button_openDir);
@@ -90,5 +101,6 @@ namespace PLC.Convert.Mermaid
         private Button button_openDir;
         private Button button_MelsecConvert;
         private Button button_SiemensConvert;
+        private Button button_LSEConvert;
     }
 }

@@ -1,9 +1,9 @@
-using Dsu.PLCConverter.FS;
 using Microsoft.Web.WebView2.WinForms;
 using PLC.Convert.FS;
 using PLC.Convert.LSCore;
 using PLC.Convert.LSCore.Expression;
 using PLC.Convert.Siemens;
+using PLC.Convert.MX;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -14,7 +14,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static PLC.Convert.Siemens.ConvertSiemensModule.ContentType;
+using static PLC.Convert.FS.ConvertCoilModule;
 
 namespace PLC.Convert.Mermaid
 {
@@ -29,6 +29,8 @@ namespace PLC.Convert.Mermaid
             button_openDir.Click += async (s, e) => await OpenPLCDirAsync();
             button_MelsecConvert.Click += async (s, e) => await OpenPLCMelsecAsync();
             button_SiemensConvert.Click += async (s, e) => await OpenPLCSiemensAsync();
+            button_LSEConvert.Click += async (s, e) => await OpenPLCLSEAsync();
+            
         }
 
         /// **PLC 프로그램을 불러와 Mermaid 변환**
@@ -106,13 +108,49 @@ namespace PLC.Convert.Mermaid
                 OpenInitSetting();
                 var files = FileOpenSave.OpenFiles(true, "csv");
                 if (files == null || files.Length == 0) return;
+                var dir = Path.GetDirectoryName(files.First());
+                
+                Network[] networks = ConvertMitsubishiModule.parseMXFile(files); 
+                IEnumerable<Terminal> coils = getCoils(networks);
 
-                await ConvertXGI(files);
+                var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
+                File.WriteAllText(dir+".mermaid", mermaidText, Encoding.UTF8);
+                LoadMermaidGraph(mermaidText);
+
+                //var file = await ConvertXGI(files);
+                //ConvertLSE(file);           
             }
             catch (Exception ex)
             {
                 MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private async Task OpenPLCLSEAsync()
+        {
+            try
+            {
+                OpenInitSetting();
+                var files = FileOpenSave.OpenFiles(false, "xml");
+                if (files == null || files.Length == 0) return;
+                var file = files.First();
+                await Task.Delay(0);
+
+                ConvertLSE(file);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ConvertLSE(string file)
+        {
+            Network[] networks = ConvertLSEModule.parseLSEFile(file);
+            IEnumerable<Terminal> coils = getCoils(networks);
+
+            var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
+            File.WriteAllText(file.Replace($".xml", ".mermaid"), mermaidText, Encoding.UTF8);
+            LoadMermaidGraph(mermaidText);
         }
 
         private async Task OpenPLCSiemensAsync()
@@ -121,15 +159,16 @@ namespace PLC.Convert.Mermaid
             try
             {
                 OpenInitSetting();
-                var files = FileOpenSave.OpenFiles(false, "AWL");
+                var extenstions = "AWL";
+                var files = FileOpenSave.OpenFiles(false, extenstions);
                 if (files == null || files.Length == 0) return;
                 var file = files.First();
 
-                ConvertSiemensModule.Network[] networks = ConvertSiemensModule.parseSiemensFile(file);
-                IEnumerable<Terminal> coils = ConvertSiemensCoilModule.getCoils(networks);
+                Network[] networks = ConvertSiemensModule.parseSiemensFile(file);
+                IEnumerable<Terminal> coils = getCoils(networks);
 
                 var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
-                File.WriteAllText(file.Replace(".AWL", ".mermaid"), mermaidText, Encoding.UTF8);
+                File.WriteAllText(file.Replace($".{extenstions}", ".mermaid"), mermaidText, Encoding.UTF8);
                 LoadMermaidGraph(mermaidText);
             }
             catch (Exception ex)
@@ -140,7 +179,6 @@ namespace PLC.Convert.Mermaid
          
 
         }
-        
 
         private async Task exportMermaid(string file, bool exportEdges = false, bool usingComment = false)
         {

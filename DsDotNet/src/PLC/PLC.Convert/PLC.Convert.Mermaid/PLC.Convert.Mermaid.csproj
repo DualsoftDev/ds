@@ -15,8 +15,9 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PLC.Convert.FS\PLC.Convert.FS.fsproj" />
-    <ProjectReference Include="..\PLC.Convert.Melsec\Dsu.PLCConverter.FS\Dsu.PLCConverter.FS.fsproj" />
-    <ProjectReference Include="..\PLC.Convert.Siemens\PLC.Convert.Siemens.fsproj" />
+    <ProjectReference Include="..\PLC.Convert.LSElectric\PLC.Convert.LSElectric\PLC.Convert.LSElectric.fsproj" />
+    <ProjectReference Include="..\PLC.Convert.Mitsubishi\PLC.Convert.Mitsubishi\PLC.Convert.Mitsubishi.fsproj" />
+    <ProjectReference Include="..\PLC.Convert.Siemens\PLC.Convert.Siemens\PLC.Convert.Siemens.fsproj" />
   </ItemGroup>
 
   <ItemGroup>

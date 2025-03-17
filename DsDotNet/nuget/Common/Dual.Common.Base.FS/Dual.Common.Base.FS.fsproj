@@ -24,7 +24,6 @@
 		<!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
-		<SignAssembly>True</SignAssembly>
 	</PropertyGroup>
 
 	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">

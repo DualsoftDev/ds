@@ -48,13 +48,12 @@ type ApiItemManager with
         [|
             let api = am.ApiItem
             let pss = calls.Select(fun s->s.VC.PS).ToOr() <&&> !@api.RxET.Expr
-            let tempRising  = getSM(td.ParentSystem).GetTempBoolTag(td.QualifiedName)
+            let tempRising  = getSM(td.ParentSystem).GetTempBoolTag("tempRisingRelay")
             yield! (pss, td.ParentSystem) --^ (tempRising, fn)
             yield  (tempRising.Expr, api.RxET.Expr) ==|  (am.ApiItemSet, fn)
         |]
 
     member am.A2_ApiEnd() =
-        let fn = getFuncName()
         let api= am.ApiItem
-        (api.RxET.Expr, api.ApiSystem._off.Expr) --| (api.ApiItemEnd, fn)
+        (api.RxET.Expr, api.ApiSystem._off.Expr) --| (api.ApiItemEnd, getFuncName())
 

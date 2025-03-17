@@ -25,8 +25,6 @@
 		<IsPackable>true</IsPackable>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<!--<GenerateProgramFile>false</GenerateProgramFile>-->
-		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>

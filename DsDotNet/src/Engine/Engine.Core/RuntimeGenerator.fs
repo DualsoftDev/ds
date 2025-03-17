@@ -8,6 +8,36 @@ open Dual.Common.Base.FS.Functions
 [<AutoOpen>]
 module RuntimeGeneratorModule =
 
+    type RuntimePackage =
+        | Simulation
+        | Control
+        | Monitoring
+        | VirtualPlant
+        | VirtualLogic
+    with
+        member x.IsVirtualMode() =
+            match x with
+            | Simulation
+            | VirtualPlant
+            | VirtualLogic -> true
+            | _ -> false
+
+        member x.IsControlMode() =
+            match x with
+            | Control -> true
+            | _ -> false
+
+
+    let ToRuntimePackage s =
+        match s with
+        | "Simulation" -> Simulation
+        | "Control" -> Control
+        | "Monitoring" -> Monitoring
+        | "VirtualPlant" -> VirtualPlant
+        | "VirtualLogic" -> VirtualLogic
+        | _ -> Simulation//ahn!!
+        //| _ -> failwithlogf $"Error ToRuntimePackage"
+
     //제어 HW CPU 기기 타입
     type PlatformTarget =
         | WINDOWS
@@ -62,33 +92,6 @@ module RuntimeGeneratorModule =
         | TimeX16
         | TimeX100
 
-    type RuntimePackage =
-        | PC
-        | PCSIM
-        | PLC
-        | PLCSIM
-        | Simulation
-        | Control
-        | Monitoring
-        | VirtualPlant
-        | VirtualLogic
-    with
-        member x.IsPackageSIM() =
-            match x with
-            | PCSIM | PLCSIM -> true
-            | _ -> false
-
-
-    let ToRuntimePackage s =
-        match s with
-        | "Simulation" -> Simulation
-        | "Control" -> Control
-        | "Monitoring" -> Monitoring
-        | "VirtualPlant" -> VirtualPlant
-        | "VirtualLogic" -> VirtualLogic
-        | _ -> Simulation//ahn!!
-        //| _ -> failwithlogf $"Error ToRuntimePackage"
-
     let InitStartMemory = 1000
     let BufferAlramSize = 9999
     let XGKAnalogOffsetByte = 96
@@ -97,6 +100,10 @@ module RuntimeGeneratorModule =
 
     let ExternalTempMemory =  "M"
     let ExternalTempIECMemory =  "%MX"
+    let ExternalXGIAddressON = "%FX153"
+    let ExternalXGIAddressOFF = "%FX154"
+    let ExternalXGKAddressON = "F00099"
+    let ExternalXGKAddressOFF = "F0009A"
     let ExternalTempNoIECMemory =  "M"
 
 
@@ -118,7 +125,6 @@ module RuntimeGeneratorModule =
         RuntimePackage: RuntimePackage
         PlatformTarget: PlatformTarget
         HwDriver: HwDriveTarget //LS-XGI, LS-XGK, Paix hw drive 이름
-        RuntimeMotionMode: RuntimeMotionMode
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
     }
@@ -128,10 +134,9 @@ module RuntimeGeneratorModule =
             DsFilePath = ""
             HwIP = "127.0.0.1"
             ExternalApi = ExternalApi.NONE_API
-            RuntimePackage = PCSIM //unit test를 위해 PCSIM으로 설정
+            RuntimePackage = Simulation //unit test를 위해 Simulation으로 설정
             PlatformTarget = WINDOWS
             HwDriver = HwDriveTarget.LS_XGK_IO
-            RuntimeMotionMode = MotionAsync
             TimeSimutionMode = TimeX1
             TimeoutCall = 15000u
         }
@@ -146,7 +151,6 @@ module RuntimeGeneratorModule =
             runtimePackage:RuntimePackage,
             platformTarget:PlatformTarget, 
             hwDriver:HwDriveTarget, 
-            runtimeMotionMode:RuntimeMotionMode, 
             timeSimutionMode:TimeSimutionMode, 
             timeoutCall:uint32) =
         { 
@@ -156,7 +160,6 @@ module RuntimeGeneratorModule =
             RuntimePackage = runtimePackage
             PlatformTarget = platformTarget
             HwDriver = hwDriver
-            RuntimeMotionMode = runtimeMotionMode
             TimeSimutionMode = timeSimutionMode
             TimeoutCall = timeoutCall
         }
@@ -198,6 +201,21 @@ module PlatformTargetExtensions =
         let allPlatforms =
             [ WINDOWS; XGI; XGK; AB; MELSEC]
 
+
+
+module RuntimePackageExtensions =
+        let fromString s =
+            match s with
+            | "Simulation"-> Simulation
+            | "Control" -> Control
+            | "Monitoring" -> Monitoring
+            | "VirtualPlant" -> VirtualPlant
+            | "VirtualLogic" -> VirtualLogic
+            | _ -> failwithf $"Error ToPlatformTarget: {s}"
+
+        let allRuntimePackage =
+            [ Simulation; Control; Monitoring; VirtualPlant; VirtualLogic]
+            
 
 module ExternalApiExtensions =
     let fromString s =

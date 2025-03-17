@@ -22,8 +22,6 @@
 		<Authors>Dual Inc.</Authors>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>

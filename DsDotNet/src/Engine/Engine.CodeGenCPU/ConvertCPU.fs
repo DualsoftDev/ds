@@ -7,30 +7,7 @@ open Engine.Common
 
 [<AutoOpen>]
 module ConvertCPU =
-    let private IsSpec (v:Vertex, vaild:ConvertType, alias:ConvertAlias)=
-        let aliasSpec    = alias = AliasTure  || alias = AliasNotCare
-        let aliasNoSpec  = alias = AliasFalse || alias = AliasNotCare
-        let isValidVertex =
-            match v with
-            | :? Real            -> aliasNoSpec && vaild.HasFlag(RealInFlow)
-            | :? Call as c  ->
-                match c.Parent with
-                | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
-                | DuParentReal _ -> aliasNoSpec && vaild.HasFlag(CallInReal)
-
-            | :? Alias as a  ->
-                 match a.Parent with
-                 | DuParentFlow _ ->
-                     match a.TargetWrapper with
-                     |  DuAliasTargetReal _         -> aliasSpec && vaild.HasFlag(RealInFlow)
-                     |  DuAliasTargetCall _         -> aliasSpec && vaild.HasFlag(CallInFlow)
-                 | DuParentReal _ ->
-                     match a.TargetWrapper with
-                     | DuAliasTargetReal _         -> failwithlog $"Error {getFuncName()}"
-                     | DuAliasTargetCall _         -> aliasSpec &&  vaild.HasFlag(CallInReal)
-            |_ -> failwithlog $"Error {getFuncName()}"
-
-        isValidVertex
+    
 
     ///Vertex 타입이 Spec에 해당하면 적용
     let private applyVertexSpec(v:Vertex)  =
@@ -45,20 +22,14 @@ module ConvertCPU =
                 yield  vr.R3_RealStartPoint()
                 yield  vr.R4_RealLink()
                 yield! vr.R5_DummyDAGCoils()
-                yield! vr.R7_RealGoingOriginError()
                 yield! vr.R8_RealGoingPulse()
-                yield! vr.R10_RealGoingTime()
-                yield! vr.R11_RealGoingMotion()
                 yield! vr.R12_RealGoingScript()
 
-                yield vr.F1_RootStart()
-                yield vr.F2_RootReset()
+
                 yield vr.F7_HomeCommand()
 
-                yield! vr.D1_DAGHeadStart()
-                yield! vr.D2_DAGTailStart()
-                yield! vr.D3_DAGCoinEnd()
-                yield! vr.D4_DAGCoinReset()
+                
+                yield! vr.D3_CoinReset()
                 yield! vr.R6_SourceTokenNumGeneration()
             
 
@@ -71,21 +42,12 @@ module ConvertCPU =
                 let vc = v.TagManager :?> CoinVertexTagManager
                 yield  vc.F4_CallEndInFlow()
 
-            //if IsSpec (v, CallInFlow, AliasFalse) then
-            //    let vc = v.TagManager :?> CoinVertexTagManager
-            //    yield! vc.F5_SourceTokenNumGeneration()
 
-            if IsSpec (v, CallInReal , AliasFalse) then
-                let vc = v.TagManager :?> CoinVertexTagManager
-                if (v:?>Call).IsJob then
-                    yield! vc.E1_CallErrTimeOver()
-                    yield! vc.E2_CallErrRXMonitor()
-                    yield! vc.E3_CallErrRXInterlockMonitor()
-                    yield  vc.E4_CallErrTotalMonitor()
+
 
             if IsSpec (v, CallInReal, AliasNotCare) then
                 let vc = v.TagManager :?> CoinVertexTagManager
-                yield vc.C1_CallPlanStart()
+                
                 yield vc.C2_CallPlanEnd()
                 yield! vc.C3_InputDetected()
                 yield! vc.C4_OutputDetected()
@@ -190,28 +152,8 @@ module ConvertCPU =
                 yield v.VM.V2_ActionVairableMove(s)
         |]
 
-    
-    let private applyJob(s:DsSystem) =
-        [|
-            let devCallSet =  s.GetTaskDevCalls()
-            for (td, coins) in devCallSet do
-                let tm = td.TagManager :?> TaskDevManager
-                yield! tm.J1_JobActionOuts(coins)
-            //for j in s.Jobs do
-            //    yield! j.J2_InputDetected()
-            //    yield! j.J3_OutputDetected()
-        |]
 
 
-    let private emulationDevice(s:DsSystem) =
-        [|
-            yield s.SetFlagForEmulation()
-
-            let devCallSet =  s.GetTaskDevCalls()
-            for (td, calls) in devCallSet do
-                if (*not(td.IsRootOnlyDevice) &&*) td.InTag.IsNonNull() then
-                    yield! td.SensorEmulation(s, calls)
-        |]
 
     let private updateRealParentExpr(x:DsSystem) =
         for dev, call in x.GetTaskDevsCall() do
@@ -238,7 +180,7 @@ module ConvertCPU =
                 sys.GenerationIO()
 
                 updateSourceTokenOrder sys
-                if not(RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM())
+                if not(RuntimeDS.ModelConfig.RuntimePackage.IsVirtualMode())
                 then
                     checkNullAddress sys
                     checkErrHWItem(sys)
@@ -253,9 +195,12 @@ module ConvertCPU =
             else
                 CheckRealReset(sys)
                 updateRealParentExpr(sys)
-                sys.GenerationRealActionMemory()
+
+            sys.GenerationRealActionMemory()
 
             [
+                yield! applyRuntimeMode sys (not(isActive))
+
                 //Active 시스템 적용
                 if isActive then
                     yield! sys.B1_HWButtonOutput()
@@ -268,9 +213,7 @@ module ConvertCPU =
                     yield! sys.B2_SWButtonOutput()
                     yield! sys.B4_SWModeLamp()
 
-                    if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
-                        yield! emulationDevice sys
-
+                 
                     yield! applyVertexToken sys
 
                 else 
@@ -301,8 +244,7 @@ module ConvertCPU =
                 yield! applyApiItem sys
                 //funcCall 적용
                 yield! funcCall sys
-                //allpyJob 적용
-                yield! applyJob sys
+          
                 ///CallOnDelay 적용
                 yield! sys.T1_DelayCall()
             ]

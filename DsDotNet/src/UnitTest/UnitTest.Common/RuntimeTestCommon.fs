@@ -17,7 +17,7 @@ open System.Text.Json.Serialization
 module RuntimeTestCommon =
 
     let getRuntimeModelForSim(pptPath) =
-        RuntimeDS.ChangeRuntimePackage(PCSIM)
+        RuntimeDS.ChangeRuntimePackage(RuntimePackage.Simulation)
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
         let modelConfig = createDefaultModelConfig() 

@@ -74,8 +74,6 @@ module TagKindList =
     | _T200MS                    = 0102  //system timer  LS 특수비트랑 이름 통일
     | _T1S                       = 0103  //system timer  LS 특수비트랑 이름 통일
     | _T2S                       = 0104  //system timer  LS 특수비트랑 이름 통일
-    ///emulation
-    | emulation                 = 9990
     ///temp (data 처리를위한 임시변수)
     | tempData                  = 9998
     ///temp (not logic 정의를 위한 plc 임시변수)

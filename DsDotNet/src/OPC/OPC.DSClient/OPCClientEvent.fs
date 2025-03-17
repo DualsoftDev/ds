@@ -8,25 +8,26 @@ open Opc.Ua
 open Opc.Ua.Client
 open Engine.Core
 
-type OPCClientEvent(sys: DsSystem) =
-    let tagOPCEventSubject = new Subject<TagEvent>()
-    let opcClientManager = OPCClientManager(sys)
-    let opcClient = OPCDsClient()
+module OPCClientEventModule =
+    let TagOPCEventSubject = new Subject<TagEvent>()
 
-    do
-        opcClient.ConnectionReady.Add(fun _ ->
-            opcClientManager.DisposeTags()  
-            let tags = opcClientManager.LoadTags(opcClient.Session.Value)
+    type OPCClientEvent(sys: DsSystem) =
+        let opcClientManager = OPCClientManager(sys)
+        let opcClient = OPCDsClient()
 
-            tags |> Seq.iter (fun tag ->
-                tag.AddHandler(fun _ _ ->  
-                        match TagKindExt.GetTagInfo(tag.DsStorage) with
-                        | Some dstag -> tagOPCEventSubject.OnNext(dstag)
-                        | None -> ()
+        do
+            opcClient.ConnectionReady.Add(fun _ ->
+                opcClientManager.DisposeTags()  
+                let tags = opcClientManager.LoadTags(opcClient.Session.Value)
+
+                tags |> Seq.iter (fun tag ->
+                    tag.AddHandler(fun _ _ ->  
+                            match TagKindExt.GetTagInfo(tag.DsStorage) with
+                            | Some dstag -> TagOPCEventSubject.OnNext(dstag)
+                            | None -> ()
+                    )
                 )
             )
-        )
-        opcClient.InitializeOPC("opc.tcp://localhost:2747", 3000);
+            opcClient.InitializeOPC("opc.tcp://localhost:2747", 3000);
 
 
-    member _.TagOPCEventSubject = tagOPCEventSubject

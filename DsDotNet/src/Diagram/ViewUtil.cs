@@ -300,6 +300,8 @@ namespace Diagram.View.MSAGL
 
         private static void HandleTaskDevEvent(EventTaskDev td)
         {
+            if (!DicTaskDevTag.ContainsKey(td.Tag)) return;
+
             var viewNodes = DicTaskDevTag[td.Tag];
 
             viewNodes.Iter(n =>

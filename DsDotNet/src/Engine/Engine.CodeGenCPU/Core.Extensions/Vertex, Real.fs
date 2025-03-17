@@ -13,7 +13,7 @@ module ConvertCpuVertex =
         let maxShortSpeedMSec =TimerModule.MinTickInterval|>float
         let v =
             time |> bind(fun t ->
-                if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
+                if RuntimeDS.ModelConfig.RuntimePackage.IsVirtualMode() then
                     match RuntimeDS.ModelConfig.TimeSimutionMode  with
                     | TimeSimutionMode.TimeNone -> None
                     | TimeSimutionMode.TimeX1 ->   Some ((t|>float)* 1.0/1.0 )

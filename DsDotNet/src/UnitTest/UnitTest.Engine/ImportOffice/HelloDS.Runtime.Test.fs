@@ -17,7 +17,7 @@ module HelloDSRuntimeTestModule =
     type HelloDSRuntimeTest() =
         inherit EngineTestBaseClass()
         do
-            RuntimeDS.ChangeRuntimePackage(PCSIM)
+            RuntimeDS.ChangeRuntimePackage(Simulation)
         let modelConfig = createDefaultModelConfig()    
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let getSystem() =

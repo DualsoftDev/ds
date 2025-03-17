@@ -7,14 +7,12 @@
         <SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <PlatformTarget>AnyCPU</PlatformTarget>
-		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
-		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 
 	<ItemGroup>
         <ProjectReference Include="..\..\..\nuget\Common\Dual.Common.Core\Dual.Common.Core.csproj" />
-        <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Parser.FS\Engine.Parser.FS.fsproj" />
+        <ProjectReference Include="..\..\Engine\Engine.Parser\Engine.Parser.csproj" />
     </ItemGroup>
 </Project>

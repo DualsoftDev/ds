@@ -155,11 +155,8 @@ type RealVertexTagManager with
         let fn = getFuncName()
         let dop = v.Flow.d_st.Expr
         let rst = v.Flow.ClearExpr
-        [|
-            if not(RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM()) then 
-                let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
-                yield (checking, rst) ==| (v.ErrGoingOrigin , fn)
-        |]
+        let checking = v.G.Expr <&&> !@v.OG.Expr <&&> !@v.RR.Expr <&&> dop
+        (checking, rst) ==| (v.ErrGoingOrigin , fn)
         
     member v.R8_RealGoingPulse(): CommentedStatement [] =
         let fn = getFuncName()
@@ -167,59 +164,4 @@ type RealVertexTagManager with
             yield! (v.G.Expr, v.System)  --^ (v.GP, fn) 
         |]
 
-    member v.R10_RealGoingTime(): CommentedStatement [] =
-        let fn = getFuncName()
-        [|
-            let getTimeStatement() =
-                [|  yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeSimMsec, fn)
-                    yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, fn)     |]
-                   
-            if v.Real.Time.IsSome then
-                
-                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
-                yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
-                
-                if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() && v.Real.TimeAvgExist  then
-                    if RuntimeDS.ModelConfig.RuntimeMotionMode = MotionAsync then
-                        yield! getTimeStatement() 
-                    elif RuntimeDS.ModelConfig.RuntimeMotionMode = MotionSync then
-                        if v.Real.Motion.IsSome then
-                            yield (v.MotionEnd.Expr  , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
-                        else 
-                            yield! getTimeStatement() 
-
-                else 
-                    yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, fn)
-                    
-        |]
-
-    member v.R11_RealGoingMotion(): CommentedStatement [] =
-        let fn = getFuncName()
-        [|
-            if v.Real.Motion.IsSome then
-                yield (v.MotionStart.Expr <&&> v.MotionEnd.Expr,   v.F.Expr) ==| (v.MotionRelay, fn)
-                yield (v.G.Expr,  (*v.MotionEnd.Expr <||>*)  v.MotionRelay.Expr) --| (v.MotionStart, fn)
-                //MotionEnd.Expr 미리 켜져 있더라도 MotionStart가 수행 (미리 위치해 있으면 3D에서 이벤트 안줌)
-                if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
-                    if RuntimeDS.ModelConfig.RuntimeMotionMode = MotionAsync then
-                        if v.Real.TimeAvg.IsSome then
-                            yield (v.TimeEnd.Expr    , v.R.Expr) ==| (v.MotionEnd, fn)   
-                        else 
-                            yield (v.MotionStart.Expr, v.R.Expr) ==| (v.MotionEnd, fn)   
-
-                else
-                    let realSensor  = v.Real.ParentApiSensorExpr
-                    if realSensor.IsNull() then
-                        yield (v.G.Expr, v._off.Expr) --| (v.MotionEnd, fn)      //실제 rx에 해당하는 하지 않으면 action 안보고 going 후 바로 MotionEnd
-                    else
-                        yield (realSensor, v._off.Expr) --| (v.MotionEnd, fn)    //실제 rx에 해당하는 하면 api 실 action sensor
-                    
-        |]
-
-    member v.R12_RealGoingScript(): CommentedStatement [] =
-        let fn = getFuncName()
-        [|
-            if v.Real.Script.IsSome then
-                yield (v.ScriptStart.Expr<&&>v.ScriptEnd.Expr, v.ET.Expr) ==| (v.ScriptRelay, fn)
-                yield (v.G.Expr, v.ScriptRelay.Expr) --| (v.ScriptStart, fn)  
-        |]
+   

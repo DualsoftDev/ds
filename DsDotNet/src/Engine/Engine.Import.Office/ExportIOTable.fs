@@ -622,7 +622,7 @@ module ExportIOTable =
 
 
 
-    let ToManualTable_BtnLamp (sys: DsSystem)  : DataTable =
+    let ToManualTable_BtnLamp (sys: DsSystem) (target:HwTarget)  (pakage:RuntimePackage) : DataTable =
 
         let dt = new System.Data.DataTable($"조작반(M)")
         dt.Columns.Add($"{ManualColumn_ControlPanel.Name}", typeof<string>) |> ignore
@@ -634,8 +634,14 @@ module ExportIOTable =
                     .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
                     |>dict
 
-
-        let emulatorAddress = (sys.TagManager:?>SystemManager).GetSystemTag(SystemTag.emulation)
+        let simAddress =
+            let isSim = pakage.IsVirtualMode()
+            match target.HwDrive with   
+            | HwDriveTarget.LS_XGK_IO -> 
+                if isSim then ExternalXGKAddressON else ExternalXGKAddressOFF
+            | HwDriveTarget.LS_XGI_IO -> 
+                if isSim then ExternalXGIAddressON else ExternalXGIAddressOFF
+            |_ -> failwith $"{target.HwDrive} Invalid simAddress tag" 
 
         //HMI TAG와 맞춰야 해서 순서  중요
         addRows [[ "AutoSelect"; "bool"; hws["AutoSelect"] ]] dt
@@ -651,8 +657,8 @@ module ExportIOTable =
         addRows [[ "OriginStateLamp"; "bool"; hws["OriginStateLamp"] ]] dt
         addRows [[ "ReadyStateLamp"; "bool"; hws["ReadyStateLamp"] ]] dt
         addRows [[ "DriveLamp"; "bool"; hws["DriveLamp"] ]] dt
-        addRows [[ "SimulationLamp"; "bool"; emulatorAddress.Address ]] dt
-
+        addRows [[ "SimulationLamp"; "bool"; simAddress]] dt
+        
         let emptyLine () = emptyRow (Enum.GetNames(typedefof<ManualColumn>)) dt
 
         emptyLine ()
@@ -719,13 +725,13 @@ module ExportIOTable =
         //    convertDataSetToPdf filePath dataTables
 
         [<Extension>]
-        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) target=
+        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) (target:HwTarget) (package:RuntimePackage)=
             let dataTables = [|
 
                 ToManualTable sys IOType.Memory
                 ToManualTable sys IOType.In
                 ToManualTable sys IOType.Out
-                ToManualTable_BtnLamp sys
+                ToManualTable_BtnLamp sys target package
 
                 ToAutoFlowTable sys target
                 ToAutoWorkTable sys target

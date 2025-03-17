@@ -251,7 +251,7 @@ module rec CoreModule =
             member x.Flow = flow
             member val Graph = DsGraph(flow.System.VertexAddRemoveHandlers)
             member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
-            member val ExternalTags = Dictionary<ExternalTag, IStorage>()
+            member val RealExternalTags = Dictionary<ExternalTag, IStorage>()
             member val ParentApiSensorExpr = getNull<IExpression>() with get, set
 
             //member val RealData:byte[] = [||] with get, set
@@ -338,7 +338,7 @@ module rec CoreModule =
 
             member val CallTime = CallTime() with get, set
             member val CallActionType = CallActionType.ActionNormal with get, set
-            member val ExternalTags = Dictionary<ExternalTag, IStorage>()
+            member val CallExternalTags = Dictionary<ExternalTag, IStorage>()
             member val Disabled:bool = false with get, set
             member val ValueParamIO = valueParamIO
 

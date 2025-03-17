@@ -7,7 +7,8 @@ open Engine.Core
 open Dual.Common.Core.FS
 
 type VertexTagManager with
-    member v.C1_CallPlanStart() =
+
+    member v.CallPlanStartActive() =
         let v = v :?> CoinVertexTagManager
         let call = v.Vertex.GetPureCall()
        
@@ -34,6 +35,16 @@ type VertexTagManager with
         else
             (sets, rsts) ==| (v.PS, f)
 
+
+    member v.CallPlanStartPassive() =
+        let v = v :?> CoinVertexTagManager
+        let call = v.Vertex.GetPureCall()
+        let parentReal = call.Parent.GetCore() :?> Vertex
+        let sets =  v.ST.Expr
+        let rsts =  call.End <||> parentReal.VR.RT.Expr
+        let f = getFuncName()
+        (sets, rsts) ==| (v.PS, f)
+
     member v.C2_CallPlanEnd() =
         let v = v :?> CoinVertexTagManager
         let call = v.Vertex.GetPureCall()
@@ -54,7 +65,7 @@ type VertexTagManager with
     member c.C4_OutputDetected() =
         let _off = c.System._off.Expr
         match c.Vertex.GetPureCall().ActionOutExpr with
-        | Some inExprs -> [(inExprs, _off) --| (c.Vertex.VC.CallOut, getFuncName())]
+        | Some outExprs -> [(outExprs, _off) --| (c.Vertex.VC.CallOut, getFuncName())]
         | None -> []
 
     member c.C5_StatActionFinish() =

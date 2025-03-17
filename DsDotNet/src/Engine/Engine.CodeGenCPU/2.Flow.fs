@@ -8,7 +8,7 @@ open Dual.Common.Core.FS
 
 type VertexTagManager with
 
-    member v.F1_RootStart() =
+    member v.F1_RootStartActive() =
         let real = v.Vertex :?> Real
         let startCausals =  v.Vertex.GetStartRootAndCausals()
         let plans = v.System.GetApiSets(real).ToOrElseOff()
@@ -32,8 +32,27 @@ type VertexTagManager with
 
         (sets, rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
 
+        
+    member v.F1_RootStartPassive() =
+        let real = v.Vertex :?> Real
+        let plans = v.System.GetApiSets(real).ToOrElseOff()
+       
+        let sets = (
+                    v.SFP.Expr <||> plans <||>
+                    real.Graph.Inits.Select(fun v->v.VC.CallOut)
+                       .ToOrElseOff()
+                    )
+                   <&&> v.Flow.d_st.Expr
 
-    member v.F2_RootReset()  =
+        let rsts = if real.Graph.Vertices.Any()
+                    then real.V.F.Expr <||> (real.V.RT.Expr <&&> real.CoinAlloffExpr)
+                    else real.V.F.Expr <||>  real.V.RT.Expr 
+
+        (sets , rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
+
+        
+
+    member v.F2_RootResetActive()  =
         let real = v.Vertex.GetPureReal()
         let resetCausals =  v.Vertex.GetResetRootAndCausals()
 
@@ -43,15 +62,28 @@ type VertexTagManager with
                 shareds.Select(fun s -> s.Vertex.GetResetRootAndCausals()).ToOrElseOn()
             else
                 v._off.Expr
-        let manualReset = if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM()
-                            then  v.RFP.Expr
-                            else  v.RFP.Expr <&&> v.Flow.mop.Expr
+        let manualReset = v.RFP.Expr <&&> v.Flow.mop.Expr
+        
+                    //if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() ahn!!
+                    //        then  v.RFP.Expr
+                    //        else  v.RFP.Expr <&&> v.Flow.mop.Expr
         let sets =
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr)
             <||>
             ( manualReset)
              <||>
             (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr <&&> !@v.Vertex.VR.OG.Expr)
+
+        let rsts = real.V.R.Expr
+        (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이
+
+    member v.F2_RootResetPassive()  =
+        let real = v.Vertex :?> Real
+       
+        let sets = v.RFP.Expr <||>
+                    if real.Graph.Vertices.Any()
+                    then real.CoinETContacts.ToAnd()   
+                    else v._off.Expr
 
         let rsts = real.V.R.Expr
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이

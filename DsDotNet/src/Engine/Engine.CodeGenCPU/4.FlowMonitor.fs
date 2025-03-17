@@ -21,11 +21,11 @@ type Flow with
         (set, rst) ==| (f.p_st, getFuncName())
 
     member f.F3_FlowReadyCondition() =
-        let set = 
-            if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
-                f._on.Expr
-            else 
-                f.HWReadyConditionsToAndElseOn
+        let set =   f.HWReadyConditionsToAndElseOn
+            //if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then ahn!!
+            //    f._on.Expr
+            //else 
+            //    f.HWReadyConditionsToAndElseOn
 
         let rst = f._off.Expr
         [
@@ -35,11 +35,11 @@ type Flow with
         ]
 
     member f.F4_FlowDriveCondition() =
-        let set = 
-            if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then
-                f._on.Expr
-            else 
-                f.HWDriveConditionsToAndElseOn
+        let set =   f.HWDriveConditionsToAndElseOn
+            //if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then ahn!!
+            //    f._on.Expr
+            //else 
+            //    f.HWDriveConditionsToAndElseOn
                 
         let rst = f._off.Expr
         [

@@ -15,22 +15,17 @@ type Spec08_DAGStatement() =
 
     let t = CpuTestSample(WINDOWS)
     [<Test>]
-    member __.``D1 DAG Head Start`` () =
+    member __.``D1 DAG  Start`` () =
         for real in t.Reals do
-            real.D1_DAGHeadStart() |> doChecks
-
-    [<Test>]
-    member __.``D2 DAG Tail Start`` () =
-        for real in t.Reals do
-            real.D2_DAGTailStart() |> doChecks
+            real.D1_CoinStart() |> doChecks
 
     [<Test>]
     member __.``D3 DAG Coin End InReal`` () =
         for real in t.Reals do
-            real.D3_DAGCoinEnd() |> doChecks
+            real.D3_CoinEnd() |> doChecks
 
     [<Test>]
     member __.``D4 DAG Coin Reset`` () =
         for real in t.Reals do
-            real.D4_DAGCoinReset() |> doChecks
+            real.D4_CoinReset() |> doChecks
 

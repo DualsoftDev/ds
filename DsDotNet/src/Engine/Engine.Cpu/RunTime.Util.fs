@@ -22,7 +22,6 @@ module internal RunTimeUtil =
                          SystemTag._T200MS
                          SystemTag._T1S
                          SystemTag._T2S
-                         SystemTag.emulation
                          SystemTag.timeout
                          ] |> Seq.cast<int>
 

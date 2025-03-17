@@ -27,7 +27,7 @@ namespace Engine.TestSimulator
     {
         public static bool Do(DsCPU dsCpu)
         {
-            RuntimeDS.ChangeRuntimePackage(RuntimePackage.PCSIM);
+            RuntimeDS.ChangeRuntimePackage(RuntimePackage.Simulation);
 
 
             bool resultMoving = false;

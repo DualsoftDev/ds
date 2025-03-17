@@ -7,7 +7,32 @@ open System.Linq
 open System
 
 [<AutoOpen>]
-module ConvertErrorCheck =
+module ConvertCheckModule =
+
+    let IsSpec (v:Vertex, vaild:ConvertType, alias:ConvertAlias)=
+            let aliasSpec    = alias = AliasTure  || alias = AliasNotCare
+            let aliasNoSpec  = alias = AliasFalse || alias = AliasNotCare
+            let isValidVertex =
+                match v with
+                | :? Real            -> aliasNoSpec && vaild.HasFlag(RealInFlow)
+                | :? Call as c  ->
+                    match c.Parent with
+                    | DuParentFlow _ -> aliasNoSpec && vaild.HasFlag(CallInFlow)
+                    | DuParentReal _ -> aliasNoSpec && vaild.HasFlag(CallInReal)
+
+                | :? Alias as a  ->
+                     match a.Parent with
+                     | DuParentFlow _ ->
+                         match a.TargetWrapper with
+                         |  DuAliasTargetReal _         -> aliasSpec && vaild.HasFlag(RealInFlow)
+                         |  DuAliasTargetCall _         -> aliasSpec && vaild.HasFlag(CallInFlow)
+                     | DuParentReal _ ->
+                         match a.TargetWrapper with
+                         | DuAliasTargetReal _         -> failwithlog $"Error {getFuncName()}"
+                         | DuAliasTargetCall _         -> aliasSpec &&  vaild.HasFlag(CallInReal)
+                |_ -> failwithlog $"Error {getFuncName()}"
+
+            isValidVertex
 
     let internal checkErrHWItem(sys:DsSystem) =
         let hwManuFlows = sys.ManualHWButtons |> Seq.collect(fun f -> f.SettingFlows)

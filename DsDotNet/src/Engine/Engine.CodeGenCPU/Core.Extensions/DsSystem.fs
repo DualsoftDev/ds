@@ -20,7 +20,7 @@ module ConvertCpuDsSystem =
 
         member s._on          = s.GetPv<bool>(SystemTag._ON)
         member s._off         = s.GetPv<bool>(SystemTag._OFF)
-        member s._emulation   = s.GetPv<bool>(SystemTag.emulation)
+        //member s._emulation   = s.GetPv<bool>(SystemTag.emulation)
         member s._auto_btn    = s.GetPv<bool>(SystemTag.auto_btn)
         member s._manual_btn  = s.GetPv<bool>(SystemTag.manual_btn)
         member s._drive_btn   = s.GetPv<bool>(SystemTag.drive_btn)
@@ -105,8 +105,8 @@ module ConvertCpuDsSystem =
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true (Some(emg)) (int HwSysTag.HwStopEmergencyErrLamp) x
                 emg.ErrorEmergency.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))
 
-        member private x.GenerationEmulationMemory()  =
-            x._emulation.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
+        //member private x.GenerationEmulationMemory()  =
+        //    x._emulation.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
 
 
         member private x.GenerationCallAlarmMemory()  =
@@ -131,13 +131,13 @@ module ConvertCpuDsSystem =
                     ErrorOffTimeUnder,  (cv.ErrOffTimeUnder    :> IStorage)
                     ErrorInterlock,     (cv.ErrInterlock       :> IStorage)
                 |]
-                |> Seq.iter(fun (k, v) ->call.ExternalTags.Add(k, v))
+                |> Seq.iter(fun (k, v) ->call.CallExternalTags.Add(k, v))
 
         member private x.GenerationRealAlarmMemory()  =
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
                 rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getTarget(x))
-                real.ExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage)
+                real.RealExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage)
 
         member  x.GenerationRealActionMemory()  =
             let target = getTarget(x)
@@ -158,15 +158,15 @@ module ConvertCpuDsSystem =
                     ScriptEnd,    (rm.ScriptEnd   :> IStorage)
                     MotionEnd,    (rm.MotionEnd   :> IStorage)
                 |]
-                |> Seq.iter(fun (k, v) ->real.ExternalTags.Add(k, v))
+                |> Seq.iter(fun (k, v) ->real.RealExternalTags.Add(k, v))
 
         member x.ClearExteralTags()  =
             let calls = x.GetAlarmCalls().Distinct()
             for call in calls do
-                call.ExternalTags.Clear()
+                call.CallExternalTags.Clear()
 
             for real in x.GetRealVertices().Distinct()  do
-                real.ExternalTags.Clear()
+                real.RealExternalTags.Clear()
 
         member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do
@@ -231,13 +231,9 @@ module ConvertCpuDsSystem =
                     dev.ManualAddress  <- TextNotUsed  //다중 작업은 수동 작업을 사용하지 않는다.
 
         member x.GenerationMemory() =
-            //Step1)Emulation base + 1 bit
-            x.GenerationEmulationMemory()
 
             let startAlarm = DsAddressModule.getCurrentMemoryIndex()
-            //Step2)Alarm base + (2 ~ N) bit
-
-
+            //Step1)Alarm base + (0 ~ N) bit
             x.GenerationCallAlarmMemory()
             x.GenerationRealAlarmMemory()
             x.GenerationButtonEmergencyMemory()
@@ -245,7 +241,7 @@ module ConvertCpuDsSystem =
 
             DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize)  //9999개 HMI 리미트
 
-            //Step3)Flow Real HMI base + (N+1 ~ M)bit
+            //Step2)Flow Real HMI base + (N ~ M)bit
             x.GenerationCallManualMemory()
             x.GenerationFlowHMIMemory()
             x.GenerationRealHMIMemory()

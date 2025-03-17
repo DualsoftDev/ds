@@ -266,13 +266,13 @@ module CoreExtensionModule =
 
         member x.NoneAction = x.Motion.IsNone &&  x.Script.IsNone
 
-        member x.ErrGoingOrigin = x.ExternalTags[ErrGoingOrigin]
+        member x.ErrGoingOrigin = x.RealExternalTags[ErrGoingOrigin]
 
-        member x.MotionStartTag = x.ExternalTags[MotionStart]
-        member x.ScriptStartTag = x.ExternalTags[ScriptStart]
+        member x.MotionStartTag = x.RealExternalTags[MotionStart]
+        member x.ScriptStartTag = x.RealExternalTags[ScriptStart]
 
-        member x.MotionEndTag = x.ExternalTags[MotionEnd]
-        member x.ScriptEndTag = x.ExternalTags[ScriptEnd]
+        member x.MotionEndTag = x.RealExternalTags[MotionEnd]
+        member x.ScriptEndTag = x.RealExternalTags[ScriptEnd]
 
 
     let getCallName (x:Call) =
@@ -303,13 +303,13 @@ module CoreExtensionModule =
         member x.NameForProperty = (x.DequotedQualifiedName.Split('.')[1..]).CombineQuoteOnDemand()
 
         member x.System = x.Parent.GetSystem()
-        member x.ErrorSensorOn        = x.ExternalTags[ErrorSensorOn    ]
-        member x.ErrorSensorOff       = x.ExternalTags[ErrorSensorOff   ]
-        member x.ErrorOnTimeOver      = x.ExternalTags[ErrorOnTimeOver  ]
-        member x.ErrorOnTimeUnder     = x.ExternalTags[ErrorOnTimeUnder ]
-        member x.ErrorOffTimeOver     = x.ExternalTags[ErrorOffTimeOver ]
-        member x.ErrorOffTimeUnder    = x.ExternalTags[ErrorOffTimeUnder]
-        member x.ErrorInterlock       = x.ExternalTags[ErrorInterlock]
+        member x.ErrorSensorOn        = x.CallExternalTags[ErrorSensorOn    ]
+        member x.ErrorSensorOff       = x.CallExternalTags[ErrorSensorOff   ]
+        member x.ErrorOnTimeOver      = x.CallExternalTags[ErrorOnTimeOver  ]
+        member x.ErrorOnTimeUnder     = x.CallExternalTags[ErrorOnTimeUnder ]
+        member x.ErrorOffTimeOver     = x.CallExternalTags[ErrorOffTimeOver ]
+        member x.ErrorOffTimeUnder    = x.CallExternalTags[ErrorOffTimeUnder]
+        member x.ErrorInterlock       = x.CallExternalTags[ErrorInterlock]
 
     let inValidTaskDevTags (x:DsSystem) =
         x.Jobs

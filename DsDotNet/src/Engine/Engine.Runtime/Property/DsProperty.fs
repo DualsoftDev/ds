@@ -314,9 +314,8 @@ module rec DsPropertyModule =
 
         let mutable dsFilePath = ""
         let mutable hwIP = ""
-        let mutable runtimePackage = RuntimePackage.PC
+        let mutable runtimePackage = RuntimePackage.Simulation
         let mutable hwDriver = ""
-        let mutable runtimeMotionMode = RuntimeMotionMode.MotionAsync
         let mutable timeSimutionMode = TimeSimutionMode.TimeX1
         let mutable timeoutCall = 0u
 
@@ -330,7 +329,6 @@ module rec DsPropertyModule =
             x.UpdateField(&hwIP, config.HwIP, nameof hwIP)
             x.UpdateField(&runtimePackage, config.RuntimePackage, nameof runtimePackage)
             x.UpdateField(&hwDriver, config.HwDriver.ToString(), nameof hwDriver)
-            x.UpdateField(&runtimeMotionMode, config.RuntimeMotionMode, nameof runtimeMotionMode)
             x.UpdateField(&timeSimutionMode, config.TimeSimutionMode, nameof timeSimutionMode)
             x.UpdateField(&timeoutCall, config.TimeoutCall, nameof timeoutCall)
 
@@ -350,10 +348,7 @@ module rec DsPropertyModule =
             with get() = hwDriver
             and set(v) = x.UpdateField(&hwDriver, v, nameof x.HwDriver)
 
-        member x.RuntimeMotionMode
-            with get() = runtimeMotionMode
-            and set(v) = x.UpdateField(&runtimeMotionMode, v, nameof x.RuntimeMotionMode)
-
+    
         member x.TimeSimutionMode
             with get() = timeSimutionMode
             and set(v) = x.UpdateField(&timeSimutionMode, v, nameof x.TimeSimutionMode)

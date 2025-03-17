@@ -16,6 +16,7 @@
 	</PropertyGroup>
 
     <ItemGroup>
+      <Compile Include="ConvertRockwellL5k.fs" />
       <Compile Include="ConvertRockwell.fs" />
     </ItemGroup>
 

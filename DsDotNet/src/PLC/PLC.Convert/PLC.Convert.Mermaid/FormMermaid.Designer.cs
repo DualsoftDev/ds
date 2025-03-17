@@ -28,56 +28,56 @@ namespace PLC.Convert.Mermaid
         /// </summary>
         private void InitializeComponent()
         {
-            button_openPLC = new Button();
+            button_openRockwell = new Button();
             button_openDir = new Button();
             button_MelsecConvert = new Button();
             button_SiemensConvert = new Button();
             button_LSEConvert = new Button();
             SuspendLayout();
             // 
-            // button_openPLC
+            // button_openRockwell
             // 
-            button_openPLC.Location = new Point(108, 12);
-            button_openPLC.Name = "button_openPLC";
-            button_openPLC.Size = new Size(112, 23);
-            button_openPLC.TabIndex = 0;
-            button_openPLC.Text = "Open File";
-            button_openPLC.UseVisualStyleBackColor = true;
+            button_openRockwell.Location = new Point(218, 12);
+            button_openRockwell.Name = "button_openRockwell";
+            button_openRockwell.Size = new Size(111, 50);
+            button_openRockwell.TabIndex = 0;
+            button_openRockwell.Text = "Open RockwellAB(*.l5k)";
+            button_openRockwell.UseVisualStyleBackColor = true;
             // 
             // button_openDir
             // 
-            button_openDir.Location = new Point(226, 12);
+            button_openDir.Location = new Point(720, 12);
             button_openDir.Name = "button_openDir";
-            button_openDir.Size = new Size(112, 23);
+            button_openDir.Size = new Size(111, 50);
             button_openDir.TabIndex = 0;
             button_openDir.Text = "Open Dir";
             button_openDir.UseVisualStyleBackColor = true;
             // 
             // button_MelsecConvert
             // 
-            button_MelsecConvert.Location = new Point(344, 12);
+            button_MelsecConvert.Location = new Point(338, 12);
             button_MelsecConvert.Name = "button_MelsecConvert";
-            button_MelsecConvert.Size = new Size(112, 23);
+            button_MelsecConvert.Size = new Size(111, 50);
             button_MelsecConvert.TabIndex = 0;
-            button_MelsecConvert.Text = "Open Melsec";
+            button_MelsecConvert.Text = "Open Melsec(*.csv)";
             button_MelsecConvert.UseVisualStyleBackColor = true;
             // 
             // button_SiemensConvert
             // 
-            button_SiemensConvert.Location = new Point(462, 12);
+            button_SiemensConvert.Location = new Point(458, 12);
             button_SiemensConvert.Name = "button_SiemensConvert";
-            button_SiemensConvert.Size = new Size(112, 23);
+            button_SiemensConvert.Size = new Size(111, 50);
             button_SiemensConvert.TabIndex = 0;
-            button_SiemensConvert.Text = "Open Siemens";
+            button_SiemensConvert.Text = "Open Siemens(*.AWL)";
             button_SiemensConvert.UseVisualStyleBackColor = true;
             // 
             // button_LSEConvert
             // 
-            button_LSEConvert.Location = new Point(580, 12);
+            button_LSEConvert.Location = new Point(578, 12);
             button_LSEConvert.Name = "button_LSEConvert";
-            button_LSEConvert.Size = new Size(112, 23);
+            button_LSEConvert.Size = new Size(111, 50);
             button_LSEConvert.TabIndex = 0;
-            button_LSEConvert.Text = "Open LSE(*.xml)";
+            button_LSEConvert.Text = "Open LSElectric(*.xml)";
             button_LSEConvert.UseVisualStyleBackColor = true;
             // 
             // FormMermaid
@@ -89,7 +89,7 @@ namespace PLC.Convert.Mermaid
             Controls.Add(button_SiemensConvert);
             Controls.Add(button_MelsecConvert);
             Controls.Add(button_openDir);
-            Controls.Add(button_openPLC);
+            Controls.Add(button_openRockwell);
             Name = "FormMermaid";
             Text = "Form1";
             ResumeLayout(false);
@@ -97,7 +97,7 @@ namespace PLC.Convert.Mermaid
 
         #endregion
 
-        private Button button_openPLC;
+        private Button button_openRockwell;
         private Button button_openDir;
         private Button button_MelsecConvert;
         private Button button_SiemensConvert;

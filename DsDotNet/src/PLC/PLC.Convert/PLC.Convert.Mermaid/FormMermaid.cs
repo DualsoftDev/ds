@@ -2,8 +2,9 @@ using Microsoft.Web.WebView2.WinForms;
 using PLC.Convert.FS;
 using PLC.Convert.LSCore;
 using PLC.Convert.LSCore.Expression;
-using PLC.Convert.Siemens;
 using PLC.Convert.MX;
+using PLC.Convert.Rockwell;
+using PLC.Convert.Siemens;
 using System;
 using System.Collections.Frozen;
 using System.Collections.Generic;
@@ -14,6 +15,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static ClassTagGenerator;
 using static PLC.Convert.FS.ConvertCoilModule;
 
 namespace PLC.Convert.Mermaid
@@ -25,7 +27,7 @@ namespace PLC.Convert.Mermaid
         private void InitializeEvent()
         {
 
-            button_openPLC.Click += async (s, e) => await OpenPLCAsync();
+            button_openRockwell.Click += async (s, e) => await OpenPLCRockwellABAsync();
             button_openDir.Click += async (s, e) => await OpenPLCDirAsync();
             button_MelsecConvert.Click += async (s, e) => await OpenPLCMelsecAsync();
             button_SiemensConvert.Click += async (s, e) => await OpenPLCSiemensAsync();
@@ -85,22 +87,47 @@ namespace PLC.Convert.Mermaid
                 MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-        private async Task OpenPLCAsync()
+        private async Task OpenPLCRockwellABAsync()
         {
             try
             {
                 OpenInitSetting();
-                var files = FileOpenSave.OpenFiles();
+                var files = FileOpenSave.OpenFiles(false, "l5k");
                 if (files == null || files.Length == 0) return;
 
                 string file = files.First();
-                await exportMermaid(file);
+                var networks = ConvertRockwellModule.parseABFile(file);
+                IEnumerable<Terminal> coils = getCoils(networks);
+
+                var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
+                File.WriteAllText(file.ToLower().Replace($".l5k", ".mermaid"), mermaidText, Encoding.UTF8);
+                LoadMermaidGraph(mermaidText);
+
+                await Task.Delay(0);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+
+        //private async Task OpenPLCAsync() // LS Electric abnormal contact 사용
+        //{
+        //    try
+        //    {
+        //        OpenInitSetting();
+        //        var files = FileOpenSave.OpenFiles();
+        //        if (files == null || files.Length == 0) return;
+
+        //        string file = files.First();
+        //        await exportMermaid(file);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        //    }
+        //}
         private async Task OpenPLCMelsecAsync()
         {
             try
@@ -116,6 +143,7 @@ namespace PLC.Convert.Mermaid
                 var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
                 File.WriteAllText(dir+".mermaid", mermaidText, Encoding.UTF8);
                 LoadMermaidGraph(mermaidText);
+
 
                 //var file = await ConvertXGI(files);
                 //ConvertLSE(file);           
@@ -135,22 +163,17 @@ namespace PLC.Convert.Mermaid
                 var file = files.First();
                 await Task.Delay(0);
 
-                ConvertLSE(file);
+                Network[] networks = ConvertLSEModule.parseLSEFile(file);
+                IEnumerable<Terminal> coils = getCoils(networks);
+
+                var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
+                File.WriteAllText(file.Replace($".xml", ".mermaid"), mermaidText, Encoding.UTF8);
+                LoadMermaidGraph(mermaidText);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("파일을 불러오는 중 오류 발생: " + ex.Message, "오류", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-        }
-
-        private void ConvertLSE(string file)
-        {
-            Network[] networks = ConvertLSEModule.parseLSEFile(file);
-            IEnumerable<Terminal> coils = getCoils(networks);
-
-            var mermaidText = MermaidExportModule.ConvertEdges(coils, false);
-            File.WriteAllText(file.Replace($".xml", ".mermaid"), mermaidText, Encoding.UTF8);
-            LoadMermaidGraph(mermaidText);
         }
 
         private async Task OpenPLCSiemensAsync()

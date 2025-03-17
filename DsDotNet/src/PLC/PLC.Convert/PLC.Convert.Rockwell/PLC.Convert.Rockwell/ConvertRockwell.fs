@@ -5,56 +5,46 @@ open System.IO
 open System.Collections.Generic
 open System.Text.RegularExpressions
 open PLC.Convert.FS.ConvertCoilModule
+open ClassTagGenerator
 
 module ConvertRockwellModule =
-  
 
-    let classifyContent (line: string) =
-        let extractContent (line: string) =
-            let matchResult = Regex.Match(line, @">(.+?)</Element>")
-            if matchResult.Success then Some matchResult.Groups.[1].Value else None
+    /// **Step 1: Rockwell 명령어 및 변수 추출**
+    /// - 정규식을 사용하여 `XIC(...)`, `XIO(...)`, `OTE(...)` 추출
+    let extractElements (line: string) =
+        let pattern = @"(XIC|XIO|OTE)\(([^)]+)\)"  // 명령어 및 괄호 안 변수 추출
+        let matches = Regex.Matches(line, pattern)
 
-        if line.Contains($"ElementType=\"{14}\"") then
-            match extractContent line with
-            | Some content -> Some (Coil content)
-            | None -> None
+        [ for m in matches -> (m.Groups.[1].Value, m.Groups.[2].Value) ]  // 예: ("XIC", "NO1_SHT_S705_RS_IBI_DOWN1")
 
-        elif line.Contains($"ElementType=\"{6}\"") then
-            match extractContent line with
-            | Some content -> Some (ContactNega content)
-            | None -> None
+    /// **Step 2: Rockwell 명령어 분류**
+    /// - `XIC` → ContactPosi (ON), `XIO` → ContactNega (OFF), `OTE` → Coil (출력)
+    let classifyContent (command: string, variable: string) =
+        match command with
+        | "XIC" -> Some (ContactPosi variable)
+        | "XIO" -> Some (ContactNega variable)
+        | "OTE" -> Some (Coil variable)
+        | _ -> None  // 알 수 없는 명령어 무시
 
-        elif line.Contains($"ElementType=\"{7}\"") then
-            match extractContent line with
-            | Some content -> Some (ContactPosi content)
-            | None -> None
-        else
-            None
+    /// **Step 3: L5K 파일을 분석하여 네트워크 단위로 분리**
+    let parseABFile (filePath: string) =
+        let l5k = plcABConvertor.convertFile filePath  // L5K 변환기 실행
 
-    let parseLSEFile (filePath: string) =
-        let lines = File.ReadLines(filePath) // Stream 방식으로 메모리 절약
-        let networks = ResizeArray<Network>()
-        let mutable currentTitle = ""
-        let mutable currentContent = ResizeArray<ContentType>()
+        let networks = ResizeArray<Network>()  // 네트워크 데이터를 저장할 리스트
+        let mutable currentTitle = ""  // 현재 네트워크 제목
+        let mutable currentContent = ResizeArray<ContentType>()  // 네트워크 내 컨텐츠
 
-        let titlePattern = Regex("<Program Task\s*=(.*)")
-        let networkStartPattern = Regex("<Rung BlockMask")
+        for line in l5k.ABRoutineList do
+            let parsedElements = extractElements line  
 
-        for line in lines do
-            if networkStartPattern.IsMatch(line) then
-                if currentContent.Count > 0 then
-                    networks.Add({ Title = currentTitle; Content = currentContent.ToArray() })
-                currentTitle <- ""
-                currentContent.Clear()
-            elif titlePattern.IsMatch(line) then
-                let m = titlePattern.Match(line)
-                currentTitle <- m.Groups.[1].Value.Trim()
-            else 
-                match classifyContent line with
-                | Some content -> currentContent.Add(content)
+            for (cmd, var) in parsedElements do
+                match classifyContent (cmd, var) with
+                | Some content -> currentContent.Add(content) // ContentType 데이터 추가
                 | None -> ()
-        
-        if currentContent.Count > 0 then
-            networks.Add({ Title = currentTitle; Content = currentContent.ToArray() })
+            // 마지막 네트워크 추가
+            if currentContent.Count > 0 then
+                networks.Add({ Title = currentTitle; Content = currentContent.ToArray() })
+            
+            currentContent.Clear()
 
         networks.ToArray()

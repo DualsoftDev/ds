@@ -133,5 +133,5 @@ module ConvertErrorCheck =
 
     let internal checkJobs(sys:DsSystem) =
         for call in sys.GetCallVertices() do
-            if call.CallActionType = CallActionType.Push && call.ValueParamIO.Out.DataType = DuBOOL then
+            if call.CallActionType = CallActionType.Push && call.ValueParamIO.Out.DataType <> DuBOOL then
                     failWithLog $"{call.Name} {call.CallActionType} 은 bool 타입만 지원합니다."

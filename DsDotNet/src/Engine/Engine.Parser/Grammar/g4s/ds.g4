@@ -413,10 +413,11 @@ actionBlock: '[' 'actions' ']' '=' '{' (categoryBlocks)* '}';
 causal: causalPhrase SEMICOLON;
     causalPhrase: causalTokensCNF (causalOperator causalTokensCNF)+;
     causalTokensCNF: causalToken (',' causalToken)* ;
-    causalToken: causalTokenBase ('('causalInParam ':' causalOutParam')')? ;
+    causalToken: causalTokenBase ('('causalInParam ':' causalOutParam')')? ('['causalCallActionType']')? ;
     causalTokenBase: identifier123 | ('#'identifierOpCmd);
     causalInParam: content;
     causalOutParam: content;
+    causalCallActionType: content;
     identifierOpCmd: identifier1;
 
     causalOperator

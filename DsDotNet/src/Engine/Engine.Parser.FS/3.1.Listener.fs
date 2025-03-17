@@ -494,7 +494,16 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                 | None,  None -> ()
                 | Some _inParam, None    -> failWithLog $"{job.DequotedQualifiedName} ValueParam Output is empty"
                 | None,  Some _outParam  -> failWithLog $"{job.DequotedQualifiedName} ValueParam Input  is empty"
+                let callActionType =
+                    match ctx.TryFindFirstChild<CausalCallActionTypeContext>() with
+                    | Some s -> 
+                        let textCallAction =  s.TryFindFirstChild<ContentContext>().Value.GetText()  
+                        if textCallAction = TextCallPush        
+                        then  CallActionType.Push   
+                        else  CallActionType.ActionNormal  
 
+                    | _-> CallActionType.ActionNormal  
+                
                 let callInput =
                     match ctx.TryFindFirstChild<CausalInParamContext>() with
                     | Some inParam ->
@@ -525,7 +534,8 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
                             td.TaskDevParamIO.OutParam <- TaskDevParam(outParam.Address, callOutput.DataType, outParam.Symbol)
                         )
 
-                parent.CreateCall(job, vp)  |> ignore
+                let call = parent.CreateCall(job, vp)  
+                call.CallActionType <- callActionType
 
             let loop () =
                 for (optParent, ctxInfo, ctx) in candidates do

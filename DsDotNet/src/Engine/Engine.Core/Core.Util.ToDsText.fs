@@ -21,7 +21,12 @@ module internal ToDsTextModule =
         let name =
             match v with
             | :? Real as r -> r.Name.QuoteOnDemand()
-            | :? Call as c -> c.NameForGraph
+            | :? Call as c -> 
+                match c.CallActionType with
+                | CallActionType.ActionNormal -> c.NameForGraph
+                | CallActionType.Push -> $"{c.NameForGraph}[{TextCallPush}]"
+                | _ -> failWithLog "ERROR"
+
             | :? Alias as a -> a.Name.QuoteOnDemand()
             | _ -> failWithLog "ERROR"
         name

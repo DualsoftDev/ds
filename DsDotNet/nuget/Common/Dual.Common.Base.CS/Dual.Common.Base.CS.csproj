@@ -25,7 +25,6 @@
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 
 		<SignAssembly>True</SignAssembly>
-		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<Target Name="CopyDocumentationToPackage" AfterTargets="Build">

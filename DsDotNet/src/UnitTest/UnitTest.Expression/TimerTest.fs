@@ -231,20 +231,6 @@ module TimerTestModule =
             timer.ACC.Value === 0u
 
 
-
-        [<Test>]
-        member __.``TIMER structure AB platform test`` () =
-            use _ = setRuntimeTarget AB
-            let storages = Storages()
-            let code = """
-                bool x0 = createTag("%MX0", false);
-                ton myTon = createWinTON(200u, $x0);
-"""
-
-            let statement = parseCodeForTarget storages code AB
-            [ "EN"; "DN"; "PRE"; "ACC"; "TT" ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === true)       // TimerStruct.Create() 에서 storage 에 추가함.
-            [ "IN"; "Q"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myTon.{n}") === false)
-
         [<Test>]
         member __.``TIMER structure WINDOWS, XGI platform test`` () =
             for platform in [WINDOWS; XGI] do

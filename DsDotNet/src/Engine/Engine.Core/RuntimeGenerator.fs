@@ -43,8 +43,6 @@ module RuntimeGeneratorModule =
         | WINDOWS
         | XGI
         | XGK
-        | AB
-        | MELSEC
         static member ofString(str:string) = DU.fromString<PlatformTarget> str |?? (fun () -> failwith "ERROR")
 
         member x.Stringify() = x.ToString()
@@ -116,7 +114,6 @@ module RuntimeGeneratorModule =
         | XGI-> ExternalTempIECMemory+index.ToString()
         | XGK-> ExternalTempNoIECMemory+index.ToString("00000")
         | WINDOWS-> ExternalTempMemory+($"{index/8}.{index%8}")
-        | _ -> failwithlog $"{target} not support"
 
     type ModelConfig = {
         DsFilePath: string
@@ -194,12 +191,10 @@ module PlatformTargetExtensions =
             | "WINDOWS"-> WINDOWS
             | "XGI"    -> XGI
             | "XGK"    -> XGK
-            | "AB"     -> AB
-            | "MELSEC" -> MELSEC
             | _ -> failwithf $"Error ToPlatformTarget: {s}"
 
         let allPlatforms =
-            [ WINDOWS; XGI; XGK; AB; MELSEC]
+            [ WINDOWS; XGI; XGK;]
 
 
 

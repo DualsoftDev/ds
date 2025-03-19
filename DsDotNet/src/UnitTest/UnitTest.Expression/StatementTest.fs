@@ -26,9 +26,9 @@ type StatementTest() =
     let storages = prepareStorage()
 
     [<Test>]
-    member __.``CTU/TON AB parsing test`` () =
-        use _ = setRuntimeTarget AB
-        let tryParse = tryParseStatement4UnitTest AB storages >> Option.get
+    member __.``CTU/TON WINDOWS parsing test`` () =
+        use _ = setRuntimeTarget WINDOWS
+        let tryParse = tryParseStatement4UnitTest WINDOWS storages >> Option.get
         let coutnerStatement:Statement = "ctu myCounter = createAbCTU(100u, false);" |> tryParse
         let counter = toCounter coutnerStatement
         let timerStatement2:Statement = "ton myTimer = createAbTON(100u, false);" |> tryParse

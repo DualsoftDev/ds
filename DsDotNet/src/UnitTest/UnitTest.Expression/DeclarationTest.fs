@@ -15,7 +15,7 @@ open Engine.Core
 
         [<Test>]
         member __.``Variable Declaration test`` () =
-            use _ = setRuntimeTarget AB
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let t1 = createTag("my_counter_control_tag", "%M1.1", false)
             let tag1 = createTag("tag1", "%M1.1", false)
@@ -33,7 +33,7 @@ open Engine.Core
                 //"ton myton2 = createWinTON(1000us, $tag1 || $tag2, $tag3)"
             ]
             for s in statementTexts do
-                let statement = tryParseStatement4UnitTest AB storages s
+                let statement = tryParseStatement4UnitTest WINDOWS storages s
                 match statement with
                 | Some stmt -> stmt.ToText() === s
                 | None -> ()

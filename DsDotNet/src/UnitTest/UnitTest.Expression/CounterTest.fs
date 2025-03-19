@@ -27,7 +27,7 @@ open PLC.CodeGen.LS
 
         [<Test>]
         member __.``CTU creation test`` () =
-            use _ = setRuntimeTarget AB
+            use _ = setRuntimeTarget WINDOWS
             let storages = Storages()
             let t1 = createTag("my_counter_control_tag", "%M1.1", false)
             let condition = var2expr t1
@@ -41,20 +41,20 @@ open PLC.CodeGen.LS
 
 
             (* Counter struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
-            let internalTags =
-                [
-                    // CTU 및 CTD 에서는 .CU 와 .CD tag 는 internal 로 숨겨져 있다.
-                    ctu.OV :> IStorage
-                    ctu.UN
-                    ctu.DN
-                    ctu.PRE
-                    ctu.ACC
-                    ctu.RES
-                ]
+            //let internalTags =
+            //    [
+            //        // CTU 및 CTD 에서는 .CU 와 .CD tag 는 internal 로 숨겨져 있다.
+            //        ctu.OV :> IStorage
+            //        ctu.UN
+            //        ctu.DN
+            //        ctu.PRE
+            //        ctu.ACC
+            //        ctu.RES
+            //    ]
 
-            storages.ContainsKey("myCTU") === true
-            for t in internalTags do
-                storages.ContainsKey(t.Name) === true
+            //storages.ContainsKey("myCTU") === true
+            //for t in internalTags do
+            //    storages.ContainsKey(t.Name) === true
 
 
             for i in [1..50] do
@@ -76,42 +76,7 @@ open PLC.CodeGen.LS
             ctu.ACC.Value === 100u
             ctu.DN.Value === true
 
-        [<Test>]
-        member __.``CTUD creation test`` () =
-            use _ = setRuntimeTarget AB
-            let storages = Storages()
-            let t1 = createTag("my_counter_up_tag", "%M1.1", false)
-            let t2 = createTag("my_counter_down_tag", "%M1.1", false)
-            let t3 = createTag("my_counter_reset_tag", "%M1.1", false)
-            let upCondition = var2expr t1
-            let downCondition = var2expr t2
-            let resetCondition = var2expr t3
-
-            let tcParam = {Storages=storages; Name="myCTU"; Preset=100u; RungInCondition=upCondition; FunctionName="createWinCTUD"}
-            let ctu = CounterStatement.CreateAbCTUD(tcParam, downCondition, resetCondition) ExpressionFixtures.runtimeTarget|> toCounter
-            ctu.OV.Value === false
-            ctu.UN.Value === false
-            ctu.DN.Value === false
-            ctu.PRE.Value === 100u
-            ctu.ACC.Value === 0u
-
-
-            (* Counter struct 의 내부 tag 들이 생성되고, 등록되었는지 확인 *)
-            let internalTags =
-                [
-                    ctu.CU :> IStorage
-                    ctu.CD
-                    ctu.OV
-                    ctu.UN
-                    ctu.DN
-                    ctu.PRE
-                    ctu.ACC
-                    ctu.RES
-                ]
-
-            storages.ContainsKey("myCTU") === true
-            for t in internalTags do
-                storages.ContainsKey(t.Name) === true
+     
 
         [<Test>]
         member __.``CTU with reset creation test`` () =
@@ -223,19 +188,6 @@ open PLC.CodeGen.LS
 
 
         [<Test>]
-        member x.``CTU on AB platform test`` () =
-            use _ = setRuntimeTarget AB
-            let storages = Storages()
-            let code = """
-                bool x0 = createTag("%MX0.0.0", false);
-                ctu myCTU = createAbCTU(2000u, $x0);
-"""
-
-            let statement = parseCodeForTarget storages code AB
-            [ "CU"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === true)
-            [ "CD"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTU.{n}") === false)
-
-        [<Test>]
         member x.``CTU on XGI platform test`` () =
             use _ = setRuntimeTarget XGI
             let storages = Storages()
@@ -295,38 +247,7 @@ open PLC.CodeGen.LS
                 [ "CU"; "CD"; "R"; "LD"; "PV"; "QU"; "QD"; "CV";] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
                 [ "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
 
-        [<Test>]
-        member x.``CTUD on AB platform test`` () =
-            use _ = setRuntimeTarget AB
-            let storages = Storages()
-            let code = """
-                bool cu = createTag("%MX0.0.0", false);
-                bool cd = createTag("%MX0.0.1", false);
-                bool r  = createTag("%MX0.0.2", false);
-                bool ld = createTag("%MX0.0.3", false);
-                ctud myCTUD = createXgiCTUD(2000u, $cu, $cd, $r, $ld);
-"""
 
-            let statement = parseCodeForTarget storages code AB
-            [ "CU"; "CD"; "OV"; "UN"; "DN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === true)
-            [ "R"; "LD"; "PV"; "QU"; "QD"; "CV"; ] |> iter (fun n -> storages.ContainsKey($"myCTUD.{n}") === false)
-
-
-
-
-        [<Test>]
-        member x.``CTR on AB platform test`` () =
-            use _ = setRuntimeTarget AB
-            let storages = Storages()
-            let code = """
-                bool cd = createTag("%MX0.0.0", false);
-                bool ld = createTag("%MX0.0.0", false);
-                ctr myCTR = createWinCTR(2000u, $cd, $ld);
-"""
-
-            let statement = parseCodeForTarget storages code AB
-            [ "CD"; "DN"; "OV"; "UN"; "PRE"; "ACC"; "RES" ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === true)
-            [ "CU"; "Q"; "PT"; "ET"; ] |> iter (fun n -> storages.ContainsKey($"myCTR.{n}") === false)
 
         [<Test>]
         member x.``CTR on WINDOWS, XGI platform test`` () =

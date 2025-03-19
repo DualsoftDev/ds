@@ -17,15 +17,17 @@ type Spec08_DAGStatement() =
     [<Test>]
     member __.``D1 DAG  Start`` () =
         for real in t.Reals do
-            real.D1_CoinStart() |> doChecks
+            real.CoinStartActive() |> doChecks
+            real.CoinStartPassive() |> doChecks
 
     [<Test>]
     member __.``D3 DAG Coin End InReal`` () =
         for real in t.Reals do
-            real.D3_CoinEnd() |> doChecks
+            real.CoinEndActive() |> doChecks
+            real.CoinEndPassive() |> doChecks
 
     [<Test>]
     member __.``D4 DAG Coin Reset`` () =
         for real in t.Reals do
-            real.D4_CoinReset() |> doChecks
+            real.D3_CoinReset() |> doChecks
 

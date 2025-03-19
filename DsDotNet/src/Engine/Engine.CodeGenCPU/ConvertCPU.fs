@@ -18,7 +18,7 @@ module ConvertCPU =
                 yield vr.E5_RealErrTotalMonitor()
 
                 yield  vr.R1_RealInitialStart()
-                yield! vr.R2_RealJobComplete()
+                
                 yield  vr.R3_RealStartPoint()
                 yield  vr.R4_RealLink()
                 yield! vr.R5_DummyDAGCoils()
@@ -214,7 +214,6 @@ module ConvertCPU =
                     yield! sys.B4_SWModeLamp()
 
                  
-                    yield! applyVertexToken sys
 
                 else 
                     yield! sys.Y1_SystemActiveBtnForPassiveFlow(activeSys)

@@ -218,7 +218,7 @@ module XGTScanModule =
 
         /// PLC 모니터링을 시작하는 싱글 스켄 함수
         member x.ScanSingle(ip:string, tags: string seq) =
-            x.Scan([(ip, tags)]|> dict)
+            x.Scan([(ip, tags)]|> dict).First().Value
 
 
         /// PLC 모니터링 대상을 업데이트하는 함수

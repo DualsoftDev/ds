@@ -12,21 +12,30 @@ module ConvertRuntimeModeModule =
         [
             yield! sys.RealActive()   
             yield! sys.CallActive()   
-            
             yield! sys.JobActionOut()   
+            yield! applyVertexToken sys
         ]
 
     let applyModeMonitor(sys:DsSystem) (isSubSys:bool)  =
         [
             yield! sys.RealPassive(isSubSys)   
             yield! sys.CallPassive()   
+        ]    
+    
+    let applyModeVirtualPlant(sys:DsSystem)(isSubSys:bool)  =
+        [       
+            yield! sys.RealPassive(isSubSys)   
+            yield! sys.CallPassive()   
+            yield! sys.SensorEmulation()   
         ]
+
 
     let applyModeSimulation(sys:DsSystem)  =
         [       
             yield! sys.RealActive()   
             yield! sys.CallActive()   
             yield! sys.SensorEmulation()   
+            yield! applyVertexToken sys
         ]
 
     let applyModeVirtualLogic(sys:DsSystem)  =
@@ -34,14 +43,9 @@ module ConvertRuntimeModeModule =
             yield! sys.RealActive()   
             yield! sys.CallActive()   
             yield! sys.SensorEmulation()   
+            yield! applyVertexToken sys
         ]
 
-    let applyModeVirtualPlant(sys:DsSystem)(isSubSys:bool)  =
-        [       
-            yield! sys.RealPassive(isSubSys)   
-            yield! sys.CallPassive()   
-            yield! sys.SensorEmulation()   
-        ]
 
     let mode = RuntimeDS.ModelConfig.RuntimePackage
     let applyRuntimeMode(sys:DsSystem)(isSubSys:bool)  =

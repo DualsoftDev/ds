@@ -39,7 +39,7 @@ type VertexTagManager with
        
         let sets = (
                     v.SFP.Expr <||> plans <||>
-                    real.Graph.Inits.Select(fun v->v.VC.CallOut)
+                    real.Graph.Inits.Except(real.Graph.Islands).Select(fun v->v.VC.CallOut)
                        .ToOrElseOff()
                     )
                    <&&> v.Flow.d_st.Expr
@@ -82,7 +82,7 @@ type VertexTagManager with
        
         let sets = v.RFP.Expr <||>
                     if real.Graph.Vertices.Any()
-                    then real.CoinETContacts.ToAnd()   
+                    then real.V.F.Expr
                     else v._off.Expr
 
         let rsts = real.V.R.Expr

@@ -15,7 +15,7 @@ type RealVertexTagManager with
 
         (set, rst) ==| (v.RR, getFuncName())
 
-    member v.R2_RealJobComplete(): CommentedStatement [] =
+    member v.RealEndActive(): CommentedStatement [] =
         let real = v.Vertex :?> Real
         let fn = getFuncName()
         [|
@@ -43,7 +43,19 @@ type RealVertexTagManager with
             (v.G.Expr, v._off.Expr) --| (v.GG, fn) 
         |]
 
+    member v.RealEndPassive(): CommentedStatement [] =
+        let real = v.Vertex :?> Real
+        let fn = getFuncName()
+        [|
+            let set = real.CoinETContacts.ToAndElseOn() 
+            let rst = 
+                if real.Graph.Vertices.Any() then
+                    v.RT.Expr <&&> real.CoinAlloffExpr  
+                else
+                    v.RT.Expr 
 
+            (set, rst) ==| (v.ET, fn)              
+        |]
         
     member v.R3_RealStartPoint() =
         let set = (v.G.Expr <&&> !@v.RR.Expr<&&> v.Link.Expr)
@@ -92,15 +104,6 @@ type RealVertexTagManager with
                 let order = order |> uint32 |> literal2expr
                 let totalSrcToken = v.System.GetSourceTokenCount() |> uint32 |>literal2expr
 
-                //if RuntimeDS.ModelConfig.RuntimePackage.IsPLCorPLCSIM()
-                //then
-                //    //처음에는 자기 순서로 시작
-                //    yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vr.SourceTokenData, fn)
-                //    yield (tempInit.Expr <&&> fbRising[v.ET.Expr], order) --> (vr.RealTokenData, fn)
-                //    //이후부터는 전체 값 만큼 증가
-                //    yield (!@tempInit.Expr <&&> fbRising[v.GP.Expr], totalSrcToken, vr.SourceTokenData.ToExpression()) --+ (vr.SourceTokenData, fn)
-                //    yield (!@tempInit.Expr <&&> fbRising[v.GP.Expr], vr.SourceTokenData.ToExpression()) --> (vr.RealTokenData, fn)
-                //else
                 yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vr.SourceTokenData, fn)
                 yield (tempInit.Expr   <&&> v.ET.Expr, order) --> (vr.RealTokenData, fn)
                 yield (!@tempInit.Expr <&&> v.GP.Expr, totalSrcToken, vr.SourceTokenData.ToExpression()) --+ (vr.SourceTokenData, fn)

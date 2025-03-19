@@ -17,7 +17,8 @@ type Spec07_CallStatement() =
     [<Test>]
     member __.``C1 CallPlanStart`` () =
         for call in t.Sys.GetVerticesHasJobInReal().Select(getVM) do
-            call.C1_CallPlanStart() |> doCheck
+            call.CallPlanStartActive() |> doCheck
+            call.CallPlanStartPassive() |> doCheck
     [<Test>]
     member __.``C2 CallPlanEnd`` () =
         for call in t.Sys.GetVerticesHasJobInReal().Select(getVM) do

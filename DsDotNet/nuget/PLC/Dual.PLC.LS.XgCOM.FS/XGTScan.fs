@@ -190,12 +190,23 @@ module XGTScanModule =
                     try
                         while not cancelScanIps.[plcIp].IsCancellationRequested do
                             do! Async.Sleep _scanDelay
-                            x.WriteToPLC(conn, xgtTags.Values.Select(fun f->f :> ITagPLC).ToArray())
+                    
                             let readBuff = Array.zeroCreate<byte> (512)
-                            x.ReadFromPLC(conn, readBuff, batches)
+
+                            // 3초 타임아웃 설정
+                            let! writeTask = Async.StartChild(async { x.WriteToPLC(conn, xgtTags.Values.Select(fun f -> f :> ITagPLC).ToArray()) }, 3000)
+                            let! readTask = Async.StartChild(async { x.ReadFromPLC(conn, readBuff, batches) }, 3000)
+
+                            try
+                                do! writeTask
+                                do! readTask
+                            with
+                            | :? TimeoutException ->
+                                logError $"Timeout occurred while communicating with PLC {plcIp}."
+
                     with
                     | ex -> logError $"Monitoring error for PLC {plcIp}: {ex}"
-            
+    
                     logInfo $"Stopped monitoring for PLC {plcIp}."
                     cancelScanIps.Remove(plcIp) |> ignore // 기존 항목 제거
                     cancelScanIps.Add(plcIp, new CancellationTokenSource()) // 새로운 토큰 추가
@@ -204,7 +215,8 @@ module XGTScanModule =
             else
                 logWarn $"No valid monitoring tags provided for PLC {plcIp}."
 
-            xgtTags |> Seq.map (fun kv -> kv.Key, kv.Value:> ITagPLC) |> dict
+            xgtTags |> Seq.map (fun kv -> kv.Key, kv.Value :> ITagPLC) |> dict
+
 
         /// PLC 모니터링을 시작하는 다중 스켄 함수
         member x.Scan(tagsPerPLC: IDictionary<string, string seq>) =

@@ -19,7 +19,8 @@ type Spec02_FlowStatement() =
     member __.``F1 Root Start`` () =
         for real in t.Reals do
             real.F1_RootStartActive() |> doCheck
-            real.F1_RootStartPassive() |> doCheck
+            real.F1_RootStartPassive(true) |> doCheck
+            real.F1_RootStartPassive(false) |> doCheck
 
     [<Test>]
     member __.``F2 Root Reset`` () =

@@ -55,9 +55,9 @@
         <Compile Include="19.SequenceToken.fs" />
         <Compile Include="20.ErrorMonitor.fs" />
         <Compile Include="21.RuntimeMode.fs" />
+        <Compile Include="ConvertRuntimeMode.fs" />
         <Compile Include="ConvertCheck.fs" />
         <Compile Include="ConvertAddress.fs" />
-        <Compile Include="ConvertRuntimeMode.fs" />
         <Compile Include="ConvertCPU.fs" />
         <Compile Include="Loader.fs" />
         <Compile Include="EntryPoint.fs" />

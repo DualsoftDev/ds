@@ -120,7 +120,7 @@ module RuntimeGeneratorModule =
         ExternalApi: ExternalApi
         RuntimePackage: RuntimePackage
         PlatformTarget: PlatformTarget
-        HwDriver: HwDriveTarget //LS-XGI, LS-XGK, Paix hw drive 이름
+        HwDriver: HwDriveTarget
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
     }

@@ -49,7 +49,7 @@ type DsSystem with
                 yield real.R7_RealGoingOriginError()
         ]   
 
-    member sys.RealPassive(isSubSystem:bool) =
+    member sys.RealPassive(isSubSystem:bool) (bVirtaulPlant:bool) =
         [
             for real in sys.GetRealVertices().Select(getVMReal) do
                 real.Real.TokenSourceOrder <- Some 1    
@@ -60,7 +60,7 @@ type DsSystem with
                     yield real.F2_RootResetActive()
                 else 
                     yield! real.RealEndPassive()
-                    yield real.F1_RootStartPassive()
+                    yield real.F1_RootStartPassive(bVirtaulPlant)
                     yield real.F2_RootResetPassive()
         ]
 

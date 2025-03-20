@@ -33,15 +33,17 @@ type VertexTagManager with
         (sets, rsts) ==| (v.ST, getFuncName())//조건에 의한 릴레이
 
         
-    member v.F1_RootStartPassive() =
+    member v.F1_RootStartPassive(bVirtaulPlant:bool) =
         let real = v.Vertex :?> Real
         let plans = v.System.GetApiSets(real).ToOrElseOff()
-       
-        let sets = (
-                    v.SFP.Expr <||> plans <||>
-                    real.Graph.Inits.Except(real.Graph.Islands).Select(fun v->v.VC.CallOut)
-                       .ToOrElseOff()
-                    )
+        let rootStart = 
+            if not(bVirtaulPlant)
+                    then
+                        real.Graph.Inits.Except(real.Graph.Islands)
+                    else 
+                        real.Graph.Vertices
+
+        let sets = (  v.SFP.Expr <||> plans <||> rootStart.Select(fun v->v.VC.CallOut).ToOrElseOff())
                    <&&> v.Flow.d_st.Expr
 
         let rsts = if real.Graph.Vertices.Any()

@@ -90,6 +90,7 @@ module MelsecScanModule =
 
 
         /// PLC 모니터링을 시작하는 함수
+        /// PLC 모니터링을 시작하는 함수
         member private x.StartMonitoring(ch: int, tags: string seq) =
             checkExistChannel ch
             let conn = connections.[ch]
@@ -100,24 +101,33 @@ module MelsecScanModule =
                 async {
                     try
                         while not cancelScanChannels[ch].IsCancellationRequested do
-                            x.WriteToPLC(conn, batches) // 반드시 실행
-                            x.ReadFromPLC(conn, batches) // 반드시 실행
-                            do! Async.Sleep scanDelay
+                            let! writeTask = Async.StartChild (async { x.WriteToPLC(conn, batches) }, 3000)
+                            let! readTask = Async.StartChild (async { x.ReadFromPLC(conn, batches) }, 3000)
+
+                            try
+                                do! writeTask
+                                do! readTask
+                                do! Async.Sleep scanDelay // 필요 시 활성화
+
+                            with
+                            | :? TimeoutException ->
+                                logError $"Timeout occurred while communicating with PLC {ch}."
+                    
                     with
                     | ex ->
                         logError $"Error in Write/Read operation for PLC {ch}: {ex}"
-                
+        
                     logInfo $"Stopped monitoring for PLC {ch}."
-                    cancelScanChannels.Remove(ch) |> ignore // 기존 항목 제거
+                    cancelScanChannels.Remove(ch) |> ignore
                     cancelScanChannels[ch] <- new CancellationTokenSource()
                 } |> Async.StartImmediate
             else
                 logWarn $"No valid monitoring tags provided for PLC {ch}."
 
-
             batches |> Seq.collect (fun batch -> batch.Tags) 
                     |> Seq.map (fun t -> t.Address, t :> ITagPLC)
                     |> dict
+
 
         /// PLC 모니터링을 시작하는 다중 스켄 함수
         member x.Scan(tagsPerPLC: IDictionary<int, string seq>) =

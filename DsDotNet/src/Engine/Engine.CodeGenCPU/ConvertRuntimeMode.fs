@@ -16,15 +16,15 @@ module ConvertRuntimeModeModule =
             yield! applyVertexToken sys
         ]
 
-    let applyModeMonitor(sys:DsSystem) (isSubSys:bool)  =
+    let applyModeMonitor(sys:DsSystem) (isSubSys:bool) =
         [
-            yield! sys.RealPassive(isSubSys)   
+            yield! sys.RealPassive  isSubSys false 
             yield! sys.CallPassive()   
         ]    
     
-    let applyModeVirtualPlant(sys:DsSystem)(isSubSys:bool)  =
+    let applyModeVirtualPlant(sys:DsSystem) (isSubSys:bool) =
         [       
-            yield! sys.RealPassive(isSubSys)   
+            yield! sys.RealPassive isSubSys true 
             yield! sys.CallPassive()   
             yield! sys.SensorEmulation()   
         ]

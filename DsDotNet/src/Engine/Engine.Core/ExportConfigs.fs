@@ -53,7 +53,7 @@ module ExportConfigsMoudle =
         Name : string
         Address : string
         DataType : string //bool. int32, float
-        DeviceType : string //input, output, memory
+        DeviceType : IOType //  type IOType = | In | Out | Memory | NotUsed
     }
     with
         member x.ToJson() = JsonConvert.SerializeObject(x, Formatting.Indented)
@@ -114,7 +114,7 @@ module ExportConfigsMoudle =
                         Name = dev.InTag.Name
                         Address = dev.InTag.Address
                         DataType = dev.InTag.DataType.ToDsDataTypeString()
-                        DeviceType = "input"
+                        DeviceType = IOType.In
                     }
                 ifs.Add dataIn |> ignore
 
@@ -126,7 +126,7 @@ module ExportConfigsMoudle =
                         Name = dev.OutTag.Name
                         Address = dev.OutTag.Address
                         DataType = dev.OutTag.DataType.ToDsDataTypeString()
-                        DeviceType = "output"
+                        DeviceType = IOType.Out
                     }
 
                 ifs.Add dataOut |> ignore

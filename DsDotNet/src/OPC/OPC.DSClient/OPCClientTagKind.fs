@@ -39,6 +39,16 @@ module OPCClientTagHelper =
             (int)FlowTag.emergency_state     
             (int)FlowTag.going_state         
             (int)FlowTag.ready_state         
+
+            (int)SystemTag.autoMonitor      
+            (int)SystemTag.manualMonitor    
+            (int)SystemTag.driveMonitor     
+            (int)SystemTag.pauseMonitor     
+            (int)SystemTag.emergencyMonitor       
+            (int)SystemTag.testMonitor      
+            (int)SystemTag.readyMonitor     
+            (int)SystemTag.originMonitor      
+
             (int)TaskDevTag.actionIn         
             (int)TaskDevTag.actionOut      
         ]

@@ -28,6 +28,7 @@ type OPCClientManager(dsSys:DsSystem) =
             |> Option.iter (fun nodeId -> this.BrowseAndAddVariables(session, nodeId, name))
 
 
+        browseAndProcess "Tag"
         browseAndProcess "Dualsoft"
         opcClientTags.Values |> Seq.iter (fun tag -> this.AddMonitoredItem(session, tag))
         opcClientTags.Values

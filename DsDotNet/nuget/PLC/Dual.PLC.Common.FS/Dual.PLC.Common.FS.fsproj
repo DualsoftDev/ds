@@ -26,8 +26,9 @@
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
 		<Compile Include="PlcUtil.fs" />
-		<Compile Include="TagPLC.fs" />
 		<Compile Include="Connect.fs" />
+		<Compile Include="TagPLC.fs" />
+		<Compile Include="ScanPLC.fs" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

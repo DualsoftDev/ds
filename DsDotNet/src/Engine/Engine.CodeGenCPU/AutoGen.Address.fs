@@ -206,7 +206,7 @@ module DsAddressModule =
                     | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다.Add I/O table 세팅필요"
 
                 match driver with
-                | PAIX_IO ->
+                | OPC_IO ->
                     let getPCIOM(head:string, offsetBit) =
                         match sizeBit with
                         |  1 -> $"{head}B{offsetBit /  8}.{offsetBit % 8}"
@@ -305,10 +305,9 @@ module DsAddressModule =
         let hwTarget =
             let slot = getFullSlotHwSlotDataTypes()
             match platformTarget with
-            | WINDOWS -> HwTarget(WINDOWS, PAIX_IO, slot)
+            | WINDOWS -> HwTarget(WINDOWS, OPC_IO, slot)
             | XGI -> HwTarget(XGI, LS_XGI_IO, slot)
             | XGK -> HwTarget(XGK, LS_XGK_IO, slot)
-            | _ -> failwithf $"Error ToPlatformTarget: {platformTarget}"
 
         getValidAddress(addr, dataType, name, isSkip, ioType, hwTarget)
      

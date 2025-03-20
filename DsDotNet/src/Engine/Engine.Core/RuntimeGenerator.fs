@@ -55,13 +55,10 @@ module RuntimeGeneratorModule =
 
     //제어 Driver IO 기기 타입
     type HwDriveTarget =
-        | NONE
         | LS_XGI_IO
         | LS_XGK_IO
-        | AB_IO
         | MELSEC_IO
-        | SIEMENS_IO
-        | PAIX_IO
+        | OPC_IO
 
     //제어 Driver IO 기기 타입
     type ExternalApi =
@@ -118,6 +115,8 @@ module RuntimeGeneratorModule =
     type ModelConfig = {
         DsFilePath: string
         HwIP: string
+        HwOPC : string
+        HwPath: string
         ExternalApi: ExternalApi
         RuntimePackage: RuntimePackage
         PlatformTarget: PlatformTarget
@@ -130,6 +129,8 @@ module RuntimeGeneratorModule =
         { 
             DsFilePath = ""
             HwIP = "127.0.0.1"
+            HwOPC = "opc.tcp://127.0.0.1:2747"
+            HwPath = "0"
             ExternalApi = ExternalApi.NONE_API
             RuntimePackage = Simulation //unit test를 위해 Simulation으로 설정
             PlatformTarget = WINDOWS
@@ -144,6 +145,8 @@ module RuntimeGeneratorModule =
 
     let createModelConfig(path:string,
             hwIP:string, 
+            hwOPC:string, 
+            hwPath:string,  
             externalApi:ExternalApi, 
             runtimePackage:RuntimePackage,
             platformTarget:PlatformTarget, 
@@ -153,6 +156,8 @@ module RuntimeGeneratorModule =
         { 
             DsFilePath = path
             HwIP = hwIP
+            HwOPC = hwOPC
+            HwPath = hwPath
             ExternalApi = externalApi
             RuntimePackage = runtimePackage
             PlatformTarget = platformTarget
@@ -183,7 +188,7 @@ module RuntimeGeneratorModule =
                     SlotDataType(i, IOType.Out, DataType.DuUINT64))
         hw
 
-    let getDefaltHwTarget() = HwTarget(WINDOWS, PAIX_IO, getFullSlotHwSlotDataTypes())
+    let getDefaltHwTarget() = HwTarget(WINDOWS, OPC_IO, getFullSlotHwSlotDataTypes())
 
 module PlatformTargetExtensions =
         let fromString s =
@@ -227,14 +232,13 @@ module HwDriveTargetExtensions =
             match s with
             | "LS_XGI_IO"  -> LS_XGI_IO
             | "LS_XGK_IO"  -> LS_XGK_IO
-            | "AB_IO"      -> AB_IO
             | "MELSEC_IO"  -> MELSEC_IO
-            | "SIEMENS_IO" -> SIEMENS_IO
-            | "PAIX_IO"    -> PAIX_IO
-            | _ -> NONE
+            | "OPC_IO" 
+            | _            -> OPC_IO
+
 
     let allDrivers =
-        [ LS_XGI_IO; LS_XGK_IO; AB_IO; MELSEC_IO; SIEMENS_IO; PAIX_IO; NONE ]
+        [ LS_XGI_IO; LS_XGK_IO;  MELSEC_IO;  OPC_IO ]
 
 
 module TimeSimutionModeExtensions =

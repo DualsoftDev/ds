@@ -180,7 +180,7 @@ module ConvertCPU =
                 sys.GenerationIO()
 
                 updateSourceTokenOrder sys
-                if not(RuntimeDS.ModelConfig.RuntimePackage.IsVirtualMode())
+                if RuntimeDS.ModelConfig.RuntimePackage = Control
                 then
                     checkNullAddress sys
                     checkErrHWItem(sys)

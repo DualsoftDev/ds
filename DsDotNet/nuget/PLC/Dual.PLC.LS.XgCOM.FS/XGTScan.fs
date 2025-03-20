@@ -12,13 +12,15 @@ open Dual.PLC.Common.FS
 module XGTScanModule =
 
     type XGTScan(plcIps: seq<string>, scanDelay: int) =
+        let tagValueChangedNotify = new Event<TagPLCValueChangedEventArgs>()
+        let connectChangedNotify = new Event<ConnectChangedEventArgs>()
+        
         let notifiedOnce = HashSet<LWBatch>()
         let writeBuff = Array.zeroCreate<byte> (512)
         let _scanDelay = scanDelay
 
      
-        let tagValueChangedNotify = new Event<TagPLCValueChangedEventArgs>()
-        let connectChangedNotify = new Event<ConnectChangedEventArgs>()
+      
         // PLC별 개별 `CancellationTokenSource` 생성
         let cancelScanIps =  Dictionary<string, CancellationTokenSource>()
 
@@ -52,13 +54,18 @@ module XGTScanModule =
             if not (connections.ContainsKey(plcIp)) then
                 failwithlog $"PLC {plcIp} is not managed in the current connections."
 
-
+      
         do
             if Seq.isEmpty plcIps then failwithlog "PLC IPs are not set"
             else plcIps |> Seq.iter (fun ip -> logInfo $"PLC IP is set to {ip}")
             
             plcIps 
             |> Seq.iter (fun ip -> cancelScanIps.Add(ip, new CancellationTokenSource()))
+        
+        
+        interface IScanPLC with
+            member x.TagValueChangedNotify = tagValueChangedNotify
+            member x.ConnectChangedNotify = connectChangedNotify
 
         new (plcIps) = XGTScan(plcIps, 5)
         new (plcIp) = XGTScan([plcIp])

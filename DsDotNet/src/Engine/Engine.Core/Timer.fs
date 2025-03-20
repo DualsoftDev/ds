@@ -225,8 +225,7 @@ module rec TimerModule =
                 match target with
                 | XGK -> [".IN"; ".TT"; xgkTimerCounterContactMarking; ".PT"; ".ET"; ".RST"] // XGK 이름에 . 있으면 걸러짐 storagesToXgxSymbol
                 | XGI | WINDOWS -> [".IN"; "._TT"; ".Q"; ".PT"; ".ET"; ".RST"]
-                | AB -> [".EN"; ".TT"; ".DN"; ".PRE"; ".ACC"; ".RES"]
-                | _ -> failwith "NOT yet supported"
+                //| AB -> [".EN"; ".TT"; ".DN"; ".PRE"; ".ACC"; ".RES"]
 
             let en, tt, dn, pre, acc, res =
                 let names = suffixes |> Seq.map (fun suffix -> $"{name}{suffix}") |> Seq.toList

@@ -80,15 +80,14 @@ class Program
 
                 // ScanSingle 메서드 호출 (채널 0 사용)
                 scanModule.Disconnect(0);
-                var tagCollections = scanModule.ScanSingle(0, data.Addresses);
-                var tags = tagCollections[0];
+                var tags = scanModule.ScanSingle(0, data.Addresses);
 
                 // 통신 업데이트를 시뮬레이션하기 위해 잠시 대기
                 Thread.Sleep(100);
-           
+                var tagArray = tags.Values.ToArray();
                 for (int i = 0; i < tags.Count; i++)
                 {
-                    tags.Values.ToArray()[i].SetWriteValue(data.Values?[i]);
+                    tagArray[i].SetWriteValue(data.Values?[i]);
                 }
 
                 Console.WriteLine();

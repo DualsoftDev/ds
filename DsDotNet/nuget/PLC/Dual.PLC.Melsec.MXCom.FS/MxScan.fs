@@ -43,6 +43,10 @@ module MelsecScanModule =
             channels 
             |> Seq.iter (fun ip -> cancelScanChannels.Add(ip, new CancellationTokenSource()))
 
+        interface IScanPLC with
+            member x.TagValueChangedNotify = tagValueChangedNotify
+            member x.ConnectChangedNotify = connectChangedNotify
+
         new (channels) = MelsecScan(channels, 5)
         new (channel) = MelsecScan([channel])
         [<CLIEvent>]
@@ -134,8 +138,8 @@ module MelsecScanModule =
 
         /// PLC 모니터링을 시작하는 싱글 스켄 함수
         member x.ScanSingle(channel:int, tags: string seq) =
-            x.Scan([(channel, tags)]|> dict)
-
+            let tagSet = x.Scan([(channel, tags)]|> dict) |> Seq.head
+            tagSet.Value
 
         /// PLC 모니터링 대상을 업데이트하는 함수
         member x.ScanUpdate(channel: int, tags: List<string>) : IDictionary<string, ITagPLC> =

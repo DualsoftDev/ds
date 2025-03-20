@@ -101,28 +101,28 @@ module rec CounterModule =
             acc <- createUInt32   $"{name}.CV" accum
             add [cd; pre; res; dn; acc]
 
-        | _ ->
-            match typ with
-            | CTU ->
-                cu  <- createBool     $"{name}.CU" false  // Count up enable bit
-                add [cu]
-            | CTR | CTD ->
-                cd  <- createBool     $"{name}.CD" false  // Count down enable bit
-                add [cd]
-            | CTUD ->
-                cu  <- createBool     $"{name}.CU" false // Count up enable bit
-                cd  <- createBool     $"{name}.CD" false // Count down enable bit
-                add [cu; cd]
+        //| _ ->  //AB 삭제
+        //    match typ with
+        //    | CTU ->
+        //        cu  <- createBool     $"{name}.CU" false  // Count up enable bit
+        //        add [cu]
+        //    | CTR | CTD ->
+        //        cd  <- createBool     $"{name}.CD" false  // Count down enable bit
+        //        add [cd]
+        //    | CTUD ->
+        //        cu  <- createBool     $"{name}.CU" false // Count up enable bit
+        //        cd  <- createBool     $"{name}.CD" false // Count down enable bit
+        //        add [cu; cd]
 
 
-            ov  <- createBool     $"{name}.OV" false   // Overflow
-            un  <- createBool     $"{name}.UN" false   // Underflow
-            ld  <- createBool     $"{name}.LD" false   // XGI: Load
-            dn  <- createBoolWithTagKind     $"{name}.DN" false  (VariableTag.PcSysVariable|>int) // Done
-            pre <- createUInt32   $"{name}.PRE" preset
-            acc <- createUInt32   $"{name}.ACC" accum
-            res <- createBool     $"{name}.RES" false
-            add [ov; un; dn; pre; acc; res;]
+        //    ov  <- createBool     $"{name}.OV" false   // Overflow
+        //    un  <- createBool     $"{name}.UN" false   // Underflow
+        //    ld  <- createBool     $"{name}.LD" false   // XGI: Load
+        //    dn  <- createBoolWithTagKind     $"{name}.DN" false  (VariableTag.PcSysVariable|>int) // Done
+        //    pre <- createUInt32   $"{name}.PRE" preset
+        //    acc <- createUInt32   $"{name}.ACC" accum
+        //    res <- createBool     $"{name}.RES" false
+        //    add [ov; un; dn; pre; acc; res;]
 
         (* 내부 structure 가 AB 기반이므로, 메모리 자체는 생성하되, storage 에 등록하지는 않는다. *)
         if isItNull(ov) then

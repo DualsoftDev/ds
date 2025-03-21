@@ -216,7 +216,7 @@ module RuntimePackageExtensions =
             | "Monitoring" -> Monitoring
             | "VirtualPlant" -> VirtualPlant
             | "VirtualLogic" -> VirtualLogic
-            | _ -> failwithf $"Error ToPlatformTarget: {s}"
+            | _ -> failwithf $"Error PlatformTarget: {s}"
 
         let allRuntimePackage =
             [ Simulation; Control; Monitoring; VirtualPlant; VirtualLogic]
@@ -227,6 +227,7 @@ module ExternalApiExtensions =
             match s with
             | "OPC"  -> ExternalApi.OPC
             | "REDIS"  -> ExternalApi.REDIS
+            | _ -> failwithf $"Error ExternalApi: {s}"
 
     let allExternalApi =
         [ OPC; REDIS;]

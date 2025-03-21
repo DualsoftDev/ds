@@ -62,8 +62,7 @@ module ConvertCpuVertex =
         member x.TimeAvg = getTime (x.DsTime.AVG, x.QualifiedName)
         member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0
         member x.TimeSimMsec =
-            if x.TimeAvg.IsNone then
-                failwithf $"Error  TimeAvgMsec ({x.QualifiedName})"
+            if x.TimeAvg.IsNone then 0u
             else
                 x.TimeAvg.Value|>uint32
 

@@ -3,13 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Project", "Project", "{BF60BC93-E09B-4E5F-9D85-95A519479D54}"
-	ProjectSection(SolutionItems) = preProject
-		..\..\Users\ahn\Pictures\Control.png = ..\..\Users\ahn\Pictures\Control.png
-		..\..\Users\ahn\Pictures\Monitoring.png = ..\..\Users\ahn\Pictures\Monitoring.png
-		..\..\Users\ahn\Pictures\Simulation.png = ..\..\Users\ahn\Pictures\Simulation.png
-		..\..\Users\ahn\Pictures\VirtualLogic.png = ..\..\Users\ahn\Pictures\VirtualLogic.png
-		..\..\Users\ahn\Pictures\VirtualPlant.png = ..\..\Users\ahn\Pictures\VirtualPlant.png
-	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "git", "git", "{078A9C52-DDC1-46F4-9235-9E6C89C87AFD}"
 	ProjectSection(SolutionItems) = preProject

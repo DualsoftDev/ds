@@ -17,39 +17,38 @@ let getTimeStatement(v:RealVertexTagManager) =
 type RealVertexTagManager with
 
         
-    member v.RealGoingTimeSimulation(): CommentedStatement [] =
+    member v.RealGoingTime(bVirtualLogic:bool): CommentedStatement [] =
         let fn = getFuncName()
-        if v.Real.Time.IsNone then [||] 
-        else
-            [|
-                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
-                yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
-                yield! getTimeStatement(v) 
-            |]
+        [|
+            yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
+            yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
 
-    member v.RealGoingTime(): CommentedStatement [] =
-        let fn = getFuncName()
-        if v.Real.Time.IsNone then [||] 
-        else
-            [|
-                yield (v.TimeStart.Expr<&&>v.TimeEnd.Expr, v.ET.Expr) ==| (v.TimeRelay, fn)
-                yield (v.G.Expr, v.TimeRelay.Expr) --| (v.TimeStart, fn)
-                
-                if v.Real.Motion.IsSome then
-                    yield (v.MotionEnd.Expr  , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
-                else 
-                    yield! getTimeStatement(v) 
-            |]
+            if bVirtualLogic && v.Real.Motion.IsSome then
+                yield (v.MotionEnd.Expr  , v._off.Expr) --| (v.TimeEnd, fn)   //3D 사용하면   시간도 모션에 의해서 끝남
+            else 
+                if v.Real.TimeSimMsec = 0u 
+                then 
+                    yield (v.TimeStart.Expr, v._off.Expr) --| (v.TimeEnd, fn)
+                else
+                    yield (v.TimeStart.Expr) --@ (v.TRealOnTime, v.Real.TimeSimMsec, getFuncName())
+                    yield (v.TRealOnTime.DN.Expr, v._off.Expr) --| (v.TimeEnd, getFuncName())
+        |]
 
 
 
     member v.R10_GoingTime(mode:RuntimePackage): CommentedStatement [] =
-        match mode with 
-        | Simulation -> v.RealGoingTimeSimulation()
-        | VirtualLogic 
-        | VirtualPlant 
-        | Control 
-        | Monitoring -> v.RealGoingTime()
+        if v.Real.Time.IsNone then [||] 
+        else 
+            match mode with 
+            | Simulation  
+            | VirtualPlant -> v.RealGoingTime(false)
+            | VirtualLogic -> v.RealGoingTime(true)
+            | Control 
+            | Monitoring -> 
+                [|
+                    yield (v._on.Expr, v._off.Expr) --| (v.TimeRelay, getFuncName())
+                |]  //타이머 사용 안함
+              
 
 
     member private v.R11_RealGoingMotion(): CommentedStatement [] =

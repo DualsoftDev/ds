@@ -62,7 +62,6 @@ module RuntimeGeneratorModule =
 
     //제어 Driver IO 기기 타입
     type ExternalApi =
-        | NONE_API
         | OPC
         | REDIS
 
@@ -131,7 +130,7 @@ module RuntimeGeneratorModule =
             HwIP = "127.0.0.1"
             HwOPC = "opc.tcp://127.0.0.1:2747"
             HwPath = "0"
-            ExternalApi = ExternalApi.NONE_API
+            ExternalApi = ExternalApi.OPC
             RuntimePackage = Simulation //unit test를 위해 Simulation으로 설정
             PlatformTarget = WINDOWS
             HwDriver = HwDriveTarget.LS_XGK_IO
@@ -193,13 +192,19 @@ module RuntimeGeneratorModule =
 module PlatformTargetExtensions =
         let fromString s =
             match s with
-            | "WINDOWS"-> WINDOWS
-            | "XGI"    -> XGI
-            | "XGK"    -> XGK
+            | "WINDOWS" | "WINDOWS PC"-> WINDOWS
+            | "XGI"  | "LS Electric XGI PLC"  -> XGI
+            | "XGK"  | "LS Electric XGK PLC"  -> XGK
             | _ -> failwithf $"Error ToPlatformTarget: {s}"
 
         let allPlatforms =
             [ WINDOWS; XGI; XGK;]
+
+        let getAlias x =
+            match x with
+            | WINDOWS -> "WINDOWS PC"
+            | XGI -> "LS Electric XGI PLC"
+            | XGK -> "LS Electric XGK PLC"
 
 
 
@@ -222,10 +227,9 @@ module ExternalApiExtensions =
             match s with
             | "OPC"  -> ExternalApi.OPC
             | "REDIS"  -> ExternalApi.REDIS
-            | _ -> ExternalApi.NONE_API
 
     let allExternalApi =
-        [ OPC; REDIS; NONE_API;]
+        [ OPC; REDIS;]
 
 module HwDriveTargetExtensions =
     let fromString s =

@@ -84,7 +84,7 @@ module OPCClientModule =
                         application.ApplicationConfiguration,
                         endpoint,
                         false,
-                        "UA Reference Client Session",
+                        "UA Dualsoft Client Session",
                         uint32 timeout,
                         null,
                         null

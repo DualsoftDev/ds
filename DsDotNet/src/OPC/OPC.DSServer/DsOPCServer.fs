@@ -141,3 +141,7 @@ type DsOPCServer(dsSys: DsSystem) =
     member this.ChangeDSStorage (stg:Storages) = 
         dsNodeManager.ChangeDSStorage stg
 
+    member this.IsConnectedNotDSClient =
+        this.ServerInternal.SessionManager.GetSessions()
+        |> Seq.filter (fun session -> not( session.SessionDiagnostics.SessionName.Contains "Dualsoft"))
+        |> Seq.exists (fun session -> session.Activated)

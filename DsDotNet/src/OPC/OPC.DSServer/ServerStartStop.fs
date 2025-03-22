@@ -12,6 +12,11 @@ module DsOpcUaServerManager =
 
     let mutable server: DsOPCServer option = None
     let IsRunning():bool = server.IsSome 
+    let IsConnectedNotDSClient():bool = 
+        match server with
+        | Some s -> s.IsConnectedNotDSClient
+        | None -> false
+
         /// <summary>
     /// OPC UA 서버 종료
     /// </summary>

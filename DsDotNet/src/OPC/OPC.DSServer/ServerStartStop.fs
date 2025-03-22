@@ -7,6 +7,7 @@ open Opc.Ua.Configuration
 open Engine.Runtime
 open Engine.Core.Interface
 open Engine.Core
+open System.IO
 
 module DsOpcUaServerManager =
 
@@ -36,6 +37,14 @@ module DsOpcUaServerManager =
             s.ChangeDSStorage(dsSys.TagManager.Storages)
         | None ->
             printfn "서버가 실행 중이 아닙니다."
+
+    let DeleteStatisticsFile(systemName:string) =
+        let filePath = Path.Combine(fromServerConfig "StatisticsFilePath", $"{systemName}.json")
+        if File.Exists filePath
+        then 
+            File.Delete filePath
+
+        filePath
 
     /// <summary>
     /// OPC UA 서버 시작

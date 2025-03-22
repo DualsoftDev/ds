@@ -35,8 +35,7 @@ module RuntimeGeneratorModule =
         | "Monitoring" -> Monitoring
         | "VirtualPlant" -> VirtualPlant
         | "VirtualLogic" -> VirtualLogic
-        | _ -> Simulation//ahn!!
-        //| _ -> failwithlogf $"Error ToRuntimePackage"
+        | _ -> Simulation
 
     //제어 HW CPU 기기 타입
     type PlatformTarget =

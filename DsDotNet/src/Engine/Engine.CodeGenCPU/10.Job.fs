@@ -68,7 +68,6 @@ type TaskDevManager with
             if d.TaskDev.ExistOutput
             then
                 let coinPlanOuts = coins.Select(fun s-> s.VC.PS.Expr <&&> s.VC.PE.Expr).ToOr()
-                //let sets = if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then _off else coinPlanOuts ahn!!
                 let callAction = coins.Head().GetPureCall().CallActionType
                 if d.TaskDev.OutDataType = DuBOOL then
                     yield getStatementTypeDigital(coinPlanOuts, d.TaskDev, callAction)

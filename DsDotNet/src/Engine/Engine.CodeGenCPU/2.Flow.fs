@@ -65,10 +65,7 @@ type VertexTagManager with
             else
                 v._off.Expr
         let manualReset = v.RFP.Expr <&&> v.Flow.mop.Expr
-        
-                    //if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() ahn!!
-                    //        then  v.RFP.Expr
-                    //        else  v.RFP.Expr <&&> v.Flow.mop.Expr
+
         let sets =
             ( (resetCausals <||> wsShareds ) <&&> real.V.ET.Expr)
             <||>

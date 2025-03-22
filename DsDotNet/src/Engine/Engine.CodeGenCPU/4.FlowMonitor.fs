@@ -20,12 +20,12 @@ type Flow with
         let rst = f.ClearExpr
         (set, rst) ==| (f.p_st, getFuncName())
 
-    member f.F3_FlowReadyCondition() =
-        let set =   f.HWReadyConditionsToAndElseOn
-            //if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then ahn!!
-            //    f._on.Expr
-            //else 
-            //    f.HWReadyConditionsToAndElseOn
+    member f.F3_FlowReadyCondition(skip:bool) =
+        let set =  
+            if skip then 
+                f._on.Expr
+            else 
+                f.HWReadyConditionsToAndElseOn
 
         let rst = f._off.Expr
         [
@@ -34,12 +34,12 @@ type Flow with
                 yield ((f.ManuExpr <||> f.AutoExpr) <&&> !@ready.ActionINFunc , f.ClearExpr) --| (ready.ErrorCondition, getFuncName())
         ]
 
-    member f.F4_FlowDriveCondition() =
-        let set =   f.HWDriveConditionsToAndElseOn
-            //if RuntimeDS.ModelConfig.RuntimePackage.IsPackageSIM() then ahn!!
-            //    f._on.Expr
-            //else 
-            //    f.HWDriveConditionsToAndElseOn
+    member f.F4_FlowDriveCondition(skip:bool) =
+        let set =  
+            if skip then 
+                f._on.Expr
+            else 
+                f.HWDriveConditionsToAndElseOn
                 
         let rst = f._off.Expr
         [

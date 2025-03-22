@@ -82,8 +82,7 @@ module ConvertCPU =
         [
             yield f.F1_FlowError()
             yield f.F2_FlowPause()
-            yield! f.F3_FlowReadyCondition()
-            yield! f.F4_FlowDriveCondition()
+
             yield! f.F5_FlowPauseAnalogAction()
             yield! f.F6_FlowPauseDigitalAction()
             yield! f.F7_FlowEmergencyAnalogAction()

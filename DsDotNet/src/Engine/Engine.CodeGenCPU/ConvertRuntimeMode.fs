@@ -62,4 +62,11 @@ module ConvertRuntimeModeModule =
             | Simulation   -> yield! applyModeSimulation sys
             | VirtualLogic -> yield! applyModeVirtualLogic sys
             | VirtualPlant -> yield! applyModeVirtualPlant sys isSubSys
+            
+            let isSkipReadyNDriveCondition = not(mode = Control)
+            for f in sys.Flows do
+                if not isSubSys
+                then
+                    yield! f.F3_FlowReadyCondition(isSkipReadyNDriveCondition)
+                    yield! f.F4_FlowDriveCondition(isSkipReadyNDriveCondition)
         ]

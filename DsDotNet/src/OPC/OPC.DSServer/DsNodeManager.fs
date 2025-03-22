@@ -209,7 +209,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         let nodeScript = this.CreateFolder("Script", "Script", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getScriptTags dsSys) nodeScript nIndex
         
-        let sysTags = (getTags dsSys);
         let rootSysTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name}_System",  $"{dsSys.GetType().Name}", nIndex, Some rootNode)
         this.CreateOpcNodes (getTags dsSys) rootSysTagfolder nIndex
 

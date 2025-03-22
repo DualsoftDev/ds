@@ -14,7 +14,6 @@ module OPCClientEventModule =
         let opcClientManager = OPCClientManager(sys)
         let opcClient = OPCDsClient()
         let tagOPCEvent = new Subject<TagEvent>()
-        let tagOPCEvent = new Subject<TagEvent>()
         
         do
             opcClient.ConnectionReady.Add(fun _ ->

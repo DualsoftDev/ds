@@ -122,6 +122,36 @@ module RuntimeGeneratorModule =
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
     }
+    with    
+        member x.ToMessage() = 
+            let baseMsg = $"DsFilePath: {x.DsFilePath}\r\nRuntimePackage: {x.RuntimePackage}"
+            let hwIOInfo = 
+                match x.HwDriver with
+                | LS_XGI_IO -> x.HwIP
+                | LS_XGK_IO -> x.HwIP
+                | MELSEC_IO -> x.HwPath
+                | OPC_IO -> x.HwOPC
+            let hwIOPlatformTarget = 
+                match x.PlatformTarget with
+                | WINDOWS -> hwIOInfo
+                | XGI -> "LS_XGI_IO"
+                | XGK -> "LS_XGK_IO"
+
+            match x.RuntimePackage with
+            | Simulation ->
+                baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}"
+            | Control -> 
+                baseMsg + $"\r\nPlatformTarget: {x.PlatformTarget}
+                \r\nHwDriver: {x.HwDriver} ({hwIOPlatformTarget}) 
+                \r\nTimeoutCall: {x.TimeoutCall}"
+            | Monitoring 
+            | VirtualPlant -> 
+                baseMsg + $"\r\nHwDriver: {x.HwDriver}({hwIOInfo})
+                \r\nTimeoutCall: {x.TimeoutCall}"
+            | VirtualLogic -> 
+                baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}\r\nExternalApi: {x.ExternalApi}
+                \r\nTimeoutCall: {x.TimeoutCall}"
+
 
     let createDefaultModelConfig() =
         { 

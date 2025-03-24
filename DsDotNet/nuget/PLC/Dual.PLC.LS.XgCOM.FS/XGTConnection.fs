@@ -30,7 +30,7 @@ module DsXgConnect =
             x.CommObject <- x.Factory.GetMLDPCommObject20(ipPort)
             if x.CommObject.Connect("") <> 1 then
                 x.TriggerConnectChanged(ConnectFailed)
-                failwith $"Init Connection failed: {ipPort}"
+                failwith $"PLC Init Connection failed: {ipPort}"
             else
                 //logInfo $"Connect Success: {ipPort}"
                 x.TriggerConnectChanged(Connected)

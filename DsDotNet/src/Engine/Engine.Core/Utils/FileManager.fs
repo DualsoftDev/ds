@@ -195,7 +195,9 @@ module FileManager =
             entry.ExtractToFile(entryPath, true)
 
         // Return the path where the files are extracted
-        PathManager.getFullPath ($"{TextDSJson}"|>DsFile)(extractPath|>DsDirectory)
+        let dsText = PathManager.getFullPath ($"{TextDSJson}"|>DsFile)(extractPath|>DsDirectory)
+        let userTagText = PathManager.getFullPath ($"{TextUserTag}"|>DsFile)(extractPath|>DsDirectory)
+        dsText, userTagText
 
 [<Extension>]
 type FileHelper =

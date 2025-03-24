@@ -9,6 +9,11 @@ open System.Runtime.CompilerServices
 module DsText =
     let [<Literal>] TextLibrary   = "DS_Library"
     let [<Literal>] TextDSJson    = "dualsoft.json"
+    let [<Literal>] TextUserTag    = "userTag.json"
+    let [<Literal>] TextOPCTagFolder = "TAG"
+    let [<Literal>] TextOPCDSFolder = "Dualsoft"
+
+
     let [<Literal>] TextEmtpyChannel = "EmtpyChannel" //channel 정보 없는 대상 Dev및 API
     let [<Literal>] TextImageChannel = "SlideImage"   //cctv url 대신에 pptx의 SlideImage 사용할 경우
     let [<Literal>] TextFuncNotUsed = "NotUsed"  //함수 사용안함

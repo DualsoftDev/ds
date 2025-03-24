@@ -49,7 +49,7 @@ module DsOpcUaServerManager =
     /// <summary>
     /// OPC UA 서버 시작
     /// </summary>
-    let Start(dsSys: DsSystem) =
+    let Start(dsSys: DsSystem, mode:RuntimePackage) =
         printfn "OPC UA 서버 초기화 중..."
         if server.IsSome  then Stop(dsSys);
         // 1. 애플리케이션 인스턴스 생성
@@ -70,7 +70,7 @@ module DsOpcUaServerManager =
             failwith("Failed to validate or generate the application certificate.")
 
         // 4. 서버 시작
-        let opcServer = new DsOPCServer(dsSys)
+        let opcServer = new DsOPCServer(dsSys, mode)
         server <- Some opcServer
         try
             application.Start(opcServer).Wait()

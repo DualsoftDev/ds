@@ -51,20 +51,21 @@ module ParserLoader =
         system, loadings
 
 
-    let LoadFromConfig (configPath: string) (target:PlatformTarget)=
+    let LoadFromConfig (configPath: string) (target:PlatformTarget) (userTagConfig:UserTagConfig option)=
         let jsonFileName =PathManager.getFileName (configPath.ToFile())
         if jsonFileName  <> TextDSJson then
             failwithf $"LoadFromConfig FileName must be {TextDSJson}: now {jsonFileName}"
 
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
-
+        let userTagConfig = userTagConfig |> Option.defaultValue {UserTags = [||]}
         RuntimeDS.ModelConfig <- cfg
         let dir = PathManager.getDirectoryName (configPath.ToFile())
         let system, loadings = loadingDS dir  cfg.DsFilePath None false target
 
         {
             Config = cfg
+            UserTagConfig = userTagConfig
             System = system
             LoadingPaths = loadings
         }

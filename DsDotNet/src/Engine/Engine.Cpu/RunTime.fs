@@ -168,7 +168,7 @@ module RunTimeModule =
 type DsCpuExt  =
     /// DsSystem 으로부터 Runtime 생성 : DsCPU*HMIPackage*(PouGen[])
     [<Extension>]
-    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig): Runtime =
+    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig) (userTagConfig:UserTagConfig): Runtime =
 
         RuntimeDS.ModelConfig <- modelCnf
         dsSys.GetCallVertices()
@@ -180,6 +180,18 @@ type DsCpuExt  =
         // Initialize storages and create POU's for the system
         let storages = Storages()
         let pous = dsSys.GeneratePOUs(storages, target) |> toArray
+
+
+        userTagConfig.UserTags.Iter(fun f->
+            if  storages.ContainsKey(f.Name) then
+                failwith $"UserTags {f.Name} 중복된 태그명"
+
+            match tryTextToDataType(f.DataType) with
+            | Some dataType ->
+                let tag = dataType.ToType().CreateBridgeTag(f.Name, f.Address, dataType.DefaultValue(), MonitorTag.UserTagType|>int|>Some)
+                storages.Add(tag.Name, tag)
+            | None -> failwith $"{f} 미지원 데이터 타입"
+            )
 
         // Create commented statements from each POU's
         let css = pous.Collect(_.CommentedStatements())

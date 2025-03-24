@@ -6,6 +6,7 @@ open Newtonsoft.Json
 open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Collections.Generic
+open System
 
 
 [<AutoOpen>]
@@ -19,7 +20,33 @@ module LoaderModule =
         LibraryInfos: Dictionary<string, string> //Api, filePath
     }
 
+    type UserTag = {
+        Name: string
+        Address: string
+        DataType: string
+        DisplayName: string
+    }
+
+    [<Flags>]
+    type UserTagColumn =
+    | Name          = 0000 
+    | Address       = 0001 
+    | DataType      = 0002
+    | DisplayName   = 0003
+
+    type UserTagConfig = {
+        UserTags: UserTag array
+    }
+
+    let createDefaultUserTagConfig() =
+        { 
+           UserTags = [||]
+        }
     let private jsonSettings = JsonSerializerSettings()
+
+    let LoadUserTagConfig (path: string) =
+        let json = File.ReadAllText(path)
+        JsonConvert.DeserializeObject<UserTagConfig>(json, jsonSettings)
 
     let LoadLibraryConfig (path: string) =
         let json = File.ReadAllText(path)
@@ -42,6 +69,10 @@ module LoaderModule =
     let SaveConfigWithPath (path: string) (cfg: ModelConfig) =
         SaveConfig path cfg
         path
+    let SaveUserTagConfigWithPath (path: string) (cfg: UserTagConfig) =
+        let json = JsonConvert.SerializeObject(cfg, jsonSettings)
+        File.WriteAllText(path, json)
+        path
 
     let ExportLoadedSystem (s: LoadedSystem) =
 
@@ -59,12 +90,15 @@ module LoaderModule =
 
         absFilePath
 
+
+
     type Model = {
         Config: ModelConfig
+        UserTagConfig: UserTagConfig
         System : DsSystem
         LoadingPaths : string list
     }
-        
+
 
 [<AutoOpen>]
 [<Extension>]
@@ -85,7 +119,7 @@ type LoaderExt =
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))
 
     [<Extension>]
-    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq, cfg:ModelConfig) =
+    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq, cfg:ModelConfig, userTagConfig:UserTagConfig) =
         let targetPaths = (loadingPaths @ [activeFilePath])
         let zipPathDS  = targetPaths.ToDsZip(changeExtension (activeFilePath|> DsFile)  "dsz")
 
@@ -98,14 +132,16 @@ type LoaderExt =
         let topLevel = getTopLevelDirectory (loadingPaths@[|activeFilePath|] |> Seq.toList)
 
         let jsFilePath = $"{zipDir}{TextDSJson}" |> getValidFile
+        let jsUserTagFilePath = $"{zipDir}{TextUserTag}" |> getValidFile
 
 
         let baseTempFilePath = $"{topLevel}base.ext"  //상대 경로 구하기 위한 임시경로
         let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
         let newCfg = createModelConfigReplacePath (cfg, activeRelaPath)
-        let config = SaveConfigWithPath jsFilePath newCfg
-
-        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;config]@layoutImgFiles.ToList())
+        let configPath = SaveConfigWithPath jsFilePath newCfg
+        let userTagConfigPath = SaveUserTagConfigWithPath jsUserTagFilePath userTagConfig
+        
+        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;configPath;userTagConfigPath]@layoutImgFiles.ToList())
 
         zipPathDS
 

@@ -67,7 +67,6 @@ module TagModule =
         let defaultValue = DsDataType.typeDefaultValue (dataType.ToType())
         createVariable name { Object = defaultValue } None
 
-
     let createTagByBoxedValue (name:string)  (boxedValue:BoxedObjectHolder) tagKind address sys fqdn: ITag =
         let v = boxedValue.Object
         let createParam () = {defaultStorageCreationParams(unbox v) tagKind with Name=name; Address= Some address; System=sys; Target = Some fqdn}
@@ -171,3 +170,41 @@ module TagModule =
         forceTrace $"--- getRungMap  statements: {statements.Count()} usedTags: {dicSource.Count} totalTags:{totalTags.Count()}"
 
         map
+
+
+    type System.Type with
+
+        member x.CreateVariable(name: string, boxedValue: obj, comment:string option) =
+            createVariable name ({ Object = boxedValue }: BoxedObjectHolder) comment
+
+        member x.CreateBridgeTag(name: string, address: string, boxedValue: obj, tagKind:TagKind option) : ITag =
+            let tk = tagKind |> Option.defaultValue (VariableTag.PcUserVariable|>int)
+            let createParam () =
+                {
+                    defaultStorageCreationParams (unbox boxedValue) (tk) with
+                        Name = name
+                        Address = Some address
+                }
+
+            match x.Name with
+            | BOOL    -> new Tag<bool>  (createParam ())
+            | CHAR    -> new Tag<char>  (createParam ())
+            | FLOAT32 -> new Tag<single>(createParam ())
+            | FLOAT64 -> new Tag<double>(createParam ())
+            | INT16   -> new Tag<int16> (createParam ())
+            | INT32   -> new Tag<int32> (createParam ())
+            | INT64   -> new Tag<int64> (createParam ())
+            | INT8    -> new Tag<int8>  (createParam ())
+            | STRING  -> new Tag<string>(createParam ())
+            | UINT16  -> new Tag<uint16>(createParam ())
+            | UINT32  -> new Tag<uint32>(createParam ())
+            | UINT64  -> new Tag<uint64>(createParam ())
+            | UINT8   -> new Tag<uint8> (createParam ())
+            | _ -> failwithlog "ERROR"
+
+        member x.CreateBridgeTag(name: string, address: string) : ITag =
+            let v = typeDefaultValue x
+            x.CreateBridgeTag(name, address, unbox v, None)
+
+        static member FromString(typeName: string) : System.Type = (textToDataType typeName).ToType()
+

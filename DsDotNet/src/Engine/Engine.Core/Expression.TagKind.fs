@@ -20,6 +20,7 @@ module TagKindModule =
         | EventTaskDev  of Tag: IStorage * Target: TaskDev      * TagKind: TaskDevTag
         | EventHwSys    of Tag: IStorage * Target: HwSystemDef  * TagKind: HwSysTag
         | EventVariable of Tag: IStorage * Target: DsSystem     * TagKind: VariableTag
+        | EventMonitor  of Tag: IStorage * Target: DsSystem     * TagKind: MonitorTag
         with
             member x.TagKind =
                 match x with
@@ -30,7 +31,8 @@ module TagKindModule =
                 | EventTaskDev  (_, _, kind) -> int kind
                 | EventHwSys    (_, _, kind) -> int kind
                 | EventVariable (_, _, kind) -> int kind
-
+                | EventMonitor  (_, _, kind) -> int kind
+                
     let TagEventSubject = new Subject<TagEvent>()
     type TagKind = int
     type TagKindTuple = TagKind * string        //TagKind, TagKindName
@@ -52,6 +54,7 @@ module TagKindModule =
                 @ EnumEx.Extract<TaskDevTag>(ft)
                 @ EnumEx.Extract<HwSysTag>(ft)
                 @ EnumEx.Extract<VariableTag>(ft)
+                @ EnumEx.Extract<MonitorTag>(ft)
 
     let allTagKindWithTypes = getTagKindFullSet true
     let allTagKinds = getTagKindFullSet false |> dict
@@ -72,6 +75,9 @@ type TagKindExt =
     [<Extension>] static member GetApiTagKind       (x:IStorage) = DU.getEnumValue<ApiItemTag>   (x.TagKind)
     [<Extension>] static member GetTaskDevTagKind   (x:IStorage) = DU.getEnumValue<TaskDevTag>   (x.TagKind)
     [<Extension>] static member GetHwSysTagKind     (x:IStorage) = DU.getEnumValue<HwSysTag>     (x.TagKind)
+    [<Extension>] static member GetMonitorTagKind     (x:IStorage) = DU.getEnumValue<MonitorTag>     (x.TagKind)
+
+    
     [<Extension>] static member GetVariableTagKind  (x:IStorage) = DU.getEnumValue<VariableTag>  (x.TagKind)
     [<Extension>] static member GetAllTagKinds () : TagKindTuple array = allTagKindWithTypes
     [<Extension>] static member TryGetTaskDevTagKind  (x:IStorage) = DU.tryGetEnumValue<TaskDevTag>   (x.TagKind)
@@ -107,7 +113,8 @@ type TagKindExt =
         | EventTaskDev   (i, _, _) -> i
         | EventHwSys     (i, _, _) -> i
         | EventVariable  (i, _, _) -> i
-
+        | EventMonitor   (i, _, _) -> i
+        
     [<Extension>]
     static member GetTarget(x:TagEvent) =
         match x with
@@ -118,6 +125,7 @@ type TagKindExt =
         | EventTaskDev   ( _, target, _) -> box target
         | EventHwSys     ( _, target, _) -> box target
         | EventVariable  ( _, target, _) -> box target
+        | EventMonitor   ( _, target, _) -> box target
 
     [<Extension>]
     static member GetTagContents(x:TagEvent) =
@@ -129,6 +137,7 @@ type TagKindExt =
         | EventTaskDev   (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
         | EventHwSys     (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
         | EventVariable  (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
+        | EventMonitor   (tag, target, kind) -> tag.Name, tag.BoxedValue, target.Name, int kind
 
 
     [<Extension>]
@@ -163,6 +172,7 @@ type TagKindExt =
         | EventTaskDev   (_, target, _) -> target.ParentSystem
         | EventHwSys     (_, target, _) -> target.System
         | EventVariable  (_, target, _) -> target
+        | EventMonitor   (_, target, _) -> target
 
     [<Extension>]
     static member IsStatusTag(x:TagEvent) =
@@ -175,16 +185,6 @@ type TagKindExt =
         | _ -> false
 
     [<Extension>]
-    static member IsTagForRedisMotion(x:TagEvent) =
-        match x with
-        | EventVertex (_, _, kind) ->
-            kind.IsOneOf( VertexTag.scriptStart
-                        , VertexTag.motionStart
-                        )
-
-        | _ -> false
-
-    [<Extension>]
     static member IsTagForRedisActionOutput(x:TagEvent) =
         match x with
         | EventTaskDev (_, _, kind) ->
@@ -192,8 +192,6 @@ type TagKindExt =
                 TaskDevTag.actionOut
             )
         | _ -> false
-
-
 
     [<Extension>]
     static member IsVertexTokenTag(x:TagEvent) =
@@ -276,10 +274,40 @@ type TagKindExt =
             , int VertexTag.homing)
 
     [<Extension>]
-    static member IsActionOutTag(x:IStorage) =
+    static member IsActionOutStg(x:IStorage) =
         x.TagKind.IsOneOf(
                int TaskDevTag.actionOut
               )
+
+    [<Extension>]
+    static member IsMonitorStg(x:IStorage) =
+        x.TagKind.IsOneOf(
+               int MonitorTag.UserTagType
+              )
+
+    [<Extension>]
+    static member IsMotionEndStg(x:IStorage) =
+        x.TagKind.IsOneOf(
+               int VertexTag.motionEnd
+              )
+    [<Extension>]
+    static member IsScriptEndStg(x:IStorage) =
+        x.TagKind.IsOneOf(
+               int VertexTag.scriptEnd
+              )
+              
+    [<Extension>]
+    static member IsMotionEnd(x:TagEvent) =
+        match x with
+        | EventVertex (s, _, _) -> s.IsMotionEndStg()
+        | _ -> false
+
+    [<Extension>]
+    static member IsScriptEnd(x:TagEvent) =
+        match x with
+        | EventVertex (s, _, _) -> s.IsScriptEndStg()
+        | _ -> false
+
 
     [<Extension>]
     static member IsPlanEndTag(x:IStorage) =
@@ -355,3 +383,4 @@ type TagKindExt =
                     )
             | EventHwSys (_, _, _) -> false
             | EventVariable (_, _, _) -> true
+            | EventMonitor (_, _, _) -> true

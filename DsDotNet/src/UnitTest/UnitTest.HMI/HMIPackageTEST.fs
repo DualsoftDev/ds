@@ -21,6 +21,6 @@ module HMIPackageTEST =
         assignAutoAddress (dsPpt.System, 0 , 0, pptParms.HwTarget)
 
         RuntimeDS.ChangeRuntimePackage(RuntimePackage.Control)
-        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.Platform) modelConfig
+        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.Platform) modelConfig pptParms.UserTagConfig
 
         hmiPackage.Devices.Length > 0  |> Assert.True

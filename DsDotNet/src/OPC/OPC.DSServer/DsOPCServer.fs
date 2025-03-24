@@ -124,7 +124,7 @@ module DsOPCServerConfig =
 
 
 
-type DsOPCServer(dsSys: DsSystem) =
+type DsOPCServer(dsSys: DsSystem, mode:RuntimePackage) =
     inherit StandardServer()
     let mutable dsNodeManager = Unchecked.defaultof<DsNodeManager>
 
@@ -135,7 +135,7 @@ type DsOPCServer(dsSys: DsSystem) =
 
     // NodeManager를 생성하여 주소 공간 관리
     override this.CreateMasterNodeManager(server: IServerInternal, configuration: ApplicationConfiguration) =
-        dsNodeManager <- new DsNodeManager(server, configuration, dsSys)
+        dsNodeManager <- new DsNodeManager(server, configuration, dsSys, mode)
         new MasterNodeManager(server, configuration, null, [|dsNodeManager:> INodeManager|])
 
     member this.ChangeDSStorage (stg:Storages) = 

@@ -9,10 +9,11 @@ type FilePath = string
 
 
 type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
-    let jsonPath = unZip zipDsPath
-    let model:Model = ParserLoader.LoadFromConfig (jsonPath) target
+    let jsonPath, userTagConfigPath = unZip zipDsPath
+    let userTagConfig = LoadUserTagConfig userTagConfigPath 
+    let model:Model = ParserLoader.LoadFromConfig (jsonPath) target (userTagConfig|> Some)
     let hwDriver =  model.Config.HwDriver
-    let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime model.System (target) model.Config
+    let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime model.System (target) model.Config userTagConfig
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
     let storages =
         let skipInternal = true
@@ -30,6 +31,7 @@ type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
     member x.HwIP = model.Config.HwIP
     member x.HwDriver = hwDriver
     member x.ModelConfig = model.Config
+    member x.UserTagConfig = model.UserTagConfig
 
     /// DsCPU: call Run, Step, Reset, Stop method on DsCPU
     member x.Cpu = dsCPU

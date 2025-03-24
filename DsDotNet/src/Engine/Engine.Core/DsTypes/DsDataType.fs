@@ -300,7 +300,11 @@ module DsDataType =
     let toValueType (x:string) = getTrimmedValueNType x |> snd
 
 
-    type IOType = | In | Out | Memory | NotUsed
+    type IOType = 
+    | In        //실제 센서 
+    | Out       //실제 액츄에이터 
+    | Memory    //모니터링 변수
+    | NotUsed
 
     type SlotDataType(slotIndex:int, ioType:IOType, dataType:DataType) =
         member x.SlotIndex = slotIndex

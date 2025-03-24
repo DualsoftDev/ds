@@ -54,7 +54,11 @@ module DsNodeManagerExt =
     let getIOTags(sys:DsSystem) =
         sys.TagManager.Storages.Values
             |> Seq.filter(fun tag -> tag.TagKind = (int)TaskDevTag.actionIn || tag.TagKind = (int)TaskDevTag.actionOut)
-    
+
+    let getMonitorTags(sys:DsSystem) =
+        sys.TagManager.Storages.Values
+            |> Seq.filter(fun tag -> tag.TagKind = (int)MonitorTag.UserTagType)
+
     let getActionTags(sys:DsSystem) =
         sys.TagManager.Storages.Values
             |> Seq.filter(fun tag -> tag.TagKind = (int)VertexTag.motionStart || tag.TagKind = (int)VertexTag.motionEnd)
@@ -63,7 +67,7 @@ module DsNodeManagerExt =
         sys.TagManager.Storages.Values
             |> Seq.filter(fun tag -> tag.TagKind = (int)VertexTag.scriptStart || tag.TagKind = (int)VertexTag.scriptEnd)
 
-type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem) =
+type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem, mode:RuntimePackage) =
     inherit CustomNodeManager2(server, configuration, "ds")
     //start TagName, end Tag
     let _motionDic = dsSys |> getDsPlanInterfaces 
@@ -113,10 +117,36 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 UserAccessLevel = AccessLevels.CurrentReadOrWrite
                 )
 
-              
-
         variable.OnWriteValue <- NodeValueEventHandler(fun context node indexRange dataEncoding value statusCode timestamp ->
             handleWriteValue(context, node, indexRange, dataEncoding, &value, &statusCode, &timestamp)
+        )
+
+        variable.OnWriteValue <- NodeValueEventHandler(fun context node indexRange dataEncoding value statusCode timestamp ->
+
+            let writeError = ServiceResult.Create(StatusCodes.BadUserAccessDenied, $"{variable.DisplayName.Text} read only")
+            let handleWrite = handleWriteValue(context, node, indexRange, dataEncoding, &value, &statusCode, &timestamp)
+            let isStg = _dsStorages.ContainsKey(node.DisplayName.Text)
+            match mode with 
+            | RuntimePackage.Control ->
+                if isStg && _dsStorages[node.DisplayName.Text].IsMonitorStg() then
+                    handleWrite
+                else 
+                    writeError
+            | RuntimePackage.VirtualLogic ->
+                if isStg && _dsStorages[node.DisplayName.Text].IsMotionEndStg() then
+                    handleWrite
+                else 
+                    writeError  
+            | RuntimePackage.VirtualPlant ->
+                if isStg && _dsStorages[node.DisplayName.Text].IsActionOutStg() then
+                    handleWrite
+                else 
+                    writeError  
+
+            | RuntimePackage.Monitoring
+            | RuntimePackage.Simulation -> writeError   
+
+           
         )
         
         folder.AddChild(variable)
@@ -193,20 +223,22 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 externalReferences[ObjectIds.ObjectsFolder] |> List<IReference>
                 
         // Dualsoft root folder under Objects
-        let rootNode = this.CreateFolder("Dualsoft", "Dualsoft", "", nIndex, None)
+        let rootNode = this.CreateFolder(DsText.TextOPCDSFolder, DsText.TextOPCDSFolder, "", nIndex, None)
         objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootNode.NodeId))
-        let rootTagNode = this.CreateFolder("Tag", "Tag", "", nIndex, None)
+        let rootTagNode = this.CreateFolder(DsText.TextOPCTagFolder,DsText.TextOPCTagFolder, "", nIndex, None)
         objectsFolder.Add(NodeStateReference(ReferenceTypeIds.Organizes, false, rootTagNode.NodeId))
 
 
-        // IO 추후 오픈 Runtime Active 모드에서 사용
         let nodeIO = this.CreateFolder("IO", "IO", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getIOTags dsSys) nodeIO nIndex
         
-        let nodeAction = this.CreateFolder("Action", "Action", "", nIndex, Some rootTagNode)
+        let nodeMONITOR = this.CreateFolder("MONITOR", "MONITOR", "", nIndex, Some rootTagNode)
+        this.CreateOpcNodes (getMonitorTags dsSys) nodeMONITOR nIndex
+        
+        let nodeAction = this.CreateFolder("ACTION", "ACTION", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getActionTags dsSys) nodeAction nIndex
 
-        let nodeScript = this.CreateFolder("Script", "Script", "", nIndex, Some rootTagNode)
+        let nodeScript = this.CreateFolder("SCRIPT", "SCRIPT", "", nIndex, Some rootTagNode)
         this.CreateOpcNodes (getScriptTags dsSys) nodeScript nIndex
         
         let rootSysTagfolder = this.CreateFolder(dsSys.Name, $"{dsSys.Name}_System",  $"{dsSys.GetType().Name}", nIndex, Some rootNode)

@@ -2,6 +2,7 @@ namespace OPC.DSServer
 
 open System
 open Engine.Runtime
+open Engine.Core
 
 /// <summary>
 /// 테스트 코드
@@ -16,7 +17,7 @@ module Program =
                 new RuntimeModel(@"z://HelloDS.dsz", Engine.Core.RuntimeGeneratorModule.PlatformTarget.WINDOWS)
 
             // OPC UA 서버 시작
-            DsOpcUaServerManager.Start(runtimeModel.System)
+            DsOpcUaServerManager.Start(runtimeModel.System, RuntimePackage.Simulation)
 
             printfn "종료하려면 아무 키나 누르세요..."
             Console.ReadKey() |> ignore

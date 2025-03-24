@@ -247,3 +247,8 @@ module TagKindList =
     | PlcUserVariable              = 16003
 
 
+    /// 17000 ~ 17999
+    [<Flags>]
+    type MonitorTag =
+    | UserTagType                  = 17000
+

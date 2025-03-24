@@ -22,6 +22,7 @@ module ImportPptModule =
 
     type PptParams = {
         HwTarget: HwTarget
+        UserTagConfig: UserTagConfig
         AutoIOM: bool
         CreateFromPpt : bool
         CreateBtnLamp : bool
@@ -32,6 +33,7 @@ module ImportPptModule =
     let defaultPptParams() =
         {
             HwTarget = getDefaltHwTarget()
+            UserTagConfig = {UserTags = [||]}
             AutoIOM = true
             CreateFromPpt = false
             CreateBtnLamp = true
@@ -227,7 +229,7 @@ module ImportPptModule =
     let pptRepo = Dictionary<DsSystem, PptDoc>()
 
     /// GetDSFromPptWithLib > (loadFromPpts > GetImportModel >) loadSystem
-    let private loadFromPpts (path: string ) isLib (pptParams:PptParams) (layoutImgPaths:HashSet<string>) (modelCnf:ModelConfig)=
+    let private loadFromPpts (path: string ) isLib (pptParams:PptParams) (layoutImgPaths:HashSet<string>) (modelCnf:ModelConfig) =
         Copylibrary.Clear()
         let dicPptDoc = Dictionary<string, PresentationDocument>()
         let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
@@ -246,6 +248,7 @@ module ImportPptModule =
                         pathStack.Pop() |> ignore)
 
                 {   Config = cfg
+                    UserTagConfig = pptParams.UserTagConfig
                     System = sys
                     LoadingPaths = [] },
                 pptRepo
@@ -274,7 +277,7 @@ module ImportPptModule =
             pptRepo.Clear()
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
 
-            let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths cfg|> Tuple.first)
+            let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths cfg |> Tuple.first)
             forceTrace $"Elapsed time for reading1 {fullName}: {millisecond} ms"
 
             let activePath = PathManager.changeExtension (fullName.ToFile()) "ds"
@@ -300,5 +303,6 @@ module ImportPptModule =
         static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams, cfg:ModelConfig)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams, cfg)
             DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
-            LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg), ret.System
+            let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg, pptParams.UserTagConfig)
+            zipPath, ret.System
 

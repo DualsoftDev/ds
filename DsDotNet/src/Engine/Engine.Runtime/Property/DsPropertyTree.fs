@@ -32,9 +32,17 @@ type DsPropertyTreeExt =
             let vertices = flow.Graph.Vertices |> Seq.map buildVertexTree |> Seq.toList
             CreateTreeNode(PropertyFlow(flow), vertices)
 
+        and createJobTask(call:Call) =
+            let taskDevNodes = call.TargetJob.TaskDefs 
+                                    |> Seq.map (fun taskDef -> 
+                                            CreateTreeNode(PropertyTaskDev(taskDef), []) )
+                                    |> Seq.toList
+            let jobNode = CreateTreeNode(PropertyJob(call.TargetJob), taskDevNodes)
+            CreateTreeNode(PropertyCall(call), [jobNode])
+
         and buildVertexTree vertex =
             match vertex with
-            | :? Call as call when call.IsJob  -> CreateTreeNode(PropertyCall(call), [])
+            | :? Call as call when call.IsJob  ->  createJobTask call
             | :? Call as call when call.IsOperator ->   CreateTreeNode(PropertyOperatorFunction(call.TargetFunc.Value :?> OperatorFunction), [])
             | :? Real as real -> 
                 let coins = real.Graph.Vertices |> Seq.map buildCoinTree |> Seq.toList
@@ -48,13 +56,8 @@ type DsPropertyTreeExt =
                 CreateTreeNode(PropertyCommandFunction(call.TargetFunc.Value :?> CommandFunction), [])
             | :? Call as call when call.IsOperator -> 
                 CreateTreeNode(PropertyOperatorFunction(call.TargetFunc.Value :?> OperatorFunction), [])
-            | :? Call as call when call.IsJob ->
-                let taskDevNodes = call.TargetJob.TaskDefs 
-                                    |> Seq.map (fun taskDef -> 
-                                            CreateTreeNode(PropertyTaskDev(taskDef), []) )
-                                    |> Seq.toList
-                let jobNode = CreateTreeNode(PropertyJob(call.TargetJob), taskDevNodes)
-                CreateTreeNode(PropertyCall(call), [jobNode])
+            | :? Call as call when call.IsJob ->  createJobTask call
+                
             | :? Alias as alias -> CreateTreeNode(PropertyAlias(alias), [])
             | _ -> failwith $"Unknown coin type: {coin.DequotedQualifiedName}"
 

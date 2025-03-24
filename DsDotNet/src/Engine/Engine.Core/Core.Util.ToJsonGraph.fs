@@ -203,7 +203,7 @@ module rec ToJsonGraphModule =
     let deviceToJson (system: DsSystem) =
         let taskDevCalls = system.GetTaskDevCalls() |> dict
         let getDevTasks(device:Device) =
-            system.GetTaskDevsCoin()
+            system.GetTaskDevs()
                 |> Seq.filter (fun (td, _c)-> td.DeviceName = device.Name)
                 |> Seq.map (fun (td, _c)-> 
                     let calls = taskDevCalls[td].Select(fun c->c.QualifiedName)|> JArray

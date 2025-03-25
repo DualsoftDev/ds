@@ -37,6 +37,7 @@ Grammar/CsParser/bin/
 *.osts
 *.dsz
 *.dll
+!XGCommLib64.dll
 !Interop.*.dll
 !ActProgDataLogging64PS.dll
 !ActProgType64PS.dll

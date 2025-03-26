@@ -17,6 +17,8 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.DsText;
 using static Engine.Core.DsConstants;
+using static Engine.Core.CoreModule.SystemModule;
+using static Engine.Core.CoreModule.GraphItemsModule;
 
 namespace Engine.Export.Office
 {
@@ -60,18 +62,18 @@ namespace Engine.Export.Office
             if (v is Call c)
             {
                 var flowName = c.Parent.GetFlow().Name;
-                var deviceName = c.TargetJob.DeviceDefs.First().DeviceName;
+                var deviceName = c.TargetJob.TaskDefs.First().DeviceName;
                 var callName = "";
                 // Find the index where flowName starts in deviceName
                 int startIndex = deviceName.IndexOf(flowName);
                 if (startIndex != -1) // If flowName is found in deviceName
-                    callName = $"{deviceName.Remove(startIndex, flowName.Length).TrimStart('_')}\n.{c.TargetJob.DeviceDefs.First().ApiItem.Name}";
+                    callName = $"{deviceName.Remove(startIndex, flowName.Length).TrimStart('_')}\n.{c.TargetJob.TaskDefs.First().ApiItem.Name}";
                 else
-                    callName = $"{deviceName}\n.{c.TargetJob.DeviceDefs.First().ApiItem.Name}";
+                    callName = $"{deviceName}\n.{c.TargetJob.TaskDefs.First().ApiItem.Name}";
 
 
-                if (c.TargetJob.JobParam.JobMulti.IsMultiAction)
-                    return $"{callName}[{c.TargetJob.DeviceDefs.Count()}]";
+                if (c.TargetJob.TaskDevCount > 1)
+                    return $"{callName}[{c.TargetJob.TaskDefs.Count()}]";
                 else
                     return callName;
             }

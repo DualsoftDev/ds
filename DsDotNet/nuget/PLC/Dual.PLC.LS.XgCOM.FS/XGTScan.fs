@@ -35,11 +35,21 @@ module XGTScanModule =
             )
             |> dict
 
-        let isXGI(tags:string seq) = 
-            let isXGI = tags |> Seq.exists (fun t -> t.StartsWith("%"))
-            if isXGI && tags |> Seq.exists (fun t -> not (t.StartsWith("%"))) then
-                failwithlog "XGI and XGK tags are mixed. Tags should consist of only one type."
-            isXGI
+        let isXGI (tags: string seq) = 
+            if tags |> Seq.filter (fun f -> System.String.IsNullOrWhiteSpace(f)) |> Seq.any
+            then 
+                failwithlog "태그 Address가 비어 있습니다."
+
+            let tags = tags |> Seq.filter (fun f -> not (System.String.IsNullOrWhiteSpace(f)))
+            let hasXGI = tags |> Seq.exists (fun t -> t.StartsWith("%"))
+            let hasXGK = tags |> Seq.exists (fun t -> not (t.StartsWith("%")))
+
+            if hasXGI && hasXGK then
+                let xgiTags = tags |> Seq.filter (fun t -> t.StartsWith("%")) |> String.concat ", "
+                let xgkTags = tags |> Seq.filter (fun t -> not (t.StartsWith("%"))) |> String.concat ", "
+                failwithlog $"XGI와 XGK 태그가 혼합되어 있습니다.\n\nXGI 태그: {xgiTags}\nXGK 태그: {xgkTags}\n\n태그는 한 종류로만 구성되어야 합니다."
+
+            hasXGI
 
         let scanCancel(plcIp: string) = 
             if cancelScanIps.ContainsKey(plcIp) then

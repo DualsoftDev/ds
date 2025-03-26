@@ -28,11 +28,18 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCall)
         let f = getFuncName()
+        let initSrcs = real.Graph.Inits.Except(real.Graph.Islands)
         [|
             for coin in coins do
-                let sets = coin.CallOut.Expr  <&&> real.VR.G.Expr
+                let sets =
+                    if initSrcs.Contains coin.Vertex then
+                        coin.CallOut.Expr  
+                    else
+                        coin.CallOut.Expr <&&> initSrcs.Select(fun f->f.VC.ET).ToAndElseOn()
+
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
-                yield (sets, rsts) ==| (coin.ST, f)
+
+                yield (sets <&&> real.VR.G.Expr , rsts) ==| (coin.ST, f)
         |]
         
     member v.CoinEndActive() =

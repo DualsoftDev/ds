@@ -39,8 +39,8 @@ type VertexTagManager with
         let rootStart = 
             if not(bVirtaulPlant)
                     then
-                        real.Graph.Inits.Except(real.Graph.Islands)
-                    else 
+                        real.Graph.Inits.Except(real.Graph.Islands) //Except(real.Graph.Islands) 없어도 되는데 사이클시작을 강제로 그리게함 
+                    else
                         real.Graph.Vertices
 
         let sets = (  v.SFP.Expr <||> plans <||> rootStart.Select(fun v->v.VC.CallOut).ToOrElseOff())

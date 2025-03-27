@@ -37,7 +37,7 @@ namespace PLC.Convert.Mermaid
             // 
             // button_openRockwell
             // 
-            button_openRockwell.Location = new Point(218, 12);
+            button_openRockwell.Location = new Point(218, 75);
             button_openRockwell.Name = "button_openRockwell";
             button_openRockwell.Size = new Size(111, 50);
             button_openRockwell.TabIndex = 0;
@@ -46,7 +46,7 @@ namespace PLC.Convert.Mermaid
             // 
             // button_openDir
             // 
-            button_openDir.Location = new Point(720, 12);
+            button_openDir.Location = new Point(720, 75);
             button_openDir.Name = "button_openDir";
             button_openDir.Size = new Size(111, 50);
             button_openDir.TabIndex = 0;
@@ -55,7 +55,7 @@ namespace PLC.Convert.Mermaid
             // 
             // button_MelsecConvert
             // 
-            button_MelsecConvert.Location = new Point(338, 12);
+            button_MelsecConvert.Location = new Point(338, 75);
             button_MelsecConvert.Name = "button_MelsecConvert";
             button_MelsecConvert.Size = new Size(111, 50);
             button_MelsecConvert.TabIndex = 0;
@@ -64,7 +64,7 @@ namespace PLC.Convert.Mermaid
             // 
             // button_SiemensConvert
             // 
-            button_SiemensConvert.Location = new Point(458, 12);
+            button_SiemensConvert.Location = new Point(458, 75);
             button_SiemensConvert.Name = "button_SiemensConvert";
             button_SiemensConvert.Size = new Size(111, 50);
             button_SiemensConvert.TabIndex = 0;
@@ -73,7 +73,7 @@ namespace PLC.Convert.Mermaid
             // 
             // button_LSEConvert
             // 
-            button_LSEConvert.Location = new Point(578, 12);
+            button_LSEConvert.Location = new Point(578, 75);
             button_LSEConvert.Name = "button_LSEConvert";
             button_LSEConvert.Size = new Size(111, 50);
             button_LSEConvert.TabIndex = 0;

@@ -20,6 +20,10 @@ namespace PLC.Convert.Mermaid
             InitializeTreeView();
             InitializeWebView();
             InitializeEvent();
+
+            this.FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            this.BackColor = System.Drawing.Color.FromArgb(30, 30, 30); // 🟢 다크 모드 배경
+            this.Text = "Reverse Viewer";
         }
 
         private void InitializeTreeView()

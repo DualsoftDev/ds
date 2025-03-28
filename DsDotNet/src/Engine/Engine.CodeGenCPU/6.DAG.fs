@@ -77,8 +77,14 @@ type VertexTagManager with
             for coin in coins do
                 let call = coin.Vertex.GetPure().V.Vertex :?> Call
                 let rsts = coin.RT.Expr
-                let sets = coin.ST.Expr <&&> call.End  <&&> real.VR.G.Expr
-                yield (sets, rsts) ==| (coin.ET, f)
+                let sets = coin.ST.Expr <&&> real.VR.G.Expr
+
+                if call.HasSensor || call.ActionOutExpr.IsNone then
+                    yield (sets <&&> call.End, rsts) ==| (coin.ET, f)
+                else 
+                    let tempRising  = getSM(call.System).GetTempBoolTag("tempFallingOutput")
+                    yield! (!@call.ActionOutExpr.Value, call.System) --^ (tempRising, f)
+                    yield (sets <&&> tempRising.Expr, rsts) ==| (coin.ET, f)
         |]
 
 

@@ -47,6 +47,7 @@ module ConvertCpuCall =
 
         member c.EndAction = if c.IsJob then c.ActionInExpr else None
         member c.EndWithoutTimer = c.EndAction.DefaultValue(c.EndPlan)
+
         member c.End =
                 if c.UsingTimeDelayCheck then
                     (c.TagManager :?> CoinVertexTagManager).TimeCheck.DN.Expr

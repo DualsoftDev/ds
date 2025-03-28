@@ -211,7 +211,7 @@ module TagKindList =
     | calcAverage               = 11106 //calcMovingDuration 기준
     | calcStandardDeviation     = 11107 //calcMovingDuration 기준
     | calcStatWorkFinish        = 11108 //calc Work 통계측정 완료  calcActiveDuration 까지 계산될경우 true
-    | calcStatActionFinish      = 11109 //calc Action 통계측정 완료  planStart와 actionIN Sensor 감지되면 true
+    | calcStatActionFinish      = 11109 //calc Action 통계측정 완료  planStart와 callFinish 되면 true
     
     /// 12000 ~ 12999
     [<Flags>]

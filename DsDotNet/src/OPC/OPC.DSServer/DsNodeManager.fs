@@ -42,7 +42,10 @@ module DsNodeManagerExt =
         VertexTag.motionEnd|>int
         VertexTag.scriptStart|>int
         VertexTag.scriptEnd|>int
+        VertexTag.scriptEnd|>int
+        MonitorTag.UserTagType|>int
         ]
+
 
     let getTags(fqdn:FqdnObject) =
         fqdn.TagManager.Storages

@@ -52,7 +52,7 @@ module ConvertRuntimeModeModule =
         [
             yield!
                 sys.GetRealVertices().Select(getVMReal).Collect(fun vr -> 
-                    vr.R10_GoingTime(mode)@
+                    vr.R10_GoingTime(mode, isSubSys)@
                     vr.R11_GoingMotion(mode)
                     )
 

@@ -36,18 +36,23 @@ type RealVertexTagManager with
 
 
 
-    member v.R10_GoingTime(mode:RuntimePackage): CommentedStatement [] =
+    member v.R10_GoingTime(mode:RuntimePackage, isSubSys:bool): CommentedStatement [] =
         if v.Real.Time.IsNone then [||] 
         else 
+            let getSkipTimeExpr() = [| yield (v._on.Expr, v._off.Expr) --| (v.TimeRelay, getFuncName()) |]  
             match mode with 
             | Simulation  
             | VirtualPlant -> v.RealGoingTime(false)
             | VirtualLogic -> v.RealGoingTime(true)
-            | Control 
-            | Monitoring -> 
-                [|
-                    yield (v._on.Expr, v._off.Expr) --| (v.TimeRelay, getFuncName())
-                |]  //타이머 사용 안함
+            | Monitoring -> getSkipTimeExpr()
+            | Control ->
+
+                    if isSubSys //isSubSys 타이머 사용 안함
+                    then 
+                        getSkipTimeExpr()
+                    else 
+                        v.RealGoingTime(false)
+                            
               
 
 

@@ -376,7 +376,7 @@ public static class ImportSymbol
             }
             catch (Exception ex)
             {
-                return null;
+                throw new Exception($"Error parsing line: {ex.Message}");   
             }
            
         }

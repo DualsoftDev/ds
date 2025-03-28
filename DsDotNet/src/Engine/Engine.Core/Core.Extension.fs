@@ -248,7 +248,10 @@ module CoreExtensionModule =
             x.TaskDefs
             |> Seq.mapi (fun i d ->
                 match x.AddressInCount, x.AddressOutCount with
-                | inCnt, outCnt when (inCnt =cnt && outCnt =cnt ) ->None
+                | inCnt, outCnt when (inCnt = cnt && outCnt = cnt ) -> 
+                    if d.IsInAddressEmpty || d.IsOutAddressEmpty 
+                    then Some d else None
+                 
                 | inCnt, outCnt ->
                     let inNullAddr = i < inCnt && d.IsInAddressEmpty
                     let outNullAddr = i < outCnt && d.IsOutAddressEmpty

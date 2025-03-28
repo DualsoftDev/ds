@@ -15,6 +15,9 @@ open System.Collections.Generic
 open Engine.Core
 open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Presentation
+open PLC.Mapper.FS.DeviceApiModule
+open System.Xml.Serialization
+open System.IO.Packaging
 
 [<AutoOpen>]
 module PptDocModule =
@@ -192,6 +195,24 @@ module PptDocModule =
         member x.Parameter: DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 
+        member x.ApisFromMapper : List<DeviceApi> =
+            let customXmlPart =
+                doc.PresentationPart.CustomXmlParts
+                |> Seq.tryFind (fun part ->
+                    use reader = new StreamReader(part.GetStream())
+                    let xml = reader.ReadToEnd()
+                    xml.Contains("<PowerPointMapper")
+                )
+
+            match customXmlPart with
+            | Some part ->
+                use stream = part.GetStream()
+                let serializer = XmlSerializer(typeof<MapperData>)
+                match serializer.Deserialize(stream) with
+                | :? MapperData as mapperData -> mapperData.DeviceApisProp
+                | _ -> new List<DeviceApi>()
+            | None -> new List<DeviceApi>()
+
     type PptDoc with
         static member Create(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
 
@@ -200,6 +221,8 @@ module PptDocModule =
             let parents = Dictionary<PptNode, seq<PptNode>>()
             let dummys = HashSet<PptDummy>()
             let edges = HashSet<PptEdge>()
+
+            
 
             // 숨김 페이지, blank page 제외한 모든 페이지
             let validSlidesAll =

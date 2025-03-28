@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <!--<TargetFramework>netcoreapp3.1</TargetFramework>-->
-		<TargetFramework>net8.0-windows</TargetFramework>
-        <RootNamespace>PLC.Convert.LSElectric</RootNamespace>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>PLC.Mapper.FS</RootNamespace>
 		<LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
 		<OutputPath>$(SolutionDir)\bin\</OutputPath>
@@ -16,18 +15,13 @@
 	</PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="ConvertLSE.Base.fs" />
-        <Compile Include="ConvertLSE.Xml.fs" />
-        <Compile Include="ConvertLSE.fs" />
+        <Compile Include="DeviceApi.fs" />
+        <Compile Include="ColorUtil.fs" />
+        <Compile Include="MappingDevice.fs" />
     </ItemGroup>
 
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="8.0.5" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
-      <ProjectReference Include="..\..\PLC.Convert.FS\PLC.Convert.FS.fsproj" />
     </ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

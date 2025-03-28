@@ -34,35 +34,37 @@ module ConvertCheckModule =
 
             isValidVertex
 
-    let internal checkErrHWItem(sys:DsSystem) =
+    let private checkErrHWItem(sys:DsSystem)  (skipBtnLamp:bool) =
         let hwManuFlows = sys.ManualHWButtons |> Seq.collect(fun f -> f.SettingFlows)
         let hwAutoFlows = sys.AutoHWButtons   |> Seq.collect(fun f -> f.SettingFlows)
-
-        for btn in sys.AutoHWButtons do
-            for flow in btn.SettingFlows do
-                if not(hwManuFlows.Contains flow) then
-                    failwithf $"{flow.Name} manual btn not exist"
-
-        for btn in sys.ManualHWButtons do
-            for flow in btn.SettingFlows do
-                if not(hwAutoFlows.Contains flow) then
-                    failwithf $"{flow.Name} auto btn not exist"
-
-        for btn in sys.HWButtons do
-            if btn.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
-                failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
-
-        for lamp in sys.HWLamps do
-            if lamp.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
-                failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
-
-        for condi in sys.HWConditions do
-            if condi.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
-                failwithf $"HW Button : {condi.Name} InAddress 값이 없습니다."
-
+     
         for action in sys.HWActions do
             if action.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
                 failwithf $"HW Lamp : {action.Name} OutAddress 값이 없습니다."
+
+        if not skipBtnLamp 
+            then 
+            for btn in sys.AutoHWButtons do
+                for flow in btn.SettingFlows do
+                    if not(hwManuFlows.Contains flow) then
+                        failwithf $"{flow.Name} manual btn not exist"
+
+            for btn in sys.ManualHWButtons do
+                for flow in btn.SettingFlows do
+                    if not(hwAutoFlows.Contains flow) then
+                        failwithf $"{flow.Name} auto btn not exist"
+
+            for btn in sys.HWButtons do
+                if btn.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                    failwithf $"HW Button : {btn.Name} InAddress 값이 없습니다."
+
+            for lamp in sys.HWLamps do
+                if lamp.OutAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                    failwithf $"HW Lamp : {lamp.Name} OutAddress 값이 없습니다."
+
+            for condi in sys.HWConditions do
+                if condi.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then
+                    failwithf $"HW Button : {condi.Name} InAddress 값이 없습니다."
 
 
     let internal checkErrApi(sys:DsSystem) =
@@ -133,7 +135,9 @@ module ConvertCheckModule =
             let fullErrorMessage = String.Join("\n", errors.Select(fun e-> $"{e.Parent.GetFlow().Name}.{e.Name}"))
             failwithf $"Work는 Reset 연결이 반드시 필요합니다. \n\n{fullErrorMessage}"
 
-    let checkNullAddress (sys: DsSystem) =
+    let checkNullAddress (sys: DsSystem) (skipBtnLamp:bool) =
+        checkErrHWItem sys skipBtnLamp
+        
         // Check for null addresses in jobs
         let nullTagJobs =
             sys.Jobs.SelectMany(fun j -> j.GetNullAddressDevTask()) |> toArray
@@ -142,27 +146,30 @@ module ConvertCheckModule =
             let errJobs = String.Join ("\n", nullTagJobs.Select(fun s->s.QualifiedName))
             failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
 
-        // Check for null buttons
-        let nullBtns =
-            sys.HWButtons
-            |> filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextNotUsed))
-            |> toArray
 
-        if nullBtns.Any() then
-            let errBtns =
-                nullBtns
-                |> map (fun b ->
-                    let inout = if b.InTag.IsNull() then "입력" else "출력"
-                    $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]")
-                |> String.concat "\n"
+        if not skipBtnLamp
+        then
+            // Check for null buttons
+            let nullBtns =
+                sys.HWButtons
+                |> filter (fun b -> b.InTag.IsNull() || (b.OutTag.IsNull() && b.OutAddress <> TextNotUsed))
+                |> toArray
 
-            failwithf $"버튼 주소가 없습니다. \n{errBtns}"
+            if nullBtns.Any() then
+                let errBtns =
+                    nullBtns
+                    |> map (fun b ->
+                        let inout = if b.InTag.IsNull() then "입력" else "출력"
+                        $"{b.ButtonType} 해당 {inout} 주소가 없습니다. [{b.Name}]")
+                    |> String.concat "\n"
 
-        // Check for null lamps
-        let nullLamps = sys.HWLamps |> filter (fun l -> l.OutTag.IsNull()) |> toArray
-        if nullLamps.Any() then
-            let errLamps = nullLamps |> map (fun l -> l.Name) |> String.concat "\n"
-            failwithf $"램프 주소가 없습니다. \n{errLamps}"
+                failwithf $"버튼 주소가 없습니다. \n{errBtns}"
+
+            // Check for null lamps
+            let nullLamps = sys.HWLamps |> filter (fun l -> l.OutTag.IsNull()) |> toArray
+            if nullLamps.Any() then
+                let errLamps = nullLamps |> map (fun l -> l.Name) |> String.concat "\n"
+                failwithf $"램프 주소가 없습니다. \n{errLamps}"
 
     let internal checkJobs(sys:DsSystem) =
         for call in sys.GetCallVertices() do

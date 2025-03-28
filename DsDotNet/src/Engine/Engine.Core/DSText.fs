@@ -19,7 +19,7 @@ module DsText =
     let [<Literal>] TextFuncNotUsed = "NotUsed"  //함수 사용안함
     let [<Literal>] TextNotUsed = "-"  //Not Uuse 처리 (주소 사용안함, 필드 사용안함, 등등)
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
-    let [<Literal>] TextDeviceSplit = "_" //DS Flow, Device 자동 파싱 기준
+    let [<Literal>] TextDeviceSplit = "-" //DS Flow, Device 자동 파싱 기준
     let [<Literal>] TextInOutSplit = ":" //in/out 구분자
 
     //edge

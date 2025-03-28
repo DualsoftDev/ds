@@ -71,6 +71,7 @@ type VertexTagManager with
     member c.C5_StatActionFinish() =
         let _off = c.System._off.Expr
         let planStart = c.Vertex.VC.PE.Expr
-        match c.Vertex.GetPureCall().ActionInExpr with
-        | Some inExprs -> (planStart <&&> inExprs, _off) --| (c.Vertex.VC.CalcStatActionFinish, getFuncName())
-        | None -> (planStart, _off)                      --| (c.Vertex.VC.CalcStatActionFinish, getFuncName())
+        (planStart <&&> c.F.Expr, _off) --| (c.Vertex.VC.CalcStatActionFinish, getFuncName())
+        //match c.Vertex.GetPureCall().ActionInExpr with
+        //| Some inExprs -> (planStart <&&> inExprs, _off) --| (c.Vertex.VC.CalcStatActionFinish, getFuncName())
+        //| None -> (planStart, _off)                      --| (c.Vertex.VC.CalcStatActionFinish, getFuncName())

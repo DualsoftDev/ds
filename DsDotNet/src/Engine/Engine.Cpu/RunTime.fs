@@ -188,8 +188,10 @@ type DsCpuExt  =
 
             match tryTextToDataType(f.DataType) with
             | Some dataType ->
-                let tag = dataType.ToType().CreateBridgeTag(f.Name, f.Address, dataType.DefaultValue(), MonitorTag.UserTagType|>int|>Some)
-                storages.Add(tag.Name, tag)
+                if not (f.Address.IsNullOrEmpty()) then
+                    let tag = dataType.ToType().CreateBridgeTag(f.Name, f.Address, dataType.DefaultValue(), MonitorTag.UserTagType|>int|>Some)
+                    storages.Add(tag.Name, tag)
+
             | None -> failwith $"{f} 미지원 데이터 타입"
             )
 

@@ -15,9 +15,10 @@ open System.Collections.Generic
 open Engine.Core
 open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Presentation
-open PLC.Mapper.FS.DeviceApiModule
+open PLC.Mapper.FS.MapperDataModule
 open System.Xml.Serialization
 open System.IO.Packaging
+open PLC.Mapper.FS
 
 [<AutoOpen>]
 module PptDocModule =
@@ -158,7 +159,22 @@ module PptDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-
+    let getMapperData(doc: PresentationDocument):MapperData option=
+        let customXmlPart =
+            doc.PresentationPart.CustomXmlParts
+            |> Seq.tryFind (fun part ->
+                use reader = new StreamReader(part.GetStream())
+                let xml = reader.ReadToEnd()
+                xml.Contains("<PowerPointMapper")
+            )
+        match customXmlPart with
+        | Some part ->
+            use stream = part.GetStream()
+            let serializer = XmlSerializer(typeof<MapperData>)
+            match serializer.Deserialize(stream) with
+            | :? MapperData as mapperData -> mapperData |> Some
+            | _->None
+        | _ -> None
 
     type PptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
         pages:IDictionary<SlidePart, PptPage>,
@@ -196,22 +212,14 @@ module PptDocModule =
         member x.Doc = doc
 
         member x.ApisFromMapper : List<DeviceApi> =
-            let customXmlPart =
-                doc.PresentationPart.CustomXmlParts
-                |> Seq.tryFind (fun part ->
-                    use reader = new StreamReader(part.GetStream())
-                    let xml = reader.ReadToEnd()
-                    xml.Contains("<PowerPointMapper")
-                )
-
-            match customXmlPart with
-            | Some part ->
-                use stream = part.GetStream()
-                let serializer = XmlSerializer(typeof<MapperData>)
-                match serializer.Deserialize(stream) with
-                | :? MapperData as mapperData -> mapperData.DeviceApisProp
-                | _ -> new List<DeviceApi>()
+            match getMapperData doc with
+            | Some mapperData -> mapperData.DeviceApisProp
             | None -> new List<DeviceApi>()
+
+        member x.UserTagsFromMapper : List<DsApiTag> =
+            match getMapperData doc with
+            | Some mapperData -> mapperData.TagsProp
+            | None -> new List<DsApiTag>()
 
     type PptDoc with
         static member Create(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =
@@ -221,8 +229,6 @@ module PptDocModule =
             let parents = Dictionary<PptNode, seq<PptNode>>()
             let dummys = HashSet<PptDummy>()
             let edges = HashSet<PptEdge>()
-
-            
 
             // 숨김 페이지, blank page 제외한 모든 페이지
             let validSlidesAll =

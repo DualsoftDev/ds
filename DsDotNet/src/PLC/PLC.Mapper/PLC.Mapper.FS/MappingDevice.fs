@@ -4,7 +4,7 @@ open System
 open System.Drawing
 open System.Collections.Generic
 open ColorUtilModule
-open DeviceApiModule
+open MapperDataModule
 
 module MappingDeviceModule =
 

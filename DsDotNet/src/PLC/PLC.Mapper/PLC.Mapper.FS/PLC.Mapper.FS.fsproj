@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
@@ -11,11 +11,15 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
 		<SignAssembly>True</SignAssembly>
-		<OutputType>Exe</OutputType>
 	</PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="DeviceApi.fs" />
+        <Compile Include="MapperTag.fs" />
+        <Compile Include="MapperTerminal.fs" />
+        <Compile Include="LSE\ConvertLSE.Config.fs" />
+        <Compile Include="LSE\ConvertLSE.Xml.fs" />
+        <Compile Include="LSE\ConvertLSE.fs" />
+        <Compile Include="MapperData.fs" />
         <Compile Include="ColorUtil.fs" />
         <Compile Include="MappingDevice.fs" />
     </ItemGroup>
@@ -23,6 +27,17 @@
     <ItemGroup>
       <PackageReference Include="System.Text.Json" Version="8.0.5" />
     </ItemGroup>
+
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(UseNugetProjectReference)' != 'true'">
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />
 	</ItemGroup>

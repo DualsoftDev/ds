@@ -20,33 +20,7 @@ module LoaderModule =
         LibraryInfos: Dictionary<string, string> //Api, filePath
     }
 
-    type UserTag = {
-        Name: string
-        Address: string
-        DataType: string
-        DisplayName: string
-    }
-
-    [<Flags>]
-    type UserTagColumn =
-    | Name          = 0000 
-    | Address       = 0001 
-    | DataType      = 0002
-    | DisplayName   = 0003
-
-    type UserTagConfig = {
-        UserTags: UserTag array
-    }
-
-    let createDefaultUserTagConfig() =
-        { 
-           UserTags = [||]
-        }
     let private jsonSettings = JsonSerializerSettings()
-
-    let LoadUserTagConfig (path: string) =
-        let json = File.ReadAllText(path)
-        JsonConvert.DeserializeObject<UserTagConfig>(json, jsonSettings)
 
     let LoadLibraryConfig (path: string) =
         let json = File.ReadAllText(path)
@@ -69,10 +43,32 @@ module LoaderModule =
     let SaveConfigWithPath (path: string) (cfg: ModelConfig) =
         SaveConfig path cfg
         path
+        
+        
+    type UserTag() =
+        member val Name      = ""  with get, set
+        member val DataType  = ""  with get, set
+        member val Address   = ""  with get, set
+        member val DisplayName   = ""  with get, set
+
+    type UserTagConfig = {
+        UserTags: UserTag array
+    }
+
+        
+    let LoadUserTagConfig (path: string) =
+        let json = File.ReadAllText(path)
+        JsonConvert.DeserializeObject<UserTagConfig>(json, jsonSettings)
+
     let SaveUserTagConfigWithPath (path: string) (cfg: UserTagConfig) =
         let json = JsonConvert.SerializeObject(cfg, jsonSettings)
         File.WriteAllText(path, json)
         path
+
+    let createDefaultUserTagConfig() =
+        { 
+           UserTags = [||]
+        }
 
     let ExportLoadedSystem (s: LoadedSystem) =
 
@@ -89,8 +85,6 @@ module LoaderModule =
         s.ReferenceSystem.Name <- refName
 
         absFilePath
-
-
 
     type Model = {
         Config: ModelConfig

@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using PLC.Mapper.FS;
-using static PLC.Mapper.FS.DeviceApiModule;
+using static PLC.Mapper.FS.MapperDataModule;
 
 namespace PLC.Mapper.CS.Test
 {
@@ -151,7 +151,7 @@ namespace PLC.Mapper.CS.Test
 
         private Color ColorFromHSV(double hue, double saturation, double value)
         {
-            int hi = Convert.ToInt32(Math.Floor(hue / 60)) % 6;
+            int hi = System.Convert.ToInt32(Math.Floor(hue / 60)) % 6;
             double f = hue / 60 - Math.Floor(hue / 60);
 
             value *= 255;

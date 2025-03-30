@@ -70,6 +70,36 @@ module MapperTagModule =
 
 
         new () = PlcTerminal()
+        member x.ToSystemDataType() : string option =
+            match x.DataType.Trim().ToLower() with
+            // Bool
+            | "boolean" | "bool" | "bit" -> Some "bool"
+
+            // Char
+            | "char" -> Some "char"
+
+            // Float / Real
+            | "float32" | "single"  -> Some "single"
+            | "float64" | "double" | "real" -> Some "double"
+
+            // Signed integers
+            | "int8"  | "sbyte"            -> Some "sByte"
+            | "int16" | "short"            -> Some "int16"
+            | "int32" | "int"              -> Some "int32"
+            | "int64" | "long"             -> Some "int64"
+
+            // Unsigned integers
+            | "uint8"  | "byte"                      -> Some "byte"
+            | "uint16" | "ushort" | "word"           -> Some "uInt16"
+            | "uint32" | "uint"   | "dword"          -> Some "uInt32"
+            | "uint64" | "ulong"  | "lword"          -> Some "uInt64"
+
+            // String
+            | "string" | "text" | "wstring" -> Some "string"
+
+            // Not recognized
+            | _ -> None
+
 
         override x.Stringify() =
             $"{x.Variable} = {base.Stringify()}, {x.Address}, {x.DataType}, {x.Comment}"

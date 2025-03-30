@@ -1,4 +1,4 @@
-﻿/*
+/*
  * http://www.Planet-Source-Code.com/vb/scripts/ShowCode.asp?txtCodeId=4587&lngWId=10
  * http://stackoverflow.com/questions/10032940/iterative-connected-components-algorithm
  */
@@ -97,7 +97,7 @@ namespace Dual.Common.Utils.Graph
         public Graph(Graph<N, E> src)
             : this(src.m_bDirected, src.m_bAllowsReflexivity)
         {
-            Logger?.Debug($"\tCreating graph with {src.m_Nodes.Count} nodes, {src.m_Edges.Count} edges.");
+            //Logger?.Debug($"\tCreating graph with {src.m_Nodes.Count} nodes, {src.m_Edges.Count} edges.");
             m_Nodes.AddRange(src.m_Nodes);
             m_Edges.AddRange(src.m_Edges);
             FilterNode = src.FilterNode;

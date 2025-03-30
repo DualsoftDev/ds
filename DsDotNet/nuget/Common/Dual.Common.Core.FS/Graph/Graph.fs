@@ -49,8 +49,8 @@ module GraphModule =
             edges_:'E seq,
             vertexHandlers:GraphVertexAddRemoveHandlers option
     ) =
-        do
-            tracefn $"Creating Graph with #vs = {vertices_.Count()}, #es = {edges_.Count()}"
+        //do
+            //tracefn $"Creating Graph with #vs = {vertices_.Count()}, #es = {edges_.Count()}"
 
         let edgeComparer = {
             new IEqualityComparer<'E> with

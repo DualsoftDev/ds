@@ -19,6 +19,7 @@ open PLC.Mapper.FS.MapperDataModule
 open System.Xml.Serialization
 open System.IO.Packaging
 open PLC.Mapper.FS
+open PowerPointAddInShared
 
 [<AutoOpen>]
 module PptDocModule =
@@ -160,21 +161,17 @@ module PptDocModule =
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
     let getMapperData(doc: PresentationDocument):MapperData option=
-        let customXmlPart =
+        let customXmlParts =
             doc.PresentationPart.CustomXmlParts
-            |> Seq.tryFind (fun part ->
-                use reader = new StreamReader(part.GetStream())
-                let xml = reader.ReadToEnd()
-                xml.Contains("<PowerPointMapper")
-            )
-        match customXmlPart with
-        | Some part ->
-            use stream = part.GetStream()
-            let serializer = XmlSerializer(typeof<MapperData>)
-            match serializer.Deserialize(stream) with
-            | :? MapperData as mapperData -> mapperData |> Some
-            | _->None
-        | _ -> None
+            |> Seq.map(fun f->
+                use reader = new StreamReader(f.GetStream())
+                reader.ReadToEnd()
+                )
+        if customXmlParts.length() > 0 then
+            Some(PowerPointMapperXml.LoadMapperData  customXmlParts)
+        else
+            None
+            
 
     type PptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
         pages:IDictionary<SlidePart, PptPage>,

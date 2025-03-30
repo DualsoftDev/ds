@@ -13,6 +13,7 @@ open System
 open System.Data
 open Engine.Parser.FS
 open Engine.Parser.FS.ModelParser
+open PLC.Mapper.FS.MapperDataModule
 
 [<AutoOpen>]
 module ImportU =
@@ -851,6 +852,8 @@ module ImportU =
             let isActive = activeSys.IsSome && activeSys.Value = sys
             doc.PreCheckPptSystem(sys)
 
+
+
             doc.MakeFlows(sys) |> ignore
 
             //자동생성
@@ -877,6 +880,18 @@ module ImportU =
             doc.MakeRealProperty(sys)
             //Job 기본 Address SlideNote로 부터 가져오기
             doc.MakeAddressBySlideNote(sys)
+
+
+            let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
+            doc.ApisFromMapper
+            |> Seq.iter (fun api ->
+                let key = $"{api.Group}{TextDeviceSplit}{api.Device}.{api.Api}"
+                if(dictTaskDev.ContainsKey(key))
+                then
+                    dictTaskDev[key].InAddress <- api.InAddress
+                    dictTaskDev[key].OutAddress<- api.OutAddress
+                )
+
 
             doc.PostCheckPptSystem(sys, isLib)
             doc.IsBuilded <- true

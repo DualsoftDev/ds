@@ -99,8 +99,7 @@ module ImportPptModule =
                     PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.HwTarget.Platform)
 
 
-            let apis =  doc.ApisFromMapper
-
+        
 
             //시스템 로딩시 중복이름을 부를 수 없다.
             CheckSameCopy(doc)

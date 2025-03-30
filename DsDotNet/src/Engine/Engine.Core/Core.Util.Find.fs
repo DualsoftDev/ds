@@ -34,7 +34,7 @@ module internal ModelFindModule =
             | _ -> None
 
 
-        let fqdn = (system.Name :: xs).JoinWith(".")
+        let fqdn = (system.Name.DeQuoteOnDemand() :: xs).JoinWith(".")
         let inner = system.TryFindFqdnVertex(fqdn).Cast<IVertex>()
         inner.OrElseWith( fun () -> getOuter())
 

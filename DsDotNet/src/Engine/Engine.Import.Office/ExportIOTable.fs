@@ -12,7 +12,7 @@ open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
 open Newtonsoft.Json
 open System.Collections.Generic
-
+open PLC.Mapper.FS.MapperDataModule
 
 [<AutoOpen>]
 module ExportIOTable =
@@ -37,13 +37,10 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.Flow}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Name}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.DataType}", typeof<string>) |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "DataType \n(In:Out)"
         dt.Columns.Add($"{IOColumn.Input}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Output}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.InSymbol}", typeof<string>)  |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "Symbol\nIn"
         dt.Columns.Add($"{IOColumn.OutSymbol}", typeof<string>)  |> ignore
-        dt.Columns[dt.Columns.Count-1].ColumnName <- "Symbol\nOut"
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
     let getFlowExportName(hw:HwSystemDef)  =
@@ -665,15 +662,15 @@ module ExportIOTable =
         dt
 
         
-    let ToIOListDataTablesWithoutIO (system: DsSystem) (rowSize:int) (target:HwTarget) =
-        let tablePanelIO = ToPanelIOTable system  true target
-        let tabletableFuncVariExternal = ToFuncVariTables system  target
-        let tables = [tablePanelIO ] @ tabletableFuncVariExternal
-        tables
 
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
-        tableDeviceIOs @ ToIOListDataTablesWithoutIO system rowSize target
+        let tablePanelIO = ToPanelIOTable system  true target
+        let tabletableFuncVariExternal = ToFuncVariTables system  target
+
+        let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
+
+        tables
 
 
     let toDataTablesToJSON (dataTables: seq<DataTable>) (fileName: string) =
@@ -746,7 +743,7 @@ module ExportIOTable =
 
         [<Extension>]
         static member ToDataJsonFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
-            let dataTables = ToIOListDataTablesWithoutIO system IOchunkBySize target
+            let dataTables = ToIOListDataTables system IOchunkBySize target
             toDataTablesToJSON dataTables "IOTABLE"
 
         [<Extension>]

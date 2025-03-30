@@ -57,6 +57,7 @@
     </ItemGroup>
 
 	<ItemGroup>
+      <ProjectReference Include="..\..\..\Apps\OfficeAddIn\PowerPointAddInShared\PowerPointAddInShared.fsproj" />
       <ProjectReference Include="..\..\PLC\PLC.Mapper\PLC.Mapper.FS\PLC.Mapper.FS.fsproj" />
       <ProjectReference Include="..\Engine.CodeGenCPU\Engine.CodeGenCPU.fsproj" />
       <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />

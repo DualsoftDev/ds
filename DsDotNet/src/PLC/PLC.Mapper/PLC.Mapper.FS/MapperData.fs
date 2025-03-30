@@ -17,7 +17,8 @@ module MapperDataModule =
         member val Api = "" with get, set
         member val Tag = "" with get, set
         member val Color = 0 with get, set
-        member val Address = "" with get, set
+        member val InAddress = "" with get, set
+        member val OutAddress = "" with get, set
 
     [<AllowNullLiteral>]
     type DsApiTag() =
@@ -30,16 +31,18 @@ module MapperDataModule =
         member val SymbolIn = "" with get, set
         member val SymbolOut = "" with get, set
 
+
+
     [<Flags>]
-    type UserTagColumn =
-        | Case      = 0x00 
-        | Flow      = 0x01
-        | Name      = 0x02 
-        | DataType  = 0x03 
-        | Input     = 0x04 
-        | Output    = 0x05 
-        | SymbolIn  = 0x06
-        | SymbolOut = 0x07
+    type IOColumn =
+        | Case = 0
+        | Flow = 1
+        | Name = 2
+        | DataType = 3
+        | Input = 4
+        | Output = 5
+        | InSymbol = 6
+        | OutSymbol = 7
 
     /// 단순히 DsApiTag 컬렉션만 포함한 구성
     type DsApiTagConfig = {
@@ -60,8 +63,7 @@ module MapperDataModule =
 
     // ========== 유틸 ==========
 
-    let createDefaultUserTagConfig () : DsApiTagConfig =
-        { UserTags = [||] }
+
 
     let createDefaultMapperData () =
         MapperData(DeviceApisProp = new List<DeviceApi>(), TagsProp = new List<DsApiTag>())
@@ -69,15 +71,6 @@ module MapperDataModule =
     let private jsonSettings = JsonSerializerSettings(NullValueHandling = NullValueHandling.Ignore)
 
     // ========== JSON 저장/불러오기 함수 ==========
-
-    let SaveUserTagConfig (path: string) (cfg: DsApiTagConfig) =
-        let json = JsonConvert.SerializeObject(cfg, Formatting.Indented, jsonSettings)
-        File.WriteAllText(path, json)
-        path
-
-    let LoadUserTagConfig (path: string) : DsApiTagConfig =
-        let json = File.ReadAllText(path)
-        JsonConvert.DeserializeObject<DsApiTagConfig>(json, jsonSettings)
 
     let SaveMapperData (path: string) (mapper: MapperData) =
         let wrapped = { Mapper = mapper }

@@ -73,9 +73,9 @@ module MappingDeviceModule =
     /// tag에서 device를 제외한 나머지를 API로 분리
     let extractApiFromTag (tag: string) (device: string) : string =
         if tag.StartsWith(device) && tag.Length <> device.Length then
-            tag.Substring(device.Length)
+            $"@{tag.Substring(device.Length)}"
         else
-            tag
+            $"@{tag}"
 
     /// 그룹 이름을 가장 많은 태그 수를 가진 device 접두어로 재지정
     let inferBestGroupName (tags: string list) : string =
@@ -116,15 +116,23 @@ module MappingDeviceModule =
             let groupName = findCommonPrefix deviceNames
 
             tags
-            |> List.map (fun tag ->
-                let device = findBestMatchingDevice tag deviceCandidates
-                let api = extractApiFromTag tag device
+            |> List.mapi (fun i tag ->
+                let deviceFull = findBestMatchingDevice tag deviceCandidates
+                let api = extractApiFromTag tag deviceFull
+                let device =  
+                    if deviceFull.Length <> groupName.Length then
+                        deviceFull.Substring(groupName.Length)
+                    else
+                        i.ToString()
+
+
                 DeviceApi(
                     Group = groupName.Trim(' ', '_', '-'),
                     Device = device.Trim(' ', '_', '-'),
                     Api = api.Trim(' ', '_', '-'),
                     Tag = tag,
-                    Address = "",
+                    OutAddress = "",
+                    InAddress = "",
                     Color = color
                 ))
 

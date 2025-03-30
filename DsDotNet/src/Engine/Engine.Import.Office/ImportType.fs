@@ -4,20 +4,12 @@ namespace Engine.Import.Office
 open System
 open Dual.Common.Core.FS
 open Engine.Core
+open PLC.Mapper.FS.MapperDataModule
 
 [<AutoOpen>]
 module ImportType =
 
-    [<Flags>]
-    type IOColumn =
-        | Case = 0
-        | Flow = 1
-        | Name = 2
-        | DataType = 3
-        | Input = 4
-        | Output = 5
-        | InSymbol = 6
-        | OutSymbol = 7
+    
 
     [<Flags>]
     type ErrorColumn =

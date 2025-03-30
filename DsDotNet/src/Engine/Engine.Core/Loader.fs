@@ -49,7 +49,6 @@ module LoaderModule =
         member val Name      = ""  with get, set
         member val DataType  = ""  with get, set
         member val Address   = ""  with get, set
-        member val DisplayName   = ""  with get, set
 
     type UserTagConfig = {
         UserTags: UserTag array

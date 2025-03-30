@@ -664,17 +664,16 @@ module ExportIOTable =
         emptyLine ()
         dt
 
+        
+    let ToIOListDataTablesWithoutIO (system: DsSystem) (rowSize:int) (target:HwTarget) =
+        let tablePanelIO = ToPanelIOTable system  true target
+        let tabletableFuncVariExternal = ToFuncVariTables system  target
+        let tables = [tablePanelIO ] @ tabletableFuncVariExternal
+        tables
 
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
-        let tablePanelIO = ToPanelIOTable system  true target
-        let tabletableFuncVariExternal = ToFuncVariTables system  target
-
-        let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
-
-        tables
-
-
+        tableDeviceIOs @ ToIOListDataTablesWithoutIO system rowSize target
 
 
     let toDataTablesToJSON (dataTables: seq<DataTable>) (fileName: string) =
@@ -747,7 +746,7 @@ module ExportIOTable =
 
         [<Extension>]
         static member ToDataJsonFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
-            let dataTables = ToIOListDataTables system IOchunkBySize target
+            let dataTables = ToIOListDataTablesWithoutIO system IOchunkBySize target
             toDataTablesToJSON dataTables "IOTABLE"
 
         [<Extension>]

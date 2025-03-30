@@ -12,6 +12,7 @@ module DsText =
     let [<Literal>] TextUserTag    = "userTag.json"
     let [<Literal>] TextOPCTagFolder = "TAG"
     let [<Literal>] TextOPCDSFolder = "Dualsoft"
+    let [<Literal>] TextUserTagCase = "모니터링"
 
 
     let [<Literal>] TextEmtpyChannel = "EmtpyChannel" //channel 정보 없는 대상 Dev및 API

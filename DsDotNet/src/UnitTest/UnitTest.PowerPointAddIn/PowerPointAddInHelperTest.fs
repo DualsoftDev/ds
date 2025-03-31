@@ -4,7 +4,6 @@ open System
 open Xunit
 open PowerPointAddInHelper.MSG
 open PowerPointAddInHelper
-open PowerPointAddInShared
 open System.Reflection
 open System.IO
 open PowerPointAddInForDualsoft

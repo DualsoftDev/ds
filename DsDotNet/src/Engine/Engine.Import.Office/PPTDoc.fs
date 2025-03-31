@@ -19,7 +19,6 @@ open PLC.Mapper.FS.MapperDataModule
 open System.Xml.Serialization
 open System.IO.Packaging
 open PLC.Mapper.FS
-open PowerPointAddInShared
 
 [<AutoOpen>]
 module PptDocModule =

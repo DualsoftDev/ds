@@ -24,7 +24,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\..\..\Apps\OfficeAddIn\PowerPointAddInHelper\PowerPointAddInHelper.csproj" />
-		<ProjectReference Include="..\..\..\Apps\OfficeAddIn\PowerPointAddInShared\PowerPointAddInShared.fsproj" />
 	</ItemGroup>
 
 	<ItemGroup>

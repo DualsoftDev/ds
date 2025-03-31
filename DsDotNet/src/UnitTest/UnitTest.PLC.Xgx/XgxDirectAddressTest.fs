@@ -21,15 +21,15 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
                     }}
                 }}
                 [jobs] = {{
-                    f1.Device1.ADV = ({addBoolIn}, {addInt16Out};UInt16);  
-                    f1.Device1.RET = ({addBoolIn}, {addInt16Out};UInt16);  
+                    f1.Device1.ADV = {{"f1-Device1".ADV ({addBoolIn}, {addInt16Out};UInt16);}}  
+                    f1.Device1.RET = {{"f1-Device1".RET ({addBoolIn}, {addInt16Out};UInt16);}}  
                 }}
                 [prop] = {{
                     [layouts] = {{
-                        f1_Device1 = (979, 460, 220, 80);
+                        "f1-Device1" = (979, 460, 220, 80);
                     }}
                 }}
-                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] f1_Device1;
+                [device file="./dsLib/Cylinder/DoubleCylinder.ds"] "f1-Device1";
                 [versions] = {{
                     DS-Langugage-Version = 1.0.0.1;
                     DS-Engine-Version = 0.9.9.6;

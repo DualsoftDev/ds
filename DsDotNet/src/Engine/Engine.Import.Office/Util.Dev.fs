@@ -85,35 +85,35 @@ module ImportUtilForDev =
     let getNewDevice (mySys:DsSystem) loadedName apiName =
         let curDir = currentFileName  |> Path.GetDirectoryName
         let libraryInfos, runDir = getLibraryInfos()
+        //무조건 라이브러 사용금지 패치중 시스템 라이브러리 삭제중  ahn!!
+        //if libraryInfos.ContainsKey(apiName) then
+        //    let libPath =  libraryInfos.[apiName]
 
-        if libraryInfos.ContainsKey(apiName) then
-            let libPath =  libraryInfos.[apiName]
+        //    let libAbsolutePath = Path.Combine(curDir, libPath)
+        //    let curLibDir = Path.GetDirectoryName libAbsolutePath
+        //    if not (Copylibrary.Contains(libAbsolutePath)) then  //시스템 라이브러리는 한번 덮어쓰기
+        //        if not (Directory.Exists curLibDir) then
+        //            Directory.CreateDirectory curLibDir |> ignore
 
-            let libAbsolutePath = Path.Combine(curDir, libPath)
-            let curLibDir = Path.GetDirectoryName libAbsolutePath
-            if not (Copylibrary.Contains(libAbsolutePath)) then  //시스템 라이브러리는 한번 덮어쓰기
-                if not (Directory.Exists curLibDir) then
-                    Directory.CreateDirectory curLibDir |> ignore
+        //        let sourcePath = PathManager.combineFullPathFile([|runDir; libPath|])
+        //        let libAbsolutePath = PathManager.combineFullPathFile([|libAbsolutePath|])
+        //        if sourcePath <> libAbsolutePath
+        //        then
+        //            File.Copy(sourcePath, libAbsolutePath, true)
 
-                let sourcePath = PathManager.combineFullPathFile([|runDir; libPath|])
-                let libAbsolutePath = PathManager.combineFullPathFile([|libAbsolutePath|])
-                if sourcePath <> libAbsolutePath
-                then
-                    File.Copy(sourcePath, libAbsolutePath, true)
+        //        Copylibrary.Add libAbsolutePath |> ignore
 
-                Copylibrary.Add libAbsolutePath |> ignore
+        //    libAbsolutePath, None
+        //else
+        let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
+        let autoGenAbsolutePath =
+            PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
 
-            libAbsolutePath, None
-        else
-            let autoGenFile = $"./dsLib/AutoGen/{loadedName}.ds"
-            let autoGenAbsolutePath =
-                PathManager.getFullPath (autoGenFile |> DsFile) (activeSysDir |> DsDirectory)
-
-            match mySys.LoadedSystems.TryFind(fun f->f.Name = loadedName) with
-            | Some autoGenDev ->  autoGenAbsolutePath, Some autoGenDev
-            | None ->
-                let newLoadedDev = createAutoGenDev (loadedName, mySys)
-                autoGenAbsolutePath, Some newLoadedDev
+        match mySys.LoadedSystems.TryFind(fun f->f.Name = loadedName) with
+        | Some autoGenDev ->  autoGenAbsolutePath, Some autoGenDev
+        | None ->
+            let newLoadedDev = createAutoGenDev (loadedName, mySys)
+            autoGenAbsolutePath, Some newLoadedDev
 
     let addOrGetExistSystem (mySys:DsSystem) loadedSys (loadedName:string) (taskDevParamIO:DeviceLoadParameters) =
         if not (mySys.LoadedSysExist(loadedName)) then

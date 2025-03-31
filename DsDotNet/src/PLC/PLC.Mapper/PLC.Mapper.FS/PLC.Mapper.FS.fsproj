@@ -37,6 +37,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
+	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

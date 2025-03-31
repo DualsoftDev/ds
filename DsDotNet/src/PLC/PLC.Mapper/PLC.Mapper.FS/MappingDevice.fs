@@ -5,11 +5,18 @@ open System.Drawing
 open System.Collections.Generic
 open ColorUtilModule
 open MapperDataModule
+open System.Text.RegularExpressions
+open System.Collections.Concurrent
+open System.Threading.Tasks
 
 module MappingDeviceModule =
 
+    let validName (txt: string) =
+        let trimmed = txt.Trim(' ', '_', '-')
+        Regex.Replace(trimmed, @"[ \-.:/\\()\[\]]", "_")
+
     /// 그룹핑 수행을 위한 내부 도우미
-    let groupByPrefixLength (names: List<string>) (prefixLen: int) : (string * string list) list =
+    let groupByPrefixLength (names: string array) (prefixLen: int) : (string * string list) list =
         names
         |> Seq.groupBy (fun n -> if n.Length >= prefixLen then n.Substring(0, prefixLen) else n)
         |> Seq.map (fun (k, vs) -> k, List.ofSeq vs)
@@ -73,9 +80,9 @@ module MappingDeviceModule =
     /// tag에서 device를 제외한 나머지를 API로 분리
     let extractApiFromTag (tag: string) (device: string) : string =
         if tag.StartsWith(device) && tag.Length <> device.Length then
-            $"@{tag.Substring(device.Length)}"
+            $"{tag.Substring(device.Length)}"
         else
-            $"@{tag}"
+            $"{tag}"
 
     /// 그룹 이름을 가장 많은 태그 수를 가진 device 접두어로 재지정
     let inferBestGroupName (tags: string list) : string =
@@ -87,23 +94,34 @@ module MappingDeviceModule =
            | [] -> "Group"
 
     /// 주어진 변수 이름 리스트를 지정된 그룹 수에 맞춰 디바이스/Api 추출 및 색상 매핑까지 포함해 반환
-    let extractGroupDeviceApis (names: List<string>) (targetGroupCount: int) : DeviceApi seq =
-        if targetGroupCount = 0 then
-            failwithf "targetGroupCount 0 입니다."
-        if names.Count = 0 then
-            failwithf "extractGroupDeviceApis names count 0 입니다."
+ 
+    let extractGroupDeviceApis (names: string array) (targetGroupCount: int) : DeviceApi seq =
+        if targetGroupCount = 0 then failwith "targetGroupCount 0 입니다."
+        if names.Length = 0 then failwith "이름 리스트가 비어있습니다."
 
         let maxLen = names |> Seq.map String.length |> Seq.max
+        let nameArray = names 
 
+        // 캐시 저장소
+        let cache = ConcurrentDictionary<int, (string * string list) list>()
+
+        // 병렬로 groupByPrefixLength 실행
         let allGroupings =
-            [1 .. maxLen]
-            |> List.map (fun len -> groupByPrefixLength names len)
-            |> List.filter (fun g -> g.Length <= targetGroupCount)
+            [|1 .. maxLen|]
+            |> Array.Parallel.choose (fun len ->
+                let res =
+                    cache.GetOrAdd(len, fun l ->
+                        groupByPrefixLength  nameArray l
+                    )
+                if res.Length <= targetGroupCount then Some res else None
+            )
 
         let bestGroups =
-            match allGroupings with
-            | [] -> [ ("ALL", names |> Seq.toList) ]
-            | groups -> groups |> List.minBy (fun g -> abs (g.Length - targetGroupCount))
+            if allGroupings.Length = 0 then
+                [ ("ALL", nameArray |> Array.toList) ]
+            else
+                allGroupings
+                |> Array.minBy (fun g -> abs (g.Length - targetGroupCount))
 
         bestGroups
         |> List.sortBy fst
@@ -111,31 +129,29 @@ module MappingDeviceModule =
             let hue = float (idx * 360 / targetGroupCount)
             let color = (hsvToColor hue 0.6 0.9).ToArgb()
             let deviceCandidates = extractDevicePrefixes tags
-            let deviceNames = tags
-                                |> List.map (fun tag -> findBestMatchingDevice tag deviceCandidates)
-            let groupName = findCommonPrefix deviceNames
+            let deviceNames = tags |> List.map (fun tag -> findBestMatchingDevice tag deviceCandidates)
+            let groupName = findCommonPrefix deviceNames |> validName
 
             tags
             |> List.mapi (fun i tag ->
                 let deviceFull = findBestMatchingDevice tag deviceCandidates
-                let api = extractApiFromTag tag deviceFull
-                let device =  
-                    if deviceFull.Length <> groupName.Length then
-                        deviceFull.Substring(groupName.Length)
+                let api = extractApiFromTag tag deviceFull  |> validName
+                let device =
+                    if deviceFull.Length > groupName.Length then
+                        deviceFull.Substring(groupName.Length) |> validName
                     else
-                        i.ToString()
-
+                        string i
 
                 DeviceApi(
-                    Group = groupName.Trim(' ', '_', '-'),
-                    Device = device.Trim(' ', '_', '-'),
-                    Api = api.Trim(' ', '_', '-'),
+                    Group = groupName,
+                    Device = device,
+                    Api = api,
                     Tag = tag,
                     OutAddress = "",
                     InAddress = "",
                     Color = color
-                ))
-
+                )
+            )
         )
         |> List.collect id
         |> Seq.ofList

@@ -88,14 +88,17 @@ type XmlReader =
         let parseGlobal (node: XmlNode) =
             let address = XgxXml.tryGetAttribute node "Address"
             let outputFlag =
-                let isBit =
-                    match LsXgiTagParserModule.tryParseXgiTag address with
-                    | Some (_, size, _) -> size = 1
-                    | _ -> false
+                if address = "" 
+                then false
+                else 
+                    let isBit =
+                        match LsXgiTagParserModule.tryParseXgiTag address with
+                        | Some (_, size, _) -> size = 1
+                        | _ -> false
 
-                match XgxXml.tryGetAttribute node "ModuleInfo" with 
-                | s when s <> "" -> s.Contains "OUT" && isBit //bit output 만
-                | _ -> address.StartsWith("%Q") && isBit //bit output 만
+                    match XgxXml.tryGetAttribute node "ModuleInfo" with 
+                    | s when s <> "" -> s.Contains "OUT" && isBit //bit output 만
+                    | _ -> address.StartsWith("%Q") && isBit //bit output 만
                 
             PlcTerminal(
                 variable = XgxXml.tryGetAttribute node "Name",

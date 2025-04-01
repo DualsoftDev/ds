@@ -11,10 +11,15 @@ open System.Threading.Tasks
 
 module MappingDeviceModule =
 
+    /// 주어진 문자열에서 특수문자 제거 및 공백 제거
+    let SegmentSplit = [|' '; '_'; '-'|]
+    [<Literal>]
+    let NonGroup = "NonGroup"
     let validName (txt: string) =
-        let trimmed = txt.Trim(' ', '_', '-')
-        Regex.Replace(trimmed, @"[ \-.:/\\()\[\]]", "_")
-
+        let pattern = @"[ \-\.:/\\()\[\]~<>""|?*]"
+        let replaced = Regex.Replace(txt, pattern, "_")
+        replaced.Trim(SegmentSplit)
+         
     /// 그룹핑 수행을 위한 내부 도우미
     let groupByPrefixLength (names: string array) (prefixLen: int) : (string * string list) list =
         names
@@ -34,6 +39,29 @@ module MappingDeviceModule =
                 while i < minLen && acc.[i] = s.[i] do i <- i + 1
                 acc.Substring(0, i)
             ) first
+
+    /// findCommonPrefix 결과가 충돌할 경우 마지막 segment 제거
+    let findSafeGroupName (items: string list) : string =
+        let items = items |> Seq.map(fun f->f.Trim(SegmentSplit)) |> Seq.toList
+        let rawPrefix = findCommonPrefix items
+        let trimmedPrefix = rawPrefix.TrimEnd(SegmentSplit)
+
+        let hasExactMatch = items |> List.exists (fun name -> name = trimmedPrefix)
+
+        if hasExactMatch then
+            // 마지막 세그먼트를 원본 문자열에서 잘라냄
+            let lastIndex =
+                SegmentSplit
+                |> Array.map (fun sep -> trimmedPrefix.LastIndexOf(sep))
+                |> Array.max
+
+            if lastIndex > 0 then
+                trimmedPrefix.Substring(0, lastIndex)
+            else
+                NonGroup
+        else
+            trimmedPrefix
+
 
     /// 재귀적으로 가능한 모든 device 후보 접두어 추출 (각 접두어에 대해 2개 이상의 API 조건 만족 시 재귀 분할)
     let rec splitDevicesRecursively (prefix: string) (tags: string list) : (string * string list) list =
@@ -77,21 +105,32 @@ module MappingDeviceModule =
         |> Option.map fst
         |> Option.defaultValue tag
 
-    /// tag에서 device를 제외한 나머지를 API로 분리
+    ///// tag에서 device를 제외한 나머지를 API로 분리 (마지막 segment만 반환)
+    //let extractApiFromTag (tag: string) (device: string) : string =
+    //    let rest =
+    //        if tag.StartsWith(device) && tag.Length > device.Length then
+    //            tag.Substring(device.Length).TrimStart(SegmentSplit)
+    //        else
+    //            tag
+
+    //    let segments = rest.Split(SegmentSplit, StringSplitOptions.RemoveEmptyEntries)
+    //    if segments.Length > 0 then
+    //        segments.[segments.Length - 1]
+    //    else
+    //        rest
+
+ 
+
+     /// tag에서 device를 제외한 나머지를 API로 분리
     let extractApiFromTag (tag: string) (device: string) : string =
         if tag.StartsWith(device) && tag.Length <> device.Length then
             $"{tag.Substring(device.Length)}"
         else
-            $"{tag}"
-
-    /// 그룹 이름을 가장 많은 태그 수를 가진 device 접두어로 재지정
-    let inferBestGroupName (tags: string list) : string =
-        let deviceCandidates = extractDevicePrefixes tags
-        deviceCandidates
-        |> List.sortByDescending (fun (_, lst) -> lst.Length)
-        |> function
-           | (prefix, _) :: _ -> prefix
-           | [] -> "Group"
+            let segments = tag.Split(SegmentSplit, StringSplitOptions.RemoveEmptyEntries)
+            if segments.Length > 0 then
+                segments.[segments.Length - 1]
+            else
+                tag
 
     /// 주어진 변수 이름 리스트를 지정된 그룹 수에 맞춰 디바이스/Api 추출 및 색상 매핑까지 포함해 반환
  
@@ -130,22 +169,29 @@ module MappingDeviceModule =
             let color = (hsvToColor hue 0.6 0.9).ToArgb()
             let deviceCandidates = extractDevicePrefixes tags
             let deviceNames = tags |> List.map (fun tag -> findBestMatchingDevice tag deviceCandidates)
-            let groupName = findCommonPrefix deviceNames |> validName
-
+            let groupName = findSafeGroupName deviceNames
+   
             tags
-            |> List.mapi (fun i tag ->
+            |> List.map (fun tag ->
                 let deviceFull = findBestMatchingDevice tag deviceCandidates
-                let api = extractApiFromTag tag deviceFull  |> validName
+                let api = extractApiFromTag tag deviceFull  
                 let device =
-                    if deviceFull.Length > groupName.Length then
-                        deviceFull.Substring(groupName.Length) |> validName
-                    else
-                        string i
 
+                    if groupName = NonGroup 
+                    then 
+                        deviceFull
+                    elif deviceFull.Length > groupName.Length then
+                        deviceFull.Substring(groupName.Length) 
+                    else
+                        failwith $"error :  device{deviceFull},  groupName{groupName},  tag{tag}"
+
+
+
+                if device.Length = 0 then failwith $"device 이름이 없습니다. tag: {tag}, deviceFull: {deviceFull}, groupName: {groupName}"
                 DeviceApi(
-                    Group = groupName,
-                    Device = device,
-                    Api = api,
+                    Group = (groupName|> validName),
+                    Device = (device|> validName),
+                    Api = (api|> validName),
                     Tag = tag,
                     OutAddress = "",
                     InAddress = "",

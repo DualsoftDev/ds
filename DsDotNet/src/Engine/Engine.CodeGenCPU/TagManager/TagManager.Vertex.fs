@@ -144,6 +144,9 @@ module TagManagerModule =
         member val ON = createTag true VertexTag.forceOn
         ///forceOnBit HMI Pulse, forceOffBit HMI 는 RF 사용
         member val ONP = createTag true VertexTag.forceOnPulse
+        /// 모니터모드에서 coin skip 할때 사용  
+        member val SkipCoin = createTag true VertexTag.passiveSkipCoin
+                    
         ///forceStartBit HMI
         member val SF = createTag true VertexTag.forceStart
         ///forceStartBit HMI Pulse

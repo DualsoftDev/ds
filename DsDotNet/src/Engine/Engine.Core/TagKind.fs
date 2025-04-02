@@ -168,6 +168,9 @@ module TagKindList =
     | forceOnPulse              = 11041
 
 
+    | passiveSkipCoin           = 11042 
+
+
     | scriptStart               = 11045
     | scriptEnd                 = 11046
     | scriptRelay               = 11047

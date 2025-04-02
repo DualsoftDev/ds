@@ -17,7 +17,7 @@
 
 
 	<ItemGroup>
-		<Compile Include="..\..\Dual.Common.Assembly.fs" Link="Dual.Common.Assembly.fs" />
+		<Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="MxType.fs" />
 		<Compile Include="MxComponent.fs" />
 		<Compile Include="MxTagParser.fs" />

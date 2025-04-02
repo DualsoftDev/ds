@@ -4,9 +4,14 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	  <Nullable>enable</Nullable>
     <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dual.PLC.Melsec.MXCom.FS\Dual.PLC.Melsec.MXCom.FS.fsproj" />

@@ -4,7 +4,12 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
+	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.cs" Link="Engine.Common.Assembly.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />

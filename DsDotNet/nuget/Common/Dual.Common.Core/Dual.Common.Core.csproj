@@ -41,6 +41,7 @@
 		<None Remove="C:\ds\DsDotNet\\bin\netstandard2.0\\netstandard2.0\Dual.Common.Core.xml" />
 		<None Remove="C:\ds\DsDotNet\\bin\netstandard2.0\\netstandard2.0\Dual.Common.Core.xml" />
 		<None Remove="C:\ds\DsDotNet\\bin\netstandard2.0\\netstandard2.0\Dual.Common.Core.xml" />
+		<None Remove="C:\ds\DsDotNet\\bin\netstandard2.0\\netstandard2.0\Dual.Common.Core.xml" />
 		<None Include="$(OutputPath)\$(TargetFramework)\Dual.Common.Core.xml" Pack="true" PackagePath="" />
 	</ItemGroup>
 

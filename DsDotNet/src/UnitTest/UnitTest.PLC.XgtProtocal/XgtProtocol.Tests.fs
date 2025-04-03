@@ -36,13 +36,13 @@ module BatchTests =
     [<Fact>]
     let ``prepareReadBatches groups tags by LWordOffset`` () =
         let batchCnt = 2 //최대 Lword 64 개씩
-        let tags = [| for i in 0..64*batchCnt-1 -> 
+        let tags = [| for i in 0..16*batchCnt-1 -> 
                         XGTTag($"%%ML000{i}", 64, i * 64) 
                     |]
         let batches = prepareReadBatches tags
         Assert.Equal(batchCnt, batches.Length)
         let offsets = batches |> Array.map (fun b -> b.Tags[0].LWordTag)
-        Assert.Equal<string[]>([|"%ML0"; "%ML64";|], offsets)
+        Assert.Equal<string[]>([|"%ML0"; "%ML16";|], offsets)
 
 
 
@@ -95,5 +95,5 @@ module IntegrationTests =
 
     [<Fact>]
     let ``XGT XGI Ethernet Integration Test - Dynamic Area Write/Read for 10 seconds`` () =
-        let areaCodesXGI = [ (*'I'; 'Q'; 'M'; 'L'; 'N'; 'K'; 'U';*) 'R';(* 'A'; 'W'*) ]
+        let areaCodesXGI = [ 'I'; (*'Q';'F';*) 'M'; 'L'; 'N'; 'K'; 'U'; 'R'; 'A'; 'W'; ]
         runEthernetTest "192.168.9.102" areaCodesXGI

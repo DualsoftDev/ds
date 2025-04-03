@@ -8,7 +8,6 @@ open System.Text.RegularExpressions
 open System.Collections
 open System.Collections.Generic
 open PLC.Mapper.FS
-open DsXgComm
 open Dual.PLC.Common.FS
 
 module XgxXml =
@@ -93,7 +92,7 @@ type XmlReader =
                 then false
                 else 
                     let isBit =
-                        match LsXgiTagParserModule.tryParseXgiTag address with
+                        match tryParseXgiTag address with
                         | Some (_, size, _) -> size = 1
                         | _ -> false
 

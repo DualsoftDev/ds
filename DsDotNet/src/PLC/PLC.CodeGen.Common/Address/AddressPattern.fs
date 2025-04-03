@@ -5,7 +5,6 @@ open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Globalization
 open System
-open DsXgComm
 open Dual.PLC.Common.FS
 
 

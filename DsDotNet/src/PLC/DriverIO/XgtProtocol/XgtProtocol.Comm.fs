@@ -91,51 +91,58 @@ type XgtEthernet(ip: string, port: int) =
 
     /// 여러 주소를 한번에 읽기 위한 랜덤 리드 프레임 생성
     member private this.CreateMutiReadFrame(addresses: string[], dataType:DataType) : byte[] =
-            if addresses.Length = 0 || addresses.Length > 16 then
-                failwith "지원되는 주소 개수는 1 ~ 16 개입니다."
+        if addresses.Length = 0 || addresses.Length > 16 then
+            failwith "지원되는 주소 개수는 1 ~ 16 개입니다."
 
-            let encodeVariable (addr: string) =
-                let device = addr.Substring(0, 3)
-                let addressFull = device + addr.Substring(3).PadLeft(5, '0')
-                let bytes = Encoding.ASCII.GetBytes(addressFull)
-                if bytes.Length <> 8 then failwith $"주소 길이 이상: {addr}"
-                8, bytes
+        let encodeVariable (addr: string) =
+            let device = addr.Substring(0, 3)
+            let addressFull = device + addr.Substring(3).PadLeft(5, '0')
+            let bytes = Encoding.ASCII.GetBytes(addressFull)
+            if bytes.Length <> 8 then failwith $"주소 길이 이상: {addr}"
+            8, bytes
 
-            let variableBlocks = addresses |> Array.map (fun (addr) -> encodeVariable addr)
+        let variableBlocks = addresses |> Array.map (fun (addr) -> encodeVariable addr)
 
-            let bodyLength = 10 * addresses.Length //(2bytes + 8bytes)  * addresses.Length
-            let totalLength = 28 + bodyLength
-            let frame = Array.zeroCreate<byte> totalLength
+        let bodyLength = 8 + (10 * addresses.Length) //   (8bytes(conifg) + (2bytes + 8bytes)  * addresses.Length
+        let totalLength = 20 + bodyLength
+        let frame = Array.zeroCreate<byte> totalLength
 
-            // Header: "LSIS-XGT"
-            let header = Encoding.ASCII.GetBytes("LSIS-XGT")
-            Array.Copy(header, 0, frame, 0, header.Length)
+        // Header: "LSIS-XGT"
+        let header = Encoding.ASCII.GetBytes("LSIS-XGT")
+        Array.Copy(header, 0, frame, 0, header.Length)
 
-            frame.[12] <- 0xA0uy
-            frame.[13] <- 0x33uy
-            frame.[14] <- frameID
-            frame.[16] <- 0x12uy
+        frame.[12] <- 0xA0uy
+        frame.[13] <- 0x33uy
+        frame.[14] <- frameID
+        frame.[16] <- byte bodyLength 
 
-
-            frame.[20] <- 0x54uy
-
-            frame.[22] <- 
-                match dataType with
-                | Bit -> 0x00uy
-                | Byte -> 0x01uy
-                | Word -> 0x02uy
-                | DWord -> 0x03uy
-                | LWord -> 0x04uy
-
-
-            frame.[26] <- 0x01uy
-            let mutable offset = 28
-            for (lenBytes, varBytes) in variableBlocks do
-                frame.[offset] <- 0x08uy
-                Array.Copy(varBytes, 0, frame, offset+2, 8)
-                offset <- offset + (2+lenBytes)
-
+           // 체크섬 설정
+        let checksum =
             frame
+            |> Seq.take 19
+            |> Seq.fold (fun acc b -> acc + int b) 0
+            |> fun sum -> byte (sum &&& 0xFF)
+
+        frame.[19] <- checksum
+        frame.[20] <- 0x54uy
+
+        frame.[22] <- 
+            match dataType with
+            | Bit -> 0x00uy
+            | Byte -> 0x01uy
+            | Word -> 0x02uy
+            | DWord -> 0x03uy
+            | LWord -> 0x04uy
+
+        frame.[26] <- byte variableBlocks.Length
+        let mutable offset = 28
+        for (lenBytes, varBytes) in variableBlocks do
+            frame.[offset] <- 0x08uy
+            Array.Copy(varBytes, 0, frame, offset+2, 8)
+            offset <- offset + (2+lenBytes)
+
+     
+        frame
 
         /// 실제 데이터 읽기 구현 (단일 주소)
     member private this.CreateWriteFrame(address: string, dataType: DataType, value: byte[]) =
@@ -166,46 +173,53 @@ type XgtEthernet(ip: string, port: int) =
         frame.[39] <- 0x00uy
         Array.Copy(value, 0, frame, 40, value.Length)
         frame
+
+
     member this.ReadData(address: string, dataType: DataType) : obj =
             let buffer = Array.zeroCreate<byte> 256
-            if this.ReadData([|address|], dataType, buffer) then
+            try
+                this.ReadData([|address|], dataType, buffer)
                 match dataType with
                 | Bit -> buffer.[0] = 1uy |> box
                 | Byte -> buffer.[0] |> box
                 | Word -> BitConverter.ToUInt16(buffer, 0) |> box
                 | DWord -> BitConverter.ToUInt32(buffer, 0) |> box
                 | LWord -> BitConverter.ToUInt64(buffer, 0) |> box
-            else null
+            with
+            |  ex ->
+                failwithf $"PLC 통신 오류: {ex.Message}"
 
-    member this.ReadData(addresses: string[], dataType:DataType, readBuffer: byte[]) : bool =
+    member this.ReadData(addresses: string[], dataType:DataType, readBuffer: byte[]) =
         match client with
         | Some tcpClient when connected ->
-            try
-                let stream = tcpClient.GetStream()
-                let frame = this.CreateMutiReadFrame(addresses, dataType)
-                stream.Write(frame, 0, frame.Length)
-                let buffer = Array.zeroCreate<byte> 256
-                let bytesRead = stream.Read(buffer, 0, buffer.Length)
+            let stream = tcpClient.GetStream()
+            let frame = this.CreateMutiReadFrame(addresses, dataType)
+            stream.Write(frame, 0, frame.Length)
+            let buffer = Array.zeroCreate<byte> 256
+            let bytesRead = stream.Read(buffer, 0, buffer.Length)
 
-                let errorState = BitConverter.ToUInt16(buffer, 26)
-                if errorState <> 0us then
-                    let errorCode = buffer.[26]
-                    let errorMsg = getXgtErrorDescription errorCode
-                    failwithf $"❌ PLC 응답 에러: 0x{errorCode:X2} - {errorMsg}"
+            let errorState = BitConverter.ToUInt16(buffer, 26)
+            if errorState <> 0us then
+                let errorCode = buffer.[26]
+                let errorMsg = getXgtErrorDescription errorCode
+                failwithf $"❌ PLC 응답 에러: 0x{errorCode:X2} - {errorMsg}"
 
-                // 최소 응답 헤더 크기 검사 (32바이트 이상이어야 함)
-                if bytesRead < 32 then false else
-                // 응답 명령어 확인 (0x0055)
-                if buffer.[20] <> 0x55uy then false else
+            // 최소 응답 헤더 크기 검사 (32바이트 이상이어야 함)
+            if bytesRead < 32 then  failwith "응답 데이터가 너무 짧습니다."
+            // 응답 명령어 확인 (0x0055)
+            if buffer.[20] <> 0x55uy then failwith "응답 명령어가 아닙니다." 
 
-                // 데이터 크기 (bytesRead - 32) 가 buffer 수용 가능해야 함
-                let dataLength = bytesRead - 32
-                if dataLength <= buffer.Length then
-                    Array.Copy(buffer, 32, readBuffer, 0, dataLength)
-                    true
-                else false
-            with _ -> false
-        | _ -> false
+            let blockCnt = int buffer.[28] // 블록 개수
+            let mutable srcOffset = 30
+            let mutable dstOffset = 0
+
+            for _ in 0 .. blockCnt-1 do   
+                srcOffset <- srcOffset + 2
+                Array.Copy(buffer, srcOffset, readBuffer, dstOffset, 8)
+                dstOffset <- dstOffset + 8
+                srcOffset <- srcOffset + 8
+
+        |_-> failwith "PLC 연결이 되어 있지 않습니다."
 
 
     member this.WriteData(address: string, dataType: DataType, value: obj) : bool =

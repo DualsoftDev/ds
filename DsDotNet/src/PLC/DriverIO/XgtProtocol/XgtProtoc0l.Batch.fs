@@ -8,9 +8,10 @@ module Batch =
 
     type DeviceInfo() =
         member val Device = "" with get, set
-        member val MemoryType = 'B' with get, set
-        member val Size = 0 with get, set
-        member val Address = 0 with get, set
+        member val LWordOffset = 0 with get, set
+        member val LWordTag =  ""  with get, set
+
+        
 
     type LWBatch(buffer: byte[], deviceInfos: DeviceInfo[], tags: XGTTag[]) =
         let mutable tags = tags
@@ -31,19 +32,18 @@ module Batch =
                 sprintf "Device: %s, Read BitOffset: %d" device maxBitOffset)
             |> String.concat "\n"
 
-    let createDevice(deviceCode: string, memType: char, size: int, offset: int) : DeviceInfo =
+    let createDevice(deviceCode: string, offset: int, lWordTag:string) : DeviceInfo =
         let dev = new DeviceInfo()
         dev.Device <- deviceCode
-        dev.MemoryType <- memType
-        dev.Size <- size
-        dev.Address <- offset
+        dev.LWordOffset <- offset
+        dev.LWordTag <- lWordTag
         dev
 
     let prepareReadBatches (tagInfos: XGTTag[]) : LWBatch[] =
         let chunkInfos =
             tagInfos
             |> Array.groupBy (fun ti -> ti.LWordTag)
-            |> Array.chunkBySize 64
+            |> Array.chunkBySize 16
 
         chunkInfos
         |> Array.map (fun chunk ->
@@ -60,6 +60,7 @@ module Batch =
                 chunk
                 |> Array.collect (fun (_, tis) ->
                     let dev = tis.[0].Device
+                    let lwordTag = tis.[0].LWordTag
                     tis
                     |> Array.map (fun ti ->
                         let byteOffset = ti.BitOffset / 8
@@ -67,7 +68,7 @@ module Batch =
                         byteOffset - byteIndex
                     )
                     |> Array.distinct
-                    |> Array.map (fun offset -> createDevice(dev, 'B', 8, offset))
+                    |> Array.map (fun offset -> createDevice(dev, offset, lwordTag))
                 )
 
             LWBatch(buffer, devices, allTags)

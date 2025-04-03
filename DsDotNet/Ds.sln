@@ -182,6 +182,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PLC.Mapper.CS.Test", "src\P
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PLC.XgtProtocol.FS", "src\PLC\DriverIO\XgtProtocol\PLC.XgtProtocol.FS.fsproj", "{852430DA-0788-A744-61BC-CB6582FE2B09}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTest.PLC.XgtProtocol", "src\UnitTest\UnitTest.PLC.XgtProtocal\UnitTest.PLC.XgtProtocol.fsproj", "{17EE423A-EF83-F786-8666-F859406DC694}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -698,6 +700,14 @@ Global
 		{852430DA-0788-A744-61BC-CB6582FE2B09}.Release|Any CPU.Build.0 = Release|Any CPU
 		{852430DA-0788-A744-61BC-CB6582FE2B09}.Release|x86.ActiveCfg = Release|Any CPU
 		{852430DA-0788-A744-61BC-CB6582FE2B09}.Release|x86.Build.0 = Release|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Debug|x86.Build.0 = Debug|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Release|Any CPU.Build.0 = Release|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Release|x86.ActiveCfg = Release|Any CPU
+		{17EE423A-EF83-F786-8666-F859406DC694}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -778,6 +788,7 @@ Global
 		{A04F5114-8F18-47CD-979E-8379E88DEAB3} = {77586D4A-C976-4543-803E-1D4AB0E684DB}
 		{9EC84D96-1EA9-4C2D-B9B6-4A7A1F0CD8AD} = {4454FFA8-1989-4ED4-B81B-1C5D0E46A061}
 		{852430DA-0788-A744-61BC-CB6582FE2B09} = {A04F5114-8F18-47CD-979E-8379E88DEAB3}
+		{17EE423A-EF83-F786-8666-F859406DC694} = {BCF8AC63-491C-4D8E-81EC-88032ED4CF05}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8B36D7B1-CD69-44C5-8E57-DE46AC18C1F7}

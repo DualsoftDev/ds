@@ -13,9 +13,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-    <Compile Include="XgtProtocol.fs" />
-    <Compile Include="Program.fs" />
+    <Compile Include="XgtProtocol.Core.fs" />
+    <Compile Include="XgtProtoc0l.Batch.fs" />
+    <Compile Include="XgtProtocol.Comm.fs" />
+    <Compile Include="XgtProtocol.Scan.fs" />
+    <Compile Include="XgtProtocol.ScanController.fs" />
+    <None Include="Program.fsx" />
   </ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
+	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />
 	</ItemGroup>

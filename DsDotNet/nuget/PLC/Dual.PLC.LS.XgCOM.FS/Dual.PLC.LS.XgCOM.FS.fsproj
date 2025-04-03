@@ -18,8 +18,6 @@
 
 	<ItemGroup>
 		<Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-		<Compile Include="LS.XGI.TagParser.fs" />
-		<Compile Include="LS.XGK.TagParser.fs" />
 		<Compile Include="XGTConnection.fs" />
 		<Compile Include="XGTTagInfo.fs" />
 		<Compile Include="XGTReadBatch.fs" />

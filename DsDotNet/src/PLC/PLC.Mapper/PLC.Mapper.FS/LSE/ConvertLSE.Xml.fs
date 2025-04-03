@@ -9,6 +9,7 @@ open System.Collections
 open System.Collections.Generic
 open PLC.Mapper.FS
 open DsXgComm
+open Dual.PLC.Common.FS
 
 module XgxXml =
 

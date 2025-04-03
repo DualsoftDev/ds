@@ -23,6 +23,8 @@
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 	<ItemGroup>
+		<Compile Include="LSE\LS.XGI.TagParser.fs" />
+		<Compile Include="LSE\LS.XGK.TagParser.fs" />
 		<Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
 		<Compile Include="AssemblyInfo.fs" />
 		<Compile Include="PlcUtil.fs" />

@@ -1,4 +1,4 @@
-namespace DsXgComm
+namespace Dual.PLC.Common.FS
 
 open Dual.Common.Core.FS
 open System

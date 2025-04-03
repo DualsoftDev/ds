@@ -44,17 +44,23 @@ module LoaderModule =
         SaveConfig path cfg
         path
         
-        
-    type UserTag() =
-        member val Name      = ""  with get, set
-        member val DataType  = ""  with get, set
-        member val Address   = ""  with get, set
+
+    type UserMonitorTag() =
+        member val Name         = ""  with get, set
+        member val DataType     = ""  with get, set
+        member val Address      = ""  with get, set
+
+    type UserDeviceTag() =
+        member val Name        = ""  with get, set
+        member val DataType = ""  with get, set
+        member val InAddress   = ""  with get, set
+        member val OutAddress  = ""  with get, set
 
     type UserTagConfig = {
-        UserTags: UserTag array
+        UserMonitorTags: UserMonitorTag array
+        UserDeviceTags: UserDeviceTag array
     }
-
-        
+    
     let LoadUserTagConfig (path: string) =
         let json = File.ReadAllText(path)
         JsonConvert.DeserializeObject<UserTagConfig>(json, jsonSettings)
@@ -66,7 +72,8 @@ module LoaderModule =
 
     let createDefaultUserTagConfig() =
         { 
-           UserTags = [||]
+           UserMonitorTags = [||]
+           UserDeviceTags = [||]
         }
 
     let ExportLoadedSystem (s: LoadedSystem) =

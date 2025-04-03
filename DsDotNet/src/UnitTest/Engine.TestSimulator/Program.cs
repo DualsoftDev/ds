@@ -23,7 +23,7 @@ namespace Engine.TestSimulator
         {
             string testFile = Path.Combine(AppContext.BaseDirectory
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/SampleA/exportDS/testA/testMy/my.pptx");
-            UserTagConfig userTagConfig = new UserTagConfig([]); 
+            UserTagConfig userTagConfig = createDefaultUserTagConfig(); 
             PptParams pptParms = new PptParams(getDefaltHwTarget(), userTagConfig, true, false, true, 1000, 100);
             var modelConfig = createDefaultModelConfig();
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms, modelConfig);

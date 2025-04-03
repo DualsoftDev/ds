@@ -182,7 +182,7 @@ type DsCpuExt  =
         let pous = dsSys.GeneratePOUs(storages, target) |> toArray
 
 
-        userTagConfig.UserTags.Iter(fun f->
+        userTagConfig.UserMonitorTags.Iter(fun f->
             if  storages.ContainsKey(f.Name) then
                 failwith $"UserTags {f.Name} 중복된 태그명"
 

@@ -58,7 +58,7 @@ module ParserLoader =
 
         let configPath = $"{PathManager.getDirectoryName (configPath.ToFile())}{TextDSJson}"
         let cfg = LoadConfig configPath
-        let userTagConfig = userTagConfig |> Option.defaultValue {UserTags = [||]}
+        let userTagConfig = userTagConfig |> Option.defaultValue (createDefaultUserTagConfig())
         RuntimeDS.ModelConfig <- cfg
         let dir = PathManager.getDirectoryName (configPath.ToFile())
         let system, loadings = loadingDS dir  cfg.DsFilePath None false target

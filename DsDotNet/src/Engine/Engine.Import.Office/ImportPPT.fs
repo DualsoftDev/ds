@@ -33,7 +33,7 @@ module ImportPptModule =
     let defaultPptParams() =
         {
             HwTarget = getDefaltHwTarget()
-            UserTagConfig = {UserTags = [||]}
+            UserTagConfig = createDefaultUserTagConfig()
             AutoIOM = true
             CreateFromPpt = false
             CreateBtnLamp = true
@@ -278,6 +278,14 @@ module ImportPptModule =
 
             let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths cfg |> Tuple.first)
             forceTrace $"Elapsed time for reading1 {fullName}: {millisecond} ms"
+            let taskDevs = model.System.TaskDevs.ToDictionary(fun f->f.FullName)
+            pptParams.UserTagConfig.UserDeviceTags.ForEach(fun f->
+                if taskDevs.ContainsKey(f.Name)
+                then 
+                    taskDevs.[f.Name].InAddress <- f.InAddress
+                    taskDevs.[f.Name].OutAddress <- f.OutAddress
+                )
+        
 
             let activePath = PathManager.changeExtension (fullName.ToFile()) "ds"
 

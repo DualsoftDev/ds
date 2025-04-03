@@ -27,17 +27,18 @@ module Scan =
 
     let readFromPLCBatches (conn: XgtEthernet) (batches: LWBatch[]) (notify: TagPLCValueChangedEventArgs -> unit) (notifiedOnce: HashSet<LWBatch>) =
         for batch in batches do
-            let tags  = batch.Tags |> Seq.map(fun t-> t.Address) |> Seq.toArray  
-            let success = conn.ReadData(tags, DataType.LWord, batch.Buffer)
-            if success then
+            let tags  = batch.DeviceInfos |> Seq.map(fun t-> t.LWordTag) |> Seq.toArray  
+            try
+                conn.ReadData(tags, DataType.LWord, batch.Buffer)
                 for tag in batch.Tags do
                     if tag.UpdateValue(batch.Buffer) then
                         notify { Ip = conn.Ip; Tag = tag }
-            else
-                if conn.IsConnected then
-                    failwithf "ReadData Failed: %s" (batch.BatchToText())
-                else
-                    conn.ReConnect() |> ignore
+                
+            with _ ->
+                //if conn.IsConnected then
+                //    failwithf "ReadData Failed: %s" (batch.BatchToText())
+               
+                conn.ReConnect() |> ignore
 
             if not (notifiedOnce.Contains(batch)) then
                 notifiedOnce.Add(batch) |> ignore
@@ -47,7 +48,8 @@ module Scan =
         let tagValueChangedNotify = new Event<TagPLCValueChangedEventArgs>()
         let connectChangedNotify = new Event<ConnectChangedEventArgs>()
         let notifiedOnce = HashSet<LWBatch>()
-        let cancelToken = new CancellationTokenSource()
+        let mutable cancelToken = new CancellationTokenSource()
+        let mutable isScanRunning = false;
 
         let connection = XgtEthernet(plcIp, 2004)
 
@@ -76,7 +78,7 @@ module Scan =
             |> Seq.toArray
             |> Array.map (fun tag ->
                 match if isXGI then tryParseXgiTag tag else tryParseXgkTag tag with
-                | Some (_, size, offset) -> tag, XGTTag(tag, size, offset)
+                | Some (_, size, offset) -> tag, (XGTTag(tag, size, offset):>ITagPLC)
                 | None -> failwithf "Unknown device or format: %s" tag
             )
 
@@ -85,16 +87,21 @@ module Scan =
 
             let isXGI = LsXgiTagParser.IsXGI(tags)
             let xgtDictTags = x.ParseTags(tags, isXGI) |> dict
-            let xgtTags = xgtDictTags.Values
-
-            let batches = prepareReadBatches(xgtTags |> Seq.toArray)
+            let xgtTags = xgtDictTags.Values |>Seq.cast<XGTTag> |> Seq.toArray
+            let batches = prepareReadBatches xgtTags
 
             async {
+                while isScanRunning do
+                    do! Async.Sleep 100
+
+                cancelToken <- new CancellationTokenSource()
                 try
+                    isScanRunning <- true
                     while not cancelToken.IsCancellationRequested do
-                        x.WriteToPLC(connection, xgtTags |> Seq.toArray)
+                        x.WriteToPLC(connection, xgtTags)
                         x.ReadFromPLC(connection, batches)
                         do! Async.Sleep scanDelay
+                    isScanRunning <- false
                 with ex ->
                     printfn "[!] Monitoring error on %s: %A" plcIp ex
             } |> Async.Start
@@ -102,6 +109,7 @@ module Scan =
             xgtDictTags
 
         member x.Scan(tags: string seq) =
+            cancelToken.Cancel()
             x.StartMonitoring(tags)
 
         member x.ScanUpdate(tags: string list) =

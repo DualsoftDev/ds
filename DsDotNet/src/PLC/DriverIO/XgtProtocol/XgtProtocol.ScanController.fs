@@ -3,17 +3,18 @@ namespace XgtProtocol
 open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
+open System.Net.Sockets
+open System.Text
 open XgtProtocol.Scan
 
 module ScanController =
 
-    type ScanManager(plcScanDelay: int) =
-        let scans = Dictionary<string, XgtProtocalScan>()
+    type ScanManager private () =
+        static let scans = Dictionary<string, XgtProtocalScan>()
 
-        /// 스캔 시작
-        member this.StartScan(ip: string, tags: string seq) =
+        static member StartScan(ip: string, tags: string seq, delay:int) =
             if not (scans.ContainsKey(ip)) then
-                let scan = XgtProtocalScan(ip, plcScanDelay)
+                let scan = XgtProtocalScan(ip, delay)
                 if scan.Connection.Connect() |> not then
                     failwith $"PLC Connection Failed: {ip}"
 
@@ -21,42 +22,39 @@ module ScanController =
 
             scans.[ip].Scan(tags)
 
-        /// 스캔 시작 - 다중 PLC
-        member this.StartScanAll(tagsPerPLC: IDictionary<string, string seq>) =
-            let totalTags = Dictionary<string, IDictionary<string, XGTTag>>()   
+        static member StartScanAll(tagsPerPLC: IDictionary<string, string seq>, delay:int) =
+            let totalTags = Dictionary<string, IDictionary<string, ITagPLC>>()
             for kv in tagsPerPLC do
-                totalTags.[kv.Key] <- this.StartScan(kv.Key, kv.Value)
+                totalTags.[kv.Key] <- ScanManager.StartScan(kv.Key, kv.Value, delay)
             totalTags
 
-        /// 스캔 갱신 (IP 변경 없이 태그 변경)
-        member this.UpdateScan(ip: string, tags: string list) =
+        static member UpdateScan(ip: string, tags: string list) =
             if scans.ContainsKey(ip) then
-                scans.[ip].ScanUpdate(tags) 
+                scans.[ip].ScanUpdate(tags)
             else
-                this.StartScan(ip, tags)
+                failwith $"PLC IP {ip} not found in scan list."
 
-        /// 연결 확인
-        member this.IsConnected(ip: string) =
+        static member IsConnected(ip: string) =
             match scans.TryGetValue(ip) with
             | true, scan -> scan.IsConnected
             | _ -> false
 
-        /// 스캔 중지
-        member this.StopScan(ip: string) =
+        static member StopScan(ip: string) =
             match scans.TryGetValue(ip) with
             | true, scan ->
                 scan.Disconnect()
                 scans.Remove(ip) |> ignore
             | _ -> ()
 
-        /// 전체 스캔 중지
-        member this.StopAll() =
+        static member StopAll() =
             for kv in scans do
                 kv.Value.Disconnect()
             scans.Clear()
 
-        /// 현재 활성 스캔 IP 리스트
-        member this.ActiveIPs =
+        static member ActiveIPs =
             scans.Keys |> Seq.toList
 
-        member this.GetScanner(ip: string) = scans.[ip]
+        static member GetScanner(ip: string) =
+            match scans.TryGetValue(ip) with
+            | true, scan -> scan
+            | _ -> Unchecked.defaultof<XgtProtocalScan>

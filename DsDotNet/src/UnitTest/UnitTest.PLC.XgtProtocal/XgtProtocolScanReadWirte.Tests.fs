@@ -23,15 +23,18 @@ module IntegrationScanTests =
     [<Fact>]
     let ``ScanManager Integration - Random Write & Read for 5 Seconds`` () =
         let ip = "192.168.9.102"
-        //let tags = [ "%ML100"; "%ML101"; "%ML1000"; "%ML1001" ; "%ML1002" ; "%ML1003" ; "%ML1004" ; "%ML1005" ]
-        let tags = [ "%RL100";  ]
-        let mgr = ScanManager(20)
-
-
-        // 스캔 시작 및 태그 참조 가져오기
-        let result = mgr.StartScan(ip, tags)
-        Assert.True(mgr.IsConnected(ip), "PLC 연결 실패")
-        mgr.GetScanner(ip).TagValueChangedNotify
+        let tags = [ "%MD100"; "%MD101"; "%ML1000"; "%ML1001" ; "%ML1002" ; "%ML1003" ; "%ML1004" ; "%ML1005" ;"%RL123"; "%ML0000"; ]
+        //let tags = [ "%RL123"; "%ML0000"; ]
+        //let tags = 
+        //    [ 
+        //        "%MX0"; "%MX1"; "%MX2"; 
+        //      ]
+        
+        
+        
+        let result = ScanManager.StartScan(ip, tags, 20)
+        Assert.True(ScanManager.IsConnected(ip), "PLC 연결 실패")
+        ScanManager.GetScanner(ip).TagValueChangedNotify
            .Subscribe(fun evt ->
                 let tag = evt.Tag
                 let value = tag.Value
@@ -39,7 +42,7 @@ module IntegrationScanTests =
             ) |> ignore
 
         let startTime = DateTime.Now
-        let duration = TimeSpan.FromSeconds(3)
+        let duration = TimeSpan.FromSeconds(10000)
 
         printfn "\n[✓] 랜덤 Write 테스트 시작: %O\n" startTime
 
@@ -51,7 +54,7 @@ module IntegrationScanTests =
 
                 printfn $"[Write] {tag.Address} ← {value} ({dtype})"
             
-            Thread.Sleep(1000)
+           // Thread.Sleep(101)
 
-        mgr.StopScan(ip)
+        ScanManager.StopScan(ip)
         printfn "\n[✓] 테스트 완료 및 스캔 중단: %O\n" DateTime.Now

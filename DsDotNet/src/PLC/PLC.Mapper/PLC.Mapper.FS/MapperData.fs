@@ -80,5 +80,9 @@ module MapperDataModule =
 
     let LoadMapperData (path: string) : MapperData =
         let json = File.ReadAllText(path)
-        let wrapper = JsonConvert.DeserializeObject<MapperDataConfig>(json, jsonSettings)
-        wrapper.Mapper
+        try
+            let wrapper = JsonConvert.DeserializeObject<MapperDataConfig>(json, jsonSettings)
+            wrapper.Mapper
+        with _-> 
+            MapperData()
+

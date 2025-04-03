@@ -39,7 +39,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+        <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
         <ProjectReference Include="..\..\Engine\Engine.Core\Engine.Core.fsproj" />
     </ItemGroup>
 	<ItemGroup>

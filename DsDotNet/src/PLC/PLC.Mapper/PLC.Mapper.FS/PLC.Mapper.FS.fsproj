@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
@@ -38,7 +38,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
-	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.LS.XgCOM.FS\Dual.PLC.LS.XgCOM.FS.fsproj" />
+	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

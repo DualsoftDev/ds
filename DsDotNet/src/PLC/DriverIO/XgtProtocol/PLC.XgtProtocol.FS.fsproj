@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>PLC.XgtProtocol.FS</RootNamespace>
+		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
+
+	<ItemGroup>
+    <Compile Include="XgtProtocol.fs" />
+    <Compile Include="Program.fs" />
+  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+</Project>

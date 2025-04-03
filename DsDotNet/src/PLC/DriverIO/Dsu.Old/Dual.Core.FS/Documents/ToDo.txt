@@ -1,2 +1,0 @@
-﻿* Critical Path 검색 방법 수정
-  - 기존 QgVertex 의 device id 를 이용하여 검색하던 것을, QgVertex 의 reset 관계를 이용해서 검색할 수 있도록 수정 필요.

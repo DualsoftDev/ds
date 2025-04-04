@@ -64,22 +64,22 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-    let getDuDataType(plcDataType:TagPLC.DataType) =
-        match plcDataType with
-        | DataType.Bit -> DuBOOL
-        | DataType.Byte -> DuUINT8
-        | DataType.Word -> DuUINT16
-        | DataType.DWord ->DuUINT32
-        | DataType.LWord ->DuUINT64
+    let getDuDataType(PlcDataSizeType:PlcDataSizeType) =
+        match PlcDataSizeType with
+        | PlcDataSizeType.Bit -> DuBOOL
+        | PlcDataSizeType.Byte -> DuUINT8
+        | PlcDataSizeType.Word -> DuUINT16
+        | PlcDataSizeType.DWord ->DuUINT32
+        | PlcDataSizeType.LWord ->DuUINT64
 
 
-    let matchPlcDataType(plcDataType:TagPLC.DataType, dt:DsDataType.DataType) =
-        match plcDataType with
-        | DataType.Bit -> DuBOOL = dt
-        | DataType.Byte -> DuUINT8 = dt   || DuINT8 = dt
-        | DataType.Word -> DuUINT16 = dt  || DuINT16 = dt
-        | DataType.DWord ->DuUINT32 = dt  || DuINT32 = dt
-        | DataType.LWord ->DuUINT64 = dt  || DuINT64 = dt
+    let matchPlcDataSizeType(PlcDataSizeType:PlcDataSizeType, dt:DsDataType.DataType) =
+        match PlcDataSizeType with
+        | PlcDataSizeType.Bit -> DuBOOL = dt
+        | PlcDataSizeType.Byte -> DuUINT8 = dt   || DuINT8 = dt
+        | PlcDataSizeType.Word -> DuUINT16 = dt  || DuINT16 = dt
+        | PlcDataSizeType.DWord ->DuUINT32 = dt  || DuINT32 = dt
+        | PlcDataSizeType.LWord ->DuUINT64 = dt  || DuINT64 = dt
 
 
     let getValidAddress (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
@@ -292,7 +292,7 @@ module DsAddressModule =
                 elif cpu = XGI || (cpu = WINDOWS && driver = LS_XGI_IO)
                 then
                     match tryParseXGITag (addr) with
-                    | Some (t) when matchPlcDataType(t.DataType, dataType) ->  addr
+                    | Some (t) when matchPlcDataSizeType(t.DataType, dataType) ->  addr
                     | _ ->  failwithf $"XGI 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
                 else 
                     addr

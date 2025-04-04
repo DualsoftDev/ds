@@ -69,7 +69,7 @@ module LSEAddressPattern =
 
 
     let getXgKTextByTag (device:LsTagInfo) : string =
-        let isBit = device.DataType = DataType.Bit
+        let isBit = device.DataType = PlcDataSizeType.Bit
 
         let offset = if isBit
                      then  device.BitOffset
@@ -106,11 +106,11 @@ module LSEAddressPattern =
 
     let private dataTypeDic =
         [|
-            1, DataType.Bit
-            8, DataType.Byte
-            16, DataType.Word
-            32, DataType.DWord
-            64, DataType.LWord
+            1, PlcDataSizeType.Bit
+            8, PlcDataSizeType.Byte
+            16, PlcDataSizeType.Word
+            32, PlcDataSizeType.DWord
+            64, PlcDataSizeType.LWord
         |] |> Tuple.toReadOnlyDictionary
 
 

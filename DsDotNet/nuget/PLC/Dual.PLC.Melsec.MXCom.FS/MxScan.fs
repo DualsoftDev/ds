@@ -13,7 +13,7 @@ module MelsecScanModule =
 
     type MelsecScan(channels: seq<int>, scanDelay: int) =
 
-        let tagValueChangedNotify = new Event<TagPLCValueChangedEventArgs>()
+        let tagValueChangedNotify = new Event<PlcTagValueChangedEventArgs>()
         let connectChangedNotify = new Event<ConnectChangedEventArgs>()
         let cancelScanChannels = Dictionary<int,  CancellationTokenSource>()
 
@@ -43,14 +43,21 @@ module MelsecScanModule =
             channels 
             |> Seq.iter (fun ip -> cancelScanChannels.Add(ip, new CancellationTokenSource()))
 
-        interface IScanPLC with
-            member x.TagValueChangedNotify = tagValueChangedNotify
-            member x.ConnectChangedNotify = connectChangedNotify
+        interface IPlcConnector with
+            member this.Connect(): unit = raise (System.NotImplementedException())
+            member this.Disconnect(): unit = raise (System.NotImplementedException())
+            member this.IpOrStation: string = raise (System.NotImplementedException())
+            member this.IsConnected: bool = raise (System.NotImplementedException())
+            member this.ReConnect(): unit = raise (System.NotImplementedException())
+            member this.Read(_address: string, _dataType: PlcDataSizeType): obj = raise (System.NotImplementedException())
+            member this.Write(_address: string, _dataType: PlcDataSizeType, _value: obj): bool = raise (System.NotImplementedException())
+            member x.ConnectChanged = connectChangedNotify.Publish
+            member x.TagValueChanged = tagValueChangedNotify.Publish
 
         new (channels) = MelsecScan(channels, 5)
         new (channel) = MelsecScan([channel])
         [<CLIEvent>]
-        member x.TagValueChangedNotify = tagValueChangedNotify.Publish
+        member x.PlcTagValueChangedNotify = tagValueChangedNotify.Publish
         [<CLIEvent>]
         member x.ConnectChangedNotify = connectChangedNotify.Publish
 
@@ -73,10 +80,10 @@ module MelsecScanModule =
         /// PLC 데이터를 쓰는 함수 (최대 512 Word 쓰기)
         member private x.WriteToPLC(conn: DsMxConnection, batches: WordBatch[]) =
             for batch in batches do
-                let writingTags = batch.Tags |> Seq.filter (fun t -> (t:>ITagPLC).GetWriteValue().IsSome)
+                let writingTags = batch.Tags |> Seq.filter (fun t -> (t:>IPlcTagReadWrite).GetWriteValue().IsSome)
                 let keys = writingTags |> Seq.map (fun t -> t.Address) |> Seq.toArray
                 let values = writingTags 
-                             |> Seq.map (fun t -> Convert.ToInt16((t:>ITagPLC).GetWriteValue().Value))
+                             |> Seq.map (fun t -> Convert.ToInt16((t:>IPlcTagReadWrite).GetWriteValue().Value))
                              |> Seq.toArray
 
                 if keys.any()
@@ -86,7 +93,7 @@ module MelsecScanModule =
                     with
                     | ex -> logError $"WriteToPLC error: {ex}"
 
-                writingTags |> Seq.cast<ITagPLC> |> Seq.iter (fun t -> t.ClearWriteValue())
+                writingTags |> Seq.cast<IPlcTagReadWrite> |> Seq.iter (fun t -> t.ClearWriteValue())
 
 
         /// PLC 모니터링을 시작하는 함수
@@ -125,13 +132,13 @@ module MelsecScanModule =
                 logWarn $"No valid monitoring tags provided for PLC {ch}."
 
             batches |> Seq.collect (fun batch -> batch.Tags) 
-                    |> Seq.map (fun t -> t.Address, t :> ITagPLC)
+                    |> Seq.map (fun t -> t.Address, t :> IPlcTagReadWrite)
                     |> dict
 
 
         /// PLC 모니터링을 시작하는 다중 스켄 함수
         member x.Scan(tagsPerPLC: IDictionary<int, string seq>) =
-            let totalTags = Dictionary<int, IDictionary<string, ITagPLC>>()   
+            let totalTags = Dictionary<int, IDictionary<string, IPlcTagReadWrite>>()   
             tagsPerPLC |> Seq.iter (fun kv ->
                 let ch, tags = kv.Key, kv.Value  
 
@@ -152,7 +159,7 @@ module MelsecScanModule =
             tagSet.Value
 
         /// PLC 모니터링 대상을 업데이트하는 함수
-        member x.ScanUpdate(channel: int, tags: List<string>) : IDictionary<string, ITagPLC> =
+        member x.ScanUpdate(channel: int, tags: List<string>) : IDictionary<string, IPlcTagReadWrite> =
             checkExistChannel channel
             scanCancel(channel) // 기존 모니터링 취소
             let xgtTags = x.StartMonitoring(channel, tags)

@@ -12,7 +12,7 @@ type LsTagInfo =
         /// Original Tag name
         Tag: string
         Device: DeviceType
-        DataType: TagPLC.DataType
+        DataType: PlcDataSizeType
         BitOffset: int
     }
 

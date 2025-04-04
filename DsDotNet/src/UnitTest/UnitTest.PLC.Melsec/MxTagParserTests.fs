@@ -3,6 +3,7 @@ namespace T
 open NUnit.Framework
 open FsUnit.Xunit
 open DsMxComm
+open Dual.PLC.Common.FS
 
 [<AutoOpen>]
 module DataTypeTesterModule =
@@ -15,12 +16,12 @@ module DataTypeTesterModule =
         [<Test>]
         member _.``Bit Type Addresses Should Parse Correctly`` () =
             [
-                "X12",    Some { Device = MxDevice.X;  DataTypeSize = MxBit;  BitOffset = 18 }
-                "Y232",   Some { Device = MxDevice.Y;  DataTypeSize = MxBit;  BitOffset = 562 }
-                "B4F",    Some { Device = MxDevice.B;  DataTypeSize = MxBit;  BitOffset = 79 }
-                "SB12",   Some { Device = MxDevice.SB; DataTypeSize = MxBit;  BitOffset = 18 }
-                "DX100",  Some { Device = MxDevice.DX; DataTypeSize = MxBit;  BitOffset = 256 }
-                "DY45",   Some { Device = MxDevice.DY; DataTypeSize = MxBit;  BitOffset = 69 }
+                "X12",    Some { Device = MxDevice.X;  DataTypeSize = Bit;  BitOffset = 18 }
+                "Y232",   Some { Device = MxDevice.Y;  DataTypeSize = Bit;  BitOffset = 562 }
+                "B4F",    Some { Device = MxDevice.B;  DataTypeSize = Bit;  BitOffset = 79 }
+                "SB12",   Some { Device = MxDevice.SB; DataTypeSize = Bit;  BitOffset = 18 }
+                "DX100",  Some { Device = MxDevice.DX; DataTypeSize = Bit;  BitOffset = 256 }
+                "DY45",   Some { Device = MxDevice.DY; DataTypeSize = Bit;  BitOffset = 69 }
             ]
             |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
 
@@ -28,16 +29,16 @@ module DataTypeTesterModule =
         [<Test>]
         member _.``Word Type Addresses Should Parse Correctly`` () =
             [
-                "D122",   Some { Device = MxDevice.D;  DataTypeSize = MxWord; BitOffset = 1952 }
-                "W3A",    Some { Device = MxDevice.W;  DataTypeSize = MxWord; BitOffset = 928 }
-                "ZR10",   Some { Device = MxDevice.ZR; DataTypeSize = MxWord; BitOffset = 160 }
-                "T15",    Some { Device = MxDevice.T;  DataTypeSize = MxWord; BitOffset = 240 }
-                "C33",    Some { Device = MxDevice.C;  DataTypeSize = MxWord; BitOffset = 528 }
-                "W20",    Some { Device = MxDevice.W;  DataTypeSize = MxWord; BitOffset = 512 }
-                "WF",     Some { Device = MxDevice.W;  DataTypeSize = MxWord; BitOffset = 240 }
-                "SWF",    Some { Device = MxDevice.SW; DataTypeSize = MxWord;  BitOffset = 240 }
-                "SW10",   Some { Device = MxDevice.SW; DataTypeSize = MxWord;  BitOffset = 256 }
-                "W3A",    Some { Device = MxDevice.W;  DataTypeSize = MxWord;  BitOffset = 928 }
+                "D122",   Some { Device = MxDevice.D;  DataTypeSize = Word; BitOffset = 1952 }
+                "W3A",    Some { Device = MxDevice.W;  DataTypeSize = Word; BitOffset = 928 }
+                "ZR10",   Some { Device = MxDevice.ZR; DataTypeSize = Word; BitOffset = 160 }
+                "T15",    Some { Device = MxDevice.T;  DataTypeSize = Word; BitOffset = 240 }
+                "C33",    Some { Device = MxDevice.C;  DataTypeSize = Word; BitOffset = 528 }
+                "W20",    Some { Device = MxDevice.W;  DataTypeSize = Word; BitOffset = 512 }
+                "WF",     Some { Device = MxDevice.W;  DataTypeSize = Word; BitOffset = 240 }
+                "SWF",    Some { Device = MxDevice.SW; DataTypeSize = Word;  BitOffset = 240 }
+                "SW10",   Some { Device = MxDevice.SW; DataTypeSize = Word;  BitOffset = 256 }
+                "W3A",    Some { Device = MxDevice.W;  DataTypeSize = Word;  BitOffset = 928 }
             ]
             |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
 
@@ -45,10 +46,10 @@ module DataTypeTesterModule =
         [<Test>]
         member _.``Hexadecimal Bit Addresses Should Parse Correctly`` () =
             [
-                "B4F",    Some { Device = MxDevice.B;  DataTypeSize = MxBit;  BitOffset = 79 }
-                "SB2C",   Some { Device = MxDevice.SB; DataTypeSize = MxBit;  BitOffset = 44 }
-                "XFF",    Some { Device = MxDevice.X;  DataTypeSize = MxBit;  BitOffset = 255 }
-                "YF",     Some { Device = MxDevice.Y;  DataTypeSize = MxBit;  BitOffset = 15 }
+                "B4F",    Some { Device = MxDevice.B;  DataTypeSize = Bit;  BitOffset = 79 }
+                "SB2C",   Some { Device = MxDevice.SB; DataTypeSize = Bit;  BitOffset = 44 }
+                "XFF",    Some { Device = MxDevice.X;  DataTypeSize = Bit;  BitOffset = 255 }
+                "YF",     Some { Device = MxDevice.Y;  DataTypeSize = Bit;  BitOffset = 15 }
             ]
             |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
 
@@ -56,12 +57,12 @@ module DataTypeTesterModule =
         [<Test>]
         member _.``Bit Offset Included Addresses Should Parse Correctly`` () =
             [
-                "D100.5", Some { Device = MxDevice.D;  DataTypeSize = MxBit;  BitOffset = 1605 }
-                "W20.3",  Some { Device = MxDevice.W;  DataTypeSize = MxBit;  BitOffset = 515 }
-                "WA.1",   Some { Device = MxDevice.W;  DataTypeSize = MxBit;  BitOffset = 161 }
-                "ZR50.7", Some { Device = MxDevice.ZR; DataTypeSize = MxBit;  BitOffset = 807 }
-                "R12.3",  Some { Device = MxDevice.R;  DataTypeSize = MxBit;  BitOffset = 195 }
-                "SW100.2",Some { Device = MxDevice.SW; DataTypeSize = MxBit;  BitOffset = 4098 }
+                "D100.5", Some { Device = MxDevice.D;  DataTypeSize = Bit;  BitOffset = 1605 }
+                "W20.3",  Some { Device = MxDevice.W;  DataTypeSize = Bit;  BitOffset = 515 }
+                "WA.1",   Some { Device = MxDevice.W;  DataTypeSize = Bit;  BitOffset = 161 }
+                "ZR50.7", Some { Device = MxDevice.ZR; DataTypeSize = Bit;  BitOffset = 807 }
+                "R12.3",  Some { Device = MxDevice.R;  DataTypeSize = Bit;  BitOffset = 195 }
+                "SW100.2",Some { Device = MxDevice.SW; DataTypeSize = Bit;  BitOffset = 4098 }
             ]
             |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
 

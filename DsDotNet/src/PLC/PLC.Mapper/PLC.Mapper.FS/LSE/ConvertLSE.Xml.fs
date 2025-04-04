@@ -102,14 +102,14 @@ type XmlReader =
                     | _ -> address.StartsWith("%Q") && isBit //bit output 만
                 
             PlcTerminal(
-                variable = XgxXml.tryGetAttribute node "Name",
-                dataType = XgxXml.tryGetAttribute node "Type",
+                name = XgxXml.tryGetAttribute node "Name",
+                dataType = PlcTagExt.ToSystemDataType(XgxXml.tryGetAttribute node "Type"),
                 comment  = XgxXml.tryGetAttribute node "Comment",
                 address  = address,
                 outputFlag = outputFlag
             )
 
-        let _DirectVarNames = Dictionary<String, PlcTerminal>(); 
+        let _DirectVarNames = Dictionary<string, PlcTerminal>(); 
         // DirectVar → PlcTerminal option
         let parseDirect (node: XmlNode) =
             let used = XgxXml.tryGetAttribute node "Used"
@@ -134,14 +134,14 @@ type XmlReader =
                                 else comment
 
                 let directVar= Some (PlcTerminal(
-                    variable = uniqName,
+                    name = uniqName,
                     address  = device,
-                    dataType = dataType,
+                    dataType = PlcTagExt.ToSystemDataType(dataType),
                     comment  = comment,
                     outputFlag = device.StartsWith("%QX")
                 ))
 
-                _DirectVarNames.Add(directVar.Value.Variable, directVar.Value);
+                _DirectVarNames.Add(directVar.Value.Name, (directVar.Value));
                 directVar
 
             else None

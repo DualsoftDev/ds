@@ -38,7 +38,7 @@ class Program
             };
 
             // 태그 값 변경 이벤트 구독
-            scanModule.TagValueChangedNotify += (obj, evt) =>
+            scanModule.PlcTagValueChangedNotify += (obj, evt) =>
             {
                 Console.WriteLine($"TagValueChanged [{evt.Ip}] {evt.Tag.Address} -> {evt.Tag.Value}");
             };

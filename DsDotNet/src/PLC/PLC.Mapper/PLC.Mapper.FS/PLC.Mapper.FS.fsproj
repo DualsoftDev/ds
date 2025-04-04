@@ -16,7 +16,6 @@
     <ItemGroup>
         <Compile Include="..\..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
         <Compile Include="MapperTag.fs" />
-        <Compile Include="MapperTerminal.fs" />
         <Compile Include="LSE\ConvertLSE.Config.fs" />
         <Compile Include="LSE\ConvertLSE.Xml.fs" />
         <Compile Include="LSE\ConvertLSE.fs" />

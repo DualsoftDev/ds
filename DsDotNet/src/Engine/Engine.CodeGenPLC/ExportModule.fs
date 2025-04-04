@@ -50,7 +50,7 @@ module ExportModule =
                     | XGI ->
                         match tryParseXGITag addr with
                         | Some tag ->
-                            if tag.DataType = TagPLC.DataType.Bit then
+                            if tag.DataType = PlcDataSizeType.Bit then
                                 yield tag.ByteOffset
                             else
                                 yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
@@ -61,8 +61,8 @@ module ExportModule =
                         match tryParseXGKTag addr with
                             | Some tag ->
                                 match tag.DataType with
-                                | DataType.Bit -> yield tag.ByteOffset
-                                | DataType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]
+                                | PlcDataSizeType.Bit -> yield tag.ByteOffset
+                                | PlcDataSizeType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]
                                 | _-> failwithlog $"XGK Not supported plc {plcType} type"
 
                             | None ->

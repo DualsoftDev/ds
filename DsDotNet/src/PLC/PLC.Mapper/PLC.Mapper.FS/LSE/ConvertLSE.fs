@@ -4,39 +4,45 @@ open System
 open System.IO
 open System.Text.RegularExpressions
 open PLC.Mapper.FS
+open Dual.PLC.Common.FS     
 
 module ConvertLSEModule =
 
 
-    let classifyContent (line: string) =
+   
+    let classifyContent (line: string) : PlcTerminal option =
         let extractContent (line: string) =
-            let matchResult = Regex.Match(line, @"<Element[^>]*>(.*?)</Element>")
-            if matchResult.Success then Some matchResult.Groups[1].Value else None
+            let m = Regex.Match(line, @"<Element[^>]*>(.*?)</Element>")
+            if m.Success then Some m.Groups[1].Value else None
 
-        if line.Contains($"ElementType=\"{ElementType.CoilMode |> int}\"") || 
-           line.Contains($"ElementType=\"{ElementType.VariableMode |> int}\"") 
-        then
-            match extractContent line with
-            | Some content -> Some (Coil (PlcTerminal(variable = content)))
-            | None -> None
+        let containsElementType (etype: ElementType) =
+            line.Contains($"ElementType=\"{etype |> int}\"")
 
-        elif line.Contains($"ElementType=\"{ElementType.ClosedContactMode |> int}\"") then
-            match extractContent line with
-            | Some content -> Some (ContactNega (PlcTerminal(variable = content)))
-            | None -> None
+        let createTerminal (variable: string) (tType: TerminalType) =
+            let terminal = PlcTerminal(name = variable, terminalType = tType)
+            terminal
 
-        elif line.Contains($"ElementType=\"{ElementType.ContactMode |> int}\"") then
-            match extractContent line with
-            | Some content -> Some (ContactPosi (PlcTerminal(variable = content)))
-            | None -> None
-        else
-            None
+        match () with
+        | _ when containsElementType ElementType.CoilMode
+                 || containsElementType ElementType.VariableMode ->
+            extractContent line
+            |> Option.map (fun v -> createTerminal v TerminalType.Coil)
+
+        | _ when containsElementType ElementType.ClosedContactMode ->
+            extractContent line
+            |> Option.map (fun v -> createTerminal v TerminalType.ContactNegated)
+
+        | _ when containsElementType ElementType.ContactMode ->
+            extractContent line
+            |> Option.map (fun v -> createTerminal v TerminalType.Contact)
+
+        | _ -> None
             
     let parseLSEFile (filePath: string) =
         let lines = File.ReadLines(filePath) // Stream 방식으로 메모리 절약
-        let networks = ResizeArray<Network>()
+        let networks = ResizeArray<Rung>()
         let mutable currentTitle = ""
-        let mutable currentContent = ResizeArray<Terminal>()
+        let mutable currentContent = ResizeArray<PlcTerminal>()
 
         let titlePattern = Regex("<Program Task\s*=(.*)")
         let networkStartPattern = Regex("<Rung BlockMask")

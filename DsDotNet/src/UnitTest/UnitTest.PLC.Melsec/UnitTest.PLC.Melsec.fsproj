@@ -28,6 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
       <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.Melsec.MXCom.FS\Dual.PLC.Melsec.MXCom.FS.fsproj" />
     </ItemGroup>
 

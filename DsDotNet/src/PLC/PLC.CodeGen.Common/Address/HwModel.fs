@@ -42,8 +42,8 @@ open Dual.PLC.Common.FS
     type PLCHwModelExt =
         [<Extension>] static member ToText(x:CpuType) = toText x
         [<Extension>] static member IsIEC(x:CpuType) = isIEC x
-        [<Extension>] static member FromDeviceMnemonic(x:string) : DataType = fromDeviceMnemonic x
-        [<Extension>] static member GetBitLength(x:DataType)  = getBitLength x
-        [<Extension>] static member ToMnemonic(x:DataType)  = toMnemonic x
-        [<Extension>] static member GetByteLength(x:DataType)  = getByteLength x
+        [<Extension>] static member FromDeviceMnemonic(x:string) : PlcDataSizeType = fromDeviceMnemonic x
+        [<Extension>] static member GetBitLength(x:PlcDataSizeType)  = getBitLength x
+        [<Extension>] static member ToMnemonic(x:PlcDataSizeType)  = toMnemonic x
+        [<Extension>] static member GetByteLength(x:PlcDataSizeType)  = getByteLength x
         [<Extension>] static member ToDeviceText(x:DeviceType)  = toDeviceText x

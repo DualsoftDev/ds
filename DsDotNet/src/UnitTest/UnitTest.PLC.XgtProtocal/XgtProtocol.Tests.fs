@@ -4,7 +4,6 @@ open System
 open Xunit
 open System.Collections.Generic
 open XgtProtocol.Batch
-open XgtProtocol.Scan
 open XgtProtocol
 open System.Threading
 open Dual.PLC.Common.FS
@@ -68,11 +67,11 @@ module IntegrationTests =
                     else $"%%{code}{kind}100"  // 예: %%MX10, %%MW10
                 let value, dt =
                     match kind with
-                    | 'X' -> box true, DataType.Bit
-                    | 'B' -> box (byte (rnd.Next(0, 256))), DataType.Byte
-                    | 'W' -> box (uint16 (rnd.Next(0, 65536))), DataType.Word
-                    | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), DataType.DWord
-                    | 'L' -> box (9876543210123456789UL), DataType.LWord
+                    | 'X' -> box true, PlcDataSizeType.Bit
+                    | 'B' -> box (byte (rnd.Next(0, 256))), PlcDataSizeType.Byte
+                    | 'W' -> box (uint16 (rnd.Next(0, 65536))), PlcDataSizeType.Word
+                    | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), PlcDataSizeType.DWord
+                    | 'L' -> box (9876543210123456789UL), PlcDataSizeType.LWord
                     | _ -> failwith $"지원되지 않는 타입: {kind}"
 
                 try

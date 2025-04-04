@@ -56,7 +56,7 @@ type XgtEthernet(ip: string, port: int) =
             true
         | None -> false
 
-    member private this.CreateReadFrame(address: string, dataType: DataType) =
+    member private this.CreateReadFrame(address: string, dataType: PlcDataSizeType) =
         let device = address.Substring(1, 2)
         let addr = address.Substring(3).PadLeft(5, '0')
         let frame = Array.zeroCreate<byte> 38
@@ -83,7 +83,7 @@ type XgtEthernet(ip: string, port: int) =
         frame
 
     /// 여러 주소를 한번에 읽기 위한 랜덤 리드 프레임 생성
-    member private this.CreateMutiReadFrame(addresses: string[], dataType:DataType) : byte[] =
+    member private this.CreateMutiReadFrame(addresses: string[], dataType:PlcDataSizeType) : byte[] =
         if addresses.Length = 0 || addresses.Length > 16 then
             failwith "지원되는 주소 개수는 1 ~ 16 개입니다."
 
@@ -138,7 +138,7 @@ type XgtEthernet(ip: string, port: int) =
         frame
 
         /// 실제 데이터 읽기 구현 (단일 주소)
-    member private this.CreateWriteFrame(address: string, dataType: DataType, value: byte[]) =
+    member private this.CreateWriteFrame(address: string, dataType: PlcDataSizeType, value: byte[]) =
         let device = address.Substring(1, 2)
         let addr = address.Substring(3).PadLeft(5, '0')
         let frame = Array.zeroCreate<byte> (42 + value.Length)
@@ -168,7 +168,7 @@ type XgtEthernet(ip: string, port: int) =
         frame
 
 
-    member this.ReadData(address: string, dataType: DataType) : obj =
+    member this.ReadData(address: string, dataType: PlcDataSizeType) : obj =
             let buffer = Array.zeroCreate<byte> 256
             try
                 this.ReadData([|address|], dataType, buffer)
@@ -182,7 +182,7 @@ type XgtEthernet(ip: string, port: int) =
             |  ex ->
                 failwithf $"PLC 통신 오류: {ex.Message}"
 
-    member this.ReadData(addresses: string[], dataType:DataType, readBuffer: byte[]) =
+    member this.ReadData(addresses: string[], dataType:PlcDataSizeType, readBuffer: byte[]) =
         match client with
         | Some tcpClient when connected ->
             let stream = tcpClient.GetStream()
@@ -215,7 +215,7 @@ type XgtEthernet(ip: string, port: int) =
         |_-> failwith "PLC 연결이 되어 있지 않습니다."
 
 
-    member this.WriteData(address: string, dataType: DataType, value: obj) : bool =
+    member this.WriteData(address: string, dataType: PlcDataSizeType, value: obj) : bool =
         match client with
         | Some tcpClient when connected ->
             try

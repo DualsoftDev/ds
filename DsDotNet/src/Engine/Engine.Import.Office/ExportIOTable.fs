@@ -12,7 +12,7 @@ open System.Runtime.CompilerServices
 open Engine.CodeGenCPU
 open Newtonsoft.Json
 open System.Collections.Generic
-open PLC.Mapper.FS.MapperDataModule
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 module ExportIOTable =

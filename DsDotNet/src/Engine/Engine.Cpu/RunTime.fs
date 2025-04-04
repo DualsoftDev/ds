@@ -13,6 +13,7 @@ open System.Reactive.Subjects
 open System.Reactive.Disposables
 open System.Reactive.Linq
 open Engine.CodeGenHMI
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 module RunTimeModule =

@@ -5,15 +5,15 @@ open System.IO
 open System.Xml
 open System.Xml.Serialization
 open DocumentFormat.OpenXml.Packaging
-open PLC.Mapper.FS.MapperDataModule
+open Engine.Core.MapperDataModule;
 
 module PowerPointMapperXml =
 
-    let SaveMapperData (doc: PresentationDocument) (data: MapperData) : unit =
-        if isNull data || isNull doc || isNull doc.PresentationPart then
+    let SaveMapperData (doc: PresentationDocument) (data: UserTagConfig) : unit =
+        if isNull doc || isNull doc.PresentationPart then
             ()
         else
-            let serializer = XmlSerializer(typeof<MapperData>)
+            let serializer = XmlSerializer(typeof<UserTagConfig>)
             let xmlString =
                 use sw = new StringWriter()
                 serializer.Serialize(sw, data)
@@ -40,10 +40,10 @@ module PowerPointMapperXml =
             stream.Write(bytes, 0, bytes.Length)
 
     
-    let LoadMapperData (xmlTexts: string seq) : MapperData =
-        let empty = MapperData()
+    let LoadMapperData (xmlTexts: string seq) : UserTagConfig =
+        let empty = createDefaultUserTagConfig()
 
-        let tryLoadFromXmlText (xml: string) : MapperData option =
+        let tryLoadFromXmlText (xml: string) : UserTagConfig option =
             try
                 let doc = XmlDocument()
                 doc.LoadXml(xml)
@@ -54,9 +54,7 @@ module PowerPointMapperXml =
                     match root.FirstChild with
                     | :? XmlCDataSection as cdata when not (String.IsNullOrWhiteSpace(cdata.Data)) ->
                         try
-                            let serializer = XmlSerializer(typeof<MapperData>)
-                            use reader = new StringReader(cdata.Data)
-                            Some(serializer.Deserialize(reader) :?> MapperData)
+                            Some(XmlToUserTagConfig cdata.Data)
                         with ex ->
                             Console.WriteLine($"[Deserialize] XML error: {ex.Message}")
                             None

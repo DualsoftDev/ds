@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System
+open MapperDataModule
 
 
 [<AutoOpen>]
@@ -44,37 +45,6 @@ module LoaderModule =
         SaveConfig path cfg
         path
         
-
-    type UserMonitorTag() =
-        member val Name         = ""  with get, set
-        member val DataType     = ""  with get, set
-        member val Address      = ""  with get, set
-
-    type UserDeviceTag() =
-        member val Name        = ""  with get, set
-        member val DataType = ""  with get, set
-        member val InAddress   = ""  with get, set
-        member val OutAddress  = ""  with get, set
-
-    type UserTagConfig = {
-        UserMonitorTags: UserMonitorTag array
-        UserDeviceTags: UserDeviceTag array
-    }
-    
-    let LoadUserTagConfig (path: string) =
-        let json = File.ReadAllText(path)
-        JsonConvert.DeserializeObject<UserTagConfig>(json, jsonSettings)
-
-    let SaveUserTagConfigWithPath (path: string) (cfg: UserTagConfig) =
-        let json = JsonConvert.SerializeObject(cfg, jsonSettings)
-        File.WriteAllText(path, json)
-        path
-
-    let createDefaultUserTagConfig() =
-        { 
-           UserMonitorTags = [||]
-           UserDeviceTags = [||]
-        }
 
     let ExportLoadedSystem (s: LoadedSystem) =
 

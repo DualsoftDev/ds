@@ -5,6 +5,7 @@ open Engine.Cpu
 open Engine.Core
 open Engine.Parser.FS
 open Dual.Common.Core.FS
+open Engine.Core.MapperDataModule
 type FilePath = string
 
 

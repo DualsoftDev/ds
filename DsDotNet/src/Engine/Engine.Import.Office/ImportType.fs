@@ -4,7 +4,7 @@ namespace Engine.Import.Office
 open System
 open Dual.Common.Core.FS
 open Engine.Core
-open PLC.Mapper.FS.MapperDataModule
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 module ImportType =
@@ -98,15 +98,10 @@ module ImportType =
         checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
         checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
 
-    let getPptDataTypeText (inType:DataType) (outType:DataType) =
-        let inTypeText  = inType.ToPLCText()
-        let outTypeText = outType.ToPLCText()
-        if inTypeText = outTypeText
-        then inTypeText
-        else $"{inTypeText}:{outTypeText}"
 
-    let getPptDevDataTypeText (dev:TaskDev) =   getPptDataTypeText dev.InDataType dev.OutDataType
-    let getPptHwDevDataTypeText (hwDev:HwSystemDef) = getPptDataTypeText hwDev.InDataType hwDev.OutDataType
+
+    let getPptDevDataTypeText (dev:TaskDev) =   DsTaskDevTypeModule.getTaskDevDataTypeText dev.TaskDevParamIO
+    let getPptHwDevDataTypeText (hwDev:HwSystemDef) = DsTaskDevTypeModule.getTaskDevDataTypeText hwDev.TaskDevParamIO
 
     let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
         if inSym.IsSome 

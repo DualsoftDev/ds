@@ -5,6 +5,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open System.Linq
 open System.Diagnostics
+open Engine.Core.MapperDataModule
 
 
 [<AutoOpen>]

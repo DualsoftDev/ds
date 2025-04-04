@@ -10,6 +10,7 @@ open DocumentFormat.OpenXml.Packaging
 open System
 open Engine.Parser.FS
 open Engine.CodeGenCPU
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 module ImportPptModule =
@@ -282,8 +283,8 @@ module ImportPptModule =
             pptParams.UserTagConfig.UserDeviceTags.ForEach(fun f->
                 if taskDevs.ContainsKey(f.Name)
                 then 
-                    taskDevs.[f.Name].InAddress <- f.InAddress
-                    taskDevs.[f.Name].OutAddress <- f.OutAddress
+                    taskDevs.[f.Name].InAddress <- f.Input
+                    taskDevs.[f.Name].OutAddress <- f.Output
                 )
         
 

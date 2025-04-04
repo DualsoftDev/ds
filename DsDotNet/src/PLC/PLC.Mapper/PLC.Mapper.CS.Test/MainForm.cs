@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using PLC.Mapper.FS;
-using static PLC.Mapper.FS.MapperDataModule;
+using static Engine.Core.MapperDataModule;
 
 namespace PLC.Mapper.CS.Test
 {

@@ -5,6 +5,7 @@ open NUnit.Framework
 
 open Dual.Common.UnitTest.FS
 open Engine.Core
+open Engine.Core.MapperDataModule
 open Engine.Import.Office
 open Engine.Cpu
 open Engine.Runtime

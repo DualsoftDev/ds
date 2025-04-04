@@ -18,7 +18,9 @@
 		<Company>Dual Inc.</Company>
 		<Authors>Dual Inc.</Authors>
 		<OutputPath>$(SolutionDir)\bin</OutputPath>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>		
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 		
 	</PropertyGroup>
 

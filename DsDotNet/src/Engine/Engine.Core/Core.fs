@@ -424,6 +424,12 @@ module rec CoreModule =
         type TaskDev internal (deviceName:string, apiItem:ApiItem, parentSys:DsSystem) =
             inherit FqdnObject(apiItem.PureName, createFqdnObject([|parentSys.Name;deviceName|]))
 
+            let getDeviceSkipFlow (deviceName: string) =
+                let idx = deviceName.IndexOf(DsText.TextDeviceSplit)
+                if idx >= 0 && idx + 1 < deviceName.Length then
+                    deviceName.Substring(idx + 1)
+                else
+                    deviceName
 
             //member x.ApiPureName = (x:>FqdnObject).QualifiedName
             member x.ApiSystemName = apiItem.ApiSystem.Name //needs test animation
@@ -432,6 +438,7 @@ module rec CoreModule =
             member x.ParentSystem = parentSys
             member x.ApiItem  = apiItem
             member x.FullName = $"{deviceName}.{x.Name}"
+            member x.FullNameWithoutFlow = $"{getDeviceSkipFlow(deviceName)}.{x.Name}"
             member x.FullNameToDsText = $"{deviceName.QuoteOnDemand()}.{x.Name.QuoteOnDemand()}"
 
             member val IsRootOnlyDevice = false with get, set

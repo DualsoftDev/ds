@@ -6,7 +6,7 @@ open System.Linq
 open Dual.Common.Core.FS
 open Engine.Core
 open Engine.CodeGenCPU
-open PLC.Mapper.FS.MapperDataModule
+open Engine.Core.MapperDataModule;
 
 [<AutoOpen>]
 module ImportIOTable =

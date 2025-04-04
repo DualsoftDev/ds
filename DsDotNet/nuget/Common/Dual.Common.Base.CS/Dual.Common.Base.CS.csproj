@@ -23,6 +23,8 @@
 		<GenerateDocumentationFile>True</GenerateDocumentationFile>
 		<!--<GeneratePackageOnBuild>True</GeneratePackageOnBuild>-->
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 
 	</PropertyGroup>
 

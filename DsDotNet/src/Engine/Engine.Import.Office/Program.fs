@@ -1,6 +1,7 @@
 namespace Engine.Runtime
 
 open Engine.Core
+open Engine.Core.MapperDataModule
 
 open Engine.Import.Office
 module testMain =

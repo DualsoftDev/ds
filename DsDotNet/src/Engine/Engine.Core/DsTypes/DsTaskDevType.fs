@@ -68,7 +68,14 @@ module DsTaskDevTypeModule =
     let changeParam(jobName: string, paramDic: Dictionary<string, TaskDevParam>, symbol: string) =
         paramDic.[jobName].Symbol <- symbol
 
-
+   
+    let getTaskDevDataTypeText (taskDevParamIO:TaskDevParamIO)=
+        let inTypeText  = taskDevParamIO.InParam.DataType.ToPLCText()
+        let outTypeText = taskDevParamIO.OutParam.DataType.ToPLCText()
+        if inTypeText = outTypeText
+        then inTypeText
+        else $"{inTypeText}{DsText.TextMixDataSplit}{outTypeText}"
+        
     let getTaskDevParam (txt: string) =
         let parts = txt.Split(';') |> Seq.toList
         

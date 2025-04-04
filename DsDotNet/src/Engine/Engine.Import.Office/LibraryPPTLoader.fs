@@ -9,6 +9,7 @@ open System.Runtime.CompilerServices
 open System.Reflection
 open LibraryLoaderModule
 open Engine.Core
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 [<Extension>]

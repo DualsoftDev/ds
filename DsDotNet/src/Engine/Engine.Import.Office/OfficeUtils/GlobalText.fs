@@ -6,7 +6,7 @@ open System.Collections.Generic
 open System
 open Newtonsoft.Json
 open System.IO
-
+open System.Text.RegularExpressions
 
 [<AutoOpen>]
 module GlobalText =
@@ -44,7 +44,22 @@ module GlobalText =
     let DSPilotPath : string =  getDSAppPath DSPilotProcessName    
     let DSRuntimePath : string =  getDSAppPath DSRuntimeProcessName    
 
-    let DSUserTagsDirectory: string = 
-        Path.Combine(
-            Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-            "dualsoft", "UserTags" );
+
+    let getUserTagPath (fulPath: string) =
+        if  String.IsNullOrEmpty fulPath 
+        then 
+            failwith "fullPath is null or empty"
+        else 
+            /// 전체 경로에서 확장자를 제거하고, 경로 구분자 등을 안전한 파일 이름 문자로 치환
+            let makeValidFileNameFromFullPath (fileFullPath: string) =
+                let noExtension = Path.Combine(Path.GetDirectoryName(fileFullPath), Path.GetFileNameWithoutExtension(fileFullPath))
+                let replaced = Regex.Replace(noExtension, "[\\/:*?\"<>|]", "_") // 윈도우 파일 이름에 안 되는 문자
+                replaced.Replace('\\', '_').Replace('/', '_')
+
+            let DSUserTagsDirectory: string = 
+                Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "dualsoft", "UserTags" );
+
+            Path.Combine(DSUserTagsDirectory, Path.GetFileNameWithoutExtension(makeValidFileNameFromFullPath(fulPath)) + ".json")
+

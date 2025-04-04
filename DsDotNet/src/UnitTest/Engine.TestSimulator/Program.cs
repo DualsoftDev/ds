@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 
+using static Engine.Core.MapperDataModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.CoreModule.SystemModule;
 using static Engine.Core.LoaderModule;
@@ -23,7 +24,7 @@ namespace Engine.TestSimulator
         {
             string testFile = Path.Combine(AppContext.BaseDirectory
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/SampleA/exportDS/testA/testMy/my.pptx");
-            UserTagConfig userTagConfig = createDefaultUserTagConfig(); 
+            var userTagConfig = createDefaultUserTagConfig(); 
             PptParams pptParms = new PptParams(getDefaltHwTarget(), userTagConfig, true, false, true, 1000, 100);
             var modelConfig = createDefaultModelConfig();
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms, modelConfig);

@@ -15,7 +15,7 @@ open System.Collections.Generic
 open Engine.Core
 open System.Runtime.CompilerServices
 open DocumentFormat.OpenXml.Presentation
-open PLC.Mapper.FS.MapperDataModule
+open Engine.Core.MapperDataModule
 open System.Xml.Serialization
 open System.IO.Packaging
 open PLC.Mapper.FS
@@ -159,7 +159,7 @@ module PptDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-    let getMapperData(doc: PresentationDocument):MapperData option=
+    let getMapperData(doc: PresentationDocument):UserTagConfig option=
         let customXmlParts =
             doc.PresentationPart.CustomXmlParts
             |> Seq.map(fun f->
@@ -209,13 +209,13 @@ module PptDocModule =
 
         member x.ApisFromMapper : List<DeviceApi> =
             match getMapperData doc with
-            | Some mapperData -> mapperData.DeviceApisProp
+            | Some mapperData -> mapperData.DeviceApis.ToList()
             | None -> new List<DeviceApi>()
 
-        member x.UserTagsFromMapper : List<DsApiTag> =
+        member x.UserTagsFromMapper : List<UserMonitorTag> =
             match getMapperData doc with
-            | Some mapperData -> mapperData.TagsProp
-            | None -> new List<DsApiTag>()
+            | Some mapperData -> mapperData.UserMonitorTags.ToList()
+            | None -> new List<UserMonitorTag>()
 
     type PptDoc with
         static member Create(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =

@@ -4,10 +4,10 @@ open System
 open System.Drawing
 open System.Collections.Generic
 open ColorUtilModule
-open MapperDataModule
 open System.Text.RegularExpressions
 open System.Collections.Concurrent
 open System.Threading.Tasks
+open Engine.Core.MapperDataModule;
 
 module MappingDeviceModule =
 

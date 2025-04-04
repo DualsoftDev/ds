@@ -13,7 +13,7 @@ open System
 open System.Data
 open Engine.Parser.FS
 open Engine.Parser.FS.ModelParser
-open PLC.Mapper.FS.MapperDataModule
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 module ImportU =

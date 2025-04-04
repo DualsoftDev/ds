@@ -38,6 +38,7 @@ module DsText =
     let [<Literal>] TextCallPush = "PUSH"
     let [<Literal>] TextJobMulti = "N"
     let [<Literal>] TextCallNegative= '!'
+    let [<Literal>] TextMixDataSplit = ':'
 
     let [<Literal>] TextMAX = "MAX" 
     let [<Literal>] TextCHK = "CHK" 

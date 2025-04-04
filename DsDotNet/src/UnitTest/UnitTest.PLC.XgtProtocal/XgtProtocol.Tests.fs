@@ -7,6 +7,7 @@ open XgtProtocol.Batch
 open XgtProtocol.Scan
 open XgtProtocol
 open System.Threading
+open Dual.PLC.Common.FS
 
 module XgtTagTests =
     

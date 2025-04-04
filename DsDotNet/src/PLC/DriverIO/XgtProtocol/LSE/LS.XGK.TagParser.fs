@@ -1,4 +1,4 @@
-namespace Dual.PLC.Common.FS
+namespace XgtProtocol
 
 open Dual.Common.Core.FS
 open System

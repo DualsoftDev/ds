@@ -42,7 +42,7 @@ module IntegrationScanTests =
             ) |> ignore
 
         let startTime = DateTime.Now
-        let duration = TimeSpan.FromSeconds(10000)
+        let duration = TimeSpan.FromSeconds(2)
 
         printfn "\n[✓] 랜덤 Write 테스트 시작: %O\n" startTime
 

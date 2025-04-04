@@ -6,6 +6,7 @@ open System.Runtime.CompilerServices
 open System.Globalization
 open System
 open Dual.PLC.Common.FS
+open XgtProtocol
 
 
 [<AutoOpen>]

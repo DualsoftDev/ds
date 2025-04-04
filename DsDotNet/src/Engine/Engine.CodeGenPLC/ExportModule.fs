@@ -12,6 +12,7 @@ open Engine.CodeGenCPU
 
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
+open Dual.PLC.Common.FS
 
 [<AutoOpen>]
 module ExportModule =
@@ -49,7 +50,7 @@ module ExportModule =
                     | XGI ->
                         match tryParseXGITag addr with
                         | Some tag ->
-                            if tag.DataType = PLCHwModel.DataType.Bit then
+                            if tag.DataType = TagPLC.DataType.Bit then
                                 yield tag.ByteOffset
                             else
                                 yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
@@ -60,8 +61,8 @@ module ExportModule =
                         match tryParseXGKTag addr with
                             | Some tag ->
                                 match tag.DataType with
-                                | PLCHwModel.DataType.Bit -> yield tag.ByteOffset
-                                | PLCHwModel.DataType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]
+                                | DataType.Bit -> yield tag.ByteOffset
+                                | DataType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]
                                 | _-> failwithlog $"XGK Not supported plc {plcType} type"
 
                             | None ->

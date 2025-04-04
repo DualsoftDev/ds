@@ -4,14 +4,7 @@ open System
 open System.Net
 open System.Net.Sockets
 open System.Text
-
-/// PLC 통신용 데이터 타입 정의
-type DataType =
-    | Bit
-    | Byte
-    | Word
-    | DWord
-    | LWord
+open Dual.PLC.Common.FS
 
 
 /// XGT PLC 통신 프로토콜 구현

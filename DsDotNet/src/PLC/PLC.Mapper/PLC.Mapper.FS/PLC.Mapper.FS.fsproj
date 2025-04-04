@@ -39,6 +39,7 @@
 	  <ProjectReference Include="..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
 	  <ProjectReference Include="..\..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	  <ProjectReference Include="..\..\DriverIO\XgtProtocol\PLC.XgtProtocol.FS.fsproj" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

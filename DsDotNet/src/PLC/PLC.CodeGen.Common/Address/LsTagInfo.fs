@@ -4,6 +4,7 @@ module LsTagInfoImpl
 open System
 open System.IO
 open System.Collections.Generic
+open Dual.PLC.Common.FS
 
 
 type LsTagInfo =
@@ -11,7 +12,7 @@ type LsTagInfo =
         /// Original Tag name
         Tag: string
         Device: DeviceType
-        DataType: PLCHwModel.DataType
+        DataType: TagPLC.DataType
         BitOffset: int
     }
 
@@ -26,7 +27,6 @@ type LsTagInfo =
         | Word -> x.BitOffset / 16
         | DWord -> x.BitOffset / 32
         | LWord -> x.BitOffset / 64
-        | Continuous -> failwithf $"error Continuous tag :{x.Tag}"
 
     static member Create(tag: string, (device: DeviceType), dataType, bitOffset: int, modelId: int option) =
         if

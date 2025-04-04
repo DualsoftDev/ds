@@ -13,6 +13,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+    <Compile Include="LSE\LS.XGI.TagParser.fs" />
+    <Compile Include="LSE\LS.XGK.TagParser.fs" />
     <Compile Include="XgtProtocol.Core.fs" />
     <Compile Include="XgtProtoc0l.Batch.fs" />
     <Compile Include="XgtProtocol.Comm.fs" />

@@ -11,6 +11,7 @@ open Engine.Core
 open Engine.Common
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
+open Dual.PLC.Common.FS
 
 
 [<AutoOpen>]
@@ -92,7 +93,7 @@ module internal XgiSymbolsModule =
         | XGI ->
             match tryParseXGITag address with
             | Some tag ->
-                let offset = if tag.DataType = PLCHwModel.DataType.Bit then tag.BitOffset else tag.ByteOffset
+                let offset = if tag.DataType = TagPLC.DataType.Bit then tag.BitOffset else tag.ByteOffset
                 address, tag.Device.ToString(), offset
             | None ->
                 failwithlog $"tryParse{targetType} {name} {address} error"
@@ -101,8 +102,8 @@ module internal XgiSymbolsModule =
             match tryParseXGKTag address with
             | Some tag ->
                 match tag.DataType with
-                | PLCHwModel.DataType.Bit -> address, tag.Device.ToString(), tag.BitOffset
-                | PLCHwModel.DataType.Word -> address, tag.Device.ToString(), tag.ByteOffset / 2
+                | DataType.Bit -> address, tag.Device.ToString(), tag.BitOffset
+                | DataType.Word -> address, tag.Device.ToString(), tag.ByteOffset / 2
                 | _-> failwithlog $"XGK Not supported plc {tag.DataType} type"
 
             | None ->

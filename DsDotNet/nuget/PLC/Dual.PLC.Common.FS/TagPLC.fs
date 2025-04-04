@@ -7,6 +7,14 @@ open System.Runtime.CompilerServices
 module TagPLC =
 
     
+    /// PLC  데이터 타입 정의
+    type DataType =
+        | Bit
+        | Byte
+        | Word
+        | DWord
+        | LWord
+
     type ITagPLC = 
         abstract Address: string 
         abstract Value: obj with get, set

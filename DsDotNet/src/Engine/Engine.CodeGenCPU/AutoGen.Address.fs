@@ -4,6 +4,7 @@ open System.Linq
 open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.Common
+open Dual.PLC.Common.FS
 
 
 [<AutoOpen>]
@@ -63,27 +64,25 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-    let getDuDataType(plcDataType:PLCHwModel.DataType) =
+    let getDuDataType(plcDataType:TagPLC.DataType) =
         match plcDataType with
-        | PLCHwModel.DataType.Bit -> DuBOOL
-        | PLCHwModel.DataType.Byte -> DuUINT8
-        | PLCHwModel.DataType.Word -> DuUINT16
-        | PLCHwModel.DataType.DWord ->DuUINT32
-        | PLCHwModel.DataType.LWord ->DuUINT64
-        | PLCHwModel.DataType.Continuous -> failwithf $"error Continuous tag "
+        | DataType.Bit -> DuBOOL
+        | DataType.Byte -> DuUINT8
+        | DataType.Word -> DuUINT16
+        | DataType.DWord ->DuUINT32
+        | DataType.LWord ->DuUINT64
 
 
-    let matchPlcDataType(plcDataType:PLCHwModel.DataType, dt:DataType) =
+    let matchPlcDataType(plcDataType:TagPLC.DataType, dt:DsDataType.DataType) =
         match plcDataType with
-        | PLCHwModel.DataType.Bit -> DuBOOL = dt
-        | PLCHwModel.DataType.Byte -> DuUINT8 = dt   || DuINT8 = dt
-        | PLCHwModel.DataType.Word -> DuUINT16 = dt  || DuINT16 = dt
-        | PLCHwModel.DataType.DWord ->DuUINT32 = dt  || DuINT32 = dt
-        | PLCHwModel.DataType.LWord ->DuUINT64 = dt  || DuINT64 = dt
-        | PLCHwModel.DataType.Continuous -> failwithf $"error Continuous tag "
+        | DataType.Bit -> DuBOOL = dt
+        | DataType.Byte -> DuUINT8 = dt   || DuINT8 = dt
+        | DataType.Word -> DuUINT16 = dt  || DuINT16 = dt
+        | DataType.DWord ->DuUINT32 = dt  || DuINT32 = dt
+        | DataType.LWord ->DuUINT64 = dt  || DuINT64 = dt
 
 
-    let getValidAddress (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
+    let getValidAddress (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
         let cpu, driver, hwSlotDataTypes = target.Platform, target.HwDrive, target.Slots
         let addr =
             if addr.IsNullOrEmpty() then
@@ -301,7 +300,7 @@ module DsAddressModule =
         newAddr
 
 
-    let getValidAddressUsingPlatform (addr: string, dataType: DataType, name: string, isSkip: bool, ioType:IOType, platformTarget:PlatformTarget) =
+    let getValidAddressUsingPlatform (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, platformTarget:PlatformTarget) =
         let hwTarget =
             let slot = getFullSlotHwSlotDataTypes()
             match platformTarget with

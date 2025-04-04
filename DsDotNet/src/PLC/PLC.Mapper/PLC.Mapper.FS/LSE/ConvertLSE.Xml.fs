@@ -9,6 +9,7 @@ open System.Collections
 open System.Collections.Generic
 open PLC.Mapper.FS
 open Dual.PLC.Common.FS
+open XgtProtocol
 
 module XgxXml =
 

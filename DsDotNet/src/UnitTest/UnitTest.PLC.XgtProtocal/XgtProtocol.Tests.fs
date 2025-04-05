@@ -67,11 +67,11 @@ module IntegrationTests =
                     else $"%%{code}{kind}100"  // 예: %%MX10, %%MW10
                 let value, dt =
                     match kind with
-                    | 'X' -> box true, PlcDataSizeType.Bit
+                    | 'X' -> box true, PlcDataSizeType.Boolean
                     | 'B' -> box (byte (rnd.Next(0, 256))), PlcDataSizeType.Byte
-                    | 'W' -> box (uint16 (rnd.Next(0, 65536))), PlcDataSizeType.Word
-                    | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), PlcDataSizeType.DWord
-                    | 'L' -> box (9876543210123456789UL), PlcDataSizeType.LWord
+                    | 'W' -> box (uint16 (rnd.Next(0, 65536))), PlcDataSizeType.UInt16
+                    | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), PlcDataSizeType.UInt32
+                    | 'L' -> box (9876543210123456789UL), PlcDataSizeType.UInt64
                     | _ -> failwith $"지원되지 않는 타입: {kind}"
 
                 try

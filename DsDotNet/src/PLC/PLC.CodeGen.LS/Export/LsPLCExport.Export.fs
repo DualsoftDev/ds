@@ -10,6 +10,7 @@ open PLC.CodeGen.Common
 open System
 open PLC.CodeGen.Common.K
 open Command
+open XgtProtocol
 
 
 [<AutoOpen>]
@@ -125,45 +126,40 @@ module XgiExportModule =
             let x, y = 0, rgi.NextRungY
 
             if destination.DataType = typeof<bool> then
-                match tryParseXGKTag destination.Address with
-                | Some ( {
-                    Tag = _tag
-                    Device = device
-                    DataType = _datatType
-                    BitOffset = totalBitOffset
-                    }) ->
-                        let dh = sprintf "%A%04d%s" device (totalBitOffset / 16) (if totalBitOffset % 16 >= 8 then "8" else "0")  // destination head : destination 의 word
-                        let offset = totalBitOffset % 8 // destination 이 속한 word 내에서의 bit offset
-                        let mSet = 1uy <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
-                        let mClear = Byte.MaxValue - (1uy <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
-                        let printBinary (n:byte) = Convert.ToString(int n, 2).PadLeft(8, '0')
-                        tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
+                match tryParseXgkTag destination.Address with
+                | Some ( dev, _size, offset) ->
+                    let dh = sprintf "%s%04d%s" dev (offset / 16) (if offset % 16 >= 8 then "8" else "0")  // destination head : destination 의 word
+                    let offset = offset % 8 // destination 이 속한 word 내에서의 bit offset
+                    let mSet = 1uy <<< offset                       // OR mask 를 통해 해당 bit set 하기 위한 용도
+                    let mClear = Byte.MaxValue - (1uy <<< offset) // AND mask 를 통해 해당 bit clear 하기 위한 용도
+                    let printBinary (n:byte) = Convert.ToString(int n, 2).PadLeft(8, '0')
+                    tracefn $"Dh: {dh}, Offset={offset}, mSet=0b{printBinary mSet}, mClear=0b{printBinary mClear}"
 
-                        let condWithTrue, condWithFalse =
-                            let cond = condition :> IExpression
-                            match source with
-                            | :? Expression<bool> as DuTerminal(DuLiteral lh) when lh.Value  ->
-                                Some cond, None
-                            | :? Expression<bool> as DuTerminal(DuLiteral lh) when not lh.Value  ->
-                                None, Some cond
-                            | _ ->
-                                let t = fbLogicalAnd([condition; source])
-                                let f = fbLogicalAnd([condition; source.NegateBool() ])
-                                Some t, Some f
+                    let condWithTrue, condWithFalse =
+                        let cond = condition :> IExpression
+                        match source with
+                        | :? Expression<bool> as DuTerminal(DuLiteral lh) when lh.Value  ->
+                            Some cond, None
+                        | :? Expression<bool> as DuTerminal(DuLiteral lh) when not lh.Value  ->
+                            None, Some cond
+                        | _ ->
+                            let t = fbLogicalAnd([condition; source])
+                            let f = fbLogicalAnd([condition; source.NegateBool() ])
+                            Some t, Some f
 
-                        if condWithTrue.IsSome then
-                            let cmd =
-                                let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"         // Byte OR
-                                XgkParamCmd(param, 5)
-                            let rgiSub = rgiCommandRung condWithTrue cmd rgi.NextRungY
-                            updateRgiWith rgiSub
+                    if condWithTrue.IsSome then
+                        let cmd =
+                            let param = $"Param={dq}BOR,{dh},{mSet},{dh},1{dq}"         // Byte OR
+                            XgkParamCmd(param, 5)
+                        let rgiSub = rgiCommandRung condWithTrue cmd rgi.NextRungY
+                        updateRgiWith rgiSub
 
-                        if condWithFalse.IsSome then
-                            let cmd =
-                                let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"      // Byte AND
-                                XgkParamCmd(param, 5)
-                            let rgiSub = rgiCommandRung condWithFalse cmd rgi.NextRungY
-                            updateRgiWith rgiSub
+                    if condWithFalse.IsSome then
+                        let cmd =
+                            let param = $"Param={dq}BAND,{dh},{mClear},{dh},1{dq}"      // Byte AND
+                            XgkParamCmd(param, 5)
+                        let rgiSub = rgiCommandRung condWithFalse cmd rgi.NextRungY
+                        updateRgiWith rgiSub
                 | _ ->
                     failwith "ERROR: XGK Tag parsing error"
             else

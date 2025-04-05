@@ -68,11 +68,12 @@ type XgtEthernet(ip: string, port: int) =
         frame.[20] <- 0x54uy
         frame.[22] <- 
             match dataType with
-            | Bit -> 0x00uy
+            | Boolean -> 0x00uy
             | Byte -> 0x01uy
-            | Word -> 0x02uy
-            | DWord -> 0x03uy
-            | LWord -> 0x04uy
+            | UInt16 -> 0x02uy
+            | UInt32-> 0x03uy
+            | UInt64 -> 0x04uy
+            | _ -> failwithf    $"지원하지 않는 데이터 타입입니다: {dataType}"
         frame.[26] <- 0x01uy
         frame.[28] <- 0x08uy
         frame.[30] <- byte '%'
@@ -121,11 +122,12 @@ type XgtEthernet(ip: string, port: int) =
 
         frame.[22] <- 
             match dataType with
-            | Bit -> 0x00uy
+            | Boolean -> 0x00uy
             | Byte -> 0x01uy
-            | Word -> 0x02uy
-            | DWord -> 0x03uy
-            | LWord -> 0x04uy
+            | UInt16 -> 0x02uy
+            | UInt32-> 0x03uy
+            | UInt64 -> 0x04uy
+            | _ -> failwithf    $"지원하지 않는 데이터 타입입니다: {dataType}"
 
         frame.[26] <- byte variableBlocks.Length
         let mutable offset = 28
@@ -150,11 +152,12 @@ type XgtEthernet(ip: string, port: int) =
         frame.[20] <- 0x58uy
         frame.[22] <- 
             match dataType with
-            | Bit -> 0x00uy
+            | Boolean -> 0x00uy
             | Byte -> 0x01uy
-            | Word -> 0x02uy
-            | DWord -> 0x03uy
-            | LWord -> 0x04uy
+            | UInt16 -> 0x02uy
+            | UInt32-> 0x03uy
+            | UInt64 -> 0x04uy
+            | _ -> failwithf    $"지원하지 않는 데이터 타입입니다: {dataType}"
         frame.[26] <- 0x01uy
         frame.[28] <- 0x08uy
         frame.[30] <- byte '%'
@@ -173,11 +176,12 @@ type XgtEthernet(ip: string, port: int) =
             try
                 this.ReadData([|address|], dataType, buffer)
                 match dataType with
-                | Bit -> buffer.[0] = 1uy |> box
+                | Boolean -> buffer.[0] = 1uy |> box
                 | Byte -> buffer.[0] |> box
-                | Word -> BitConverter.ToUInt16(buffer, 0) |> box
-                | DWord -> BitConverter.ToUInt32(buffer, 0) |> box
-                | LWord -> BitConverter.ToUInt64(buffer, 0) |> box
+                | UInt16 -> BitConverter.ToUInt16(buffer, 0) |> box
+                | UInt32-> BitConverter.ToUInt32(buffer, 0) |> box
+                | UInt64-> BitConverter.ToUInt64(buffer, 0) |> box
+                | _ -> failwithf $"지원하지 않는 데이터 타입입니다: {dataType}"
             with
             |  ex ->
                 failwithf $"PLC 통신 오류: {ex.Message}"
@@ -222,11 +226,12 @@ type XgtEthernet(ip: string, port: int) =
                 let stream = tcpClient.GetStream()
                 let valueBytes =
                     match dataType with
-                    | Bit -> [| if unbox<bool> value then 0x01uy else 0x00uy |]
+                    | Boolean -> [| if unbox<bool> value then 0x01uy else 0x00uy |]
                     | Byte -> [| unbox<byte> value |]
-                    | Word -> BitConverter.GetBytes(unbox<uint16> value)
-                    | DWord -> BitConverter.GetBytes(unbox<uint32> value)
-                    | LWord -> BitConverter.GetBytes(unbox<uint64> value)
+                    | UInt16 -> BitConverter.GetBytes(unbox<uint16> value)
+                    | UInt32 -> BitConverter.GetBytes(unbox<uint32> value)
+                    | UInt64 -> BitConverter.GetBytes(unbox<uint64> value)
+                    | _ -> failwithf $"{dataType}지원하지 않는 데이터 타입입니다."
                 let frame = this.CreateWriteFrame(address, dataType, valueBytes)
                 stream.Write(frame, 0, frame.Length)
                 let _ = stream.Read(Array.zeroCreate<byte> 256, 0, 256)

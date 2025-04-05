@@ -33,6 +33,11 @@ type PlcTagBase(address: string, sizeBits: int) =
             with get() = this.Value
             and set(v) = this.Value <- v
         member x.Address = x.Address
+        member this.ReadWriteType: ReadWriteType =
+            if address.StartsWith("Q") || address.StartsWith("P") then 
+                ReadWriteType.Write
+            else
+                ReadWriteType.Read
         member this.SetWriteValue(v) = this.SetWriteValue(v)
         member this.ClearWriteValue() = this.ClearWriteValue()
         member this.GetWriteValue() = this.GetWriteValue()

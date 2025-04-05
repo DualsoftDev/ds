@@ -51,7 +51,7 @@ type XgtPlcScan(ip: string, scanDelay: int) =
             try
                 connection.ReadData(
                     batch.DeviceInfos |> Seq.map (fun d -> d.LWordTag) |> Seq.toArray,
-                    PlcDataSizeType.LWord,
+                    PlcDataSizeType.UInt64,
                     batch.Buffer
                 )
 
@@ -78,7 +78,7 @@ type XgtPlcScan(ip: string, scanDelay: int) =
             |> Seq.distinct
             |> Seq.choose (fun tagStr ->
                 match if isXGI then tryParseXgiTag tagStr else tryParseXgkTag tagStr with
-                | Some (_, size, offset) ->
+                | Some (_dev, size, offset) ->
                     let tag = XGTTag(tagStr, size, offset)
                     tagMap.[tagStr] <- tag :> IPlcTagReadWrite
                     Some tag

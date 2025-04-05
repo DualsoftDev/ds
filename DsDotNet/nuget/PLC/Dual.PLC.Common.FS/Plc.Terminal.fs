@@ -10,7 +10,8 @@ type PlcTerminal
         ?comment: string,
         ?outputFlag: bool,
         ?initialValue: obj,
-        ?terminalType: TerminalType
+        ?terminalType: TerminalType,
+        ?readWriteType: ReadWriteType
     ) =
 
     // 내부 상태
@@ -19,10 +20,11 @@ type PlcTerminal
 
     let nameRaw       = defaultArg name ""
     let addressRaw    = defaultArg address ""
-    let dataTypeRaw   = defaultArg dataType PlcDataSizeType.Bit
+    let dataTypeRaw   = defaultArg dataType PlcDataSizeType.Boolean
     let commentRaw    = defaultArg comment ""
     let outputFlag    = defaultArg outputFlag false
-
+    let readWriteTypeRaw    = defaultArg readWriteType ReadWriteType.Read
+    
     new () = PlcTerminal()
 
 
@@ -36,6 +38,7 @@ type PlcTerminal
         member _.Value
             with get() = value
             and set(v) = value <- v
+        member this.ReadWriteType: ReadWriteType = readWriteTypeRaw
         member _.SetWriteValue(v) = writeValue <- Some v
         member _.ClearWriteValue() = writeValue <- None
         member _.GetWriteValue() = writeValue

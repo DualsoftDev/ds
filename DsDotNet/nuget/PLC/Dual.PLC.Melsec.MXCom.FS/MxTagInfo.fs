@@ -19,6 +19,11 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     interface IPlcTagReadWrite with
         member x.Address with get() = address 
         member x.Value with get() = currentValue and set(v) = currentValue <- v
+        member x.ReadWriteType: ReadWriteType = 
+            if deviceAddress.StartsWith("Y") then 
+                ReadWriteType.Write
+            else
+                ReadWriteType.Read
         member x.SetWriteValue(value: obj) = writeValue <- Some value
         member x.ClearWriteValue() = writeValue <- None
         member x.GetWriteValue() = writeValue
@@ -38,7 +43,7 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     member x.WordTag =
         let offset = mxTagInfo.BitOffset / 16
            
-        if x.DataType = Bit && not(x.IsDotBit) then
+        if x.DataType = Boolean && not(x.IsDotBit) then
             if x.Device.IsHexa
             then $"K4{x.DeviceText}{(offset*16):X}" 
             else $"K4{x.DeviceText}{offset*16}"
@@ -50,8 +55,8 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     member x.UpdateValue(data: int16) : bool =
         let newValue =
             match x.DataType with
-            | Bit -> (data &&& (1s <<< mxTagInfo.BitOffset % 16) <> 0s) :> obj
-            | Word -> data :> obj 
+            | Boolean -> (data &&& (1s <<< mxTagInfo.BitOffset % 16) <> 0s) :> obj
+            | UInt16 -> data :> obj 
             | _ -> failwith "Unsupported data type"
 
         if currentValue = null || currentValue <> newValue then

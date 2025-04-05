@@ -5,6 +5,7 @@ open System
 open System.IO
 open System.Collections.Generic
 
+type CpuType = Xgk | Xgi | Xgr | XgbMk | XgbIEC | Unknown
 
 type DeviceCPUInfo =
     { nID: int

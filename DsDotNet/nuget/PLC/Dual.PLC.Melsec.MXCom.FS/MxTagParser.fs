@@ -19,8 +19,8 @@ module MxTagParserModule =
             member x.ToText = x.ToString()
             member x.DevType =
                 match x with
-                | X | Y | DX | DY | M | L | B | F | SB | SM -> Bit
-                | _ -> Word
+                | X | Y | DX | DY | M | L | B | F | SB | SM -> Boolean
+                | _ -> UInt16
 
             static member Create s =
                 match s with
@@ -59,10 +59,10 @@ module MxTagParserModule =
             if baseOffset = -1 then None
             else
                 match d2 with
-                | Some bit when parsedDevice.DevType = Word -> 
+                | Some bit when parsedDevice.DevType = UInt16 -> 
                     let bitOffset = tryParseInt bit true
                     if bitOffset = -1 then None else Some (baseOffset * 16 + bitOffset)
-                | None -> if parsedDevice.DevType = Bit
+                | None -> if parsedDevice.DevType = Boolean
                             then Some baseOffset
                             else Some (baseOffset*16)
                 | _ -> None
@@ -73,7 +73,7 @@ module MxTagParserModule =
                 getBitOffset parsedDevice d1 d2
                 |> Option.map (fun bitOffset -> 
                     { Device = parsedDevice
-                      DataTypeSize = if d2.IsSome then Bit else  parsedDevice.DevType
+                      DataTypeSize = if d2.IsSome then Boolean else  parsedDevice.DevType
                       BitOffset = bitOffset })
             | None -> None
 

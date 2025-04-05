@@ -5,7 +5,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open PLC.CodeGen.Common
 open Dual.PLC.Common.FS
-
+open XgtProtocol
 
 [<AutoOpen>]
 module DsAddressModule =
@@ -64,22 +64,26 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-    let getDuDataType(plcDataSizeType:PlcDataSizeType) =
+
+    let getDuDataType (plcDataSizeType: PlcDataSizeType) : DataType =
         match plcDataSizeType with
-        | PlcDataSizeType.Bit -> DuBOOL
-        | PlcDataSizeType.Byte -> DuUINT8
-        | PlcDataSizeType.Word -> DuUINT16
-        | PlcDataSizeType.DWord ->DuUINT32
-        | PlcDataSizeType.LWord ->DuUINT64
+        | PlcDataSizeType.Boolean -> DuBOOL
+        | PlcDataSizeType.Byte    -> DuUINT8
+        | PlcDataSizeType.SByte   -> DuINT8
+        | PlcDataSizeType.Int16   -> DuINT16
+        | PlcDataSizeType.UInt16  -> DuUINT16
+        | PlcDataSizeType.Int32   -> DuINT32
+        | PlcDataSizeType.UInt32  -> DuUINT32
+        | PlcDataSizeType.Int64   -> DuINT64
+        | PlcDataSizeType.UInt64  -> DuUINT64
+        | PlcDataSizeType.Float   -> DuFLOAT32
+        | PlcDataSizeType.Double  -> DuFLOAT64
+        | PlcDataSizeType.String  -> DuSTRING
+        | PlcDataSizeType.DateTime -> DuUINT64 // 또는 DuSTRING 등 타임 표현 방식에 따라
 
 
-    let matchPlcDataSizeType(plcDataSizeType:PlcDataSizeType, dt:DsDataType.DataType) =
-        match plcDataSizeType with
-        | PlcDataSizeType.Bit -> DuBOOL = dt
-        | PlcDataSizeType.Byte -> DuUINT8 = dt   || DuINT8 = dt
-        | PlcDataSizeType.Word -> DuUINT16 = dt  || DuINT16 = dt
-        | PlcDataSizeType.DWord ->DuUINT32 = dt  || DuINT32 = dt
-        | PlcDataSizeType.LWord ->DuUINT64 = dt  || DuINT64 = dt
+    let matchPlcDataSizeType (plcType: PlcDataSizeType, duType: DataType) : bool =
+        getDuDataType plcType = duType 
 
 
     let getValidAddress (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
@@ -222,6 +226,7 @@ module DsAddressModule =
                     | NotUsed -> failwithf $"{ioType} not support {name}"
 
                 | LS_XGK_IO |  LS_XGI_IO ->
+                    let isBool = dataType = DuBOOL
                     match ioType with
                     | (In | Out) ->
                         let iSlot, sumBit =  getSlotInfoIEC(ioType, cnt)
@@ -237,15 +242,14 @@ module DsAddressModule =
                             getXgiIOTextBySize(io, cnt ,sizeBit, iSlot, sumBit)
 
                         | LS_XGK_IO ->
-                            let isBool = dataType = DuBOOL
                             if isBool then
-                                getXgkTextByType("P", getSlotInfoNonIEC(ioType, cnt), isBool)
+                                LsXgkTagParser.ParseValidText($"P{getSlotInfoNonIEC(ioType, cnt)}", isBool)
                             else
                                 match ioType with
                                 | IOType.In ->
-                                    getXgkTextByType("P", cnt+XGKAnalogOffsetByte, isBool)
+                                    LsXgkTagParser.ParseValidText($"P{cnt+XGKAnalogOffsetByte}", isBool)
                                 | IOType.Out ->
-                                    getXgkTextByType("P", cnt+XGKAnalogOffsetByte+XGKAnalogOutOffsetByte, isBool)  //test ahn 임시 Q 는  시프트 ??
+                                    LsXgkTagParser.ParseValidText($"P{cnt+XGKAnalogOffsetByte+XGKAnalogOutOffsetByte}", isBool)
                                 | _ ->
                                     failwithf $"Error {target} not support {name}"
 
@@ -260,7 +264,7 @@ module DsAddressModule =
                         | LS_XGI_IO ->
                             getXgiMemoryTextBySize("M", cnt ,sizeBit)
                         | LS_XGK_IO ->
-                            getXgkTextByType("M", cnt, dataType = DuBOOL)
+                            LsXgkTagParser.ParseValidText($"P{cnt}", isBool)
                         //| PlatformTarget.WINDOWS ->
                         //    getPCIOMTextBySize("M", cnt ,sizeBit)
                         | _ ->
@@ -277,22 +281,19 @@ module DsAddressModule =
             else
                 if cpu = XGK || (cpu = WINDOWS && driver = LS_XGK_IO)
                 then
-                    let xgkAddress (addr: string) =
-                        if List.contains addr.[0] ['P'; 'M'; 'K'; 'F'] then
-                            let padCnt = if dataType = DuBOOL then 5 else 4
-                            addr.[0].ToString() + addr.Substring(1).PadLeft(padCnt, '0')
-                        else
-                            addr
+                
+                    let addressXGK = LsXgkTagParser.ParseValidText(addr, (dataType = DuBOOL))
 
-                    match tryParseXGKTagByBitType (xgkAddress addr) with
-                    | Some (t) -> t |> getXgKTextByTag
-
-                    | _ ->  failwithf $"XGK 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
+                    if addressXGK.IsNonNull()
+                    then 
+                        addressXGK
+                    else 
+                        failwithf $"XGK 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
                 
                 elif cpu = XGI || (cpu = WINDOWS && driver = LS_XGI_IO)
                 then
-                    match tryParseXGITag (addr) with
-                    | Some (t) when matchPlcDataSizeType(t.DataType, dataType) ->  addr
+                    match tryParseXgiTag (addr) with
+                    | Some (_) ->  addr
                     | _ ->  failwithf $"XGI 주소가 잘못되었습니다.{name} {addr} (dataType:{dataType})"
                 else 
                     addr

@@ -18,7 +18,7 @@
     <ItemGroup>
         <Compile Include="Address\CSVPLCTypeList.fs" />
         <Compile Include="Address\CSVDeviceSizeInfo.fs" />
-        <Compile Include="Address\HwModel.fs" />
+        <None Include="Address\HwModel.fs" />
         <Compile Include="Address\DeviceSize.fs" />
         <Compile Include="Address\HwModelManager.fs" />
         <Compile Include="Address\LsTagInfo.fs" />

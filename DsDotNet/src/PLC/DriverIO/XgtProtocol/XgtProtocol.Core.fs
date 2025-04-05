@@ -44,7 +44,7 @@ type XGTTag(address: string, dataTypeSize: int, bitOffset: int) =
     override x.UpdateValue(buffer: byte[]) : bool =
         let newValue : obj =
             match x.DataType with
-            | Bit ->
+            | Boolean ->
                 if x.Device = "S" then
                     let lw = BitConverter.ToUInt16(buffer, x.StartByteOffset) |> int
                     (lw = (bitOffset % step)) :> obj
@@ -52,9 +52,11 @@ type XGTTag(address: string, dataTypeSize: int, bitOffset: int) =
                     let lw = BitConverter.ToUInt64(buffer, x.LWordOffset * 8)
                     (lw &&& (1UL <<< (x.BitOffset % 64)) <> 0UL) :> obj
             | Byte  -> buffer.[x.StartByteOffset] :> obj
-            | Word  -> BitConverter.ToUInt16(buffer, x.StartByteOffset) :> obj
-            | DWord -> BitConverter.ToUInt32(buffer, x.StartByteOffset) :> obj
-            | LWord -> BitConverter.ToUInt64(buffer, x.StartByteOffset) :> obj
+            | UInt16  -> BitConverter.ToUInt16(buffer, x.StartByteOffset) :> obj
+            | UInt32-> BitConverter.ToUInt32(buffer, x.StartByteOffset) :> obj
+            | UInt64-> BitConverter.ToUInt64(buffer, x.StartByteOffset) :> obj
+            | _-> failwith $"Unsupported data type: {x.DataType}"
+
 
         if base.Value <> newValue then
             base.Value <- newValue

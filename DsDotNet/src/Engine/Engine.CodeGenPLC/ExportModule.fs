@@ -13,6 +13,7 @@ open Engine.CodeGenCPU
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 open Dual.PLC.Common.FS
+open XgtProtocol
 
 [<AutoOpen>]
 module ExportModule =
@@ -48,21 +49,21 @@ module ExportModule =
                 [
                     match plcType with
                     | XGI ->
-                        match tryParseXGITag addr with
-                        | Some tag ->
-                            if tag.DataType = PlcDataSizeType.Bit then
-                                yield tag.ByteOffset
+                        match tryParseXgiTag addr with
+                        | Some (_dev, size, offset) ->
+                            if size = 1 then
+                                yield offset/8
                             else
-                                yield! [tag.ByteOffset..tag.DataType.GetByteLength()]
+                                yield! [offset/8..size/8]
                         | None ->
                             failwithlog $"tryParse{plcType} {addr} error"
 
                     | XGK ->
-                        match tryParseXGKTag addr with
-                            | Some tag ->
-                                match tag.DataType with
-                                | PlcDataSizeType.Bit -> yield tag.ByteOffset
-                                | PlcDataSizeType.Word -> yield! [tag.ByteOffset..tag.ByteOffset + 1]
+                        match tryParseXgkTag addr with
+                            | Some (_dev, size, offset) ->
+                                match size with
+                                | 1  -> yield offset/8
+                                | 16 -> yield! [offset/8..offset/8 + 1]
                                 | _-> failwithlog $"XGK Not supported plc {plcType} type"
 
                             | None ->

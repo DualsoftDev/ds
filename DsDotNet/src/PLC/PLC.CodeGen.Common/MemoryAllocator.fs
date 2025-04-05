@@ -4,6 +4,7 @@ open System.Collections.Generic
 open Engine.Core
 open Dual.Common.Core.FS
 open System.Text.RegularExpressions
+open XgtProtocol
 
 [<AutoOpen>]
 module MemoryAllocator =
@@ -112,7 +113,7 @@ module MemoryAllocator =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{bitIndex}"
                         elif target = XGK then
-                            getXgkBitText(typ, bitIndex)
+                            LsXgkTagParser.ParseAddress(typ, bitIndex, true)
                         else
                             failwithlog "ERROR"
                     //debugfn "Address %s allocated" address
@@ -157,7 +158,7 @@ module MemoryAllocator =
                         if target = XGI then
                             $"%%{typ}{reqMemType}{byteIndex / byteSize}"
                         elif target = XGK then
-                            getXgkWordText (typ, byteIndex)
+                            LsXgkTagParser.ParseAddress ($"{typ}",byteIndex*8, false)
                         else
                             failwithlog "ERROR"
 

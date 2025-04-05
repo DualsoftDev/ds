@@ -13,11 +13,11 @@ module IntegrationScanTests =
 
     /// 태그 주소에 따라 랜덤 값을 생성하고 해당 DataType 반환
     let generateTagValue (tag: string) : obj * PlcDataSizeType =
-        if tag.Contains("X") then box true, PlcDataSizeType.Bit
+        if tag.Contains("X") then box true, PlcDataSizeType.Boolean
         elif tag.Contains("B") then box (byte (random.Next(0, 256))), PlcDataSizeType.Byte
-        elif tag.Contains("W") then box (uint16 (random.Next(0, 65536))), PlcDataSizeType.Word
-        elif tag.Contains("D") then box (uint32 (random.Next())), PlcDataSizeType.DWord
-        elif tag.Contains("L") then box (9876543210123456789UL), PlcDataSizeType.LWord
+        elif tag.Contains("W") then box (uint16 (random.Next(0, 65536))), PlcDataSizeType.UInt16
+        elif tag.Contains("D") then box (uint32 (random.Next())), PlcDataSizeType.UInt32
+        elif tag.Contains("L") then box (9876543210123456789UL), PlcDataSizeType.UInt64
         else failwith $"알 수 없는 태그 타입: {tag}"
 
     [<Fact>]

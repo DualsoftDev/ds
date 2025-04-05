@@ -12,6 +12,7 @@ open Engine.Common
 open PLC.CodeGen.Common
 open PLC.CodeGen.LS
 open Dual.PLC.Common.FS
+open XgtProtocol
 
 
 [<AutoOpen>]
@@ -91,20 +92,18 @@ module internal XgiSymbolsModule =
     let getXGXTagInfo (targetType:PlatformTarget) (address:string) (name:string) =
         match targetType with
         | XGI ->
-            match tryParseXGITag address with
-            | Some tag ->
-                let offset = if tag.DataType = PlcDataSizeType.Bit then tag.BitOffset else tag.ByteOffset
-                address, tag.Device.ToString(), offset
+            match tryParseXgiTag address with
+            | Some (dev, _size, offset) -> address, dev.ToString(), offset   
             | None ->
                 failwithlog $"tryParse{targetType} {name} {address} error"
 
         | XGK ->
-            match tryParseXGKTag address with
-            | Some tag ->
-                match tag.DataType with
-                | PlcDataSizeType.Bit -> address, tag.Device.ToString(), tag.BitOffset
-                | PlcDataSizeType.Word -> address, tag.Device.ToString(), tag.ByteOffset / 2
-                | _-> failwithlog $"XGK Not supported plc {tag.DataType} type"
+            match tryParseXgkTag address with
+            | Some (dev, size, offset) ->
+                match size with
+                | 1 -> address, dev.ToString(), offset
+                | 16 -> address, dev.ToString(), offset*16 / 2
+                | _-> failwithlog $"XGK Not supported plc {address} type"
 
             | None ->
                 failwithlog $"tryParse{targetType} {name} {address} error"
@@ -161,7 +160,7 @@ module internal XgiSymbolsModule =
 
                         t.Address, "", -1
                     | XGK ->
-                        if t.Address = "" then  //XGK 는 무조건 address 가 있어야 한다.
+                        if t.Address.IsNullOrEmpty() then  //XGK 는 무조건 address 가 있어야 한다.
                             t.Address <- TextAddrEmpty
                         
                         if t.Address = TextAddrEmpty then

@@ -4,20 +4,32 @@ open System.Runtime.CompilerServices
 
 // PLC 데이터 타입 정의
 type PlcDataSizeType =
-    | Bit
+    | Boolean
+    | SByte
     | Byte
-    | Word
-    | DWord
-    | LWord
+    | Int16
+    | UInt16
+    | Int32
+    | UInt32
+    | Int64
+    | UInt64
+    | Float  // = REAL
+    | Double // = LREAL
+    | String
+    | DateTime
 
     static member FromBitSize(size: int) =
         match size with
-        | 1  -> Bit
+        | 1  -> Boolean
         | 8  -> Byte
-        | 16 -> Word
-        | 32 -> DWord
-        | 64 -> LWord
+        | 16 -> UInt16
+        | 32 -> UInt32
+        | 64 -> UInt64
         | _  -> failwithf "[PlcDataSizeType] Unknown data bit size: %d" size
+
+type ReadWriteType =
+    | Read
+    | Write
 
 // 접점/코일 종류 정의
 type TerminalType = 
@@ -53,6 +65,7 @@ type IPlcTag =
 type IPlcTagReadWrite =
     abstract Address: string
     abstract Value: obj with get, set
+    abstract ReadWriteType: ReadWriteType
     abstract SetWriteValue: obj -> unit
     abstract ClearWriteValue: unit -> unit
     abstract GetWriteValue: unit -> option<obj>
@@ -67,27 +80,20 @@ type IPlcTerminal =
 [<Extension>] 
 type PlcTagExt =
 
-    [<Extension>] 
+    [<Extension>]
     static member ToSystemDataType(txt: string) : PlcDataSizeType =
-        match txt.Trim().ToLowerInvariant() with
-        // Bool
-        | "boolean" | "bool" | "bit"                    -> Bit
-        // Char
-        | "char"                                        -> Byte
-        // Float / Real
-        | "float32" | "single"                          -> DWord
-        | "float64" | "double" | "real"                 -> LWord
-        // Signed integers
-        | "int8"  | "sbyte"                             -> Byte
-        | "int16" | "short"                             -> Word
-        | "int32" | "int"                               -> DWord
-        | "int64" | "long"                              -> LWord
-        // Unsigned integers
-        | "uint8"  | "byte"                             -> Byte
-        | "uint16" | "ushort" | "word"                  -> Word
-        | "uint32" | "uint"   | "dword"                 -> DWord
-        | "uint64" | "ulong"  | "lword"                 -> LWord
-        // String-like → 가장 큰 타입 할당
-        | "string" | "text" | "wstring"                 -> LWord
-        // Unknown
-        | _ -> failwithf "[ToSystemDataType] Unknown data type string: %s" txt
+        match txt.Trim().ToUpperInvariant() with
+        | "BOOL" | "BOOLEAN" | "BIT"            -> PlcDataSizeType.Boolean
+        | "SBYTE" | "SINT"                      -> PlcDataSizeType.SByte
+        | "BYTE" | "USINT"                      -> PlcDataSizeType.Byte
+        | "INT" | "INT16"                       -> PlcDataSizeType.Int16
+        | "UINT" | "UINT16" | "WORD"            -> PlcDataSizeType.UInt16
+        | "DINT" | "INT32"                      -> PlcDataSizeType.Int32
+        | "UDINT" | "UINT32" | "DWORD"          -> PlcDataSizeType.UInt32
+        | "LINT" | "INT64"                      -> PlcDataSizeType.Int64
+        | "ULINT" | "UINT64" | "LWORD"          -> PlcDataSizeType.UInt64
+        | "REAL" | "FLOAT" | "FLOAT32"          -> PlcDataSizeType.Float
+        | "LREAL" | "DOUBLE" | "FLOAT64"        -> PlcDataSizeType.Double
+        | "STRING"                              -> PlcDataSizeType.String
+        | "DATETIME" | "DATE_AND_TIME"          -> PlcDataSizeType.DateTime
+        | unknown -> failwithf "Unknown OPC type string: %s" unknown

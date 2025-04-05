@@ -73,42 +73,53 @@ module LsXgkTagParserModule =
                 None
 
 
-    let tryParseXgkValidText (tag: string) (isBit: bool): string option =
-        let standardizeTag (device: string) (remaining: string) (wordLength: int) =
-            if isBit then
-                match remaining with
-                | RegexPattern @"^(\d+)([\da-fA-F])$" [ Int32Pattern word; hexaBitString] ->  
-                    let paddedWord = word.ToString().PadLeft(wordLength, '0')
-                    Some $"{device}{paddedWord}{hexaBitString}"
-                | RegexPattern @"^([\da-fA-F])$" [ hexaBitString] ->     
-                    Some $"{device}{String('0', wordLength)}{hexaBitString}"
-                | _ -> 
-                    logWarn($"ERROR standardizing xgk tag: {tag}")
-                    None
-            else
-                match remaining with
-                | RegexPattern @"^(\d+)$" [ Int32Pattern word ] ->       
-                    let paddedWord = word.ToString().PadLeft(wordLength, '0')
-                    Some $"{device}{paddedWord}"
-                | _ -> 
-                    logWarn($"ERROR standardizing xgk tag: {tag}")
-                    None
+    let Xgk5Digit = [ "L"; "N"; "D"; "R" ]
+    let Xgk4Digit = [ "P"; "M"; "K"; "F"; "T"; "C" ]
 
-        option {
-            if tag.Length > 0 then
-                let device, remaining = tag.[0].ToString(), tag.Substring(1)
-                match tag.[0] with
-                | 'P' | 'M' | 'K' | 'F' ->
-                    let maxLength = if isBit then 6 else 5
-                    if tag.Length <= maxLength then
-                        return! standardizeTag device remaining 4
-                | 'L' ->
-                    let maxLength = if isBit then 7 else 6
-                    if tag.Length <= maxLength then
-                        return! standardizeTag device remaining 5
-                | _ -> 
-                    return! tryParseXgkTag tag |> Option.map (fun (_) ->  tag)
-        }
+    let getXgkBitText (device:string, offset: int) : string =
+        let word = offset / 16
+        let bit = offset % 16
+        match device.ToUpper() with
+        | d when Xgk5Digit |> List.contains d ->
+            device + sprintf "%05i.%X" word bit
+        | d when Xgk4Digit |> List.contains d ->
+            device + sprintf "%04i%X" word bit
+        | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
+
+    let getXgkWordText (device:string, offsetBit: int) : string =
+        
+        let wordIndex = offsetBit / 16
+        match device.ToUpper() with
+        | d when Xgk5Digit |> List.contains d ->
+            sprintf "%s%05i" d wordIndex
+        | d when Xgk4Digit |> List.contains d ->
+            sprintf "%s%04i" d wordIndex
+        | _ -> failwithf $"XGK device({device})는 지원하지 않습니다."
+
+
+    let parseAddress(dev:string, offsetBit:int, isBit:bool): string =
+        if isBit then   
+            getXgkBitText (dev, offsetBit)
+        else
+            getXgkWordText (dev, offsetBit)
+
+    let tryParseXgkValidText (tag: string) (isBit: bool): string option =
+        if String.IsNullOrWhiteSpace(tag) || tag.Length < 2 then
+            None
+        else
+            let fullName =   
+                if List.contains tag.[0] ['P'; 'M'; 'K'; 'F'] then
+                    let padCnt = if isBit then 5 else 4
+                    tag.[0].ToString() + tag.Substring(1).PadLeft(padCnt, '0')
+                else
+                    tag
+            
+            match tryParseXgkTag fullName with
+            | Some (dev, size, offset) when isBit && size = BIT ->
+                getXgkBitText(dev, offset) |> Some
+            | Some (dev, size, offset) when not isBit && size = WORD ->
+                getXgkWordText(dev, offset) |> Some
+            | _ -> None
 
     let tryParseXgkTagAbbreviated (tag: string) (isBit: bool): (string * int * int) option =
         match tryParseXgkValidText tag isBit with
@@ -139,6 +150,10 @@ type LsXgkTagParser =
         match tryParseXgkValidText tag isBit with
         | Some standardText -> tryParseXgkTag standardText |? (getNull<string * int * int>())
         | None -> getNull<string * int * int>()
+        
+    [<Extension>]
+    static member ParseAddress(dev:string, offsetBit:int, isBit:bool): string =
+        parseAddress (dev, offsetBit, isBit)
 
     ///// (약식 표기, BIT Type) XGK tag 문자열을 parsing 해서 StandardText 반환
     ///// 약식에 따른 영향 없는  'P', 'M', 'K', 'F', 'L' 제외한 TAG는 XGK TAG면 그대로 반환

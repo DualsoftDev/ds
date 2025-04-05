@@ -8,6 +8,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open Dual.Common.UnitTest.FS
 open PLC.CodeGen.Common
+open XgtProtocol
 
 type XgxComparisonTest(xgx:PlatformTarget) =
     inherit XgxTestBaseClass(xgx)
@@ -40,9 +41,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         pi.DataType === typeof<double>
         eu.DataType === typeof<double>
         if xgx = XGK then
-            let addrPi = tryParseXGKTag(pi.Address).Value
-            let addrEu = tryParseXGKTag(eu.Address).Value
-            abs(addrEu.BitOffset - addrPi.BitOffset) === 64 
+            let _, _, addrPi = tryParseXgkTag(pi.Address).Value
+            let _, _, addrEu = tryParseXgkTag(eu.Address).Value
+            abs(addrEu - addrPi) === 64
 
         x.saveTestResult f xml
 
@@ -133,9 +134,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         nn1.DataType === typeof<int32>
         unn1.DataType === typeof<uint32>
         if xgx = XGK then
-            let addrNn1 = tryParseXGKTag(nn1.Address).Value
-            let addrNn2 = tryParseXGKTag(nn2.Address).Value
-            addrNn2.BitOffset === addrNn1.BitOffset + 32 
+            let _, _, addrNn1 = tryParseXgkTag(nn1.Address).Value
+            let _, _, addrNn2 = tryParseXgkTag(nn2.Address).Value
+            addrNn2 === addrNn1 + 32 
 
         x.saveTestResult f xml
 
@@ -266,9 +267,9 @@ type XgxComparisonTest(xgx:PlatformTarget) =
         pi.DataType === typeof<single>
         eu.DataType === typeof<single>
         if xgx = XGK then
-            let addrPi = tryParseXGKTag(pi.Address).Value
-            let addrEu = tryParseXGKTag(eu.Address).Value
-            abs(addrEu.BitOffset - addrPi.BitOffset) === 32 
+            let _, _, addrPi = tryParseXgkTag(pi.Address).Value
+            let _, _, addrEu = tryParseXgkTag(eu.Address).Value
+            abs(addrEu - addrPi) === 32 
 
         x.saveTestResult f xml
 

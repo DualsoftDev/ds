@@ -846,6 +846,23 @@ module ImportU =
             |> Seq.filter (fun page -> page.PageNum = 1)
             |> Seq.iter (processPage doc mySys systemRepo)
 
+        [<Extension>]
+        static member UpdateIOFromUserDeviceTags(doc: PptDoc, sys: DsSystem, hwTarget:HwDriveTarget) =
+        
+            match doc.HwIOType with
+            | Some io when io = hwTarget ->  //설정드라이브랑 같아야 가져옴
+                let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
+                doc.UserDeviceTags
+                |> Seq.iter (fun api ->
+                    let key = api.DeviceApiName
+                    if(dictTaskDev.ContainsKey(key))
+                    then
+                        dictTaskDev[key].InAddress <- api.Input
+                        dictTaskDev[key].OutAddress<- api.Output
+                    )
+            |_-> ()
+
+
 
         [<Extension>]
         static member BuildSystem(doc: PptDoc, sys: DsSystem, hwTarget:HwTarget, isLib:bool, isCreateBtnLLib:bool) =
@@ -881,17 +898,8 @@ module ImportU =
             //Job 기본 Address SlideNote로 부터 가져오기
             doc.MakeAddressBySlideNote(sys)
 
-
-            let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
-            doc.UserDeviceTags
-            |> Seq.iter (fun api ->
-                let key = api.DeviceApiName
-                if(dictTaskDev.ContainsKey(key))
-                then
-                    dictTaskDev[key].InAddress <- api.Input
-                    dictTaskDev[key].OutAddress<- api.Output
-                )
-
+            //IO Table로 부터 가져오기
+            doc.UpdateIOFromUserDeviceTags(sys, hwTarget.HwDrive)
 
             doc.PostCheckPptSystem(sys, isLib)
             doc.IsBuilded <- true

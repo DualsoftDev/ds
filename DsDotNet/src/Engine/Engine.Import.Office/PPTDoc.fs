@@ -207,6 +207,11 @@ module PptDocModule =
         member x.Parameter: DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 
+        member x.HwIOType : HwDriveTarget option =
+            match getMapperData doc with
+            | Some mapperData -> mapperData.HwIO |> HwDriveTargetExtensions.fromString |> Some
+            | None -> None
+
         member x.UserDeviceTags : List<UserDeviceTag> =
             match getMapperData doc with
             | Some mapperData -> mapperData.UserDeviceTags.ToList()

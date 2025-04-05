@@ -9,7 +9,7 @@ open Engine.Core.MapperDataModule;
 
 module PowerPointMapperXml =
 
-    let SaveMapperData (doc: PresentationDocument) (data: UserTagConfig) : unit =
+    let SaveOpenXmlMapperData (doc: PresentationDocument) (data: UserTagConfig) : unit =
         if isNull doc || isNull doc.PresentationPart then
             ()
         else

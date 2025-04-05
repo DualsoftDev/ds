@@ -62,6 +62,9 @@ module MapperDataModule =
         [<field: DataMember(Name = "UserDeviceTagsProp")>]
         member val UserDeviceTags = ResizeArray<UserDeviceTag>() with get, set
 
+        [<field: DataMember(Name = "HwIOProp")>]
+        member val HwIO = "" with get, set
+
     // ========== 생성자 및 변환 함수 ==========
 
     let createDefaultUserTagConfig() =

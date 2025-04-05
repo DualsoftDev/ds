@@ -202,11 +202,11 @@ type XgtEthernet(ip: string, port: int) =
             // 응답 명령어 확인 (0x0055)
             if buffer.[20] <> 0x55uy then failwith "응답 명령어가 아닙니다." 
 
-            let blockCnt = int buffer.[28] // 블록 개수
+            //let blockCnt = int buffer.[28] // 블록 개수  XGSIM시뮬레이션이랑 HW랑 다름  XGSIM = HW *10
             let mutable srcOffset = 30
             let mutable dstOffset = 0
 
-            for _ in 0 .. blockCnt-1 do   
+            for _ in 0 .. addresses.Length-1 do   
                 srcOffset <- srcOffset + 2
                 Array.Copy(buffer, srcOffset, readBuffer, dstOffset, 8)
                 dstOffset <- dstOffset + 8

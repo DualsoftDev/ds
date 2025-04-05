@@ -64,8 +64,8 @@ module DsAddressModule =
             ) |>  Seq.sum
 
 
-    let getDuDataType(PlcDataSizeType:PlcDataSizeType) =
-        match PlcDataSizeType with
+    let getDuDataType(plcDataSizeType:PlcDataSizeType) =
+        match plcDataSizeType with
         | PlcDataSizeType.Bit -> DuBOOL
         | PlcDataSizeType.Byte -> DuUINT8
         | PlcDataSizeType.Word -> DuUINT16
@@ -73,8 +73,8 @@ module DsAddressModule =
         | PlcDataSizeType.LWord ->DuUINT64
 
 
-    let matchPlcDataSizeType(PlcDataSizeType:PlcDataSizeType, dt:DsDataType.DataType) =
-        match PlcDataSizeType with
+    let matchPlcDataSizeType(plcDataSizeType:PlcDataSizeType, dt:DsDataType.DataType) =
+        match plcDataSizeType with
         | PlcDataSizeType.Bit -> DuBOOL = dt
         | PlcDataSizeType.Byte -> DuUINT8 = dt   || DuINT8 = dt
         | PlcDataSizeType.Word -> DuUINT16 = dt  || DuINT16 = dt

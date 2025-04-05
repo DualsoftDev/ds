@@ -207,10 +207,10 @@ module PptDocModule =
         member x.Parameter: DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 
-        member x.ApisFromMapper : List<DeviceApi> =
+        member x.UserDeviceTags : List<UserDeviceTag> =
             match getMapperData doc with
-            | Some mapperData -> mapperData.DeviceApis.ToList()
-            | None -> new List<DeviceApi>()
+            | Some mapperData -> mapperData.UserDeviceTags.ToList()
+            | None -> new List<UserDeviceTag>()
 
         member x.UserTagsFromMapper : List<UserMonitorTag> =
             match getMapperData doc with

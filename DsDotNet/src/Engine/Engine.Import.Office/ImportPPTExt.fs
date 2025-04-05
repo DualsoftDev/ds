@@ -883,13 +883,13 @@ module ImportU =
 
 
             let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
-            doc.ApisFromMapper
+            doc.UserDeviceTags
             |> Seq.iter (fun api ->
-                let key = $"{api.Group}{TextDeviceSplit}{api.Device}.{api.Api}"
+                let key = api.DeviceApiName
                 if(dictTaskDev.ContainsKey(key))
                 then
-                    dictTaskDev[key].InAddress <- api.InAddress
-                    dictTaskDev[key].OutAddress<- api.OutAddress
+                    dictTaskDev[key].InAddress <- api.Input
+                    dictTaskDev[key].OutAddress<- api.Output
                 )
 
 

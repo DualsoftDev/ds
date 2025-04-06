@@ -8,7 +8,7 @@ open Dual.PLC.Common.FS
 
 
 /// XGT PLC 통신 프로토콜 구현
-type XgtEthernet(ip: string, port: int) =
+type XgtEthernet(ip: string, port: int, timeoutMs:int) =
     let mutable client: TcpClient option = None
     let mutable connected = false
     let frameID = byte (ip.Split('.').[3] |> int)
@@ -37,11 +37,22 @@ type XgtEthernet(ip: string, port: int) =
 
     member this.Connect() =
         try
-            let tcpClient = new TcpClient()
-            tcpClient.Connect(IPAddress.Parse(ip), port)
-            client <- Some tcpClient
-            connected <- true
-            true
+            use tcpClient = new TcpClient()
+            let result = tcpClient.BeginConnect(IPAddress.Parse(ip), port, null, null)
+            let success = result.AsyncWaitHandle.WaitOne(timeoutMs)
+            if not success then
+                // 타임아웃 발생
+                false
+            else
+                try
+                    tcpClient.EndConnect(result)
+                    
+                    client <- Some tcpClient
+                    connected <- true
+                    true
+                with
+                | _ -> false
+
         with _ -> false
 
     member this.ReConnect() =

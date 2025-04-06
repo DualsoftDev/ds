@@ -9,9 +9,9 @@ open Dual.Common.Core.FS
 
 type TaskDev with
 
-    member d.SensorEmulation(sys:DsSystem, coins:Vertex seq) =
+    member d.SensorEmulation(coins:Vertex seq) =
         let call = coins.OfType<Call>().First()
-        let rst = sys._off.Expr
+        let rst = call.MutualResetExpr
 
         [|
             if call.ValueParamIO.In.DataType = DuBOOL then

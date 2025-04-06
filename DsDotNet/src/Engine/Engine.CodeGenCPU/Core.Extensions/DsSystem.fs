@@ -239,7 +239,7 @@ module ConvertCpuDsSystem =
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
 
-            DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize)  //9999개 HMI 리미트
+            DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize)  //10000개 HMI 리미트
 
             //Step2)Flow Real HMI base + (N ~ M)bit
             x.GenerationCallManualMemory()

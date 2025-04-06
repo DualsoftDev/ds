@@ -375,7 +375,7 @@ module TagManagerModule =
                 if x.ErrOffTimeOver.Value     then yield "해지시간초과"
                 if x.ErrShort.Value           then yield "센서감지"
                 if x.ErrOpen.Value            then yield "센서오프"
-                if x.ErrInterlock.Value            then yield "반대센서오프"
+                if x.ErrInterlock.Value            then yield "반대센서"
             |]
         member x.ErrorText   =
             let errors = x.ErrorList

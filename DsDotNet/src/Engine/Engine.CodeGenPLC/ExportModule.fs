@@ -45,29 +45,34 @@ module ExportModule =
             getXgxPOUParamsFromCss pouName css
 
         let usedByteIndices =
-            let getBytes addr =
+            let getBytes (t:IStorage) =
                 [
                     match plcType with
                     | XGI ->
-                        match tryParseXgiTag addr with
+                        match tryParseXgiTag t.Address with
                         | Some (_dev, size, offset) ->
                             if size = 1 then
                                 yield offset/8
                             else
                                 yield! [offset/8..size/8]
                         | None ->
-                            failwithlog $"tryParse{plcType} {addr} error"
+                            failwithlog $"tryParse{plcType} {t.Address} error"
 
                     | XGK ->
-                        match tryParseXgkTag addr with
+                        match tryParseXgkTag t.Address with
                             | Some (_dev, size, offset) ->
                                 match size with
                                 | 1  -> yield offset/8
-                                | 16 -> yield! [offset/8..offset/8 + 1]
+                                | 16 ->     //실제 사용에 따라 영역설절
+                                    match t.BoxedValue.GetType().GetMemorySizePrefix() with
+                                    | "W" -> yield! [offset/8..offset/8 + 1]
+                                    | "D" -> yield! [offset/8..offset/8 + 2]
+                                    | _ -> failwithlog "ERROR"
+
                                 | _-> failwithlog $"XGK Not supported plc {plcType} type"
 
                             | None ->
-                                failwithlog $"tryParse{plcType} {addr} error"
+                                failwithlog $"tryParse{plcType} {t.Address} error"
 
                     | _ -> failwithlog $"Not supported plc {plcType} type"
                 ]
@@ -88,7 +93,7 @@ module ExportModule =
 
             // generate used memory byte indices
             autoMemoryAllocationTags
-            |> Seq.collect (fun f -> f.Address |> getBytes)
+            |> Seq.collect (fun f -> f |> getBytes)
             |> Seq.distinct
             |> Seq.sort
             |> List.ofSeq

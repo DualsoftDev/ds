@@ -16,7 +16,7 @@ type TaskDevManager with
         let fn = getFuncName()
         let _off = coins.First()._off.Expr
 
-        let rstMemos = coins.SelectMany(fun c-> c.MutualResetCoins.Select(fun c->c.VC.PS)).Distinct()
+        let rstMemos = coins.OfType<Call>().SelectMany(fun c-> c.MutualResetCoins.Select(fun c->c.VC.PS)).Distinct()
         let flowEmg = coins.Select(fun c-> c.Flow.emg_st).ToOr()
         let flowPause = coins.Select(fun c-> c.Flow.p_st).ToOr()
         let emgActions = coins.SelectMany(fun c-> c.Flow.HWEmergencyDigitalActions)

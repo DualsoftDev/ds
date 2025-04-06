@@ -10,24 +10,24 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
     let scanners = Dictionary<string, 'T>()
 
     /// 스캐너 인스턴스 생성 방식은 자식이 구현
-    abstract member CreateScanner: ip: string * delay: int -> 'T
+    abstract member CreateScanner: ip: string * delay: int * timeoutMs: int -> 'T
 
     /// 스캔 시작 + 태그 매핑 반환
-    member this.StartScan(ip: string, tags: string seq, delay: int) : IDictionary<string, IPlcTagReadWrite> =
+    member this.StartScan(ip: string, tags: string seq, delay: int, timeoutMs:int) : IDictionary<string, IPlcTagReadWrite> =
         if not (scanners.ContainsKey(ip)) then
-            let scanner = this.CreateScanner(ip, delay)
+            let scanner = this.CreateScanner(ip, delay, timeoutMs)
             scanner.Connect()
             scanners.Add(ip, scanner)
 
         scanners.[ip].Scan(tags)
 
     /// 여러 PLC에 대해 스캔 시작 및 전체 태그 매핑 반환
-    member this.StartScanAll(tagsPerPLC: IDictionary<string, string seq>, delay: int) : IDictionary<string, IDictionary<string, IPlcTagReadWrite>> =
+    member this.StartScanAll(tagsPerPLC: IDictionary<string, string seq>, delay: int, timeoutMs:int) : IDictionary<string, IDictionary<string, IPlcTagReadWrite>> =
         let totalTags = Dictionary<string, IDictionary<string, IPlcTagReadWrite>>()
         for kv in tagsPerPLC do
             let ip = kv.Key
             let tags = kv.Value
-            let mapped = this.StartScan(ip, tags, delay)
+            let mapped = this.StartScan(ip, tags, delay, timeoutMs)
             totalTags.Add(ip, mapped)
         totalTags
 

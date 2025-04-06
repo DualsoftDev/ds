@@ -82,6 +82,28 @@ module DsAddressModule =
         | PlcDataSizeType.DateTime -> DuUINT64 // 또는 DuSTRING 등 타임 표현 방식에 따라
 
 
+
+        
+    let getXgiIOTextBySize (device:string, offset: int, bitSize:int, iSlot:int, sumBit:int) : string =
+        if bitSize = 1
+        then $"%%{device}X0.{iSlot}.{(offset-sumBit) % 64}"  //test ahn 아날로그 base 1로 일단 고정
+        else
+            match bitSize with  //test ahn  xgi 규격확인
+            | 8 -> $"%%{device}B{offset+1024}"
+            | 16 -> $"%%{device}W{offset+1024}"
+            | 32 -> $"%%{device}D{offset+1024}"
+            | 64 -> $"%%{device}L{offset+1024}"
+            | _ -> failwithf $"Invalid size :{bitSize}"
+
+
+    let getXgiMemoryTextBySize (device:string, offset: int, bitSize:int) : string =
+        if bitSize = 1
+        then $"%%{device}X{offset}"
+        else
+            if offset%8 = 0 
+            then getXgiIOTextBySize (device, offset, bitSize, 0, 0)
+            else failwithf $"Word Address는 8의 배수여야 합니다. {offset}"
+
     let matchPlcDataSizeType (plcType: PlcDataSizeType, duType: DataType) : bool =
         getDuDataType plcType = duType 
 
@@ -264,7 +286,7 @@ module DsAddressModule =
                         | LS_XGI_IO ->
                             getXgiMemoryTextBySize("M", cnt ,sizeBit)
                         | LS_XGK_IO ->
-                            LsXgkTagParser.ParseValidText($"M{cnt}", isBool)
+                            LsXgkTagParser.ParseAddress("M", cnt, isBool)
                         //| PlatformTarget.WINDOWS ->
                         //    getPCIOMTextBySize("M", cnt ,sizeBit)
                         | _ ->

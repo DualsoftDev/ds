@@ -336,7 +336,7 @@ module ExportIOTable =
                     yield rowItems ($"{call.Name}_감지시간부족이상", call.ErrorOnTimeUnder.Address)
                     yield rowItems ($"{call.Name}_해지시간초과이상", call.ErrorOffTimeOver.Address)
                     yield rowItems ($"{call.Name}_해지시간부족이상", call.ErrorOffTimeUnder.Address)
-                    yield rowItems ($"{call.Name}_반대센서오프이상", call.ErrorInterlock.Address)
+                    yield rowItems ($"{call.Name}_반대센서이상", call.ErrorInterlock.Address)
 
                 for real in sys.GetRealVertices() |> Seq.sortBy (fun r -> r.Name) do
                     yield rowItems ($"{real.Name}_작업원위치이상", real.ErrGoingOrigin.Address)

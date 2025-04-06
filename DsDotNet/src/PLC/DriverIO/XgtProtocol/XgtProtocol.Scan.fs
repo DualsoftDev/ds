@@ -4,10 +4,10 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
-type XgtPlcScan(ip: string, scanDelay: int) =
+type XgtPlcScan(ip: string, scanDelay: int, timeoutMs:int) =
     inherit PlcScanBase(ip, scanDelay)
 
-    let connection = XgtEthernet(ip, 2004)
+    let connection = XgtEthernet(ip, 2004, timeoutMs)
     let mutable xgtTags: XGTTag[] = [||]
     let mutable batches: LWBatch[] = [||]
     let notifiedOnce = HashSet<LWBatch>()

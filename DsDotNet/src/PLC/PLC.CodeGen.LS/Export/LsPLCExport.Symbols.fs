@@ -102,7 +102,7 @@ module internal XgiSymbolsModule =
             | Some (dev, size, offset) ->
                 match size with
                 | 1 -> address, dev.ToString(), offset
-                | 16 -> address, dev.ToString(), offset*16 / 2
+                | 16 -> address, dev.ToString(), offset/16
                 | _-> failwithlog $"XGK Not supported plc {address} type"
 
             | None ->

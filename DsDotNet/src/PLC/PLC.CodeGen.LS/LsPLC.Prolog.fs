@@ -6,6 +6,7 @@ open System.Linq
 open Engine.Core
 open Dual.Common.Core.FS
 open PLC.CodeGen.Common
+open XgtProtocol
 
 [<AutoOpen>]
 module XgiPrologModule =
@@ -37,8 +38,8 @@ module XgiPrologModule =
 
     let validateAddress name (address:string) targetType =
         match targetType with
-        | XGI -> if address.IsXGIAddress() then Ok true else Error $"Invalid address: '{name} ({address})'"
-        | XGK -> if address.IsXGKAddress() then Ok true else Error $"Invalid address: '{name} ({address})'"
+        | XGI -> if tryParseXgiTag(address).IsSome then Ok true else Error $"Invalid address: '{name} ({address})'"
+        | XGK -> if tryParseXgkTag(address).IsSome then Ok true else Error $"Invalid address: '{name} ({address})'"
         | _ -> Error $"Invalid targetType: '{targetType}'"
 
 

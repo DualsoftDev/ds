@@ -83,19 +83,19 @@ module MemoryAllocator =
             match reqMemType with
             | "X" ->
                 let bitIndex =
-                    match ofBit, ofByteRange with
-                    | Some bit, _ when bit % unitSize = unitSize-1 -> // 마지막 fragment bit 을 쓰는 상황
+                    match ofBit(*, ofByteRange*) with
+                    | Some bit(*, _ *)when bit % unitSize = unitSize-1 -> // 마지막 fragment bit 을 쓰는 상황
                         ofBit <- None
                         bit
-                    | Some bit, _ -> // 마지막이 아닌 여유 fragment bit 을 쓰는 상황
+                    | Some bit(*, _*) -> // 마지막이 아닌 여유 fragment bit 을 쓰는 상황
                         ofBit <- Some(bit + 1)
                         bit
-                    | None, Some(s, e) ->
-                        let bit = s * 8
-                        ofBit <- Some(bit + 1)
-                        ofByteRange <- if s + (unitSize/8) = e then None else Some(s + (unitSize/8), e)
-                        bit
-                    | None, None ->
+                    //| None, Some(s, e) ->
+                    //    let bit = s * 8
+                    //    ofBit <- Some(bit + 1)
+                    //    ofByteRange <- if s + (unitSize/8) = e then None else Some(s + (unitSize/8), e)
+                    //    bit
+                    | None(*, None*) ->
                         let bit = byteCursor * 8
                         ofBit <- Some(bit + 1)
                         byteCursor <- byteCursor+unitSize/8

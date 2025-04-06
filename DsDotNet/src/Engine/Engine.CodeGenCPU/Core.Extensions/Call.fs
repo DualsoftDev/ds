@@ -140,6 +140,18 @@ module ConvertCpuCall =
             then outExprs.ToOr()|>Some
             else None
 
+        member c.MutualResetCoins =
+            let mts = c.Parent.GetSystem().S.MutualCalls
+            if c.IsJob then mts[c] else []
+
+        member c.MutualResetExpr =
+                    c.MutualResetCoins
+                                .Choose(tryGetPureCall)
+                                .Choose(fun c->c.EndAction)
+                                .Distinct()
+                                .ToOrElseOff()
+
+
 
 
 

@@ -69,7 +69,7 @@ type DsSystem with
             let devCallSet =  sys.GetTaskDevCalls()
             for (td, calls) in devCallSet do
                 if td.InTag.IsNonNull() then
-                    yield! td.SensorEmulation(sys, calls)
+                    yield! td.SensorEmulation(calls)
         ]
 
     member sys.JobActionOut() =

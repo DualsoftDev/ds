@@ -210,15 +210,13 @@ module ConvertCPU =
                     yield! sys.Y5_SystemEmgAlramError()
                     yield! sys.B2_SWButtonOutput()
                     yield! sys.B4_SWModeLamp()
-
-                 
-
-                else 
-                    yield! sys.Y1_SystemActiveBtnForPassiveFlow(activeSys)
+         
+                //else 
+                //    yield! sys.Y1_SystemActiveBtnForPassiveFlow(activeSys)
                     
+                    if RuntimeDS.ModelConfig.PlatformTarget.IsPLC then 
+                        yield! sys.Y6_SystemClearBtnForFlow()
 
-                if RuntimeDS.ModelConfig.PlatformTarget.IsPLC then 
-                    yield! sys.Y6_SystemClearBtnForFlow()
 
                 //Variables  적용
                 yield! applyVariables sys

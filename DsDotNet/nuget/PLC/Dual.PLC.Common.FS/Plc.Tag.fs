@@ -63,9 +63,9 @@ type IPlcTag =
 
 // 읽기/쓰기 기능 포함
 type IPlcTagReadWrite =
+    abstract ReadWriteType: ReadWriteType
     abstract Address: string
     abstract Value: obj with get, set
-    abstract ReadWriteType: ReadWriteType
     abstract SetWriteValue: obj -> unit
     abstract ClearWriteValue: unit -> unit
     abstract GetWriteValue: unit -> option<obj>

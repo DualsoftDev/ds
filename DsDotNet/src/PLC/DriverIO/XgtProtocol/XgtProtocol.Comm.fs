@@ -34,26 +34,33 @@ type XgtEthernet(ip: string, port: int, timeoutMs:int) =
 
     member this.Ip = ip
     member this.IsConnected = connected
-
     member this.Connect() =
         try
-            use tcpClient = new TcpClient()
-            let result = tcpClient.BeginConnect(IPAddress.Parse(ip), port, null, null)
-            let success = result.AsyncWaitHandle.WaitOne(timeoutMs)
-            if not success then
-                // 타임아웃 발생
-                false
-            else
-                try
-                    tcpClient.EndConnect(result)
-                    
-                    client <- Some tcpClient
-                    connected <- true
-                    true
-                with
-                | _ -> false
-
+            let tcpClient = new TcpClient()
+            tcpClient.Connect(IPAddress.Parse(ip), port)
+            client <- Some tcpClient
+            connected <- true
+            true
         with _ -> false
+    //member this.Connect() =
+    //    try
+    //        use tcpClient = new TcpClient()
+    //        let result = tcpClient.BeginConnect(IPAddress.Parse(ip), port, null, null)
+    //        let success = result.AsyncWaitHandle.WaitOne(timeoutMs)
+    //        if not success then
+    //            // 타임아웃 발생
+    //            false
+    //        else
+    //            try
+    //                tcpClient.EndConnect(result)
+                    
+    //                client <- Some tcpClient
+    //                connected <- true
+    //                true
+    //            with
+    //            | _ -> false
+
+    //    with _ -> false
 
     member this.ReConnect() =
         if not connected then this.Connect()

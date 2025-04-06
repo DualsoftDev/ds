@@ -264,7 +264,7 @@ module DsAddressModule =
                         | LS_XGI_IO ->
                             getXgiMemoryTextBySize("M", cnt ,sizeBit)
                         | LS_XGK_IO ->
-                            LsXgkTagParser.ParseValidText($"P{cnt}", isBool)
+                            LsXgkTagParser.ParseValidText($"M{cnt}", isBool)
                         //| PlatformTarget.WINDOWS ->
                         //    getPCIOMTextBySize("M", cnt ,sizeBit)
                         | _ ->

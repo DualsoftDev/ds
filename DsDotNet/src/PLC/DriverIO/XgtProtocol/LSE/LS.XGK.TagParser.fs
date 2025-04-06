@@ -121,11 +121,7 @@ module LsXgkTagParserModule =
                 getXgkWordText(dev, offset) |> Some
             | _ -> None
 
-    let tryParseXgkTagAbbreviated (tag: string) (isBit: bool): (string * int * int) option =
-        match tryParseXgkValidText tag isBit with
-        | Some standardText -> tryParseXgkTag standardText
-        | None -> None
-            
+
 
 [<Extension>]   // For C#
 type LsXgkTagParser =

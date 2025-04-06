@@ -896,7 +896,7 @@ module ImportU =
             //RealTime속성 만들기
             doc.MakeRealProperty(sys)
             //Job 기본 Address SlideNote로 부터 가져오기
-            doc.MakeAddressBySlideNote(sys)
+            //doc.MakeAddressBySlideNote(sys)
 
             //IO Table로 부터 가져오기
             doc.UpdateIOFromUserDeviceTags(sys, hwTarget.HwDrive)

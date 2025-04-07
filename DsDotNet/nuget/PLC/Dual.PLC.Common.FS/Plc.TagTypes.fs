@@ -2,30 +2,41 @@ namespace Dual.PLC.Common.FS
 
 open System.Runtime.CompilerServices
 
-// PLC 데이터 타입 정의
 type PlcDataSizeType =
     | Boolean
-    | SByte
-    | Byte
-    | Int16
-    | UInt16
-    | Int32
-    | UInt32
-    | Int64
-    | UInt64
-    | Float  // = REAL
-    | Double // = LREAL
+    | SByte    | Byte
+    | Int16    | UInt16
+    | Int32    | UInt32  | Float     // REAL
+    | Int64    | UInt64  | Double    // LREAL
     | String
     | DateTime
 
+    /// 비트 수로부터 PlcDataSizeType 추론
     static member FromBitSize(size: int) =
         match size with
-        | 1  -> Boolean
-        | 8  -> Byte
-        | 16 -> UInt16
-        | 32 -> UInt32
-        | 64 -> UInt64
-        | _  -> failwithf "[PlcDataSizeType] Unknown data bit size: %d" size
+        | 1   -> Boolean
+        | 8   -> Byte        // 기본 Byte
+        | 16  -> UInt16      // 기본 UInt16
+        | 32  -> UInt32      // 기본 UInt32
+        | 64  -> UInt64      // 기본 UInt64
+        | _   -> failwithf "[PlcDataSizeType] Unknown data bit size: %d" size
+
+    /// PlcDataSizeType → 비트 수
+    static member TypeBitSize(dataType: PlcDataSizeType) =
+        match dataType with
+        | Boolean    -> 1
+        | SByte      -> 8
+        | Byte       -> 8
+        | Int16      -> 16
+        | UInt16     -> 16
+        | Int32      -> 32
+        | UInt32     -> 32
+        | Int64      -> 64
+        | UInt64     -> 64
+        | Float      -> 32
+        | Double     -> 64
+        | String     -> 8 * 64   // 예: 문자열 최대 길이 기반. 수정 가능
+        | DateTime   -> 64       // 일반적으로 8바이트 (예: ticks)
 
 type ReadWriteType =
     | Read
@@ -54,27 +65,6 @@ type TerminalType =
 
     /// static helper: contact 판별
     static member IsContactType(t: TerminalType) = t.IsContactType()
-
-// PLC 태그 메타 정보
-type IPlcTag =
-    abstract Name: string
-    abstract DataType: PlcDataSizeType
-    abstract Comment: string
-
-// 읽기/쓰기 기능 포함
-type IPlcTagReadWrite =
-    abstract ReadWriteType: ReadWriteType
-    abstract Address: string
-    abstract Value: obj with get, set
-    abstract SetWriteValue: obj -> unit
-    abstract ClearWriteValue: unit -> unit
-    abstract GetWriteValue: unit -> option<obj>
-
-// 전체 태그 정보
-type IPlcTerminal =
-    inherit IPlcTag
-    inherit IPlcTagReadWrite
-    abstract TerminalType: TerminalType with get
 
 // 문자열 → PlcDataSizeType 확장
 [<Extension>] 

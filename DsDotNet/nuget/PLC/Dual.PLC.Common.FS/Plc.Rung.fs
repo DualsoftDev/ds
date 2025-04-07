@@ -5,7 +5,7 @@ open System.Runtime.Serialization
 
 type Rung = {
     Title: string
-    Content: PlcTerminal array
+    Items: PlcTerminal array
 }
 
 module RungLogic =
@@ -20,8 +20,7 @@ module RungLogic =
     let getCoils (rungs: Rung array) : seq<PlcTerminal> =
         rungs
         |> Seq.choose (fun rung ->
-            let content = rung.Content
-            if Array.exists isCoil content && Array.exists isContact content then
-                Array.tryFind isCoil content
+            if Array.exists isCoil rung.Items && Array.exists isContact rung.Items then
+                Array.tryFind isCoil rung.Items
             else
                 None)

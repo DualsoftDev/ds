@@ -4,53 +4,21 @@ open System
 
 type PlcTerminal
     (
-        ?name: string,
-        ?address: string,
-        ?dataType: PlcDataSizeType,
-        ?comment: string,
-        ?outputFlag: bool,
-        ?initialValue: obj,
-        ?terminalType: TerminalType,
-        ?readWriteType: ReadWriteType
+        tag: PlcTagBase,
+        ?terminalType: TerminalType
     ) =
 
-    // 내부 상태
-    let mutable value = defaultArg initialValue null
-    let mutable writeValue: option<obj> = None
+    let terminalTypeRaw = defaultArg terminalType TerminalType.Empty
 
-    let nameRaw       = defaultArg name ""
-    let addressRaw    = defaultArg address ""
-    let dataTypeRaw   = defaultArg dataType PlcDataSizeType.Boolean
-    let commentRaw    = defaultArg comment ""
-    let outputFlag    = defaultArg outputFlag false
-    let readWriteTypeRaw    = defaultArg readWriteType ReadWriteType.Read
-    
-    new () = PlcTerminal()
+    /// 내부 태그 객체
+    member _.Tag = tag
 
+    /// 접점/코일 타입
+    member _.TerminalType = terminalTypeRaw
+    member _.Address    = tag.Address
+    member _.Name       = tag.Name
+    member _.DataType   = tag.DataType
 
-    interface IPlcTag with
-        member _.Name = nameRaw
-        member this.DataType = dataTypeRaw
-        member _.Comment = commentRaw
-
-    interface IPlcTagReadWrite with
-        member _.Address = addressRaw
-        member _.Value
-            with get() = value
-            and set(v) = value <- v
-        member this.ReadWriteType: ReadWriteType = readWriteTypeRaw
-        member _.SetWriteValue(v) = writeValue <- Some v
-        member _.ClearWriteValue() = writeValue <- None
-        member _.GetWriteValue() = writeValue
-
-    interface IPlcTerminal with
-        member _.TerminalType = defaultArg terminalType TerminalType.Empty
-
-
-    member x.Name         = (x:>IPlcTerminal).Name
-    member x.Address      = (x:>IPlcTerminal).Address
-    member x.DataType     = (x:>IPlcTerminal).DataType
-    member x.TerminalType = (x:>IPlcTerminal).TerminalType
-    member x.OutputFlag   = outputFlag
-
-
+    /// 기본 출력 형식
+    override _.ToString() =
+        $"[{tag.ReadWriteType}] {tag.Name} @ {tag.Address} ({tag.DataType}) <{terminalTypeRaw}>"

@@ -4,6 +4,14 @@ open System
 open System.Collections.Generic
 open System.Threading
 
+type ScanAddress = string
+type ScanTag =
+    {
+        Name : string 
+        Address : ScanAddress
+        Comment : string
+    }
+
 [<AbstractClass>]
 type PlcScanBase(ip: string, scanDelay: int) =
 
@@ -38,7 +46,7 @@ type PlcScanBase(ip: string, scanDelay: int) =
     abstract member IsConnected: bool
     abstract member WriteTags: unit -> unit
     abstract member ReadTags: unit -> unit
-    abstract member PrepareTags: string seq -> IDictionary<string, IPlcTagReadWrite>
+    abstract member PrepareTags: ScanTag seq -> IDictionary<ScanAddress, PlcTagBase>
 
     // ---------------------------
     // 🟢 현재 스캔 상태 확인용
@@ -48,7 +56,7 @@ type PlcScanBase(ip: string, scanDelay: int) =
     // ---------------------------
     // 🚀 스캔 시작
     // ---------------------------
-    member this.Scan(tags: string seq) : IDictionary<string, IPlcTagReadWrite> =
+    member this.Scan(tags: ScanTag seq) : IDictionary<ScanAddress, PlcTagBase> =
         cancelToken.Cancel()
 
         let tagMap = this.PrepareTags(tags)

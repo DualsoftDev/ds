@@ -4,14 +4,14 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
-type XgtPlcScan(ip: string, scanDelay: int, timeoutMs:int) =
+type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int) =
     inherit PlcScanBase(ip, scanDelay)
 
     let connection = XgtEthernet(ip, 2004, timeoutMs)
     let mutable xgtTags: XGTTag[] = [||]
     let mutable batches: LWBatch[] = [||]
     let notifiedOnce = HashSet<LWBatch>()
-    let tagMap = Dictionary<string, IPlcTagReadWrite>()
+    let tagMap = Dictionary<ScanAddress, PlcTagBase>()
 
     // ---------------------------
     // 연결 관련
@@ -38,56 +38,59 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs:int) =
         for tag in xgtTags do
             match tag.GetWriteValue() with
             | Some value ->
-                if not (connection.WriteData(tag.Address, tag.DataType, value)) then
-                    failwith $"WriteData 실패: {tag.Address}"
+                if not (connection.Write(tag.Address, tag.DataType, value)) then
+                    failwith $"Write 실패: {tag.Address}"
                 tag.ClearWriteValue()
             | None -> ()
 
-    // ---------------------------
-    // 태그 읽기
-    // ---------------------------
-    override _.ReadTags() =
+
+      override _.ReadTags() =
         for batch in batches do
             try
-                connection.ReadData(
-                    batch.DeviceInfos |> Seq.map (fun d -> d.LWordTag) |> Seq.toArray,
-                    PlcDataSizeType.UInt64,
-                    batch.Buffer
-                )
+                // 중복 제거된 LWord 주소만 추출하여 읽기 요청
+                let addresses =
+                    batch.Tags
+                    |> Seq.map (fun tag -> tag.LWordTag)
+                    |> Seq.distinct
+                    |> Seq.toArray
 
+                connection.Reads(addresses, PlcDataSizeType.UInt64, batch.Buffer)
+
+                // 태그별 값 업데이트 및 변경 이벤트 발생
                 for tag in batch.Tags do
                     if tag.UpdateValue(batch.Buffer) then
                         base.TriggerTagChanged { Ip = ip; Tag = tag }
 
-            with ex ->
-                printfn "[XGT Read Error] %s: %s" ip ex.Message
-                connection.ReConnect() |> ignore
+                // 최초 읽기 알림만 등록
+                if notifiedOnce.Add(batch) then
+                    () // 추후 알림 로직 확장 여지
 
-            if not (notifiedOnce.Contains(batch)) then
-                notifiedOnce.Add(batch) |> ignore
+            with ex ->
+                eprintfn $"[⚠️ XGT Read Error] IP: {ip}, 예외: {ex.Message}"
+                connection.ReConnect() |> ignore
 
     // ---------------------------
     // 태그 준비 및 파싱
     // ---------------------------
-    override _.PrepareTags(tags: string seq) : IDictionary<string, IPlcTagReadWrite> =
+    override _.PrepareTags(tags: ScanTag seq)  =
         tagMap.Clear()
-        let isXGI = LsXgiTagParser.IsXGI(tags)
+        let isXGI = LsXgiTagParser.IsXGI(tags |> Seq.map(fun s-> s.Address))
 
-        let parsedTags =
+        let parsed =
             tags
             |> Seq.distinct
-            |> Seq.choose (fun tagStr ->
-                match if isXGI then tryParseXgiTag tagStr else tryParseXgkTag tagStr with
+            |> Seq.choose (fun scanTag ->
+                match if isXGI then tryParseXgiTag scanTag.Address else tryParseXgkTag scanTag.Address with
                 | Some (_dev, size, offset) ->
-                    let tag = XGTTag(tagStr, size, offset)
-                    tagMap.[tagStr] <- tag :> IPlcTagReadWrite
+                    let tag = XGTTag(scanTag.Name, scanTag.Address, PlcDataSizeType.FromBitSize(size), offset)
+                    tagMap[scanTag.Address] <- tag
                     Some tag
                 | None ->
-                    printfn "[⚠️ 태그 무시됨] 파싱 실패: %s" tagStr
+                    printfn $"[⚠️ 무시됨] 태그 파싱 실패: {scanTag.Name}"
                     None
             )
             |> Seq.toArray
 
-        xgtTags <- parsedTags
-        batches <- prepareReadBatches parsedTags
-        tagMap :> IDictionary<string, IPlcTagReadWrite>
+        xgtTags <- parsed
+        batches <- prepareReadBatches parsed
+        upcast tagMap

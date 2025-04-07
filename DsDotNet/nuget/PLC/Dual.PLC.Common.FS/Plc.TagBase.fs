@@ -1,43 +1,40 @@
 namespace Dual.PLC.Common.FS
 
+open System
+
 [<AbstractClass>]
-type PlcTagBase(address: string, sizeBits: int) =
-    let mutable value: obj = null
-    let mutable writeValue: option<obj> = None
+type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType, 
+                ?comment: string, ?initialValue: obj) =
 
-    /// 주소
-    member _.Address = address
+    do
+        match initialValue with
+        | Some v ->
+            let systemType = PlcTagExt.ToSystemDataType(v.GetType().Name)
+            if systemType <> dataType then
+                printfn $"⚠️ 초기값 타입 불일치: {v.GetType().Name} ≠ {dataType}"  // 로그만 출력
+        | _ -> ()
 
-    /// 데이터 타입
-    member _.DataType = PlcDataSizeType.FromBitSize(sizeBits)
+    let mutable value     = defaultArg initialValue null
+    let mutable writeVal  = None: obj option
 
-    /// 현재 값
+    
+    member _.Name     = name
+    member _.Address  = address
+    member _.DataType = dataType
+    
     member this.Value
         with get() = value
         and set(v) = value <- v
 
-    /// 쓰기용 값
-    member this.SetWriteValue(v: obj) = writeValue <- Some v
-    member this.ClearWriteValue() = writeValue <- None
-    member this.GetWriteValue() = writeValue
+    member _.Comment  = defaultArg comment ""
 
+    member this.SetWriteValue(v: obj) = writeVal <- Some v
+    member this.ClearWriteValue()     = writeVal <- None
+    member this.GetWriteValue()       = writeVal
+
+    abstract member ReadWriteType: ReadWriteType
     abstract member UpdateValue: byte[] -> bool
+    default _.UpdateValue _ = false
 
-    interface IPlcTag with
-        member _.Name = address
-        member this.DataType = this.DataType
-        member _.Comment = ""
-
-    interface IPlcTagReadWrite with
-        member this.Value
-            with get() = this.Value
-            and set(v) = this.Value <- v
-        member x.Address = x.Address
-        member this.ReadWriteType: ReadWriteType =
-            if address.StartsWith("Q") || address.StartsWith("P") then 
-                ReadWriteType.Write
-            else
-                ReadWriteType.Read
-        member this.SetWriteValue(v) = this.SetWriteValue(v)
-        member this.ClearWriteValue() = this.ClearWriteValue()
-        member this.GetWriteValue() = this.GetWriteValue()
+    override this.ToString() =
+        $"[{this.ReadWriteType}] {name} @ {address} ({dataType})"

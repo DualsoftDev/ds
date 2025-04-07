@@ -24,15 +24,14 @@
 	</PropertyGroup>
 	<ItemGroup>
 		<Compile Include="..\..\..\src\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-		<Compile Include="Plc.Tag.fs" />
+		<Compile Include="Plc.TagTypes.fs" />
 		<Compile Include="Plc.TagBase.fs" />
+		<Compile Include="Plc.Terminal.fs" />
+		<Compile Include="Plc.Rung.fs" />
 		<Compile Include="Plc.BatchBase.fs" />
-		<Compile Include="Plc.Connect.fs" />
 		<Compile Include="Plc.ConnectBase.fs" />
 		<Compile Include="Plc.Scan.fs" />
 		<Compile Include="PLc.ScanManager.fs" />
-		<Compile Include="Plc.Terminal.fs" />
-		<Compile Include="Plc.Rung.fs" />
 	</ItemGroup>
 	<ItemGroup>
 		<PackageReference Update="FSharp.Core" Version="8.0.400" />

@@ -2,18 +2,14 @@ namespace XgtProtocol
 
 open System
 open System.Net
-open System.Net.Sockets
 open System.Text
 open Dual.PLC.Common.FS
 
+type XgtEthernet(ip: string, port: int, timeoutMs: int) =
+    inherit PlcEthernetBase(ip, port, timeoutMs)
 
-/// XGT PLC 통신 프로토콜 구현
-type XgtEthernet(ip: string, port: int, timeoutMs:int) =
-    let mutable client: TcpClient option = None
-    let mutable connected = false
     let frameID = byte (ip.Split('.').[3] |> int)
 
-    
     let getXgtErrorDescription (code: byte) : string =
         match code with
         | 0x10uy -> "지원하지 않는 명령어입니다."
@@ -31,151 +27,143 @@ type XgtEthernet(ip: string, port: int, timeoutMs:int) =
         | 0x21uy -> "프레임 체크섬(BCC) 오류입니다."
         | _      -> $"알 수 없는 에러 코드: 0x{code:X2}"
 
-
-    member this.Ip = ip
-    member this.IsConnected = connected
-    member this.Connect() =
-        try
-            let tcpClient = new TcpClient()
-            tcpClient.Connect(IPAddress.Parse(ip), port)
-            client <- Some tcpClient
-            connected <- true
-            true
-        with _ -> false
-    //member this.Connect() =
-    //    try
-    //        use tcpClient = new TcpClient()
-    //        let result = tcpClient.BeginConnect(IPAddress.Parse(ip), port, null, null)
-    //        let success = result.AsyncWaitHandle.WaitOne(timeoutMs)
-    //        if not success then
-    //            // 타임아웃 발생
-    //            false
-    //        else
-    //            try
-    //                tcpClient.EndConnect(result)
-                    
-    //                client <- Some tcpClient
-    //                connected <- true
-    //                true
-    //            with
-    //            | _ -> false
-
-    //    with _ -> false
-
-    member this.ReConnect() =
-        if not connected then this.Connect()
-        else true
-
-    member this.Disconnect() =
-        match client with
-        | Some tcpClient ->
-            tcpClient.Close()
-            connected <- false
-            true
-        | None -> false
-
-    member private this.CreateReadFrame(address: string, dataType: PlcDataSizeType) =
-        let device = address.Substring(1, 2)
-        let addr = address.Substring(3).PadLeft(5, '0')
-        let frame = Array.zeroCreate<byte> 38
-        Array.Copy(Encoding.ASCII.GetBytes("LSIS-XGT"), 0, frame, 0, 8)
-        frame.[12] <- 0xA0uy
-        frame.[13] <- 0x33uy
-        frame.[14] <- frameID
-        frame.[16] <- 0x12uy
-        frame.[20] <- 0x54uy
-        frame.[22] <- 
-            match dataType with
-            | Boolean -> 0x00uy
-            | Byte -> 0x01uy
-            | UInt16 -> 0x02uy
-            | UInt32-> 0x03uy
-            | UInt64 -> 0x04uy
-            | _ -> failwithf    $"지원하지 않는 데이터 타입입니다: {dataType}"
-        frame.[26] <- 0x01uy
-        frame.[28] <- 0x08uy
-        frame.[30] <- byte '%'
-        frame.[31] <- byte device.[0]
-        frame.[32] <- byte device.[1]
-        for i in 0..4 do
-            frame.[33 + i] <- byte addr.[i]
-        frame
-
-    /// 여러 주소를 한번에 읽기 위한 랜덤 리드 프레임 생성
-    member private this.CreateMutiReadFrame(addresses: string[], dataType:PlcDataSizeType) : byte[] =
+    
+    override _.CreateMultiReadFrame(addresses: string[], dataType: PlcDataSizeType) : byte[] =
         if addresses.Length = 0 || addresses.Length > 16 then
-            failwith "지원되는 주소 개수는 1 ~ 16 개입니다."
+            failwith "읽기 가능한 주소 수는 1~16개입니다."
 
-        let encodeVariable (addr: string) =
+        let encodeAddress (addr: string) =
             let device = addr.Substring(0, 3)
-            let addressFull = device + addr.Substring(3).PadLeft(5, '0')
-            let bytes = Encoding.ASCII.GetBytes(addressFull)
-            if bytes.Length <> 8 then failwith $"주소 길이 이상: {addr}"
-            8, bytes
+            let number = addr.Substring(3).PadLeft(5, '0')
+            let full = device + number
+            let bytes = Encoding.ASCII.GetBytes(full)
+            if bytes.Length <> 8 then failwith $"주소 포맷 오류: {addr}"
+            bytes
 
-        let variableBlocks = addresses |> Array.map (fun (addr) -> encodeVariable addr)
-
-        let bodyLength = 8 + (10 * addresses.Length) //   (8bytes(conifg) + (2bytes + 8bytes)  * addresses.Length
+        let configLength = 8
+        let perVarLength = 10
+        let bodyLength = configLength + (perVarLength * addresses.Length)
         let totalLength = 20 + bodyLength
         let frame = Array.zeroCreate<byte> totalLength
 
-        // Header: "LSIS-XGT"
-        let header = Encoding.ASCII.GetBytes("LSIS-XGT")
-        Array.Copy(header, 0, frame, 0, header.Length)
-
-        frame.[12] <- 0xA0uy
-        frame.[13] <- 0x33uy
-        frame.[14] <- frameID
-        frame.[16] <- byte bodyLength 
-
-           // 체크섬 설정
-        let checksum =
-            frame
-            |> Seq.take 19
-            |> Seq.fold (fun acc b -> acc + int b) 0
-            |> fun sum -> byte (sum &&& 0xFF)
-
-        frame.[19] <- checksum
-        frame.[20] <- 0x54uy
-
-        frame.[22] <- 
-            match dataType with
-            | Boolean -> 0x00uy
-            | Byte -> 0x01uy
-            | UInt16 -> 0x02uy
-            | UInt32-> 0x03uy
-            | UInt64 -> 0x04uy
-            | _ -> failwithf    $"지원하지 않는 데이터 타입입니다: {dataType}"
-
-        frame.[26] <- byte variableBlocks.Length
-        let mutable offset = 28
-        for (lenBytes, varBytes) in variableBlocks do
-            frame.[offset] <- 0x08uy
-            Array.Copy(varBytes, 0, frame, offset+2, 8)
-            offset <- offset + (2+lenBytes)
-
-     
-        frame
-
-        /// 실제 데이터 읽기 구현 (단일 주소)
-    member private this.CreateWriteFrame(address: string, dataType: PlcDataSizeType, value: byte[]) =
-        let device = address.Substring(1, 2)
-        let addr = address.Substring(3).PadLeft(5, '0')
-        let frame = Array.zeroCreate<byte> (42 + value.Length)
+        // Header
         Array.Copy(Encoding.ASCII.GetBytes("LSIS-XGT"), 0, frame, 0, 8)
         frame.[12] <- 0xA0uy
         frame.[13] <- 0x33uy
         frame.[14] <- frameID
-        frame.[16] <- byte (0x16 + value.Length)
+        frame.[16] <- byte bodyLength
+
+        // Checksum
+        let checksum =
+            frame |> Seq.take 19 |> Seq.fold (fun acc b -> acc + int b) 0 |> fun s -> byte (s &&& 0xFF)
+        frame.[19] <- checksum
+
+        // Body
+        frame.[20] <- 0x54uy // READ
+        frame.[22] <-
+            match dataType with
+            | Boolean -> 0x00uy
+            | Byte    -> 0x01uy
+            | UInt16  -> 0x02uy
+            | UInt32  -> 0x03uy
+            | UInt64  -> 0x04uy
+            | _ -> failwith $"지원하지 않는 데이터 타입: {dataType}"
+        frame.[26] <- byte addresses.Length
+
+        let mutable offset = 28
+        for addr in addresses do
+            frame.[offset] <- 0x08uy        // 길이
+            frame.[offset + 1] <- 0x00uy    // reserved
+            Array.Copy(encodeAddress addr, 0, frame, offset + 2, 8)
+            offset <- offset + 10
+
+        frame
+
+    override x.CreateReadFrame(address: string, dataType: PlcDataSizeType) =
+        x.CreateMultiReadFrame([| address |], dataType) 
+        //let device = address.Substring(1, 2)
+        //let addr = address.Substring(3).PadLeft(5, '0')
+        //let frame = Array.zeroCreate<byte> 38
+        //Array.Copy(Encoding.ASCII.GetBytes("LSIS-XGT"), 0, frame, 0, 8)
+        //frame.[12] <- 0xA0uy
+        //frame.[13] <- 0x33uy
+        //frame.[14] <- frameID
+        //frame.[16] <- 0x12uy
+        //frame.[20] <- 0x54uy
+        //frame.[22] <-
+        //    match dataType with
+        //    | Boolean -> 0x00uy
+        //    | Byte -> 0x01uy
+        //    | UInt16 -> 0x02uy
+        //    | UInt32 -> 0x03uy
+        //    | UInt64 -> 0x04uy
+        //    | _ -> failwithf $"지원하지 않는 데이터 타입입니다: {dataType}"
+        //frame.[26] <- 0x01uy
+        //frame.[28] <- 0x08uy
+        //frame.[30] <- byte '%'
+        //frame.[31] <- byte device.[0]
+        //frame.[32] <- byte device.[1]
+        //for i in 0..4 do
+        //    frame.[33 + i] <- byte addr.[i]
+        //frame
+
+    override _.ParseMultiReadResponse(buffer: byte[], count: int, dataType: PlcDataSizeType, readBuffer: byte[]) =
+        if buffer.Length < 32 then
+            failwith "응답 데이터가 너무 짧습니다."
+        if buffer.[20] <> 0x55uy then
+            failwith "응답 명령어가 아닙니다."
+
+        let errorState = BitConverter.ToUInt16(buffer, 26)
+        if errorState <> 0us then
+            let errorCode = buffer.[26]
+            failwith $"❌ PLC 응답 에러: 0x{errorCode:X2} - {getXgtErrorDescription errorCode}"
+
+        // 타입당 바이트 수 계산
+        let elementSizeBits = PlcDataSizeType.TypeBitSize dataType
+        let elementSizeBytes = (elementSizeBits + 7) / 8
+
+        let expectedSize = count * elementSizeBytes
+        if readBuffer.Length < expectedSize then
+            failwith $"readBuffer 크기 부족: {readBuffer.Length} < {expectedSize}"
+
+        let mutable srcOffset = 30
+        let mutable dstOffset = 0
+
+        for _ in 0 .. count - 1 do
+            srcOffset <- srcOffset + 2         // block size(2 bytes) skip
+            Array.Copy(buffer, srcOffset, readBuffer, dstOffset, elementSizeBytes)
+            dstOffset <- dstOffset + elementSizeBytes
+            srcOffset <- srcOffset + 8         // fixed LWord data size
+
+
+
+    override _.CreateWriteFrame(address: string, dataType: PlcDataSizeType, value: obj) =
+        let device = address.Substring(1, 2)
+        let addr = address.Substring(3).PadLeft(5, '0')
+        let valueBytes =
+            match dataType with
+            | Boolean -> [| if unbox<bool> value then 0x01uy else 0x00uy |]
+            | Byte -> [| unbox<byte> value |]
+            | UInt16 -> BitConverter.GetBytes(unbox<uint16> value)
+            | UInt32 -> BitConverter.GetBytes(unbox<uint32> value)
+            | UInt64 -> BitConverter.GetBytes(unbox<uint64> value)
+            | _ -> failwithf $"{dataType}는 지원하지 않는 타입입니다."
+
+        let frame = Array.zeroCreate<byte> (42 + valueBytes.Length)
+        Array.Copy(Encoding.ASCII.GetBytes("LSIS-XGT"), 0, frame, 0, 8)
+        frame.[12] <- 0xA0uy
+        frame.[13] <- 0x33uy
+        frame.[14] <- frameID
+        frame.[16] <- byte (0x16 + valueBytes.Length)
         frame.[20] <- 0x58uy
-        frame.[22] <- 
+        frame.[22] <-
             match dataType with
             | Boolean -> 0x00uy
             | Byte -> 0x01uy
             | UInt16 -> 0x02uy
-            | UInt32-> 0x03uy
+            | UInt32 -> 0x03uy
             | UInt64 -> 0x04uy
-            | _ -> failwithf    $"지원하지 않는 데이터 타입입니다: {dataType}"
+            | _ -> failwithf $"지원하지 않는 데이터 타입입니다: {dataType}"
         frame.[26] <- 0x01uy
         frame.[28] <- 0x08uy
         frame.[30] <- byte '%'
@@ -183,76 +171,25 @@ type XgtEthernet(ip: string, port: int, timeoutMs:int) =
         frame.[32] <- byte device.[1]
         for i in 0..4 do
             frame.[33 + i] <- byte addr.[i]
-        frame.[38] <- byte value.Length
+        frame.[38] <- byte valueBytes.Length
         frame.[39] <- 0x00uy
-        Array.Copy(value, 0, frame, 40, value.Length)
+        Array.Copy(valueBytes, 0, frame, 40, valueBytes.Length)
         frame
 
+    override _.ParseReadResponse(buffer: byte[], dataType: PlcDataSizeType) : obj =
+        let errorState = BitConverter.ToUInt16(buffer, 26)
+        if errorState <> 0us then
+            let errorCode = buffer.[26]
+            let msg = getXgtErrorDescription errorCode
+            failwith $"❌ PLC 응답 에러: 0x{errorCode:X2} - {msg}"
 
-    member this.ReadData(address: string, dataType: PlcDataSizeType) : obj =
-            let buffer = Array.zeroCreate<byte> 256
-            try
-                this.ReadData([|address|], dataType, buffer)
-                match dataType with
-                | Boolean -> buffer.[0] = 1uy |> box
-                | Byte -> buffer.[0] |> box
-                | UInt16 -> BitConverter.ToUInt16(buffer, 0) |> box
-                | UInt32-> BitConverter.ToUInt32(buffer, 0) |> box
-                | UInt64-> BitConverter.ToUInt64(buffer, 0) |> box
-                | _ -> failwithf $"지원하지 않는 데이터 타입입니다: {dataType}"
-            with
-            |  ex ->
-                failwithf $"PLC 통신 오류: {ex.Message}"
+        if buffer.Length < 32 then failwith "응답 데이터가 너무 짧습니다."
+        if buffer.[20] <> 0x55uy then failwith "응답 명령어가 아닙니다."
 
-    member this.ReadData(addresses: string[], dataType:PlcDataSizeType, readBuffer: byte[]) =
-        match client with
-        | Some tcpClient when connected ->
-            let stream = tcpClient.GetStream()
-            let frame = this.CreateMutiReadFrame(addresses, dataType)
-            stream.Write(frame, 0, frame.Length)
-            let buffer = Array.zeroCreate<byte> 256
-            let bytesRead = stream.Read(buffer, 0, buffer.Length)
-
-            let errorState = BitConverter.ToUInt16(buffer, 26)
-            if errorState <> 0us then
-                let errorCode = buffer.[26]
-                let errorMsg = getXgtErrorDescription errorCode
-                failwithf $"❌ PLC 응답 에러: 0x{errorCode:X2} - {errorMsg}"
-
-            // 최소 응답 헤더 크기 검사 (32바이트 이상이어야 함)
-            if bytesRead < 32 then  failwith "응답 데이터가 너무 짧습니다."
-            // 응답 명령어 확인 (0x0055)
-            if buffer.[20] <> 0x55uy then failwith "응답 명령어가 아닙니다." 
-
-            //let blockCnt = int buffer.[28] // 블록 개수  XGSIM시뮬레이션이랑 HW랑 다름  XGSIM = HW *10
-            let mutable srcOffset = 30
-            let mutable dstOffset = 0
-
-            for _ in 0 .. addresses.Length-1 do   
-                srcOffset <- srcOffset + 2
-                Array.Copy(buffer, srcOffset, readBuffer, dstOffset, 8)
-                dstOffset <- dstOffset + 8
-                srcOffset <- srcOffset + 8
-
-        |_-> failwith "PLC 연결이 되어 있지 않습니다."
-
-
-    member this.WriteData(address: string, dataType: PlcDataSizeType, value: obj) : bool =
-        match client with
-        | Some tcpClient when connected ->
-            try
-                let stream = tcpClient.GetStream()
-                let valueBytes =
-                    match dataType with
-                    | Boolean -> [| if unbox<bool> value then 0x01uy else 0x00uy |]
-                    | Byte -> [| unbox<byte> value |]
-                    | UInt16 -> BitConverter.GetBytes(unbox<uint16> value)
-                    | UInt32 -> BitConverter.GetBytes(unbox<uint32> value)
-                    | UInt64 -> BitConverter.GetBytes(unbox<uint64> value)
-                    | _ -> failwithf $"{dataType}지원하지 않는 데이터 타입입니다."
-                let frame = this.CreateWriteFrame(address, dataType, valueBytes)
-                stream.Write(frame, 0, frame.Length)
-                let _ = stream.Read(Array.zeroCreate<byte> 256, 0, 256)
-                true
-            with _ -> false
-        | _ -> false
+        match dataType with
+        | Boolean -> buffer.[30] = 1uy |> box
+        | Byte    -> buffer.[30]       |> box
+        | UInt16  -> BitConverter.ToUInt16(buffer, 30) |> box
+        | UInt32  -> BitConverter.ToUInt32(buffer, 30) |> box
+        | UInt64  -> BitConverter.ToUInt64(buffer, 30) |> box
+        | _ -> failwith $"지원하지 않는 데이터 타입입니다: {dataType}"

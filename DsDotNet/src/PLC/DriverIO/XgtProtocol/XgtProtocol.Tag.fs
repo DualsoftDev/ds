@@ -4,12 +4,29 @@ open System
 open Dual.PLC.Common.FS
 
 /// XGTTag: LS(XGT) 전용 태그 표현
-type XGTTag(address: string, dataTypeSize: int, bitOffset: int) =
-    inherit PlcTagBase(address, dataTypeSize)
+type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, ?comment: string) =
+    inherit PlcTagBase(name, address, dataSizeType, ?comment = comment)
 
     let step = 100
+    let typeSize = PlcDataSizeType.TypeBitSize dataSizeType  
 
+    /// 보조 생성자 (XGI 여부 기반 파싱)
+    new (address: string, isXgi: bool) =
+        let size, offset =
+            match isXgi with
+            | true  -> LsXgiTagParser.Parse address |> fun (_, s, o) -> s, o
+            | false -> LsXgkTagParser.Parse address |> fun (_, s, o) -> s, o
+        let dataType = PlcDataSizeType.FromBitSize size
+        XGTTag(address, address, dataType, offset)
+
+        
     member val LWordOffset = -1 with get, set
+    /// LWord 태그 이름 (e.g., %ML0)
+    member x.LWordTag =
+        if address.StartsWith("%") then
+            sprintf "%%%sL%d" x.Device (x.BitOffset / 64)
+        else
+            sprintf "%sL%d" x.Device (x.BitOffset / 64)
 
     /// 디바이스 문자열 (e.g., "MB", "MW", "ZR")
     member _.Device =
@@ -22,23 +39,21 @@ type XGTTag(address: string, dataTypeSize: int, bitOffset: int) =
         if address.StartsWith("S") then bitOffset / step * 16
         else bitOffset
 
-    /// LWord 태그 이름 (e.g., %ML0)
-    member x.LWordTag =
-        if address.StartsWith("%") then
-            sprintf "%%%sL%d" x.Device (x.BitOffset / 64)
-        else
-            sprintf "%sL%d" x.Device (x.BitOffset / 64)
-
     /// 시작 바이트 위치 (LWordOffset * 8 + 내부 오프셋)
     member x.StartByteOffset = x.LWordOffset * 8 + (x.BitOffset % 64) / 8
 
     /// 메모리 타입 문자 (Bit → 'X', 그 외 → 'B')
-    member _.MemType = if dataTypeSize = 1 then 'X' else 'B'
+    member _.MemType = if typeSize = 1 then 'X' else 'B'
 
     /// 데이터 크기 (Bit → 내부 비트 인덱스, 그 외 → 바이트 크기)
     member x.Size =
-        if dataTypeSize = 1 then x.BitOffset % 8
-        else dataTypeSize / 8
+        if typeSize = 1 then x.BitOffset % 8
+        else typeSize / 8
+        
+    /// 읽기/쓰기 타입 판단
+    override _.ReadWriteType: ReadWriteType =
+        if address.StartsWith("%Q") || address.StartsWith("P") then Write
+        else Read
 
     /// 버퍼 값을 읽어 현재 값으로 설정, 변경 여부 반환
     override x.UpdateValue(buffer: byte[]) : bool =
@@ -56,7 +71,6 @@ type XGTTag(address: string, dataTypeSize: int, bitOffset: int) =
             | UInt32-> BitConverter.ToUInt32(buffer, x.StartByteOffset) :> obj
             | UInt64-> BitConverter.ToUInt64(buffer, x.StartByteOffset) :> obj
             | _-> failwith $"Unsupported data type: {x.DataType}"
-
 
         if base.Value <> newValue then
             base.Value <- newValue

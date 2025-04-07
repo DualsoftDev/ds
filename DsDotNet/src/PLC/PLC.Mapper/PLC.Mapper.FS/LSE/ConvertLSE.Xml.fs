@@ -4,45 +4,32 @@ open Dual.Common.Core.FS
 open System
 open System.Xml
 open System.Text.RegularExpressions
-
-open System.Collections
 open System.Collections.Generic
 open PLC.Mapper.FS
 open Dual.PLC.Common.FS
 open XgtProtocol
 
+[<AutoOpen>]
 module XgxXml =
 
     [<Literal>]
     let private globalVarPath = "Project/Configurations/Configuration/GlobalVariables/GlobalVariable"
+    
 
-    /// XML 노드에서 속성을 안전하게 가져오기
+
     let tryGetAttribute (node: XmlNode) (attr: string) =
         if isNull node || isNull node.Attributes || isNull node.Attributes.[attr] then "" 
         else node.Attributes.[attr].Value
 
-    /// XmlNode에서 속성을 안전하게 추출한 뒤 IP 문자열로 변환
     let tryGetEFMTBIp (node: XmlNode) (attrPrefix: string) =
         let getIpByte idx = 
             match tryGetAttribute node (attrPrefix + idx.ToString()) with
             | "" -> 0uy
-            | raw -> match Byte.TryParse(raw) with
-                     | true, value -> value
-                     | _ -> 0uy
+            | raw -> match Byte.TryParse(raw) with true, value -> value | _ -> 0uy
+        $"{getIpByte 0}.{getIpByte 1}.{getIpByte 2}.{getIpByte 3}"
 
-        // 각 IP 주소의 4개 바이트를 가져옵니다.
-        let b1 = getIpByte 0
-        let b2 = getIpByte 1 
-        let b3 = getIpByte 2
-        let b4 = getIpByte 3
-
-        // IP 주소를 점으로 구분하여 출력합니다.
-        $"{b1}.{b2}.{b3}.{b4}"
-
-    /// XmlNode에서 속성을 안전하게 추출한 뒤 IP 문자열로 변환
     let tryGetIp (node: XmlNode) (attr: string) =
-        let raw = tryGetAttribute node attr
-        match UInt32.TryParse(raw) with
+        match UInt32.TryParse(tryGetAttribute node attr) with
         | true, ipInt ->
             let b1 = byte (ipInt &&& 0xFFu)
             let b2 = byte ((ipInt >>> 8) &&& 0xFFu)
@@ -51,73 +38,73 @@ module XgxXml =
             $"{b1}.{b2}.{b3}.{b4}"
         | _ -> "0.0.0.0"
 
-
-    /// XG5000 XGT 타입 여부 확인
     let IsXg5kXGT (xmlPath: string) =
         let doc = DualXmlDocument.loadFromFile xmlPath
         doc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGTBasicParam") <> null
 
-    /// Global 변수 내 Symbol 노드 리스트
+    let IsXg5kXGI(xmlPath:string) =
+        let xdoc = DualXmlDocument.loadFromFile xmlPath
+        xdoc.GetXmlNode("//Configurations/Configuration/Parameters/Parameter/XGIBasicParam") <> null
+
     let getGlobalSymbolXmlNodes (doc: XmlDocument) =
         doc.SelectNodes($"{globalVarPath}/Symbols/Symbol")
 
-    /// Global 변수 내 DirectVar 노드 리스트
     let getDirectVarXmlNodes (doc: XmlDocument) =
         doc.SelectNodes($"{globalVarPath}/DirectVarComment/DirectVar")
 
-
 type XmlReader =
 
-    static member ReadTags(xmlPath: string, ?usedOnly: bool) : PlcTerminal[] * string array =
+    static member ReadTags(xmlPath: string, ?usedOnly: bool) : XGTTag[] * string array =
+        let isXGI = IsXg5kXGI xmlPath
         let usedOnly = defaultArg usedOnly true
         let xdoc: XmlDocument = DualXmlDocument.loadFromFile xmlPath
         let addrPattern = Regex("^%(?<iom>[IQM])(?<size>[XBW])", RegexOptions.Compiled)
 
-            // IP 주소 추출
+        // Offset 계산
+        let getBitOffset(device:string) =
+            let parseData = if isXGI then  tryParseXgiTag device else tryParseXgkTag device
+            match parseData with
+            | Some (_, _, offset) -> offset
+            | None -> failwith $"Invalid device format: {device}"
+
         let ipNode = xdoc.SelectSingleNode("//Parameter[@Type='FENET PARAMETER']/Safety_Comm")
         let ip = XgxXml.tryGetIp ipNode "IPAddress"
 
-      // XGPD_CONFIG_INFO_FENET에서 복수의 서브 IP 추출
         let ipSubNodes = xdoc.SelectNodes("//XGPD_CONFIG_INFO_FENET")
         let subIps = 
             ipSubNodes 
             |> _.ToEnumerables()
-            |> Seq.map (fun node -> XgxXml.tryGetEFMTBIp node "IpAddr_") // "IpAddr_0", "IpAddr_1", "IpAddr_2", "IpAddr_3" 필드에서 서브 IP 추출
+            |> Seq.map (fun node -> XgxXml.tryGetEFMTBIp node "IpAddr_")
             |> Seq.toArray
 
-        // GlobalSymbol → PlcTerminal
-        let parseGlobal (node: XmlNode) =
-            let address = XgxXml.tryGetAttribute node "Address"
-            let outputFlag =
-                if address = "" 
-                then false
-                else 
-                    let isBit =
-                        match tryParseXgiTag address with
-                        | Some (_, size, _) -> size = 1
-                        | _ -> false
+        let parseGlobal (node: XmlNode) : XGTTag =
+            let name     = XgxXml.tryGetAttribute node "Name"
+            let address  = XgxXml.tryGetAttribute node "Address"
+            let typStr   = XgxXml.tryGetAttribute node "Type"
+            let comment  = XgxXml.tryGetAttribute node "Comment"
+            let moduleInfo = XgxXml.tryGetAttribute node "ModuleInfo"
 
-                    match XgxXml.tryGetAttribute node "ModuleInfo" with 
-                    | s when s <> "" -> s.Contains "OUT" && isBit //bit output 만
-                    | _ -> address.StartsWith("%Q") && isBit //bit output 만
-                
-            PlcTerminal(
-                name = XgxXml.tryGetAttribute node "Name",
-                dataType = PlcTagExt.ToSystemDataType(XgxXml.tryGetAttribute node "Type"),
-                comment  = XgxXml.tryGetAttribute node "Comment",
-                address  = address,
-                outputFlag = outputFlag
-            )
+            let tag =
+                XGTTag(
+                    name,
+                    address,
+                    PlcTagExt.ToSystemDataType typStr,
+                    getBitOffset address,
+                    comment = comment
+                )
+            tag
 
-        let _DirectVarNames = Dictionary<string, PlcTerminal>(); 
-        // DirectVar → PlcTerminal option
-        let parseDirect (node: XmlNode) =
-            let used = XgxXml.tryGetAttribute node "Used"
-            let device = XgxXml.tryGetAttribute node "Device"
+
+        let _DirectVarNames = Dictionary<string, XGTTag>()
+
+        let parseDirect (node: XmlNode) : XGTTag option =
+            let used    = XgxXml.tryGetAttribute node "Used"
+            let device  = XgxXml.tryGetAttribute node "Device"
             let comment = XgxXml.tryGetAttribute node "Comment"
 
-            if device <> "" && comment <> "" && not usedOnly || used = "1" then
-                let dataType =
+            if device <> "" && comment <> "" && (not usedOnly || used = "1") then
+                // 데이터 타입 추출
+                let typeStr =
                     match addrPattern.Match(device) with
                     | m when m.Success ->
                         match m.Groups.["size"].Value with
@@ -129,24 +116,29 @@ type XmlReader =
                         | unknown -> failwithf "Unknown data type: %s" unknown
                     | _ -> ""
 
-                let uniqName  = if _DirectVarNames.ContainsKey comment
-                                then $"{comment}_{device}" 
-                                else comment
+                // 이름 중복 방지 처리
+                let uniqName =
+                    if _DirectVarNames.ContainsKey comment then $"{comment}_{device}" else comment
+                
 
-                let directVar= Some (PlcTerminal(
-                    name = uniqName,
-                    address  = device,
-                    dataType = PlcTagExt.ToSystemDataType(dataType),
-                    comment  = comment,
-                    outputFlag = device.StartsWith("%QX")
-                ))
+                let tag =
+                    XGTTag(
+                        uniqName,
+                        device,
+                        PlcTagExt.ToSystemDataType(typeStr),
+                        getBitOffset device,
+                        comment = comment
+                    )
 
-                _DirectVarNames.Add(directVar.Value.Name, (directVar.Value));
-                directVar
+           
+                // 중복 등록 방지용 이름 보관
+                _DirectVarNames[uniqName] <- tag
 
-            else None
+                Some(tag)
+            else
+                None
 
-        // 전체 태그 수집
+
         let tags =
             [|
                 for node in XgxXml.getGlobalSymbolXmlNodes xdoc |> _.ToEnumerables() do
@@ -155,8 +147,7 @@ type XmlReader =
                 for node in XgxXml.getDirectVarXmlNodes xdoc |> _.ToEnumerables() do
                     match parseDirect node with
                     | Some tag -> yield tag
-                    | None     -> ()
+                    | None -> ()
             |]
 
-        // 반환: 태그 + 마스터 IP, 서브 IP
-        tags, [|ip|]@subIps
+        tags, Array.append [|ip|] subIps

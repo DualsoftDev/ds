@@ -12,7 +12,7 @@ module XgtTagTests =
     
     [<Fact>]   
     let ``XGTTag UpdateValue should detect change for UInt16`` () =
-        let tag = XGTTag("%MW00010", 16, 160)
+        let tag = XGTTag("%MW00010", true)
         tag.LWordOffset <- 20 // StartByteOffset = 160
         let buf = Array.zeroCreate<byte> 256
         BitConverter.GetBytes(123us).CopyTo(buf, tag.StartByteOffset)
@@ -22,7 +22,7 @@ module XgtTagTests =
 
     [<Fact>]
     let ``XGTTag UpdateValue should return false for no change`` () =
-        let tag = XGTTag("%MW00010", 16, 160)
+        let tag = XGTTag("%MW00010", true)
         tag.LWordOffset <- 20
         let buf = Array.zeroCreate<byte> 256
         BitConverter.GetBytes(321us).CopyTo(buf, tag.StartByteOffset)
@@ -37,7 +37,7 @@ module BatchTests =
     let ``prepareReadBatches groups tags by LWordOffset`` () =
         let batchCnt = 2 //최대 Lword 64 개씩
         let tags = [| for i in 0..16*batchCnt-1 -> 
-                        XGTTag($"%%ML000{i}", 64, i * 64) 
+                        XGTTag($"%%ML000{i}", true) 
                     |]
         let batches = prepareReadBatches tags
         Assert.Equal(batchCnt, batches.Length)
@@ -60,7 +60,7 @@ module IntegrationTests =
         else 
             let rnd = Random()
             let start = DateTime.Now
-            let areaTypes = [ (*'X'; 'B'; 'W'; 'D'; *)'L' ]  // 디바이스 타입
+            let areaTypes = [ 'X'; 'B'; 'W'; 'D'; 'L' ]  // 디바이스 타입
 
             for code in areaCodes do
                 for kind in areaTypes do
@@ -77,8 +77,8 @@ module IntegrationTests =
                         | _ -> failwith $"지원되지 않는 타입: {kind}"
 
                     try
-                        let ok = conn.WriteData(address, dt, value)
-                        let read = conn.ReadData(address, dt)
+                        let ok = conn.Write(address, dt, value)
+                        let read = conn.Read(address, dt)
                         Assert.True(ok, $"쓰기 실패 - {address}")
                         Assert.Equal(value, read)
                         printfn $"[✓] {address} → {value} (읽기: {read})"

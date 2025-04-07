@@ -3,47 +3,55 @@ namespace Dual.PLC.Common.FS
 open System
 open System.Collections.Generic
 
-/// 공통 ScanManager 베이스 클래스 - 태그 매핑 반환형 버전
+/// 공통 ScanManager 베이스 클래스
 [<AbstractClass>]
 type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
 
     let scanners = Dictionary<string, 'T>()
 
-    /// 스캐너 인스턴스 생성 방식은 자식이 구현
+    /// 스캐너 인스턴스 생성 방식 (자식 클래스에서 정의)
     abstract member CreateScanner: ip: string * delay: int * timeoutMs: int -> 'T
 
-    /// 스캔 시작 + 태그 매핑 반환
-    member this.StartScan(ip: string, tags: string seq, delay: int, timeoutMs:int) : IDictionary<string, IPlcTagReadWrite> =
-        if not (scanners.ContainsKey(ip)) then
-            let scanner = this.CreateScanner(ip, delay, timeoutMs)
-            scanner.Connect()
-            scanners.Add(ip, scanner)
+    /// 스캔 시작 - 스캐너가 없으면 생성 및 등록 후 Scan 수행
+    member this.StartScan(ip: string, tags: seq<ScanTag>, delay: int, timeoutMs: int) : IDictionary<ScanAddress, PlcTagBase> =
+        let scanner =
+            match scanners.TryGetValue(ip) with
+            | true, existing -> existing
+            | false, _ ->
+                let newScanner = this.CreateScanner(ip, delay, timeoutMs)
+                newScanner.Connect()
+                scanners.Add(ip, newScanner)
+                newScanner
 
-        scanners.[ip].Scan(tags)
+        scanner.Scan(tags)
 
-    /// 여러 PLC에 대해 스캔 시작 및 전체 태그 매핑 반환
-    member this.StartScanAll(tagsPerPLC: IDictionary<string, string seq>, delay: int, timeoutMs:int) : IDictionary<string, IDictionary<string, IPlcTagReadWrite>> =
-        let totalTags = Dictionary<string, IDictionary<string, IPlcTagReadWrite>>()
-        for kv in tagsPerPLC do
-            let ip = kv.Key
-            let tags = kv.Value
-            let mapped = this.StartScan(ip, tags, delay, timeoutMs)
-            totalTags.Add(ip, mapped)
-        totalTags
+    member this.StartScan(ip: string, tags: seq<string>, delay: int, timeoutMs: int) : IDictionary<string, PlcTagBase> =
+        let scanTags = tags |> Seq.map (fun x -> { Name = x; Address = x; Comment = "" })
+        this.StartScan(ip, scanTags, delay, timeoutMs) 
 
-    /// 태그 변경 시 스캔 내용 업데이트
-    member this.UpdateScan(ip: string, tags: string list) =
+    /// 여러 PLC에 대해 스캔 시작 - IP 별 태그 목록 입력
+    member this.StartScanAll(tagsPerPLC: IDictionary<string, seq<ScanTag>>, delay: int, timeoutMs: int) : IDictionary<string, IDictionary<string, PlcTagBase>> =
+        tagsPerPLC
+        |> Seq.map (fun kvp -> kvp.Key, this.StartScan(kvp.Key, kvp.Value, delay, timeoutMs))
+        |> dict
+
+    /// 기존 스캐너에 태그 목록 변경 적용 (IP 기반)
+    member this.UpdateScan(ip: string, tags: list<ScanTag>) =
         match scanners.TryGetValue(ip) with
         | true, scanner -> ignore (scanner.Scan(tags))
-        | _ -> failwith $"PLC IP {ip} not found in scan list."
+        | _ -> failwith $"[UpdateScan] IP {ip}에 대한 스캐너가 존재하지 않습니다."
 
-    /// 연결 여부 확인
-    member this.IsConnected(ip: string) =
+    member this.UpdateScan(ip: string, tags: seq<string>)  =
+        let scanTags = tags |> Seq.map (fun x -> { Name = x; Address = x; Comment = "" }) |> Seq.toList
+        this.UpdateScan(ip, scanTags)
+
+    /// 현재 연결 상태 확인
+    member this.IsConnected(ip: string) : bool =
         match scanners.TryGetValue(ip) with
         | true, scanner -> scanner.IsConnected
         | _ -> false
 
-    /// 특정 스캔 중지
+    /// 특정 IP의 스캐너 연결 종료 및 제거
     member this.StopScan(ip: string) =
         match scanners.TryGetValue(ip) with
         | true, scanner ->
@@ -51,16 +59,16 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
             scanners.Remove(ip) |> ignore
         | _ -> ()
 
-    /// 모든 스캔 중지
+    /// 모든 PLC 스캔 정지 및 스캐너 초기화
     member this.StopAll() =
-        for kv in scanners do
-            kv.Value.Disconnect()
+        scanners.Values |> Seq.iter (fun scanner -> scanner.Disconnect())
         scanners.Clear()
 
-    /// 현재 스캔 중인 IP 리스트
-    member this.ActiveIPs =
+    /// 현재 스캔 중인 모든 IP 리스트 반환
+    member this.ActiveIPs : string list =
         scanners.Keys |> Seq.toList
 
+    /// 특정 IP의 스캐너 인스턴스를 반환 (option 타입)
     member this.GetScanner(ip: string) : 'T option =
         match scanners.TryGetValue(ip) with
         | true, scanner -> Some scanner

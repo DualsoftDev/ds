@@ -13,7 +13,7 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
     abstract member CreateScanner: ip: string * delay: int * timeoutMs: int -> 'T
 
     /// 스캔 시작 - 스캐너가 없으면 생성 및 등록 후 Scan 수행
-    member this.StartScan(ip: string, tags: seq<ScanTag>, delay: int, timeoutMs: int) : IDictionary<ScanAddress, PlcTagBase> =
+    member this.StartScan(ip: string, tags: seq<TagInfo>, delay: int, timeoutMs: int) : IDictionary<ScanAddress, PlcTagBase> =
         let scanner =
             match scanners.TryGetValue(ip) with
             | true, existing -> existing
@@ -30,13 +30,13 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
         this.StartScan(ip, scanTags, delay, timeoutMs) 
 
     /// 여러 PLC에 대해 스캔 시작 - IP 별 태그 목록 입력
-    member this.StartScanAll(tagsPerPLC: IDictionary<string, seq<ScanTag>>, delay: int, timeoutMs: int) : IDictionary<string, IDictionary<string, PlcTagBase>> =
+    member this.StartScanAll(tagsPerPLC: IDictionary<string, seq<TagInfo>>, delay: int, timeoutMs: int) : IDictionary<string, IDictionary<string, PlcTagBase>> =
         tagsPerPLC
         |> Seq.map (fun kvp -> kvp.Key, this.StartScan(kvp.Key, kvp.Value, delay, timeoutMs))
         |> dict
 
     /// 기존 스캐너에 태그 목록 변경 적용 (IP 기반)
-    member this.UpdateScan(ip: string, tags: list<ScanTag>) =
+    member this.UpdateScan(ip: string, tags: list<TagInfo>) =
         match scanners.TryGetValue(ip) with
         | true, scanner -> ignore (scanner.Scan(tags))
         | _ -> failwith $"[UpdateScan] IP {ip}에 대한 스캐너가 존재하지 않습니다."

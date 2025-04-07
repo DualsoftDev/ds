@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<RootNamespace>PLC.XgtProtocol.FS</RootNamespace>
+		<LangVersion>8.0</LangVersion>
+		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
+		<OutputPath>$(SolutionDir)\bin\</OutputPath>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<OtherFlags>--warnon:1182</OtherFlags>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+	</PropertyGroup>
+
+	<ItemGroup>
+    <Compile Include="Melsec\MX.TagParser.fs" />
+    <Compile Include="MelecProtocol.Tag.fs" />
+    <Compile Include="MelecProtocol.Batch.fs" />
+    <Compile Include="MelecProtocol.Comm.fs" />
+	<Compile Include="MelecProtocol.Scan.fs" />
+	<None Include="MelecProtocol.ScanController.fs" />
+  </ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
+	</ItemGroup>
+	<ItemGroup>
+		<PackageReference Update="FSharp.Core" Version="8.0.400" />
+	</ItemGroup>
+</Project>

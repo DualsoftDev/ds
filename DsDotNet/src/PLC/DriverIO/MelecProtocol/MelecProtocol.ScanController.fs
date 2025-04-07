@@ -1,8 +1,9 @@
-namespace XgtProtocol
+namespace MelsecProtocol
 
 open Dual.PLC.Common.FS
 
-type XgtScanManager() =
+
+type MxScanManager() = /////ahn!! 임시
     inherit PlcScanManagerBase<XgtPlcScan>()
 
     override _.CreateScanner(ip: string, delay: int, timeoutMs:int) =

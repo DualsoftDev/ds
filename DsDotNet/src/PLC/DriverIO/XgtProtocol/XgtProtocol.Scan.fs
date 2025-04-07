@@ -72,7 +72,7 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int) =
     // ---------------------------
     // 태그 준비 및 파싱
     // ---------------------------
-    override _.PrepareTags(tags: ScanTag seq)  =
+    override _.PrepareTags(tags: TagInfo seq)  =
         tagMap.Clear()
         let isXGI = LsXgiTagParser.IsXGI(tags |> Seq.map(fun s-> s.Address))
 

@@ -3,11 +3,13 @@ namespace DsMxComm
 open Dual.Common.Core.FS
 open System
 open System.Runtime.CompilerServices
-open Dual.PLC.Common.FS
 
 [<AutoOpen>]
 module MxTagParserModule =
 
+    type MxDeviceType =
+        | MxBit 
+        | MxWord 
 
     /// Mitsubishi PLC의 다양한 장치 유형을 정의하는 타입
     [<AutoOpen>]
@@ -19,8 +21,8 @@ module MxTagParserModule =
             member x.ToText = x.ToString()
             member x.DevType =
                 match x with
-                | X | Y | DX | DY | M | L | B | F | SB | SM -> Boolean
-                | _ -> UInt16
+                | X | Y | DX | DY | M | L | B | F | SB | SM -> MxBit
+                | _ -> MxWord
 
             static member Create s =
                 match s with
@@ -40,7 +42,7 @@ module MxTagParserModule =
     type MxTagInfo = 
         {
             Device: MxDevice
-            DataTypeSize: PlcDataSizeType
+            DataTypeSize: MxDeviceType
             BitOffset: int
         }
 
@@ -59,10 +61,10 @@ module MxTagParserModule =
             if baseOffset = -1 then None
             else
                 match d2 with
-                | Some bit when parsedDevice.DevType = UInt16 -> 
+                | Some bit when parsedDevice.DevType = MxWord -> 
                     let bitOffset = tryParseInt bit true
                     if bitOffset = -1 then None else Some (baseOffset * 16 + bitOffset)
-                | None -> if parsedDevice.DevType = Boolean
+                | None -> if parsedDevice.DevType = MxBit
                             then Some baseOffset
                             else Some (baseOffset*16)
                 | _ -> None
@@ -73,7 +75,7 @@ module MxTagParserModule =
                 getBitOffset parsedDevice d1 d2
                 |> Option.map (fun bitOffset -> 
                     { Device = parsedDevice
-                      DataTypeSize = if d2.IsSome then Boolean else  parsedDevice.DevType
+                      DataTypeSize = if d2.IsSome then MxBit else  parsedDevice.DevType
                       BitOffset = bitOffset })
             | None -> None
 

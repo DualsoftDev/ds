@@ -12,24 +12,12 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     let mutable address: string = deviceAddress
     let mutable writeValue: obj option = None
 
-    interface IPlcTag with
-        member x.Name with get() = address 
-        member x.DataType = mxTagInfo.DataTypeSize
-        member x.Comment with get() = "" 
-    interface IPlcTagReadWrite with
-        member x.Address with get() = address 
-        member x.Value with get() = currentValue and set(v) = currentValue <- v
-        member x.ReadWriteType: ReadWriteType = 
-            if deviceAddress.StartsWith("Y") then 
-                ReadWriteType.Write
-            else
-                ReadWriteType.Read
-        member x.SetWriteValue(value: obj) = writeValue <- Some value
-        member x.ClearWriteValue() = writeValue <- None
-        member x.GetWriteValue() = writeValue
+    member x.Address with get() = address 
+    member x.Value with get() = currentValue and set(v) = currentValue <- v
+    member x.SetWriteValue(value: obj) = writeValue <- Some value
+    member x.ClearWriteValue() = writeValue <- None
+    member x.GetWriteValue() = writeValue
 
-    member x.Value = currentValue
-    member x.Address = address
     member x.DataType = mxTagInfo.DataTypeSize
     member x.Device = mxTagInfo.Device 
     member x.DeviceText = 
@@ -43,7 +31,7 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     member x.WordTag =
         let offset = mxTagInfo.BitOffset / 16
            
-        if x.DataType = Boolean && not(x.IsDotBit) then
+        if x.DataType = MxBit && not(x.IsDotBit) then
             if x.Device.IsHexa
             then $"K4{x.DeviceText}{(offset*16):X}" 
             else $"K4{x.DeviceText}{offset*16}"
@@ -55,9 +43,8 @@ type MxTag(deviceAddress: string, mxTagInfo: MxTagInfo) =
     member x.UpdateValue(data: int16) : bool =
         let newValue =
             match x.DataType with
-            | Boolean -> (data &&& (1s <<< mxTagInfo.BitOffset % 16) <> 0s) :> obj
-            | UInt16 -> data :> obj 
-            | _ -> failwith "Unsupported data type"
+            | MxBit -> (data &&& (1s <<< mxTagInfo.BitOffset % 16) <> 0s) :> obj
+            | MxWord -> data :> obj 
 
         if currentValue = null || currentValue <> newValue then
             currentValue <- newValue

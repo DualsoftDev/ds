@@ -29,6 +29,8 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
     member _.Comment  = defaultArg comment ""
     
     abstract member ReadWriteType: ReadWriteType
+    abstract member IsMemory: bool
+    
     abstract member UpdateValue: byte[] -> bool
     default _.UpdateValue _ = false
 

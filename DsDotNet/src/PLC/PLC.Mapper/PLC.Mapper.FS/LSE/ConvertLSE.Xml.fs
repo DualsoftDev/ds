@@ -84,8 +84,8 @@ type XmlReader =
 				//<Module Base="0" Slot="0" Id="42243" SubType="0" Name="입력 모듈:XGI-D28A/B (DC 24V 입력, 64점 (전류소스 싱크공용/ 전류소스 입력))" Comment="" Details="0000000000000000"></Module>
 				//<Module Base="0" Slot="1" Id="42287" SubType="0" Name="출력 모듈:XGQ-TR8A/B (트랜지스터 출력, 64점 (0.1A용, 싱크출력/소스출력))" Comment="" Details="0000000000000000"></Module>
 				//<BaseInfo> **)
-                if address.StartsWith "%Q" && address.StartsWith "P" then true 
-                else true
+                if address.StartsWith "%Q" || address.StartsWith "P" then true 
+                else false
 
         let parseGlobal (node: XmlNode) : PlcTagBase option =
             let name     = XgxXml.tryGetAttribute node "Name"
@@ -97,33 +97,38 @@ type XmlReader =
                                   elif moduleInfo.Contains ":OUT:"  then Some (true)
                                   elif moduleInfo.Contains ":IN:"  then Some (false)
                                   else 
-                                       failwith $"Invalid ModuleInfo format: {moduleInfo}"
-       
-            let devType =  
-                    if address.IsNullOrEmpty() then PlcDataSizeType.UserDefined
-                    else LsTagParser.GetDataType (address, isXGI)
+                                       None
+            
 
-            if PlcDataSizeType.FromString(typStr) <> devType
-            then 
-                failwith $"{typStr} <> {address} ({devType}) err"
+
+            match PlcDataSizeType.TryFromString(typStr) with
+            | None -> None
+            | Some v -> 
+                let devType =  
+                        if address.IsNullOrEmpty() then PlcDataSizeType.UserDefined
+                        else v
+
+                if not(address.IsNullOrEmpty()) && PlcDataSizeType.FromString(typStr) <> devType 
+                then 
+                    failwith $"{typStr} <> {address} ({devType}) err"
                 
 
-            let bitOffset = 
-                    if address.IsNullOrEmpty() then 0
-                    else getBitOffset address
+                let bitOffset = 
+                        if address.IsNullOrEmpty() then 0
+                        else getBitOffset address
 
-            let isOutput =  isOutput(smartOutputFlag, address)
+                let isOutput =  isOutput(smartOutputFlag, address)
 
-            let tag =
-                XGTTag(
-                    name,
-                    address,
-                    devType,
-                    bitOffset,
-                    isOutput,
-                    comment = comment
-                )
-            Some tag
+                let tag =
+                    XGTTag(
+                        name,
+                        address,
+                        devType,
+                        bitOffset,
+                        isOutput,
+                        comment = comment
+                    )
+                Some tag
 
 
         let _DirectVarNames = Dictionary<string, PlcTagBase>()
@@ -131,11 +136,9 @@ type XmlReader =
         let parseDirect (node: XmlNode) : PlcTagBase option =
             let used    = XgxXml.tryGetAttribute node "Used"
             let device  = XgxXml.tryGetAttribute node "Device"
-            let comment = XgxXml.tryGetAttribute node "Comment"
+            let comment = XgxXml.tryGetAttribute node "Comment" |> validName
 
             if device <> "" && comment <> "" && (not usedOnly || used = "1") then
-
-                // 이름 중복 방지 처리
                 let uniqName =
                     if _DirectVarNames.ContainsKey comment then $"{comment}_{device}" else comment
                 
@@ -146,6 +149,7 @@ type XmlReader =
 
                 let dataType = PlcDataSizeType.FromBitSize size
                 let isOutput =  isOutput(None, device)
+
                 let tag =
                     XGTTag(
                         uniqName,

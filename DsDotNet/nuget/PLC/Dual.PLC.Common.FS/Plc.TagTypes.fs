@@ -40,23 +40,29 @@ type PlcDataSizeType =
         | DateTime   -> 64       // 일반적으로 8바이트 (예: ticks)
         | UserDefined -> 0        // 사용자 정의 타입은 비트 수를 알 수 없음
 
-    static member FromString(txt: string) : PlcDataSizeType =
+    static member TryFromString(txt: string) : PlcDataSizeType option =
         match txt.Trim().ToUpperInvariant() with
-        | "BOOL" | "BOOLEAN" | "BIT"            -> PlcDataSizeType.Boolean
-        | "SBYTE" | "SINT"                      -> PlcDataSizeType.SByte
-        | "BYTE" | "USINT"                      -> PlcDataSizeType.Byte
-        | "INT" | "INT16"                       -> PlcDataSizeType.Int16
-        | "UINT" | "UINT16" | "WORD"            -> PlcDataSizeType.UInt16
-        | "DINT" | "INT32"                      -> PlcDataSizeType.Int32
-        | "UDINT" | "UINT32" | "DWORD"          -> PlcDataSizeType.UInt32
-        | "LINT" | "INT64"                      -> PlcDataSizeType.Int64
-        | "ULINT" | "UINT64" | "LWORD"          -> PlcDataSizeType.UInt64
-        | "REAL" | "FLOAT" | "FLOAT32"          -> PlcDataSizeType.Float
-        | "LREAL" | "DOUBLE" | "FLOAT64"        -> PlcDataSizeType.Double
-        | "STRING"                              -> PlcDataSizeType.String
-        | "DATETIME" | "DATE_AND_TIME"          -> PlcDataSizeType.DateTime
-        | unknown -> failwithf "Unknown PlcTag type string: %s" unknown
-
+        | "BOOL" | "BOOLEAN" | "BIT"            -> Some PlcDataSizeType.Boolean
+        | "SBYTE" | "SINT"                      -> Some PlcDataSizeType.SByte
+        | "BYTE" | "USINT"                      -> Some PlcDataSizeType.Byte
+        | "INT" | "INT16"                       -> Some PlcDataSizeType.Int16
+        | "UINT" | "UINT16" | "WORD"            -> Some PlcDataSizeType.UInt16
+        | "DINT" | "INT32"                      -> Some PlcDataSizeType.Int32
+        | "UDINT" | "UINT32" | "DWORD"          -> Some PlcDataSizeType.UInt32
+        | "LINT" | "INT64"                      -> Some PlcDataSizeType.Int64
+        | "ULINT" | "UINT64" | "LWORD"          -> Some PlcDataSizeType.UInt64
+        | "REAL" | "FLOAT" | "FLOAT32"          -> Some PlcDataSizeType.Float
+        | "LREAL" | "DOUBLE" | "FLOAT64"        -> Some PlcDataSizeType.Double
+        | "STRING"                              -> Some PlcDataSizeType.String
+        | "DATETIME" | "DATE_AND_TIME"          -> Some PlcDataSizeType.DateTime
+        | unknown -> 
+            None 
+    
+    static member FromString(txt: string) : PlcDataSizeType =
+        match PlcDataSizeType.TryFromString txt with
+        | Some v -> v
+        | None ->
+            failwithf "Unknown PlcTag type string: %s" txt
 
 type ReadWriteType =
     | Read

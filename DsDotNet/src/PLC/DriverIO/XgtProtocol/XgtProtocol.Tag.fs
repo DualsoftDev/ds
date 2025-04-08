@@ -32,9 +32,12 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
     member x.AddressKey = $"{x.Device}_{x.BitOffset}"
     /// 디바이스 문자열 (e.g., "MB", "MW", "ZR")
     member _.Device =
-        let dev = address.TrimStart('%')
-        if dev.StartsWith("ZR") then dev.Substring(0, 2)
-        else dev.Substring(0, 1)
+        if address = ""
+        then "A"  //주소가 없으면 Auto Dev xgt
+        else 
+            let dev = address.TrimStart('%')
+            if dev.StartsWith("ZR") then dev.Substring(0, 2)
+            else dev.Substring(0, 1)
 
     /// 비트 단위 오프셋 계산
     member _.BitOffset =
@@ -55,6 +58,15 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
     /// 읽기/쓰기 타입 판단
     override _.ReadWriteType: ReadWriteType = 
         if isOutput then Write else Read
+
+    override x.IsMemory =
+         if isOutput then false
+         else 
+            match x.Device with
+            | "I" | "A"  -> false
+            | _ -> true
+
+
 
     /// 버퍼 값을 읽어 현재 값으로 설정, 변경 여부 반환
     override x.UpdateValue(buffer: byte[]) : bool =

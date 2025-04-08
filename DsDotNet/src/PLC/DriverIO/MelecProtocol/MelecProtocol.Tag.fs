@@ -28,6 +28,7 @@ type MelsecTag(name: string, address: string, dataSizeType: PlcDataSizeType, bit
 
     /// 읽기/쓰기 타입 (기본 Read)
     override _.ReadWriteType = Read
+    override _.IsMemory = true
 
     /// MELSEC 응답 버퍼로부터 값 업데이트
     override this.UpdateValue(buffer: byte[]) =

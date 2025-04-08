@@ -20,6 +20,7 @@
         <Compile Include="LSE\ConvertLSE.Xml.fs" />
         <Compile Include="LSE\ConvertLSE.fs" />
         <Compile Include="ColorUtil.fs" />
+        <Compile Include="PrefixTrie.fs" />
         <Compile Include="MappingDevice.fs" />
     </ItemGroup>
 

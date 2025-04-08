@@ -87,6 +87,10 @@ type XmlReader =
                 if address.StartsWith "%Q" || address.StartsWith "P" then true 
                 else false
 
+        let _DirectVarNames = Dictionary<string, PlcTagBase>()
+        let getUniqName (name, address)=
+                    if _DirectVarNames.ContainsKey name then $"{name}_{address}" else name
+
         let parseGlobal (node: XmlNode) : PlcTagBase option =
             let name     = XgxXml.tryGetAttribute node "Name"
             let address  = XgxXml.tryGetAttribute node "Address"
@@ -118,10 +122,10 @@ type XmlReader =
                         else getBitOffset address
 
                 let isOutput =  isOutput(smartOutputFlag, address)
-
+                let uniqName = getUniqName (name, address)
                 let tag =
                     XGTTag(
-                        name,
+                        uniqName,
                         address,
                         devType,
                         bitOffset,
@@ -131,7 +135,6 @@ type XmlReader =
                 Some tag
 
 
-        let _DirectVarNames = Dictionary<string, PlcTagBase>()
 
         let parseDirect (node: XmlNode) : PlcTagBase option =
             let used    = XgxXml.tryGetAttribute node "Used"
@@ -139,9 +142,8 @@ type XmlReader =
             let comment = XgxXml.tryGetAttribute node "Comment" |> validName
 
             if device <> "" && comment <> "" && (not usedOnly || used = "1") then
-                let uniqName =
-                    if _DirectVarNames.ContainsKey comment then $"{comment}_{device}" else comment
                 
+                let uniqName = getUniqName (comment, device)
                 let size, offset =
                     match isXGI with
                     | true  -> LsXgiTagParser.Parse device |> fun (_, s, o) -> s, o
@@ -181,5 +183,20 @@ type XmlReader =
                     | Some tag -> yield tag
                     | None -> ()
             |]
+
+        /// 중복된 이름을 가진 태그 발견시 예외처리 
+        let duplicateNames = 
+            tags
+            |> Array.groupBy (fun tag -> tag.Name)
+            |> Array.filter (fun (_, tags) -> tags.Length > 1)
+            |> Array.map (fun (name, tags) -> name, tags.Length)
+
+        if duplicateNames.Length > 0 then
+            let msg = 
+                duplicateNames
+                |> Array.map (fun (name, count) -> $"{name} : {count}개")
+                |> String.concat "\n"
+            failwithf "Duplicate tag names found:\n%s" msg
+
 
         tags, Array.append [|ip|] subIps

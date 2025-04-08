@@ -15,11 +15,13 @@
 	<ItemGroup>
     <Compile Include="LSE\LS.XGI.TagParser.fs" />
     <Compile Include="LSE\LS.XGK.TagParser.fs" />
+    <Compile Include="LSE\LS.TagParser.fs" />
     <Compile Include="XgtProtocol.Tag.fs" />
     <Compile Include="XgtProtoc0l.Batch.fs" />
     <Compile Include="XgtProtocol.Comm.fs" />
     <Compile Include="XgtProtocol.Scan.fs" />
     <Compile Include="XgtProtocol.ScanController.fs" />
+    <None Include="Program.fsx" />
   </ItemGroup>
 
 	<ItemGroup>

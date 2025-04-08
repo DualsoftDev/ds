@@ -5,15 +5,20 @@ open System.IO
 open System.Text.RegularExpressions
 open PLC.Mapper.FS
 open Dual.PLC.Common.FS     
+open System.Collections.Generic
+open XgtProtocol
 
 module ConvertLSEModule =
 
             
     let parseLSEFile (filePath: string) =
         let lines = File.ReadLines(filePath) // Stream 방식으로 메모리 절약
+        let isXGI = IsXg5kXGI filePath
+
         let tags = XmlReader.ReadTags (filePath, false) |> fst
         let tagsByAddress = tags |> Seq.map(fun t -> t.Address, t) |> dict
         let tagsByName = tags |> Seq.map(fun t -> t.Name, t) |> dict
+        let _DirectTagNames = Dictionary<string, PlcTagBase>()
 
         let networks = ResizeArray<Rung>()
         let mutable currentTitle = ""
@@ -29,30 +34,45 @@ module ConvertLSEModule =
                 line.Contains($"ElementType=\"{etype |> int}\"")
 
             let getTerminal (variable: string) (tType: TerminalType) =
-                let tag = 
-                    if tagsByAddress.ContainsKey variable then
-                        tagsByAddress.[variable]
-                    elif tagsByName.ContainsKey variable then
-                        tagsByName.[variable]
-                    else
-                        failwith $"Tag not found: {variable}"
+                let lsTag = 
+                    if isXGI then tryParseXgiTag variable else tryParseXgkTag variable
 
-                PlcTerminal(tag, tType)
+                if lsTag.IsNone then None
+                else
+                    let tag =   
+                        if tagsByAddress.ContainsKey variable then
+                            tagsByAddress.[variable]
+                        elif tagsByName.ContainsKey variable then
+                            tagsByName.[variable]
+                        else
+                            if _DirectTagNames.ContainsKey (variable)
+                            then
+                                _DirectTagNames.[variable]
+                            else 
+                                let newTag =
+                                    XgtProtocol.XGTTag(
+                                        variable,
+                                        isXGI
+                                    ) :>PlcTagBase
+                                _DirectTagNames.Add(variable, newTag)   
+                                newTag
+
+                    PlcTerminal(tag, tType) |> Some
 
 
             match () with
             | _ when containsElementType ElementType.CoilMode
                      || containsElementType ElementType.VariableMode ->
                 extractContent line
-                |> Option.map (fun v -> getTerminal v TerminalType.Coil)
+                |> Option.bind (fun v -> getTerminal v TerminalType.Coil)
 
             | _ when containsElementType ElementType.ClosedContactMode ->
                 extractContent line
-                |> Option.map (fun v -> getTerminal v TerminalType.ContactNegated)
+                |> Option.bind (fun v -> getTerminal v TerminalType.ContactNegated)
 
             | _ when containsElementType ElementType.ContactMode ->
                 extractContent line
-                |> Option.map (fun v -> getTerminal v TerminalType.Contact)
+                |> Option.bind (fun v -> getTerminal v TerminalType.Contact)
 
             | _ -> None
 

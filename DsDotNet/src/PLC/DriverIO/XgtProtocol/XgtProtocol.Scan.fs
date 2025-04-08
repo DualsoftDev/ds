@@ -74,7 +74,7 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int) =
     // ---------------------------
     override _.PrepareTags(tags: TagInfo seq)  =
         tagMap.Clear()
-        let isXGI = LsXgiTagParser.IsXGI(tags |> Seq.map(fun s-> s.Address))
+        let isXGI = LsTagParser.IsXGI(tags |> Seq.map(fun s-> s.Address))
 
         let parsed =
             tags

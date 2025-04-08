@@ -69,7 +69,7 @@ module LsXgkTagParserModule =
                 Some ( device, BIT, totalBitOffset )
 
             | _ ->
-                logWarn $"Failed to parse XGK tag : {tag}"
+                //logDebug $"Failed to parse XGK tag : {tag}"
                 None
 
 

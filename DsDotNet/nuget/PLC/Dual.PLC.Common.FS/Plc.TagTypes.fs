@@ -10,6 +10,7 @@ type PlcDataSizeType =
     | Int64    | UInt64  | Double    // LREAL
     | String
     | DateTime
+    | UserDefined
 
     /// 비트 수로부터 PlcDataSizeType 추론
     static member FromBitSize(size: int) =
@@ -37,6 +38,7 @@ type PlcDataSizeType =
         | Double     -> 64
         | String     -> 8 * 64   // 예: 문자열 최대 길이 기반. 수정 가능
         | DateTime   -> 64       // 일반적으로 8바이트 (예: ticks)
+        | UserDefined -> 0        // 사용자 정의 타입은 비트 수를 알 수 없음
 
 type ReadWriteType =
     | Read
@@ -86,4 +88,4 @@ type PlcTagExt =
         | "LREAL" | "DOUBLE" | "FLOAT64"        -> PlcDataSizeType.Double
         | "STRING"                              -> PlcDataSizeType.String
         | "DATETIME" | "DATE_AND_TIME"          -> PlcDataSizeType.DateTime
-        | unknown -> failwithf "Unknown OPC type string: %s" unknown
+        | unknown -> failwithf "Unknown PlcTag type string: %s" unknown

@@ -4,20 +4,20 @@ open System
 open Dual.PLC.Common.FS
 
 /// XGTTag: LS(XGT) 전용 태그 표현
-type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, ?comment: string) =
+type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, isOutput: bool, ?comment: string) =
     inherit PlcTagBase(name, address, dataSizeType, ?comment = comment)
 
     let step = 100
     let typeSize = PlcDataSizeType.TypeBitSize dataSizeType  
 
     /// 보조 생성자 (XGI 여부 기반 파싱)
-    new (address: string, isXgi: bool) =
+    new (address: string, isXgi: bool, isOutput) =
         let size, offset =
             match isXgi with
             | true  -> LsXgiTagParser.Parse address |> fun (_, s, o) -> s, o
             | false -> LsXgkTagParser.Parse address |> fun (_, s, o) -> s, o
         let dataType = PlcDataSizeType.FromBitSize size
-        XGTTag(address, address, dataType, offset)
+        XGTTag(address, address, dataType, offset, isOutput)
 
         
     member val LWordOffset = -1 with get, set
@@ -28,6 +28,8 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
         else
             sprintf "%sL%d" x.Device (x.BitOffset / 64)
 
+    ///같은주소 다른표기때문에 동일 주소 확인용 %MW10 = %MX16 
+    member x.AddressKey = $"{x.Device}_{x.BitOffset}"
     /// 디바이스 문자열 (e.g., "MB", "MW", "ZR")
     member _.Device =
         let dev = address.TrimStart('%')
@@ -51,9 +53,8 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
         else typeSize / 8
         
     /// 읽기/쓰기 타입 판단
-    override _.ReadWriteType: ReadWriteType =
-        if address.StartsWith("%Q") || address.StartsWith("P") then Write
-        else Read
+    override _.ReadWriteType: ReadWriteType = 
+        if isOutput then Write else Read
 
     /// 버퍼 값을 읽어 현재 값으로 설정, 변경 여부 반환
     override x.UpdateValue(buffer: byte[]) : bool =

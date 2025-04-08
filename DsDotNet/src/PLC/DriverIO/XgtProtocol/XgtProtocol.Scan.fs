@@ -4,8 +4,8 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
-type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int) =
-    inherit PlcScanBase(ip, scanDelay)
+type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) =
+    inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
 
     let connection = XgtEthernet(ip, 2004, timeoutMs)
     let mutable xgtTags: XGTTag[] = [||]
@@ -82,7 +82,7 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int) =
             |> Seq.choose (fun scanTag ->
                 match if isXGI then tryParseXgiTag scanTag.Address else tryParseXgkTag scanTag.Address with
                 | Some (_dev, size, offset) ->
-                    let tag = XGTTag(scanTag.Name, scanTag.Address, PlcDataSizeType.FromBitSize(size), offset)
+                    let tag = XGTTag(scanTag.Name, scanTag.Address, PlcDataSizeType.FromBitSize(size), offset, scanTag.IsOutput)
                     tagMap[scanTag.Address] <- tag
                     Some tag
                 | None ->

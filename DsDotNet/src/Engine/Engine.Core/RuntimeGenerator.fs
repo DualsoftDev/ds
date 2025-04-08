@@ -26,7 +26,13 @@ module RuntimeGeneratorModule =
             match x with
             | Control -> true
             | _ -> false
-
+        ///PLC, PC 값을 읽기만 함
+        member x.IsMonitorOnlyMode() =
+            match x with
+            | Monitoring
+            | Simulation
+            | VirtualLogic -> true
+            | _ -> false
 
     let ToRuntimePackage s =
         match s with

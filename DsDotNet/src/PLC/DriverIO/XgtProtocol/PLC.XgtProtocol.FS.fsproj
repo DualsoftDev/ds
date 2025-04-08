@@ -21,7 +21,6 @@
     <Compile Include="XgtProtocol.Comm.fs" />
     <Compile Include="XgtProtocol.Scan.fs" />
     <Compile Include="XgtProtocol.ScanController.fs" />
-    <None Include="Program.fsx" />
   </ItemGroup>
 
 	<ItemGroup>

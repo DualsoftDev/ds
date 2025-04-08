@@ -10,10 +10,11 @@ type TagInfo =
         Name : string 
         Address : ScanAddress
         Comment : string
+        IsOutput : bool
     }
 
 [<AbstractClass>]
-type PlcScanBase(ip: string, scanDelay: int) =
+type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
 
     let tagValueChanged = Event<PlcTagValueChangedEventArgs>()
     let connectChanged = Event<ConnectChangedEventArgs>()
@@ -70,8 +71,17 @@ type PlcScanBase(ip: string, scanDelay: int) =
             try
                 try
                     while not cancelToken.IsCancellationRequested do
-                        this.WriteTags()
+                        if isMonitorOnly
+                        then 
+                            if tagMap.Values |> Seq.exists(fun f-> f.GetWriteValue().IsSome)
+                            then // 모니터 모드인데 태그 쓰기 요청이 있는 경우
+                                let errTags = tagMap.Values |> Seq.filter(fun f-> f.GetWriteValue().IsSome)
+                                failwith $"모니터 모드에서 태그 쓰기 요청이 있습니다: {errTags|>Seq.head}"
+                        else 
+                            this.WriteTags()
+
                         this.ReadTags()
+
                         do! Async.Sleep scanDelay
                 with ex ->
                     printfn "[PLC SCAN ERROR] %s: %s" ip ex.Message

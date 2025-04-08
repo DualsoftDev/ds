@@ -9,7 +9,7 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
     do
         match initialValue with
         | Some v ->
-            let systemType = PlcTagExt.ToSystemDataType(v.GetType().Name)
+            let systemType = PlcDataSizeType.FromString(v.GetType().Name)
             if systemType <> dataType then
                 printfn $"⚠️ 초기값 타입 불일치: {v.GetType().Name} ≠ {dataType}"  // 로그만 출력
         | _ -> ()
@@ -27,14 +27,20 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
         and set(v) = value <- v
 
     member _.Comment  = defaultArg comment ""
-
-    member this.SetWriteValue(v: obj) = writeVal <- Some v
-    member this.ClearWriteValue()     = writeVal <- None
-    member this.GetWriteValue()       = writeVal
-
+    
     abstract member ReadWriteType: ReadWriteType
     abstract member UpdateValue: byte[] -> bool
     default _.UpdateValue _ = false
+
+    member this.SetWriteValue(v: obj) =
+            if this.ReadWriteType = ReadWriteType.Read then
+                failwith $"{this} Read-Only Tag"
+            else
+                writeVal <- Some v
+
+    member this.ClearWriteValue()     = writeVal <- None
+    member this.GetWriteValue()       = writeVal
+    
 
     override this.ToString() =
         $"[{this.ReadWriteType}] {name} @ {address} ({dataType})"

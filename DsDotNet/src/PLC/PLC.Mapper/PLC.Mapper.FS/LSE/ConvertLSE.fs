@@ -50,9 +50,10 @@ module ConvertLSEModule =
                                 _DirectTagNames.[variable]
                             else 
                                 let newTag =
-                                    XgtProtocol.XGTTag(
+                                    XGTTag(
                                         variable,
-                                        isXGI
+                                        isXGI,
+                                        false
                                     ) :>PlcTagBase
                                 _DirectTagNames.Add(variable, newTag)   
                                 newTag

@@ -185,7 +185,7 @@ type TagKindExt =
         | _ -> false
 
     [<Extension>]
-    static member IsTagForRedisActionOutput(x:TagEvent) =
+    static member IsTagForActionOutput(x:TagEvent) =
         match x with
         | EventTaskDev (_, _, kind) ->
             kind.IsOneOf(

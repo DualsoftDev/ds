@@ -15,7 +15,7 @@ module ConvertLSEModule =
         let lines = File.ReadLines(filePath) // Stream 방식으로 메모리 절약
         let isXGI = IsXg5kXGI filePath
 
-        let tags = XmlReader.ReadTags (filePath, false) |> fst
+        let tags = XmlReader.ReadTags (filePath, false) |> fun (tag, _, _) -> tag
         let tagsByAddress = tags |> Seq.map(fun t -> t.Address, t) |> dict
         let tagsByName = tags |> Seq.map(fun t -> t.Name, t) |> dict
         let _DirectTagNames = Dictionary<string, PlcTagBase>()

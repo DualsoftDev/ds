@@ -13,11 +13,7 @@ module PowerPointMapperXml =
         if isNull doc || isNull doc.PresentationPart then
             ()
         else
-            let serializer = XmlSerializer(typeof<UserTagConfig>)
-            let xmlString =
-                use sw = new StringWriter()
-                serializer.Serialize(sw, data)
-                sw.ToString()
+            let xmlString = UserTagConfigToXmlText(data);
 
             let wrappedXml = $"<PowerPointMapper><![CDATA[{xmlString}]]></PowerPointMapper>"
             let bytes = System.Text.Encoding.UTF8.GetBytes(wrappedXml)

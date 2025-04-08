@@ -27,8 +27,8 @@ module Prelude =
     let forceCast<'T> (x: obj) = box x :?> 'T
 
     // https://github.com/fsharp/fsharp/blob/cb6cb5c410f537c81cf26825657ef3bb29a7e952/src/fsharp/FSharp.Core/printf.fs#L1645
-    let failwithf format =
-        Printf.ksprintf failwith format
+    //let failwithf format =   ExtraTopLevelOperators F# core  사용
+    //    Printf.ksprintf failwith format
 
     /// no operation
     let noop() = ()

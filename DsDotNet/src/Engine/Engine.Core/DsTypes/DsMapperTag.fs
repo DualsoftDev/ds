@@ -13,7 +13,8 @@ module MapperDataModule =
 
     [<AllowNullLiteral>]
     type DeviceApi() =
-        member val Group = "" with get, set
+        member val Area = "" with get, set
+        member val Work = "" with get, set
         member val Device = "" with get, set
         member val Api = "" with get, set
         member val Tag = "" with get, set
@@ -64,6 +65,9 @@ module MapperDataModule =
 
         [<field: DataMember(Name = "HwIOProp")>]
         member val HwIO = "" with get, set
+        
+        [<field: DataMember(Name = "HwIPProp")>]
+        member val HwIP = "" with get, set
 
     // ========== 생성자 및 변환 함수 ==========
 

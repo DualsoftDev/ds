@@ -121,28 +121,20 @@ module MappingDeviceModule =
                     if groupName = NonGroup then deviceFull
                     elif deviceFull.Length > groupPrefixLen then deviceFull.Substring(groupPrefixLen)
                     else failwith $"error: device={deviceFull}, groupName={groupName}, tag={tag}"
+                let work = 
+                    let devSplit = device.Split(SegmentSplit, StringSplitOptions.RemoveEmptyEntries)
+                    if groupName = NonGroup && devSplit.Length > 1 
+                    then devSplit[1]
+                    else devSplit[0]
 
-                if groupName = "" || device = "" || api = "" 
+
+                if groupName = "" || work = "" || device = "" || api = "" 
                 then 
                     failwith $"extractGroupDeviceApis {tag} err"
 
-                //if  tag.Contains  "#201 S/OTR 파레트 선택"
-                //then 
-                //    try
-                //        failwith $"extractGroupDeviceApis {tag} err"
-                //    with _->
-                //        DeviceApi(
-                //            Group = validName groupName,
-                //            Device = validName device,
-                //            Api = validName api,
-                //            Tag = tag,
-                //            OutAddress = "",
-                //            InAddress = "",
-                //            Color = color
-                //        )
-                //else 
                 DeviceApi(
-                        Group = validName groupName,
+                        Area = validName groupName,
+                        Work = validName work,  
                         Device = validName device,
                         Api = validName api,
                         Tag = tag,

@@ -54,7 +54,7 @@ module XgxXml =
 
 type XmlReader =
 
-    static member ReadTags(xmlPath: string, ?usedOnly: bool) : PlcTagBase[] * string array =
+    static member ReadTags(xmlPath: string, ?usedOnly: bool) : PlcTagBase[] * string array  * bool=
         let isXGI = IsXg5kXGI xmlPath
         let usedOnly = defaultArg usedOnly true
         let xdoc: XmlDocument = DualXmlDocument.loadFromFile xmlPath
@@ -199,4 +199,4 @@ type XmlReader =
             failwithf "Duplicate tag names found:\n%s" msg
 
 
-        tags, Array.append [|ip|] subIps
+        tags, Array.append [|ip|] subIps, isXGI

@@ -80,6 +80,7 @@ module DsAddressModule =
         | PlcDataSizeType.Double  -> DuFLOAT64
         | PlcDataSizeType.String  -> DuSTRING
         | PlcDataSizeType.DateTime -> DuUINT64 // 또는 DuSTRING 등 타임 표현 방식에 따라
+        | PlcDataSizeType.UserDefined -> failwithf "PlcDataSizeType.UserDefined not exist DuDataType"
 
 
 

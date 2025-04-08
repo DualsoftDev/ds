@@ -178,7 +178,7 @@ namespace PLC.Mapper.CS.Test
         private Image RenderGroupedImage(IEnumerable<DeviceApi> items)
         {
             var sorted = items
-                .GroupBy(i => i.Group)
+                .GroupBy(i => i.Area)
                 .OrderBy(g => g.Key)
                 .SelectMany(g => g.OrderBy(i => i.Device).ThenBy(i => i.Api))
                 .ToList();
@@ -193,11 +193,11 @@ namespace PLC.Mapper.CS.Test
             while (index < sorted.Count)
             {
                 var current = sorted[index];
-                string currentGroup = current.Group;
+                string currentGroup = current.Area;
                 Color groupColor = Color.FromArgb(current.Color);
 
                 int start = index;
-                while (index + 1 < sorted.Count && sorted[index + 1].Group == currentGroup)
+                while (index + 1 < sorted.Count && sorted[index + 1].Area == currentGroup)
                     index++;
 
                 int blockY = CanvasMargin + start * LineHeight;

@@ -30,6 +30,7 @@ module GlobalText =
 
 
     let DSPilotProcessName : string = "DSPilot.Winform"
+    let DSPWizardProcessName : string = "DSPilot.Winform.Wizard"
     let DSRuntimeProcessName : string = "DSRuntime.Winform"
     let getDSAppPath(appName:string) : string =
         let basePath = AppDomain.CurrentDomain.BaseDirectory
@@ -41,6 +42,7 @@ module GlobalText =
         else
             $@"{appPath}\Dualsoft\PowerPointAddIn For Dualsoft\{appName}.exe"
 
+    let DSPWizardPath : string =  getDSAppPath DSPWizardProcessName    
     let DSPilotPath : string =  getDSAppPath DSPilotProcessName    
     let DSRuntimePath : string =  getDSAppPath DSRuntimeProcessName    
 

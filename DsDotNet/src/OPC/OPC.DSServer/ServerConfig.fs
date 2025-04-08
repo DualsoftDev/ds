@@ -4,12 +4,13 @@ open Newtonsoft.Json
 open System
 open System.IO
 open System.Collections.Generic
+open Engine.Core
 
 [<AutoOpen>]
 module ServerConfigModule =
 
     type OPCServerConfig = {
-        OPCServerPort: string
+        OPCServerStartPort: string
     }
 
     type StatisticsConfig = {
@@ -33,7 +34,7 @@ module ServerConfigModule =
 
     // Default configuration
     let defaultConfig = {
-        OPCServerConfig = { OPCServerPort = "2747" }
+        OPCServerConfig = { OPCServerStartPort = "50000" }
         StatisticsConfig = { StatisticsFilePath = "%APPDATA%\\dualsoft\\DSPilot\\StatisticsData\\" }
     }
 
@@ -54,7 +55,7 @@ module ServerConfigModule =
     // Retrieve a specific configuration value by key
     let getValueFromConfig (key: string) (config: Configuration) : string =
         match key with
-        | "OPCServerPort" -> config.OPCServerConfig.OPCServerPort
+        | "OPCServerStartPort" -> config.OPCServerConfig.OPCServerStartPort
         | "StatisticsFilePath" -> resolvePath config.StatisticsConfig.StatisticsFilePath
         | _ -> failwithf "Key '%s' not found in configuration" key
 
@@ -73,8 +74,23 @@ module ServerConfigModule =
         getValueFromConfig key config
 
 
-    let GetServerPort() = 
-        fromServerConfig "OPCServerPort"
+
+    let GetOPCServerPort(mode: RuntimePackage, targetIp:string) = 
+        let serverStartPort = fromServerConfig "OPCServerStartPort" |> Convert.ToInt32
+        let serverPort =
+            let lastIp =
+                match targetIp.Split('.') |> Array.tryLast with
+                | Some ipStr when System.Int32.TryParse(ipStr) |> fst -> int ipStr
+                | _ -> failwith $"잘못된 targetIp 형식: {targetIp}"
+
+            match mode with
+            | RuntimePackage.Simulation     -> serverStartPort + 0     + lastIp
+            | RuntimePackage.Control        -> serverStartPort + 1000  + lastIp
+            | RuntimePackage.Monitoring     -> serverStartPort + 2000  + lastIp
+            | RuntimePackage.VirtualPlant   -> serverStartPort + 4000  + lastIp
+            | RuntimePackage.VirtualLogic   -> 2747 //  // Virtual Logic Port 고정
+
+        serverPort
 
     // Save statistics to a JSON file
     let SaveStatisticsToJson ((systemName: string), (statsMap: IDictionary<string, StatsDto>)) =

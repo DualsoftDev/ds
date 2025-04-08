@@ -14,7 +14,9 @@ open Opc.Ua.Configuration
 
 [<AutoOpen>]
 module DsOPCServerConfig =
-    let createApplicationConfiguration () =
+    let createApplicationConfiguration (mode: RuntimePackage, targetIp:string) =
+        let instanceName = $"{targetIp}_{mode.ToString()}"   
+
         let applySecurityPolicies (serverConfig: ServerConfiguration) =
             // 기본적인 보안 정책 리스트
             let securityPolicies = [
@@ -40,12 +42,10 @@ module DsOPCServerConfig =
             serverConfig.UserTokenPolicies.Add(UserTokenPolicy(UserTokenType.Certificate))
 
 
-
-
         let config = ApplicationConfiguration()
-        config.ApplicationName <- "Dualsoft OPC UA Server"
-        config.ApplicationUri <- "urn:localhost:UA:DualsoftServer"
-        config.ProductUri <- "uri:dualsoft.com:opc:server"
+        config.ApplicationName <- $"Dualsoft OPC UA Server [{instanceName}]"
+        config.ApplicationUri <- $"urn:localhost:UA:DualsoftServer:{instanceName}"
+        config.ProductUri <- $"uri:dualsoft.com:opc:{instanceName}"
         config.ApplicationType <- ApplicationType.Server
 
         //let configureSecurity (securityConfig: SecurityConfiguration) =
@@ -68,8 +68,7 @@ module DsOPCServerConfig =
         securityConfig.ApplicationCertificate <- CertificateIdentifier(
             StoreType = "Directory",
             StorePath = storePath,
-            SubjectName = "CN=OPC UA Server, C=US, S=Arizona, O=OPC Foundation, DC=localhost"
-        )
+            SubjectName = $"CN=OPC UA Server {instanceName}, O=Dualsoft, DC=localhost"        )
 
         //configureSecurity securityConfig
         config.SecurityConfiguration <- securityConfig
@@ -88,7 +87,7 @@ module DsOPCServerConfig =
 
         // Server Configuration
         let serverConfig = ServerConfiguration()
-        let serverPort = ServerConfigModule.GetServerPort()   
+        let serverPort = ServerConfigModule.GetOPCServerPort(mode, targetIp)
 
         serverConfig.BaseAddresses.Add($"opc.tcp://localhost:{serverPort}")
         serverConfig.AlternateBaseAddresses.Add($"https://ds:{serverPort}")

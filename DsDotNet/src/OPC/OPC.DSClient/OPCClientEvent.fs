@@ -10,7 +10,7 @@ open Engine.Core
 
 module OPCClientEventModule =
 
-    type OPCClientEvent(sys: DsSystem) =
+    type OPCClientEvent(sys: DsSystem, serverPort:int) =
         let opcClientManager = OPCClientManager(sys)
         let opcClient = OPCDsClient()
         let tagOPCEvent = new Subject<TagEvent>()
@@ -28,7 +28,8 @@ module OPCClientEventModule =
                     )
                 )
             )
-            opcClient.InitializeOPC("opc.tcp://localhost:2747", 3000);
+
+            opcClient.InitializeOPC($"opc.tcp://localhost:{serverPort}", 3000);
 
         member x.TagOPCEventSubject = tagOPCEvent
         member x.Disconnect() = 

@@ -17,7 +17,7 @@ module Program =
                 new RuntimeModel(@"z://HelloDS.dsz", Engine.Core.RuntimeGeneratorModule.PlatformTarget.WINDOWS)
 
             // OPC UA 서버 시작
-            DsOpcUaServerManager.Start(runtimeModel.System, RuntimePackage.Simulation)
+            DsOpcUaServerManager.Start(runtimeModel.System, RuntimePackage.Simulation, "127")
 
             printfn "종료하려면 아무 키나 누르세요..."
             Console.ReadKey() |> ignore

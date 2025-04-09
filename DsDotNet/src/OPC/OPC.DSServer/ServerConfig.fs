@@ -84,13 +84,16 @@ module ServerConfigModule =
                 | _ -> failwith $"잘못된 targetIp 형식: {targetIp}"
 
             match mode with
-            | RuntimePackage.Simulation     -> serverStartPort + 0     + lastIp
             | RuntimePackage.Control        -> serverStartPort + 1000  + lastIp
             | RuntimePackage.Monitoring     -> serverStartPort + 2000  + lastIp
             | RuntimePackage.VirtualPlant   -> serverStartPort + 4000  + lastIp
-            | RuntimePackage.VirtualLogic   -> 2747 //  // Virtual Logic Port 고정
+            | RuntimePackage.Simulation   
+            | RuntimePackage.VirtualLogic   -> 2747 //  Simulation, Virtual Logic Port 고정
 
         serverPort
+
+    let GetOPCServerPortByModeText(mode: string, targetIp:string) = 
+        GetOPCServerPort (ToRuntimePackage mode, targetIp)
 
     // Save statistics to a JSON file
     let SaveStatisticsToJson ((systemName: string), (statsMap: IDictionary<string, StatsDto>)) =

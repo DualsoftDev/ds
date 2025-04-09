@@ -248,6 +248,11 @@ module rec CoreModule =
                 with get() = x.DsTime.AVG
                 and set(v) = x.DsTime.AVG <- v
 
+            member x.CreateDefalutTime() = 
+                x.DsTime <- DsTime()
+                x.DsTime.AVG <- Some 500u
+                x.DsTime.STD <- Some 5u
+
             member x.Flow = flow
             member val Graph = DsGraph(flow.System.VertexAddRemoveHandlers)
             member val ModelingEdges = HashSet<ModelingEdgeInfo<Vertex>>()
@@ -574,9 +579,9 @@ module rec CoreModule =
 
                         flow.Graph.Vertices.OfType<Real>().Iter(fun r->r.Finished <- false)  //기존 Real이 원위치 취소
                         newReal.Finished <- true    //마지막 Real이 원위치
-
-
-                          // Create and add a new ApiItem
+                        newReal.CreateDefalutTime() //기본 시간 생성  
+                        
+                        // Create and add a new ApiItem
                         let newApi = sys.CreateApiItem(apiName, newReal, newReal)
                         sys.ApiItems.Add newApi |> ignore
 

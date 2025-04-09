@@ -849,8 +849,8 @@ module ImportU =
         [<Extension>]
         static member UpdateIOFromUserDeviceTags(doc: PptDoc, sys: DsSystem, hwTarget:HwDriveTarget) =
         
-            if doc.HwIOType <> Some hwTarget then  //설정드라이브랑 같아야 가져옴
-                failwithf "Error: Setting HW_IO Type과 문서에 저장된 타입이 다릅니다. saved : %A <> setting : %A"  doc.HwIOType hwTarget
+            if doc.HwIOType.IsSome && doc.HwIOType.Value <> hwTarget then  //설정드라이브랑 같아야 가져옴
+                failwithf "Error: Setting HW_IO Type과 문서에 저장된 타입이 다릅니다. saved : %A <> setting : %A"  doc.HwIOType.Value hwTarget
 
             match doc.HwIOType with
             | Some io  -> 

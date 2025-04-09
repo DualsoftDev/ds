@@ -12,7 +12,7 @@ type TaskDevManager with
 
 
 
-    member d.J1_JobActionOuts(coins:Vertex seq) =
+    member d.J1_JobActionOuts(coins:Vertex seq, isSimMode:bool) =
         let fn = getFuncName()
         let _off = coins.First()._off.Expr
 
@@ -67,7 +67,11 @@ type TaskDevManager with
         [|
             if d.TaskDev.ExistOutput
             then
-                let coinPlanOuts = coins.Select(fun s-> s.VC.PS.Expr <&&> s.VC.PE.Expr).ToOr()
+                let coinPlanOuts =
+                    if isSimMode 
+                        then coins.Select(fun s-> s.VC.PS.Expr).ToOr()
+                        else coins.Select(fun s-> s.VC.PS.Expr <&&> s.VC.PE.Expr).ToOr()
+
                 let callAction = coins.Head().GetPureCall().CallActionType
                 if d.TaskDev.OutDataType = DuBOOL then
                     yield getStatementTypeDigital(coinPlanOuts, d.TaskDev, callAction)

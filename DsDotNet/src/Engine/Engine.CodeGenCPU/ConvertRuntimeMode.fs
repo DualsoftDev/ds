@@ -12,7 +12,7 @@ module ConvertRuntimeModeModule =
         [
             yield! sys.RealActive()   
             yield! sys.CallActive()   
-            yield! sys.JobActionOut()   
+            yield! sys.JobActionOut(false)   
             yield! applyVertexToken sys
         ]
 
@@ -32,6 +32,7 @@ module ConvertRuntimeModeModule =
 
     let applyModeSimulation(sys:DsSystem)  =
         [       
+            yield! sys.JobActionOut(true)   
             yield! sys.RealActive()   
             yield! sys.CallActive()   
             yield! sys.SensorEmulation()   

@@ -72,12 +72,16 @@ type DsSystem with
                     yield! td.SensorEmulation(calls)
         ]
 
-    member sys.JobActionOut() =
+        
+
+                
+
+    member sys.JobActionOut(isSimMode) =
         [|
             let devCallSet = sys.GetTaskDevCalls()
             for (td, coins) in devCallSet do
                 let tm = td.TagManager :?> TaskDevManager
-                yield! tm.J1_JobActionOuts(coins)
+                yield! tm.J1_JobActionOuts(coins, isSimMode)
         |]
 
 

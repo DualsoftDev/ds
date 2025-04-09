@@ -81,7 +81,7 @@ module ServerConfigModule =
             let lastIp =
                 match targetIp.Split('.') |> Array.tryLast with
                 | Some ipStr when System.Int32.TryParse(ipStr) |> fst -> int ipStr
-                | _ -> failwith $"잘못된 targetIp 형식: {targetIp}"
+                | _ -> 0
 
             match mode with
             | RuntimePackage.Control        -> serverStartPort + 1000  + lastIp

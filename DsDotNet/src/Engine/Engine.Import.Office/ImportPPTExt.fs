@@ -850,20 +850,20 @@ module ImportU =
         static member UpdateIOFromUserDeviceTags(doc: PptDoc, sys: DsSystem, hwTarget:HwDriveTarget) =
         
             if doc.HwIOType.IsSome && doc.HwIOType.Value <> hwTarget then  //설정드라이브랑 같아야 가져옴
-                failwithf "Error: Setting HW_IO Type과 문서에 저장된 타입이 다릅니다. saved : %A <> setting : %A"  doc.HwIOType.Value hwTarget
-
-            match doc.HwIOType with
-            | Some io  -> 
-                let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
-                doc.UserDeviceTags
-                |> Seq.iter (fun api ->
-                    let key = api.DeviceApiName
-                    if(dictTaskDev.ContainsKey(key))
-                    then
-                        dictTaskDev[key].InAddress <- api.Input
-                        dictTaskDev[key].OutAddress<- api.Output
-                    )
-            |_-> ()
+                debugf "Error: Setting HW_IO Type과 문서에 저장된 타입이 다릅니다. saved : %A <> setting : %A"  doc.HwIOType.Value hwTarget
+            else 
+                match doc.HwIOType with
+                | Some io  -> 
+                    let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
+                    doc.UserDeviceTags
+                    |> Seq.iter (fun api ->
+                        let key = api.DeviceApiName
+                        if(dictTaskDev.ContainsKey(key))
+                        then
+                            dictTaskDev[key].InAddress <- api.Input
+                            dictTaskDev[key].OutAddress<- api.Output
+                        )
+                |_-> ()
 
 
 

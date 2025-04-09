@@ -457,12 +457,26 @@ module rec CoreModule =
             //CPU 생성시 할당됨 OutTag
             member val OutTag = getNull<ITag>() with get, set
 
+            member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
+            member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
+            member x.IsAnalogSensor = x.InTag.IsNonNull() && x.InTag.DataType <> typedefof<bool>
+            member x.IsAnalogActuator = x.OutTag.IsNonNull() && x.OutTag.DataType <> typedefof<bool>
+            member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
+
+
+
         /// Job 정의: Call 이 호출하는 Job 항목
         type Job (names:Fqdn, system:DsSystem, tasks:TaskDev list) =
             inherit FqdnObject(names.Last(), createFqdnObject(names.SkipLast(1).ToArray()))
             member x.System = system
             member x.TaskDefs = tasks
             member x.Name = failWithLog $"{names.Combine()} Name using 'DequotedQualifiedName'"
+           
+            member x.TaskDevCount     = x.TaskDefs.Count()
+            member x.AddressInCount   = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).Count()
+            member x.AddressOutCount  = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).Count()
+
+            member x.ApiDefs = x.TaskDefs |> map _.ApiItem
 
 
 
@@ -477,22 +491,6 @@ module rec CoreModule =
                 let tgt = x.Operand2
                 sprintf "%s %s %s"  src (x.Operator |> toTextModelEdge) tgt  //"+" <|> "-"
 
-
-        type TaskDev with
-            member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
-            member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
-            member x.IsAnalogSensor = x.InTag.IsNonNull() && x.InTag.DataType <> typedefof<bool>
-            member x.IsAnalogActuator = x.OutTag.IsNonNull() && x.OutTag.DataType <> typedefof<bool>
-            member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator
-
-
-
-        type Job with
-            member x.TaskDevCount     = x.TaskDefs.Count()
-            member x.AddressInCount   = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.InParam.Address <> TextNotUsed).Count()
-            member x.AddressOutCount  = x.TaskDefs.Filter(fun t->t.TaskDevParamIO.OutParam.Address <> TextNotUsed).Count()
-
-            member x.ApiDefs = x.TaskDefs |> map _.ApiItem
 
 
     [<AutoOpen>]
@@ -584,8 +582,17 @@ module rec CoreModule =
                         // Create and add a new ApiItem
                         let newApi = sys.CreateApiItem(apiName, newReal, newReal)
                         sys.ApiItems.Add newApi |> ignore
+                        let reals = flow.Graph.Vertices.OfType<Real>().ToArray()  //추가한뒤 다시 구함
+                        
+                        if flow.Graph.Vertices.OfType<Real>().Count() = 2 then  //2개 는 Real  인터락 리셋처리
+                            // Iterate over reals up to newReal
+                            let realFst = reals[0]
+                            let realSnd = reals[1]
+                            let mei = ModelingEdgeInfo<Vertex>(realFst, "<|>", realSnd)
+                            (!fwdCreateEdgeOnFlow) flow mei |> ignore
 
-                        if flow.Graph.Vertices.OfType<Real>().Count() > 1 then  //2개 부터 인터락 리셋처리
+
+                        elif flow.Graph.Vertices.OfType<Real>().Count() > 2 then  //3개 부터 Alias 인터락 리셋처리
                             // Iterate over reals up to newReal
                             reals
                                 .TakeWhile(fun r -> r <> newReal)
@@ -599,9 +606,6 @@ module rec CoreModule =
                                     let mei = ModelingEdgeInfo<Vertex>(myAlias, "<|>", exAlias)
                                     (!fwdCreateEdgeOnFlow) flow mei |> ignore )
 
-                            // Potentially update other ApiItems based on the new ApiItem
-                            //sys.ApiItems.TakeWhile(fun a -> a <> newApi)  autoGenByFlow 처리로 인해 필요없음
-                            //     .Iter(fun a -> ApiResetInfo.Create(sys, a.Name, ModelingEdgeType.Interlock, newApi.Name) |> ignore)
 
                         newApi
                     | _ ->

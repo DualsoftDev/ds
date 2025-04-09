@@ -101,10 +101,10 @@ module ExportIOTable =
             let tail = name[(head.Length+TextDeviceSplit.Length)..]
             head, tail
 
-    let rowIOItems (dev: TaskDev, job: Job) target =
+    let rowIOItems (devIndex:int, dev: TaskDev, job: Job) target =
         let inSym  =  dev.TaskDevParamIO.InParam.Symbol
         let outSym =  dev.TaskDevParamIO.OutParam.Symbol
-        let inSkip, outSkip = dev.GetSkipInfo(job)
+        let inSkip, outSkip = FindExtension.GetSkipInfo(devIndex, job)
 
         let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.PureName}"
         [
@@ -122,26 +122,26 @@ module ExportIOTable =
     let ExcelchunkBySize = 1000000
     let PDFchunkBySize = 100
 
-
     let ToDeviceIOTables  (sys: DsSystem) (rowSize:int) target : DataTable seq =
 
         let totalRows =
             seq {
                 let mutable extCnt = 0
                 let devsJob =  sys.GetTaskDevs()
-
-                for (dev, job) in  devsJob do
-                    //외부입력 전용 확인하여 출력 생성하지 않는다.
-                    if  dev.IsRootOnlyDevice
-                    then
-                        dev.OutAddress <- (TextNotUsed)
-                        if dev.InAddress = TextAddrEmpty
+                for g in devsJob.GroupBy(fun (dev, job) -> job) do
+                    g |> Seq.mapi(fun i (dev, job) ->
+                        if dev.IsRootOnlyDevice
                         then
-                            dev.InAddress  <-  getExternalTempMemory (target, extCnt)
-                            extCnt <- extCnt+1
+                            dev.OutAddress <- (TextNotUsed)
+                            if dev.InAddress = TextAddrEmpty
+                            then
+                                dev.InAddress  <-  getExternalTempMemory (target, extCnt)
+                                extCnt <- extCnt+1
 
-                    yield rowIOItems (dev, job) target
-        }
+                        rowIOItems (i, dev, job) target
+                    )
+                
+            }
 
         let dts =
             totalRows
@@ -664,11 +664,11 @@ module ExportIOTable =
         
 
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
-        let tableDeviceIOs = ToDeviceIOTables system rowSize target
+        //let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system  true target
         let tabletableFuncVariExternal = ToFuncVariTables system  target
 
-        let tables = tableDeviceIOs  @ [tablePanelIO ] @ tabletableFuncVariExternal
+        let tables =(* tableDeviceIOs  @ *)[tablePanelIO ] @ tabletableFuncVariExternal
 
         tables
 

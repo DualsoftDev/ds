@@ -19,11 +19,11 @@ module ImportPptModule =
         ActivePath: string
         LoadingPaths: string seq
         LayoutImgPaths: string seq
+        UserTagConfig : UserTagConfig
     }
 
     type PptParams = {
         HwTarget: HwTarget
-        UserTagConfig: UserTagConfig
         AutoIOM: bool
         CreateFromPpt : bool
         CreateBtnLamp : bool
@@ -34,7 +34,6 @@ module ImportPptModule =
     let defaultPptParams() =
         {
             HwTarget = getDefaltHwTarget()
-            UserTagConfig = createDefaultUserTagConfig()
             AutoIOM = true
             CreateFromPpt = false
             CreateBtnLamp = true
@@ -238,6 +237,10 @@ module ImportPptModule =
             try
                 let cfg =  createModelConfigReplacePath (modelCnf, path)
                 let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams, dicPptDoc, pathStack, layoutImgPaths)
+                let userTagConfig =     
+                    match doc.UserTagConfig with 
+                    |Some v-> v
+                    |_ -> createDefaultUserTagConfig() 
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
@@ -248,7 +251,7 @@ module ImportPptModule =
                         pathStack.Pop() |> ignore)
 
                 {   Config = cfg
-                    UserTagConfig = pptParams.UserTagConfig
+                    UserTagConfig = userTagConfig
                     System = sys
                     LoadingPaths = [] },
                 pptRepo
@@ -279,14 +282,7 @@ module ImportPptModule =
 
             let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths cfg |> Tuple.first)
             forceTrace $"Elapsed time for reading1 {fullName}: {millisecond} ms"
-            let taskDevs = model.System.TaskDevs.ToDictionary(fun f->f.FullName)
-            pptParams.UserTagConfig.UserDeviceTags.ForEach(fun f->
-                if taskDevs.ContainsKey(f.Name)
-                then 
-                    taskDevs.[f.Name].InAddress <- f.Input
-                    taskDevs.[f.Name].OutAddress <- f.Output
-                )
-        
+          
 
             let activePath = PathManager.changeExtension (fullName.ToFile()) "ds"
 
@@ -306,11 +302,12 @@ module ImportPptModule =
                 ActivePath = activePath
                 LoadingPaths = loadingPaths
                 LayoutImgPaths = layoutImgPaths
+                UserTagConfig = model.UserTagConfig
             }
 
-        static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams, cfg:ModelConfig)=
+        static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams,  cfg:ModelConfig)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams, cfg)
             DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
-            let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg, pptParams.UserTagConfig)
+            let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg, ret.UserTagConfig)
             zipPath, ret.System
 

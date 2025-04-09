@@ -379,19 +379,22 @@ module DsAddressModule =
 
         let devsJob =  sys.GetTaskDevsWithoutSkipAddress()
         let mutable extCnt = 0
-        for dev, job in devsJob do
-            let inSkip, outSkip = getSkipInfo(dev, job)
+        for g in devsJob.GroupBy(fun (_dev, job) -> job) do
+            g |> Seq.iteri(fun i (dev, job) ->
 
-            dev.InAddress  <- getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In, target)
-            dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
+                let inSkip, outSkip = getSkipInfo(i, job)
 
-            if dev.IsRootOnlyDevice
-            then
-                if dev.InAddress = TextAddrEmpty && not(inSkip) then
-                    dev.InAddress  <-  getExternalTempMemory(target, extCnt)
-                    extCnt <- extCnt+1
+                dev.InAddress  <- getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In, target)
+                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
 
-                dev.OutAddress <- TextNotUsed
+                if dev.IsRootOnlyDevice
+                then
+                    if dev.InAddress = TextAddrEmpty && not(inSkip) then
+                        dev.InAddress  <-  getExternalTempMemory(target, extCnt)
+                        extCnt <- extCnt+1
+
+                    dev.OutAddress <- TextNotUsed
+                    )
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
 

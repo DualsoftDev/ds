@@ -200,12 +200,7 @@ module internal ModelFindModule =
             .Where(fun c->c.Parent.GetCore() :? Real)
 
 
-    let getSkipInfo(dev:TaskDev, job:Job) =
-        let devIndex =
-            let lastPart = dev.DeviceName.Split("_").Last()
-            match System.Int32.TryParse(lastPart) with
-            | (true, value) -> value
-            | (false, _) -> 1
+    let getSkipInfo(devIndex:int, job:Job) =
 
         let inSkip = job.AddressInCount < devIndex
         let outSkip = job.AddressOutCount < devIndex
@@ -213,15 +208,16 @@ module internal ModelFindModule =
         inSkip, outSkip
 
     let updateDeviceSkipAddress (x: DsSystem) =
-        let calls = x|>getVerticesHasJob
-        calls
-            |> collect(fun c-> c.TaskDefs.Select(fun dev-> dev, c.TargetJob))
-            |> iter(fun (dev, job) ->
-                let inSkip, outSkip = getSkipInfo(dev, job)
+        x.Jobs
+        |> Seq.map(fun job -> job.TaskDefs, job)
+        |> Seq.iter(fun (devs, job) ->
+            devs |> Seq.iteri(fun i dev ->  
+                let inSkip, outSkip = getSkipInfo(i, job)
                 if inSkip then
                     dev.InAddress <- TextNotUsed
                 if outSkip then
-                    dev.OutAddress <- TextNotUsed )
+                    dev.OutAddress <- TextNotUsed)  
+        )
 
     let getTaskDevs(x: DsSystem, onlyCoin:bool) =
         let calls = getVerticesHasJob(x)
@@ -336,7 +332,7 @@ type FindExtension =
     [<Extension>] static member GetDevicesOfFlow(x:Flow) =  getDevicesOfFlow x
     [<Extension>] static member GetDistinctApis(x:DsSystem) =  getDistinctApis x
 
-    [<Extension>] static member GetSkipInfo(dev:TaskDev, job:Job) =  getSkipInfo (dev, job)
+    [<Extension>] static member GetSkipInfo(devIndex:int, job:Job) =  getSkipInfo (devIndex, job)
     [<Extension>] static member GetVerticesOfJobCalls(x:DsSystem) =  getVerticesOfJobCalls x
     [<Extension>]
         static member GetAlarmCalls(x:DsSystem) =

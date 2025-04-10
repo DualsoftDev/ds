@@ -6,6 +6,7 @@ open Engine.Core
 open Engine.CodeGenCPU
 open Dual.Common.Core.FS
 open Engine.Common
+open System.Collections.Generic
 
 type RealVertexTagManager with
 
@@ -47,14 +48,25 @@ type RealVertexTagManager with
         let real = v.Vertex :?> Real
         let fn = getFuncName()
         [|
-            let set = real.CoinETContacts.ToAndElseOn() 
+            let setNormal = real.CoinETContacts.ToAndElseOn() 
+            let initSrcs = real.Graph.HeadConnectedVertices
+            let dict = Dictionary<string, PlanVar<bool>>()
+            for coin in initSrcs do
+                let tempRising = v.System.GetTempBoolTag("tempCallOut")
+                dict.Add(coin.QualifiedName, tempRising) |>ignore
+                yield! (coin.VC.CallOut.Expr, v.System)  --^ (tempRising, fn) 
+                
+            let setOrExpr = //시작동전이 하나라도 한번더 동작하면 강제 Real END
+                initSrcs.OfType<Call>().Select(fun coin -> 
+                        dict[coin.QualifiedName].Expr <&&> coin.V.F.Expr)
+                        .ToOrElseOff()
             let rst = 
                 if real.Graph.Vertices.Any() then
                     v.RT.Expr <&&> real.CoinAlloffExpr  
                 else
                     v.RT.Expr 
 
-            (set, rst) ==| (v.ET, fn)              
+            (setNormal <||> setOrExpr, rst) ==| (v.ET, fn)              
         |]
         
     member v.R3_RealStartPoint() =

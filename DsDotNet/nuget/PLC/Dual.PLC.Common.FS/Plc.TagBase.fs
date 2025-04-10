@@ -1,6 +1,7 @@
 namespace Dual.PLC.Common.FS
 
 open System
+open System.ComponentModel
 
 [<AbstractClass>]
 type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType, 
@@ -29,17 +30,13 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
     member _.Comment  = defaultArg comment ""
     
     abstract member ReadWriteType: ReadWriteType
+    [<Browsable(false)>]
     abstract member IsMemory: bool
     
     abstract member UpdateValue: byte[] -> bool
     default _.UpdateValue _ = false
 
-    member this.SetWriteValue(v: obj) =
-            if this.ReadWriteType = ReadWriteType.Read then
-                failwith $"{this} Read-Only Tag"
-            else
-                writeVal <- Some v
-
+    member this.SetWriteValue(v: obj) = writeVal <- Some v
     member this.ClearWriteValue()     = writeVal <- None
     member this.GetWriteValue()       = writeVal
     

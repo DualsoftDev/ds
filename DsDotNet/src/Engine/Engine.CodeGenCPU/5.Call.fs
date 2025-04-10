@@ -22,11 +22,10 @@ type VertexTagManager with
             )
             <&&> call.SafetyExpr
 
-        let rst =  call.End
         let rstMemos = call.MutualResetCoins.Select(fun c->c.VC.PS)
 
         let sets = sets <&&> !@rstMemos.ToOrElseOff()
-        let rsts = rst <||> !@call.V.Flow.r_st.Expr <||> parentReal.VR.RT.Expr
+        let rsts = call.End <||> !@call.V.Flow.r_st.Expr// <||> parentReal.VR.RT.Expr
 
         
         let f = getFuncName()

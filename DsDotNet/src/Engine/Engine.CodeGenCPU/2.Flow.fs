@@ -39,7 +39,7 @@ type VertexTagManager with
         let rootStart = 
             if not(bVirtaulPlant)
                     then
-                        real.Graph.Inits.Except(real.Graph.Islands) //Except(real.Graph.Islands) 없어도 되는데 사이클시작을 강제로 그리게함 
+                        real.Graph.HeadConnectedVertices //Except(real.Graph.Islands) 없어도 되는데 사이클시작을 강제로 그리게함 
                     else
                         real.Graph.Vertices
 
@@ -71,7 +71,7 @@ type VertexTagManager with
             <||>
             ( manualReset)
              <||>
-            (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr <&&> !@v.Vertex.VR.OG.Expr)
+            (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr )//<&&> !@v.Vertex.VR.OG.Expr)
 
         let rsts = real.V.R.Expr
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이

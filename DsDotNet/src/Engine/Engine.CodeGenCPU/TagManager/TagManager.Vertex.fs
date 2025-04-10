@@ -94,7 +94,7 @@ module TagManagerModule =
         ///Segment End Tag
         member val ET =
             let et = createTag  true  VertexTag.endTag
-            if RuntimeDS.ModelConfig.RuntimePackage.IsVirtualMode() then
+            if RuntimeDS.ModelConfig.RuntimePackage = Simulation then
                 if v :? Real && (v :?> Real).Finished then
                     et.Value <- true
             et
@@ -373,7 +373,7 @@ module TagManagerModule =
                 if x.ErrOnTimeOver.Value      then yield "감지시간초과"
                 if x.ErrOffTimeUnder.Value then yield "해지시간부족"
                 if x.ErrOffTimeOver.Value     then yield "해지시간초과"
-                if x.ErrShort.Value           then yield "센서감지"
+                if x.ErrShort.Value           then yield "센서쇼트"
                 if x.ErrOpen.Value            then yield "센서오프"
                 if x.ErrInterlock.Value            then yield "반대센서"
             |]

@@ -28,7 +28,7 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCall)
         let f = getFuncName()
-        let initSrcs = real.Graph.Inits.Except(real.Graph.Islands)
+        let initSrcs = real.Graph.HeadConnectedVertices
         [|
             for coin in coins do
                 let sets =

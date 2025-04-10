@@ -38,6 +38,20 @@ type DsSystem with
                 yield! real.CoinStartPassive()
                 yield! real.CoinEndPassive()
         ]
+
+    member sys.CallVirtualPlant() =
+        [
+            let f = getFuncName()
+            for vc in sys.GetVerticesOfCoins().Select(getVMCall) do
+                let call = vc.Vertex :?> Call       
+                let tempRising  = getSM(call.System).GetTempBoolTag("tempFallingOutput")
+                yield! (call.Start, call.System) --^ (tempRising, f)
+
+                yield (tempRising.Expr, call.End) ==| (vc.ST, f)
+                yield (vc.ST.Expr     , call.End) ==| (vc.PS, f)
+
+
+        ]
         
 
     member sys.RealActive() =

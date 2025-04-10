@@ -99,3 +99,10 @@ type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
     member this.StopScan() =
         if not cancelToken.IsCancellationRequested then
             cancelToken.Cancel()
+
+            async {
+                while isRunning do
+                    do! Async.Sleep(50) // 50ms 지연 
+            } |> Async.Start // 비동기로 처리
+                   
+            this.Disconnect()

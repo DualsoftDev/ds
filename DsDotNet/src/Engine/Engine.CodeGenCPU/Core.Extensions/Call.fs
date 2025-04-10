@@ -32,6 +32,7 @@ module ConvertCpuCall =
 
         member c.MaxDelayTime  = c.CallTime.TimeDelayCheckMSec
 
+        member c.StartPlan =   c.VC.PS.Expr
         member c.EndPlan =
             if c.IsCommand then
                 (c.TagManager :?> CoinVertexTagManager).CallCommandEnd.Expr
@@ -44,10 +45,29 @@ module ConvertCpuCall =
         member c.TimeOutMaxMSec     = c.CallTime.TimeOutMaxMSec
         member c.TimeDelayCheckMSec = c.CallTime.TimeDelayCheckMSec
         member c.UsingTimeDelayCheck  = c.IsJob && c.CallTime.TimeDelayCheckMSec > 0u
+        member c.ActionInExpr =
+            let inExprs =
+                c.TaskDefs.Where(fun d-> d.ExistInput)
+                          .Select(fun d-> d.GetInExpr(c))
+
+            if inExprs.Any()
+            then inExprs.ToAnd() |>Some
+
+            else None
+
+        member c.ActionOutExpr =
+            let outExprs =
+                c.TaskDefs.Where(fun d-> d.ExistOutput)
+                          .Select(fun d-> d.GetOutExpr(c))
+
+            if outExprs.Any()
+            then outExprs.ToOr()|>Some
+            else None
 
         member c.EndAction = if c.IsJob then c.ActionInExpr else None
         member c.EndWithoutTimer = c.EndAction.DefaultValue(c.EndPlan)
 
+        member c.Start = c.ActionOutExpr.DefaultValue(c.StartPlan)
         member c.End =
                 if c.UsingTimeDelayCheck then
                     (c.TagManager :?> CoinVertexTagManager).TimeCheck.DN.Expr
@@ -121,24 +141,7 @@ module ConvertCpuCall =
                 c._off.Expr
 
 
-        member c.ActionInExpr =
-            let inExprs =
-                c.TaskDefs.Where(fun d-> d.ExistInput)
-                          .Select(fun d-> d.GetInExpr(c))
-
-            if inExprs.Any()
-            then inExprs.ToAnd() |>Some
-
-            else None
-
-        member c.ActionOutExpr =
-            let outExprs =
-                c.TaskDefs.Where(fun d-> d.ExistOutput)
-                          .Select(fun d-> d.GetOutExpr(c))
-
-            if outExprs.Any()
-            then outExprs.ToOr()|>Some
-            else None
+        
 
         member c.MutualResetCoins =
             let mts = c.Parent.GetSystem().S.MutualCalls

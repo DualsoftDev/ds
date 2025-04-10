@@ -248,7 +248,6 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         this.CreateOpcNodes (getTags dsSys) rootSysTagfolder nIndex
 
         // Create Tree Structure
-        let treeFlows = DsPropertyTreeExt.GetPropertyTreeFromSystem(dsSys)
         let processTreeLevels (rootNode: FolderState) (treeFlows: DsTreeNode) =
             // 큐를 사용하여 단계별로 처리
             let queue = Queue<(FolderState * DsTreeNode)>()
@@ -302,10 +301,17 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         // 자식 노드를 큐에 추가
                         for child in treeNode.Children do
                             queue.Enqueue(folder, child)
+#if DEBUG
+        [dsSys]@dsSys.GetRecursiveLoadedSystems()  //디버그 모드에서만 사용된 시스템 전부 모니터 사용
+#else 
+        [dsSys]
+#endif
+        |> Seq.iter (fun sys ->
+            let treeFlows = DsPropertyTreeExt.GetPropertyTreeFromSystem(sys)
+            processTreeLevels rootNode treeFlows 
+        )
 
 
-
-        processTreeLevels rootNode treeFlows 
         this.processTextAdd rootNode dsSys
 
         // Subscribe to DS tag events

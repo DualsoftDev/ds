@@ -57,7 +57,7 @@ module DBLoggerApi =
                 let errs =
                     [|
                         if isTrue(errOpen)            then yield $"{call.Name} 센서오프이상"
-                        if isTrue(errShort)           then yield $"{call.Name} 센서감지이상"
+                        if isTrue(errShort)           then yield $"{call.Name} 센서쇼트이상"
                         if isTrue(errOnTimeOver)      then yield $"{call.Name} 감지시간초과 이상"
                         if isTrue(errOnTimeUnder)     then yield $"{call.Name} 감지시간부족 이상"
                         if isTrue(errOffTimeOver)     then yield $"{call.Name} 해지시간초과 이상"

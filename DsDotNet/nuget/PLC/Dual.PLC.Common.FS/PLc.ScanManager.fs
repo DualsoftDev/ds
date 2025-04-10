@@ -55,13 +55,13 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
     member this.StopScan(ip: string) =
         match scanners.TryGetValue(ip) with
         | true, scanner ->
-            scanner.Disconnect()
+            scanner.StopScan()  
             scanners.Remove(ip) |> ignore
         | _ -> ()
 
     /// 모든 PLC 스캔 정지 및 스캐너 초기화
     member this.StopAll() =
-        scanners.Values |> Seq.iter (fun scanner -> scanner.Disconnect())
+        scanners.Keys |> Seq.iter (fun ip -> this.StopScan(ip))
         scanners.Clear()
 
     /// 현재 스캔 중인 모든 IP 리스트 반환

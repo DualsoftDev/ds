@@ -286,20 +286,25 @@ type TagKindExt =
               )
 
     [<Extension>]
-    static member IsMotionEndStg(x:IStorage) =
-        x.TagKind.IsOneOf(
-               int VertexTag.motionEnd
-              )
+    static member IsMotionStartStg(x:IStorage) = x.TagKind = int VertexTag.motionStart
     [<Extension>]
-    static member IsScriptEndStg(x:IStorage) =
-        x.TagKind.IsOneOf(
-               int VertexTag.scriptEnd
-              )
+    static member IsMotionEndStg(x:IStorage) = x.TagKind = int VertexTag.motionEnd
+    [<Extension>]
+    static member IsScriptStartStg(x:IStorage) = x.TagKind = int VertexTag.scriptStart
+    [<Extension>]
+    static member IsScriptEndStg(x:IStorage) = x.TagKind = int VertexTag.scriptEnd
+   
               
     [<Extension>]
     static member IsMotionEnd(x:TagEvent) =
         match x with
         | EventVertex (s, _, _) -> s.IsMotionEndStg()
+        | _ -> false    
+
+    [<Extension>]
+    static member IsMotionStart(x:TagEvent) =
+        match x with
+        | EventVertex (s, _, _) -> s.IsMotionStartStg()
         | _ -> false
 
     [<Extension>]

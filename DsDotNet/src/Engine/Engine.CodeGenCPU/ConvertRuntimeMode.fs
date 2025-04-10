@@ -22,10 +22,10 @@ module ConvertRuntimeModeModule =
             yield! sys.CallPassive()   
         ]    
     
-    let applyModeVirtualPlant(sys:DsSystem) (isSubSys:bool) =
+    let applyModeVirtualPlant(sys:DsSystem) (isSubSys:bool)=
         [       
-            yield! sys.RealPassive isSubSys true 
-            yield! sys.CallPassive()   
+            yield! sys.RealPassive  isSubSys true 
+            yield! sys.CallVirtualPlant()   
             yield! sys.SensorEmulation()   
         ]
 

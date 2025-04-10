@@ -60,10 +60,9 @@ type DsSystem with
                     | DuIdleModeLamp      ->  s._idleMonitor.Expr
                     | DuOriginStateLamp    ->
                         let originActions =
-                            s.GetRealVertices()
-                                .Select(getVMReal)
-                                .Select(fun r->r.OA)
-                                .ToOrElseOff()
+                            let actions = s.GetRealVertices().Select(getVMReal)
+                                            |> Seq.collect(fun r-> [|r.OB; r.OA|])
+                            actions.ToOrElseOff()
                         
                         s._originMonitor.Expr <||> (originActions <&&> s._flicker1sec.Expr) 
                 

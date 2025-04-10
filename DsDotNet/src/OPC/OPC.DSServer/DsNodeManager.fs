@@ -302,7 +302,8 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         for child in treeNode.Children do
                             queue.Enqueue(folder, child)
 #if DEBUG
-        [dsSys]@dsSys.GetRecursiveLoadedSystems()  //디버그 모드에서만 사용된 시스템 전부 모니터 사용
+        //[dsSys]@dsSys.GetRecursiveLoadedSystems()  //디버그 모드에서만 사용된 시스템 전부 모니터 사용
+        [dsSys]
 #else 
         [dsSys]
 #endif

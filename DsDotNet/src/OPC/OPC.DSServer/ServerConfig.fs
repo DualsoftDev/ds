@@ -85,10 +85,10 @@ module ServerConfigModule =
 
             match mode with
             | RuntimePackage.Control        -> serverStartPort + 1000  + lastIp
-            | RuntimePackage.Monitoring     -> serverStartPort + 2000  + lastIp
-            | RuntimePackage.VirtualPlant   -> serverStartPort + 4000  + lastIp
+            | RuntimePackage.VirtualPlant   -> serverStartPort + 2000  + lastIp
+            | RuntimePackage.Monitoring    
             | RuntimePackage.Simulation   
-            | RuntimePackage.VirtualLogic   -> 2747 //  Simulation, Virtual Logic Port 고정
+            | RuntimePackage.VirtualLogic   -> 2747 //  Monitoring, Simulation, Virtual Logic Port 고정
 
         serverPort
 

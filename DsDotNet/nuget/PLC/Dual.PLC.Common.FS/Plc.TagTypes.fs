@@ -11,6 +11,22 @@ type PlcDataSizeType =
     | String
     | DateTime
     | UserDefined
+    static member GetAllTypes() =
+        [|
+            Boolean
+            SByte
+            Byte
+            Int16
+            UInt16
+            Int32
+            UInt32
+            Int64
+            UInt64
+            Float
+            Double
+            String
+            DateTime
+        |]
 
     /// 비트 수로부터 PlcDataSizeType 추론
     static member FromBitSize(size: int) =

@@ -56,16 +56,19 @@ type RealVertexTagManager with
                 dict.Add(coin.QualifiedName, tempRising) |>ignore
                 yield! (coin.VC.CallOut.Expr, v.System)  --^ (tempRising, fn) 
                 
-            let setOrExpr = //시작동전이 하나라도 한번더 동작하면 강제 Real END
+            let setOrExpr = //한번끝난 시작동전이 하나라도 한번더 동작시작하면 강제 Real END
                 initSrcs.OfType<Call>().Select(fun coin -> 
                         dict[coin.QualifiedName].Expr <&&> coin.V.F.Expr)
                         .ToOrElseOff()
+
+
             let rst = 
                 if real.Graph.Vertices.Any() then
                     v.RT.Expr <&&> real.CoinAlloffExpr  
                 else
                     v.RT.Expr 
 
+            (setOrExpr, rst) ==| (real.VR.RR, fn)              
             (setNormal <||> setOrExpr, rst) ==| (v.ET, fn)              
         |]
         

@@ -27,7 +27,7 @@ namespace PLC.Mapper.CS.Test
         {
             var names = LoadNameList();
             BuildCharColorMap(names);
-            var list = MappingDeviceModule.extractGroupDeviceApis(names.ToArray(), 5);
+            var list = MappingDeviceModule.extractGroupDeviceApis(names.ToArray(), 5, []);
             var image = RenderGroupedImage(list);
             pictureBox1.Image = image;
         }

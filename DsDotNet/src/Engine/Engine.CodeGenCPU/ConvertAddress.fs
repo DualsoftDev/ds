@@ -42,9 +42,9 @@ module ConvertAddressModule =
             tags.Iter(fun f->f.AliasNames.AddRange(aliasSet))
             )
 
-    let updateSourceTokenOrder(sys: DsSystem) =
+    let updateSourceTokenOrder(sys: DsSystem, generationAllToken:bool) =
               // Aggregate all addresses to check for duplicates along with their API names
-        sys.GetRealVertices().Where(fun w->w.IsSourceToken)
+        sys.GetRealVertices().Where(fun w->w.IsSourceToken || generationAllToken)
            .OrderBy(fun f->f.QualifiedName) |> Seq.iteri(fun i v -> v.TokenSourceOrder <- Some (i+1))
 
     let setSimulationEmptyAddress(sys:DsSystem) =

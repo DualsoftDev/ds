@@ -239,7 +239,7 @@ type TagKindExt =
               int FlowTag.idle_mode,
               
               int VertexTag.calcStatActionFinish,
-              int VertexTag.planStart,
+              int VertexTag.going,
               int VertexTag.startTag, 
               int VertexTag.finish, 
               int VertexTag.endTag)

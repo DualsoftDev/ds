@@ -18,7 +18,7 @@ type VertexTagManager with
             let start = !@real.V.ErrWork.Expr <&&> v.G.Expr <&&> v.Flow.aop.Expr
             for coin in coinHeads@coinTails do
                 let sets = if coinHeads.Contains coin 
-                           then  start<&&>  v.RR.Expr 
+                           then  start <&&> v.RR.Expr 
                            else  start <&&> coin.Vertex.GetStartDAGAndCausals() 
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
                 yield (sets, rsts) ==| (coin.ST, f)

@@ -17,7 +17,6 @@ module ConvertCPU =
                 yield vr.M1_OriginMonitor()
                 yield vr.E5_RealErrTotalMonitor()
 
-                yield  vr.R1_RealInitialStart()
                 
                 yield  vr.R3_RealStartPoint()
                 yield  vr.R4_RealLink()
@@ -178,7 +177,7 @@ module ConvertCPU =
                 sys.GenerationMemory()
                 sys.GenerationIO()
                 let mode = RuntimeDS.ModelConfig.RuntimePackage 
-                updateSourceTokenOrder sys
+                updateSourceTokenOrder( sys,  mode = Monitoring) 
                 if mode = Control || mode = Monitoring
                 then
                     checkNullAddress sys (mode = Monitoring) //모니터링 모드에서는 버튼램프 주소체크 안함

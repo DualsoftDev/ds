@@ -88,7 +88,9 @@ module DsTimeAnalysisMoudle =
                 activeDuration <-  (endTime - statsStart).TotalMilliseconds |> uint32
             if movingStart <> DateTime.MinValue then
                 movingDuration <-  (endTime - movingStart).TotalMilliseconds |> uint32
-            
+            //else 
+            //    failwithf $"{vertex.QualifiedName} 신호놓침 planStart"
+
             resetStat vertex  //opc rising 위해서 값 초기화
             updateStat vertex  
             
@@ -96,6 +98,8 @@ module DsTimeAnalysisMoudle =
 
             statsStart <- DateTime.MinValue
             movingStart <- DateTime.MinValue
+            activeDuration <- 0u
+            movingDuration <- 0u
 
 
       
@@ -164,7 +168,7 @@ module DsTimeAnalysisMoudle =
         match tagKind with
         | VertexTag.startTag ->
             stats.StartTracking(call, DateTime.UtcNow) 
-        | VertexTag.planStart ->
+        | VertexTag.going    ->
             stats.StartMoving() 
 
         | VertexTag.calcStatActionFinish ->
@@ -183,10 +187,11 @@ module DsTimeAnalysisMoudle =
             | VertexTag.endTag->
                 stats.EndTracking(real)    //work는 종료하고 바로 시작(실제Going을 Moving으로 처리)
             | VertexTag.finish ->
-                let startDelay = 50  
+                let startDelay = 100  
                 async {
-                    do! Async.Sleep(startDelay) // 50ms 지연  // work는 종료하고 바로 시작해서 다음 StartStat 시간이 처리됨 방지
-                    stats.StartTracking(real, DateTime.UtcNow.AddMilliseconds(-startDelay))
+                    let sTime = DateTime.UtcNow
+                    do! Async.Sleep(startDelay) // 100ms 지연  // work는 종료하고 바로 시작해서 다음 StartStat 시간이 처리됨 방지
+                    stats.StartTracking(real, sTime)//(*DateTime.UtcNow.AddMilliseconds(-startDelay)*))
                 } |> Async.Start // 비동기로 처리
             | _ -> debugfn "Unhandled VertexTag: %A" tagKind
 

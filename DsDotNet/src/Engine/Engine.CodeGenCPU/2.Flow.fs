@@ -39,12 +39,15 @@ type VertexTagManager with
         let rootStart = 
             if not(bVirtaulPlant)
                     then
-                        real.Graph.HeadConnectedVertices //Except(real.Graph.Islands) 없어도 되는데 사이클시작을 강제로 그리게함 
+                        real.Graph.HeadConnectedVertices 
                     else
                         real.Graph.Vertices
+        let rootStart = rootStart.Select(fun v->v.VC.CallOut).ToOrElseOff()
 
-        let sets = (  v.SFP.Expr <||> plans <||> rootStart.Select(fun v->v.VC.CallOut).ToOrElseOff())
-                   <&&> v.Flow.d_st.Expr
+        let sets = v.SFP.Expr 
+                    <||> plans 
+                    <||> rootStart
+                    <||> real.VR.RR.Expr //같은동전이 2번 시작하는 경우
 
         let rsts = if real.Graph.Vertices.Any()
                     then real.V.F.Expr <||> (real.V.RT.Expr <&&> real.CoinAlloffExpr)

@@ -12,7 +12,7 @@ module XgtTagTests =
     
     [<Fact>]   
     let ``XGTTag UpdateValue should detect change for UInt16`` () =
-        let tag = XGTTag("%MW00010", true)
+        let tag = XGTTag("%MW00010", true, false)
         tag.LWordOffset <- 20 // StartByteOffset = 160
         let buf = Array.zeroCreate<byte> 256
         BitConverter.GetBytes(123us).CopyTo(buf, tag.StartByteOffset)
@@ -22,7 +22,7 @@ module XgtTagTests =
 
     [<Fact>]
     let ``XGTTag UpdateValue should return false for no change`` () =
-        let tag = XGTTag("%MW00010", true)
+        let tag = XGTTag("%MW00010", true, false)
         tag.LWordOffset <- 20
         let buf = Array.zeroCreate<byte> 256
         BitConverter.GetBytes(321us).CopyTo(buf, tag.StartByteOffset)
@@ -37,7 +37,7 @@ module BatchTests =
     let ``prepareReadBatches groups tags by LWordOffset`` () =
         let batchCnt = 2 //최대 Lword 64 개씩
         let tags = [| for i in 0..16*batchCnt-1 -> 
-                        XGTTag($"%%ML000{i}", true) 
+                        XGTTag($"%%ML000{i}", true, false) 
                     |]
         let batches = prepareReadBatches tags
         Assert.Equal(batchCnt, batches.Length)

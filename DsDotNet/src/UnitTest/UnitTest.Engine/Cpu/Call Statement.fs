@@ -29,4 +29,4 @@ type Spec07_CallStatement() =
         let devCallSet =  t.Sys.GetTaskDevCalls()
         for (td, coins) in devCallSet do
             let tm = td.TagManager :?> TaskDevManager
-            tm.J1_JobActionOuts(coins)  |> doChecks
+            tm.J1_JobActionOuts(coins, true)  |> doChecks

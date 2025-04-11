@@ -6,7 +6,7 @@ open Dual.PLC.Common.FS
 open XgtProtocol
 
 type ScanManagerFixture() =
-    member val Manager = XgtScanManager() :> PlcScanManagerBase<XgtPlcScan>
+    member val Manager = XgtScanManager(20, 3000, false) :> PlcScanManagerBase<XgtPlcScan>
 
 module ScanManagerTests =
 
@@ -18,13 +18,13 @@ module ScanManagerTests =
 
     [<Fact>]
     let ``IsConnected should return false for unknown IP`` () =
-        let scanMgr = XgtScanManager()
+        let scanMgr = XgtScanManager(20, 3000, false)
         let result = scanMgr.GetScanner(ipUnknown) |> Option.map (fun s -> s.IsConnected) |> Option.defaultValue false
         Assert.False(result)
 
     [<Fact>]
     let ``StopScan should clear all scans`` () =
-        let scanMgr = XgtScanManager()
+        let scanMgr = XgtScanManager(20, 3000, false)
 
         let input =
             dict [
@@ -32,24 +32,24 @@ module ScanManagerTests =
                 ip103, seq { "%MW200" }
             ]
         try
-            input |> Seq.iter (fun kv -> scanMgr.StartScan(kv.Key, kv.Value, 20, 500) |> ignore)
+            input |> Seq.iter (fun kv -> scanMgr.StartScanReadOnly(kv.Key, kv.Value) |> ignore)
             
             Assert.True(scanMgr.GetScanner(ip100).IsSome)
             Assert.True(scanMgr.GetScanner(ip103).IsSome)
 
-            scanMgr.StartScan(ip100, dummyTags, 20, 500) |> ignore
+            scanMgr.StartScanReadOnly(ip100, dummyTags) |> ignore
             Assert.True(scanMgr.GetScanner(ip100).IsSome)
 
             scanMgr.StopScan(ip100)
             Assert.False(scanMgr.GetScanner(ip100).IsSome)
 
-            scanMgr.StartScan(ip100, seq { "%MW100" }, 20, 3000) |> ignore
-            scanMgr.UpdateScan(ip100,[ "%MW100"; "%MW101" ])
+            scanMgr.StartScanReadOnly(ip100, seq { "%MW100" }) |> ignore
+            scanMgr.UpdateScanReadOnly(ip100,[ "%MW100"; "%MW101" ])
 
             Assert.True(scanMgr.GetScanner(ip100).IsSome)
 
-            scanMgr.StartScan(ip100, dummyTags, 20, 500) |> ignore
-            scanMgr.StartScan(ip103, dummyTags, 20, 500) |> ignore
+            scanMgr.StartScanReadOnly(ip100, dummyTags) |> ignore
+            scanMgr.StartScanReadOnly(ip103, dummyTags) |> ignore
 
             scanMgr.StopAll()
 

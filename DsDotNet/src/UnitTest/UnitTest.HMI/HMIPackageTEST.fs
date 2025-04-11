@@ -9,6 +9,7 @@ open Engine.CodeGenHMI
 open Engine.Cpu
 open Engine.Core
 open Engine.CodeGenCPU
+open Engine.Core.MapperDataModule
 
 module HMIPackageTEST =
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
@@ -21,6 +22,8 @@ module HMIPackageTEST =
         assignAutoAddress (dsPpt.System, 0 , 0, pptParms.HwTarget)
 
         RuntimeDS.ChangeRuntimePackage(RuntimePackage.Control)
-        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.Platform) modelConfig pptParms.UserTagConfig
+        let userTagConfig = createDefaultUserTagConfig(); 
+
+        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.Platform) modelConfig  userTagConfig
 
         hmiPackage.Devices.Length > 0  |> Assert.True

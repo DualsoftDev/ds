@@ -74,7 +74,7 @@ type VertexTagManager with
             <||>
             ( manualReset)
              <||>
-            (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr )//<&&> !@v.Vertex.VR.OG.Expr)
+            (( real.VR.OB.Expr <||>  real.VR.OA.Expr ) <&&> real.Flow.mop.Expr <&&> !@v.Vertex.VR.OG.Expr)
 
         let rsts = real.V.R.Expr
         (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이

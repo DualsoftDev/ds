@@ -22,14 +22,14 @@ module IntegrationScanTests =
 
     [<Fact>]
     let ``Integration - Random Write & Read for 5 Seconds`` () =
-        let scanMgr = XgtScanManager()
+        let scanMgr = XgtScanManager(20, 3000, false)
         let ip = "192.168.9.102"
 
         let tags = 
             [ "%MD100"; "%MD101"; "%ML1000"; "%ML1001" ; "%ML1002" ; "%ML1003"
               "%ML1004"; "%ML1005"; "%RL123"; "%ML0000" ]
         try
-            let result = scanMgr.StartScan(ip, tags, 20, 500)
+            let result = scanMgr.StartScanReadOnly(ip, tags)
             
             // 이벤트 구독
             scanMgr.GetScanner(ip).Value.TagValueChangedNotify

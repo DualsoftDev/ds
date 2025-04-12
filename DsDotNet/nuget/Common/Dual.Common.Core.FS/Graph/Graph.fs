@@ -116,7 +116,7 @@ module GraphModule =
         member private x.ConnectedVertices = x.Edges |> Seq.collect(fun e -> [e.Source; e.Target]) |> Seq.distinct
         member x.Islands = x.Vertices.Except(x.ConnectedVertices)
         /// Island 가 아닌 연결 처음 시작 vertices. 
-        member x.HeadConnectedVertices = x.Inits.Except(x.Islands)
+        member x.HeadConnectedOrSingleVertex = if x.Vertices.Count > 1 then x.Inits.Except(x.Islands) else  x.Vertices 
         member x.GetIncomingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Target = vertex)
         member x.GetOutgoingEdges(vertex:'V) = x.Edges.Where(fun e -> e.Source = vertex)
         member x.GetEdges(vertex:'V) = x.GetIncomingEdges(vertex).Concat(x.GetOutgoingEdges(vertex))

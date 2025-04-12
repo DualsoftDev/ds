@@ -118,7 +118,7 @@ module RuntimeGeneratorModule =
 
     type ModelConfig = {
         DsFilePath: string
-        HwIP: string
+        mutable HwIP: string
         HwOPC : string
         HwPath: string
         ExternalApi: ExternalApi

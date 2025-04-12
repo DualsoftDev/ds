@@ -318,6 +318,29 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         // Subscribe to DS tag events
         this.SubscribeToDsTagEvents()
 
+
+        let sendStat() =
+            _variables.Iter(fun kv ->
+                let tagKind = _dsStorages[kv.Key].TagKind |> int
+                if tagKind = int VertexTag.calcAverage  ||
+                   tagKind = int VertexTag.calcStandardDeviation
+                then 
+                    kv.Value.Value <- _dsStorages[kv.Key].BoxedValue;
+                    kv.Value.Timestamp <- DateTime.UtcNow   
+                    kv.Value.ClearChangeMasks(this.SystemContext, false)    
+            )      
+                            
+
+        /// 5초마다 통계데이터 전송 클라이언트 
+        let startClientMonitor () =
+            let timer = new System.Timers.Timer(1000.0)
+            timer.Elapsed.Add(fun _ -> sendStat())
+            timer.AutoReset <- true
+            timer.Start()
+
+        DsTimeAnalysisMoudle.initUpdateStat dsSys
+        startClientMonitor()
+
     /// JSON 데이터를 추가하는 함수
     member private this.processTextAdd(rootNode: FolderState)(dsSys: DsSystem) =
         let dsData = dsSys.ToDsText(false, false)

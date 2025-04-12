@@ -120,27 +120,38 @@ module DsOPCServerConfig =
 
         config
 
-
-
-
-type DsOPCServer(dsSys: DsSystem, mode:RuntimePackage) =
+type DsOPCServer(dsSys: DsSystem, mode: RuntimePackage) =
     inherit StandardServer()
+
     let mutable dsNodeManager = Unchecked.defaultof<DsNodeManager>
 
+    // 생성자 실행 블록
     do
         DsTimeAnalysisMoudle.statsMap.Clear()
-        LoadStatisticsFromJson (dsSys.Name) 
-        |> Seq.iter(fun kv -> DsTimeAnalysisMoudle.statsMap.TryAdd(kv.Key, getCalcStats(kv.Value)) |> ignore)
+        let data = LoadStatisticsFromJson (dsSys.Name)
+        data
+        |> Seq.iter (fun kv -> DsTimeAnalysisMoudle.statsMap.TryAdd(kv.Key, getCalcStats(kv.Value)) |> ignore)
 
-    // NodeManager를 생성하여 주소 공간 관리
+
+    /// NodeManager를 생성하여 주소 공간 관리
     override this.CreateMasterNodeManager(server: IServerInternal, configuration: ApplicationConfiguration) =
         dsNodeManager <- new DsNodeManager(server, configuration, dsSys, mode)
-        new MasterNodeManager(server, configuration, null, [|dsNodeManager:> INodeManager|])
+        new MasterNodeManager(server, configuration, null, [| dsNodeManager :> INodeManager |])
 
-    member this.ChangeDSStorage (stg:Storages) = 
+    /// 외부 저장소 변경
+    member this.ChangeDSStorage(stg: Storages) =
         dsNodeManager.ChangeDSStorage stg
 
+    /// Dualsoft 클라이언트 외의 세션들   
+    member this.ClientDsSessions =
+        let clients = 
+            base.ServerInternal.SessionManager.GetSessions()
+            |> Seq.filter (fun session ->
+                not (String.IsNullOrWhiteSpace session.SessionDiagnostics.SessionName) &&
+                not (session.SessionDiagnostics.SessionName.Contains "Dualsoft"))
+        clients  
+    
+    /// Dualsoft 클라이언트 외의 세션이 접속되어 있는지 확인
     member this.IsConnectedNotDSClient =
-        this.ServerInternal.SessionManager.GetSessions()
-        |> Seq.filter (fun session -> not( session.SessionDiagnostics.SessionName.Contains "Dualsoft"))
-        |> Seq.exists (fun session -> session.Activated)
+        this.ClientDsSessions |> Seq.exists (fun session -> session.Activated)
+          

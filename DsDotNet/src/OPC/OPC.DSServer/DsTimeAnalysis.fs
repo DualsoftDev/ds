@@ -26,6 +26,10 @@ module DsTimeAnalysisMoudle =
         let mutable M2 = 0.0f
         let mutable activeDuration = 0u // StatsStart → finishTag
         let mutable movingDuration = 0u // MovingStart → finishTag
+        
+        let mutable activeLastLog = 0u 
+        let mutable movingLastLog = 0u 
+
 
         let mutable statsStart = DateTime.MinValue 
         let mutable movingStart = DateTime.MinValue 
@@ -66,7 +70,8 @@ module DsTimeAnalysisMoudle =
                 tm.CalcActiveDuration.BoxedValue <- activeDuration  
                 tm.CalcMovingDuration.BoxedValue <- movingDuration  
 
-
+                activeLastLog <- activeDuration
+                movingLastLog <- movingDuration
         //member x.StatsStart = statsStart
         //member val MovingStart = DateTime.MinValue with get, set
     
@@ -106,8 +111,9 @@ module DsTimeAnalysisMoudle =
         /// 대기 시간 계산
         member this.WaitingDuration  =  activeDuration - movingDuration
         /// 동작 시간
-        member this.ActiveDuration  = activeDuration
-        member this.MovingDuration  = movingDuration 
+        member this.ActiveLastLog  = activeLastLog
+        member this.MovingLastLog  = movingLastLog
+
 
         member this.DriveStateChaged(driveOn:bool) =   
             if not(driveOn) then    //drive_state가 꺼지면 초기화
@@ -117,6 +123,8 @@ module DsTimeAnalysisMoudle =
         member x.Mean with get () = mean and set v = mean <- v
         member x.MeanTemp with get () = M2 and set v = M2 <- v
 
+        member x.ActiveDuration with get () = activeDuration and set v = activeDuration <- v
+        member x.MovingDuration with get () = movingDuration and set v = movingDuration <- v
 
         /// 모집단 표준편차
         member this.StandardDeviation = getStandardDeviation() 
@@ -129,9 +137,13 @@ module DsTimeAnalysisMoudle =
         |> Seq.filter(fun kvp -> kvp.Key.IsNonNull()) //null이 아닌 것만 필터링 todo null 아예 안나게 처리필요
         |> Seq.map(fun kvp -> 
             let statJson =  
-                {   Count = kvp.Value.Count;
+                {   
+                    Count = kvp.Value.Count;
                     Mean = kvp.Value.Mean; 
-                    MeanTemp = kvp.Value.MeanTemp }
+                    MeanTemp = kvp.Value.MeanTemp;
+                    ActiveTime = kvp.Value.ActiveLastLog;
+                    MovingTime = kvp.Value.MovingLastLog;
+                }
             kvp.Key, statJson) 
         |> dict   
         
@@ -140,6 +152,8 @@ module DsTimeAnalysisMoudle =
         calcStats.Count <- statsDto.Count   
         calcStats.Mean <- statsDto.Mean
         calcStats.MeanTemp <- statsDto.MeanTemp
+        calcStats.ActiveDuration <- statsDto.ActiveTime
+        calcStats.MovingDuration <- statsDto.MovingTime
         calcStats
 
     /// 통계 객체 가져오기 (없으면 생성)
@@ -150,6 +164,20 @@ module DsTimeAnalysisMoudle =
             let newStats = CalcStats()
             statsMap[fqdn] <- newStats
             newStats
+
+    let initUpdateStat (dsSys:DsSystem) =
+        dsSys.Flows.Iter(fun flow -> 
+            flow.GetVerticesOfFlow()
+            |> Seq.iter (fun vertex -> 
+                let stats = getOrCreateStats (vertex.QualifiedName)
+                let vm = vertex.TagManager :?> VertexTagManager  
+                vm.CalcAverage.BoxedValue <- stats.Mean 
+                vm.CalcStandardDeviation.BoxedValue <-stats.StandardDeviation 
+                vm.CalcActiveDuration.BoxedValue <-stats.ActiveDuration 
+                vm.CalcMovingDuration.BoxedValue <-stats.MovingDuration 
+                vm.CalcCount.BoxedValue <-stats.Count 
+                )
+            )
 
     let processFlow (flow: Flow) =
         let driveOn = (flow.TagManager:?> FlowManager).GetFlowTag(FlowTag.drive_state).Value

@@ -26,6 +26,8 @@ module ServerConfigModule =
         Count: uint32
         Mean: float32
         MeanTemp: float32
+        ActiveTime: uint32
+        MovingTime: uint32
     }
 
     // Helper function to resolve paths with environment variables
@@ -86,7 +88,7 @@ module ServerConfigModule =
             match mode with
             | RuntimePackage.Control        -> serverStartPort + 1000  + lastIp
             | RuntimePackage.VirtualPlant   -> serverStartPort + 2000  + lastIp
-            | RuntimePackage.Monitoring    
+            | RuntimePackage.Monitoring     -> serverStartPort + 3000  + lastIp
             | RuntimePackage.Simulation   
             | RuntimePackage.VirtualLogic   -> 2747 //  Monitoring, Simulation, Virtual Logic Port 고정
 

@@ -8,6 +8,7 @@ open Engine.Runtime
 open Engine.Core.Interface
 open Engine.Core
 open System.IO
+open System.Collections.Generic
 
 module DsOpcUaServerManager =
 
@@ -17,6 +18,11 @@ module DsOpcUaServerManager =
         match server with
         | Some s -> s.IsConnectedNotDSClient
         | None -> false
+
+    let GetDSClients() = 
+        match server with
+        | Some s -> s.ClientDsSessions
+        | None -> []
 
         /// <summary>
     /// OPC UA 서버 종료

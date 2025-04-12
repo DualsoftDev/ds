@@ -39,7 +39,7 @@ type VertexTagManager with
         let rootStart = 
             if not(bVirtaulPlant)
                     then
-                        real.Graph.HeadConnectedVertices 
+                        real.Graph.HeadConnectedOrSingleVertex 
                     else
                         real.Graph.Vertices
         let rootStart = rootStart.Select(fun v->v.VC.CallOut).ToOrElseOff()
@@ -84,11 +84,11 @@ type VertexTagManager with
        
         let sets = v.RFP.Expr <||>
                     if real.Graph.Vertices.Any()
-                    then real.V.F.Expr
+                    then real.V.RR.Expr <&&> real.V.F.Expr 
                     else v._off.Expr
 
         let rsts = real.V.R.Expr
-        (sets, rsts) ==| (v.RT, getFuncName())//조건에 의한 릴레이
+        (sets, rsts) ==| (v.RT, getFuncName())
 
 
     member v.F3_RealEndInFlow() =

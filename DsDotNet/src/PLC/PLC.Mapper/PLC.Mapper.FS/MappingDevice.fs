@@ -80,9 +80,9 @@ module MappingDeviceModule =
         else
             failwith $"extractApiFromTag tag {tag} device {device} err"
 
-    let private extractDeviceAndApiFromUserGroup (tags: string[]) : string * (string * string)[] =
+    let private extractDeviceAndApiFromUserGroup (tags: string[])  (groupName:string)   : string * (string * string)[] =
         let prefix = findCommonPrefix (tags |> Array.toList)
-        let trimmedPrefix = prefix.TrimEnd(SegmentSplit)
+        let trimmedPrefix = prefix.Substring(groupName.Length).TrimEnd(SegmentSplit)
         let device = trimmedPrefix
 
         let deviceApiList =
@@ -90,7 +90,7 @@ module MappingDeviceModule =
             |> Array.map (fun tag ->
                 let suffix = tag.Substring(device.Length).TrimStart(SegmentSplit)
                 let api =
-                    if String.IsNullOrWhiteSpace(suffix) then "ON"
+                    if String.IsNullOrWhiteSpace(suffix) then "DO"
                     else String.concat "_" (suffix.Split(SegmentSplit, System.StringSplitOptions.RemoveEmptyEntries))
                 tag, api)
 
@@ -132,7 +132,7 @@ module MappingDeviceModule =
                 let filtered = tags |> Array.filter nameSet.Contains
                 if filtered.Length < 2 then [||]
                 else
-                    let device, deviceApiList = extractDeviceAndApiFromUserGroup filtered
+                    let device, deviceApiList = extractDeviceAndApiFromUserGroup filtered groupName
                     let color = (hsvToColor (float (idx * 360 / targetGroupCount)) 0.7 0.9).ToArgb()
                     createDeviceApis groupName device deviceApiList color
             )

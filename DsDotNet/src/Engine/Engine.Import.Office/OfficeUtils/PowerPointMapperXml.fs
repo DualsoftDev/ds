@@ -6,16 +6,18 @@ open System.Xml
 open System.Xml.Serialization
 open DocumentFormat.OpenXml.Packaging
 open Engine.Core.MapperDataModule;
+open Engine.Core.ModelConfigExtensions
+open Engine.Core
 
 module PowerPointMapperXml =
 
-    let SaveOpenXmlMapperData (doc: PresentationDocument) (data: UserTagConfig) : unit =
+    let SaveOpenXmlModelConfig (doc: PresentationDocument) (data: ModelConfig) : unit =
         if isNull doc || isNull doc.PresentationPart then
             ()
         else
-            let xmlString = UserTagConfigToXmlText(data);
+            let json = ModelConfigToJsonText(data);
 
-            let wrappedXml = $"<PowerPointMapper><![CDATA[{xmlString}]]></PowerPointMapper>"
+            let wrappedXml = $"<PowerPointMapper><![CDATA[{json}]]></PowerPointMapper>"
             let bytes = System.Text.Encoding.UTF8.GetBytes(wrappedXml)
 
             // 기존 파트 제거
@@ -36,10 +38,10 @@ module PowerPointMapperXml =
             stream.Write(bytes, 0, bytes.Length)
 
     
-    let LoadMapperData (xmlTexts: string seq) : UserTagConfig =
-        let empty = createDefaultUserTagConfig()
+    let LoadOpenXmlModelConfig (xmlTexts: string seq) : ModelConfig =
+        let empty = createDefaultModelConfig()
 
-        let tryLoadFromXmlText (xml: string) : UserTagConfig option =
+        let tryLoadFromXmlText (xml: string) : ModelConfig option =
             try
                 let doc = XmlDocument()
                 doc.LoadXml(xml)
@@ -50,7 +52,7 @@ module PowerPointMapperXml =
                     match root.FirstChild with
                     | :? XmlCDataSection as cdata when not (String.IsNullOrWhiteSpace(cdata.Data)) ->
                         try
-                            Some(XmlToUserTagConfig cdata.Data)
+                            Some(ModelConfigFromJsonText cdata.Data)
                         with ex ->
                             Console.WriteLine($"[Deserialize] XML error: {ex.Message}")
                             None

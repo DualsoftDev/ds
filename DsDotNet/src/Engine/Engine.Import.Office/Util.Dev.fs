@@ -8,6 +8,7 @@ open Dual.Common.Core.FS
 open Dual.Common.Base.FS
 open System.Reflection
 open LibraryLoaderModule
+open System
 
 [<AutoOpen>]
 module ImportUtilForDev =
@@ -50,7 +51,9 @@ module ImportUtilForDev =
             dev
 
     let getLibraryConfig()=
-        let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
+        //let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
+        let runDir = AppDomain.CurrentDomain.BaseDirectory
+
         let runDir =
             if Net48Path.Exists (Path.Combine(runDir, "dsLib")) then
                 runDir

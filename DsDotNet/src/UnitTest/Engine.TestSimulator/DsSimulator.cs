@@ -27,9 +27,6 @@ namespace Engine.TestSimulator
     {
         public static bool Do(DsCPU dsCpu)
         {
-            RuntimeDS.ChangeRuntimePackage(RuntimePackage.Simulation);
-
-
             bool resultMoving = false;
             Task.Run(async () => {
                 CpuExtensionsModule.preManualAction(dsCpu.MySystem);

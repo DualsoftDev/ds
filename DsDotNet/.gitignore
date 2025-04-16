@@ -190,5 +190,5 @@ Ds.linux.sln
 
 Apps/OfficeAddIn/PowerPointAddInHelper/Utils/**/*.xml
 Experimental/
-src/UnitTest/dualsoft.json
+src/UnitTest/modelConfig.json
 packages

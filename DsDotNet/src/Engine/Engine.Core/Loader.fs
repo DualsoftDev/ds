@@ -8,6 +8,7 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System
 open MapperDataModule
+open ModelConfigExtensions
 
 
 [<AutoOpen>]
@@ -63,8 +64,7 @@ module LoaderModule =
         absFilePath
 
     type Model = {
-        Config: ModelConfig
-        UserTagConfig: UserTagConfig
+        ModelConfig: ModelConfig
         System : DsSystem
         LoadingPaths : string list
     }
@@ -89,7 +89,7 @@ type LoaderExt =
         FileManager.fileWriteAllText(dsFilePath, sys.ToDsText(false, true))
 
     [<Extension>]
-    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq, cfg:ModelConfig, userTagConfig:UserTagConfig) =
+    static member saveModelZip (loadingPaths:string seq, activeFilePath:string, layoutImgFiles:string seq, cfg:ModelConfig) =
         let targetPaths = (loadingPaths @ [activeFilePath])
         let zipPathDS  = targetPaths.ToDsZip(changeExtension (activeFilePath|> DsFile)  "dsz")
 
@@ -101,17 +101,14 @@ type LoaderExt =
 
         let topLevel = getTopLevelDirectory (loadingPaths@[|activeFilePath|] |> Seq.toList)
 
-        let jsFilePath = $"{zipDir}{TextDSJson}" |> getValidFile
-        let jsUserTagFilePath = $"{zipDir}{TextUserTag}" |> getValidFile
-
+        let jsFilePath = $"{zipDir}{TextModelConfigJson}" |> getValidFile
 
         let baseTempFilePath = $"{topLevel}base.ext"  //상대 경로 구하기 위한 임시경로
         let activeRelaPath = getRelativePath(baseTempFilePath|>DsFile) (activeFilePath|>DsFile);//   // 상대경로로 기본 저장
         let newCfg = createModelConfigReplacePath (cfg, activeRelaPath)
         let configPath = SaveConfigWithPath jsFilePath newCfg
-        let userTagConfigPath = SaveUserTagConfigWithPath jsUserTagFilePath userTagConfig
         
-        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;configPath;userTagConfigPath]@layoutImgFiles.ToList())
+        addFilesToExistingZipAndDeleteFiles zipPathDS ([zipPathPpt;configPath]@layoutImgFiles.ToList())
 
         zipPathDS
 

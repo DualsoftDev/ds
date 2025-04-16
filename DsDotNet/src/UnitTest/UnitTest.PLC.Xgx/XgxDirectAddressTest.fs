@@ -46,7 +46,7 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
             ParserOptions.Create4Simulation(systemRepo, libPath, "ActiveCpuNA.me", None, DuNone)
             )
 
-        exportXMLforLSPLC (xgx, sys, "XXXXXXXXX", XgxGenerationParameters.Default())
+        exportXMLforLSPLC (sys, "XXXXXXXXX", XgxGenerationParameters.Default())
 
 type XgiDirectAddressTest() =
     inherit XgxDirectAddressTest(XGI)

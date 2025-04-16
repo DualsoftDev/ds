@@ -16,14 +16,10 @@ module HMIPackageTEST =
     [<Fact>]
     let ``HMIPackage Create Test`` () =
         let pptParms:PptParams = defaultPptParams()
-        let modelConfig = createDefaultModelConfig();
 
-        let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms, modelConfig)
+        let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms)
         assignAutoAddress (dsPpt.System, 0 , 0, pptParms.HwTarget)
 
-        RuntimeDS.ChangeRuntimePackage(RuntimePackage.Control)
-        let userTagConfig = createDefaultUserTagConfig(); 
-
-        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.Platform) modelConfig  userTagConfig
+        let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) (pptParms.HwTarget.PlatformTarget) dsPpt.ModelConfig  
 
         hmiPackage.Devices.Length > 0  |> Assert.True

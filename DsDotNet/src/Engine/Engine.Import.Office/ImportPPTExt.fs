@@ -294,7 +294,7 @@ module ImportU =
                             let libFilePath  =libInfos[libApis.First()]
                             failWithLog $"{kv.Key}은 시스템 Libaray Api를 사용하였습니다.\r\n{libFilePath}에 {errApis}가 없습니다. \r\n\r\n {libConfig} \r\n\r\n시스템 Libaray는 지정된 이름만 사용가능합니다."
                      )
-                let platformTarget = target.Platform
+                let platformTarget = target.PlatformTarget
                 callNAutoPres
                 |> Seq.filter(fun node -> node.NodeType = CALL) //Call만 처리
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
@@ -847,7 +847,7 @@ module ImportU =
             |> Seq.iter (processPage doc mySys systemRepo)
 
         [<Extension>]
-        static member UpdateIOFromUserDeviceTags(doc: PptDoc, sys: DsSystem, hwTarget:HwDriveTarget) =
+        static member UpdateIOFromDeviceTags(doc: PptDoc, sys: DsSystem, hwTarget:HwIO) =
         
             if doc.HwIOType.IsSome && doc.HwIOType.Value <> hwTarget then  //설정드라이브랑 같아야 가져옴
                 debugf "Error: Setting HW_IO Type과 문서에 저장된 타입이 다릅니다. saved : %A <> setting : %A"  doc.HwIOType.Value hwTarget
@@ -855,7 +855,7 @@ module ImportU =
                 match doc.HwIOType with
                 | Some io  -> 
                     let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
-                    doc.UserDeviceTags
+                    doc.DeviceTags
                     |> Seq.iter (fun api ->
                         let key = api.DeviceApiName
                         if(dictTaskDev.ContainsKey(key))
@@ -902,7 +902,7 @@ module ImportU =
             //doc.MakeAddressBySlideNote(sys)
 
             //IO Table로 부터 가져오기
-            doc.UpdateIOFromUserDeviceTags(sys, hwTarget.HwDrive)
+            doc.UpdateIOFromDeviceTags(sys, hwTarget.HwIO)
 
             doc.PostCheckPptSystem(sys, isLib)
             doc.IsBuilded <- true

@@ -64,13 +64,13 @@ module CpuLoader =
 
 
 
-    let applyTagManager(activeSys:DsSystem, storages:Storages, target:PlatformTarget) =
+    let applyTagManager(activeSys:DsSystem, storages:Storages, target:PlatformTarget, timeoutCall:uint32) =
         let createTagM  (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 
             RuntimeDS.System <- Some sys
             let isActive = sys = activeSys
-            sys.TagManager <- SystemManager(sys, storages, target)
+            sys.TagManager <- SystemManager(sys, storages, target, timeoutCall)
             sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))
             sys.ActionVariables.Iter(fun a-> a.TagManager <- ActionVariableManager(a, sys))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f, isActive, activeSys))
@@ -94,10 +94,10 @@ module CpuLoader =
 
     type DsSystem with
         /// DsSystem 으로부터 PouGen seq 생성
-        member sys.GeneratePOUs (storages:Storages, target:PlatformTarget) : PouGen seq =
+        member sys.GeneratePOUs (storages:Storages, target:PlatformTarget, timeoutCall:uint32) : PouGen seq =
             UniqueName.resetAll()
 
-            applyTagManager (sys, storages, target)
+            applyTagManager (sys, storages, target, timeoutCall)
 
             let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환

@@ -110,7 +110,7 @@ module DsAddressModule =
 
 
     let getValidAddress (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
-        let cpu, driver, hwSlotDataTypes = target.Platform, target.HwDrive, target.Slots
+        let cpu, driver, hwSlotDataTypes = target.PlatformTarget, target.HwIO, target.Slots
         let addr =
             if addr.IsNullOrEmpty() then
                 failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"

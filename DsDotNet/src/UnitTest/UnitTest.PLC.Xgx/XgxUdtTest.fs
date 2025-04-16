@@ -125,7 +125,7 @@ copyStructIf(true, $people[1], $hong);
 
 
     member x.``UDT decl plc gen`` () =
-        exportXMLforLSPLC (XGI, sys, "XXXXXXXXX", XgxGenerationParameters.Default())
+        exportXMLforLSPLC (sys, "XXXXXXXXX", XgxGenerationParameters.Default())
 
 
 

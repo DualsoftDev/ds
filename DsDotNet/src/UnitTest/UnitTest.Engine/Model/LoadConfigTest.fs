@@ -13,13 +13,13 @@ module LoadConfigTestModule =
         inherit EngineTestBaseClass()
 
         let dsFileDir = PathManager.combineFullPathDirectory ([|@$"{__SOURCE_DIRECTORY__}"; "../../UnitTest.Model/UnitTestExample/dsSimple"|])
-        let configFile = PathManager.getFullPath  ( @"dualsoft.json"|>DsFile) (dsFileDir.ToDirectory())
+        let configFile = PathManager.getFullPath  ( @"modelConfig.json"|>DsFile) (dsFileDir.ToDirectory())
         
       
         [<Test>]
         member __.``LoadModelFromConfigTest`` () =
 
-            let model = ParserLoader.LoadFromConfig configFile PlatformTarget.WINDOWS None 
+            let model = ParserLoader.LoadFromConfig configFile PlatformTarget.WINDOWS  
             model.System.Name === "Factory"
 
 

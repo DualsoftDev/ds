@@ -20,19 +20,21 @@
     <ItemGroup>
         <Compile Include="..\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
         <Compile Include="CommonAppSettings.fs" />
-        <Compile Include="DsTypes\DsTypeUtil.fs" />
-        <Compile Include="Interface.fs" />
         <Compile Include="DSText.fs" />
         <Compile Include="DsConstants.fs" />
+        <Compile Include="DsTypes\DsTypeUtil.fs" />
+        <Compile Include="Interface.fs" />
         <Compile Include="DsTypes\DsType.fs" />
         <Compile Include="DsTypes\DsDataType.fs" />
+        <Compile Include="DsTypes\DsIOType.fs" />
         <Compile Include="DsTypes\DsValueType.fs" />
         <Compile Include="DsTypes\DsTaskDevType.fs" />
         <Compile Include="DsTypes\DsCallType.fs" />
-        <Compile Include="DsTypes\DsMapperTag.fs" />
         <Compile Include="DsEvent.fs" />
         <Compile Include="DsLog.fs" />
         <Compile Include="Prolog.fs" />
+        <Compile Include="MapperData.fs" />
+        <Compile Include="RuntimeMode.fs" />
         <Compile Include="Utils\PathManager.fs" />
         <Compile Include="Utils\FileManager.fs" />
 		<Compile Include="Utils\TypeConversion.fs" />
@@ -40,7 +42,6 @@
 		<Compile Include="Text.fs" />
 		<Compile Include="Fqdn.fs" />
 		<Compile Include="UniqueName.fs" />
-		<Compile Include="RuntimeGenerator.fs" />
 		<Compile Include="Expression.Interfaces.fs" />
         <Compile Include="Tag, Variable.fs" />
         <Compile Include="TagKind.fs" />

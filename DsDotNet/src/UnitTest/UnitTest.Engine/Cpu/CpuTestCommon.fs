@@ -21,9 +21,8 @@ module CpuTestUtil =
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.System <- Some sys
-            RuntimeDS.ChangeRuntimePackage(RuntimePackage.Simulation)
 
-            applyTagManager (sys, Storages(), target)
+            applyTagManager (sys, Storages(), target, 15000u)
             checkCausalModel sys
             sys
 

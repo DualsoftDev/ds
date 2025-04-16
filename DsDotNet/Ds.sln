@@ -176,7 +176,7 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "UnitTest.PLC.XgtProtocol", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CodeGen", "CodeGen", "{C8D5274F-AC00-46C7-1F8D-E88E81087A52}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PLC.MelecProtocol", "src\PLC\DriverIO\MelecProtocol\PLC.MelecProtocol.fsproj", "{A6D25206-7009-C6E4-04FB-7C7399E6D62D}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "PLC.MelecProtocol.FS", "src\PLC\DriverIO\MelecProtocol\PLC.MelecProtocol.FS.fsproj", "{A6D25206-7009-C6E4-04FB-7C7399E6D62D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

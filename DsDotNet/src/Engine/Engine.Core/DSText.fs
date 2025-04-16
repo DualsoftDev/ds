@@ -8,8 +8,7 @@ open System.Runtime.CompilerServices
 [<AutoOpen>]
 module DsText =
     let [<Literal>] TextLibrary   = "DS_Library"
-    let [<Literal>] TextDSJson    = "dualsoft.json"
-    let [<Literal>] TextUserTag    = "userTag.json"
+    let [<Literal>] TextModelConfigJson = "modelConfig.json"
     let [<Literal>] TextOPCTagFolder = "TAG"
     let [<Literal>] TextOPCDSFolder = "Dualsoft"
     let [<Literal>] TextUserTagCase = "모니터링"
@@ -81,6 +80,8 @@ module DsTextExport =
     let [<Literal>] TextXlsActionPause       = "정지출력"
     
     let [<Literal>] TextXlsAllFlow =  "ALL"
+
+
 [<AutoOpen>]
 module DsTextProperty =
 

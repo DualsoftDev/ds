@@ -4,6 +4,11 @@ open System.Reactive.Subjects
 open Dual.Common.Core.FS
 open System.Collections.Generic
 open Dual.Common.Base.FS.Functions
+open MapperDataModule
+open System.Runtime.Serialization
+open System.Xml
+open System.IO
+open Newtonsoft.Json
 
 [<AutoOpen>]
 module RuntimeGeneratorModule =
@@ -44,22 +49,14 @@ module RuntimeGeneratorModule =
         | _ -> Simulation
 
     //제어 HW CPU 기기 타입
+
     type PlatformTarget =
         | WINDOWS
         | XGI
         | XGK
-        static member ofString(str:string) = DU.fromString<PlatformTarget> str |?? (fun () -> failwith "ERROR")
-
-        member x.Stringify() = x.ToString()
-        member x.IsPLC = x <> WINDOWS
-        member x.TryGetPlcType() =
-            match x with
-            | WINDOWS -> None
-            | _ -> Some x
-
 
     //제어 Driver IO 기기 타입
-    type HwDriveTarget =
+    type HwIO =
         | LS_XGI_IO
         | LS_XGK_IO
         | MELSEC_IO
@@ -71,10 +68,15 @@ module RuntimeGeneratorModule =
         | REDIS
 
     //HW CPU,  Driver IO, Slot 정보 조합
-    type HwTarget(platformTarget:PlatformTarget, hwDriveTarget:HwDriveTarget, slots:SlotDataType[]) =
-        member x.Platform = platformTarget
-        member x.HwDrive = hwDriveTarget
-        member x.Slots = slots
+    type HwTarget(platformTarget:PlatformTarget, hwIO:HwIO, slots:SlotDataType[]) =
+        member x.PlatformTarget = platformTarget
+        member x.HwIO = hwIO
+        member val Slots = slots with get, set
+        member val StartMemory = 1000 with get, set
+
+
+    let createDefaultHwTarget() = 
+        HwTarget(PlatformTarget.WINDOWS, HwIO.LS_XGI_IO, [||])
 
     type RuntimeMotionMode =
         | MotionAsync
@@ -92,6 +94,8 @@ module RuntimeGeneratorModule =
         | TimeX100
 
     let InitStartMemory = 1000
+    let OpModeLampBtnMemorySize = 100 ////OP 조작 LAMP 100개만 지원
+    
     let BufferAlramSize = 10000
     let XGKAnalogOffsetByte = 96
     let XGKAnalogOutOffsetByte = 96
@@ -111,28 +115,39 @@ module RuntimeGeneratorModule =
 
 
     let getExternalTempMemory (target:HwTarget, index:int) =
-        match target.Platform with
+        match target.PlatformTarget with
         | XGI-> ExternalTempIECMemory+index.ToString()
         | XGK-> ExternalTempNoIECMemory+index.ToString("00000")
         | WINDOWS-> ExternalTempMemory+($"{index/8}.{index%8}")
 
     type ModelConfig = {
         DsFilePath: string
-        mutable HwIP: string
+        HwIP: string
         HwOPC : string
         HwPath: string
+        TagConfig : TagConfig   
         ExternalApi: ExternalApi
         RuntimePackage: RuntimePackage
-        PlatformTarget: PlatformTarget
-        HwDriver: HwDriveTarget
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
+        HwTarget : HwTarget
     }
     with    
+        member x.PlatformTarget = x.HwTarget.PlatformTarget
+        member x.HwIO = x.HwTarget.HwIO
+        member x.Slots = x.HwTarget.Slots
+        member x.UpdateTagConfig(tagConfig:TagConfig) = 
+            x.TagConfig.DeviceApis.Clear()
+            x.TagConfig.DeviceApis.AddRange(tagConfig.DeviceApis)
+            x.TagConfig.UserMonitorTags.Clear()
+            x.TagConfig.UserMonitorTags.AddRange(tagConfig.UserMonitorTags)
+            x.TagConfig.DeviceTags.Clear()
+            x.TagConfig.DeviceTags.AddRange(tagConfig.DeviceTags)
+
         member x.ToMessage() = 
             let baseMsg = $"DsFilePath: {x.DsFilePath}\r\nRuntimePackage: {x.RuntimePackage}"
             let hwIOInfo = 
-                match x.HwDriver with
+                match x.HwIO with
                 | LS_XGI_IO -> x.HwIP
                 | LS_XGK_IO -> x.HwIP
                 | MELSEC_IO -> x.HwPath
@@ -148,11 +163,11 @@ module RuntimeGeneratorModule =
                 baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}"
             | Control -> 
                 baseMsg + $"\r\nPlatformTarget: {x.PlatformTarget}
-                \r\nHwDriver: {x.HwDriver} ({hwIOPlatformTarget}) 
+                \r\nHwDriver: {x.HwIO} ({hwIOPlatformTarget}) 
                 \r\nTimeoutCall: {x.TimeoutCall}"
             | Monitoring 
             | VirtualPlant -> 
-                baseMsg + $"\r\nHwDriver: {x.HwDriver}({hwIOInfo})
+                baseMsg + $"\r\nHwDriver: {x.HwIO}({hwIOInfo})
                 \r\nTimeoutCall: {x.TimeoutCall}"
             | VirtualLogic -> 
                 baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}\r\nExternalApi: {x.ExternalApi}
@@ -165,26 +180,25 @@ module RuntimeGeneratorModule =
             HwIP = "127.0.0.1"
             HwOPC = "opc.tcp://127.0.0.1:2747"
             HwPath = "0"
+            TagConfig = createDefaultTagConfig()    
             ExternalApi = ExternalApi.OPC
             RuntimePackage = Simulation //unit test를 위해 Simulation으로 설정
-            PlatformTarget = WINDOWS
-            HwDriver = HwDriveTarget.LS_XGK_IO
             TimeSimutionMode = TimeX1
             TimeoutCall = 15000u
+            HwTarget = createDefaultHwTarget()
         }
-    let createDefaultModelConfigWithHwDriver(hwDriver: HwDriveTarget) =
-        { createDefaultModelConfig() with HwDriver = hwDriver }
+    let createModelConfigWithHwConfig(config: ModelConfig,  ip:string, tagConfig:TagConfig) =
+        { config with  HwIP = ip; TagConfig = tagConfig }
     let createModelConfigWithSimMode(config: ModelConfig, package:RuntimePackage) =
         { config with RuntimePackage = package }
-
     let createModelConfig(path:string,
             hwIP:string, 
             hwOPC:string, 
             hwPath:string,  
+            tagConfig:TagConfig, 
             externalApi:ExternalApi, 
             runtimePackage:RuntimePackage,
-            platformTarget:PlatformTarget, 
-            hwDriver:HwDriveTarget, 
+            hwTarget:HwTarget,
             timeSimutionMode:TimeSimutionMode, 
             timeoutCall:uint32) =
         { 
@@ -192,12 +206,12 @@ module RuntimeGeneratorModule =
             HwIP = hwIP
             HwOPC = hwOPC
             HwPath = hwPath
+            TagConfig = tagConfig
             ExternalApi = externalApi
             RuntimePackage = runtimePackage
-            PlatformTarget = platformTarget
-            HwDriver = hwDriver
             TimeSimutionMode = timeSimutionMode
             TimeoutCall = timeoutCall
+            HwTarget = hwTarget
         }
     let createModelConfigReplacePath (cfg:ModelConfig, path:string) =
         { cfg with DsFilePath = path }
@@ -206,11 +220,10 @@ module RuntimeGeneratorModule =
 
     type RuntimeDS() =
         static member val System : ISystem option = None with get, set
-        static member val ModelConfig : ModelConfig = createDefaultModelConfig() with get, set
+        static member val RuntimePackage : RuntimePackage = Simulation with get, set
+        static member val TimeSimutionMode : TimeSimutionMode = TimeX1 with get, set
+        static member val IsPLC = false with get, set
         
-        //RuntimePackage는 외부에서 변경가능 
-        static member ChangeRuntimePackage(package:RuntimePackage) =
-            RuntimeDS.ModelConfig <- createModelConfigWithSimMode(RuntimeDS.ModelConfig, package) 
 
     let getFullSlotHwSlotDataTypes() =
         let hw =
@@ -241,8 +254,6 @@ module PlatformTargetExtensions =
             | XGI -> "LS Electric XGI PLC"
             | XGK -> "LS Electric XGK PLC"
 
-
-
 module RuntimePackageExtensions =
         let fromString s =
             match s with
@@ -255,7 +266,6 @@ module RuntimePackageExtensions =
 
         let allRuntimePackage =
             [ Simulation; Control; Monitoring; VirtualPlant; VirtualLogic]
-            
 
 module ExternalApiExtensions =
     let fromString s =
@@ -267,19 +277,18 @@ module ExternalApiExtensions =
     let allExternalApi =
         [ OPC; REDIS;]
 
-module HwDriveTargetExtensions =
+module HwIOExtensions =
     let fromString s =
             match s with
             | "LS_XGI_IO"  -> LS_XGI_IO
             | "LS_XGK_IO"  -> LS_XGK_IO
             | "MELSEC_IO"  -> MELSEC_IO
-            | "OPC_IO" 
-            | _            -> OPC_IO
+            | "OPC_IO"     -> OPC_IO
+            | _ -> failwithf $"Error HwIO: {s}"
 
 
     let allDrivers =
         [ LS_XGI_IO; LS_XGK_IO;  MELSEC_IO;  OPC_IO ]
-
 
 module TimeSimutionModeExtensions =
 
@@ -310,3 +319,36 @@ module TimeSimutionModeExtensions =
 
         let allModes =
             [ TimeNone; TimeX0_1; TimeX0_5; TimeX1; TimeX2; TimeX4; TimeX8; TimeX16; TimeX100 ]
+
+
+module ModelConfigExtensions =
+
+
+    //// ========== XML 문자열 직렬화 ==========
+    //let ModelConfigToXmlText (config: ModelConfig) : string =
+    //    let serializer = DataContractSerializer(typeof<ModelConfig>)
+    //    use stringWriter = new StringWriter()
+    //    use xmlWriter = XmlWriter.Create(stringWriter, XmlWriterSettings(Indent = true))
+    //    serializer.WriteObject(xmlWriter, config)
+    //    xmlWriter.Flush()
+    //    stringWriter.ToString()
+
+    //let XmlToModelConfig (xmlText: string) : ModelConfig =
+    //    let serializer = DataContractSerializer(typeof<ModelConfig>)
+    //    use stringReader = new StringReader(xmlText)
+    //    use xmlReader = XmlReader.Create(stringReader)
+    //    try
+    //        serializer.ReadObject(xmlReader) :?> ModelConfig
+    //    with _ ->
+    //        createDefaultModelConfig()
+
+
+    // ========== JSON 저장/불러오기 ==========
+
+    let private jsonSettings = JsonSerializerSettings()
+    let ModelConfigToJsonText (cfg: ModelConfig) : string =
+        JsonConvert.SerializeObject(cfg, Formatting.Indented, jsonSettings)
+
+    let ModelConfigFromJsonText (json: string) : ModelConfig =
+        JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
+

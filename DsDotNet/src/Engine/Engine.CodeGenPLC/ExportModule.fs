@@ -163,6 +163,8 @@ module ExportModule =
             mutable StartMemory: int
             mutable EnableXmlComment: bool
             mutable MaxPouSplit: int
+            mutable PlatformTarget: PlatformTarget
+            mutable TimeoutCall: uint32
         }
         static member Default() = {
             ExistingLSISprj = ""
@@ -171,10 +173,12 @@ module ExportModule =
             StartMemory = 0
             EnableXmlComment = true
             MaxPouSplit = 0     // 사용한다면 2000 정도 권장
+            PlatformTarget = XGK
+            TimeoutCall = 15000u
         }
 
 
-    let exportXMLforLSPLC (platformTarget:PlatformTarget, system:DsSystem, path:string, xgxGenParams:XgxGenerationParameters) =
+    let exportXMLforLSPLC (system:DsSystem, path:string, xgxGenParams:XgxGenerationParameters) =
         let _, millisecond =
             duration (fun () ->
                 let {
@@ -184,6 +188,8 @@ module ExportModule =
                     StartMemory = startMemory
                     EnableXmlComment = enableXmlComment
                     MaxPouSplit = maxPouSplit
+                    PlatformTarget = platformTarget
+                    TimeoutCall = timeoutCall
                 } = xgxGenParams
 
                 if !! platformTarget.IsOneOf(XGI, XGK) then
@@ -194,7 +200,7 @@ module ExportModule =
                 let localStorage = new Storages()
 
                 DsAddressModule.setMemoryIndex(startMemory)
-                let pous = system.GeneratePOUs(globalStorage, platformTarget).ToArray()
+                let pous = system.GeneratePOUs(globalStorage, platformTarget, timeoutCall).ToArray()
                 // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정  
                 let currentMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  
 
@@ -235,8 +241,8 @@ module ExportModule =
 
 
 type LsPLC =
-    static member ExportXML(platformTarget:PlatformTarget, system:DsSystem, outputXmlPath:string, xgxGenParams:XgxGenerationParameters) =
-        exportXMLforLSPLC(platformTarget, system, outputXmlPath, xgxGenParams)
+    static member ExportXML(system:DsSystem, outputXmlPath:string, xgxGenParams:XgxGenerationParameters) =
+        exportXMLforLSPLC(system, outputXmlPath, xgxGenParams)
 
 
 

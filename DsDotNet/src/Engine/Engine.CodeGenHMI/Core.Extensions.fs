@@ -160,12 +160,11 @@ module ConvertHMI =
     [<Extension>]
     type ConvertHMIExt =
         [<Extension>]
-        static member GetHMIPackage (sys:DsSystem) : HMIPackage =
-            let ip        = RuntimeDS.ModelConfig.HwIP
+        static member GetHMIPackage (sys:DsSystem, hwIP:string) : HMIPackage =
             let versionDS = Assembly.GetExecutingAssembly().GetName().Version.ToString()
             let system    = sys.GetHMI()
             let devices   = sys.Devices.SelectMany(fun d -> d.GetHMIs()).ToArray()
-            HMIPackage(ip, versionDS, system, devices) |> tee (fun x-> x.BuildTagMap())
+            HMIPackage(hwIP, versionDS, system, devices) |> tee (fun x-> x.BuildTagMap())
 
         [<Extension>]
         static member GetHMIPackageTags (package:HMIPackage)  =

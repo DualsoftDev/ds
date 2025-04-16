@@ -9,20 +9,18 @@ open System.IO
 open PowerPointAddInForDualsoft
 open Engine.Core
 open Newtonsoft.Json
+open PowerPointAddInHelper.Helper
 
 module MSG_TEST =
 
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
     RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
-    RegistryPptDS.HWIP <-  "127.0.0.1"
+    GlobalHelper.ActivePPTPath <- testPath
 
-    
     let setXGK() = 
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGK.ToString();
-        RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGK_IO.ToString();
     let setXGI() = 
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.XGI.ToString();
-        RegistryPptDS.HwDriver <- HwDriveTarget.LS_XGI_IO.ToString();
     let setWindows() = 
         RegistryPptDS.PagePlatformTarget <- PlatformTarget.WINDOWS.ToString();
 
@@ -39,9 +37,6 @@ module MSG_TEST =
     [<Fact>]
     let ``MSG_PLCIOCSV`` () =
         MSG_PLCIOCSV.Do(testPath, "", false)|> Assert.True
-    [<Fact>]
-    let ``MSG_HWSETTING`` () =
-        MSG_HWSETTING.Do(false)|> Assert.True
     [<Fact>]
     let ``MSG_ANIMATION`` () =
         MSG_ANIMATION.Do(testPath, false)|> Assert.True

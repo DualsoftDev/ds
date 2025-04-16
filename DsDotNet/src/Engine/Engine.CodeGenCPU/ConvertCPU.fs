@@ -176,7 +176,7 @@ module ConvertCPU =
             if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출
                 sys.GenerationMemory()
                 sys.GenerationIO()
-                let mode = RuntimeDS.ModelConfig.RuntimePackage 
+                let mode = RuntimeDS.RuntimePackage 
                 updateSourceTokenOrder( sys,  mode = Monitoring) 
                 if mode = Control || mode = Monitoring
                 then
@@ -213,7 +213,7 @@ module ConvertCPU =
                 //else 
                 //    yield! sys.Y1_SystemActiveBtnForPassiveFlow(activeSys)
                     
-                    if RuntimeDS.ModelConfig.PlatformTarget.IsPLC then 
+                    if RuntimeDS.IsPLC then 
                         yield! sys.Y6_SystemClearBtnForFlow()
 
 

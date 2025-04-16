@@ -26,7 +26,7 @@ type LibraryPptLoaderExt =
             for file in files do
                 if not (file.Contains("~$")) then //pptx 사용중 임시파일 무시 ~$HelloDS.pptx
                     
-                    let sys = ImportPpt.GetDSFromPptWithLib(file, true, pptParms, modelConfig).System
+                    let sys = ImportPpt.GetDSFromPptWithLib(file, true, pptParms).System
                     let relPath = Net48Path.GetRelativePath(directoryPath, Path.ChangeExtension(file, ".ds"))
                     //let relPathAddLibDirPath = Path.Combine("dsLib", relPath)
                     for item in sys.ApiItems do

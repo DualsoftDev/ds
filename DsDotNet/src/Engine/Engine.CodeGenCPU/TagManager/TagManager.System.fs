@@ -10,7 +10,7 @@ module SystemManagerModule =
 
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (sys:DsSystem, stg:Storages, platformTarget:PlatformTarget) =
+    type SystemManager (sys:DsSystem, stg:Storages, platformTarget:PlatformTarget, timeoutCall:uint) =
         let cpu = platformTarget
         // 시스템 TAG는 root 시스템   TAG 공용 사용 ex)curSys._ON  = rootSys._ON
         let dsSysTag (dt:DataType) autoAddr target (systemTag:SystemTag) (internalSysTag:bool) =
@@ -74,7 +74,7 @@ module SystemManagerModule =
 
         let tout     =
             let tout = dsSysUint32   true sys SystemTag.timeout  false
-            tout.Value <- RuntimeDS.ModelConfig.TimeoutCall
+            tout.Value <- timeoutCall
             tout
 
         let pauseMonitor     = dsSysBit true sys SystemTag.pauseMonitor     false

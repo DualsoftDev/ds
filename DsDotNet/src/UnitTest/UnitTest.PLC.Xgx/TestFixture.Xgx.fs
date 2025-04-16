@@ -201,7 +201,6 @@ module XgxFixtures =
         [<SetUp>]
         member x.Setup () =
             RuntimeDS.System <- Some sys
-            RuntimeDS.ChangeRuntimePackage(RuntimePackage.Simulation)
 
 
         [<TearDown>]

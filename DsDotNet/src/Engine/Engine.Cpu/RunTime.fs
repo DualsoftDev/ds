@@ -169,9 +169,13 @@ module RunTimeModule =
 type DsCpuExt  =
     /// DsSystem 으로부터 Runtime 생성 : DsCPU*HMIPackage*(PouGen[])
     [<Extension>]
-    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig) (userTagConfig:UserTagConfig): Runtime =
+    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig): Runtime =
 
-        RuntimeDS.ModelConfig <- modelCnf
+        RuntimeDS.RuntimePackage <- modelCnf.RuntimePackage
+        RuntimeDS.TimeSimutionMode <- modelCnf.TimeSimutionMode
+        RuntimeDS.IsPLC <- modelCnf.PlatformTarget = PlatformTarget.XGI || 
+                           modelCnf.PlatformTarget = PlatformTarget.XGK
+
         dsSys.GetCallVertices()
              .Where(fun f-> f.CallTime.IsDefault)
              .Iter(fun f-> f.CallTime.TimeOut <- Some modelCnf.TimeoutCall)
@@ -180,10 +184,10 @@ type DsCpuExt  =
 
         // Initialize storages and create POU's for the system
         let storages = Storages()
-        let pous = dsSys.GeneratePOUs(storages, target) |> toArray
+        let pous = dsSys.GeneratePOUs(storages, target, modelCnf.TimeoutCall) |> toArray
 
 
-        userTagConfig.UserMonitorTags.Iter(fun f->
+        modelCnf.TagConfig.UserMonitorTags.Iter(fun f->
             if  storages.ContainsKey(f.Name) then
                 failwith $"UserTags {f.Name} 중복된 태그명"
 
@@ -198,7 +202,7 @@ type DsCpuExt  =
 
         // Create commented statements from each POU's
         let css = pous.Collect(_.CommentedStatements())
-        let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys)
+        let hmiPackage = ConvertHMIExt.GetHMIPackage(dsSys, modelCnf.HwIP)
         let hmiPackageTags = ConvertHMIExt.GetHMIPackageTags(hmiPackage)
         // Create and return a DsCPU object
         new DsCPU(css, dsSys, loadedSystems, hmiPackageTags), hmiPackage, pous

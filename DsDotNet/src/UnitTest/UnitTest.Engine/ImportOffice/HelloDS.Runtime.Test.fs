@@ -17,14 +17,13 @@ module HelloDSRuntimeTestModule =
 
     type HelloDSRuntimeTest() =
         inherit EngineTestBaseClass()
-        do
-            RuntimeDS.ChangeRuntimePackage(Simulation)
+      
         let modelConfig = createDefaultModelConfig()    
         let helloDSPptPath = @$"{__SOURCE_DIRECTORY__}/../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils/HelloDS.pptx"
         let getSystem() =
             let pptParms:PptParams = defaultPptParams()
 
-            let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms, modelConfig)
+            let result = ImportPpt.GetDSFromPptWithLib (helloDSPptPath, false, pptParms)
             let {
                 System = system
                 ActivePath =  exportPath
@@ -39,8 +38,8 @@ module HelloDSRuntimeTestModule =
         [<Test>]
         member __.``HelloDS runtime model test``() =
             let system = getSystem()
-            let userTagConfig = createDefaultUserTagConfig()
-            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS) modelConfig userTagConfig
+            let tagConfig = createDefaultTagConfig()
+            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS) modelConfig 
             system.TagManager.Storages.Count > 0 === true
 
             let json = SystemTextJson.Serialize(hMIPackage)

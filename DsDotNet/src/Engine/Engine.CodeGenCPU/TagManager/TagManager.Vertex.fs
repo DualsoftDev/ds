@@ -94,7 +94,7 @@ module TagManagerModule =
         ///Segment End Tag
         member val ET =
             let et = createTag  true  VertexTag.endTag
-            if RuntimeDS.ModelConfig.RuntimePackage = Simulation then
+            if RuntimeDS.RuntimePackage = Simulation then
                 if v :? Real && (v :?> Real).Finished then
                     et.Value <- true
             et

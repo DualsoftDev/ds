@@ -159,7 +159,7 @@ module PptDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-    let getMapperData(doc: PresentationDocument):UserTagConfig option=
+    let getModelConfig(doc: PresentationDocument):ModelConfig option=
         let customXmlParts =
             doc.PresentationPart.CustomXmlParts
             |> Seq.map(fun f->
@@ -167,10 +167,20 @@ module PptDocModule =
                 reader.ReadToEnd()
                 )
         if customXmlParts.length() > 0 then
-            Some(PowerPointMapperXml.LoadMapperData  customXmlParts)
+            Some(PowerPointMapperXml.LoadOpenXmlModelConfig  customXmlParts)
         else
             None
             
+    let getModelConfigFromPPTFile(path:string) : ModelConfig =
+        match Office.Open(path) |> getModelConfig with
+        | Some mapperData -> mapperData 
+        | None ->
+            createDefaultModelConfig()  
+
+    let saveModelConfig(path:string, modelConfig:ModelConfig) =
+        let doc = Office.Open(path)
+        PowerPointMapperXml.SaveOpenXmlModelConfig doc modelConfig
+        doc.Save()
 
     type PptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
         pages:IDictionary<SlidePart, PptPage>,
@@ -207,24 +217,24 @@ module PptDocModule =
         member x.Parameter: DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 
-        member x.UserTagConfig : UserTagConfig option =
-            match getMapperData doc with
+        member x.ModelConfig : ModelConfig option =
+            match getModelConfig doc with
             | Some mapperData -> mapperData |> Some
             | None -> None
 
-        member x.HwIOType : HwDriveTarget option =
-            match getMapperData doc with
-            | Some mapperData -> mapperData.HwIO |> HwDriveTargetExtensions.fromString |> Some
+        member x.HwIOType : HwIO option =
+            match getModelConfig doc with
+            | Some mapperData -> mapperData.HwIO  |> Some
             | None -> None
 
-        member x.UserDeviceTags : List<UserDeviceTag> =
-            match getMapperData doc with
-            | Some mapperData -> mapperData.UserDeviceTags.ToList()
-            | None -> new List<UserDeviceTag>()
+        member x.DeviceTags : List<DeviceTag> =
+            match getModelConfig doc with
+            | Some mapperData -> mapperData.TagConfig.DeviceTags.ToList()
+            | None -> new List<DeviceTag>()
 
         member x.UserTagsFromMapper : List<UserMonitorTag> =
-            match getMapperData doc with
-            | Some mapperData -> mapperData.UserMonitorTags.ToList()
+            match getModelConfig doc with
+            | Some mapperData -> mapperData.TagConfig.UserMonitorTags.ToList()
             | None -> new List<UserMonitorTag>()
 
     type PptDoc with

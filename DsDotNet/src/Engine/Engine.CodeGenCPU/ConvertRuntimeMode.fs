@@ -48,7 +48,7 @@ module ConvertRuntimeModeModule =
         ]
 
 
-    let mode = RuntimeDS.ModelConfig.RuntimePackage
+    let mode = RuntimeDS.RuntimePackage
     let applyRuntimeMode(sys:DsSystem)(isSubSys:bool)  =
         [
             yield!

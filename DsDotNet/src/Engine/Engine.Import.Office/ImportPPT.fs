@@ -19,7 +19,7 @@ module ImportPptModule =
         ActivePath: string
         LoadingPaths: string seq
         LayoutImgPaths: string seq
-        UserTagConfig : UserTagConfig
+        ModelConfig : ModelConfig
     }
 
     type PptParams = {
@@ -92,11 +92,11 @@ module ImportPptModule =
 
             let doc =
                 match dicPptDoc.TryGetValue pathPpt with
-                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.HwTarget.Platform)
+                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.HwTarget.PlatformTarget)
                 | false, _ ->
                     let newDoc = Office.Open(pathPpt)
                     dicPptDoc.Add(pathPpt, newDoc)
-                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.HwTarget.Platform)
+                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.HwTarget.PlatformTarget)
 
 
         
@@ -228,19 +228,18 @@ module ImportPptModule =
     let pptRepo = Dictionary<DsSystem, PptDoc>()
 
     /// GetDSFromPptWithLib > (loadFromPpts > GetImportModel >) loadSystem
-    let private loadFromPpts (path: string ) isLib (pptParams:PptParams) (layoutImgPaths:HashSet<string>) (modelCnf:ModelConfig) =
+    let private loadFromPpts (path: string ) isLib (pptParams:PptParams) (layoutImgPaths:HashSet<string>)  =
         Copylibrary.Clear()
         let dicPptDoc = Dictionary<string, PresentationDocument>()
         let pathStack = Stack<string>() //파일 오픈시 예외 로그 path PPT Stack
 
         try
             try
-                let cfg =  createModelConfigReplacePath (modelCnf, path)
                 let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams, dicPptDoc, pathStack, layoutImgPaths)
-                let userTagConfig =     
-                    match doc.UserTagConfig with 
+                let modelConfig =     
+                    match doc.ModelConfig with 
                     |Some v-> v
-                    |_ -> createDefaultUserTagConfig() 
+                    |_ -> createDefaultModelConfig() 
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
@@ -250,10 +249,11 @@ module ImportPptModule =
                         pptDoc.BuildSystem(dsSystem, pptParams.HwTarget, isLib, pptParams.CreateBtnLamp)
                         pathStack.Pop() |> ignore)
 
-                {   Config = cfg
-                    UserTagConfig = userTagConfig
+                {
+                    ModelConfig = modelConfig
                     System = sys
-                    LoadingPaths = [] },
+                    LoadingPaths = [] 
+                },
                 pptRepo
 
             with ex ->
@@ -275,12 +275,12 @@ module ImportPptModule =
 
 
     type ImportPpt =
-        static member GetDSFromPptWithLib(fullName: string, isLib:bool, pptParams:PptParams, cfg:ModelConfig): DSFromPpt =
+        static member GetDSFromPptWithLib(fullName: string, isLib:bool, pptParams:PptParams): DSFromPpt =
             ModelParser.ClearDicParsingText()
             pptRepo.Clear()
             let layoutImgPaths = HashSet<string>() //LayoutImgPaths 저장
 
-            let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths cfg |> Tuple.first)
+            let model, millisecond = duration (fun () -> loadFromPpts fullName isLib pptParams layoutImgPaths  |> Tuple.first)
             forceTrace $"Elapsed time for reading1 {fullName}: {millisecond} ms"
           
 
@@ -292,7 +292,7 @@ module ImportPptModule =
                         model.System, model.LoadingPaths
                     else
                         LoaderExt.ExportToDS (model.System, activePath)
-                        ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.Platform) false )
+                        ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.PlatformTarget) false )
 
 
             forceTrace $"Elapsed time for reading2 {fullName}: {millisecond} ms"
@@ -302,12 +302,12 @@ module ImportPptModule =
                 ActivePath = activePath
                 LoadingPaths = loadingPaths
                 LayoutImgPaths = layoutImgPaths
-                UserTagConfig = model.UserTagConfig
+                ModelConfig = model.ModelConfig
             }
 
-        static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams,  cfg:ModelConfig)=
-            let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams, cfg)
+        static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams)=
+            let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams)
             DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
-            let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, cfg, ret.UserTagConfig)
+            let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, ret.ModelConfig)
             zipPath, ret.System
 

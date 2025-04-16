@@ -15,7 +15,7 @@ module OriginTestModule =
 
         let libdir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model"
             
-        let configFile = PathManager.getFullPath  (@"dualsoft.json"|>DsFile) (libdir.ToDirectory())
+        let configFile = PathManager.getFullPath  (@"modelConfig.json"|>DsFile) (libdir.ToDirectory())
         let genConfig (filePath:string) =
             let mConfig = createDefaultModelConfig()
             let cfg = createModelConfigReplacePath(mConfig, $@"{libdir}/MultipleJobdefCallExample/{filePath}" )
@@ -25,7 +25,7 @@ module OriginTestModule =
                 (filePath:string)
                 (answer:seq<KeyValuePair<string, InitialType>>) =
             genConfig(filePath)
-            let model = ParserLoader.LoadFromConfig(configFile) PlatformTarget.WINDOWS None
+            let model = ParserLoader.LoadFromConfig(configFile) PlatformTarget.WINDOWS 
             let originChecker = 
                 [
                         for f in model.System.Flows do

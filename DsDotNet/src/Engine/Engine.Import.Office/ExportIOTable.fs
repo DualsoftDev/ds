@@ -633,12 +633,12 @@ module ExportIOTable =
 
         let simAddress =
             let isSim = pakage.IsVirtualMode()
-            match target.HwDrive with   
-            | HwDriveTarget.LS_XGK_IO -> 
+            match target.HwIO with   
+            | HwIO.LS_XGK_IO -> 
                 if isSim then ExternalXGKAddressON else ExternalXGKAddressOFF
-            | HwDriveTarget.LS_XGI_IO -> 
+            | HwIO.LS_XGI_IO -> 
                 if isSim then ExternalXGIAddressON else ExternalXGIAddressOFF
-            |_ -> failwith $"{target.HwDrive} Invalid simAddress tag" 
+            |_ -> failwith $"{target.HwIO} Invalid simAddress tag" 
 
         //HMI TAG와 맞춰야 해서 순서  중요
         addRows [[ "AutoSelect"; "bool"; hws["AutoSelect"] ]] dt

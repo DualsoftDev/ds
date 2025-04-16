@@ -47,7 +47,7 @@ module GlobalText =
     let DSRuntimePath : string =  getDSAppPath DSRuntimeProcessName    
 
 
-    let getUserTagPath (fulPath: string, hwIOName:string) =
+    let getModelConfigPath (fulPath: string) =
         if  String.IsNullOrEmpty fulPath 
         then 
             failwith "fullPath is null or empty"
@@ -61,8 +61,8 @@ module GlobalText =
             let DSUserTagsDirectory: string = 
                 Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "dualsoft", "UserTags" );
+                    "dualsoft", "ModelConfig" );
             let fileName = 
-                Path.GetFileNameWithoutExtension(makeValidFileNameFromFullPath(hwIOName+"_"+fulPath)) + ".json"
+                Path.GetFileNameWithoutExtension(makeValidFileNameFromFullPath(fulPath)) + ".json"
             Path.Combine(DSUserTagsDirectory, fileName)
 

@@ -617,6 +617,14 @@ module ExportIOTable =
         emptyLine ()
         dt
 
+    let simAddress (target:HwTarget)  (pakage:RuntimePackage) =
+            let isSim = pakage.IsVirtualMode()
+            match target.HwIO with   
+            | HwIO.LS_XGK_IO -> 
+                if isSim then ExternalXGKAddressON else ExternalXGKAddressOFF
+            | HwIO.LS_XGI_IO -> 
+                if isSim then ExternalXGIAddressON else ExternalXGIAddressOFF
+            |_ -> failwith $"{target.HwIO} Invalid simAddress tag" 
 
 
     let ToManualTable_BtnLamp (sys: DsSystem) (target:HwTarget)  (pakage:RuntimePackage) : DataTable =
@@ -630,15 +638,7 @@ module ExportIOTable =
                     .Where(fun f->f :? ButtonDef || f :? LampDef )
                     .Select(fun f-> f.Name, if f :? ButtonDef  then f.InAddress else f.OutAddress)
                     |>dict
-
-        let simAddress =
-            let isSim = pakage.IsVirtualMode()
-            match target.HwIO with   
-            | HwIO.LS_XGK_IO -> 
-                if isSim then ExternalXGKAddressON else ExternalXGKAddressOFF
-            | HwIO.LS_XGI_IO -> 
-                if isSim then ExternalXGIAddressON else ExternalXGIAddressOFF
-            |_ -> failwith $"{target.HwIO} Invalid simAddress tag" 
+        let simAddress = simAddress target pakage   
 
         //HMI TAG와 맞춰야 해서 순서  중요
         addRows [[ "AutoSelect"; "bool"; hws["AutoSelect"] ]] dt
@@ -660,6 +660,41 @@ module ExportIOTable =
 
         emptyLine ()
         dt
+
+
+    let GetDeviceTags (sys: DsSystem) : DeviceTag[] =
+
+        let hws =
+            sys.HwSystemDefs
+            |> Seq.filter (fun f -> f :? ButtonDef || f :? LampDef)
+            |> Seq.map (fun f -> f.Name, if f :? ButtonDef then f.InAddress else f.OutAddress)
+            |> dict
+
+        let tag (case:ExcelCase) name dataType inAddr outAddr : DeviceTag =
+            let devTag = DeviceTag()
+            devTag.Case <- case.ToText()
+            devTag.Flow  <- "ALL"
+            devTag.Name  <- name
+            devTag.DataType  <- dataType
+            devTag.Input   <- inAddr 
+            devTag.Output  <- outAddr 
+            devTag
+
+        [|
+            tag  XlsAutoBTN "AutoSelect" "bool"         hws["AutoSelect"]   TextNotUsed 
+            tag  XlsManualBTN "ManualSelect" "bool"     hws["ManualSelect"] TextNotUsed 
+            tag  XlsDriveBTN "DrivePushBtn" "bool"      hws["DrivePushBtn"] TextNotUsed 
+            tag  XlsPauseBTN "PausePushBtn" "bool"      hws["PausePushBtn"] TextNotUsed 
+            tag  XlsClearBTN "ClearPushBtn" "bool"      hws["ClearPushBtn"] TextNotUsed 
+            tag  XlsEmergencyBTN "EmergencyBtn" "bool"  hws["EmergencyBtn"] TextNotUsed
+            tag  XlsAutoLamp "AutoModeLamp" "bool"      TextNotUsed hws["AutoModeLamp"]
+            tag  XlsManualLamp "ManualModeLamp" "bool"  TextNotUsed hws["ManualModeLamp"]
+            tag  XlsIdleLamp "IdleModeLamp" "bool"      TextNotUsed hws["IdleModeLamp"]
+            tag  XlsErrorLamp "ErrorLamp" "bool"        TextNotUsed hws["ErrorLamp"]
+            tag  XlsHomingLamp "OriginStateLamp" "bool" TextNotUsed hws["OriginStateLamp"]
+            tag  XlsReadyLamp "ReadyStateLamp" "bool"   TextNotUsed hws["ReadyStateLamp"]
+            tag  XlsDriveLamp "DriveLamp" "bool"        TextNotUsed  hws["DriveLamp"]
+        |]
 
         
 

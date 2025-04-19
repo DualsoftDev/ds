@@ -29,16 +29,18 @@ namespace Engine.TestSimulator
         {
             bool resultMoving = false;
             Task.Run(async () => {
+                dsCpu.Run();
+                var sm = dsCpu.MySystem.TagManager as SystemManager;
                 CpuExtensionsModule.preManualAction(dsCpu.MySystem);
-                var homeBtn = (dsCpu.MySystem.TagManager as SystemManager).GetSystemTag(TagKindList.SystemTag.home_btn);
+                var homeBtn = sm.GetSystemTag(TagKindList.SystemTag.home_btn);
                 homeBtn.BoxedValue = true;
-                dsCpu.RunInBackground();
-                var org = (dsCpu.MySystem.TagManager as SystemManager).GetSystemTag(Core.TagKindList.SystemTag.originMonitor);
-                int waitForOriginMonitorLimit = 10000;
-                if (!await WaitForOriginMonitorAsync(org, waitForOriginMonitorLimit))
+
+                int waitForOriginMonitorLimit = 5000;
+                if (!await WaitForOriginMonitorAsync(sm.GetSystemTag(TagKindList.SystemTag.originMonitor), waitForOriginMonitorLimit))
                 {
                     throw new TimeoutException($"OriginMonitor was not set within the timeout period of {waitForOriginMonitorLimit} milliseconds.");
                 }
+
                 homeBtn.BoxedValue = false;
 
                 CpuExtensionsModule.preAutoDriveAction(dsCpu.MySystem);

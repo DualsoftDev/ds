@@ -1,0 +1,10 @@
+{
+  "DsFilePath": "Factory.ds",
+  "HwIP": "192.168.9.100",
+  "RuntimePackage": { "Case": "Simulation" },
+  "PlatformTarget": { "Case": "WINDOWS" },
+  "HwDriver": { "Case": "LS_XGK_IO" },
+  "RuntimeMotionMode": { "Case": "MotionAsync" },
+  "TimeSimutionMode": { "Case": "TimeX1" },
+  "TimeoutCall": 15000
+}

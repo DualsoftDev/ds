@@ -328,9 +328,9 @@ module DsAddressModule =
         let hwTarget =
             let slot = getFullSlotHwSlotDataTypes()
             match platformTarget with
-            | WINDOWS -> HwTarget(WINDOWS, OPC_IO, slot)
-            | XGI -> HwTarget(XGI, LS_XGI_IO, slot)
-            | XGK -> HwTarget(XGK, LS_XGK_IO, slot)
+            | WINDOWS -> HwTarget(WINDOWS, OPC_IO, slot, 1000)
+            | XGI -> HwTarget(XGI, LS_XGI_IO, slot, 1000)
+            | XGK -> HwTarget(XGK, LS_XGK_IO, slot, 1000)
 
         getValidAddress(addr, dataType, name, isSkip, ioType, hwTarget)
      

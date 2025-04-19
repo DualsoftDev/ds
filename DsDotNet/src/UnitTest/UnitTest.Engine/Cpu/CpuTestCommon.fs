@@ -43,7 +43,7 @@ module CpuTestUtil =
         let vertexAll         = vertices
         do
 
-            DsAddressModule.assignAutoAddress(sys, 0, 100000, getDefaltHwTarget()) 
+            DsAddressModule.assignAutoAddress(sys, 0, 100000, defaultHwTarget) 
 
             sys.GenerationIO()
             sys.GenerationOrigins()

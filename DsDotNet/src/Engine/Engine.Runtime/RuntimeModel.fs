@@ -28,7 +28,7 @@ type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
     member x.Storages = storages
     member x.PlatformTarget = target
     member x.HwIP = model.ModelConfig.HwIP
-    member x.HwIO = model.ModelConfig.HwIO
+    member x.HwIO = model.ModelConfig.HwTarget.HwIO
     member x.ModelConfig = model.ModelConfig
     member x.TagConfig = model.ModelConfig.TagConfig
 

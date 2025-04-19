@@ -138,10 +138,7 @@ module RunTimeModule =
             disposables.Dispose()
 
         member x.Run()  = doRun()
-        member x.RunInBackground()  = async { doRun() } |> Async.Start
-
-        member x.Stop() =
-            doScanStop()
+        member x.Stop() = doScanStop()
 
         member x.Step() =
             doScanStop()

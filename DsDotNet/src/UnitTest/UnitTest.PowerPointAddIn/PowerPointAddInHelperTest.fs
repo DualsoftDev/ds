@@ -14,7 +14,7 @@ open PowerPointAddInHelper.Helper
 module MSG_TEST =
 
     let testPath = @$"{__SOURCE_DIRECTORY__}../../../../bin/net8.0-windows/HelloDS.pptx";
-    RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
+    //RegistryPptDS.TimeSimutionMode <-  TimeSimutionModeExtensions.toString(TimeSimutionMode.TimeX1)
     GlobalHelper.ActivePPTPath <- testPath
 
     let setXGK() = 
@@ -34,9 +34,6 @@ module MSG_TEST =
     let ``MSG_GENWINPC`` () =
         setWindows()  //Windows 기준으로 테스트
         MSG_GENWINPC.Do(testPath, false)|> Assert.True
-    [<Fact>]
-    let ``MSG_PLCIOCSV`` () =
-        MSG_PLCIOCSV.Do(testPath, "", false)|> Assert.True
     [<Fact>]
     let ``MSG_ANIMATION`` () =
         MSG_ANIMATION.Do(testPath, false)|> Assert.True

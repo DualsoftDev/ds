@@ -23,7 +23,7 @@ module ImportPptModule =
     }
 
     type PptParams = {
-        HwTarget: HwTarget
+        mutable HwTarget: HwTarget
         AutoIOM: bool
         CreateFromPpt : bool
         CreateBtnLamp : bool
@@ -33,7 +33,7 @@ module ImportPptModule =
 
     let defaultPptParams() =
         {
-            HwTarget = getDefaltHwTarget()
+            HwTarget = defaultHwTarget
             AutoIOM = true
             CreateFromPpt = false
             CreateBtnLamp = true

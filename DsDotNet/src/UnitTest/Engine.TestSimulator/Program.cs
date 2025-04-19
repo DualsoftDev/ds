@@ -14,6 +14,8 @@ using static Engine.Core.RuntimeGeneratorModule;
 using static Engine.Import.Office.ImportPptModule;
 using static Engine.Info.DBLoggerORM;
 using static Engine.Info.DBWriterModule;
+using Engine.Import.Office;
+using Engine.CodeGenCPU;
 
 namespace Engine.TestSimulator
 {
@@ -24,9 +26,13 @@ namespace Engine.TestSimulator
         {
             string testFile = Path.Combine(AppContext.BaseDirectory
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/SampleA/exportDS/testA/testMy/my.pptx");
-            PptParams pptParms = new PptParams(getDefaltHwTarget(),  true, false, true, 1000, 100);
+            var modelConfig = ModelConfigPPT.getModelConfigFromPPTFile(testFile);
+            PptParams pptParms = new PptParams(modelConfig.HwTarget,  true, false, true, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize);
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms);
+            DsAddressModule.setMemoryIndex(modelConfig.HwTarget.StartMemory);
+            DsAddressModule.assignAutoAddress(_system, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize, modelConfig.HwTarget);
             RuntimeModel runModel = new(dsz, PlatformTarget.WINDOWS);
+
             _ = DsSimulator.Do(runModel.Cpu);
             Console.ReadKey();
         }

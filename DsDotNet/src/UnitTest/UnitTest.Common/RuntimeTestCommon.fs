@@ -19,7 +19,8 @@ module RuntimeTestCommon =
     let getRuntimeModelForSim(pptPath) =
         let helloDSPath = pptPath
         let pptParms:PptParams =  defaultPptParams()
-        let modelConfig = createDefaultModelConfig() 
+        let modelConfig = ModelConfigPPT.getModelConfigFromPPTFile (pptPath)
+        pptParms.HwTarget <- modelConfig.HwTarget   
 
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms)
         let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.PlatformTarget)

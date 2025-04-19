@@ -21,6 +21,33 @@ open System.IO.Packaging
 open PLC.Mapper.FS
 
 [<AutoOpen>]
+module ModelConfigPPT =
+
+    let getModelConfig(doc: PresentationDocument):ModelConfig option=
+        let customXmlParts =
+            doc.PresentationPart.CustomXmlParts
+            |> Seq.map(fun f->
+                use reader = new StreamReader(f.GetStream())
+                reader.ReadToEnd()
+                )
+        if customXmlParts.length() > 0 then
+            Some(PowerPointMapperXml.LoadOpenXmlModelConfig  customXmlParts)
+        else
+            None
+            
+    let getModelConfigFromPPTFile(path:string) : ModelConfig =
+        match Office.Open(path) |> getModelConfig with
+        | Some mapperData -> mapperData 
+        | None ->
+            createDefaultModelConfig()  
+
+    let saveModelConfig(path:string, modelConfig:ModelConfig) =
+        let doc = Office.Open(path)
+        PowerPointMapperXml.SaveOpenXmlModelConfig doc modelConfig
+        doc.Save()
+
+
+[<AutoOpen>]
 module PptDocModule =
 
     let [<Literal>] pptHeadPage = 1
@@ -159,29 +186,6 @@ module PptDocModule =
 
         groupShapes |> Seq.filter (fun f -> not (groupSubs.Contains(f.GroupName())))
 
-    let getModelConfig(doc: PresentationDocument):ModelConfig option=
-        let customXmlParts =
-            doc.PresentationPart.CustomXmlParts
-            |> Seq.map(fun f->
-                use reader = new StreamReader(f.GetStream())
-                reader.ReadToEnd()
-                )
-        if customXmlParts.length() > 0 then
-            Some(PowerPointMapperXml.LoadOpenXmlModelConfig  customXmlParts)
-        else
-            None
-            
-    let getModelConfigFromPPTFile(path:string) : ModelConfig =
-        match Office.Open(path) |> getModelConfig with
-        | Some mapperData -> mapperData 
-        | None ->
-            createDefaultModelConfig()  
-
-    let saveModelConfig(path:string, modelConfig:ModelConfig) =
-        let doc = Office.Open(path)
-        PowerPointMapperXml.SaveOpenXmlModelConfig doc modelConfig
-        doc.Save()
-
     type PptDoc private(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target,
         pages:IDictionary<SlidePart, PptPage>,
         nodes:IDictionary<string, PptNode>,
@@ -224,7 +228,7 @@ module PptDocModule =
 
         member x.HwIOType : HwIO option =
             match getModelConfig doc with
-            | Some mapperData -> mapperData.HwIO  |> Some
+            | Some mapperData -> mapperData.HwTarget.HwIO  |> Some
             | None -> None
 
         member x.DeviceTags : List<DeviceTag> =

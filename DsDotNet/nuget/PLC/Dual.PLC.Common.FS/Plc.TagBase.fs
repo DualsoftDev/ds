@@ -5,7 +5,7 @@ open System.ComponentModel
 
 [<AbstractClass>]
 type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType, 
-                ?comment: string, ?initialValue: obj) =
+                ?comment: string, ?sourceName: string, ?initialValue: obj) =
 
     do
         match initialValue with
@@ -28,6 +28,7 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
         and set(v) = value <- v
 
     member _.Comment  = defaultArg comment ""
+    member _.SourceName = defaultArg sourceName ""  
     
     abstract member ReadWriteType: ReadWriteType
     [<Browsable(false)>]

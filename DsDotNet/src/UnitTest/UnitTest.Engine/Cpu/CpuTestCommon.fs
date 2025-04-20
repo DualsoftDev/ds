@@ -61,8 +61,6 @@ module CpuTestUtil =
         member x.Reals  =  realTypeAll.Select(getVMReal)
         member x.Calls  =  callTypeAll.Select(getVM)
         member x.Apis  =  sys.ApiItems.Select(getAM)
-        //member x.ApiCallSet  =  sys.GetTaskDevCallSet().Select(fun (td,cs)->(td.ApiItems.Select(),cs))
-        //member x.TaskDevCallSet  =  sys.GetTaskDevCallSet() //test ahn
 
         member x.InRealCalls  =  callTypeAll.Where(fun f->f.Parent.GetCore() :? Real).OfType<Call>()
         member x.AbleVertexInFlows    =  callTypeAll

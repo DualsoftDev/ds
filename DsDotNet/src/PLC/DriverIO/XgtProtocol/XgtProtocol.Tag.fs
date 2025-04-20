@@ -4,8 +4,8 @@ open System
 open Dual.PLC.Common.FS
 
 /// XGTTag: LS(XGT) 전용 태그 표현
-type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, isOutput: bool, ?comment: string) =
-    inherit PlcTagBase(name, address, dataSizeType, ?comment = comment)
+type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, isOutput: bool, ?comment: string, ?sourceName: string) =
+    inherit PlcTagBase(name, address, dataSizeType, ?comment = comment, ?sourceName = sourceName)
 
     let step = 100
     let typeSize = PlcDataSizeType.TypeBitSize dataSizeType  
@@ -41,7 +41,8 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
 
     /// 비트 단위 오프셋 계산
     member _.BitOffset =
-        if address.StartsWith("S") then bitOffset / step * 16
+        if address.TrimStart('%').StartsWith("S") 
+        then bitOffset / step * 16
         else bitOffset
 
     /// 시작 바이트 위치 (LWordOffset * 8 + 내부 오프셋)
@@ -49,6 +50,24 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
 
     /// 메모리 타입 문자 (Bit → 'X', 그 외 → 'B')
     member _.MemType = if typeSize = 1 then 'X' else 'B'
+    member x.GetAddressAlias(size:PlcDataSizeType) =
+        let isXgi = address.StartsWith("%")
+        let addressTemp = 
+            match size with
+            | Boolean -> if isXgi 
+                         then sprintf "%sX%d" x.Device x.BitOffset
+                         else sprintf "%s%d" x.Device x.BitOffset
+                        
+            | Byte    -> sprintf "%sB%d.%d" x.Device (x.BitOffset / 8) (x.BitOffset % 8)
+            | UInt16  -> sprintf "%sW%d.%d" x.Device (x.BitOffset / 16) (x.BitOffset % 16)
+            | UInt32  -> sprintf "%sD%d.%d" x.Device (x.BitOffset / 32) (x.BitOffset % 32)
+            | UInt64  -> sprintf "%sL%d.%d" x.Device (x.BitOffset / 64) (x.BitOffset % 64)
+            | _ -> failwith $"Unsupported data type: {size}"
+
+        if isXgi then
+            sprintf "%%%s" addressTemp
+        else
+            addressTemp
 
     /// 데이터 크기 (Bit → 내부 비트 인덱스, 그 외 → 바이트 크기)
     member x.Size =

@@ -102,8 +102,8 @@ type XmlReader =
                                   elif moduleInfo.Contains ":IN:"  then Some (false)
                                   else 
                                        None
-            
 
+            let sourceName = name
 
             match PlcDataSizeType.TryFromString(typStr) with
             | None -> None
@@ -130,7 +130,8 @@ type XmlReader =
                         devType,
                         bitOffset,
                         isOutput,
-                        comment = comment
+                        comment = comment,
+                        sourceName = sourceName
                     )
                 Some tag
 
@@ -139,11 +140,12 @@ type XmlReader =
         let parseDirect (node: XmlNode) : PlcTagBase option =
             let used    = XgxXml.tryGetAttribute node "Used"
             let device  = XgxXml.tryGetAttribute node "Device"
-            let comment = XgxXml.tryGetAttribute node "Comment" |> validName
-
+            let comment = XgxXml.tryGetAttribute node "Comment" 
+            let sourceName = comment
+            
             if device <> "" && comment <> "" && (not usedOnly || used = "1") then
                 
-                let uniqName = getUniqName (comment, device)
+                let uniqName = getUniqName (comment|> validName, device)
                 let size, offset =
                     match isXGI with
                     | true  -> LsXgiTagParser.Parse device |> fun (_, s, o) -> s, o
@@ -159,10 +161,10 @@ type XmlReader =
                         dataType,
                         offset,
                         isOutput,
-                        comment = comment
+                        comment = comment,
+                        sourceName = sourceName
                     ) :> PlcTagBase
 
-           
                 // 중복 등록 방지용 이름 보관
                 _DirectVarNames[uniqName] <- tag
 

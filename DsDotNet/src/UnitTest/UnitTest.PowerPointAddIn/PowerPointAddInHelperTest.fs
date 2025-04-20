@@ -10,6 +10,7 @@ open PowerPointAddInForDualsoft
 open Engine.Core
 open Newtonsoft.Json
 open PowerPointAddInHelper.Helper
+open Engine.CodeGenCPU
 
 module MSG_TEST =
 
@@ -44,9 +45,15 @@ module MSG_TEST =
     [<Fact>]
     let ``MSG_XGT`` () =
         let testXGT() =
+
             MSG_GENIOLIST.Do(testPath, false)|> Assert.True
+            DsAddressModule.InitializeIOMemoryIndex()
+
             MSG_GENLSPLC.Do(testPath, false)|> Assert.True
+            DsAddressModule.InitializeIOMemoryIndex()
+
             MSG_TIMECHART.Do(testPath, false)|> Assert.True
+            DsAddressModule.InitializeIOMemoryIndex()
 
             //test ahn simulation 로딩 테스트 다른방식 사용필요
             //MSG_SIMULATION.Do(testPath, SimViewEnum.FromPptPage, false, false)|> Assert.True

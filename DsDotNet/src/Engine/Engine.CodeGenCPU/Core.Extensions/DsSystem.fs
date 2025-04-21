@@ -11,8 +11,8 @@ module ConvertCpuDsSystem =
         if address.IsNullOrEmpty() || address = TextAddrEmpty || address = TextNotUsed then
             failwithf $"{name} 해당 주소가 없습니다."
 
-    let getMemory (tag:IStorage) (target:HwCPU) =
-        getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
+    let getMemory (tag:IStorage) (target:HwTarget) =
+        getValidAddress(TextAddrEmpty, DuBOOL, tag.Name, false, IOType.Memory, target)
      
     type DsSystem with
         member private s.GetPv<'T when 'T:equality >(st:SystemTag) =
@@ -98,20 +98,17 @@ module ConvertCpuDsSystem =
                     | DuDriveState -> (int HwSysTag.HwDriveConditionErr)
 
                 condi.ErrorCondition <- createPlanVar  x.Storages  $"{condi.Name}_err" DuBOOL true (Some(condi)) tagKind x
-                condi.ErrorCondition.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, condi.Name, false, IOType.Memory, getTarget(x))
+                condi.ErrorCondition.Address <- getValidAddress(TextAddrEmpty, DuBOOL, condi.Name, false, IOType.Memory, getHwTarget(x))
 
         member x.GenerationButtonEmergencyMemory()  =
             for emg in x.HWButtons.Where(fun f-> f.ButtonType = DuEmergencyBTN) do
                 emg.ErrorEmergency <- createPlanVar  x.Storages  $"{emg.Name}_err" DuBOOL true (Some(emg)) (int HwSysTag.HwStopEmergencyErrLamp) x
-                emg.ErrorEmergency.Address <- getValidAddressUsingPlatform(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getTarget(x))
-
-        //member private x.GenerationEmulationMemory()  =
-        //    x._emulation.Address <- getValidAddressUsingPlatform(TextAddrEmpty,DuBOOL, x._emulation.Name, false, IOType.Memory  , getTarget(x))
+                emg.ErrorEmergency.Address <- getValidAddress(TextAddrEmpty, DuBOOL, emg.Name, false, IOType.Memory, getHwTarget(x))
 
 
         member private x.GenerationCallAlarmMemory()  =
             let calls = x.GetAlarmCalls().Distinct()
-            let target = getTarget(x)
+            let target = getHwTarget(x)
 
             for call in calls do
                 let cv =  call.TagManager :?> CoinVertexTagManager
@@ -136,11 +133,11 @@ module ConvertCpuDsSystem =
         member private x.GenerationRealAlarmMemory()  =
             for real in x.GetRealVertices().Distinct()  |> Seq.sortBy (fun c -> c.Name) do
                 let rm =  real.TagManager :?> RealVertexTagManager
-                rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getTarget(x))
+                rm.ErrGoingOrigin.Address <- getMemory rm.ErrGoingOrigin (getHwTarget(x))
                 real.RealExternalTags.Add(ErrGoingOrigin, rm.ErrGoingOrigin :> IStorage)
 
         member  x.GenerationRealActionMemory()  =
-            let target = getTarget(x)
+            let target = getHwTarget(x)
             let reals = x.GetRealVertices().Distinct() |> Seq.sortBy (fun c -> c.Name)
             for real in reals do
                 let rm =  real.TagManager :?> RealVertexTagManager
@@ -171,7 +168,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationFlowHMIMemory()  =
             for flow in x.GetFlowsOrderByName() do
                 let fm =  flow.TagManager :?> FlowManager
-                let target = getTarget(x)
+                let target = getHwTarget(x)
                 let tag = fm.GetFlowTag(FlowTag.auto_btn)   in tag.Address  <- getMemory tag target
                 let tag = fm.GetFlowTag(FlowTag.auto_mode)  in tag.Address  <- getMemory tag target
                 let tag = fm.GetFlowTag(FlowTag.manual_btn) in tag.Address  <- getMemory tag target
@@ -184,7 +181,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationRealHMIMemory()  =
             for real in x.GetVerticesOfRealOrderByName().Distinct() do
                 let rm =  real.TagManager :?> RealVertexTagManager
-                let target = getTarget(x)
+                let target = getHwTarget(x)
                 rm.ON.Address      <- getMemory rm.ON target
                 rm.RF.Address      <- getMemory rm.RF target
                 rm.SF.Address      <- getMemory rm.SF target
@@ -225,21 +222,21 @@ module ConvertCpuDsSystem =
                 if call.TargetJob.TaskDevCount = 1
                     ||( dev.OutAddress <> TextNotUsed  &&  cv.SF.Address = TextAddrEmpty)
                 then
-                    cv.SF.Address    <- getMemory  cv.SF (getTarget(x))
+                    cv.SF.Address    <- getMemory  cv.SF (getHwTarget(x))
                     dev.ManualAddress  <- cv.SF.Address
                 else
                     dev.ManualAddress  <- TextNotUsed  //다중 작업은 수동 작업을 사용하지 않는다.
 
         member x.GenerationMemory() =
 
-            let startAlarm = DsAddressModule.getCurrentMemoryIndex()
+            let startAlarm = DsAddressCore.getCurrentMemoryIndex()
             //Step1)Alarm base + (0 ~ N) bit
             x.GenerationCallAlarmMemory()
             x.GenerationRealAlarmMemory()
             x.GenerationButtonEmergencyMemory()
             x.GenerationCallConditionMemory()
 
-            DsAddressModule.setMemoryIndex(startAlarm+BufferAlramSize)  //10000개 HMI 리미트
+            DsAddressCore.setMemoryIndex(startAlarm+BufferAlramSize)  //10000개 HMI 리미트
 
             //Step2)Flow Real HMI base + (N ~ M)bit
             x.GenerationCallManualMemory()

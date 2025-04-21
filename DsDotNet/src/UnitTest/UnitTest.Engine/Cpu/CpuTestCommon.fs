@@ -15,14 +15,14 @@ open System.Linq
 [<AutoOpen>]
 module CpuTestUtil =
 
-    type CpuTestSample(target:HwCPU) =
+    type CpuTestSample(hwCPU:HwCPU) =
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.ReplaceSystem sys
-            let cnf = createDefaultModelConfig ()
-            applyTagManager (sys, Storages(), target, cnf)
+            let cnf = createModelConfigReplaceHwCPU (createDefaultModelConfig(),hwCPU)
+            applyTagManager (sys, Storages(),  cnf)
             checkCausalModel sys
             sys
 

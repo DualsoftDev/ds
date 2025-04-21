@@ -305,7 +305,7 @@ module TagManagerModule =
                                     else off
 
         ///Timer time avg
-        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.TargetType)
+        member val TRealOnTime  = timer s ($"{v.QualifiedName}_ONTIME"|>validStorageName) sys (sysManager.HwTarget.HwCPU)
 
         member x.IsFinished = x.Real.Finished
         member x.NoTransData = x.Real.NoTransData
@@ -341,8 +341,8 @@ module TagManagerModule =
         //member val TOUT = timer  s ($"{v.QualifiedName}_TOUT"|>validStorageName) sys (sysManager.TargetType)
 
         ///Timer time
-        member val TimeMax     = timer  s ($"{v.QualifiedName}_TimeMax"|>validStorageName) sys (sysManager.TargetType)
-        member val TimeCheck  =  timer  s ($"{v.QualifiedName}_TimeCheck"|>validStorageName) sys (sysManager.TargetType)
+        member val TimeMax     = timer  s ($"{v.QualifiedName}_TimeMax"|>validStorageName) sys (sysManager.HwTarget.HwCPU)
+        member val TimeCheck  =  timer  s ($"{v.QualifiedName}_TimeCheck"|>validStorageName) sys (sysManager.HwTarget.HwCPU)
 
         member val PS   = createTag  true VertexTag.planStart
         member val PE   = createTag  true VertexTag.planEnd

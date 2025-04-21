@@ -4,8 +4,8 @@ open System
 open Dual.PLC.Common.FS
 
 /// XGTTag: LS(XGT) 전용 태그 표현
-type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, isOutput: bool, ?comment: string, ?sourceName: string) =
-    inherit PlcTagBase(name, address, dataSizeType, ?comment = comment, ?sourceName = sourceName)
+type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOffset: int, isOutput: bool, ?comment: string) =
+    inherit PlcTagBase(name, address, dataSizeType, ?comment = comment)
 
     let step = 100
     let typeSize = PlcDataSizeType.TypeBitSize dataSizeType  

@@ -103,8 +103,6 @@ type XmlReader =
                                   else 
                                        None
 
-            let sourceName = name
-
             match PlcDataSizeType.TryFromString(typStr) with
             | None -> None
             | Some v -> 
@@ -130,9 +128,12 @@ type XmlReader =
                         devType,
                         bitOffset,
                         isOutput,
-                        comment = comment,
-                        sourceName = sourceName
+                        comment = comment
                     )
+
+                // 중복 등록 방지용 이름 보관
+                _DirectVarNames[uniqName] <- tag
+
                 Some tag
 
 
@@ -141,7 +142,6 @@ type XmlReader =
             let used    = XgxXml.tryGetAttribute node "Used"
             let device  = XgxXml.tryGetAttribute node "Device"
             let comment = XgxXml.tryGetAttribute node "Comment" 
-            let sourceName = comment
             
             if device <> "" && comment <> "" && (not usedOnly || used = "1") then
                 
@@ -161,8 +161,7 @@ type XmlReader =
                         dataType,
                         offset,
                         isOutput,
-                        comment = comment,
-                        sourceName = sourceName
+                        comment = comment
                     ) :> PlcTagBase
 
                 // 중복 등록 방지용 이름 보관
@@ -187,18 +186,18 @@ type XmlReader =
             |]
 
         /// 중복된 이름을 가진 태그 발견시 예외처리 
-        let duplicateNames = 
-            tags
-            |> Array.groupBy (fun tag -> tag.Name)
-            |> Array.filter (fun (_, tags) -> tags.Length > 1)
-            |> Array.map (fun (name, tags) -> name, tags.Length)
+        //let duplicateNames = 
+        //    tags
+        //    |> Array.groupBy (fun tag -> tag.Name)
+        //    |> Array.filter (fun (_, tags) -> tags.Length > 1)
+        //    |> Array.map (fun (name, tags) -> name, tags.Length)
 
-        if duplicateNames.Length > 0 then
-            let msg = 
-                duplicateNames
-                |> Array.map (fun (name, count) -> $"{name} : {count}개")
-                |> String.concat "\n"
-            failwithf "Duplicate tag names found:\n%s" msg
+        //if duplicateNames.Length > 0 then
+        //    let msg = 
+        //        duplicateNames
+        //        |> Array.map (fun (name, count) -> $"{name} : {count}개")
+        //        |> String.concat "\n"
+        //    failwithf "Duplicate tag names found:\n%s" msg
 
 
         tags, Array.append [|ip|] subIps, isXGI

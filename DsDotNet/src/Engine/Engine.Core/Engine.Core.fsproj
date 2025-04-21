@@ -33,13 +33,13 @@
         <Compile Include="DsEvent.fs" />
         <Compile Include="DsLog.fs" />
         <Compile Include="Prolog.fs" />
+        <Compile Include="Text.fs" />
         <Compile Include="TagConfig.fs" />
         <Compile Include="ModelConfig.fs" />
         <Compile Include="Utils\PathManager.fs" />
         <Compile Include="Utils\FileManager.fs" />
 		<Compile Include="Utils\TypeConversion.fs" />
 		<Compile Include="Utils\VersionExtension.fs" />
-		<Compile Include="Text.fs" />
 		<Compile Include="Fqdn.fs" />
 		<Compile Include="UniqueName.fs" />
 		<Compile Include="Expression.Interfaces.fs" />

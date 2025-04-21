@@ -10,6 +10,10 @@ open Newtonsoft.Json
 module MapperDataModule =
 
     // ========== 모델 타입 정의 ==========
+    type MapperTag (name: string, address:string) =
+        member this.Name = name
+        member this.Address = address
+        member this.OpcName = $"{name}_{address}" |> validStorageName
 
     [<AllowNullLiteral>]
     type DeviceApi() =
@@ -17,10 +21,10 @@ module MapperDataModule =
         member val Work = "" with get, set
         member val Device = "" with get, set
         member val Api = "" with get, set
-        member val Tag = "" with get, set
         member val Color = 0 with get, set
         member val InAddress = "" with get, set
         member val OutAddress = "" with get, set
+        member val MapperTag = MapperTag("", "") with get, set
         
     [<Flags>]
     type IOColumn =

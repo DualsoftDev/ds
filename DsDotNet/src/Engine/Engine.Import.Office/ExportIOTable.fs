@@ -129,7 +129,9 @@ module ExportIOTable =
                 let mutable extCnt = 0
                 let devsJob =  sys.GetTaskDevs()
                 for g in devsJob.GroupBy(fun (dev, job) -> job) do
-                    g |> Seq.mapi(fun i (dev, job) ->
+                    let mutable devIndex = 0
+                    for (dev, job) in g do
+                        devIndex <- devIndex + 1
                         if dev.IsRootOnlyDevice
                         then
                             dev.OutAddress <- (TextNotUsed)
@@ -138,10 +140,8 @@ module ExportIOTable =
                                 dev.InAddress  <-  getExternalTempMemory (target, extCnt)
                                 extCnt <- extCnt+1
 
-                        rowIOItems (i, dev, job) target
-                    )
-                
-            }
+                        yield rowIOItems (devIndex, dev, job) target
+          }
 
         let dts =
             totalRows
@@ -699,11 +699,11 @@ module ExportIOTable =
         
 
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
-        //let tableDeviceIOs = ToDeviceIOTables system rowSize target
+        let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system  true target
         let tabletableFuncVariExternal = ToFuncVariTables system  target
 
-        let tables =(* tableDeviceIOs  @ *)[tablePanelIO ] @ tabletableFuncVariExternal
+        let tables = tableDeviceIOs @ [tablePanelIO ] @ tabletableFuncVariExternal
 
         tables
 

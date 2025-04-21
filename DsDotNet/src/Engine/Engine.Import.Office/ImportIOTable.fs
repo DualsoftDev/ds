@@ -7,6 +7,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open Engine.CodeGenCPU
 open Engine.Core.MapperDataModule;
+open Engine.CodeGenCPU.DsAddressUtil
 
 [<AutoOpen>]
 module ImportIOTable =

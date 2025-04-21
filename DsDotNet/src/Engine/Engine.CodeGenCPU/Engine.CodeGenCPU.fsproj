@@ -23,9 +23,11 @@
         <Compile Include="TagManager\TagManager.TaskDev.fs" />
         <Compile Include="TagManager\TagManager.Variable.fs" />
         <Compile Include="TagManager\TagManager.ActionVariable.fs" />
+        <Compile Include="TagAddress\DsAddressUtil.fs" />
+        <Compile Include="TagAddress\DsAddressCore.fs" />
+        <Compile Include="TagAddress\DsAddressModule.fs" />
         <Compile Include="Expression.Extension.fs" />
         <Compile Include="Core.Extensions.Utils.fs" />
-        <Compile Include="AutoGen.Address.fs" />
         <Compile Include="Core.Extensions\ApiItem, TaskDev.fs" />
         <Compile Include="Core.Extensions\HwSystemDef.fs" />
         <Compile Include="Core.Extensions\DsSystem.fs" />
@@ -74,6 +76,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+        <ProjectReference Include="..\..\PLC\DriverIO\MelecProtocol\PLC.MelecProtocol.FS.fsproj" />
         <ProjectReference Include="..\..\PLC\PLC.CodeGen.Common\PLC.CodeGen.Common.fsproj" />
         <ProjectReference Include="..\Engine.Core\Engine.Core.fsproj" />
         <ProjectReference Include="..\Engine.Parser.FS\Engine.Parser.FS.fsproj" />

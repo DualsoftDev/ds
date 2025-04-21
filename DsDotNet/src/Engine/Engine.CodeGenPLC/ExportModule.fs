@@ -196,10 +196,10 @@ module ExportModule =
                 let globalStorage = new Storages()
                 let localStorage = new Storages()
 
-                DsAddressModule.setMemoryIndex(startMemory)
+                DsAddressCore.setMemoryIndex(startMemory)
                 let pous = system.GeneratePOUs globalStorage modelConfig |> toArray
                 // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정  
-                let currentMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  
+                let currentMemory = DsAddressCore.getCurrentMemoryIndex()/8+1  
 
                 // Create a list to hold <C>ommented <S>tatement<S>
                 let css = [|

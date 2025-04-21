@@ -21,12 +21,16 @@
         <Compile Include="LSE\ConvertLSE.Config.fs" />
         <Compile Include="LSE\ConvertLSE.Xml.fs" />
         <Compile Include="LSE\ConvertLSE.fs" />
+        <Compile Include="MX\CSVTypes.fs" />
+        <Compile Include="MX\CSVParser.fs" />
+        <Compile Include="MX\ConvertMitsubishi.fs" />
         <Compile Include="ColorUtil.fs" />
         <Compile Include="PrefixTrie.fs" />
         <Compile Include="MappingDevice.fs" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="Microsoft.VisualBasic" Version="10.3.0" />
       <PackageReference Include="System.Text.Json" Version="8.0.5" />
     </ItemGroup>
 
@@ -41,6 +45,7 @@
 	  <ProjectReference Include="..\..\..\..\nuget\Common\Dual.Common.Core.FS\Dual.Common.Core.FS.fsproj" />
 	  <ProjectReference Include="..\..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
 	  <ProjectReference Include="..\..\..\Engine\Engine.Core\Engine.Core.fsproj" />
+	  <ProjectReference Include="..\..\DriverIO\MelecProtocol\PLC.MelecProtocol.FS.fsproj" />
 	  <ProjectReference Include="..\..\DriverIO\XgtProtocol\PLC.XgtProtocol.FS.fsproj" />
 	</ItemGroup>
 	<ItemGroup>

@@ -64,13 +64,13 @@ module CpuLoader =
 
 
 
-    let applyTagManager(activeSys:DsSystem, storages:Storages, target:HwCPU, modelCnf:ModelConfig) =
+    let applyTagManager(activeSys:DsSystem, storages:Storages, modelCnf:ModelConfig) =
         let createTagM  (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 
             RuntimeDS.ReplaceSystem(sys)
             let isActive = sys = activeSys
-            sys.TagManager <- SystemManager(sys, storages, target, modelCnf.TimeoutCall)
+            sys.TagManager <- SystemManager(sys, storages, modelCnf.HwTarget, modelCnf.TimeoutCall)
             sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))
             sys.ActionVariables.Iter(fun a-> a.TagManager <- ActionVariableManager(a, sys))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f, isActive, activeSys))
@@ -97,8 +97,8 @@ module CpuLoader =
         member sys.GeneratePOUs (storages:Storages) (modelCnf:ModelConfig) : PouGen seq =
             UniqueName.resetAll()
             let mode = modelCnf.RuntimeMode
-            let target = modelCnf.HwCPU
-            applyTagManager (sys, storages, target, modelCnf)
+            let hwCPU = modelCnf.HwCPU
+            applyTagManager (sys, storages,  modelCnf)
 
             let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
@@ -109,13 +109,13 @@ module CpuLoader =
                 |> Seq.map(fun s ->
                     try
                         match s with
-                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys, mode, target))
-                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys, mode, target))
+                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys, mode, hwCPU))
+                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys, mode, hwCPU))
                         | _ -> failwithlog (getFuncName())
                     with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
                     )
                 //자신(Acitve) system을  CPU 변환
-                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys, mode, target))]
+                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys, mode, hwCPU))]
 
             pous
 

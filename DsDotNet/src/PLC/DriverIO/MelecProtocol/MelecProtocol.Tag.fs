@@ -27,7 +27,7 @@ type MelsecTag(name: string, address: string, dataSizeType: PlcDataSizeType, bit
     member val LWordOffset = 0 with get, set
 
     /// 읽기/쓰기 타입 (기본 Read)
-    override _.ReadWriteType = Read
+    override _.ReadWriteType = if address.StartsWith("Y") then ReadWriteType.Write else ReadWriteType.Read
     override _.IsMemory = true
 
     /// MELSEC 응답 버퍼로부터 값 업데이트

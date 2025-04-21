@@ -1,79 +1,89 @@
 namespace MelsecProtocol
 
 open System
+open System.Collections.Generic
+open System.Diagnostics
+open System.Diagnostics.Contracts
+open System.IO
+open System.Linq
+open System.Net
 open System.Net.Sockets
 open System.Text
 
+
+// Ethernet 단순 통신 래퍼
 type MxEthernet(ip: string, port: int, timeoutMs: int) =
-    // TCP 연결 및 스트림 초기화
     let client = new TcpClient()
-    let stream = 
-        client.ReceiveTimeout <- timeoutMs
+    do
         client.SendTimeout <- timeoutMs
+        client.ReceiveTimeout <- timeoutMs
         client.Connect(ip, port)
-        client.GetStream()
+    let stream = client.GetStream()
 
-    // 기본 3E 프레임 헤더 구성 함수
-    member private _.MakeHeader(dataLength: int) =
-        [|
-            yield! [| 0x50uy; 0x00uy |]  // Subheader: PC → PLC
-            yield! [| 0x00uy; 0xFFuy |]  // Network No. / PC No.
-            yield! [| 0xFFuy; 0x03uy |]  // I/O No. / Unit No.
-            yield! [| 0x00uy; 0x00uy |]  // Station No. / Reserved
-            yield! BitConverter.GetBytes(uint16 dataLength) // 데이터 길이
-            yield! [| 0x00uy; 0x00uy |]  // 모니터링 타이머 (기본값)
-        |]
+    interface IDisposable with
+        member _.Dispose() =
+            stream.Dispose()
+            client.Close()
 
-
-
-
-    // 워드 읽기 명령 생성
-    member x.BuildReadWordCommand(device: string, startAddr: int, count: int) =
-        let deviceCode =
-            match device with
-            | "D" -> 0xA8uy
-            | "M" -> 0x90uy
-            | _ -> failwith $"Unsupported device: {device}"
-
-        let addrBytes = BitConverter.GetBytes(startAddr)
-        let addr32 = [| addrBytes[0]; addrBytes[1]; 0x00uy |] // 3바이트 주소
-
-        let payload =
-            [|
-                yield! [| 0x01uy; 0x04uy |]  // Command: Read (0401)
-                yield! [| 0x00uy; 0x00uy |]  // Subcommand
-                yield! addr32               // Start address (3 bytes)
-                yield deviceCode            // Device code
-                yield! BitConverter.GetBytes(uint16 count) // Read point count
-            |]
-
-        let header = x.MakeHeader(payload.Length)
-        Array.concat [ header; payload ]
-
-    // 명령 전송 및 응답 수신
-    member _.SendAndReceive(data: byte[]) =
-        stream.Write(data, 0, data.Length)
-        let buffer = Array.zeroCreate 1024
-        let bytesRead = stream.Read(buffer, 0, buffer.Length)
-        buffer.[0..bytesRead-1]
-
-    // 응답 바이트 배열을 정수 배열로 변환
-    member private _.BytesToIntArray(data: byte[]) =
-        data
-        |> Array.chunkBySize 2
-        |> Array.map (fun (pair: byte[]) ->
-            match pair with
-            | [| l; h |] -> int h <<< 8 ||| int l
-            | _ -> failwith "Invalid byte pair")
-
-    // 외부 API: 워드 읽기
-    member this.ReadWord(device: string, startAddr: int, count: int) =
-        let cmd = this.BuildReadWordCommand(device, startAddr, count)
-        let res = this.SendAndReceive(cmd)
-        let wordData = res.[11..] // 응답 헤더 11바이트 이후부터 유효 데이터
-        this.BytesToIntArray(wordData)
-
-    // 외부 API: 연결 종료
     member _.Close() =
         stream.Close()
         client.Close()
+
+    member private _.SendAndReceive(data: byte[]) : byte[] =
+        stream.Write(data, 0, data.Length)
+        stream.Flush()
+        use ms = new MemoryStream()
+        let buff = Array.zeroCreate 1024
+        let mutable bytesRead = 0
+        while stream.DataAvailable || bytesRead = 0 do
+            let sz = stream.Read(buff, 0, buff.Length)
+            if sz = 0 then raise <| IOException("No data received")
+            ms.Write(buff, 0, sz)
+            bytesRead <- sz
+        ms.ToArray()
+
+    member private _.BuildHeader(dataLength: int) =
+        let list = ResizeArray<byte>()
+        list.AddRange([| 0x50uy; 0x00uy |]) // 3E Frame
+        list.AddRange([| 0x00uy; 0xFFuy; 0xFFuy; 0x03uy; 0x00uy |])
+        list.AddRange(BitConverter.GetBytes(uint16 dataLength))
+        list.AddRange(BitConverter.GetBytes(uint16 0x0010)) // CPU Timer
+        list
+
+    member private _.GetDeviceCode(device: string) =
+        match device.ToUpper() with
+        | "D" -> 0xA8uy
+        | "M" -> 0x90uy
+        | "X" -> 0x9Cuy
+        | "Y" -> 0x9Duy
+        | _ -> raise (ArgumentException("Unsupported device"))
+
+    member private this.BuildReadCommand(device: string, address: int, count: uint16) =
+        let header = this.BuildHeader(12)
+        header.AddRange([| 0x01uy; 0x04uy |]) // Command: batch read
+        header.AddRange([| 0x00uy; 0x00uy |]) // Subcommand
+        header.AddRange(BitConverter.GetBytes(address &&& 0xFFFFFF).[0..2])
+        header.Add(this.GetDeviceCode(device))
+        header.AddRange(BitConverter.GetBytes(count))
+        header.ToArray()
+
+    member this.ReadWords(device: string, address: int, count: uint16) =
+        let cmd = this.BuildReadCommand(device, address, count)
+        let res = this.SendAndReceive(cmd)
+        if res.Length < 11 then failwith "Invalid response"
+        let data = res.[11..]
+        Array.init (int count) (fun i -> BitConverter.ToInt16(data, i * 2) |> int)
+
+    member this.WriteWord(device: string, startAddr: int, values: int[]) =
+        let wordCount = values.Length
+        let header = this.BuildHeader(12 + wordCount * 2)
+        header.AddRange([| 0x01uy; 0x14uy |]) // Command: batch write
+        header.AddRange([| 0x00uy; 0x00uy |])
+        header.AddRange(BitConverter.GetBytes(startAddr).[0..2])
+        header.Add(this.GetDeviceCode(device))
+        header.AddRange(BitConverter.GetBytes(uint16 wordCount))
+        for v in values do
+            header.AddRange(BitConverter.GetBytes(int16 v))
+        let res = this.SendAndReceive(header.ToArray())
+        if res.[9] <> 0uy || res.[10] <> 0uy then failwith "Write error"
+        ()

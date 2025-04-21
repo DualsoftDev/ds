@@ -3,8 +3,8 @@ namespace MelsecProtocol
 open Dual.PLC.Common.FS
 
 
-type MxScanManager() = /////ahn!! 임시
-    inherit PlcScanManagerBase<XgtPlcScan>()
+type MxScanManager(delay: int, timeoutMs:int, isMonitorOnly: bool) =
+    inherit PlcScanManagerBase<MxPlcScan>()
 
-    override _.CreateScanner(ip: string, delay: int, timeoutMs:int) =
-        XgtPlcScan(ip, delay, timeoutMs)
+    override _.CreateScanner(ip: string) =
+        MxPlcScan(ip, delay, timeoutMs, isMonitorOnly)

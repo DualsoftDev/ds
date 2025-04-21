@@ -55,7 +55,7 @@ module DsOpcUaServerManager =
     /// <summary>
     /// OPC UA 서버 시작
     /// </summary>
-    let Start(dsSys: DsSystem, mode:RuntimePackage, targetIP:string) =
+    let Start(dsSys: DsSystem, mode:RuntimeMode, targetIP:string) =
         printfn "OPC UA 서버 초기화 중..."
         if server.IsSome  then Stop(dsSys);
         // 1. 애플리케이션 인스턴스 생성

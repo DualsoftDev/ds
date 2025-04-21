@@ -16,7 +16,7 @@ type XgiFromStatementTestCollection() = class end
 [<CollectionDefinition("XgkFromStatementTestCollection", DisableParallelization = true)>]
 type XgkFromStatementTestCollection() = class end
 
-type XgxFromStatementTest(xgx:PlatformTarget) =
+type XgxFromStatementTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
     let createParam() =  getXgxProjectParams xgx "UnitTestProject"
     let mutable prjParam = createParam() 

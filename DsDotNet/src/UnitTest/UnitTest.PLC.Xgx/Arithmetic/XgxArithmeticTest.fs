@@ -10,7 +10,7 @@ open Dual.Common.Base.CS
 open Dual.Common.UnitTest.FS
 open type Dual.Common.Base.CS.DcLogger
 
-type XgxArithematicTest(xgx:PlatformTarget) =
+type XgxArithematicTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let enableTraceCache = DcLogger.EnableTrace

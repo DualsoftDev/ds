@@ -314,7 +314,7 @@ module rec DsPropertyModule =
 
         let mutable dsFilePath = ""
         let mutable hwIP = ""
-        let mutable runtimePackage = RuntimePackage.Simulation
+        let mutable runtimeMode = RuntimeMode.Simulation
         let mutable hwDriver = ""
         let mutable timeSimutionMode = TimeSimutionMode.TimeX1
         let mutable timeoutCall = 0u
@@ -327,7 +327,7 @@ module rec DsPropertyModule =
             x.Name <- "Model Config"
             x.UpdateField(&dsFilePath, config.DsFilePath, nameof dsFilePath)
             x.UpdateField(&hwIP, config.HwIP, nameof hwIP)
-            x.UpdateField(&runtimePackage, config.RuntimePackage, nameof runtimePackage)
+            x.UpdateField(&runtimeMode, config.RuntimeMode, nameof runtimeMode)
             x.UpdateField(&hwDriver, config.HwTarget.HwIO.ToString(), nameof hwDriver)
             x.UpdateField(&timeSimutionMode, config.TimeSimutionMode, nameof timeSimutionMode)
             x.UpdateField(&timeoutCall, config.TimeoutCall, nameof timeoutCall)
@@ -340,9 +340,9 @@ module rec DsPropertyModule =
             with get() = hwIP
             and set(v) = x.UpdateField(&hwIP, v, nameof x.HwIP)
 
-        member x.RuntimePackage
-            with get() = runtimePackage
-            and set(v) = x.UpdateField(&runtimePackage, v, nameof x.RuntimePackage)
+        member x.RuntimeMode
+            with get() = runtimeMode
+            and set(v) = x.UpdateField(&runtimeMode, v, nameof x.RuntimeMode)
 
         member x.HwDriver
             with get() = hwDriver

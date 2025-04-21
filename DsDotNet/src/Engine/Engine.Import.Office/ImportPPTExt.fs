@@ -234,10 +234,10 @@ module ImportU =
 
         //real call alias  만들기
         [<Extension>]
-        static member MakeSegment(doc: PptDoc, mySys: DsSystem, target:HwTarget) =
+        static member MakeSegment(doc: PptDoc, mySys: DsSystem) =
             let dicFlow = doc.DicFlow
             let dicVertex = doc.DicVertex
-
+            let cnf = doc.ModelConfig
 
             let pptNodes = doc.Nodes
 
@@ -294,7 +294,6 @@ module ImportU =
                             let libFilePath  =libInfos[libApis.First()]
                             failWithLog $"{kv.Key}은 시스템 Libaray Api를 사용하였습니다.\r\n{libFilePath}에 {errApis}가 없습니다. \r\n\r\n {libConfig} \r\n\r\n시스템 Libaray는 지정된 이름만 사용가능합니다."
                      )
-                let platformTarget = target.PlatformTarget
                 callNAutoPres
                 |> Seq.filter(fun node -> node.NodeType = CALL) //Call만 처리
                 |> Seq.sortBy(fun node -> (node.PageNum, node.Position.Left, node.Position.Top))
@@ -309,7 +308,7 @@ module ImportU =
                                 dicVertex[parent.Key] :?> Real |> DuParentReal
                         else
                             dicFlow[node.PageNum] |> DuParentFlow
-                    createCallVertex (mySys, node, parentWrapper, platformTarget, dicVertex)
+                    createCallVertex (mySys, node, parentWrapper, cnf.HwTarget.HwCPU, dicVertex)
                 )
 
 
@@ -621,32 +620,42 @@ module ImportU =
                 api.RX <- rx
                 )
         [<Extension>]
-        static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool, hwTarget:HwTarget) =
-            let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
+        static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool) =
+
+            let cnf = doc.ModelConfig
+
             if not(autoIO)
                 && activeSys.IsSome && activeSys.Value = sys
-                && pageTables.IsEmpty()
+                && not(cnf.HwTarget.HasSlot)
             then
-                failwithf "IO Table이 없습니다. Add I/O Table을 수행하세요"
+                failwithf "IO Table이 없습니다. Utils > 주소 할당 수행하세요"
 
+            ImportIODevModule.ApplyIO(sys, cnf.TagConfig.DeviceTags, cnf.HwTarget)
+
+
+
+
+
+            //let pageTables = doc.GetTables(System.Enum.GetValues(typedefof<IOColumn>).Length)
             // io table 에서 첫 row 가 "CASE" 인 table 들의 모든 row 들을 device name 별로 중복 검사?
-            pageTables
-            |> Seq.map (snd)        // only tables
-            |> Seq.filter (fun table -> table.Rows.Count > 0)
-            |> Seq.filter (fun table -> table.Rows[0].ItemArray[(int) IOColumn.Case] = $"{IOColumn.Case}")
-            |> Seq.collect (fun table ->
-                table.Rows
-                    .Cast<DataRow>()
-                    .Where(fun r -> r.ItemArray[(int) IOColumn.Case] <> $"{IOColumn.Case}") // head row 제외
-                    .Select(fun row -> row))    // only rows
-            |> Seq.groupBy (getDevName)
-            |> Seq.iter (fun (name, rows) ->
-                let rowsWithIndexes = rows |> Seq.toArray
-                if rowsWithIndexes.Length > 1 && name <> "" then
-                    // Handle the exception for duplicate names here
-                    failwithf "Duplicate name: %s" name)
+            //pageTables
+            //|> Seq.map (snd)        // only tables
+            //|> Seq.filter (fun table -> table.Rows.Count > 0)
+            //|> Seq.filter (fun table -> table.Rows[0].ItemArray[(int) IOColumn.Case] = $"{IOColumn.Case}")
+            //|> Seq.collect (fun table ->
+            //    table.Rows
+            //        .Cast<DataRow>()
+            //        .Where(fun r -> r.ItemArray[(int) IOColumn.Case] <> $"{IOColumn.Case}") // head row 제외
+            //        .Select(fun row -> row))    // only rows
+            //|> Seq.groupBy (getDevName)
+            //|> Seq.iter (fun (name, rows) ->
+            //    let rowsWithIndexes = rows |> Seq.toArray
+            //    if rowsWithIndexes.Length > 1 && name <> "" then
+            //        // Handle the exception for duplicate names here
+            //        failwithf "Duplicate name: %s" name)
+            //ApplyIO(sys, [], cnf.HwTarget)
 
-            ApplyIO(sys, pageTables, hwTarget)
+
 
         [<Extension>]
         static member UpdateLayouts(doc: PptDoc, sys: DsSystem) =
@@ -847,28 +856,22 @@ module ImportU =
             |> Seq.iter (processPage doc mySys systemRepo)
 
         [<Extension>]
-        static member UpdateIOFromDeviceTags(doc: PptDoc, sys: DsSystem, hwTarget:HwIO) =
-        
-            if doc.HwIOType.IsSome && doc.HwIOType.Value <> hwTarget then  //설정드라이브랑 같아야 가져옴
-                debugf "Error: Setting HW_IO Type과 문서에 저장된 타입이 다릅니다. saved : %A <> setting : %A"  doc.HwIOType.Value hwTarget
-            else 
-                match doc.HwIOType with
-                | Some io  -> 
-                    let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
-                    doc.DeviceTags
-                    |> Seq.iter (fun api ->
-                        let key = api.DeviceApiName
-                        if(dictTaskDev.ContainsKey(key))
-                        then
-                            dictTaskDev[key].InAddress <- api.Input
-                            dictTaskDev[key].OutAddress<- api.Output
-                        )
-                |_-> ()
-
+        static member UpdateIOFromDeviceTags(doc: PptDoc, sys: DsSystem) =
+    
+            let io= doc.HwIOType 
+            let dictTaskDev =  sys.TaskDevs.ToDictionary(fun td -> td.FullName) 
+            doc.DeviceTags
+            |> Seq.iter (fun api ->
+                let key = api.DeviceApiName
+                if(dictTaskDev.ContainsKey(key))
+                then
+                    dictTaskDev[key].InAddress <- api.Input
+                    dictTaskDev[key].OutAddress<- api.Output
+                )
 
 
         [<Extension>]
-        static member BuildSystem(doc: PptDoc, sys: DsSystem, hwTarget:HwTarget, isLib:bool, isCreateBtnLLib:bool) =
+        static member BuildSystem(doc: PptDoc, sys: DsSystem, isLib:bool, isCreateBtnLLib:bool) =
             let isActive = activeSys.IsSome && activeSys.Value = sys
             doc.PreCheckPptSystem(sys)
 
@@ -886,7 +889,7 @@ module ImportU =
 
             doc.MakeConditionNActions(sys)
             //segment 리스트 만들기
-            doc.MakeSegment(sys, hwTarget)
+            doc.MakeSegment(sys)
             //Edge  만들기
             doc.MakeEdges(sys)
             //Safety AutoPre 만들기
@@ -902,7 +905,7 @@ module ImportU =
             //doc.MakeAddressBySlideNote(sys)
 
             //IO Table로 부터 가져오기
-            doc.UpdateIOFromDeviceTags(sys, hwTarget.HwIO)
+            doc.UpdateIOFromDeviceTags(sys)
 
             doc.PostCheckPptSystem(sys, isLib)
             doc.IsBuilded <- true

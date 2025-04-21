@@ -7,7 +7,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 open Dual.Common.UnitTest.FS
 
-type XgxBitwiseTest(xgx:PlatformTarget) =
+type XgxBitwiseTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Bitwise shift test`` () =

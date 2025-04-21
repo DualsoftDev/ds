@@ -6,7 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
 	  <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 	  <Nullable>enable</Nullable>
-    <PlatformTarget>x64</PlatformTarget>
+    <HwCPU>x64</HwCPU>
   </PropertyGroup>
 
   <ItemGroup>

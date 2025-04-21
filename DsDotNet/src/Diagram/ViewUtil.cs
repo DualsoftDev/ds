@@ -21,7 +21,7 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.DsType;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.Interface;
-using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Core.ModelConfigModule;
 using static Engine.Core.TagKindList;
 using static Engine.Core.TagKindModule;
 using static Engine.Core.TagKindModule.TagEvent;

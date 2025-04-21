@@ -10,7 +10,7 @@ open Dual.Common.UnitTest.FS
 open PLC.CodeGen.Common
 open XgtProtocol
 
-type XgxComparisonTest(xgx:PlatformTarget) =
+type XgxComparisonTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``COMP double test`` () =

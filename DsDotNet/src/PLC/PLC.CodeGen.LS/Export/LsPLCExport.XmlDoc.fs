@@ -9,7 +9,7 @@ open Dual.Common.Base.CS
 
 [<AutoOpen>]
 module internal XgxXmlExtensionImpl =
-    let getXPathGlobalVariable (xgx:PlatformTarget) =
+    let getXPathGlobalVariable (xgx:HwCPU) =
         let var =
             match xgx with
             | XGI -> "GlobalVariable"
@@ -21,7 +21,7 @@ module internal XgxXmlExtensionImpl =
 type XgxXmlExtension =
     /// XmlNode '//Configurations/Configuration/GlobalVariables/{GlobalVariable, VariableComment}' 반환
     [<Extension>]
-    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:PlatformTarget) : XmlNode = getXPathGlobalVariable xgx |> xdoc.SelectSingleNode
+    static member GetXmlNodeTheGlobalVariable (xdoc:XmlDocument, xgx:HwCPU) : XmlNode = getXPathGlobalVariable xgx |> xdoc.SelectSingleNode
 
     /// XGK 에서 사용할 수 없는 변수명 체크
     [<Extension>]
@@ -72,7 +72,7 @@ type XgxXmlExtension =
     ///
     /// - Symbol 의 DevicePos 가 음수인 Symbol 이 있는지 확인한다.
     [<Extension>]
-    static member Check(xdoc:XmlDocument, xgx:PlatformTarget) =
+    static member Check(xdoc:XmlDocument, xgx:HwCPU) =
         let checkSymbols() =
             let xPathGlobalVar = getXPathGlobalVariable xgx
             let globalSymbols:XmlNode[] = xdoc.GetXmlNodes($"{xPathGlobalVar}/Symbols/Symbol").ToArray()

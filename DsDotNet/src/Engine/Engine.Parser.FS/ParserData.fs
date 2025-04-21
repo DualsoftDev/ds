@@ -32,9 +32,9 @@ module ParserDataModule =
 
 
     /// Parsing 과정에 필요한 데이터를 담고 있는 클래스
-    type ParserData(target:PlatformTarget, storages: Storages, exprParser: exprParser option) =
+    type ParserData(target:HwCPU, storages: Storages, exprParser: exprParser option) =
         new() = ParserData(WINDOWS, Storages(), None)
-        member x.TargetType:PlatformTarget = target
+        member x.TargetType:HwCPU = target
         member x.Storages: Storages = storages
         member x.ExprParser: exprParser option = exprParser
         /// UDT 선언.  type 선언

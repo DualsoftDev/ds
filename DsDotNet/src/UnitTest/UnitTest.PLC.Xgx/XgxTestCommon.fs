@@ -2,7 +2,7 @@ namespace T
 
 open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
-open Engine.Core.RuntimeGeneratorModule
+open Engine.Core.ModelConfigModule
 
 
 [<AutoOpen>]
@@ -38,7 +38,7 @@ module XgxTestCommonModule =
         </Rung>
 """
     
-    let getSimpleLocalSymbolInfos(xgx:PlatformTarget): SymbolInfo list =
+    let getSimpleLocalSymbolInfos(xgx:HwCPU): SymbolInfo list =
         let device =
             match xgx with
             | XGI -> "I"

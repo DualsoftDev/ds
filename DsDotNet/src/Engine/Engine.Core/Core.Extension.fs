@@ -357,7 +357,7 @@ type SystemExt =
         let inValidTaskDevTags = inValidTaskDevTags(x);
         let inValidHwSystemTag = inValidHwSystemTag(x);
         if inValidTaskDevTags.Any() then
-            failwith <| "Add I/O Table을 수행하세요\n\n" + String.Join("\n", inValidTaskDevTags)
+            failwith <| "Utils > 주소 할당 수행하세요\n\n" + String.Join("\n", inValidTaskDevTags)
         if inValidHwSystemTag.Any() then
             failwith <| "HW 조작 IO Table을 작성하세요\n\n" + String.Join("\n", inValidHwSystemTag)
 

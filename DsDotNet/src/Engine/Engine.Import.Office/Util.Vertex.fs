@@ -73,7 +73,7 @@ module ImportUtilVertex =
 
 
 
-    let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget) =
+    let private createCall (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, hwCPU:HwCPU) =
         match  mySys.LoadedSystems.TryFind(fun d -> d.Name = $"{node.DevName}") with
             |  Some dev ->
                 getCallFromLoadedSys mySys dev node parentWrapper
@@ -86,11 +86,11 @@ module ImportUtilVertex =
                     ApiName = node.ApiName
                     ValueParamIO = node.ValueParamIO
                     Parent = parentWrapper
-                    PlatformTarget = platformTarget
+                    HwCPU = hwCPU
                     }
                 addNewCall callParams
 
-    let createCallVertex (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, platformTarget:PlatformTarget, dicSeg: Dictionary<string, Vertex>) =
+    let createCallVertex (mySys: DsSystem, node: PptNode, parentWrapper: ParentWrapper, hwCPU:HwCPU, dicSeg: Dictionary<string, Vertex>) =
         let call =
             if node.IsFunction then
                 if node.IsRootNode.Value then
@@ -100,7 +100,7 @@ module ImportUtilVertex =
             else
                 match mySys.Flows.TryFind(fun f-> f.Name = node.Job.Head()) with
                 | Some _ ->
-                    createCall (mySys, node, parentWrapper, platformTarget)
+                    createCall (mySys, node, parentWrapper, hwCPU)
                 | None ->   failWithLog $"Flow not found : {node.Job.Head()}"
 
         node.UpdateCallProperty(call)

@@ -143,8 +143,8 @@ module ExpressionExtension =
     /// Tag<'T> (들)로부터 OR  Expression<'T> 생성
     let toOr xs = tryToOr xs |> Option.get
 
-    let onExpr() = RuntimeDS.System.Value.OnTag().Expr
-    let offExpr() = RuntimeDS.System.Value.OffTag().Expr
+    let onExpr() = RuntimeDS.Param.System.Value.OnTag().Expr
+    let offExpr() = RuntimeDS.Param.System.Value.OffTag().Expr
 
     [<Extension>]
     type ExpressionExt =

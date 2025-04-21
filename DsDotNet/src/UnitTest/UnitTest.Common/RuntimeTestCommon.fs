@@ -23,7 +23,7 @@ module RuntimeTestCommon =
         pptParms.HwTarget <- modelConfig.HwTarget   
 
         let zipPath, sys = ImportPpt.GetRuntimeZipFromPpt (helloDSPath, pptParms)
-        let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.PlatformTarget)
+        let runtimeModel = new RuntimeModel(zipPath, pptParms.HwTarget.HwCPU)
 
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]

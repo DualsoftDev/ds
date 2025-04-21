@@ -20,7 +20,7 @@ module ExportModule =
     /// 실제 구동용.  Generate XML file for XGI or XGK PLC.
     /// UnitTest 용은 generateXmlForTest 참고
     let private generateXmlXGX
-        (plcType:PlatformTarget) (system: DsSystem)
+        (plcType:HwCPU) (system: DsSystem)
         (globalStorages:Storages, localStorages:Storages)
         (pous: PouGen seq, maxPouSplit:int, existingLSISprj:string)
         (startMemory:int, startTimer:int, startCounter:int)
@@ -163,8 +163,7 @@ module ExportModule =
             mutable StartMemory: int
             mutable EnableXmlComment: bool
             mutable MaxPouSplit: int
-            mutable PlatformTarget: PlatformTarget
-            mutable TimeoutCall: uint32
+            mutable ModelConfig: ModelConfig
         }
         static member Default() = {
             ExistingLSISprj = ""
@@ -173,8 +172,7 @@ module ExportModule =
             StartMemory = 0
             EnableXmlComment = true
             MaxPouSplit = 0     // 사용한다면 2000 정도 권장
-            PlatformTarget = XGK
-            TimeoutCall = 15000u
+            ModelConfig = createModelConfigReplaceHwCPU(createDefaultModelConfig(), XGK)
         }
 
 
@@ -188,19 +186,18 @@ module ExportModule =
                     StartMemory = startMemory
                     EnableXmlComment = enableXmlComment
                     MaxPouSplit = maxPouSplit
-                    PlatformTarget = platformTarget
-                    TimeoutCall = timeoutCall
+                    ModelConfig = modelConfig
                 } = xgxGenParams
 
-                if !! platformTarget.IsOneOf(XGI, XGK) then
-                    failwithf $"Not supported plc {platformTarget} type"
+                if !! modelConfig.HwCPU.IsOneOf(XGI, XGK) then
+                    failwithf $"Not supported plc {modelConfig.HwCPU} type"
 
                 //use _ = DcLogger.CreateTraceEnabler()
                 let globalStorage = new Storages()
                 let localStorage = new Storages()
 
                 DsAddressModule.setMemoryIndex(startMemory)
-                let pous = system.GeneratePOUs(globalStorage, platformTarget, timeoutCall).ToArray()
+                let pous = system.GeneratePOUs globalStorage modelConfig |> toArray
                 // bit를 바이트 단위로 나누고 다음 바이트 시작 주소로 설정  
                 let currentMemory = DsAddressModule.getCurrentMemoryIndex()/8+1  
 
@@ -223,7 +220,7 @@ module ExportModule =
                     )
 
                 let xml, millisecond = duration (fun () ->
-                    generateXmlXGX platformTarget system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (currentMemory, startTimer, startCounter) enableXmlComment )
+                    generateXmlXGX modelConfig.HwCPU system (globalStorage, localStorage) (pous, maxPouSplit, existingLSISprj) (currentMemory, startTimer, startCounter) enableXmlComment )
 
                 forceTrace $"\tgenerateXmlXGX: elapsed {millisecond} ms"
 

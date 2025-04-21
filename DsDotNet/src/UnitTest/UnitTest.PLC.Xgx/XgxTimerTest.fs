@@ -14,7 +14,7 @@ open System
 
 
 
-type XgxTimerTest(xgx:PlatformTarget) =
+type XgxTimerTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Timer test`` () =

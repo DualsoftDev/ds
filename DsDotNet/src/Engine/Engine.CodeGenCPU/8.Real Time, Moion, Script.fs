@@ -36,7 +36,7 @@ type RealVertexTagManager with
 
 
 
-    member v.R10_GoingTime(mode:RuntimePackage, isSubSys:bool): CommentedStatement [] =
+    member v.R10_GoingTime(mode:RuntimeMode, isSubSys:bool): CommentedStatement [] =
         if v.Real.Time.IsNone then [||] 
         else 
             let getSkipTimeExpr() = [| yield (v._on.Expr, v._off.Expr) --| (v.TimeRelay, getFuncName()) |]  
@@ -91,7 +91,7 @@ type RealVertexTagManager with
         |]
 
             
-    member v.R11_GoingMotion(mode:RuntimePackage): CommentedStatement [] = 
+    member v.R11_GoingMotion(mode:RuntimeMode): CommentedStatement [] = 
         match mode with
         | Simulation -> v.RealGoingMotionSimulation()
         | VirtualLogic -> v.RealGoingMotionVirtualLogic()

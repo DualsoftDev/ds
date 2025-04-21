@@ -44,7 +44,7 @@ module rec CounterModule =
         ACC: VariableBase<CountUnitType>
     }
 
-    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, target:PlatformTarget) =
+    let private CreateCounterParameters(typ:CounterType, storages:Storages, name, preset, accum:CountUnitType, target:HwCPU) =
         let nullB = getNull<VariableBase<bool>>()
         let mutable cu  = nullB  // Count up enable bit
         let mutable cd  = nullB  // Count down enable bit
@@ -196,7 +196,7 @@ module rec CounterModule =
         member _.CU = base.CU
         interface ICTU with
             member x.CU = x.CU
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:HwCPU) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTUStruct(counterParams, sys)
             storages.Add(name, cs)
@@ -208,7 +208,7 @@ module rec CounterModule =
         interface ICTD with
             member x.CD = x.CD
             member x.LD = x.LD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:HwCPU) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTDStruct(counterParams, sys)
             storages.Add(name, cs)
@@ -222,7 +222,7 @@ module rec CounterModule =
             member x.CU = x.CU
             member x.CD = x.CD
             member x.LD = x.LD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:HwCPU) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTUDStruct(counterParams, sys)
             storages.Add(name, cs)
@@ -233,7 +233,7 @@ module rec CounterModule =
         member _.RES = base.RES
         interface ICTR with
             member x.CD = x.CD
-        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+        static member Create(typ:CounterType, storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:HwCPU) =
             let counterParams = CreateCounterParameters(typ, storages, name, preset, accum, target)
             let cs = new CTRStruct(counterParams, sys)
             storages.Add(name, cs)

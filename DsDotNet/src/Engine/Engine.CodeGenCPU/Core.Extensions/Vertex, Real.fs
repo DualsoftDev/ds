@@ -9,12 +9,12 @@ open System
 [<AutoOpen>]
 module ConvertCpuVertex =
 
-    let getTime  (time:uint32 option, nameFqdn:string)=
+    let getTime  (time:uint32 option, nameFqdn:string, mode:RuntimeMode)=
         let maxShortSpeedMSec =TimerModule.MinTickInterval|>float
         let v =
             time |> bind(fun t ->
-                if RuntimeDS.RuntimePackage.IsVirtualMode() then
-                    match RuntimeDS.TimeSimutionMode  with
+                if mode.IsVirtualMode() then
+                    match RuntimeDS.Param.TimeSimutionMode  with
                     | TimeSimutionMode.TimeNone -> None
                     | TimeSimutionMode.TimeX1 ->   Some ((t|>float)* 1.0/1.0 )
                     | TimeSimutionMode.TimeX2 ->   Some ((t|>float)* 1.0/2.0 )
@@ -29,7 +29,7 @@ module ConvertCpuVertex =
                     )
 
         if v.IsSome && v.Value < maxShortSpeedMSec then
-            failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.TimeSimutionMode}) {nameFqdn}
+            failwithf $"시뮬레이션 배속을 재설정 하세요.현재설정({RuntimeDS.Param.TimeSimutionMode}) {nameFqdn}
                         \r\n[최소동작시간 : {maxShortSpeedMSec}, 배속반영 동작 시간 : {v.Value}]"
         else
             v
@@ -52,7 +52,7 @@ module ConvertCpuVertex =
     type Real with
         member r.V = r.TagManager :?> RealVertexTagManager
 
-        member x.TimeAvg = getTime (x.DsTime.AVG, x.QualifiedName)
+        member x.TimeAvg = getTime (x.DsTime.AVG, x.QualifiedName, x.V.RuntimeMode)
         member x.TimeAvgExist = x.TimeAvg.IsSome && x.TimeAvg.Value <> 0.0
         member x.TimeSimMsec =
             if x.TimeAvg.IsNone then 0u

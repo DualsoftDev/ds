@@ -46,7 +46,7 @@ module internal XgiFile =
     //  static member CPUs      = [|"XGI-CPUE"; "XGI-CPUH"; "XGI-CPUS"; "XGI-CPUS/P"; "XGI-CPUU"; "XGI-CPUU/D"; "XGI-CPUUN" |]
     //static member CPUsID    = [|"106"     ; "102"     ; "104"     ; "110"       ; "100"     ; "107"       ; "111"       |]
     /// Template XGI XML 문자열을 반환
-    let getTemplateXgxXml (targetType: PlatformTarget) =
+    let getTemplateXgxXml (targetType: HwCPU) =
         match targetType with
         | XGI -> "xgi-4.5.2.template.xml"
         | XGK -> "XGK-CPUUN-4.77.99.1.template.xml"

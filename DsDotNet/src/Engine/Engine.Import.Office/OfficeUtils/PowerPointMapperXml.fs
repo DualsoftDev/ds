@@ -6,10 +6,21 @@ open System.Xml
 open System.Xml.Serialization
 open DocumentFormat.OpenXml.Packaging
 open Engine.Core.MapperDataModule;
-open Engine.Core.ModelConfigExtensions
 open Engine.Core
+open Newtonsoft.Json
+
+
+
 
 module PowerPointMapperXml =
+
+        // ========== JSON 저장/불러오기 ==========
+    let private jsonSettings = JsonSerializerSettings()
+    let ModelConfigToJsonText (cfg: ModelConfig) : string =
+        JsonConvert.SerializeObject(cfg, Formatting.Indented, jsonSettings)
+
+    let ModelConfigFromJsonText (json: string) : ModelConfig =
+        JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
 
     let SaveOpenXmlModelConfig (doc: PresentationDocument) (data: ModelConfig) : unit =
         if isNull doc || isNull doc.PresentationPart then

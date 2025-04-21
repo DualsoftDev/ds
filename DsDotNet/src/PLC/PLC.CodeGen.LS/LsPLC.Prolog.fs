@@ -25,7 +25,7 @@ module XgiPrologModule =
         else
             xml
 
-    let validateVariableName (name:string) (targetType:PlatformTarget) =
+    let validateVariableName (name:string) (targetType:HwCPU) =
         let n = name.ToUpper()
         if targetType = XGI && n[0].IsOneOf('N', 'M', 'R') && Regex.IsMatch(n.Substring(1), @"^([XBWDL]?)(\d+)$") then
             // @"^([NMR][XBWDL]?)(\d+)$"

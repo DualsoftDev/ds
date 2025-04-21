@@ -48,7 +48,7 @@ module POUParametersModule =
         member val XgxTimerResolutionSpec:XgkTimerResolutionSpec list = [] with get, set
 
     type XgxProjectParams = {
-        TargetType         : PlatformTarget
+        TargetType         : HwCPU
         ProjectName        : string
         ProjectComment     : string
         ScanProgramName    : string         // "Scan Program" or "스캔 프로그램".  Damn it!
@@ -104,7 +104,7 @@ module POUParametersModule =
     let defaultXGIProjectParams = createDefaultProjectParams XGI defaultMemorySize   // 640K "M" memory 영역
     let defaultXGKProjectParams = createDefaultProjectParams XGK defaultMemorySize
 
-    let getXgxProjectParams (targetType:PlatformTarget) (projectName:string) =
+    let getXgxProjectParams (targetType:HwCPU) (projectName:string) =
         assert(isInUnitTest())
         let getProjectParams =
             match targetType with

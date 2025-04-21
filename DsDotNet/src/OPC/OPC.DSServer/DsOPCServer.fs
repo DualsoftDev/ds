@@ -14,7 +14,7 @@ open Opc.Ua.Configuration
 
 [<AutoOpen>]
 module DsOPCServerConfig =
-    let createApplicationConfiguration (mode: RuntimePackage, targetIp:string) =
+    let createApplicationConfiguration (mode: RuntimeMode, targetIp:string) =
         let instanceName = $"{targetIp}_{mode.ToString()}"   
 
         let applySecurityPolicies (serverConfig: ServerConfiguration) =
@@ -120,7 +120,7 @@ module DsOPCServerConfig =
 
         config
 
-type DsOPCServer(dsSys: DsSystem, mode: RuntimePackage) =
+type DsOPCServer(dsSys: DsSystem, mode: RuntimeMode) =
     inherit StandardServer()
 
     let mutable dsNodeManager = Unchecked.defaultof<DsNodeManager>

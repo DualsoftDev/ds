@@ -10,7 +10,7 @@ using static Engine.Core.MapperDataModule;
 using static Engine.Core.CoreModule;
 using static Engine.Core.CoreModule.SystemModule;
 using static Engine.Core.LoaderModule;
-using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Core.ModelConfigModule;
 using static Engine.Import.Office.ImportPptModule;
 using static Engine.Info.DBLoggerORM;
 using static Engine.Info.DBWriterModule;
@@ -31,7 +31,7 @@ namespace Engine.TestSimulator
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms);
             DsAddressModule.setMemoryIndex(modelConfig.HwTarget.StartMemory);
             DsAddressModule.assignAutoAddress(_system, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize, modelConfig.HwTarget);
-            RuntimeModel runModel = new(dsz, PlatformTarget.WINDOWS);
+            RuntimeModel runModel = new(dsz, HwCPU.WINDOWS);
 
             _ = DsSimulator.Do(runModel.Cpu);
             Console.ReadKey();

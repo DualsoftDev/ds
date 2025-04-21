@@ -11,7 +11,7 @@ open System
 
 
 
-type XgxUdtTest(xgx:PlatformTarget) =
+type XgxUdtTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let udtBaseCode = """

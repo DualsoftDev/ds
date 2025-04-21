@@ -9,7 +9,7 @@ open Engine.Parser.FS
 
 [<AutoOpen>]
 module ExpressionFixtures =
-    let tryParseStatement4UnitTest (targetType:PlatformTarget) (storages: Storages) (text: string) : Statement option =
+    let tryParseStatement4UnitTest (targetType:HwCPU) (storages: Storages) (text: string) : Statement option =
         try
             let parser = ParserUtilityModule.createExpressionParser (text)
             let ctx = parser.statement ()
@@ -22,9 +22,9 @@ module ExpressionFixtures =
 
     let sys = DsSystem.Create4Test("testSys")
     let mutable runtimeTarget = WINDOWS
-    let setRuntimeTarget(target:PlatformTarget) =
+    let setRuntimeTarget(target:HwCPU) =
             let runtimeTargetBackup = target
-            RuntimeDS.System <- Some sys
+            RuntimeDS.ReplaceSystem sys
             runtimeTarget <- target
             ParserUtil.runtimeTarget <-target
             disposable { runtimeTarget <- runtimeTargetBackup }

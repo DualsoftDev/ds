@@ -617,7 +617,7 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-    let simAddress (target:HwTarget)  (pakage:RuntimePackage) =
+    let simAddress (target:HwTarget)  (pakage:RuntimeMode) =
             let isSim = pakage.IsVirtualMode()
             match target.HwIO with   
             | HwIO.LS_XGK_IO -> 
@@ -627,7 +627,7 @@ module ExportIOTable =
             |_ -> failwith $"{target.HwIO} Invalid simAddress tag" 
 
 
-    let ToManualTable_BtnLamp (sys: DsSystem) (target:HwTarget)  (pakage:RuntimePackage) : DataTable =
+    let ToManualTable_BtnLamp (sys: DsSystem) (target:HwTarget)  (pakage:RuntimeMode) : DataTable =
 
         let dt = new System.Data.DataTable($"조작반(M)")
         dt.Columns.Add($"{ManualColumn_ControlPanel.Name}", typeof<string>) |> ignore
@@ -756,7 +756,7 @@ module ExportIOTable =
         //    convertDataSetToPdf filePath dataTables
 
         [<Extension>]
-        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) (target:HwTarget) (package:RuntimePackage)=
+        static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) (target:HwTarget) (package:RuntimeMode)=
             let dataTables = [|
 
                 ToManualTable sys IOType.Memory

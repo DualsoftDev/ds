@@ -64,13 +64,13 @@ module CpuLoader =
 
 
 
-    let applyTagManager(activeSys:DsSystem, storages:Storages, target:PlatformTarget, timeoutCall:uint32) =
+    let applyTagManager(activeSys:DsSystem, storages:Storages, target:HwCPU, modelCnf:ModelConfig) =
         let createTagM  (sys:DsSystem) =
             debugfn($"createTagM System: {sys.Name}")
 
-            RuntimeDS.System <- Some sys
+            RuntimeDS.ReplaceSystem(sys)
             let isActive = sys = activeSys
-            sys.TagManager <- SystemManager(sys, storages, target, timeoutCall)
+            sys.TagManager <- SystemManager(sys, storages, target, modelCnf.TimeoutCall)
             sys.Variables.Iter(fun v-> v.TagManager <- VariableManager(v, sys))
             sys.ActionVariables.Iter(fun a-> a.TagManager <- ActionVariableManager(a, sys))
             sys.Flows.Iter(fun f->f.TagManager <- FlowManager(f, isActive, activeSys))
@@ -79,9 +79,9 @@ module CpuLoader =
             sys.GetVertices().Iter(fun v->
                 match v with
                 | :? Real ->
-                    v.TagManager <- RealVertexTagManager(v, isActive)
+                    v.TagManager <- RealVertexTagManager(v, isActive, modelCnf.RuntimeMode)
                 | (:? Call | :? Alias) ->
-                    v.TagManager <-  CoinVertexTagManager(v, isActive)
+                    v.TagManager <-  CoinVertexTagManager(v, isActive, modelCnf.RuntimeMode)
                 | _ ->
                     failwithlog (getFuncName()))
 
@@ -94,10 +94,11 @@ module CpuLoader =
 
     type DsSystem with
         /// DsSystem 으로부터 PouGen seq 생성
-        member sys.GeneratePOUs (storages:Storages, target:PlatformTarget, timeoutCall:uint32) : PouGen seq =
+        member sys.GeneratePOUs (storages:Storages) (modelCnf:ModelConfig) : PouGen seq =
             UniqueName.resetAll()
-
-            applyTagManager (sys, storages, target, timeoutCall)
+            let mode = modelCnf.RuntimeMode
+            let target = modelCnf.HwCPU
+            applyTagManager (sys, storages, target, modelCnf)
 
             let pous =
                 //자신(Acitve)이 Loading 한 system을 재귀적으로 한번에 가져와 CPU 변환
@@ -108,13 +109,13 @@ module CpuLoader =
                 |> Seq.map(fun s ->
                     try
                         match s with
-                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys))
-                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys))
+                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys, mode, target))
+                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys, mode, target))
                         | _ -> failwithlog (getFuncName())
                     with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
                     )
                 //자신(Acitve) system을  CPU 변환
-                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys))]
+                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys, mode, target))]
 
             pous
 

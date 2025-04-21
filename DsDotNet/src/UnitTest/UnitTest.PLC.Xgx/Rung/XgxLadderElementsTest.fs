@@ -8,7 +8,7 @@ open Engine.Core
 open Engine.Parser.FS
 open Dual.Common.UnitTest.FS
 
-type XgxLadderElementTest(xgx:PlatformTarget) =
+type XgxLadderElementTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let span width = width*3

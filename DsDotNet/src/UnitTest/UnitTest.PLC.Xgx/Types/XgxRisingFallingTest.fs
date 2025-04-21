@@ -8,7 +8,7 @@ open Engine.Core
 open Dual.Common.Core.FS
 
 
-type XgxRisingFallingTest(xgx:PlatformTarget) =
+type XgxRisingFallingTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
     let baseCode =
             match xgx with

@@ -78,7 +78,7 @@ module ConvertorPrologModule =
         | STRING -> "STRING" // 32 byte
         | _ -> failwithlog "ERROR"
 
-    let systemTypeToXgxTypeName (target:PlatformTarget) (typ: System.Type) =
+    let systemTypeToXgxTypeName (target:HwCPU) (typ: System.Type) =
         match target with
         | XGI -> systemTypeToXgiTypeName typ
         | XGK -> systemTypeToXgkTypeName typ

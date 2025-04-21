@@ -144,7 +144,7 @@ module ConvertCheckModule =
 
         if nullTagJobs.Any() then
             let errJobs = String.Join ("\n", nullTagJobs.Select(fun s->s.QualifiedName))
-            failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nAdd I/O Table을 수행하세요"
+            failwithf $"Device 주소가 없습니다. \n{errJobs} \n\nUtils > 주소 할당 수행하세요"
 
 
         if not skipBtnLamp

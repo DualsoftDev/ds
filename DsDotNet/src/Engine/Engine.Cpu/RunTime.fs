@@ -166,12 +166,10 @@ module RunTimeModule =
 type DsCpuExt  =
     /// DsSystem 으로부터 Runtime 생성 : DsCPU*HMIPackage*(PouGen[])
     [<Extension>]
-    static member CreateRuntime (dsSys:DsSystem) (target:PlatformTarget) (modelCnf:ModelConfig): Runtime =
-
-        RuntimeDS.RuntimePackage <- modelCnf.RuntimePackage
-        RuntimeDS.TimeSimutionMode <- modelCnf.TimeSimutionMode
-        RuntimeDS.IsPLC <- modelCnf.PlatformTarget = PlatformTarget.XGI || 
-                           modelCnf.PlatformTarget = PlatformTarget.XGK
+    static member CreateRuntime (dsSys:DsSystem) (modelCnf:ModelConfig): Runtime =
+        RuntimeDS.ReplaceSystem dsSys
+        RuntimeDS.UpdateParam(modelCnf.RuntimeMode, modelCnf.TimeSimutionMode)
+        
 
         dsSys.GetCallVertices()
              .Where(fun f-> f.CallTime.IsDefault)
@@ -181,7 +179,7 @@ type DsCpuExt  =
 
         // Initialize storages and create POU's for the system
         let storages = Storages()
-        let pous = dsSys.GeneratePOUs(storages, target, modelCnf.TimeoutCall) |> toArray
+        let pous = dsSys.GeneratePOUs storages modelCnf |> toArray
 
 
         modelCnf.TagConfig.UserMonitorTags.Iter(fun f->

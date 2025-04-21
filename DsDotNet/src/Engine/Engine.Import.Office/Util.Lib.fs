@@ -16,16 +16,16 @@ module ImportUtilForLib =
         ApiName: string
         ValueParamIO: ValueParamIO
         Parent: ParentWrapper
-        PlatformTarget:PlatformTarget
+        HwCPU:HwCPU
     }
     with
         member x.WithDevName(newDevName: string) =
             { x with DevName = newDevName }
 
-    let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) (platformTarget:PlatformTarget) =
+    let getDeviceOrganization (mySys: DsSystem) (libFilePath: string) (name: string) (hwCPU:HwCPU) =
         match mySys.LoadedSystems.TryFind(fun f -> f.Name = name) with
         | Some f -> f.ReferenceSystem
-        | None -> (ParserLoader.LoadFromDevicePath libFilePath name platformTarget) |>fst
+        | None -> (ParserLoader.LoadFromDevicePath libFilePath name hwCPU) |>fst
 
     let processSingleTask (tasks: HashSet<TaskDev>) (param: CallParams) (devOrg: DsSystem) (loadedName: string) (apiName: string) (taskDevParamIO: DeviceLoadParameters) =
         let task = getLoadedTasks param.MySys devOrg loadedName apiName taskDevParamIO param.Node (param.Node.Job.Combine())
@@ -51,7 +51,7 @@ module ImportUtilForLib =
         (libFilePath, autoGenSys, getProperty)
 
     let processTask (tasks: HashSet<TaskDev>) (param: CallParams) (loadedName: string) (libFilePath: string) (autoGenSys: LoadedSystem option) (getProperty: string -> DeviceLoadParameters) =
-        let devOrg = getDeviceOrganization param.MySys libFilePath loadedName (param.PlatformTarget)
+        let devOrg = getDeviceOrganization param.MySys libFilePath loadedName (param.HwCPU)
         let TaskDevParams = getProperty loadedName
 
         let task = getTaskDev autoGenSys loadedName  param.ApiName

@@ -23,7 +23,7 @@ open PLC.Mapper.FS
 [<AutoOpen>]
 module ModelConfigPPT =
 
-    let getModelConfig(doc: PresentationDocument):ModelConfig option=
+    let inline getModelConfigFromDoc(doc: PresentationDocument):ModelConfig option =
         let customXmlParts =
             doc.PresentationPart.CustomXmlParts
             |> Seq.map(fun f->
@@ -31,15 +31,14 @@ module ModelConfigPPT =
                 reader.ReadToEnd()
                 )
         if customXmlParts.length() > 0 then
-            Some(PowerPointMapperXml.LoadOpenXmlModelConfig  customXmlParts)
+            PowerPointMapperXml.LoadOpenXmlModelConfig  customXmlParts |>Some
         else
             None
             
     let getModelConfigFromPPTFile(path:string) : ModelConfig =
-        match Office.Open(path) |> getModelConfig with
-        | Some mapperData -> mapperData 
-        | None ->
-            createDefaultModelConfig()  
+        match Office.Open(path) |> getModelConfigFromDoc with
+        | Some cfg -> cfg
+        | None -> createDefaultModelConfig()
 
     let saveModelConfig(path:string, modelConfig:ModelConfig) =
         let doc = Office.Open(path)
@@ -221,25 +220,14 @@ module PptDocModule =
         member x.Parameter: DeviceLoadParameters = parameter.Value
         member x.Doc = doc
 
-        member x.ModelConfig : ModelConfig option =
-            match getModelConfig doc with
-            | Some mapperData -> mapperData |> Some
-            | None -> None
+        member x.ModelConfig : ModelConfig  =
+                 match getModelConfigFromDoc doc with
+                 | Some cfg -> cfg
+                 | None -> createDefaultModelConfig()
 
-        member x.HwIOType : HwIO option =
-            match getModelConfig doc with
-            | Some mapperData -> mapperData.HwTarget.HwIO  |> Some
-            | None -> None
-
-        member x.DeviceTags : List<DeviceTag> =
-            match getModelConfig doc with
-            | Some mapperData -> mapperData.TagConfig.DeviceTags.ToList()
-            | None -> new List<DeviceTag>()
-
-        member x.UserTagsFromMapper : List<UserMonitorTag> =
-            match getModelConfig doc with
-            | Some mapperData -> mapperData.TagConfig.UserMonitorTags.ToList()
-            | None -> new List<UserMonitorTag>()
+        member x.HwIOType : HwIO  = x.ModelConfig.HwTarget.HwIO
+        member x.DeviceTags = x.ModelConfig.TagConfig.DeviceTags.ToList()
+        member x.UserTagsFromMapper= x.ModelConfig.TagConfig.UserMonitorTags.ToList()
 
     type PptDoc with
         static member Create(path: string, parameter: DeviceLoadParameters option, doc: PresentationDocument, target) =

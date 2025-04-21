@@ -10,7 +10,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.LS.Config.POU.Program.LDRoutine.ElementType
 open Engine.Parser.FS
 
-type XgxRungTest(xgx:PlatformTarget) =
+type XgxRungTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let getProjectParams4Test xgx funName = { getXgxProjectParams xgx funName with EnableXmlComment = true }

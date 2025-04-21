@@ -12,7 +12,7 @@ open Dual.Common.Core.FS
 open PLC.CodeGen.LS
 open PLC.CodeGen.Common.FlatExpressionModule
 
-type XgxGenerationTest(xgx:PlatformTarget) =
+type XgxGenerationTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
     let newline = "\r\n"
     let and28 = """

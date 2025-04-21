@@ -149,7 +149,7 @@ module internal rec Command =
 
     type System.Type with
 
-        member x.GetSizeString(target:PlatformTarget) = systemTypeToXgxTypeName target x
+        member x.GetSizeString(target:HwCPU) = systemTypeToXgxTypeName target x
 
 
     let bxiXgiPredicate (prjParam: XgxProjectParams) (x, y) (predicate: Predicate) : BlockXmlInfo =
@@ -174,7 +174,7 @@ module internal rec Command =
 
             bxiXgiBox prjParam (x, y) func namedInputParameters outputParameters ""
 
-    let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (cond:IExpression option) (func: Function) (target:PlatformTarget): BlockXmlInfo =
+    let bxiXgiFunction (prjParam: XgxProjectParams) (x, y) (cond:IExpression option) (func: Function) (target:HwCPU): BlockXmlInfo =
         match func with
         | Arithmetic(name, output, args) ->
             // argument 갯수에 따라서 다른 함수를 불러야 할 때 사용.  e.g "ADD3_INT" : 3개의 인수를 더하는 함수

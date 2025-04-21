@@ -77,7 +77,7 @@ module ServerConfigModule =
 
 
 
-    let GetOPCServerPort(mode: RuntimePackage, targetIp:string) = 
+    let GetOPCServerPort(mode: RuntimeMode, targetIp:string) = 
         let serverStartPort = fromServerConfig "OPCServerStartPort" |> Convert.ToInt32
         let serverPort =
             let lastIp =
@@ -86,16 +86,16 @@ module ServerConfigModule =
                 | _ -> 0
 
             match mode with
-            | RuntimePackage.Control        -> serverStartPort + 1000  + lastIp
-            | RuntimePackage.VirtualPlant   -> serverStartPort + 2000  + lastIp
-            | RuntimePackage.Monitoring     -> serverStartPort + 3000  + lastIp
-            | RuntimePackage.Simulation   
-            | RuntimePackage.VirtualLogic   -> 2747 //  Monitoring, Simulation, Virtual Logic Port 고정
+            | RuntimeMode.Control        -> serverStartPort + 1000  + lastIp
+            | RuntimeMode.VirtualPlant   -> serverStartPort + 2000  + lastIp
+            | RuntimeMode.Monitoring     -> serverStartPort + 3000  + lastIp
+            | RuntimeMode.Simulation   
+            | RuntimeMode.VirtualLogic   -> 2747 //  Monitoring, Simulation, Virtual Logic Port 고정
 
         serverPort
 
     let GetOPCServerPortByModeText(mode: string, targetIp:string) = 
-        GetOPCServerPort (ToRuntimePackage mode, targetIp)
+        GetOPCServerPort (ToRuntimeMode mode, targetIp)
 
     // Save statistics to a JSON file
     let SaveStatisticsToJson ((systemName: string), (statsMap: IDictionary<string, StatsDto>)) =

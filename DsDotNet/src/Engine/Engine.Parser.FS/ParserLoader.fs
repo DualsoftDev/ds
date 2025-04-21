@@ -30,7 +30,7 @@ module ParserLoader =
         else
             failwithf $"Invalid ds file format \r\n ds format is [sys] ... \r\n {dsFilePath}"
 
-    let loadingDS (loadingConfigDir: string)  (dsFile: string ) (loadedName: string option)  autoGenDevice (target:PlatformTarget)=
+    let loadingDS (loadingConfigDir: string)  (dsFile: string ) (loadedName: string option)  autoGenDevice (target:HwCPU)=
         ParserUtil.runtimeTarget  <- target
         let systemRepo = ShareableSystemRepository()
 
@@ -52,7 +52,7 @@ module ParserLoader =
         system, loadings
 
 
-    let LoadFromConfig (configPath: string) (target:PlatformTarget) =
+    let LoadFromConfig (configPath: string) (target:HwCPU) =
         let jsonFileName =PathManager.getFileName (configPath.ToFile())
         if jsonFileName  <> TextModelConfigJson then
             failwithf $"LoadFromConfig FileName must be {TextModelConfigJson}: now {jsonFileName}"
@@ -69,7 +69,7 @@ module ParserLoader =
         }
 
 
-    let LoadFromActivePath (activePath: string) (target:PlatformTarget) (autoGenDevice:bool)=
+    let LoadFromActivePath (activePath: string) (target:HwCPU) (autoGenDevice:bool)=
         ModelParser.ClearDicParsingText()
 
         let f() =
@@ -81,10 +81,10 @@ module ParserLoader =
         ret
 
 
-    let LoadFromDevicePath (activePath: string) (loadedName: string) (target:PlatformTarget)=
+    let LoadFromDevicePath (activePath: string) (loadedName: string) (target:HwCPU)=
         let dir = PathManager.getDirectoryName (activePath.ToFile())
         loadingDS dir activePath (Some(loadedName)) false  target
 
-    let LoadFromChatGptPath (activePath: string) (target:PlatformTarget)=
+    let LoadFromChatGptPath (activePath: string) (target:HwCPU)=
         LoadFromActivePath activePath  target true
 

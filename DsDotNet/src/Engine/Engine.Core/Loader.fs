@@ -8,7 +8,6 @@ open System.Runtime.CompilerServices
 open System.Collections.Generic
 open System
 open MapperDataModule
-open ModelConfigExtensions
 
 
 [<AutoOpen>]

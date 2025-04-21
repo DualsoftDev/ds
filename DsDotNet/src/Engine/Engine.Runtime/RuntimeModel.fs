@@ -9,10 +9,10 @@ open Engine.Core.MapperDataModule
 type FilePath = string
 
 
-type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
+type RuntimeModel(zipDsPath:FilePath, target:HwCPU)  =
     let jsonPath = unZip zipDsPath
     let model:Model = ParserLoader.LoadFromConfig (jsonPath) target 
-    let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime model.System (target) model.ModelConfig 
+    let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime model.System  model.ModelConfig 
     let kindDescriptions = GetAllTagKinds() |> Tuple.toDictionary
     let storages =
         let skipInternal = true
@@ -26,7 +26,7 @@ type RuntimeModel(zipDsPath:FilePath, target:PlatformTarget)  =
     member x.TagKindDescriptions = kindDescriptions
     member x.JsonPath = jsonPath
     member x.Storages = storages
-    member x.PlatformTarget = target
+    member x.HwCPU = target
     member x.HwIP = model.ModelConfig.HwIP
     member x.HwIO = model.ModelConfig.HwTarget.HwIO
     member x.ModelConfig = model.ModelConfig

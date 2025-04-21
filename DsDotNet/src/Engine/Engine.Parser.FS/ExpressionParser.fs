@@ -528,7 +528,7 @@ module rec ExpressionParserModule =
         optStatement
 
 
-    let parseCodeForTarget (storages: Storages) (text: string) (target:PlatformTarget): Statement list =
+    let parseCodeForTarget (storages: Storages) (text: string) (target:HwCPU): Statement list =
         try
             ParserUtil.runtimeTarget  <- target
             let parser = createExpressionParser (text)

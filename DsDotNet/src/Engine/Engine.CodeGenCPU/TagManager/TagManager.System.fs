@@ -10,8 +10,8 @@ module SystemManagerModule =
 
 
     /// DsSystem Manager : System Tag  를 관리하는 컨테이어
-    type SystemManager (sys:DsSystem, stg:Storages, platformTarget:PlatformTarget, timeoutCall:uint) =
-        let cpu = platformTarget
+    type SystemManager (sys:DsSystem, stg:Storages, hwCPU:HwCPU, timeoutCall:uint) =
+        let cpu = hwCPU
         // 시스템 TAG는 root 시스템   TAG 공용 사용 ex)curSys._ON  = rootSys._ON
         let dsSysTag (dt:DataType) autoAddr target (systemTag:SystemTag) (internalSysTag:bool) =
             let name =
@@ -107,7 +107,7 @@ module SystemManagerModule =
             on.Value <- true
             off.Value <- false
 
-            if cpu = PlatformTarget.XGK then
+            if cpu = HwCPU.XGK then
                 on.Address  <- "F00099"
                 off.Address <- "F0009A"
 
@@ -122,7 +122,7 @@ module SystemManagerModule =
             member x.Storages = stg
 
         member s.Storages = stg
-        member s.TargetType = platformTarget
+        member s.TargetType = hwCPU
         member s.MutualCalls = mutualCalls
         member s.GetTempBoolTag(name:string) : PlanVar<bool>=
                 createPlanVar  stg  name DuBOOL false None (int SystemTag.tempBit) sys :?> PlanVar<bool>

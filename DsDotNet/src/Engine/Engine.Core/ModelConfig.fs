@@ -11,9 +11,31 @@ open System.IO
 open Newtonsoft.Json
 
 [<AutoOpen>]
-module RuntimeGeneratorModule =
+module ModelConfigModule =
 
-    type RuntimePackage =
+    
+    let InitStartMemory = 1000
+    let OpModeLampBtnMemorySize = 100 ////OP 조작 LAMP 100개만 지원
+    
+    let BufferAlramSize = 10000
+    let XGKAnalogOffsetByte = 96
+    let XGKAnalogOutOffsetByte = 96
+
+
+    let ExternalTempMemory =  "M"
+    let ExternalTempIECMemory =  "%MX"
+    let ExternalXGIAddressON = "%FX153"
+    let ExternalXGIAddressOFF = "%FX154"
+    let ExternalXGKAddressON = "F00099"
+    let ExternalXGKAddressOFF = "F0009A"
+    let ExternalTempNoIECMemory =  "M"
+
+
+    let HMITempMemory =  "%HX99"  //iec xgk 구분안함
+    let HMITempManualAction =  "%HX0"  //iec xgk 구분안함
+
+
+    type RuntimeMode =
         | Simulation
         | Control
         | Monitoring
@@ -39,7 +61,7 @@ module RuntimeGeneratorModule =
             | VirtualLogic -> true
             | _ -> false
 
-    let ToRuntimePackage s =
+    let ToRuntimeMode s =
         match s with
         | "Simulation" -> Simulation
         | "Control" -> Control
@@ -50,10 +72,13 @@ module RuntimeGeneratorModule =
 
     //제어 HW CPU 기기 타입
 
-    type PlatformTarget =
+    type HwCPU =
         | WINDOWS
         | XGI
         | XGK
+        with 
+            member x.IsPLC = 
+                x = XGI || x = XGK
 
     //제어 Driver IO 기기 타입
     type HwIO =
@@ -68,10 +93,11 @@ module RuntimeGeneratorModule =
         | REDIS
 
     //HW CPU,  Driver IO, Slot 정보 조합
-    type HwTarget(platformTarget:PlatformTarget, hwIO:HwIO, slots:SlotDataType[], startM:int) =
-        member x.PlatformTarget = platformTarget
+    type HwTarget(hwCPU:HwCPU, hwIO:HwIO, slots:SlotDataType[], startM:int) =
+        member x.HwCPU = hwCPU
+        member x.HasSlot = slots.any(fun a -> a.IOType <> IOType.NotUsed)
         member x.HwIO = 
-            match platformTarget with
+            match hwCPU with
             | WINDOWS -> hwIO
             | XGI -> LS_XGI_IO
             | XGK -> LS_XGK_IO
@@ -83,7 +109,7 @@ module RuntimeGeneratorModule =
     let defaultHwTarget = 
         let slot0 =   SlotDataType(0, IOType.In, DataType.DuUINT64)
         let slot1 =   SlotDataType(1, IOType.Out, DataType.DuUINT64)
-        HwTarget(PlatformTarget.WINDOWS, HwIO.LS_XGI_IO, [|slot0; slot1|], 1000)
+        HwTarget(HwCPU.WINDOWS, HwIO.LS_XGI_IO, [|slot0; slot1|], 1000)
 
     type RuntimeMotionMode =
         | MotionAsync
@@ -100,29 +126,9 @@ module RuntimeGeneratorModule =
         | TimeX16
         | TimeX100
 
-    let InitStartMemory = 1000
-    let OpModeLampBtnMemorySize = 100 ////OP 조작 LAMP 100개만 지원
-    
-    let BufferAlramSize = 10000
-    let XGKAnalogOffsetByte = 96
-    let XGKAnalogOutOffsetByte = 96
-
-
-    let ExternalTempMemory =  "M"
-    let ExternalTempIECMemory =  "%MX"
-    let ExternalXGIAddressON = "%FX153"
-    let ExternalXGIAddressOFF = "%FX154"
-    let ExternalXGKAddressON = "F00099"
-    let ExternalXGKAddressOFF = "F0009A"
-    let ExternalTempNoIECMemory =  "M"
-
-
-    let HMITempMemory =  "%HX99"  //iec xgk 구분안함
-    let HMITempManualAction =  "%HX0"  //iec xgk 구분안함
-
 
     let getExternalTempMemory (target:HwTarget, index:int) =
-        match target.PlatformTarget with
+        match target.HwCPU with
         | XGI-> ExternalTempIECMemory+index.ToString()
         | XGK-> ExternalTempNoIECMemory+index.ToString("00000")
         | WINDOWS-> ExternalTempMemory+($"{index/8}.{index%8}")
@@ -134,44 +140,35 @@ module RuntimeGeneratorModule =
         HwPath: string
         TagConfig : TagConfig   
         ExternalApi: ExternalApi
-        RuntimePackage: RuntimePackage
+        RuntimeMode: RuntimeMode
         TimeSimutionMode : TimeSimutionMode
         TimeoutCall : uint32
-        HwTarget : HwTarget
+        HwTarget : HwTarget 
     }
     with    
-        member x.PlatformTarget = x.HwTarget.PlatformTarget
-
-
+        member x.HwCPU = x.HwTarget.HwCPU
         member x.Slots = x.HwTarget.Slots
-        member x.UpdateTagConfig(tagConfig:TagConfig) = 
-            x.TagConfig.DeviceApis.Clear()
-            x.TagConfig.DeviceApis.AddRange(tagConfig.DeviceApis)
-            x.TagConfig.UserMonitorTags.Clear()
-            x.TagConfig.UserMonitorTags.AddRange(tagConfig.UserMonitorTags)
-            x.TagConfig.DeviceTags.Clear()
-            x.TagConfig.DeviceTags.AddRange(tagConfig.DeviceTags)
 
         member x.ToMessage() = 
-            let baseMsg = $"DsFilePath: {x.DsFilePath}\r\nRuntimePackage: {x.RuntimePackage}"
+            let baseMsg = $"RuntimeMode: {x.RuntimeMode}"
             let hwIOInfo = 
                 match x.HwTarget.HwIO with
                 | LS_XGI_IO -> x.HwIP
                 | LS_XGK_IO -> x.HwIP
                 | MELSEC_IO -> x.HwPath
                 | OPC_IO -> x.HwOPC
-            let hwIOPlatformTarget = 
-                match x.PlatformTarget with
+            let hwIOHwCPU = 
+                match x.HwCPU with
                 | WINDOWS -> hwIOInfo
                 | XGI -> "LS_XGI_IO"
                 | XGK -> "LS_XGK_IO"
 
-            match x.RuntimePackage with
+            match x.RuntimeMode with
             | Simulation ->
                 baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}"
             | Control -> 
-                baseMsg + $"\r\nPlatformTarget: {x.PlatformTarget}
-                \r\nHwDriver: {x.HwTarget.HwIO} ({hwIOPlatformTarget}) 
+                baseMsg + $"\r\nHwCPU: {x.HwCPU}
+                \r\nHwDriver: {x.HwTarget.HwIO} ({hwIOHwCPU}) 
                 \r\nTimeoutCall: {x.TimeoutCall}"
             | Monitoring 
             | VirtualPlant -> 
@@ -190,22 +187,19 @@ module RuntimeGeneratorModule =
             HwPath = "0"
             TagConfig = createDefaultTagConfig()    
             ExternalApi = ExternalApi.OPC
-            RuntimePackage = Simulation //unit test를 위해 Simulation으로 설정
+            RuntimeMode = Simulation //unit test를 위해 Simulation으로 설정
             TimeSimutionMode = TimeX1
             TimeoutCall = 15000u
             HwTarget = defaultHwTarget
         }
-    let createModelConfigWithHwConfig(config: ModelConfig,  ip:string, tagConfig:TagConfig) =
-        { config with  HwIP = ip; TagConfig = tagConfig }
-    let createModelConfigWithSimMode(config: ModelConfig, package:RuntimePackage) =
-        { config with RuntimePackage = package }
+
     let createModelConfig(path:string,
             hwIP:string, 
             hwOPC:string, 
             hwPath:string,  
             tagConfig:TagConfig, 
             externalApi:ExternalApi, 
-            runtimePackage:RuntimePackage,
+            runtimeMode:RuntimeMode,
             hwTarget:HwTarget,
             timeSimutionMode:TimeSimutionMode, 
             timeoutCall:uint32) =
@@ -216,22 +210,46 @@ module RuntimeGeneratorModule =
             HwPath = hwPath
             TagConfig = tagConfig
             ExternalApi = externalApi
-            RuntimePackage = runtimePackage
+            RuntimeMode = runtimeMode
             TimeSimutionMode = timeSimutionMode
             TimeoutCall = timeoutCall
             HwTarget = hwTarget
         }
     let createModelConfigReplacePath (cfg:ModelConfig, path:string) =
         { cfg with DsFilePath = path }
-    let createModelConfigReplacePackage (cfg:ModelConfig, runtimePackage:RuntimePackage) =
-        { cfg with RuntimePackage = runtimePackage }
+    let createModelConfigReplaceRuntimeMode (cfg:ModelConfig, runtimeMode:RuntimeMode) =
+        { cfg with RuntimeMode = runtimeMode }
+    let createModelConfigReplaceHwCPU(cfg:ModelConfig, hwCPU:HwCPU) =
+        let newHwTarget = new HwTarget(hwCPU,  cfg.HwTarget.HwIO , cfg.HwTarget.Slots,  cfg.HwTarget.StartMemory )
+        { cfg with HwTarget = newHwTarget }
+    let createModelConfigWithHwConfig(config: ModelConfig,  hwTarget:HwTarget) =
+        { config with  HwTarget = hwTarget }
+    let createModelConfigWithHwIp(config: ModelConfig,  ip:string, tagConfig:TagConfig) =
+        { config with  HwIP = ip; TagConfig = tagConfig }
+
+    type RuntimeParam =
+        {
+            System: ISystem option
+            RuntimeMode: RuntimeMode
+            TimeSimutionMode: TimeSimutionMode
+        }
 
     type RuntimeDS() =
-        static member val System : ISystem option = None with get, set
-        static member val RuntimePackage : RuntimePackage = Simulation with get, set
-        static member val TimeSimutionMode : TimeSimutionMode = TimeX1 with get, set
-        static member val IsPLC = false with get, set
-        
+        static member val Param = 
+                            {
+                                System = None
+                                RuntimeMode = Simulation
+                                TimeSimutionMode = TimeX1
+                            } with get, set
+
+        static member ReplaceSystem(sys: ISystem) =
+            RuntimeDS.Param <- { RuntimeDS.Param with System = Some sys }
+        static member UpdateParam(runtimeMode:RuntimeMode, timeSimutionMode:TimeSimutionMode) =
+            RuntimeDS.Param <-  {
+                                    System = RuntimeDS.Param.System 
+                                    RuntimeMode = runtimeMode
+                                    TimeSimutionMode = timeSimutionMode
+                                }
 
     let getFullSlotHwSlotDataTypes() =
         let hw =
@@ -245,13 +263,13 @@ module RuntimeGeneratorModule =
 
     //let getDefaltHwTarget() = defaultHwTarget
 
-module PlatformTargetExtensions =
+module HwCPUExtensions =
         let fromString s =
             match s with
             | "WINDOWS" | "WINDOWS PC"-> WINDOWS
             | "XGI"  | "LS Electric XGI PLC"  -> XGI
             | "XGK"  | "LS Electric XGK PLC"  -> XGK
-            | _ -> failwithf $"Error ToPlatformTarget: {s}"
+            | _ -> failwithf $"Error ToHwCPU: {s}"
 
         let allPlatforms =
             [ WINDOWS; XGI; XGK;]
@@ -262,7 +280,7 @@ module PlatformTargetExtensions =
             | XGI -> "LS Electric XGI PLC"
             | XGK -> "LS Electric XGK PLC"
 
-module RuntimePackageExtensions =
+module RuntimeModeExtensions =
         let fromString s =
             match s with
             | "Simulation"-> Simulation
@@ -270,9 +288,9 @@ module RuntimePackageExtensions =
             | "Monitoring" -> Monitoring
             | "VirtualPlant" -> VirtualPlant
             | "VirtualLogic" -> VirtualLogic
-            | _ -> failwithf $"Error PlatformTarget: {s}"
+            | _ -> failwithf $"Error HwCPU: {s}"
 
-        let allRuntimePackage =
+        let allRuntimeMode =
             [ Simulation; Control; Monitoring; VirtualPlant; VirtualLogic]
 
 module ExternalApiExtensions =
@@ -327,38 +345,4 @@ module TimeSimutionModeExtensions =
 
         let allModes =
             [ TimeNone; TimeX0_1; TimeX0_5; TimeX1; TimeX2; TimeX4; TimeX8; TimeX16; TimeX100 ]
-
-
-module ModelConfigExtensions =
-
-
-    //// ========== XML 문자열 직렬화 ==========
-    //let ModelConfigToXmlText (config: ModelConfig) : string =
-    //    let serializer = DataContractSerializer(typeof<ModelConfig>)
-    //    use stringWriter = new StringWriter()
-    //    use xmlWriter = XmlWriter.Create(stringWriter, XmlWriterSettings(Indent = true))
-    //    serializer.WriteObject(xmlWriter, config)
-    //    xmlWriter.Flush()
-    //    stringWriter.ToString()
-
-    //let XmlToModelConfig (xmlText: string) : ModelConfig =
-    //    let serializer = DataContractSerializer(typeof<ModelConfig>)
-    //    use stringReader = new StringReader(xmlText)
-    //    use xmlReader = XmlReader.Create(stringReader)
-    //    try
-    //        serializer.ReadObject(xmlReader) :?> ModelConfig
-    //    with _ ->
-    //        createDefaultModelConfig()
-
-
-    // ========== JSON 저장/불러오기 ==========
-
-    let private jsonSettings = JsonSerializerSettings()
-    let ModelConfigToJsonText (cfg: ModelConfig) : string =
-        JsonConvert.SerializeObject(cfg, Formatting.Indented, jsonSettings)
-
-    let ModelConfigFromJsonText (json: string) : ModelConfig =
-        JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
-
-
 

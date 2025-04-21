@@ -48,8 +48,7 @@ module ConvertRuntimeModeModule =
         ]
 
 
-    let mode = RuntimeDS.RuntimePackage
-    let applyRuntimeMode(sys:DsSystem)(isSubSys:bool)  =
+    let applyRuntimeMode(sys:DsSystem) (isSubSys:bool) (mode:RuntimeMode)  =
         [
             yield!
                 sys.GetRealVertices().Select(getVMReal).Collect(fun vr -> 

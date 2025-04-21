@@ -58,7 +58,7 @@ module MemoryAllocator =
         (typ: string)
         (availableByteRange: IntRange)
         (FList(reservedBytes: int list))
-        (target: PlatformTarget)
+        (target: HwCPU)
       : PLCMemoryAllocator =
         tracefn $"xxx-------------------------MemoryAllocator created!"
         let startByte, endByte = availableByteRange

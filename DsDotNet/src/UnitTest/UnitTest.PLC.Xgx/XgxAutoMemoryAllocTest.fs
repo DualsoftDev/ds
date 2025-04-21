@@ -9,7 +9,7 @@ open PLC.CodeGen.LS
 open PLC.CodeGen.Common
 
 
-type AutoMemoryAllocTest(xgx:PlatformTarget) =
+type AutoMemoryAllocTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Auto memory allocation test`` () =

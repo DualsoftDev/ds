@@ -14,10 +14,10 @@ module Program =
         try
             // 4. RuntimeModel 초기화
             let runtimeModel = 
-                new RuntimeModel(@"z://HelloDS.dsz", Engine.Core.RuntimeGeneratorModule.PlatformTarget.WINDOWS)
+                new RuntimeModel(@"z://HelloDS.dsz", Engine.Core.ModelConfigModule.HwCPU.WINDOWS)
 
             // OPC UA 서버 시작
-            DsOpcUaServerManager.Start(runtimeModel.System, RuntimePackage.Simulation, "127")
+            DsOpcUaServerManager.Start(runtimeModel.System, RuntimeMode.Simulation, "127")
 
             printfn "종료하려면 아무 키나 누르세요..."
             Console.ReadKey() |> ignore

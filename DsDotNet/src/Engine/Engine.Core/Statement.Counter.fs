@@ -57,13 +57,13 @@ module CounterStatementModule =
                 ResetCondition=cParams.ResetCondition; LoadCondition=cParams.LoadCondition;  }
         DuCounter counterStatement
 
-    let (*private*) createCounterStatement (storages:Storages) (cParams:CounterCreateParams) (target:PlatformTarget): Statement =
+    let (*private*) createCounterStatement (storages:Storages) (cParams:CounterCreateParams) (target:HwCPU): Statement =
         let accum = 0u
         let cs =    // counter structure
             let typ    = cParams.Type
             let name   = cParams.Name
             let preset = cParams.Preset
-            let sys    = RuntimeDS.System.Value
+            let sys    = RuntimeDS.Param.System.Value
             match typ with
             | CTU  -> CTUStruct.Create (typ, storages, name, preset, accum, sys, target) :> CounterBaseStruct
             | CTD  -> CTDStruct.Create (typ, storages, name, preset, accum, sys, target)

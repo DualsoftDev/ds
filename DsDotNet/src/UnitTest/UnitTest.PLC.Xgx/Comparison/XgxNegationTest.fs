@@ -10,7 +10,7 @@ open Engine.Core
 open PLC.CodeGen.Common.FlatExpressionModule
 
 
-type XgxNegationTest(xgx:PlatformTarget) =
+type XgxNegationTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let baseCode =

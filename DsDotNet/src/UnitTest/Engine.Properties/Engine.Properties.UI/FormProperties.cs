@@ -6,7 +6,7 @@ using Engine.Core;
 using Engine.Runtime;
 using static Engine.Runtime.DsPropertyTreeModule;
 using static Engine.Runtime.DsPropertyTreeExt;
-using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Core.ModelConfigModule;
 using static Engine.Runtime.DsPropertyModule;
 using System.Diagnostics;
 using static Engine.Runtime.DsPropertyBaseModule;
@@ -95,7 +95,7 @@ namespace DSModeler
         {
             try
             {
-                var runtimeModel = new RuntimeModel(filePath, PlatformTarget.WINDOWS);
+                var runtimeModel = new RuntimeModel(filePath, HwCPU.WINDOWS);
                 _RootTree = DsPropertyTreeExt.GetPropertyTree(runtimeModel);
                 PopulateTreeView(_RootTree);
                 ShowMessage("DSZ 파일이 성공적으로 열렸습니다.", "파일 열기 완료");

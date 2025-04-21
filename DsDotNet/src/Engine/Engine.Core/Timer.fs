@@ -220,7 +220,7 @@ module rec TimerModule =
         member _.TT:VariableBase<bool> = tt
         member _.Type = typ
 
-        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:PlatformTarget) =
+        static member Create(typ:TimerType, storages:Storages, name, preset:CountUnitType, accum:CountUnitType, sys, target:HwCPU) =
             let suffixes  =
                 match target with
                 | XGK -> [".IN"; ".TT"; xgkTimerCounterContactMarking; ".PT"; ".ET"; ".RST"] // XGK 이름에 . 있으면 걸러짐 storagesToXgxSymbol

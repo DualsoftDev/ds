@@ -9,7 +9,7 @@ open Engine.CodeGenPLC
 open Dual.Common.UnitTest.FS
 
 
-type XgxDirectAddressTest(xgx:PlatformTarget) =
+type XgxDirectAddressTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
     //ADV, RET 주소 같음
     let code (addBoolIn, addInt16Out) =
@@ -46,7 +46,7 @@ type XgxDirectAddressTest(xgx:PlatformTarget) =
             ParserOptions.Create4Simulation(systemRepo, libPath, "ActiveCpuNA.me", None, DuNone)
             )
         let param =  XgxGenerationParameters.Default()
-        param.PlatformTarget <- xgx
+        param.ModelConfig <- createModelConfigReplaceHwCPU (param.ModelConfig ,xgx)
             
         exportXMLforLSPLC (sys, "XXXXXXXXX", param)
 

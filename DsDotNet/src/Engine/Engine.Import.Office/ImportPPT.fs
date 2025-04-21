@@ -92,11 +92,11 @@ module ImportPptModule =
 
             let doc =
                 match dicPptDoc.TryGetValue pathPpt with
-                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.HwTarget.PlatformTarget)
+                | true, existingDoc -> PptDoc.Create (pathPpt, Some paras, existingDoc, pptParams.HwTarget.HwCPU)
                 | false, _ ->
                     let newDoc = Office.Open(pathPpt)
                     dicPptDoc.Add(pathPpt, newDoc)
-                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.HwTarget.PlatformTarget)
+                    PptDoc.Create (pathPpt, paras |> Some, newDoc, pptParams.HwTarget.HwCPU)
 
 
         
@@ -184,10 +184,10 @@ module ImportPptModule =
             doc.MakeInterfaces(theSys)
 
             if paras.LoadingType = DuNone || paras.LoadingType = DuDevice then //External system 은 Interfaces만 만들고 나중에 buildSystem 수행
-                doc.BuildSystem(theSys, pptParams.HwTarget, isLib, pptParams.CreateBtnLamp)
+                doc.BuildSystem(theSys, isLib, pptParams.CreateBtnLamp)
 
             if paras.LoadingType = DuNone then
-                doc.UpdateActionIO(theSys, pptParams.AutoIOM, pptParams.HwTarget)
+                doc.UpdateActionIO(theSys, pptParams.AutoIOM)
                 doc.UpdateLayouts(theSys)
                 layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
 
@@ -236,17 +236,14 @@ module ImportPptModule =
         try
             try
                 let sys, doc = PowerPointImportor.GetImportModel(pptRepo, path, isLib, pptParams, dicPptDoc, pathStack, layoutImgPaths)
-                let modelConfig =     
-                    match doc.ModelConfig with 
-                    |Some v-> v
-                    |_ -> createDefaultModelConfig() 
+                let modelConfig = doc.ModelConfig
 
                 //ExternalSystem 순환참조때문에 완성못한 시스템 BuildSystem 마무리하기
                 pptRepo
                     .Where(fun dic -> not dic.Value.IsBuilded)
                     .ForEach(fun (KeyValue(dsSystem, pptDoc)) ->
                         pathStack.Push(pptDoc.Path)
-                        pptDoc.BuildSystem(dsSystem, pptParams.HwTarget, isLib, pptParams.CreateBtnLamp)
+                        pptDoc.BuildSystem(dsSystem, isLib, pptParams.CreateBtnLamp)
                         pathStack.Pop() |> ignore)
 
                 {
@@ -292,7 +289,7 @@ module ImportPptModule =
                         model.System, model.LoadingPaths
                     else
                         LoaderExt.ExportToDS (model.System, activePath)
-                        ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.PlatformTarget) false )
+                        ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.HwCPU) false )
 
 
             forceTrace $"Elapsed time for reading2 {fullName}: {millisecond} ms"

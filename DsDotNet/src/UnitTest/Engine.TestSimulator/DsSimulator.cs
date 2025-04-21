@@ -17,7 +17,7 @@ using static Engine.Core.CoreModule;
 using static Engine.Core.CoreModule.GraphItemsModule;
 using static Engine.Core.ExpressionForwardDeclModule;
 using static Engine.Core.Interface;
-using static Engine.Core.RuntimeGeneratorModule;
+using static Engine.Core.ModelConfigModule;
 using static Engine.Cpu.RunTimeModule;
 
 

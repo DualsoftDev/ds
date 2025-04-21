@@ -7,7 +7,7 @@ open Dual.Common.Core.FS
 open NUnit.Framework
 
 
-type XgxCounterTest(xgx:PlatformTarget) =
+type XgxCounterTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Counter CTD simple test`` () =

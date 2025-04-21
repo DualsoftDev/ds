@@ -54,7 +54,7 @@ module TagManagerModule =
     /// Vertex Manager : 소속되어 있는 DsBit 를 관리하는 컨테이어
     [<DebuggerDisplay("{Name}")>]
     [<AbstractClass>]
-    type VertexTagManager (v:Vertex, isActive:bool)  =
+    type VertexTagManager (v:Vertex, isActive:bool, mode:RuntimeMode)  =
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
 
@@ -94,7 +94,7 @@ module TagManagerModule =
         ///Segment End Tag
         member val ET =
             let et = createTag  true  VertexTag.endTag
-            if RuntimeDS.RuntimePackage = Simulation then
+            if mode = Simulation then
                 if v :? Real && (v :?> Real).Finished then
                     et.Value <- true
             et
@@ -233,8 +233,8 @@ module TagManagerModule =
 
 
 
-    and RealVertexTagManager(v:Vertex, isActive:bool) =
-        inherit VertexTagManager(v, isActive)
+    and RealVertexTagManager(v:Vertex, isActive:bool, mode) =
+        inherit VertexTagManager(v, isActive, mode)
 
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
@@ -256,6 +256,7 @@ module TagManagerModule =
         let mergeToken = createData(v, VertexTag.mergeToken, DuUINT32)
         let sourceToken = createData(v, VertexTag.sourceToken, DuUINT32)
 
+        member x.RuntimeMode = mode
         member x.Real = x.Vertex :?> Real
         member x.OriginInfo
             with get() = originInfo
@@ -323,8 +324,8 @@ module TagManagerModule =
         member val MotionRelay  = if useMotion then createTagMotionNScript real VertexTag.motionRelay else off
         member val TimeRelay    = if useTime   then createTag true VertexTag.timeRelay   else off
 
-    and CoinVertexTagManager(v:Vertex, isActive:bool) =
-        inherit VertexTagManager(v, isActive)
+    and CoinVertexTagManager(v:Vertex, isActive:bool, mode) =
+        inherit VertexTagManager(v, isActive, mode)
         let sys =  v.Parent.GetSystem()
         let s =  sys.TagManager.Storages
         let sysManager = sys.TagManager :?> SystemManager

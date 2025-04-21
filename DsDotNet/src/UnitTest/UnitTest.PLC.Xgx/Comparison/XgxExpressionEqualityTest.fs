@@ -12,7 +12,7 @@ open Dual.Common.Core.FS
 open System
 
 
-type XgxExpEqualityTest(xgx:PlatformTarget) =
+type XgxExpEqualityTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     member x.``Assignment simple test`` () =

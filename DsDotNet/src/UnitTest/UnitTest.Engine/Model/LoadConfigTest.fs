@@ -19,7 +19,7 @@ module LoadConfigTestModule =
         [<Test>]
         member __.``LoadModelFromConfigTest`` () =
 
-            let model = ParserLoader.LoadFromConfig configFile PlatformTarget.WINDOWS  
+            let model = ParserLoader.LoadFromConfig configFile HwCPU.WINDOWS  
             model.System.Name === "Factory"
 
 

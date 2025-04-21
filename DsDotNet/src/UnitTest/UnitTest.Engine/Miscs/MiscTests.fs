@@ -102,7 +102,7 @@ module MiscTestModule =
         member __.``Generic test`` () =
             let sys = DsSystem.Create4Test("testSys")
             //RuntimeDS.Target <- XGI
-            RuntimeDS.System <- Some sys
+            RuntimeDS.ReplaceSystem sys
 
             let anal(v:IValue<'T>) =
                 let innerType = typedefof<'T>

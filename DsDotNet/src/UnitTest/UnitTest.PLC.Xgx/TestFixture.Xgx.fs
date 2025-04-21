@@ -34,7 +34,7 @@ module XgxGenerationTestModule =
 
     /// bool x00 = createTag("%IX0.0.0", false); 등과 같은 항목을 반복 생성한다.
     /// varPrefix: e.g "x", addressPrefix: e.g. "%IX0."
-    let generateBitTagVariableDeclarationSeq (xgx:PlatformTarget) (varPrefix:string) (addressPrefix:string) (start: int) (count: int) =
+    let generateBitTagVariableDeclarationSeq (xgx:HwCPU) (varPrefix:string) (addressPrefix:string) (start: int) (count: int) =
         seq {
             for i in start .. start + count - 1 do
                 let tag =
@@ -48,31 +48,31 @@ module XgxGenerationTestModule =
                 yield sprintf "bool %s%02d = createTag(\"%s\", false);" varPrefix (i-start) tag
         }
 
-    let private getAddressPrefix (xgx:PlatformTarget) =
+    let private getAddressPrefix (xgx:HwCPU) =
         match xgx with
         | XGI -> "IX0"
         | XGK -> "P"
         | _ -> failwith "Not supported runtime target"
 
-    let generateBitTagVariableDeclarations (xgx:PlatformTarget) (start: int) (count: int) =
+    let generateBitTagVariableDeclarations (xgx:HwCPU) (start: int) (count: int) =
         let addressPrefix = getAddressPrefix xgx
         generateBitTagVariableDeclarationSeq xgx "x" addressPrefix start count |> String.concat "\n"
 
     /// bool varPrefix00 = createTag("%IX0.0.0", false); 등과 같은 항목을 반복 생성한다.
-    let generateNamedBitTagVariableDeclarations (xgx:PlatformTarget) (varPrefix:string) (addressPrefix:string) (start: int) (count: int) =
+    let generateNamedBitTagVariableDeclarations (xgx:HwCPU) (varPrefix:string) (addressPrefix:string) (start: int) (count: int) =
         generateBitTagVariableDeclarationSeq xgx varPrefix addressPrefix start count |> String.concat "\n"
 
     let generateInt16VariableDeclarations (start: int) (count: int) =
         generateVariableDeclarations "int16" "nn" (fun i -> sprintf "%ds" i) start count
 
-    let generateLargeVariableDeclarations (xgx:PlatformTarget) =
+    let generateLargeVariableDeclarations (xgx:HwCPU) =
         let addressPrefix = getAddressPrefix xgx
         seq {
             yield! generateBitTagVariableDeclarationSeq xgx "x" addressPrefix 0 40
             yield! generateVariableDeclarationSeq "int32" "nn" (fun i -> sprintf "%d" i) 1 9
         } |> String.concat "\n"
 
-    let internal saveXgxTestResult (xgx:PlatformTarget) (testFunctionName:string) (xml:string) =
+    let internal saveXgxTestResult (xgx:HwCPU) (testFunctionName:string) (xml:string) =
         let xmlDir = Path.Combine(projectDir, $"{xgx}/Xmls")
         let xmlAnswerDir = Path.Combine(xmlDir, "Answers")
         File.WriteAllText($@"{xmlDir}/{testFunctionName}.xml", xml)
@@ -86,9 +86,9 @@ module XgxFixtures =
 
     let mutable runtimeTarget = WINDOWS, LS_XGK_IO
     let sys = DsSystem.Create4Test("")
-    let setRuntimeTarget(target:PlatformTarget) =
+    let setRuntimeTarget(target:HwCPU) =
         let runtimeTargetBackup = target, LS_XGK_IO
-        RuntimeDS.System <- Some sys
+        RuntimeDS.ReplaceSystem sys
         ParserUtil.runtimeTarget <- target
         runtimeTarget <- target, LS_XGK_IO
         disposable { runtimeTarget <- runtimeTargetBackup }
@@ -104,7 +104,7 @@ module XgxFixtures =
             failwith $"Failed to parse Expression: {text}\r\n{exn}" // Just warning.  하나의 이름에 '.' 을 포함하는 경우.  e.g "#seg.testMe!!!"
 
     /// Unit test 용 PLC XML 생성 함수.  실제 runtime 환경에서는 generateXmlXGX 사용
-    let private generateXmlForTest (xgx:PlatformTarget) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
+    let private generateXmlForTest (xgx:HwCPU) projName (storages:Storages) (commentedStatements:CommentedStatement list) : string =
         tracefn <| $"IsDebugVersion={IsDebugVersion}, isInUnitTest()={isInUnitTest()}"
 
         //verify (RuntimeDS.Target = xgx)
@@ -130,12 +130,12 @@ module XgxFixtures =
 
         prjParam.GenerateXmlString()
 
-    let TestPlatformTarget = XGI
+    let TestHwCPU = XGI
 
 
 
     [<AbstractClass>]
-    type XgxTestBaseClass(xgx:PlatformTarget) =
+    type XgxTestBaseClass(xgx:HwCPU) =
         inherit TestClassWithLogger(Path.Combine($"{__SOURCE_DIRECTORY__}/App.config"), "UnitTestLogger")
 
         let sys = DsSystem.Create4Test("testSys")
@@ -200,13 +200,13 @@ module XgxFixtures =
 
         [<SetUp>]
         member x.Setup () =
-            RuntimeDS.System <- Some sys
+            RuntimeDS.ReplaceSystem sys
 
 
         [<TearDown>]
         member __.TearDown () =
-            RuntimeDS.System <- Some sys
+            RuntimeDS.ReplaceSystem sys
 
         member __.saveTestResult testFunctionName (xml:string) = saveXgxTestResult xgx testFunctionName (formatXml xml)
         member __.generateXmlForTest = generateXmlForTest xgx
-        member __.PlatformTarget = xgx
+        member __.HwCPU = xgx

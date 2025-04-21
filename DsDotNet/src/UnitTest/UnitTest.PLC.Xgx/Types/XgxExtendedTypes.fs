@@ -6,7 +6,7 @@ open Dual.Common.Core.FS
 open Engine.Core
 open Engine.Parser.FS
 
-type XgxExtendedTypesTest(xgx:PlatformTarget) =
+type XgxExtendedTypesTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let span width = width*3

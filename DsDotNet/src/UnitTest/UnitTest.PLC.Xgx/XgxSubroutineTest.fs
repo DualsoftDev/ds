@@ -8,7 +8,7 @@ open Dual.Common.UnitTest.FS
 open Engine.Parser.FS
 
 
-type XgxSubroutineTest(xgx:PlatformTarget) =
+type XgxSubroutineTest(xgx:HwCPU) =
     inherit XgxTestBaseClass(xgx)
 
     let code = """

@@ -39,7 +39,7 @@ module HelloDSRuntimeTestModule =
         member __.``HelloDS runtime model test``() =
             let system = getSystem()
             let tagConfig = createDefaultTagConfig()
-            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime(system) (WINDOWS) modelConfig 
+            let _dsCPU, hMIPackage, _pous = DsCpuExt.CreateRuntime system modelConfig 
             system.TagManager.Storages.Count > 0 === true
 
             let json = SystemTextJson.Serialize(hMIPackage)

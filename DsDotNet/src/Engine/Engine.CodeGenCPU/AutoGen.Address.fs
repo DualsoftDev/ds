@@ -110,7 +110,7 @@ module DsAddressModule =
 
 
     let getValidAddress (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, target:HwTarget) =
-        let cpu, driver, hwSlotDataTypes = target.PlatformTarget, target.HwIO, target.Slots
+        let cpu, driver, hwSlotDataTypes = target.HwCPU, target.HwIO, target.Slots
         let addr =
             if addr.IsNullOrEmpty() then
                 failwithf $"주소가 없습니다. {name} \n 인터페이스 생략시 '-' 입력필요"
@@ -134,9 +134,9 @@ module DsAddressModule =
                 curr + bitSize - (curr%bitSize) + bitSize
 
         let sizeBit =
-            if cpu = PlatformTarget.XGI then
+            if cpu = HwCPU.XGI then
                 dataType.ToBitSize()
-            elif cpu = PlatformTarget.XGK then
+            elif cpu = HwCPU.XGK then
                 match dataType.ToBitSize() with
                 | 1 -> 1
                 | 8 -> 16
@@ -229,7 +229,7 @@ module DsAddressModule =
 
                     match Seq.tryHead slotSpares with
                     | Some (s) -> (s.SlotIndex, assigned (s.SlotIndex - 1))
-                    | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다.Add I/O table 세팅필요"
+                    | None ->  failwithf $"{settingType}Type 슬롯이 부족합니다.Utils > 주소 할당 필요"
 
                 match driver with
                 | OPC_IO ->
@@ -276,7 +276,7 @@ module DsAddressModule =
                                 | _ ->
                                     failwithf $"Error {target} not support {name}"
 
-                        //| PlatformTarget.WINDOWS ->
+                        //| HwCPU.WINDOWS ->
                         //    let io = if ioType = IOType.In then "I" else "O"
                         //    getPCIOMTextBySize(io, cnt ,sizeBit)
                         | _ ->
@@ -288,7 +288,7 @@ module DsAddressModule =
                             getXgiMemoryTextBySize("M", cnt ,sizeBit)
                         | LS_XGK_IO ->
                             LsXgkTagParser.ParseAddress("M", cnt, isBool)
-                        //| PlatformTarget.WINDOWS ->
+                        //| HwCPU.WINDOWS ->
                         //    getPCIOMTextBySize("M", cnt ,sizeBit)
                         | _ ->
                             failwithf $"Error{name} {target} not support"
@@ -324,10 +324,10 @@ module DsAddressModule =
         newAddr
 
 
-    let getValidAddressUsingPlatform (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, platformTarget:PlatformTarget) =
+    let getValidAddressUsingPlatform (addr: string, dataType: DsDataType.DataType, name: string, isSkip: bool, ioType:IOType, hwCPU:HwCPU) =
         let hwTarget =
             let slot = getFullSlotHwSlotDataTypes()
-            match platformTarget with
+            match hwCPU with
             | WINDOWS -> HwTarget(WINDOWS, OPC_IO, slot, 1000)
             | XGI -> HwTarget(XGI, LS_XGI_IO, slot, 1000)
             | XGK -> HwTarget(XGK, LS_XGK_IO, slot, 1000)

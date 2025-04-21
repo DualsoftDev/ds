@@ -70,7 +70,7 @@ module DsNodeManagerExt =
         sys.TagManager.Storages.Values
             |> Seq.filter(fun tag -> tag.TagKind = (int)VertexTag.scriptStart || tag.TagKind = (int)VertexTag.scriptEnd)
 
-type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem, mode:RuntimePackage) =
+type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem, mode:RuntimeMode) =
     inherit CustomNodeManager2(server, configuration, "ds")
     //start TagName, end Tag
     let _motionDic = dsSys |> getDsPlanInterfaces 
@@ -130,24 +130,24 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             let handleWrite = handleWriteValue(context, node, indexRange, dataEncoding, &value, &statusCode, &timestamp)
             let isStg = _dsStorages.ContainsKey(node.DisplayName.Text)
             match mode with 
-            | RuntimePackage.Control ->
+            | RuntimeMode.Control ->
                 if isStg && _dsStorages[node.DisplayName.Text].IsMonitorStg() then
                     handleWrite
                 else 
                     writeError
-            | RuntimePackage.VirtualLogic ->
+            | RuntimeMode.VirtualLogic ->
                 if isStg && _dsStorages[node.DisplayName.Text].IsMotionEndStg() then
                     handleWrite
                 else 
                     writeError  
-            | RuntimePackage.VirtualPlant ->
+            | RuntimeMode.VirtualPlant ->
                 if isStg && _dsStorages[node.DisplayName.Text].IsActionOutStg() then
                     handleWrite
                 else 
                     writeError  
 
-            | RuntimePackage.Monitoring
-            | RuntimePackage.Simulation -> writeError   
+            | RuntimeMode.Monitoring
+            | RuntimeMode.Simulation -> writeError   
 
            
         )

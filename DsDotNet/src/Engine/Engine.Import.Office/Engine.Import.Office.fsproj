@@ -38,6 +38,7 @@
         <Compile Include="ImportDocCheck.fs" />
         <Compile Include="ImportUtilView.fs" />
         <Compile Include="ImportIOTable.fs" />
+        <Compile Include="ImportIODevTags.fs" />
         <Compile Include="ExportExcel.fs" />
         <Compile Include="ExportLayoutTable.fs" />
         <Compile Include="ExportIOTable.fs" />

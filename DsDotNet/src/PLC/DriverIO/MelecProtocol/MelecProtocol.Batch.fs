@@ -2,6 +2,7 @@ namespace MelsecProtocol
 
 open System
 open Dual.PLC.Common.FS
+open System.Collections.Generic
 
 [<AutoOpen>]
 module Batch =
@@ -27,3 +28,16 @@ module Batch =
                 $"Device: {dev}, Max BitOffset: {maxOffset}"
             )
             |> String.concat "\n"
+
+
+
+    let prepareReadBatches (tags: MelsecTag[]) : DWBatch[] =
+        tags
+        |> Seq.groupBy (fun t -> t.LWordTag)
+        |> Seq.map (fun (_lword, group) ->
+            let tagArray = group |> Seq.toArray
+            let bufferSize = 8 * 1  // 64비트 = 8바이트, LWord 하나 기준
+            let buffer = Array.zeroCreate<byte> bufferSize
+            DWBatch(buffer, tagArray)
+        )
+        |> Seq.toArray

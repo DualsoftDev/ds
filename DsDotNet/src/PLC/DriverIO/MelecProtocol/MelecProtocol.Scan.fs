@@ -77,7 +77,8 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
                 notifiedOnce.Add(batch) |> ignore
 
             with ex ->
-                eprintfn $"[⚠️ MELSEC Read 실패] {ip}: {ex.Message}"
+                eprintfn $"[⚠️ MELSEC Read 실패
+                ] {ip}: {ex.Message}"
 
 
     //override _.ReadTags() =

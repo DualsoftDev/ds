@@ -21,8 +21,8 @@
 		<Compile Include="MelecProtocol.DeviceInfo.fs" />
 		<Compile Include="MelecProtocol.Tag.fs" />
 		<Compile Include="MelecProtocol.TagParser.fs" />
-		<Compile Include="MelecProtocol.Comm.fs" />
 		<Compile Include="MelecProtocol.Batch.fs" />
+		<Compile Include="MelecProtocol.Comm.fs" />
 		<Compile Include="MelecProtocol.Scan.fs" />
 		<Compile Include="MelecProtocol.ScanController.fs" />
   </ItemGroup>

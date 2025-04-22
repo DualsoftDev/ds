@@ -19,31 +19,31 @@ class Program
         // 테스트 태그 구성
         const int count = 33;
 
-        string[] bitDeviceTypes = { "X", "Y", "M", "L", "B", "SM", "SB", "DX", "DY", "F", "Z", "V" };
+        //string[] bitDeviceTypes = { "X", "Y", "M", "L", "B", "SM", "SB", "DX", "DY", "F", "Z", "V" };
         string[] wordDeviceTypes = { "D", "W", "R", "ZR", "T", "C", "SD", "SW" };
 
         var tags = new List<TagInfo>();
 
-        foreach (var dev in bitDeviceTypes)
-        {
-            for (int i = 0; i < count; i++)
-            {
-                string address = MxTagParser.ParseFromSegment(dev, i, 1);
-                tags.Add(new TagInfo(
-                    name: $"{dev}_bit_{i}",
-                    address: address,
-                    comment: $"Test Bit {address}",
-                    isOutput: false
-                ));
-            }
-        }
+        //foreach (var dev in bitDeviceTypes)
+        //{
+        //    for (int i = 0; i < count; i++)
+        //    {
+        //        string address = MxTagParser.ParseFromSegment(dev, i, 1);
+        //        tags.Add(new TagInfo(
+        //            name: $"{dev}_bit_{i}",
+        //            address: address,
+        //            comment: $"Test Bit {address}",
+        //            isOutput: false
+        //        ));
+        //    }
+        //}
 
         foreach (var dev in wordDeviceTypes)
         {
             for (int i = 0; i < count; i++)
             {
                 int offset = i * 1; // 워드는 10진수 주소 사용
-                string address = MxTagParser.ParseFromSegment(dev, i*16, 16);
+                string address = MxTagParser.ParseFromSegment(dev, i * 16, 16);
                 tags.Add(new TagInfo(
                     name: $"{dev}_word_{i}",
                     address: address,

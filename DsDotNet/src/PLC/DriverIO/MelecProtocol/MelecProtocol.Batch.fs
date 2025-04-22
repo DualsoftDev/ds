@@ -54,33 +54,3 @@ module Batch =
         |> Seq.groupBy (fun t -> t.DWordTag)
         |> Seq.map (fun (_, group) -> createBatch group)
         |> Seq.toArray
-
-    /// MELSEC 랜덤 리드 구현 - 배치 기준
-    type MxEthernet with
-        member this.ReadDWordRandom(batches: DWBatch[]) : byte[] =
-            if batches.Length > 192 then failwith "MELSEC MC 프로토콜 제한: 최대 192 항목까지 지원됨"
-
-            let buildCommand () =
-                let header = ResizeArray<byte>()
-                header.AddRange([| 0x50uy; 0x00uy; 0x00uy; 0xFFuy; 0xFFuy; 0x03uy; 0x00uy |])
-
-                let bodyLength = 2 + batches.Length * 6
-                header.AddRange(BitConverter.GetBytes(uint16 (bodyLength + 12)))
-                header.AddRange(BitConverter.GetBytes(uint16 0x0010))
-                header.AddRange([| 0x03uy; 0x04uy; 0x01uy; 0x00uy |])
-                header.AddRange(BitConverter.GetBytes(uint16 batches.Length))
-
-                for batch in batches do
-                    let dev = batch.BatchAddressHead.ToString()
-                    let addr = batch.BatchAddressOffset
-                    let addrBytes = BitConverter.GetBytes(uint32 addr)
-                    header.AddRange(addrBytes.[0..2])
-                    header.Add(this.GetDeviceCode(dev))
-                    header.AddRange(BitConverter.GetBytes(uint16 2)) // 2워드(4바이트) 고정
-
-                header.ToArray()
-
-            let cmd = buildCommand()
-            let res = this.SendAndReceive(cmd)
-            if res.Length < 11 then failwith "Invalid response"
-            res.[11..]

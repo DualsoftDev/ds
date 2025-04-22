@@ -17,7 +17,7 @@ class Program
         var scanner = scanMgr.CreateScanner(plcIp);
 
         // 테스트 태그 구성
-        const int count = 10;
+        const int count = 33;
 
         string[] bitDeviceTypes = { "X", "Y", "M", "L", "B", "SM", "SB", "DX", "DY", "F", "Z", "V" };
         string[] wordDeviceTypes = { "D", "W", "R", "ZR", "T", "ST", "C", "SD", "SW" };
@@ -28,7 +28,7 @@ class Program
         {
             for (int i = 0; i < count; i++)
             {
-                string address = $"{dev}{i:X}"; // 예: M0, M1, ..., M9
+                string address = MxTagParser.ParseAddress(dev, i, PlcDataSizeType.Boolean);
                 tags.Add(new TagInfo(
                     name: $"{dev}_bit_{i}",
                     address: address,
@@ -43,7 +43,7 @@ class Program
             for (int i = 0; i < count; i++)
             {
                 int offset = i * 1; // 워드는 10진수 주소 사용
-                string address = $"{dev}{offset}";
+                string address = MxTagParser.ParseAddress(dev, i*16, PlcDataSizeType.UInt16);
                 tags.Add(new TagInfo(
                     name: $"{dev}_word_{i}",
                     address: address,

@@ -83,7 +83,7 @@ module DsAddressCore =
                 getPCIOM (prefix, (if sizeBit = 1 then cnt else cnt * 8))
             | MELSEC_IO ->
                 let prefix = match ioType with In -> "X" | Out -> "Y" | Memory -> "M" | _ -> failwith $"지원 안됨: {ioType}"
-                MxTagParser.ParseAddress(prefix, cnt, sizeBit)
+                MxTagParser.ParseFromSegment(prefix, cnt, sizeBit)
             | LS_XGI_IO ->
                 let prefix = match ioType with In -> "I" | Out -> "Q" | Memory -> "M" | _ -> failwith $"지원 안됨: {ioType}"
                 if ioType = Memory

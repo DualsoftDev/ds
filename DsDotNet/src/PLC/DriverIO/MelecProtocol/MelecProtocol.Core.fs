@@ -1,19 +1,24 @@
 namespace MelsecProtocol
 
-// 열거형 정의
+/// MELSEC 프로토콜 열거형 및 상수 정의
+
+/// 사용할 MELSEC 프레임 형식
+[<RequireQualifiedAccess>]
 type McFrame =
     | MC3E = 0x0050
     | MC4E = 0x0054
 
+/// MELSEC 디바이스 타입 (디바이스 명령 코드)
+[<RequireQualifiedAccess>]
 type PlcDeviceType =
-    | M = 0x90 | SM = 0x91 | L = 0x92 | F = 0x93 | V = 0x94 | S = 0x98 | X = 0x9C | Y = 0x9D | B = 0xA0
-    | SB = 0xA1 | DX = 0xA2 | DY = 0xA3 | D = 0xA8 | SD = 0xA9 | R = 0xAF | ZR = 0xB0 | W = 0xB4
-    | SW = 0xB5 | TC = 0xC0 | TS = 0xC1 | TN = 0xC2 | CC = 0xC3 | CS = 0xC4 | CN = 0xC5
+    | M = 0x90 | SM = 0x91 | L = 0x92 | F = 0x93 | V = 0x94 | S = 0x98 | X = 0x9C | Y = 0x9D
+    | B = 0xA0 | SB = 0xA1 | DX = 0xA2 | DY = 0xA3 | D = 0xA8 | SD = 0xA9 | R = 0xAF | ZR = 0xB0
+    | W = 0xB4 | SW = 0xB5 | TC = 0xC0 | TS = 0xC1 | TN = 0xC2 | CC = 0xC3 | CS = 0xC4 | CN = 0xC5
     | SC = 0xC6 | SS = 0xC7 | SN = 0xC8 | Z = 0xCC | TT = 0xCD | TM = 0xCE | CT = 0xCF
     | CM = 0xD0 | A = 0xD1 | Max = 0xFF
 
-      
-
+/// MELSEC 명령어 구분 (Access Command)
+[<RequireQualifiedAccess>]
 type DeviceAccessCommand =
     | BatchRead = 0x0401
     | BatchWrite = 0x1401
@@ -26,12 +31,15 @@ type DeviceAccessCommand =
     | RemoteReset = 0x1006
     | ReadCpuModelName = 0x0101
 
+/// MELSEC 디바이스 접근 타입 (비트/워드)
+[<RequireQualifiedAccess>]
 type DeviceAccessType =
     | Bit = 0
     | Word = 1
 
-module MelsecProtocolCore = 
-    
+/// MELSEC 디바이스 이름 매핑
+module MelsecProtocolCore =
+
     let deviceMap =
         dict [
             "M", PlcDeviceType.M

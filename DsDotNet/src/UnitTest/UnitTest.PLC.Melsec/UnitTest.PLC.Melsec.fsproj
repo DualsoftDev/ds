@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <Compile Include="MxTagParserTests.fs" />
+        <Compile Include="MxTagCommTest.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
@@ -29,7 +30,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.Common.FS\Dual.PLC.Common.FS.fsproj" />
-      <ProjectReference Include="..\..\..\nuget\PLC\Dual.PLC.Melsec.MXCom.FS\Dual.PLC.Melsec.MXCom.FS.fsproj" />
+      <ProjectReference Include="..\..\PLC\DriverIO\MelecProtocol\PLC.MelecProtocol.FS.fsproj" />
     </ItemGroup>
 
     <ItemGroup>

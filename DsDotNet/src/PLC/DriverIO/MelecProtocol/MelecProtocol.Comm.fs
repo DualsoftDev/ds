@@ -3,8 +3,14 @@ namespace MelsecProtocol
 open System
 open System.IO
 open System.Net.Sockets
+open System.Collections.Generic
+open System.Text
+open System.Text.RegularExpressions
+open Dual.PLC.Common.FS
 
-// Ethernet 단순 통신 래퍼
+/// MELSEC Ethernet 통신 구현
+/// 3E Frame 기반, Word/Bit, K포맷, 랜덤 DWord 읽기 지원
+
 type MxEthernet(ip: string, port: int, timeoutMs: int) =
     let client = new TcpClient()
     do
@@ -22,7 +28,7 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
         stream.Close()
         client.Close()
 
-    member private _.SendAndReceive(data: byte[]) : byte[] =
+    member _.SendAndReceive(data: byte[]) : byte[] =
         stream.Write(data, 0, data.Length)
         stream.Flush()
         use ms = new MemoryStream()
@@ -36,45 +42,69 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
         ms.ToArray()
 
     member private _.BuildHeader(dataLength: int) =
-        let list = ResizeArray<byte>()
-        list.AddRange([| 0x50uy; 0x00uy |]) // 3E Frame
-        list.AddRange([| 0x00uy; 0xFFuy; 0xFFuy; 0x03uy; 0x00uy |])
-        list.AddRange(BitConverter.GetBytes(uint16 dataLength))
-        list.AddRange(BitConverter.GetBytes(uint16 0x0010)) // CPU Timer
-        list
+        let header = ResizeArray<byte>()
+        header.AddRange([| 0x50uy; 0x00uy |])
+        header.AddRange([| 0x00uy; 0xFFuy; 0xFFuy; 0x03uy; 0x00uy |])
+        header.AddRange(BitConverter.GetBytes(uint16 dataLength))
+        header.AddRange(BitConverter.GetBytes(uint16 0x0010))
+        header
 
-    /// 디바이스 문자열 → 디바이스 코드 byte
-    member private _. GetDeviceCode (device: string) : byte =
+    member _.GetDeviceCode(device: string) : byte =
         match MelsecProtocolCore.deviceMap.TryGetValue(device.ToUpper()) with
         | true, dev -> byte dev
         | _ -> raise (ArgumentException($"Unsupported device: {device}"))
 
-    member private this.BuildReadCommand(device: string, address: int, count: uint16) =
-        let header = this.BuildHeader(12)
-        header.AddRange([| 0x01uy; 0x04uy |]) // Command: batch read
-        header.AddRange([| 0x00uy; 0x00uy |]) // Subcommand
-        header.AddRange(BitConverter.GetBytes(address &&& 0xFFFFFF).[0..2])
-        header.Add(this.GetDeviceCode(device))
-        header.AddRange(BitConverter.GetBytes(count))
-        header.ToArray()
-
     member this.ReadWords(device: string, address: int, count: uint16) =
-        let cmd = this.BuildReadCommand(device, address, count)
+        let cmd =
+            let hdr = this.BuildHeader(12)
+            hdr.AddRange([| 0x01uy; 0x04uy; 0x00uy; 0x00uy |])
+            hdr.AddRange(BitConverter.GetBytes(uint32 address).[0..2])
+            hdr.Add(this.GetDeviceCode(device))
+            hdr.AddRange(BitConverter.GetBytes(count))
+            hdr.ToArray()
         let res = this.SendAndReceive(cmd)
         if res.Length < 11 then failwith "Invalid response"
         let data = res.[11..]
         Array.init (int count) (fun i -> BitConverter.ToInt16(data, i * 2) |> int)
 
     member this.WriteWord(device: string, startAddr: int, values: int[]) =
-        let wordCount = values.Length
-        let header = this.BuildHeader(12 + wordCount * 2)
-        header.AddRange([| 0x01uy; 0x14uy |]) // Command: batch write
-        header.AddRange([| 0x00uy; 0x00uy |])
-        header.AddRange(BitConverter.GetBytes(startAddr).[0..2])
-        header.Add(this.GetDeviceCode(device))
-        header.AddRange(BitConverter.GetBytes(uint16 wordCount))
-        for v in values do
-            header.AddRange(BitConverter.GetBytes(int16 v))
-        let res = this.SendAndReceive(header.ToArray())
+        let wordBytes = values |> Array.collect (fun x -> BitConverter.GetBytes(int16 x))
+        let cmd =
+            let count = uint16 (wordBytes.Length / 2)
+            let hdr = this.BuildHeader(12 + wordBytes.Length)
+            hdr.AddRange([| 0x01uy; 0x14uy; 0x00uy; 0x00uy |])
+            hdr.AddRange(BitConverter.GetBytes(uint32 startAddr).[0..2])
+            hdr.Add(this.GetDeviceCode(device))
+            hdr.AddRange(BitConverter.GetBytes(count))
+            hdr.AddRange(wordBytes)
+            hdr.ToArray()
+        let res = this.SendAndReceive(cmd)
         if res.[9] <> 0uy || res.[10] <> 0uy then failwith "Write error"
-        ()
+
+    member this.ReadBits(device: string, address: int, count: uint16) =
+        let cmd =
+            let hdr = this.BuildHeader(12)
+            hdr.AddRange([| 0x01uy; 0x04uy; 0x01uy; 0x00uy |])
+            hdr.AddRange(BitConverter.GetBytes(uint32 address).[0..2])
+            hdr.Add(this.GetDeviceCode(device))
+            hdr.AddRange(BitConverter.GetBytes(count))
+            hdr.ToArray()
+        let res = this.SendAndReceive(cmd)
+        if res.Length < 11 then failwith "Invalid response"
+        let data = res.[11..]
+        Array.init (int count) (fun i -> int (data.[i] &&& 0x01uy))
+
+    member this.WriteBits(device: string, address: int, values: int[]) =
+        let bitBytes = values |> Array.map (fun x -> if x <> 0 then 0x10uy else 0x00uy)
+        let cmd =
+            let count = uint16 bitBytes.Length
+            let hdr = this.BuildHeader(12 + bitBytes.Length)
+            hdr.AddRange([| 0x01uy; 0x14uy; 0x01uy; 0x00uy |])
+            hdr.AddRange(BitConverter.GetBytes(uint32 address).[0..2])
+            hdr.Add(this.GetDeviceCode(device))
+            hdr.AddRange(BitConverter.GetBytes(count))
+            hdr.AddRange(bitBytes)
+            hdr.ToArray()
+        let res = this.SendAndReceive(cmd)
+        if res.[9] <> 0uy || res.[10] <> 0uy then failwith "Bit write error"
+

@@ -4,6 +4,7 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
+/// MELSEC PLC 스캔 구현 (DWord 랜덤 읽기 최적화 기반)
 type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) =
     inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
 
@@ -13,7 +14,6 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
     let notifiedOnce = HashSet<DWBatch>()
     let tagMap = Dictionary<ScanAddress, PlcTagBase>()
 
-    // 연결 상태
     override _.Connect() =
         try
             base.TriggerConnectChanged { Ip = ip; State = Connected }
@@ -25,19 +25,20 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
         connection.Close()
         base.TriggerConnectChanged { Ip = ip; State = Disconnected }
 
-    override _.IsConnected = true // 실제 연결 상태 체크 필요시 확장 가능
+    override _.IsConnected = true
 
     override _.WriteTags() =
         tags
         |> Array.filter (fun tag -> tag.GetWriteValue().IsSome)
         |> Array.groupBy (fun tag -> tag.DeviceCode)
         |> Array.iter (fun (deviceCode, group) ->
-            // 같은 디바이스에서 연속된 BitOffset을 묶어서 한 번에 전송
             group
             |> Array.sortBy (fun t -> t.BitOffset)
-            |> Seq.chunkBySize 10 // 연속 쓰기를 위해 최대 10개씩 묶기
+            |> Seq.chunkBySize 10
             |> Seq.iter (fun chunk ->
-                let start = chunk[0].BitOffset
+                let isBit = chunk[0].IsBit || chunk[0].IsDotBit || chunk[0].IsKFormat
+                let start = if isBit then chunk[0].BitOffset else chunk[0].BitOffset / 16
+
                 let values =
                     chunk
                     |> Array.map (fun tag ->
@@ -48,55 +49,64 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
                         | Some v -> failwith $"지원되지 않는 값 타입: {v.GetType().Name}"
                         | None -> 0)
 
-                connection.WriteWord(deviceCode, start, values)
+                if isBit then
+                    connection.WriteBits(deviceCode, start, values)
+                else
+                    connection.WriteWord(deviceCode, start, values)
+
                 chunk |> Array.iter (fun tag -> tag.ClearWriteValue())
             )
         )
 
-
-    // 태그 읽기
     override _.ReadTags() =
         for batch in batches do
             try
                 let deviceCode = batch.Tags[0].DeviceCode
-                let offsets = batch.Tags |> Array.map (fun t -> t.BitOffset)
-                let start = Array.min offsets
-                let stop = Array.max offsets
-                let count = (stop - start) / 16 + 1 |> uint16
+                let start = batch.Tags |> Array.minBy (fun t -> t.BitOffset) |> fun t -> t.BitOffset
+                let stop = batch.Tags |> Array.maxBy (fun t -> t.BitOffset) |> fun t -> t.BitOffset
+                let count = ((stop - start) / 16 + 1) |> uint16
 
                 let rawWords = connection.ReadWords(deviceCode, start, count)
-                let buffer = rawWords |> Array.collect (fun w -> BitConverter.GetBytes(uint16 w))
+                let buffer = rawWords |> Array.collect BitConverter.GetBytes
                 Array.Copy(buffer, batch.Buffer, min buffer.Length batch.Buffer.Length)
 
                 for tag in batch.Tags do
                     if tag.UpdateValue(batch.Buffer) then
                         base.TriggerTagChanged { Ip = ip; Tag = tag }
 
-                // 최초 알림 1회
                 notifiedOnce.Add(batch) |> ignore
 
             with ex ->
                 eprintfn $"[⚠️ MELSEC Read 실패] {ip}: {ex.Message}"
 
-    // 태그 파싱 및 배치 구성
+
+    //override _.ReadTags() =
+    //    try
+    //        let buffer = connection.ReadDWordRandom(batches)
+
+    //        for batch in batches do
+    //            Array.Copy(buffer, 0, batch.Buffer, 0, min buffer.Length batch.Buffer.Length)
+
+    //            for tag in batch.Tags do
+    //                if tag.UpdateValue(batch.Buffer) then
+    //                    base.TriggerTagChanged { Ip = ip; Tag = tag }
+
+    //            notifiedOnce.Add(batch) |> ignore
+
+    //    with ex ->
+    //        eprintfn "[⚠️ MELSEC Read 실패] %s: %s" ip ex.Message
+
     override _.PrepareTags(tagsInput: TagInfo seq) =
         tagMap.Clear()
-
-        let isValid = MelsecDevice.IsMelsecAddress
-
         let parsed =
             tagsInput
             |> Seq.distinct
             |> Seq.choose (fun tagInfo ->
-                if isValid tagInfo.Address then
-                    let _, offset, _ = MelsecDevice.Parsing(tagInfo.Address)
-                    let tag = MelsecTag(tagInfo.Name, tagInfo.Address, PlcDataSizeType.Boolean, offset, tagInfo.Comment)
+                match MxTagParser.TryParseToMxTag(tagInfo) with
+                | Some tag ->
                     tagMap.[tagInfo.Address] <- tag
                     Some tag
-                else
-                    printfn $"[⚠️ 파싱 무시됨] {tagInfo.Name} ({tagInfo.Address})"
-                    None
-            )
+                | None -> None)
             |> Seq.toArray
 
         tags <- parsed

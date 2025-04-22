@@ -25,8 +25,11 @@ module ConvertMitsubishiModule =
                 | _ -> TerminalType.Empty
 
             if terminalType <> TerminalType.Empty then
-                let tag = MelsecTag(name, name, PlcDataSizeType.Boolean, 0, comment)
-                Some (PlcTerminal(tag, terminalType))
+                match MxDeviceInfo.Create(name) with
+                | Some mxInfo ->
+                    let tag = MelsecTag(name, mxInfo, comment)
+                    Some (PlcTerminal(tag, terminalType))
+                |  None -> None
             else None
         | _ -> None
 
@@ -49,7 +52,12 @@ module ConvertMitsubishiModule =
 
         let tags =
             comments 
-            |> Seq.map (fun kv -> MelsecTag(kv.Value, kv.Key, PlcDataSizeType.Boolean, 0, kv.Value) ) 
+            |> Seq.map (fun kv -> 
+                match MxDeviceInfo.Create(kv.Key) with
+                | Some mxInfo ->
+                    MelsecTag(kv.Value, mxInfo,  kv.Value)
+                |  None -> failwith $"지원하지 않는 디바이스: {kv.Key}"
+                )
             |> Seq.toArray
 
         networks, tags

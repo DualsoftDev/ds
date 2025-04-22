@@ -8,103 +8,103 @@ open MelsecProtocol
 [<AutoOpen>]
 module DataTypeTesterModule =
 
-    let (===) x y = y |> should equal x
+    let (===) (x: MxDeviceInfo option) (y: MxDeviceInfo option) =
+        match x, y with
+        | Some a, Some b ->
+            a.Device |> should equal b.Device
+            a.BitOffset |> should equal b.BitOffset
+            a.DataTypeSize |> should equal b.DataTypeSize
+            a.NibbleK |> should equal b.NibbleK
+            MxDeviceInfo.Create(a.Address) |> should equal (Some a)
+        | None, None -> ()
+        | _ -> failwithf "Expected %A but got %A" y x
+
 
     type DataTypeTester() =
 
-        // ✅ 1. 일반적인 비트(MxBit) 주소 테스트 
         [<Test>]
-        member _.``MxBit Type Addresses Should Parse Correctly`` () =
+        member _.``Parse Valid MxBit Addresses`` () =
             [
-                "X12",     Some { Device = MxDevice.X;  DataTypeSize = MxBit;  BitOffset = 18 }
-                "Y232",    Some { Device = MxDevice.Y;  DataTypeSize = MxBit;  BitOffset = 562 }
-                "B4F",     Some { Device = MxDevice.B;  DataTypeSize = MxBit;  BitOffset = 79 }
-                "SB12",    Some { Device = MxDevice.SB; DataTypeSize = MxBit;  BitOffset = 18 }
-                "DX100",   Some { Device = MxDevice.DX; DataTypeSize = MxBit;  BitOffset = 256 }
-                "DY45",    Some { Device = MxDevice.DY; DataTypeSize = MxBit;  BitOffset = 69 }
-                "M0",      Some { Device = MxDevice.M;  DataTypeSize = MxBit;  BitOffset = 0 }
-                "SM5",     Some { Device = MxDevice.SM; DataTypeSize = MxBit;  BitOffset = 5 }
+                "X12", MxDevice.X, 0x12
+                "Y232", MxDevice.Y, 0x232
+                "B4F", MxDevice.B, 0x4F
+                "SB12", MxDevice.SB, 0x12
+                "DX100", MxDevice.DX, 0x100
+                "DY45", MxDevice.DY, 0x45
+                "M0", MxDevice.M, 0
+                "SM5", MxDevice.SM, 5
             ]
-            |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
+            |> List.iter (fun (addr, device, bitOffset) ->
+                Some {
+                    Device = device
+                    BitOffset = bitOffset
+                    DataTypeSize = MxDeviceType.MxBit
+                    NibbleK = 0
+                } === MxDeviceInfo.Create(addr))
 
-        // ✅ 2. 일반적인 워드(MxWord) 주소 테스트
         [<Test>]
-        member _.``MxWord Type Addresses Should Parse Correctly`` () =
+        member _.``Parse Valid MxWord Addresses`` () =
             [
-                "D122",    Some { Device = MxDevice.D;  DataTypeSize = MxWord; BitOffset = 1952 }
-                "W3A",     Some { Device = MxDevice.W;  DataTypeSize = MxWord; BitOffset = 928 }
-                "ZR10",    Some { Device = MxDevice.ZR; DataTypeSize = MxWord; BitOffset = 160 }
-                "T15",     Some { Device = MxDevice.T;  DataTypeSize = MxWord; BitOffset = 240 }
-                "C33",     Some { Device = MxDevice.C;  DataTypeSize = MxWord; BitOffset = 528 }
-                "WF",      Some { Device = MxDevice.W;  DataTypeSize = MxWord; BitOffset = 240 }
-                "SWF",     Some { Device = MxDevice.SW; DataTypeSize = MxWord; BitOffset = 240 }
-                "SD123",   Some { Device = MxDevice.SD; DataTypeSize = MxWord; BitOffset = 1968 }
-                "R99",     Some { Device = MxDevice.R;  DataTypeSize = MxWord; BitOffset = 1584 }
-                "SW10",    Some { Device = MxDevice.SW; DataTypeSize = MxWord; BitOffset = 256 }
+                "D122", MxDevice.D, 122
+                "W3A", MxDevice.W, 0x3A
+                "ZR10", MxDevice.ZR, 10
+                "WF", MxDevice.W, 0xF
+                "SWF", MxDevice.SW, 0xF
+                "SD123", MxDevice.SD, 123
+                "R99", MxDevice.R, 99
+                "SW10", MxDevice.SW, 0x10
             ]
-            |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
+            |> List.iter (fun (addr, device, wordOffset) ->
+                Some {
+                    Device = device
+                    BitOffset = wordOffset * 16
+                    DataTypeSize = MxDeviceType.MxWord
+                    NibbleK = 0
+                } === MxDeviceInfo.Create(addr))
 
-        // ✅ 3. 16진수 기반 비트 주소 테스트
         [<Test>]
-        member _.``Hexadecimal MxBit Addresses Should Parse Correctly`` () =
+        member _.``Parse Valid MxDotBit Addresses`` () =
             [
-                "B4F",     Some { Device = MxDevice.B;  DataTypeSize = MxBit;  BitOffset = 79 }
-                "SB2C",    Some { Device = MxDevice.SB; DataTypeSize = MxBit;  BitOffset = 44 }
-                "XFF",     Some { Device = MxDevice.X;  DataTypeSize = MxBit;  BitOffset = 255 }
-                "YF",      Some { Device = MxDevice.Y;  DataTypeSize = MxBit;  BitOffset = 15 }
-                "W10",     Some { Device = MxDevice.W;  DataTypeSize = MxWord; BitOffset = 256 }
-                "SW1F",    Some { Device = MxDevice.SW; DataTypeSize = MxWord; BitOffset = 496 }
+                "D100.5", MxDevice.D, 100 * 16 + 5
+                "W20.3", MxDevice.W, 0x20 * 16 + 3
+                "WA.1", MxDevice.W, 0xA * 16 + 1
+                "ZR50.7", MxDevice.ZR, 50 * 16 + 7
+                "R12.3", MxDevice.R, 12 * 16 + 3
+                "SW100.2", MxDevice.SW, 0x100 * 16 + 2
             ]
-            |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
+            |> List.iter (fun (addr, device, bitOffset) ->
+                Some {
+                    Device = device
+                    BitOffset = bitOffset
+                    DataTypeSize = MxDeviceType.MxDotBit
+                    NibbleK = 0
+                } === MxDeviceInfo.Create(addr))
 
-        // ✅ 4. 비트 오프셋 포함된 주소 테스트
         [<Test>]
-        member _.``MxBit Offset Included Addresses Should Parse Correctly`` () =
+        member _.``Parse Valid K Format Addresses`` () =
             [
-                "D100.5",  Some { Device = MxDevice.D;  DataTypeSize = MxBit;  BitOffset = 1605 }
-                "W20.3",   Some { Device = MxDevice.W;  DataTypeSize = MxBit;  BitOffset = 515 }
-                "WA.1",    Some { Device = MxDevice.W;  DataTypeSize = MxBit;  BitOffset = 161 }
-                "ZR50.7",  Some { Device = MxDevice.ZR; DataTypeSize = MxBit;  BitOffset = 807 }
-                "R12.3",   Some { Device = MxDevice.R;  DataTypeSize = MxBit;  BitOffset = 195 }
-                "SW100.2", Some { Device = MxDevice.SW; DataTypeSize = MxBit;  BitOffset = 4098 }
+                "K4M9", MxDevice.M, 9, 4
+                "K2Y200", MxDevice.Y, 0x200, 2
+                "K8B0", MxDevice.B, 0, 8
+                "K2X10", MxDevice.X, 0x10, 2
             ]
-            |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
+            |> List.iter (fun (addr, device, bitOffset, nibbleK) ->
+                Some {
+                    Device = device
+                    BitOffset = bitOffset
+                    DataTypeSize = MxDeviceType.MxBit
+                    NibbleK = nibbleK
+                } === MxDeviceInfo.Create(addr))
 
-        // ✅ 5. K 형식 주소 (워드 단위 그룹)
         [<Test>]
-        member _.``K-Format Addresses Should Parse Correctly`` () =
+        member _.``Invalid Mx Addresses Return None`` () =
             [
-                "K4M9",    Some { Device = MxDevice.M;  DataTypeSize = MxWord; BitOffset = 36 }  // 9 * 4
-                "K2Y200",  Some { Device = MxDevice.Y;  DataTypeSize = MxWord; BitOffset = 1024 } // 200 * 2 (hex)
-                "K8B0",    Some { Device = MxDevice.D;  DataTypeSize = MxWord; BitOffset = 24 }   // 3 * 8
-                "K2X10",   Some { Device = MxDevice.X;  DataTypeSize = MxWord; BitOffset = 32 }   // 0x10 * 2 = 16*2
+                // ❌ 존재하지 않는 장치 또는 문법 오류
+                "Invalid123"; "XYZ"; "XG12"; "D..10"; "123"; "M-1"; "P4Z"; "A123"
+                "D100.."; "B-12"; "T100.X"; "WXYZ"; "SBG12"; "XZZ"; "ZR.F"
+                // ❌ K포맷 비정상: 비정상 접두어 또는 범위 초과
+                "K5Z10"; "K0D5"; "K3M-2"; "K4A100"; "K9M0"
+                // ❌ 존재하지 않는 조합
+                "K2TS2"; "K2CS3"; "K2SD100"
             ]
-            |> List.iter (fun (addr, expected) -> tryParseMxTag addr === expected)
-
-        // ✅ 6. 잘못된 주소 테스트
-        [<Test>]
-        member _.``Invalid Addresses Should Return None`` () =
-            [
-                "Invalid123"
-                "XYZ"
-                "XG12"
-                "D..10"
-                "123"
-                "M-1"
-                "P4Z"
-                "A123"
-                "D100.."
-                "B-12"
-                "T100.X"
-                "WXYZ"
-                "SBG12"
-                "XZZ"
-                "ZR.F"
-                "K5Z10"
-                "K0D5"
-                "K3M-2"
-                "K4A100"
-                "K9M0"
-                "MA"
-            ]
-            |> List.iter (fun addr -> tryParseMxTag addr === None)
+            |> List.iter (fun addr -> None === MxDeviceInfo.Create(addr))

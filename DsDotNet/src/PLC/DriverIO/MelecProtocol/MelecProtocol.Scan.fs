@@ -36,7 +36,7 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
             |> Array.sortBy (fun t -> t.BitOffset)
             |> Seq.chunkBySize 10
             |> Seq.iter (fun chunk ->
-                let isBit = chunk[0].IsBit || chunk[0].IsDotBit || chunk[0].IsKFormat
+                let isBit = chunk[0].IsBit 
                 let start = if isBit then chunk[0].BitOffset else chunk[0].BitOffset / 16
 
                 let values =

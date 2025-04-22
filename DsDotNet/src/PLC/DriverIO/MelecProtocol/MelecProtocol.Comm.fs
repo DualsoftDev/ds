@@ -50,8 +50,8 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
         header
 
     member _.GetDeviceCode(device: string) : byte =
-        match MelsecProtocolCore.deviceMap.TryGetValue(device.ToUpper()) with
-        | true, dev -> byte dev
+        match MxDevice.Create(device) with
+        | Some v -> byte v
         | _ -> raise (ArgumentException($"Unsupported device: {device}"))
 
     member this.ReadWords(device: string, address: int, count: uint16) =
@@ -107,4 +107,3 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
             hdr.ToArray()
         let res = this.SendAndReceive(cmd)
         if res.[9] <> 0uy || res.[10] <> 0uy then failwith "Bit write error"
-

@@ -44,13 +44,7 @@ module DsOpcUaServerManager =
         | None ->
             printfn "서버가 실행 중이 아닙니다."
 
-    let DeleteStatisticsFile(systemName:string) =
-        let filePath = Path.Combine(fromServerConfig "StatisticsFilePath", $"{systemName}.json")
-        if File.Exists filePath
-        then 
-            File.Delete filePath
 
-        filePath
 
     /// <summary>
     /// OPC UA 서버 시작

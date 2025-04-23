@@ -9,7 +9,8 @@
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-		<UseNugetProjectReference Condition="'$(UseNugetProjectReference)' == ''">false</UseNugetProjectReference>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
     <ItemGroup>

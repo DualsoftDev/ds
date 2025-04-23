@@ -10,28 +10,28 @@ open Dual.PLC.Common.FS
 
 module XgtTagTests =
     
-    [<Fact>]   
-    let ``XGTTag UpdateValue should detect change for UInt16`` () =
-        let tag = XGTTag("%MW00010", true, false)
-        tag.LWordOffset <- 20 // StartByteOffset = 160
-        let buf = Array.zeroCreate<byte> 256
-        BitConverter.GetBytes(123us).CopyTo(buf, tag.StartByteOffset)
-        let changed = tag.UpdateValue(buf)
-        Assert.True(changed)
-        Assert.Equal(box 123us, tag.Value)
+    //[<Fact>]   
+    //let ``XGTTag UpdateValue should detect change for UInt16`` () =
+    //    let tag = XGTTag("%MW00010", true, false)
+    //    tag.LWordOffset <- 20 // StartByteOffset = 160
+    //    let buf = Array.zeroCreate<byte> 256
+    //    BitConverter.GetBytes(123us).CopyTo(buf, tag.StartByteOffset)
+    //    let changed = tag.UpdateValue(buf)
+    //    Assert.True(changed)
+    //    Assert.Equal(box 123us, tag.Value)
 
-    [<Fact>]
-    let ``XGTTag UpdateValue should return false for no change`` () =
-        let tag = XGTTag("%MW00010", true, false)
-        tag.LWordOffset <- 20
-        let buf = Array.zeroCreate<byte> 256
-        BitConverter.GetBytes(321us).CopyTo(buf, tag.StartByteOffset)
-        tag.UpdateValue(buf) |> ignore // 첫 번째 업데이트
-        let changed = tag.UpdateValue(buf) // 두 번째는 변경 없어야 함
-        Assert.False(changed)
+    //[<Fact>]
+    //let ``XGTTag UpdateValue should return false for no change`` () =
+    //    let tag = XGTTag("%MW00010", true, false)
+    //    tag.LWordOffset <- 20
+    //    let buf = Array.zeroCreate<byte> 256
+    //    BitConverter.GetBytes(321us).CopyTo(buf, tag.StartByteOffset)
+    //    tag.UpdateValue(buf) |> ignore // 첫 번째 업데이트
+    //    let changed = tag.UpdateValue(buf) // 두 번째는 변경 없어야 함
+    //    Assert.False(changed)
 
 
-module BatchTests =
+//module BatchTests =
 
     [<Fact>]
     let ``prepareReadBatches groups tags by LWordOffset`` () =

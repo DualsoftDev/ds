@@ -19,6 +19,7 @@
 		<Compile Include="Property\DsPropertyUtils.fs" />
 		<Compile Include="Property\DsPropertyBase.fs" />
 		<Compile Include="RuntimeModel.fs" />
+		<Compile Include="RuntimeDSPServer.fs" />
 		<Compile Include="Property\DsProperty.fs" />
 		<Compile Include="Property\DsPropertyTree.fs" />
 		<Compile Include="Program.fs" />

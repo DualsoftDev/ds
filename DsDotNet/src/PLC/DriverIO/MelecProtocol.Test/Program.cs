@@ -10,18 +10,19 @@ class Program
     {
         const int delay = 20;         // 스캔 주기 (ms)
         const int timeout = 2000;      // 통신 타임아웃 (ms)
-        const bool isMonitorOnly = true;
+        const bool isMonitorOnly = false;
         const string plcIp = "192.168.9.109";  // 실제 MELSEC PLC IP 주소
 
         var scanMgr = new MxScanManager(delay, timeout, isMonitorOnly);
         var scanner = scanMgr.CreateScanner(plcIp);
 
         // 테스트 태그 구성
-        const int count = 1024;
+        const int count = 5;
 
-        string[] bitDeviceTypes = { };//{ "X", "Y", "M", "L", "B", "SM", "SB", "DX", "DY", "F", "Z", "V" };
-        string[] wordDeviceTypes = { /*"D", "W",*/ "T", "C" };//, "SD", "SW" };
-
+        //string[] bitDeviceTypes = { "M", "L", "X", "Y", "B", "DX", "DY", "F" };
+        //string[] wordDeviceTypes = { "T", "D", "W", "C" };
+        string[] bitDeviceTypes = { "L" };
+        string[] wordDeviceTypes = { "D" };
 
         var tags = new List<TagInfo>();
 
@@ -56,22 +57,42 @@ class Program
 
         scanner.TagValueChangedNotify += (s, e) =>
         {
-            Console.WriteLine($"📡 [PLC {e.Ip}] {e.Tag.Name} ({e.Tag.Address}) = {e.Tag.Value}");
+            Console.WriteLine($" [PLC {e.Ip}] {e.Tag.Name} ({e.Tag.Address}) = {e.Tag.Value}");
         };
 
         scanner.ConnectChangedNotify += (s, e) =>
         {
-            Console.WriteLine($"🔌 [PLC {e.Ip}] 연결 상태 변경: {e.State}");
+            Console.WriteLine($" [PLC {e.Ip}] 연결 상태 변경: {e.State}");
         };
 
-        Console.WriteLine("⏳ MELSEC PLC 스캔 시작 중...");
+        Console.WriteLine(" MELSEC PLC 스캔 시작 중...");
         scanner.Connect();
-        scanner.Scan(tags);
 
-        Console.WriteLine("▶ 스캔 중입니다. 종료하려면 아무 키나 누르세요...");
+        var xgTags =  scanner.Scan(tags);
+            Thread.Sleep(100);
+        while (scanner.IsScanning)
+        {
+            Thread.Sleep(1);
+            foreach (var tag in xgTags.Values)
+            {
+                if (tag.Value is bool b)
+                {
+                    tag.SetWriteValue(!b);
+                }
+                else if (tag.Value is UInt16 i)
+                {
+                    tag.SetWriteValue(i + 1);
+                }
+                else 
+                {
+                }
+            }
+        }
+
+        Console.WriteLine(" 스캔 중입니다. 종료하려면 아무 키나 누르세요...");
         Console.ReadKey();
 
-        Console.WriteLine("⛔ 스캔 종료 중...");
+        Console.WriteLine(" 스캔 종료 중...");
         scanner.StopScan();
         scanner.Disconnect();
     }

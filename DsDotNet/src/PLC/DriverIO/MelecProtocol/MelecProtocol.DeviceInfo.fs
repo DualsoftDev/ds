@@ -98,7 +98,7 @@ type MxDeviceInfo =
 
             | RegexPattern @"^(X|Y|B|W)([0-9A-F]+)$" [device; d1]
             | RegexPattern @"^(M|L|F|Z|V|D|R|T|C)(\d+)$" [device; d1]
-            | RegexPattern @"^(ZR|ST|SM|SD)(\d+)$" [device; d1]
+            | RegexPattern @"^(ZR|ST|SM|SD|TN|CN)(\d+)$" [device; d1]
             | RegexPattern @"^(SW|SB|DX|DY)([0-9A-F]+)$" [device; d1] ->
                 getRecord(device, d1, None)
             | _ -> None

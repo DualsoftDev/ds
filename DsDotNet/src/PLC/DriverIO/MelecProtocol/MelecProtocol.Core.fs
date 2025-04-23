@@ -58,16 +58,15 @@ module MxDeviceExtensions =
         static member IsBit(device: MxDevice) : bool =
             match device with
             | MxDevice.X | MxDevice.Y | MxDevice.M | MxDevice.L | MxDevice.F
-            | MxDevice.B | MxDevice.SB | MxDevice.SM | MxDevice.DX | MxDevice.DY
-            | MxDevice.TS | MxDevice.CS -> true
+            | MxDevice.B | MxDevice.SB | MxDevice.SM | MxDevice.DX | MxDevice.DY-> true
             | _ -> false
 
         static member Create(head: string) : MxDevice option =
             let normalized =
                 head.ToUpperInvariant()
                 |> function
-                    | "T" -> "TS"
-                    | "C" -> "CS"
+                    | "T" -> "TN"
+                    | "C" -> "CN"
                     | x -> x
 
             match Enum.TryParse<MxDevice>(normalized, ignoreCase = true) with

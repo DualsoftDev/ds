@@ -27,37 +27,33 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
 
     override _.IsConnected = true
 
+    // ---------------------------
+    // 태그 쓰기
+    // ---------------------------
     override _.WriteTags() =
-        tags
-        |> Array.filter (fun tag -> tag.GetWriteValue().IsSome)
-        |> Array.groupBy (fun tag -> tag.DeviceCode.ToString())
-        |> Array.iter (fun (deviceCode, group) ->
-            group
-            |> Array.sortBy (fun t -> t.BitOffset)
-            |> Seq.chunkBySize 10
-            |> Seq.iter (fun chunk ->
-                let isBit = chunk[0].IsBit 
-                let start = if isBit then chunk[0].BitOffset else chunk[0].BitOffset / 16
-
+        for tag in tags do
+            match tag.GetWriteValue() with
+            | Some value ->
+                let deviceCode = tag.DeviceCode
+                let start = if tag.IsBit then tag.BitOffset else tag.BitOffset / 16
                 let values =
-                    chunk
-                    |> Array.map (fun tag ->
-                        match tag.GetWriteValue() with
-                        | Some (:? bool as b) -> if b then 1 else 0
-                        | Some (:? int16 as i) -> int i
-                        | Some (:? int as i) -> i
-                        | Some v -> failwith $"지원되지 않는 값 타입: {v.GetType().Name}"
-                        | None -> 0)
-
-                if isBit then
-                    connection.WriteBits(deviceCode, start, values)
+                    match value with
+                    | :? bool as b ->  if b then 1 else 0 
+                    | :? int16 as i -> int i 
+                    | :? int as i ->  i 
+                    | _ -> failwith $"지원되지 않는 값 타입: {value.GetType().Name}"
+                if tag.IsBit 
+                then 
+                    connection.WriteBit(deviceCode, start, values)
+                    //let a = connection.ReadBits(deviceCode, start, 1)
+                    //Console.WriteLine($" [PLC  {tag.Name} ({tag.Address}) = {tag.Value} ({a[0]})");
                 else
                     connection.WriteWord(deviceCode, start, values)
+                    //let a = connection.ReadWords(deviceCode, start, 1)
+                    //Console.WriteLine($" [PLC  {tag.Name} ({tag.Address}) = {tag.Value} ({a[0]})");
 
-                chunk |> Array.iter (fun tag -> tag.ClearWriteValue())
-            )
-        )
-
+                tag.ClearWriteValue()
+            | None -> ()
 
 
     override _.ReadTags() =

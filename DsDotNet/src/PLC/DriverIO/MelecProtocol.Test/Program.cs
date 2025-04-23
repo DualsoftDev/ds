@@ -17,10 +17,10 @@ class Program
         var scanner = scanMgr.CreateScanner(plcIp);
 
         // 테스트 태그 구성
-        const int count = 2;
+        const int count = 8192;
 
-        string[] bitDeviceTypes = { "X", "Y", "M", "L", "B", "SM", "SB", "DX", "DY", "F", "Z", "V" };
-        string[] wordDeviceTypes = { "D", "W", "R", "ZR", "T", "C", "SD", "SW" };
+        string[] bitDeviceTypes = { };//{ "X", "Y", "M", "L", "B", "SM", "SB", "DX", "DY", "F", "Z", "V" };
+        string[] wordDeviceTypes = { "W"};// , "W", "R", "ZR", "T", "C", "SD", "SW" };
 
         var tags = new List<TagInfo>();
 

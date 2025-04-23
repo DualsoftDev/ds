@@ -81,31 +81,6 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
 
     override x.CreateReadFrame(address: string, dataType: PlcDataSizeType) =
         x.CreateMultiReadFrame([| address |], dataType) 
-        //let device = address.Substring(1, 2)
-        //let addr = address.Substring(3).PadLeft(5, '0')
-        //let frame = Array.zeroCreate<byte> 38
-        //Array.Copy(Encoding.ASCII.GetBytes("LSIS-XGT"), 0, frame, 0, 8)
-        //frame.[12] <- 0xA0uy
-        //frame.[13] <- 0x33uy
-        //frame.[14] <- frameID
-        //frame.[16] <- 0x12uy
-        //frame.[20] <- 0x54uy
-        //frame.[22] <-
-        //    match dataType with
-        //    | Boolean -> 0x00uy
-        //    | Byte -> 0x01uy
-        //    | UInt16 -> 0x02uy
-        //    | UInt32 -> 0x03uy
-        //    | UInt64 -> 0x04uy
-        //    | _ -> failwithf $"지원하지 않는 데이터 타입입니다: {dataType}"
-        //frame.[26] <- 0x01uy
-        //frame.[28] <- 0x08uy
-        //frame.[30] <- byte '%'
-        //frame.[31] <- byte device.[0]
-        //frame.[32] <- byte device.[1]
-        //for i in 0..4 do
-        //    frame.[33 + i] <- byte addr.[i]
-        //frame
 
     override _.ParseMultiReadResponse(buffer: byte[], count: int, dataType: PlcDataSizeType, readBuffer: byte[]) =
         if buffer.Length < 32 then
@@ -134,7 +109,6 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
             Array.Copy(buffer, srcOffset, readBuffer, dstOffset, elementSizeBytes)
             dstOffset <- dstOffset + elementSizeBytes
             srcOffset <- srcOffset + 8         // fixed LWord data size
-
 
 
     override _.CreateWriteFrame(address: string, dataType: PlcDataSizeType, value: obj) =

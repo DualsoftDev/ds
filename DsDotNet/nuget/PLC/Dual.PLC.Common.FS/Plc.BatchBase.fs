@@ -20,8 +20,5 @@ type PlcBatchBase<'T when 'T :> PlcTagBase>(buffer: byte[], initialTags: 'T[]) =
     member this.SetTags(newTags: 'T[]) =
         tags <- Array.copy newTags
 
-    /// Batch 주소 - 일반적으로 첫 태그 기준으로 구함
-    abstract member BatchAddress: string
-
     /// 디버깅용 텍스트 - 디바이스별 최대 BitOffset 정보 요약
     abstract member BatchToText: unit -> string

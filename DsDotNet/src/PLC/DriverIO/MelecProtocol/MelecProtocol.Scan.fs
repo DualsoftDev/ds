@@ -30,7 +30,7 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
     override _.WriteTags() =
         tags
         |> Array.filter (fun tag -> tag.GetWriteValue().IsSome)
-        |> Array.groupBy (fun tag -> tag.DeviceCode)
+        |> Array.groupBy (fun tag -> tag.DeviceCode.ToString())
         |> Array.iter (fun (deviceCode, group) ->
             group
             |> Array.sortBy (fun t -> t.BitOffset)
@@ -58,44 +58,25 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
             )
         )
 
+
+
     override _.ReadTags() =
-        for batch in batches do
-            try
-                let deviceCode = batch.Tags[0].DeviceCode
-                let start = batch.Tags |> Array.minBy (fun t -> t.BitOffset) |> fun t -> t.BitOffset
-                let stop = batch.Tags |> Array.maxBy (fun t -> t.BitOffset) |> fun t -> t.BitOffset
-                let count = ((stop - start) / 16 + 1) |> uint16
+        try
+            for batch in batches do
+               
+                batch.Buffer <- connection.ReadDWordRandom(batch)
 
-                let rawWords = connection.ReadWords(deviceCode, start, count)
-                let buffer = rawWords |> Array.collect BitConverter.GetBytes
-                Array.Copy(buffer, batch.Buffer, min buffer.Length batch.Buffer.Length)
-
+                // 태그별 값 업데이트 및 변경 이벤트 발생
                 for tag in batch.Tags do
                     if tag.UpdateValue(batch.Buffer) then
                         base.TriggerTagChanged { Ip = ip; Tag = tag }
 
-                notifiedOnce.Add(batch) |> ignore
+                // 최초 읽기 알림만 등록
+                if notifiedOnce.Add(batch) then
+                    () // 추후 알림 로직 확장 여지
 
-            with ex ->
-                eprintfn $"[⚠️ MELSEC Read 실패
-                ] {ip}: {ex.Message}"
-
-
-    //override _.ReadTags() =
-    //    try
-    //        let buffer = connection.ReadDWordRandom(batches)
-
-    //        for batch in batches do
-    //            Array.Copy(buffer, 0, batch.Buffer, 0, min buffer.Length batch.Buffer.Length)
-
-    //            for tag in batch.Tags do
-    //                if tag.UpdateValue(batch.Buffer) then
-    //                    base.TriggerTagChanged { Ip = ip; Tag = tag }
-
-    //            notifiedOnce.Add(batch) |> ignore
-
-    //    with ex ->
-    //        eprintfn "[⚠️ MELSEC Read 실패] %s: %s" ip ex.Message
+        with ex ->
+            eprintfn "[⚠️ MELSEC Read 실패] %s: %s" ip ex.Message
 
     override _.PrepareTags(tagsInput: TagInfo seq) =
         tagMap.Clear()

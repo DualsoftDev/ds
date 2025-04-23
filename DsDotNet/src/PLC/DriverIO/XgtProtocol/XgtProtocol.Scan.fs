@@ -44,7 +44,7 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool)
             | None -> ()
 
 
-      override _.ReadTags() =
+    override _.ReadTags() =
         for batch in batches do
             try
                 // 중복 제거된 LWord 주소만 추출하여 읽기 요청

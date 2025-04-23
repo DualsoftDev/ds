@@ -64,7 +64,7 @@ module MxDeviceExtensions =
 
         static member Create(head: string) : MxDevice option =
             let normalized =
-                head.Trim().ToUpperInvariant()
+                head.ToUpperInvariant()
                 |> function
                     | "T" -> "TS"
                     | "C" -> "CS"

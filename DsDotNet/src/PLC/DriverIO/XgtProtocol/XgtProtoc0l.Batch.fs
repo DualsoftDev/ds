@@ -6,15 +6,10 @@ open Dual.PLC.Common.FS
 [<AutoOpen>]
 module Batch =
 
+    let [<Literal>] MaxBatchSize = 16
     /// LS (XGT) 전용 배치
     type LWBatch(buffer: byte[], tags: XGTTag[]) =
         inherit PlcBatchBase<XGTTag>(buffer, tags)
-
-        override this.BatchAddress =
-            if this.Tags.Length > 0 then
-                let tag = this.Tags.[0]
-                sprintf "%%%sL%d" tag.Device (tag.BitOffset / 64)
-            else ""
 
         override this.BatchToText() =
             this.Tags
@@ -28,7 +23,7 @@ module Batch =
     let prepareReadBatches (tagInfos: XGTTag[]) : LWBatch[] =
         tagInfos
         |> Array.groupBy (fun ti -> ti.LWordTag)
-        |> Array.chunkBySize 16
+        |> Array.chunkBySize MaxBatchSize
         |> Array.map (fun chunk ->
             let allTags = chunk |> Array.collect snd
             let buffer = Array.zeroCreate<byte> (chunk.Length * 8)

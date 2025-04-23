@@ -45,9 +45,6 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
         then bitOffset / step * 16
         else bitOffset
 
-    /// 시작 바이트 위치 (LWordOffset * 8 + 내부 오프셋)
-    member x.StartByteOffset = x.LWordOffset * 8 + (x.BitOffset % 64) / 8
-
     /// 메모리 타입 문자 (Bit → 'X', 그 외 → 'B')
     member _.MemType = if typeSize = 1 then 'X' else 'B'
     member x.GetAddressAlias(size:PlcDataSizeType) =
@@ -86,22 +83,25 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
             | _ -> true
 
 
-
     /// 버퍼 값을 읽어 현재 값으로 설정, 변경 여부 반환
     override x.UpdateValue(buffer: byte[]) : bool =
+        
+        /// 시작 바이트 위치 (LWordOffset * 8 + 내부 오프셋)
+        let startByteOffset = x.LWordOffset * 8 + (x.BitOffset % 64) / 8
+
         let newValue : obj =
             match x.DataType with
             | Boolean ->
                 if x.Device = "S" then
-                    let lw = BitConverter.ToUInt16(buffer, x.StartByteOffset) |> int
+                    let lw = BitConverter.ToUInt16(buffer, startByteOffset) |> int
                     (lw = (bitOffset % step)) :> obj
                 else
                     let lw = BitConverter.ToUInt64(buffer, x.LWordOffset * 8)
                     (lw &&& (1UL <<< (x.BitOffset % 64)) <> 0UL) :> obj
-            | Byte  -> buffer.[x.StartByteOffset] :> obj
-            | UInt16  -> BitConverter.ToUInt16(buffer, x.StartByteOffset) :> obj
-            | UInt32-> BitConverter.ToUInt32(buffer, x.StartByteOffset) :> obj
-            | UInt64-> BitConverter.ToUInt64(buffer, x.StartByteOffset) :> obj
+            | Byte  -> buffer.[startByteOffset] :> obj
+            | UInt16  -> BitConverter.ToUInt16(buffer, startByteOffset) :> obj
+            | UInt32-> BitConverter.ToUInt32(buffer  , startByteOffset) :> obj
+            | UInt64-> BitConverter.ToUInt64(buffer  , startByteOffset) :> obj
             | _-> failwith $"Unsupported data type: {x.DataType}"
 
         if base.Value <> newValue then

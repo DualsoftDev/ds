@@ -4,11 +4,11 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
-/// MELSEC 전용 배치 - 디지털 DWord 단위 최적화
+/// MELSEC 전용 배치 -  DWord 단위 최적화
 [<AutoOpen>]
 module Batch =
     let [<Literal>] MaxBatchSize = 192  // 구버전 ahn 96 ?????
-    /// 디지털 DWord 기준으로 구성된 MELSEC 배치
+    ///  DWord 기준으로 구성된 MELSEC 배치
     type DWBatch(buffer: byte[], tags: MelsecTag[]) =
         inherit PlcBatchBase<MelsecTag>(buffer, tags)
 

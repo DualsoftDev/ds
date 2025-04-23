@@ -14,6 +14,7 @@ module MapperDataModule =
         member this.Name = name
         member this.Address = address
         member this.OpcName = $"{name}_{address}" |> validStorageName
+        member val UsedPous = ResizeArray<string>() with get, set
 
     [<AllowNullLiteral>]
     type DeviceApi() =

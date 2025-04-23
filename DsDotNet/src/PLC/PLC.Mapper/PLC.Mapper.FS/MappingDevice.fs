@@ -105,7 +105,7 @@ module MappingDeviceModule =
                 Color = color
             ))
 
-    let extractGroupDeviceApis (mapperTags: MapperTag[]) (targetGroupCount: int) (userPairs: seq<string * MapperTag[]>) : DeviceApi[] =
+    let extractGroupDeviceApis (mapperTags: MapperTag[]) (targetGroupCount: int) (usingPouGroup:bool) (userPairs: seq<string * MapperTag[]>) : DeviceApi[] =
         if targetGroupCount = 0 then failwith "targetGroupCount 0 입니다."
         if mapperTags.Length = 0 then failwith "이름 리스트가 비어있습니다."
 
@@ -124,13 +124,30 @@ module MappingDeviceModule =
             |> Seq.concat
             |> Seq.toArray
 
+        let cache = ConcurrentDictionary<int, (string * MapperTag[])[]>()
+        let _dicMapperTag = Dictionary<string, MapperTag>()
+        let getUniqDevName (device: string, tag: MapperTag) =
+            if _dicMapperTag.ContainsKey(tag.Name) then
+                $"{device}({tag.Address})"
+            else
+                _dicMapperTag.Add(tag.Name, tag)
+                device
+
+
+
+
+
+
+
 
         let userGroupKeys = userGroupApis |> Array.map (fun d -> d.MapperTag.OpcName) |> Set.ofArray
-        let remainingTags = mapperTags |> Array.filter (fun tag -> not (userGroupKeys.Contains tag.OpcName))
-
+        let remainingTags = mapperTags
+                            |> Array.filter (fun tag -> 
+                                not (userGroupKeys.Contains tag.OpcName)
+                                || (usingPouGroup && tag.UsedPous.Count = 0)
+                            )
+                              
         let maxLen = remainingTags |> Array.maxBy (fun t -> t.Name.Length) |> fun t -> t.Name.Length
-        let cache = ConcurrentDictionary<int, (string * MapperTag[])[]>()
-
         let bestGroups =
             [|1 .. maxLen|]
             |> Array.Parallel.choose (fun len ->
@@ -140,16 +157,14 @@ module MappingDeviceModule =
                 if arr.Length = 0 then [| ("ALL", remainingTags) |]
                 else arr |> Array.minBy (fun g -> abs (g.Length - targetGroupCount))
 
-        let _dicMapperTag = Dictionary<string, MapperTag>()
-        let getUniqDevName (device: string, tag: MapperTag) =
-            if _dicMapperTag.ContainsKey(tag.Name) then
-                $"{device}({tag.Address})"
-            else
-                _dicMapperTag.Add(tag.Name, tag)
-                device
+        let groupByPou =
+            mapperTags |> Array.except remainingTags 
+            |> Array.groupBy (fun tag -> tag.UsedPous[0])     
+            
 
         let autoGroupApis =
-            bestGroups
+            bestGroups 
+            |> Array.append groupByPou
             |> Array.sortBy fst
             |> Array.mapi (fun idx (_grp, tags) ->
                 let hue = float ((idx + Seq.length userPairs) * 360 / targetGroupCount)

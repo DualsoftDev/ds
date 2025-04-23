@@ -99,8 +99,18 @@ module ConvertLSEModule =
             else 
                 addLine(line)
         
-   
-        networks.ToArray()
+           // addressTitles 생성: 주소 → 타이틀 리스트 매핑
+        let addressTitles =
+            networks
+            |> Seq.collect (fun net ->
+                net.Items
+                |> Seq.map (fun term -> term.Tag.Address, net.Title)
+            )
+            |> Seq.groupBy fst
+            |> Seq.map (fun (addr, entries) -> addr, entries |> Seq.map snd |> Seq.distinct |> List)
+            |> dict
+
+        networks.ToArray(), addressTitles
 
 
     let parseActionOutLSEFile (filePath: string) = XmlReader.ReadTags (filePath, false)

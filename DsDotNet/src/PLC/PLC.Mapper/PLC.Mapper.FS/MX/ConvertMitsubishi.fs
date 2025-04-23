@@ -19,7 +19,7 @@ module ConvertMitsubishiModule =
 
             let terminalType =
                 match programCSVLine.Instruction with
-                | il when il.StartsWith("OUT") -> TerminalType.Coil
+                | il when il.StartsWith("OUT") || il.StartsWith("SET") || il.StartsWith("RST") -> TerminalType.Coil
                 | il when il.StartsWith("ANI") || il.StartsWith("ORI") || il.StartsWith("LDI") -> TerminalType.ContactNegated
                 | il when il.StartsWith("AND") || il.StartsWith("OR") || il.StartsWith("LD") -> TerminalType.Contact
                 | _ -> TerminalType.Empty
@@ -33,32 +33,53 @@ module ConvertMitsubishiModule =
             else None
         | _ -> None
 
-    /// MELSEC Network 구조 생성
+
     let parseMXFile (files: string[]) =
         let (pous, comments, _) = CSVParser.parseCSVs(files)
-        let rungs = pous |> Array.collect (fun pou -> pou.Rungs)
 
+        // Networks 생성
         let networks =
-            rungs
-            |> Array.fold (fun acc rung ->
-                let content =
-                    rung
-                    |> Array.choose (fun line -> classifyContent line comments)
+            pous
+            |> Array.fold (fun acc pou ->
+                let pouNetworks =
+                    pou.Rungs
+                    |> Array.fold (fun accRung rung ->
+                        let content =
+                            rung
+                            |> Array.choose (fun line -> classifyContent line comments)
 
-                if content.Length > 0 then
-                    { Title = ""; Items = content } :: acc // <-- 명시적으로 Rung 생성
-                else acc
+                        if content.Length > 0 then
+                            { Title = pou.Name; Items = content } :: accRung
+                        else accRung
+                    ) []
+                pouNetworks @ acc
             ) []
 
+        // Tags 생성
         let tags =
             comments 
-            |> Seq.map (fun kv -> 
+            |> Seq.choose (fun kv -> 
                 match MxDeviceInfo.Create(kv.Key) with
                 | Some mxInfo ->
-                    MelsecTag(kv.Value, mxInfo,  kv.Value)
-                |  None -> failwith $"지원하지 않는 디바이스: {kv.Key}"
-                )
+                    MelsecTag(kv.Value, mxInfo, kv.Value) |> Some
+                | None -> None
+            )
             |> Seq.toArray
 
-        networks, tags
-        //networks |> List.rev |> List.toArray, comments
+        // addressTitles 생성: 주소 → 타이틀 리스트 매핑 (TerminalType.Coil만)
+        let addressTitles =
+            networks
+            |> Seq.collect (fun net ->
+                net.Items
+                |> Seq.choose (fun term ->
+                    if term.TerminalType = TerminalType.Coil then
+                        Some (term.Tag.Address, net.Title)
+                    else None
+                )
+            )
+            |> Seq.groupBy fst
+            |> Seq.map (fun (addr, entries) -> addr, entries |> Seq.map snd |> Seq.distinct |> List)
+            |> dict
+
+        networks, tags, addressTitles
+

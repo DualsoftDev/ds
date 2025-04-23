@@ -137,7 +137,6 @@ module ModelConfigModule =
         DsFilePath: string
         HwIP: string
         HwOPC : string
-        HwPath: string
         TagConfig : TagConfig   
         ExternalApi: ExternalApi
         RuntimeMode: RuntimeMode
@@ -155,7 +154,7 @@ module ModelConfigModule =
                 match x.HwTarget.HwIO with
                 | LS_XGI_IO -> x.HwIP
                 | LS_XGK_IO -> x.HwIP
-                | MELSEC_IO -> x.HwPath
+                | MELSEC_IO -> x.HwIP
                 | OPC_IO -> x.HwOPC
             let hwIOHwCPU = 
                 match x.HwCPU with
@@ -184,7 +183,6 @@ module ModelConfigModule =
             DsFilePath = ""
             HwIP = "127.0.0.1"
             HwOPC = "opc.tcp://127.0.0.1:2747"
-            HwPath = "0"
             TagConfig = createDefaultTagConfig()    
             ExternalApi = ExternalApi.OPC
             RuntimeMode = Simulation //unit test를 위해 Simulation으로 설정
@@ -196,7 +194,6 @@ module ModelConfigModule =
     let createModelConfig(path:string,
             hwIP:string, 
             hwOPC:string, 
-            hwPath:string,  
             tagConfig:TagConfig, 
             externalApi:ExternalApi, 
             runtimeMode:RuntimeMode,
@@ -207,7 +204,6 @@ module ModelConfigModule =
             DsFilePath = path
             HwIP = hwIP
             HwOPC = hwOPC
-            HwPath = hwPath
             TagConfig = tagConfig
             ExternalApi = externalApi
             RuntimeMode = runtimeMode

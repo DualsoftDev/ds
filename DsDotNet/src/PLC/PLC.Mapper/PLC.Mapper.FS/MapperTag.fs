@@ -15,7 +15,7 @@ module MapperTagModule =
         if String.IsNullOrWhiteSpace(txt) then
             failwith "Invalid name: empty or whitespace string"
         else
-            let pattern = @"[ \.\()\[\]]"
+            let pattern = @"[ `\-\.#:/\\()\[\]~<>""|?*]"
             let cleaned = Regex.Replace(txt, pattern, "_")
             let compressed = Regex.Replace(cleaned, "_{2,}", "_")
             let trimmed = compressed.Trim(SegmentSplit)

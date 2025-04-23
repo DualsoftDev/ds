@@ -69,7 +69,7 @@ type RealVertexTagManager with
                     v.RT.Expr
 
             (setOrExpr, rst) ==| (real.VR.RR, fn)              
-            (setNormal(* <||> setOrExpr*), rst) ==| (v.ET, fn)       //setOrExpr  2번시작시 자동END       
+            (setNormal <||> setOrExpr, rst) ==| (v.ET, fn)       //setOrExpr  2번시작시 자동END       
         |]
         
     member v.R3_RealStartPoint() =

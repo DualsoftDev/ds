@@ -26,7 +26,11 @@
         <Compile Include="MX\ConvertMitsubishi.fs" />
         <Compile Include="ColorUtil.fs" />
         <Compile Include="PrefixTrie.fs" />
+        <Compile Include="MappingUtils.fs" />
+        <Compile Include="MappingGroup.fs" />
         <Compile Include="MappingDevice.fs" />
+        <Compile Include="MappingApi.fs" />
+        <Compile Include="Mapping.fs" />
     </ItemGroup>
 
     <ItemGroup>

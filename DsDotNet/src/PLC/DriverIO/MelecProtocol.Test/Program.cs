@@ -18,7 +18,7 @@ class Program
 
         // 테스트 태그 구성
         //const int count = 0x1ff0;
-        const int count = 0x1f0;
+        const int count = 0x3f0;
 
         //string[] bitDeviceTypes = { "M", "L", "X", "Y", "B", "DX", "DY", "F" };
         //string[] wordDeviceTypes = { "T", "D", "W", "C" };

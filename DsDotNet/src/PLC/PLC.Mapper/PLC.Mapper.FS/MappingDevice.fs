@@ -135,50 +135,46 @@ module MappingDeviceModule =
 
 
 
-
-
-
-
-
         let userGroupKeys = userGroupApis |> Array.map (fun d -> d.MapperTag.OpcName) |> Set.ofArray
-        let remainingTags = mapperTags
-                            |> Array.filter (fun tag -> 
-                                not (userGroupKeys.Contains tag.OpcName)
-                                || (usingPouGroup && tag.UsedPous.Count = 0)
-                            )
+        let remainingTags = mapperTags |> Array.filter (fun tag -> not (userGroupKeys.Contains tag.OpcName))
                               
-        let maxLen = remainingTags |> Array.maxBy (fun t -> t.Name.Length) |> fun t -> t.Name.Length
         let bestGroups =
-            [|1 .. maxLen|]
-            |> Array.Parallel.choose (fun len ->
-                let result = cache.GetOrAdd(len, fun l -> groupByPrefixLength remainingTags l)
-                if result.Length <= targetGroupCount then Some result else None)
-            |> fun arr ->
-                if arr.Length = 0 then [| ("ALL", remainingTags) |]
-                else arr |> Array.minBy (fun g -> abs (g.Length - targetGroupCount))
+            if usingPouGroup
+            then
+                mapperTags  |> Array.filter (fun tag ->  tag.UsedPous.Count > 0)
+                |> Array.groupBy (fun tag -> tag.UsedPous[0])     
+            else 
+                let maxLen = remainingTags |> Array.maxBy (fun t -> t.Name.Length) |> fun t -> t.Name.Length
+                [|1 .. maxLen|]
+                |> Array.Parallel.choose (fun len ->
+                    let result = cache.GetOrAdd(len, fun l -> groupByPrefixLength remainingTags l)
+                    if result.Length <= targetGroupCount then Some result else None)
+                |> fun arr ->
+                    if arr.Length = 0 then [| ("ALL", remainingTags) |]
+                    else arr |> Array.minBy (fun g -> abs (g.Length - targetGroupCount))
 
-        let groupByPou =
-            mapperTags |> Array.except remainingTags 
-            |> Array.groupBy (fun tag -> tag.UsedPous[0])     
-            
+
 
         let autoGroupApis =
             bestGroups 
-            |> Array.append groupByPou
             |> Array.sortBy fst
-            |> Array.mapi (fun idx (_grp, tags) ->
+            |> Array.mapi (fun idx (grp, tags) ->
                 let hue = float ((idx + Seq.length userPairs) * 360 / targetGroupCount)
                 let color = (hsvToColor hue 0.7 0.9).ToArgb()
                 let tagList = tags |> Array.toList
                 let deviceCandidates = extractDevicePrefixes (tagList |> List.map (fun t -> t.Name))
                 let prefixTrie = deviceCandidates |> Array.map fst |> buildPrefixTrie
                 let deviceNames = tags |> Array.map (fun tag -> tryFindLongestPrefix prefixTrie tag.Name |> Option.defaultValue tag.Name)
-                let groupName = findSafeGroupName deviceNames
+                let groupName = 
+                    if usingPouGroup
+                    then grp
+                    else findSafeGroupName deviceNames
+                        
                 tags |> Array.map (fun tag ->
                     let deviceFull = tryFindLongestPrefix prefixTrie tag.Name |> Option.defaultValue tag.Name
                     let api = extractApiFromTag tag deviceFull
                     let device =
-                        if groupName = NonGroup then deviceFull
+                        if groupName = NonGroup ||  usingPouGroup then deviceFull
                         elif deviceFull.Length > groupName.Length then deviceFull.Substring(groupName.Length)
                         else failwithf "error: device=%s, groupName=%s, tag=%s" deviceFull groupName tag.Name
                     let work =
@@ -186,7 +182,8 @@ module MappingDeviceModule =
                         if groupName = NonGroup && devSplit.Length > 1 then devSplit[1] else devSplit[0]
 
                     let dev = getUniqDevName (device, tag) 
-
+                    if validName work = "" then
+                        failwithf "createDeviceApis 오류: tag=%A" tag
                     DeviceApi(
                         Area = validName groupName,
                         Work = validName work,

@@ -8,7 +8,7 @@ open Dual.PLC.Common.FS
 type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) =
     inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
 
-    let connection = new MxEthernet(ip, 5002, timeoutMs)
+    let connection = new MxEthernet(ip, 5000, timeoutMs, true)
     let mutable tags: MelsecTag[] = [||]
     let mutable batches: DWBatch[] = [||]
     let notifiedOnce = HashSet<DWBatch>()
@@ -55,8 +55,54 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
                 tag.ClearWriteValue()
             | None -> ()
 
+    // ---------------------------
+    // 태그 랜덤 쓰기 (구현필요)
+    // ---------------------------
+    //override _.WriteTags() =
+    //    let writeItems =
+    //        tags
+    //        |> Seq.filter (fun tag ->  tag.GetWriteValue().IsSome)
+                
+    //    let wordItems =
+    //        writeItems
+    //        |> Seq.filter (fun tag ->not tag.IsBit)
+    //        |> Seq.map (fun tag ->
+    //            let value =  tag.GetWriteValue() .Value
+    //            let deviceCode = tag.DeviceCode
+    //            let start = tag.BitOffset / 16
+    //            let intValue =
+    //                match value with
+    //                | :? int16 as i -> int i
+    //                | :? int as i -> i
+    //                | _ -> failwith $"Unsupported value type: {value.GetType().Name}"
+    //            (deviceCode, start, intValue))
+    //        |> Seq.toArray
 
-    override _.ReadTags() =
+    //    if wordItems.Length > 0 then
+    //        connection.WriteWordRandom(wordItems)
+
+    //    let bitItems =
+    //        writeItems
+    //        |> Seq.filter (fun tag -> tag.IsBit)
+    //        |> Seq.map (fun tag ->
+    //                let value =  tag.GetWriteValue().Value
+    //                let deviceCode = tag.DeviceCode
+    //                let start = tag.BitOffset 
+    //                let intValue =
+    //                    match value with
+    //                    | :? bool as b ->  if b then 1 else 0 
+    //                    | _ -> failwith $"Unsupported value type: {value.GetType().Name}"
+    //                (deviceCode, start, intValue))
+    //        |> Seq.toArray
+
+    //    if bitItems.Length > 0 then
+    //        connection.WriteBitRandom(bitItems)
+
+    //    // Clear write values
+    //    for tag in writeItems do
+    //        tag.ClearWriteValue()
+
+    override _.ReadTags(delayMs:int) =
         try
             for batch in batches do
                
@@ -70,6 +116,8 @@ type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) 
                 // 최초 읽기 알림만 등록
                 if notifiedOnce.Add(batch) then
                     () // 추후 알림 로직 확장 여지
+
+                Async.Sleep(delayMs) |> Async.RunSynchronously  
 
         with ex ->
             eprintfn "[⚠️ MELSEC Read 실패] %s: %s" ip ex.Message

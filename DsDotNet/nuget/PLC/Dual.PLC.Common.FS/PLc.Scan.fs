@@ -46,7 +46,7 @@ type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
     abstract member Disconnect: unit -> unit
     abstract member IsConnected: bool
     abstract member WriteTags: unit -> unit
-    abstract member ReadTags: unit -> unit
+    abstract member ReadTags: int -> unit
     abstract member PrepareTags: TagInfo seq -> IDictionary<ScanAddress, PlcTagBase>
 
     // ---------------------------
@@ -80,7 +80,7 @@ type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
                         else 
                             this.WriteTags()
 
-                        this.ReadTags()
+                        this.ReadTags(scanDelay)
 
                         do! Async.Sleep scanDelay
                 with ex ->

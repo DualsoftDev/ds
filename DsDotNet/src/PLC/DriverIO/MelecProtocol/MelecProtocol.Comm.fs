@@ -4,16 +4,50 @@ open System
 open System.IO
 open System.Net.Sockets
 open System.Collections.Generic
+open System.Net
 
 /// MELSEC Ethernet 통신 구현 (3E 프레임, 24비트 주소 대응)
-type MxEthernet(ip: string, port: int, timeoutMs: int) =
-    // TCP 클라이언트 초기화 및 연결 설정
-    let client = new TcpClient()
+type MxEthernet(ip: string, port: int, timeoutMs: int, isUDP:bool) =
+    let clientTcpOpt = if not isUDP then Some(new TcpClient()) else None
+    let clientUdpOpt = if isUDP then Some(new UdpClient()) else None
+
     do
-        client.SendTimeout <- timeoutMs
-        client.ReceiveTimeout <- timeoutMs
-        client.Connect(ip, port)
-    let stream = client.GetStream()
+        match clientTcpOpt, clientUdpOpt with
+        | Some tcp, _ ->
+            tcp.SendTimeout <- timeoutMs
+            tcp.ReceiveTimeout <- timeoutMs
+            tcp.Connect(ip, port)
+        | _, Some udp ->
+            udp.Client.SendTimeout <- timeoutMs
+            udp.Client.ReceiveTimeout <- timeoutMs
+            udp.Connect(ip, port)
+        | _ -> ()
+
+    let stream =
+        match clientTcpOpt with
+        | Some tcp -> tcp.GetStream() :> Stream
+        | None -> new MemoryStream() :> Stream  // dummy; not used in UDP
+
+    // 공통 헤더 생성 함수
+    let buildHeader() =
+        ResizeArray([|
+            0x50uy; 0x00uy;
+            0x00uy; 0xFFuy;
+            0xFFuy; 0x03uy;
+            0x00uy
+        |])
+
+    let writeDeviceEntry(b: ResizeArray<byte>, code: byte, address: int) =
+        b.AddRange([|
+            byte (address &&& 0xFF)
+            byte ((address >>> 8) &&& 0xFF)
+            byte ((address >>> 16) &&& 0xFF)
+            code
+        |])
+
+    // 이하 buildRandomReadCommand, buildWriteCommand, buildSequentialReadCommand는 그대로 사용
+
+    // 나머지 Read/Write 함수들은 기존 코드 그대로 유지
 
     /// 공통 헤더 생성 함수
     let buildHeader() =
@@ -59,6 +93,36 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
         w.Write(body.ToArray())               // 바디 작성
 
         ms.ToArray()
+
+
+    /// 랜덤 라이트 명령어 생성 함수
+    let buildRandomWriteCommand (devices: (MxDevice * int * int)[], isBit:bool) : byte[] =  //isBit 구현필요
+        use body = new MemoryStream()
+        use bw = new BinaryWriter(body)
+
+        bw.Write(uint16 0x0010)               // Monitoring Timer
+        bw.Write(uint16 0x1402)               // Command (0x1402: Random Write)
+        bw.Write(uint16 0x0000)               // Subcommand
+
+        bw.Write(byte devices.Length)        // Word Count
+        bw.Write(byte 0)                     // DWord Count (0)
+
+        let deviceEntries = ResizeArray()
+        for (code, addr, value) in devices do
+            writeDeviceEntry(deviceEntries, byte code, addr)
+            deviceEntries.AddRange(BitConverter.GetBytes(uint16 value))
+        bw.Write(deviceEntries.ToArray())
+
+        use ms = new MemoryStream()
+        use w = new BinaryWriter(ms)
+
+        let header = buildHeader()
+        w.Write(header.ToArray())             // 헤더 작성
+        //w.Write(uint16 body.Length)           // 데이터 길이
+        w.Write(body.ToArray())               // 바디 작성
+
+        ms.ToArray()
+
 
     /// 쓰기 명령어 생성 함수 (비트 또는 워드)
     let buildWriteCommand (device: MxDevice, address: int, values: int[], isBit: bool) =
@@ -108,28 +172,48 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
 
         ms.ToArray()
 
-    /// 명령어 전송 및 응답 수신
     member _.SendAndReceive(data: byte[]) : byte[] =
-        stream.Write(data, 0, data.Length)
-        stream.Flush()
-        use ms = new MemoryStream()
-        let buff = Array.zeroCreate 1024
-        let mutable bytesRead = 0
-        while stream.DataAvailable || bytesRead = 0 do
-            let sz = stream.Read(buff, 0, buff.Length)
-            if sz = 0 then raise <| IOException("No data received")
-            ms.Write(buff, 0, sz)
-            bytesRead <- sz
-        ms.ToArray()
+        match clientTcpOpt, clientUdpOpt with
+        | Some tcp, _ ->
+            let ns = tcp.GetStream()
+            ns.Write(data, 0, data.Length)
+            ns.Flush()
+
+            use ms = new MemoryStream()
+            let buff = Array.zeroCreate 1024
+            let mutable bytesRead = 0
+
+            while (tcp.Available > 0) || bytesRead = 0 do
+                let sz = ns.Read(buff, 0, buff.Length)
+                if sz = 0 then raise <| IOException("No data received")
+                ms.Write(buff, 0, sz)
+                bytesRead <- sz
+            ms.ToArray()
+
+        | _, Some udp ->
+            let ep = IPEndPoint(IPAddress.Any, 0)
+            let mutable remote = ep
+            udp.Send(data, data.Length) |> ignore
+            let res = udp.Receive(&remote)
+            res
+
+        | _ -> failwith "No client initialized"
 
     interface IDisposable with
         member _.Dispose() =
             stream.Dispose()
-            client.Close()
+            match clientTcpOpt, clientUdpOpt with
+            | Some tcp, _ -> tcp.Close()
+            | _, Some udp -> udp.Close()
+            | _ -> ()
 
     member _.Close() =
         stream.Close()
-        client.Close()
+        match clientTcpOpt, clientUdpOpt with
+        | Some tcp, _ -> tcp.Close()
+        | _, Some udp -> udp.Close()
+        | _ -> ()
+
 
     member this.ReadDWordRandom(batch: DWBatch) : byte[] =
         let deviceInfos =
@@ -148,6 +232,19 @@ type MxEthernet(ip: string, port: int, timeoutMs: int) =
             failwith $"Invalid random response\r\n{batch.BatchToText()}"
         else
             res.[11..]
+
+            
+    member this.WriteWordRandom(devices: (MxDevice * int * int)[]) =
+        let cmd = buildRandomWriteCommand(devices, false)
+        let res = this.SendAndReceive(cmd)
+        if res.Length < 11 || res.[9] <> 0uy || res.[10] <> 0uy then
+            failwith "WriteWordRandom error"
+
+    member this.WriteBitRandom(devices: (MxDevice * int * int)[]) =
+        let cmd = buildRandomWriteCommand(devices, true)
+        let res = this.SendAndReceive(cmd)
+        if res.Length < 11 || res.[9] <> 0uy || res.[10] <> 0uy then
+            failwith "WriteBitRandom error"
 
     member this.WriteWord(device: MxDevice, address: int, value: int) =
         let cmd = buildWriteCommand(device, address, [|value|], false)

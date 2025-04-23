@@ -44,7 +44,7 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool)
             | None -> ()
 
 
-    override _.ReadTags() =
+    override _.ReadTags(delayMs:int) =
         for batch in batches do
             try
                 // 중복 제거된 LWord 주소만 추출하여 읽기 요청
@@ -64,6 +64,8 @@ type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool)
                 // 최초 읽기 알림만 등록
                 if notifiedOnce.Add(batch) then
                     () // 추후 알림 로직 확장 여지
+
+                Async.Sleep(delayMs) |> Async.RunSynchronously  
 
             with ex ->
                 eprintfn $"[⚠️ XGT Read Error] IP: {ip}, 예외: {ex.Message}"

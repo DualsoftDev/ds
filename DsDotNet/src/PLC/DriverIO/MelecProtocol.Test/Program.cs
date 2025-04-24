@@ -10,7 +10,7 @@ class Program
     {
         const int delay = 20;         // 스캔 주기 (ms)
         const int timeout = 2000;      // 통신 타임아웃 (ms)
-        const bool isMonitorOnly = false;
+        const bool isMonitorOnly = true;
         const string plcIp = "192.168.9.109";  // 실제 MELSEC PLC IP 주소
 
         var scanMgr = new MxScanManager(delay, timeout, isMonitorOnly);
@@ -70,25 +70,25 @@ class Program
         scanner.Connect();
 
         var xgTags =  scanner.Scan(tags);
-            Thread.Sleep(100);
-        while (scanner.IsScanning)
-        {
-            Thread.Sleep(1);
-            foreach (var tag in xgTags.Values)
-            {
-                if (tag.Value is bool b)
-                {
-                    tag.SetWriteValue(!b);
-                }
-                else if (tag.Value is UInt16 i)
-                {
-                    tag.SetWriteValue(i + 1);
-                }
-                else 
-                {
-                }
-            }
-        }
+        //    Thread.Sleep(100);
+        //while (scanner.IsScanning)
+        //{
+        //    Thread.Sleep(1);
+        //    foreach (var tag in xgTags.Values)
+        //    {
+        //        if (tag.Value is bool b)
+        //        {
+        //            tag.SetWriteValue(!b);
+        //        }
+        //        else if (tag.Value is UInt16 i)
+        //        {
+        //            tag.SetWriteValue(i + 1);
+        //        }
+        //        else 
+        //        {
+        //        }
+        //    }
+        //}
 
         Console.WriteLine(" 스캔 중입니다. 종료하려면 아무 키나 누르세요...");
         Console.ReadKey();

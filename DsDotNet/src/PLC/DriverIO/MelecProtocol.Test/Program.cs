@@ -18,18 +18,19 @@ class Program
 
         // 테스트 태그 구성
         //const int count = 0x1ff0;
-        const int count = 0x3f0;
+        const int start = 0x1300;
+        const int count = 11;
 
         //string[] bitDeviceTypes = { "M", "L", "X", "Y", "B", "DX", "DY", "F" };
         //string[] wordDeviceTypes = { "T", "D", "W", "C" };
-        string[] bitDeviceTypes = { "Y" };
-        string[] wordDeviceTypes = { /*"D"*/ };
+        string[] bitDeviceTypes = { "Y",  "M" };
+        string[] wordDeviceTypes = { /*"D" */};
 
         var tags = new List<TagInfo>();
 
         foreach (var dev in bitDeviceTypes)
         {
-            for (int i = 0x1000; i < 0x1000+count; i++)
+            for (int i = start; i < start + count; i++)
             {
                 string address = MxTagParser.ParseFromSegment(dev, i, 1);
                 tags.Add(new TagInfo(

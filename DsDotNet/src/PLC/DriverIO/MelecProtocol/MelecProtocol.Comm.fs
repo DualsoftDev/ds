@@ -58,6 +58,16 @@ type MxEthernet(ip: string, port: int, timeoutMs: int, isUDP:bool) =
             0x00uy                      // Station No. (0x00)
         |])
 
+        //Built-in Ethernet
+    //let buildHeader() =
+    //    ResizeArray([|
+    //        0x50uy; 0x00uy;             // Subheader
+    //        0x00uy; 0xFFuy;             // Network No., PC No.
+    //        0x00uy; 0x00uy;             // I/O No. (Built-in Ethernet)
+    //        0x00uy                      // Station No.
+    //    |])
+
+
     /// 디바이스 주소 및 코드 기록 (24비트 주소 대응)
     let writeDeviceEntry(b: ResizeArray<byte>, code: byte, address: int) =
         b.AddRange([|
@@ -221,7 +231,7 @@ type MxEthernet(ip: string, port: int, timeoutMs: int, isUDP:bool) =
             |> Seq.distinctBy (fun t -> t.DWordTag)
             |> Seq.map (fun t ->
                 let code = byte t.DeviceCode
-                let offset = if MxDevice.IsBit(t.DeviceCode) then t.BitOffset else t.BitOffset / 16
+                let offset = if MxDevice.IsBit(t.DeviceCode) then t.BitOffset/32*32 else t.BitOffset / 16
                 (code, offset))
             |> Seq.toArray
 

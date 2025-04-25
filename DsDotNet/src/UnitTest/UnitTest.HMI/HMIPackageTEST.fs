@@ -18,8 +18,6 @@ module HMIPackageTEST =
         let pptParms:PptParams = defaultPptParams()
 
         let dsPpt = ImportPpt.GetDSFromPptWithLib (testPath, false, pptParms)
-        assignAutoAddress (dsPpt.System, 0 , 0, pptParms.HwTarget)
-
         let dsCPU, hmiPackage, _ = DsCpuExt.CreateRuntime(dsPpt.System) dsPpt.ModelConfig  
 
         hmiPackage.Devices.Length > 0  |> Assert.True

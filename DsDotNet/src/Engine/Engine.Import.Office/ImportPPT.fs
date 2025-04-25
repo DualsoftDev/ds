@@ -281,6 +281,7 @@ module ImportPptModule =
 
             let (system, loadingPaths), millisecond =
                 duration(fun () ->
+                        DsAddressApplyIO.ApplyDeviceTags(model.System, model.ModelConfig.TagConfig.DeviceTags);
                         LoaderExt.ExportToDS (model.System, activePath)
                         ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.HwCPU) false )
 
@@ -297,7 +298,6 @@ module ImportPptModule =
 
         static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams)
-            DsAddressAutoGen.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
             let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, ret.ModelConfig)
             zipPath, ret.System
 

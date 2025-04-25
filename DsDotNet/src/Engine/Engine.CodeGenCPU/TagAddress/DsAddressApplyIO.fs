@@ -35,7 +35,7 @@ module DsAddressApplyIO =
         checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
         checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
 
-    let ApplyDeviceTags (sys: DsSystem, devTags: DeviceTag seq, hwTarget: HwTarget) =
+    let ApplyDeviceTags (sys: DsSystem, devTags: DeviceTag seq) =
         let dicDev =
             sys.Jobs
             |> Seq.collect (fun job -> job.TaskDefs.Select(fun td -> td.FullName, td))
@@ -50,7 +50,7 @@ module DsAddressApplyIO =
                 textToDataType checkInType, textToDataType checkOutType
 
         let extractHardwareData (tag: DeviceTag) =
-            let name = tag.Name.Trim()
+            let name = tag.DeviceApiName
             let dataType = tag.DataType.Trim()
             let inSym = if tag.SymbolIn <> "" then Some (tag.SymbolIn.Trim()) else None
             let outSym = if tag.SymbolOut <> "" then Some (tag.SymbolOut.Trim()) else None
@@ -63,20 +63,19 @@ module DsAddressApplyIO =
             name, dataType, inSym, outSym, inAddr, outAddr
 
         let updateDev (tag: DeviceTag) =
-            let devName = tag.Name
             let name, dataType, inSym, outSym, inAddr, outAddr = extractHardwareData tag
-            if dicDev.ContainsKey(devName) then
-                let dev = dicDev.[devName]
+            if dicDev.ContainsKey(name) then
+                let dev = dicDev.[name]
                 let inAddrValid = inAddr |> emptyToSkipAddress
                 let outAddrValid = outAddr |> emptyToSkipAddress
                 let inType, outType = getInOutDataType dataType
 
-                dev.InAddress <- getValidAddress(inAddrValid, inType, dev.QualifiedName, false, IOType.In, hwTarget)
-                dev.OutAddress <- getValidAddress(outAddrValid, outType, dev.QualifiedName, false, IOType.Out, hwTarget)
+                dev.InAddress <-  inAddrValid  
+                dev.OutAddress <- outAddrValid 
 
                 updateTaskDevParam dev (inSym, inType) (outSym, outType)
             else
-                logDebug $"모델에 {devName} 이름이 없습니다."
+                failwith $"모델에 {name} 이름이 없습니다."
 
         let updateVarOrConst (tag: DeviceTag) (isConst: bool) =
             let name = tag.Name.Trim()
@@ -122,7 +121,9 @@ module DsAddressApplyIO =
             sys.HWButtons
             |> Seq.tryFind (fun b -> b.Name = name && b.ButtonType = btnType)
             |> Option.iter (fun b ->
-                updateHwAddress b (tag.Input, tag.Output) hwTarget
+                b.InAddress <-  tag.Input  
+                b.OutAddress <-  tag.Output 
+
                 let inType, outType = getInOutDataType tag.DataType
                 updateHwParam b (Some tag.SymbolIn, inType) (Some tag.SymbolOut, outType))
 
@@ -131,7 +132,8 @@ module DsAddressApplyIO =
             sys.HWLamps
             |> Seq.tryFind (fun l -> l.Name = name && l.LampType = lampType)
             |> Option.iter (fun l ->
-                updateHwAddress l (tag.Input, tag.Output) hwTarget
+                l.InAddress <-  tag.Input  
+                l.OutAddress <-  tag.Output 
                 let inType, outType = getInOutDataType tag.DataType
                 updateHwParam l (Some tag.SymbolIn, inType) (Some tag.SymbolOut, outType))
 
@@ -143,7 +145,8 @@ module DsAddressApplyIO =
             sys.HWConditions
             |> Seq.tryFind (fun c -> c.Name = tag.Name && c.ConditionType = condType)
             |> Option.iter (fun cond ->
-                updateHwAddress cond (tag.Input, tag.Output) hwTarget
+                cond.InAddress <-  tag.Input  
+                cond.OutAddress <-  tag.Output 
                 updateHwParam cond (inSym, inType) (outSym, outType)
             )
 
@@ -156,7 +159,8 @@ module DsAddressApplyIO =
             sys.HWActions
             |> Seq.tryFind (fun a -> a.Name = tag.Name && a.ActionType = actType)
             |> Option.iter (fun act ->
-                updateHwAddress act (tag.Input, tag.Output) hwTarget
+                act.InAddress <-  tag.Input  
+                act.OutAddress <-  tag.Output 
                 updateHwParam act (inSym, inType) (outSym, outType)
             )
 

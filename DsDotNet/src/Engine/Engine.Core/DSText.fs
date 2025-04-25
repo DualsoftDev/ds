@@ -21,6 +21,8 @@ module DsText =
     let [<Literal>] TextAddrEmpty = "_"  //주소 없음 Error 대상
     let [<Literal>] TextDeviceSplit = "-" //DS Flow, Device 자동 파싱 기준
     let [<Literal>] TextInOutSplit = ":" //in/out 구분자
+    let [<Literal>] TextAllFlow = "ALL" // 모든 Flow 적용
+    
 
     //edge
     let [<Literal>] TextStartEdge         = ">"

@@ -1,10 +1,6 @@
 namespace Engine.CodeGenCPU
 
 open Dual.Common.Core.FS
-open PLC.CodeGen.Common
-open Dual.PLC.Common.FS
-open XgtProtocol
-open Engine.CodeGenCPU.DsAddressUtil
 open Engine.Core
 open System.Linq
 open Engine.Core.MapperDataModule
@@ -14,15 +10,22 @@ open System
 module DsAddressExportIO =
 
 
+    let toSymbol opt = if String.IsNullOrWhiteSpace(opt) then "" else opt
+    let toAddr addr = if addr =  ""  then  TextAddrEmpty  else addr
+    
+    let formatDataTypeOpt (inType: DataType ) (outType: DataType ) =
+            if inType = outType then
+                inType.ToPLCText()
+            else
+                $"{inType.ToPLCText()}:{outType.ToPLCText()}"
+
+
     let ExportDeviceTags (sys: DsSystem) : DeviceTag seq =
-        
-        let toSymbol opt = if String.IsNullOrWhiteSpace(opt) then "" else opt
 
-        let toAddr addr = if addr = TextAddrEmpty || addr = TextNotUsed then "" else addr
-
-        let makeDeviceTag case name dataType input output symbolIn symbolOut =
+        let makeDeviceTag case  flow (name:string) dataType input output symbolIn symbolOut =
             DeviceTag(
                 Case = case,
+                Flow = flow,
                 Name = name,
                 DataType = dataType,
                 Input = input,
@@ -36,10 +39,17 @@ module DsAddressExportIO =
             |> Seq.collect (fun job ->
                 job.TaskDefs
                 |> Seq.map (fun dev ->
-                    let dt = $"{dev.InDataType.ToPLCText()}:{dev.OutDataType.ToPLCText()}"
+                    let dt =  formatDataTypeOpt dev.InDataType dev.OutDataType
+                    let flow = 
+                        dev.FullName.Contains(DsText.TextDeviceSplit)
+                        |> function
+                        | true -> dev.FullName.Split(DsText.TextDeviceSplit)[0]
+                        | false -> TextAllFlow
+
                     makeDeviceTag
-                        "Address"
-                        dev.FullName
+                        TextTagIOAddress
+                        flow
+                        dev.FullNameWithoutFlow
                         dt
                         (toAddr dev.InAddress)
                         (toAddr dev.OutAddress)
@@ -50,58 +60,58 @@ module DsAddressExportIO =
         let exportButtons =
             sys.HWButtons
             |> Seq.map (fun b ->
-                let dt = $"{b.InDataType.ToPLCText()}:{b.OutDataType.ToPLCText()}"
+                let dt =  formatDataTypeOpt b.InDataType b.OutDataType
                 let tagCase =
                     match b.ButtonType with
-                    | BtnType.DuAutoBTN     -> "AutoBTN"
-                    | BtnType.DuManualBTN   -> "ManualBTN"
-                    | BtnType.DuDriveBTN    -> "DriveBTN"
-                    | BtnType.DuPauseBTN    -> "PauseBTN"
-                    | BtnType.DuEmergencyBTN-> "EmergencyBTN"
-                    | BtnType.DuTestBTN     -> "TestBTN"
-                    | BtnType.DuReadyBTN    -> "ReadyBTN"
-                    | BtnType.DuClearBTN    -> "ClearBTN"
-                    | BtnType.DuHomeBTN     -> "HomeBTN"
-                makeDeviceTag tagCase b.Name dt (toAddr b.InAddress) (toAddr b.OutAddress) (toSymbol b.TaskDevParamIO.InParam.Symbol) (toSymbol b.TaskDevParamIO.OutParam.Symbol)
+                    | BtnType.DuAutoBTN     -> TextTagIOAutoBTN
+                    | BtnType.DuManualBTN   -> TextTagIOManualBTN
+                    | BtnType.DuDriveBTN    -> TextTagIODriveBTN
+                    | BtnType.DuPauseBTN    -> TextTagIOPauseBTN
+                    | BtnType.DuEmergencyBTN-> TextTagIOEmergencyBTN
+                    | BtnType.DuTestBTN     -> TextTagIOTestBTN
+                    | BtnType.DuReadyBTN    -> TextTagIOReadyBTN
+                    | BtnType.DuClearBTN    -> TextTagIOClearBTN
+                    | BtnType.DuHomeBTN     -> TextTagIOHomeBTN
+                makeDeviceTag tagCase TextAllFlow b.Name dt (toAddr b.InAddress) (toAddr b.OutAddress) (toSymbol b.TaskDevParamIO.InParam.Symbol) (toSymbol b.TaskDevParamIO.OutParam.Symbol)
             )
 
         let exportLamps =
             sys.HWLamps
             |> Seq.map (fun l ->
-                let dt = $"{l.InDataType.ToPLCText()}:{l.OutDataType.ToPLCText()}"
+                let dt =  formatDataTypeOpt l.InDataType l.OutDataType
                 let tagCase =
                     match l.LampType with
-                    | LampType.DuAutoModeLamp    -> "AutoLamp"
-                    | LampType.DuManualModeLamp  -> "ManualLamp"
-                    | LampType.DuDriveStateLamp  -> "DriveLamp"
-                    | LampType.DuErrorStateLamp  -> "ErrorLamp"
-                    | LampType.DuTestDriveStateLamp -> "TestLamp"
-                    | LampType.DuReadyStateLamp  -> "ReadyLamp"
-                    | LampType.DuIdleModeLamp    -> "IdleLamp"
-                    | LampType.DuOriginStateLamp -> "HomingLamp"
-                makeDeviceTag tagCase l.Name dt (toAddr l.InAddress) (toAddr l.OutAddress) (toSymbol l.TaskDevParamIO.InParam.Symbol) (toSymbol l.TaskDevParamIO.OutParam.Symbol)
+                    | LampType.DuAutoModeLamp        -> TextTagIOAutoLamp
+                    | LampType.DuManualModeLamp      -> TextTagIOManualLamp
+                    | LampType.DuDriveStateLamp      -> TextTagIODriveLamp
+                    | LampType.DuErrorStateLamp      -> TextTagIOErrorLamp
+                    | LampType.DuTestDriveStateLamp  -> TextTagIOTestLamp
+                    | LampType.DuReadyStateLamp      -> TextTagIOReadyLamp
+                    | LampType.DuIdleModeLamp        -> TextTagIOIdleLamp
+                    | LampType.DuOriginStateLamp     -> TextTagIOHomingLamp
+                makeDeviceTag tagCase TextAllFlow l.Name dt (toAddr l.InAddress) (toAddr l.OutAddress) (toSymbol l.TaskDevParamIO.InParam.Symbol) (toSymbol l.TaskDevParamIO.OutParam.Symbol)
             )
 
         let exportConditions =
             sys.HWConditions
             |> Seq.map (fun c ->
-                let dt = $"{c.InDataType.ToPLCText()}:{c.OutDataType.ToPLCText()}"
+                let dt =  formatDataTypeOpt c.InDataType c.OutDataType
                 let tagCase =
                     match c.ConditionType with
-                    | ConditionType.DuReadyState -> "ConditionReady"
-                    | ConditionType.DuDriveState -> "ConditionDrive"
-                makeDeviceTag tagCase c.Name dt (toAddr c.InAddress) (toAddr c.OutAddress) (toSymbol c.TaskDevParamIO.InParam.Symbol) (toSymbol c.TaskDevParamIO.OutParam.Symbol)
+                    | ConditionType.DuReadyState -> TextTagIOConditionReady
+                    | ConditionType.DuDriveState -> TextTagIOConditionDrive
+                makeDeviceTag tagCase TextAllFlow c.Name dt (toAddr c.InAddress) (toAddr c.OutAddress) (toSymbol c.TaskDevParamIO.InParam.Symbol) (toSymbol c.TaskDevParamIO.OutParam.Symbol)
             )
 
         let exportActions =
             sys.HWActions
             |> Seq.map (fun a ->
-                let dt = $"{a.InDataType.ToPLCText()}:{a.OutDataType.ToPLCText()}"
+                let dt =  formatDataTypeOpt a.InDataType a.OutDataType
                 let tagCase =
                     match a.ActionType with
-                    | ActionType.DuEmergencyAction -> "ActionEmg"
-                    | ActionType.DuPauseAction     -> "ActionPause"
-                makeDeviceTag tagCase a.Name dt (toAddr a.InAddress) (toAddr a.OutAddress) (toSymbol a.TaskDevParamIO.InParam.Symbol) (toSymbol a.TaskDevParamIO.OutParam.Symbol)
+                    | ActionType.DuEmergencyAction -> TextTagIOActionEmg
+                    | ActionType.DuPauseAction     -> TextTagIOActionPause
+                makeDeviceTag tagCase TextAllFlow a.Name dt (toAddr a.InAddress) (toAddr a.OutAddress) (toSymbol a.TaskDevParamIO.InParam.Symbol) (toSymbol a.TaskDevParamIO.OutParam.Symbol)
             )
 
         let exportVariables =
@@ -109,8 +119,8 @@ module DsAddressExportIO =
             |> Seq.map (fun v ->
                 let tagCase = 
                     match v.VariableType with
-                    | VariableType.ConstType -> "Const"
-                    | VariableType.VariableType -> "Variable"
+                    | VariableType.ConstType ->    TextTagIOConst
+                    | VariableType.VariableType -> TextTagIOVariable
 
                 let input =
                     match v.VariableType with
@@ -118,7 +128,7 @@ module DsAddressExportIO =
                     | VariableType.VariableType -> TextNotUsed
 
                 let dataTypeText = v.Type.ToPLCText()
-                makeDeviceTag tagCase v.Name dataTypeText input TextNotUsed "" ""
+                makeDeviceTag tagCase TextAllFlow v.Name dataTypeText input TextNotUsed "" ""
             )
 
 
@@ -127,9 +137,9 @@ module DsAddressExportIO =
             |> Seq.map (fun f ->
                 match f with
                 | :? OperatorFunction as op ->
-                    makeDeviceTag "Operator" op.Name "" (op.OperatorCode.TrimEnd(';')) "-" "" ""
+                    makeDeviceTag "Operator" TextAllFlow  op.Name "" (op.OperatorCode.TrimEnd(';')) "-" "" ""
                 | :? CommandFunction as cmd ->
-                    makeDeviceTag "Command" cmd.Name "" "-" (cmd.CommandCode.TrimEnd(';')) "" ""
+                    makeDeviceTag "Command" TextAllFlow  cmd.Name "" "-" (cmd.CommandCode.TrimEnd(';')) "" ""
                 | _ -> null
             )
             |> Seq.filter (fun x -> x <> null)

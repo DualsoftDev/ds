@@ -62,9 +62,11 @@ module DsAddressAutoGen =
             g |> Seq.iteri(fun i (dev, job) ->
 
                 let inSkip, outSkip = getSkipInfo(i, job)
+                let inAdd = DsAddressExportIO.toAddr dev.InAddress
+                let outAdd = DsAddressExportIO.toAddr dev.OutAddress
 
-                dev.InAddress  <- getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In, target)
-                dev.OutAddress <- getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
+                dev.InAddress  <- getValidAddress(inAdd,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In, target)
+                dev.OutAddress <- getValidAddress(outAdd, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target)
 
                 if dev.IsRootOnlyDevice
                 then

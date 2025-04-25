@@ -7,6 +7,7 @@ open XgtProtocol
 open Engine.CodeGenCPU.DsAddressUtil
 open Engine.Core
 open System.Linq
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
 module DsAddressModule =
@@ -75,3 +76,27 @@ module DsAddressModule =
                     )
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
+
+
+    let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)=
+          if taskDevParamDataType <> dataType
+                then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
+
+    let updatePptTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+        if inSym.IsSome then  dev.SetInSymbol(inSym.Value)
+        if outSym.IsSome then  dev.SetOutSymbol(outSym.Value)
+
+        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
+        checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
+
+    let getPptDevDataTypeText (dev:TaskDev) =   DsTaskDevTypeModule.getTaskDevDataTypeText dev.TaskDevParamIO
+    let getPptHwDevDataTypeText (hwDev:HwSystemDef) = DsTaskDevTypeModule.getTaskDevDataTypeText hwDev.TaskDevParamIO
+
+    let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+        if inSym.IsSome 
+        then hwDev.TaskDevParamIO.InParam.Symbol <- inSym.Value
+        if outSym.IsSome 
+        then hwDev.TaskDevParamIO.InParam.Symbol <- outSym.Value
+
+        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
+        checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType

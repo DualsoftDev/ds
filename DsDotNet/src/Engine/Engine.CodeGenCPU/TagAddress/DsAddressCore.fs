@@ -21,7 +21,7 @@ module DsAddressCore =
     let setMemoryIndex i = memoryCnt <- i
     let getCurrentMemoryIndex () = memoryCnt
 
-    let InitializeIOMemoryIndex () =
+    let initializeIOMemoryIndex () =
         memoryCnt <- InitStartMemory
         inDigitCnt <- 0
         inAnalogCnt <- 0

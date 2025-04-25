@@ -1,18 +1,19 @@
-// Copyright (c) Dualsoft  All Rights Reserved.
-namespace Engine.Import.Office
+namespace Engine.CodeGenCPU
 
-open System
-open System.Linq
 open Dual.Common.Core.FS
-open Engine.Core
-open Engine.CodeGenCPU
-open Engine.Core.MapperDataModule;
+open PLC.CodeGen.Common
+open Dual.PLC.Common.FS
+open XgtProtocol
 open Engine.CodeGenCPU.DsAddressUtil
+open Engine.Core
+open System.Linq
+open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
-module ImportIODevModule =
-    let ApplyIO (sys: DsSystem, devTags: DeviceTag seq, hwTarget: HwTarget) =
+module DsAddressApplyIO =
 
+
+    let ApplyDeviceTags (sys: DsSystem, devTags: DeviceTag seq, hwTarget: HwTarget) =
         let dicDev =
             sys.Jobs
             |> Seq.collect (fun job -> job.TaskDefs.Select(fun td -> td.FullName, td))
@@ -142,34 +143,35 @@ module ImportIODevModule =
             let case = tag.Case.Trim()
             let name = tag.Name.Trim()
             if name <> "" then
-                match TextToXlsType(case) with
-                | XlsAddress         -> updateDev tag
-                | XlsVariable        -> updateVarOrConst tag false
-                | XlsConst           -> updateVarOrConst tag true
-                | XlsCommand         -> updateFunction(tag, true)
-                | XlsOperator        -> updateFunction(tag, false)
-                | XlsConditionReady  -> updateCondition (tag, ConditionType.DuReadyState)
-                | XlsConditionDrive  -> updateCondition (tag, ConditionType.DuDriveState)
-                | XlsActionEmg       -> updateAction (tag, ActionType.DuEmergencyAction)
-                | XlsActionPause     -> updateAction (tag, ActionType.DuPauseAction)
+                match TextToTagIOType(case) with
+                | TagIOAddress         -> updateDev tag
+                | TagIOVariable        -> updateVarOrConst tag false
+                | TagIOConst           -> updateVarOrConst tag true
+                | TagIOCommand         -> updateFunction(tag, true)
+                | TagIOOperator        -> updateFunction(tag, false)
+                | TagIOConditionReady  -> updateCondition (tag, ConditionType.DuReadyState)
+                | TagIOConditionDrive  -> updateCondition (tag, ConditionType.DuDriveState)
+                | TagIOActionEmg       -> updateAction (tag, ActionType.DuEmergencyAction)
+                | TagIOActionPause     -> updateAction (tag, ActionType.DuPauseAction)
 
                 // 버튼
-                | XlsAutoBTN         -> updateHardwareBtn (tag, BtnType.DuAutoBTN)
-                | XlsManualBTN       -> updateHardwareBtn (tag, BtnType.DuManualBTN)
-                | XlsDriveBTN        -> updateHardwareBtn (tag, BtnType.DuDriveBTN)
-                | XlsPauseBTN        -> updateHardwareBtn (tag, BtnType.DuPauseBTN)
-                | XlsEmergencyBTN    -> updateHardwareBtn (tag, BtnType.DuEmergencyBTN)
-                | XlsTestBTN         -> updateHardwareBtn (tag, BtnType.DuTestBTN)
-                | XlsReadyBTN        -> updateHardwareBtn (tag, BtnType.DuReadyBTN)
-                | XlsClearBTN        -> updateHardwareBtn (tag, BtnType.DuClearBTN)
-                | XlsHomeBTN         -> updateHardwareBtn (tag, BtnType.DuHomeBTN)
+                | TagIOAutoBTN         -> updateHardwareBtn (tag, BtnType.DuAutoBTN)
+                | TagIOManualBTN       -> updateHardwareBtn (tag, BtnType.DuManualBTN)
+                | TagIODriveBTN        -> updateHardwareBtn (tag, BtnType.DuDriveBTN)
+                | TagIOPauseBTN        -> updateHardwareBtn (tag, BtnType.DuPauseBTN)
+                | TagIOEmergencyBTN    -> updateHardwareBtn (tag, BtnType.DuEmergencyBTN)
+                | TagIOTestBTN         -> updateHardwareBtn (tag, BtnType.DuTestBTN)
+                | TagIOReadyBTN        -> updateHardwareBtn (tag, BtnType.DuReadyBTN)
+                | TagIOClearBTN        -> updateHardwareBtn (tag, BtnType.DuClearBTN)
+                | TagIOHomeBTN         -> updateHardwareBtn (tag, BtnType.DuHomeBTN)
 
                 // 램프
-                | XlsAutoLamp        -> updateHardwareLamp (tag, LampType.DuAutoModeLamp)
-                | XlsManualLamp      -> updateHardwareLamp (tag, LampType.DuManualModeLamp)
-                | XlsDriveLamp       -> updateHardwareLamp (tag, LampType.DuDriveStateLamp)
-                | XlsErrorLamp       -> updateHardwareLamp (tag, LampType.DuErrorStateLamp)
-                | XlsTestLamp        -> updateHardwareLamp (tag, LampType.DuTestDriveStateLamp)
-                | XlsReadyLamp       -> updateHardwareLamp (tag, LampType.DuReadyStateLamp)
-                | XlsIdleLamp        -> updateHardwareLamp (tag, LampType.DuIdleModeLamp)
-                | XlsHomingLamp      -> updateHardwareLamp (tag, LampType.DuOriginStateLamp)
+                | TagIOAutoLamp        -> updateHardwareLamp (tag, LampType.DuAutoModeLamp)
+                | TagIOManualLamp      -> updateHardwareLamp (tag, LampType.DuManualModeLamp)
+                | TagIODriveLamp       -> updateHardwareLamp (tag, LampType.DuDriveStateLamp)
+                | TagIOErrorLamp       -> updateHardwareLamp (tag, LampType.DuErrorStateLamp)
+                | TagIOTestLamp        -> updateHardwareLamp (tag, LampType.DuTestDriveStateLamp)
+                | TagIOReadyLamp       -> updateHardwareLamp (tag, LampType.DuReadyStateLamp)
+                | TagIOIdleLamp        -> updateHardwareLamp (tag, LampType.DuIdleModeLamp)
+                | TagIOHomingLamp      -> updateHardwareLamp (tag, LampType.DuOriginStateLamp)
+

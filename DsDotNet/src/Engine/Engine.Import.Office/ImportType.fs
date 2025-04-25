@@ -55,13 +55,12 @@ module ImportType =
             Page : int
         }
 
-    type TaskDevParamRawItem  = string*DataType*string //address, dataType, func
 
     let getDevName (row: Data.DataRow) =
         let flowName = row.[(int) IOColumn.Flow].ToString()
         let name = row.[(int) IOColumn.Name].ToString()
 
-        if row.[(int) IOColumn.Case].ToString() = TextXlsAddress
+        if row.[(int) IOColumn.Case].ToString() = TextTagIOAddress
         then
 
             if name.Split(".").Length <> 2 then
@@ -76,41 +75,6 @@ module ImportType =
         let indexStr = index.ToString().PadLeft(2, '0')
         $"{loadedName}_{indexStr}"
 
-
-    let checkPptDataType (taskDevParamRaw:TaskDevParamRawItem) (taskDevParam:TaskDevParam) =
-        let address, typePpt = taskDevParamRaw |>fun (addr,t,_) -> addr, t
-        if (address <> TextNotUsed) && (typePpt <> taskDevParam.DataType)
-        then
-            failWithLog $"error datatype : {taskDevParamRaw} <> {taskDevParam.DataType}"
-
-
-   
-
-    let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)=
-          if taskDevParamDataType <> dataType
-                then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
-
-
-    let updatePptTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
-        if inSym.IsSome then  dev.SetInSymbol(inSym.Value)
-        if outSym.IsSome then  dev.SetOutSymbol(outSym.Value)
-
-        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
-        checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
-
-
-
-    let getPptDevDataTypeText (dev:TaskDev) =   DsTaskDevTypeModule.getTaskDevDataTypeText dev.TaskDevParamIO
-    let getPptHwDevDataTypeText (hwDev:HwSystemDef) = DsTaskDevTypeModule.getTaskDevDataTypeText hwDev.TaskDevParamIO
-
-    let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
-        if inSym.IsSome 
-        then hwDev.TaskDevParamIO.InParam.Symbol <- inSym.Value
-        if outSym.IsSome 
-        then hwDev.TaskDevParamIO.InParam.Symbol <- outSym.Value
-
-        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
-        checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
 
 
     let nameCheck (shape: Shape, nodeType: NodeType, iPage: int, name:string) =

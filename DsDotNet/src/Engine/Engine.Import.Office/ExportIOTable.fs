@@ -13,6 +13,7 @@ open Engine.CodeGenCPU
 open Newtonsoft.Json
 open System.Collections.Generic
 open Engine.Core.MapperDataModule
+open Engine.CodeGenCPU.DsAddressUtil
 
 [<AutoOpen>]
 module ExportIOTable =
@@ -54,7 +55,7 @@ module ExportIOTable =
 
         addIOColumn dt
 
-        let toBtnText (btns: ButtonDef seq, xlsCase: ExcelCase) =
+        let toBtnText (btns: ButtonDef seq, xlsCase: TagIOCase) =
             for btn in btns do
                 if containSys then
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) target
@@ -62,7 +63,7 @@ module ExportIOTable =
                     dt.Rows.Add(xlsCase.ToText(), getFlowExportName(btn), btn.Name, dType,  btn.InAddress, btn.OutAddress ,"", "")
                     |> ignore
 
-        let toLampText (lamps: LampDef seq, xlsCase: ExcelCase) =
+        let toLampText (lamps: LampDef seq, xlsCase: TagIOCase) =
             for lamp in lamps do
                 if containSys then
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) target
@@ -71,23 +72,23 @@ module ExportIOTable =
                     |> ignore
 
 
-        toBtnText  (sys.AutoHWButtons,      ExcelCase.XlsAutoBTN)
-        toBtnText  (sys.ManualHWButtons,    ExcelCase.XlsManualBTN)
-        toBtnText  (sys.DriveHWButtons,     ExcelCase.XlsDriveBTN)
-        toBtnText  (sys.PauseHWButtons,     ExcelCase.XlsPauseBTN)
-        toBtnText  (sys.ClearHWButtons,     ExcelCase.XlsClearBTN)
-        toBtnText  (sys.EmergencyHWButtons, ExcelCase.XlsEmergencyBTN)
-        toBtnText  (sys.HomeHWButtons,      ExcelCase.XlsHomeBTN)
-        toBtnText  (sys.TestHWButtons,      ExcelCase.XlsTestBTN)
-        toBtnText  (sys.ReadyHWButtons,     ExcelCase.XlsReadyBTN)
-        toLampText (sys.AutoHWLamps,        ExcelCase.XlsAutoLamp)
-        toLampText (sys.ManualHWLamps,      ExcelCase.XlsManualLamp)
-        toLampText (sys.IdleHWLamps,        ExcelCase.XlsIdleLamp)
-        toLampText (sys.ErrorHWLamps,       ExcelCase.XlsErrorLamp)
-        toLampText (sys.OriginHWLamps,      ExcelCase.XlsHomingLamp)
-        toLampText (sys.ReadyHWLamps,       ExcelCase.XlsReadyLamp)
-        toLampText (sys.DriveHWLamps,       ExcelCase.XlsDriveLamp)
-        toLampText (sys.TestHWLamps,        ExcelCase.XlsTestLamp)
+        toBtnText  (sys.AutoHWButtons,     TagIOCase.TagIOAutoBTN)
+        toBtnText  (sys.ManualHWButtons,   TagIOCase.TagIOManualBTN)
+        toBtnText  (sys.DriveHWButtons,    TagIOCase.TagIODriveBTN)
+        toBtnText  (sys.PauseHWButtons,    TagIOCase.TagIOPauseBTN)
+        toBtnText  (sys.ClearHWButtons,    TagIOCase.TagIOClearBTN)
+        toBtnText  (sys.EmergencyHWButtons,TagIOCase.TagIOEmergencyBTN)
+        toBtnText  (sys.HomeHWButtons,     TagIOCase.TagIOHomeBTN)
+        toBtnText  (sys.TestHWButtons,     TagIOCase.TagIOTestBTN)
+        toBtnText  (sys.ReadyHWButtons,    TagIOCase.TagIOReadyBTN)
+        toLampText (sys.AutoHWLamps,       TagIOCase.TagIOAutoLamp)
+        toLampText (sys.ManualHWLamps,     TagIOCase.TagIOManualLamp)
+        toLampText (sys.IdleHWLamps,       TagIOCase.TagIOIdleLamp)
+        toLampText (sys.ErrorHWLamps,      TagIOCase.TagIOErrorLamp)
+        toLampText (sys.OriginHWLamps,     TagIOCase.TagIOHomingLamp)
+        toLampText (sys.ReadyHWLamps,      TagIOCase.TagIOReadyLamp)
+        toLampText (sys.DriveHWLamps,      TagIOCase.TagIODriveLamp)
+        toLampText (sys.TestHWLamps,       TagIOCase.TagIOTestLamp)
 
 
         dt
@@ -108,7 +109,7 @@ module ExportIOTable =
 
         let flow, name = splitNameForRow $"{dev.DeviceName}.{dev.ApiItem.PureName}"
         [
-            TextXlsAddress
+            TextTagIOAddress
             flow
             name
             getPptDevDataTypeText (dev)
@@ -204,8 +205,8 @@ module ExportIOTable =
                     let funcText = funcOperatorText func.Statements
 
                     [
-                        TextXlsOperator
-                        TextXlsAllFlow
+                        TextTagIOOperator
+                        TextTagIOAllFlow
                         name
                         TextNotUsed
                         funcText
@@ -222,8 +223,8 @@ module ExportIOTable =
                     let funcText =    funcText func.Statements
 
                     [
-                        TextXlsCommand
-                        TextXlsAllFlow
+                        TextTagIOCommand
+                        TextTagIOAllFlow
                         name
                         TextNotUsed
                         TextNotUsed
@@ -235,8 +236,8 @@ module ExportIOTable =
         let variRows =
             sys.Variables.Map(fun vari->
                 [
-                    vari.VariableType = Mutable ?= (TextXlsVariable, TextXlsConst)
-                    TextXlsAllFlow
+                    vari.VariableType = Mutable ?= (TextTagIOVariable, TextTagIOConst)
+                    TextTagIOAllFlow
                     vari.Name
                     vari.Type.ToText()
                     vari.VariableType = Mutable ?= (TextNotUsed, vari.InitValue)
@@ -248,10 +249,10 @@ module ExportIOTable =
 
 
         let condiRows =
-            let getXlsConditionLabel (conditionType:ConditionType) =
+            let getTagIOConditionLabel (conditionType:ConditionType) =
                 match conditionType with
-                | DuReadyState  -> TextXlsConditionReady
-                | DuDriveState  -> TextXlsConditionDrive
+                | DuReadyState  -> TextTagIOConditionReady
+                | DuDriveState  -> TextTagIOConditionDrive
 
 
             sys.HWConditions
@@ -260,7 +261,7 @@ module ExportIOTable =
                 let _, name = splitNameForRow cond.Name
                 updateHwAddress (cond) (cond.InAddress, cond.OutAddress) hwTarget
                 [
-                    getXlsConditionLabel cond.ConditionType
+                    getTagIOConditionLabel cond.ConditionType
                     getFlowExportName (cond)
                     name
                     getPptHwDevDataTypeText cond
@@ -271,10 +272,10 @@ module ExportIOTable =
                 ]
             )
         let actionRows =
-            let getXlsActionLabel (actionType:ActionType) =
+            let getTagIOActionLabel (actionType:ActionType) =
                 match actionType with
-                | DuEmergencyAction  -> TextXlsActionEmg
-                | DuPauseAction      -> TextXlsActionPause
+                | DuEmergencyAction  -> TextTagIOActionEmg
+                | DuPauseAction      -> TextTagIOActionPause
 
             sys.HWActions
             |> Seq.sortBy(fun action -> action.Name)
@@ -282,7 +283,7 @@ module ExportIOTable =
                 let _, name = splitNameForRow action.Name
                 updateHwAddress (action) (action.InAddress, action.OutAddress) hwTarget
                 [
-                    getXlsActionLabel action.ActionType
+                    getTagIOActionLabel action.ActionType
                     getFlowExportName (action)
                     name
                     getPptHwDevDataTypeText action
@@ -670,7 +671,7 @@ module ExportIOTable =
             |> Seq.map (fun f -> f.Name, if f :? ButtonDef then f.InAddress else f.OutAddress)
             |> dict
 
-        let tag (case:ExcelCase) name dataType inAddr outAddr : DeviceTag =
+        let tag (case:TagIOCase) name dataType inAddr outAddr : DeviceTag =
             let devTag = DeviceTag()
             devTag.Case <- case.ToText()
             devTag.Flow  <- "ALL"
@@ -681,19 +682,19 @@ module ExportIOTable =
             devTag
 
         [|
-            tag  XlsAutoBTN "AutoSelect" "bool"         hws["AutoSelect"]   TextNotUsed 
-            tag  XlsManualBTN "ManualSelect" "bool"     hws["ManualSelect"] TextNotUsed 
-            tag  XlsDriveBTN "DrivePushBtn" "bool"      hws["DrivePushBtn"] TextNotUsed 
-            tag  XlsPauseBTN "PausePushBtn" "bool"      hws["PausePushBtn"] TextNotUsed 
-            tag  XlsClearBTN "ClearPushBtn" "bool"      hws["ClearPushBtn"] TextNotUsed 
-            tag  XlsEmergencyBTN "EmergencyBtn" "bool"  hws["EmergencyBtn"] TextNotUsed
-            tag  XlsAutoLamp "AutoModeLamp" "bool"      TextNotUsed hws["AutoModeLamp"]
-            tag  XlsManualLamp "ManualModeLamp" "bool"  TextNotUsed hws["ManualModeLamp"]
-            tag  XlsIdleLamp "IdleModeLamp" "bool"      TextNotUsed hws["IdleModeLamp"]
-            tag  XlsErrorLamp "ErrorLamp" "bool"        TextNotUsed hws["ErrorLamp"]
-            tag  XlsHomingLamp "OriginStateLamp" "bool" TextNotUsed hws["OriginStateLamp"]
-            tag  XlsReadyLamp "ReadyStateLamp" "bool"   TextNotUsed hws["ReadyStateLamp"]
-            tag  XlsDriveLamp "DriveLamp" "bool"        TextNotUsed  hws["DriveLamp"]
+            tag  TagIOAutoBTN "AutoSelect" "bool"         hws["AutoSelect"]   TextNotUsed 
+            tag  TagIOManualBTN "ManualSelect" "bool"     hws["ManualSelect"] TextNotUsed 
+            tag  TagIODriveBTN "DrivePushBtn" "bool"      hws["DrivePushBtn"] TextNotUsed 
+            tag  TagIOPauseBTN "PausePushBtn" "bool"      hws["PausePushBtn"] TextNotUsed 
+            tag  TagIOClearBTN "ClearPushBtn" "bool"      hws["ClearPushBtn"] TextNotUsed 
+            tag  TagIOEmergencyBTN "EmergencyBtn" "bool"  hws["EmergencyBtn"] TextNotUsed
+            tag  TagIOAutoLamp "AutoModeLamp" "bool"      TextNotUsed hws["AutoModeLamp"]
+            tag  TagIOManualLamp "ManualModeLamp" "bool"  TextNotUsed hws["ManualModeLamp"]
+            tag  TagIOIdleLamp "IdleModeLamp" "bool"      TextNotUsed hws["IdleModeLamp"]
+            tag  TagIOErrorLamp "ErrorLamp" "bool"        TextNotUsed hws["ErrorLamp"]
+            tag  TagIOHomingLamp "OriginStateLamp" "bool" TextNotUsed hws["OriginStateLamp"]
+            tag  TagIOReadyLamp "ReadyStateLamp" "bool"   TextNotUsed hws["ReadyStateLamp"]
+            tag  TagIODriveLamp "DriveLamp" "bool"        TextNotUsed  hws["DriveLamp"]
         |]
 
         

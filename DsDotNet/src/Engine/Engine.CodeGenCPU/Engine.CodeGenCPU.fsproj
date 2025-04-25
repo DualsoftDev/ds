@@ -26,6 +26,7 @@
         <Compile Include="TagAddress\DsAddressUtil.fs" />
         <Compile Include="TagAddress\DsAddressCore.fs" />
         <Compile Include="TagAddress\DsAddressModule.fs" />
+        <Compile Include="TagAddress\DsAddressApplyIO.fs" />
         <Compile Include="Expression.Extension.fs" />
         <Compile Include="Core.Extensions.Utils.fs" />
         <Compile Include="Core.Extensions\ApiItem, TaskDev.fs" />

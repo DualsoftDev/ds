@@ -11,6 +11,99 @@ module DsAddressUtil =
     let emptyToSkipAddress address =
         if address = TextAddrEmpty then TextNotUsed else address.Trim().ToUpper()
 
+    type TaskDevParamRawItem  = string*DataType*string //address, dataType, func
+    
+    ///인터페이스 Tag 기본 형식
+    type TagIOCase =
+        | TagIOAddress //주소
+        | TagIOVariable //변수
+        | TagIOConst //상수
+        | TagIOCommand  //명령
+        | TagIOOperator //연산
+        | TagIOAutoBTN //자동 버튼
+        | TagIOManualBTN //수동 버튼
+        | TagIODriveBTN //운전 버튼
+        | TagIOPauseBTN //일시정지 버튼
+        | TagIOClearBTN //해지 버튼
+        | TagIOEmergencyBTN //비상 버튼
+        | TagIOTestBTN //시운전 시작 버튼
+        | TagIOHomeBTN //홈(원위치) 버튼
+        | TagIOReadyBTN //준비(원위치) 버튼
+        | TagIOAutoLamp //자동 램프
+        | TagIOManualLamp //수동 램프
+        | TagIODriveLamp //운전 램프
+        | TagIOErrorLamp //이상 램프
+        | TagIOReadyLamp //준비 램프
+        | TagIOIdleLamp //대기 램프
+        | TagIOHomingLamp //원위치중 램프
+        | TagIOTestLamp //시운전 램프
+        | TagIOConditionReady //준비조건 상태
+        | TagIOConditionDrive //운전조건 상태
+        | TagIOActionEmg  //비상 상태시 출력
+        | TagIOActionPause //정지 상태시 출력
+
+        member x.ToText() =
+            match x with
+            | TagIOAddress -> TextTagIOAddress
+            | TagIOVariable -> TextTagIOVariable
+            | TagIOConst   -> TextTagIOConst
+            | TagIOCommand -> TextTagIOCommand
+            | TagIOOperator -> TextTagIOOperator
+            | TagIOAutoBTN -> TextTagIOAutoBTN
+            | TagIOManualBTN -> TextTagIOManualBTN
+            | TagIODriveBTN -> TextTagIODriveBTN
+            | TagIOPauseBTN -> TextTagIOPauseBTN
+            | TagIOClearBTN -> TextTagIOClearBTN
+            | TagIOEmergencyBTN -> TextTagIOEmergencyBTN
+            | TagIOTestBTN -> TextTagIOTestBTN
+            | TagIOReadyBTN -> TextTagIOReadyBTN
+            | TagIOHomeBTN -> TextTagIOHomeBTN
+            | TagIOAutoLamp -> TextTagIOAutoLamp
+            | TagIOManualLamp -> TextTagIOManualLamp
+            | TagIODriveLamp -> TextTagIODriveLamp
+            | TagIOErrorLamp -> TextTagIOErrorLamp
+            | TagIOTestLamp -> TextTagIOTestLamp
+            | TagIOReadyLamp -> TextTagIOReadyLamp
+            | TagIOIdleLamp -> TextTagIOIdleLamp
+            | TagIOHomingLamp -> TextTagIOHomingLamp
+            | TagIOConditionReady -> TextTagIOConditionReady
+            | TagIOConditionDrive -> TextTagIOConditionDrive
+            | TagIOActionEmg -> TextTagIOActionEmg
+            | TagIOActionPause -> TextTagIOActionPause
+            
+    let TextToTagIOType (txt: string) =
+        match txt.ToLower() with
+        | TextTagIOAddress -> TagIOAddress
+        | TextTagIOVariable -> TagIOVariable
+        | TextTagIOConst -> TagIOConst
+        | TextTagIOCommand -> TagIOCommand
+        | TextTagIOOperator -> TagIOOperator
+        | TextTagIOAutoBTN -> TagIOAutoBTN
+        | TextTagIOManualBTN -> TagIOManualBTN
+        | TextTagIOEmergencyBTN -> TagIOEmergencyBTN
+        | TextTagIOPauseBTN -> TagIOPauseBTN
+        | TextTagIODriveBTN -> TagIODriveBTN
+        | TextTagIOTestBTN -> TagIOTestBTN
+        | TextTagIOClearBTN -> TagIOClearBTN
+        | TextTagIOHomeBTN -> TagIOHomeBTN
+        | TextTagIOReadyBTN -> TagIOReadyBTN
+        | TextTagIOAutoLamp -> TagIOAutoLamp
+        | TextTagIOManualLamp -> TagIOManualLamp
+        | TextTagIODriveLamp -> TagIODriveLamp
+        | TextTagIOTestLamp -> TagIOTestLamp
+        | TextTagIOErrorLamp -> TagIOErrorLamp
+        | TextTagIOReadyLamp -> TagIOReadyLamp
+        | TextTagIOIdleLamp -> TagIOIdleLamp
+        | TextTagIOHomingLamp -> TagIOHomingLamp
+        
+        | TextTagIOConditionReady -> TagIOConditionReady
+        | TextTagIOConditionDrive -> TagIOConditionDrive
+        | TextTagIOActionEmg -> TagIOActionEmg
+        | TextTagIOActionPause -> TagIOActionPause
+        
+
+        | _ -> failwithf $"'{txt}' TextTagIOType Error check type"
+
     let getDuDataType = function
         | PlcDataSizeType.Boolean -> DuBOOL
         | PlcDataSizeType.Byte    -> DuUINT8

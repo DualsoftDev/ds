@@ -24,8 +24,6 @@ module ImportPptModule =
 
     type PptParams = {
         mutable HwTarget: HwTarget
-        AutoIOM: bool
-        CreateFromPpt : bool
         CreateBtnLamp : bool
         StartMemory : int
         OpMemory: int
@@ -34,8 +32,6 @@ module ImportPptModule =
     let defaultPptParams() =
         {
             HwTarget = defaultHwTarget
-            AutoIOM = true
-            CreateFromPpt = false
             CreateBtnLamp = true
             StartMemory = 1000
             OpMemory = 100
@@ -187,7 +183,7 @@ module ImportPptModule =
                 doc.BuildSystem(theSys, isLib, pptParams.CreateBtnLamp)
 
             if paras.LoadingType = DuNone then
-                doc.UpdateActionIO(theSys, pptParams.AutoIOM)
+                //doc.UpdateActionIO(theSys, pptParams.AutoIOM)
                 doc.UpdateLayouts(theSys)
                 layoutImgPaths.AddRange(doc.SaveSlideImage())|>ignore
 
@@ -285,9 +281,6 @@ module ImportPptModule =
 
             let (system, loadingPaths), millisecond =
                 duration(fun () ->
-                    if pptParams.CreateFromPpt then
-                        model.System, model.LoadingPaths
-                    else
                         LoaderExt.ExportToDS (model.System, activePath)
                         ParserLoader.LoadFromActivePath activePath (pptParams.HwTarget.HwCPU) false )
 

@@ -27,7 +27,7 @@ namespace Engine.TestSimulator
             string testFile = Path.Combine(AppContext.BaseDirectory
                 , @$"../../src/UnitTest/UnitTest.Model/ImportOfficeExample/SampleA/exportDS/testA/testMy/my.pptx");
             var modelConfig = ModelConfigPPT.getModelConfigFromPPTFile(testFile);
-            PptParams pptParms = new PptParams(modelConfig.HwTarget,  true, false, true, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize);
+            PptParams pptParms = new PptParams(modelConfig.HwTarget, true, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize);
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms);
             DsAddressModule.assignAutoAddress(_system, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize, modelConfig.HwTarget);
             RuntimeModel runModel = new(dsz, HwCPU.WINDOWS);

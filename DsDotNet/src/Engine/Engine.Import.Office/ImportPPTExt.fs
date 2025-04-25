@@ -619,18 +619,18 @@ module ImportU =
                 api.TX <- tx
                 api.RX <- rx
                 )
-        [<Extension>]
-        static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool) =
+        //[<Extension>]
+        //static member UpdateActionIO(doc: PptDoc, sys: DsSystem, autoIO:bool) =
 
-            let cnf = doc.ModelConfig
+        //    let cnf = doc.ModelConfig
 
-            if not(autoIO)
-                && activeSys.IsSome && activeSys.Value = sys
-                && not(cnf.HwTarget.HasSlot)
-            then
-                failwithf "IO Table이 없습니다. Utils > 주소 할당 수행하세요"
+        //    if not(autoIO)
+        //        && activeSys.IsSome && activeSys.Value = sys
+        //        && not(cnf.HwTarget.HasSlot)
+        //    then
+        //        failwithf "IO Table이 없습니다. Utils > 주소 할당 수행하세요"
 
-            ImportIODevModule.ApplyIO(sys, cnf.TagConfig.DeviceTags, cnf.HwTarget)
+        //    ImportIODevModule.ApplyIO(sys, cnf.TagConfig.DeviceTags, cnf.HwTarget)
 
 
 

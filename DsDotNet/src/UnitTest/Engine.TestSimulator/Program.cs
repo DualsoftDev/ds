@@ -29,7 +29,6 @@ namespace Engine.TestSimulator
             var modelConfig = ModelConfigPPT.getModelConfigFromPPTFile(testFile);
             PptParams pptParms = new PptParams(modelConfig.HwTarget, true, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize);
             (string dsz, DsSystem _system) = ImportPpt.GetRuntimeZipFromPpt(testFile, pptParms);
-            DsAddressModule.assignAutoAddress(_system, modelConfig.HwTarget.StartMemory, OpModeLampBtnMemorySize, modelConfig.HwTarget);
             RuntimeModel runModel = new(dsz, HwCPU.WINDOWS);
 
             _ = DsSimulator.Do(runModel.Cpu);

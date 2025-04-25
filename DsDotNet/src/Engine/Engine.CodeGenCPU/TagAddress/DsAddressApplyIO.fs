@@ -12,6 +12,28 @@ open Engine.Core.MapperDataModule
 [<AutoOpen>]
 module DsAddressApplyIO =
 
+    let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)=
+            if taskDevParamDataType <> dataType
+                then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
+
+    let updateTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+        if inSym.IsSome then  dev.SetInSymbol(inSym.Value)
+        if outSym.IsSome then  dev.SetOutSymbol(outSym.Value)
+
+        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
+        checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
+
+    let getDevDataTypeText (dev:TaskDev) =   DsTaskDevTypeModule.getTaskDevDataTypeText dev.TaskDevParamIO
+    let getHwDevDataTypeText (hwDev:HwSystemDef) = DsTaskDevTypeModule.getTaskDevDataTypeText hwDev.TaskDevParamIO
+
+    let updateHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
+        if inSym.IsSome 
+        then hwDev.TaskDevParamIO.InParam.Symbol <- inSym.Value
+        if outSym.IsSome 
+        then hwDev.TaskDevParamIO.InParam.Symbol <- outSym.Value
+
+        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
+        checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
 
     let ApplyDeviceTags (sys: DsSystem, devTags: DeviceTag seq, hwTarget: HwTarget) =
         let dicDev =
@@ -52,7 +74,7 @@ module DsAddressApplyIO =
                 dev.InAddress <- getValidAddress(inAddrValid, inType, dev.QualifiedName, false, IOType.In, hwTarget)
                 dev.OutAddress <- getValidAddress(outAddrValid, outType, dev.QualifiedName, false, IOType.Out, hwTarget)
 
-                updatePptTaskDevParam dev (inSym, inType) (outSym, outType)
+                updateTaskDevParam dev (inSym, inType) (outSym, outType)
             else
                 logDebug $"모델에 {devName} 이름이 없습니다."
 
@@ -68,7 +90,7 @@ module DsAddressApplyIO =
             elif not isConst && value <> TextNotUsed then
                 failWithLog $"변수 {name} Input 영역에 값 입력이 없어야 합니다. ('-' 입력)"
 
-            let variableData = VariableData(name, textToDataType dataType, if isConst then Immutable else Mutable)
+            let variableData = VariableData(name, textToDataType dataType, if isConst then ConstType else VariableType)
             if isConst then variableData.InitValue <- value
 
             sys.AddVariables(variableData)
@@ -102,7 +124,7 @@ module DsAddressApplyIO =
             |> Option.iter (fun b ->
                 updateHwAddress b (tag.Input, tag.Output) hwTarget
                 let inType, outType = getInOutDataType tag.DataType
-                updatePptHwParam b (Some tag.SymbolIn, inType) (Some tag.SymbolOut, outType))
+                updateHwParam b (Some tag.SymbolIn, inType) (Some tag.SymbolOut, outType))
 
         let updateHardwareLamp (tag: DeviceTag, lampType: LampType) =
             let name = tag.Name.Trim().DeQuoteOnDemand()
@@ -111,7 +133,7 @@ module DsAddressApplyIO =
             |> Option.iter (fun l ->
                 updateHwAddress l (tag.Input, tag.Output) hwTarget
                 let inType, outType = getInOutDataType tag.DataType
-                updatePptHwParam l (Some tag.SymbolIn, inType) (Some tag.SymbolOut, outType))
+                updateHwParam l (Some tag.SymbolIn, inType) (Some tag.SymbolOut, outType))
 
         let updateCondition (tag: DeviceTag, condType: ConditionType) =
             let inType, outType = getInOutDataType tag.DataType
@@ -122,7 +144,7 @@ module DsAddressApplyIO =
             |> Seq.tryFind (fun c -> c.Name = tag.Name && c.ConditionType = condType)
             |> Option.iter (fun cond ->
                 updateHwAddress cond (tag.Input, tag.Output) hwTarget
-                updatePptHwParam cond (inSym, inType) (outSym, outType)
+                updateHwParam cond (inSym, inType) (outSym, outType)
             )
 
 
@@ -135,7 +157,7 @@ module DsAddressApplyIO =
             |> Seq.tryFind (fun a -> a.Name = tag.Name && a.ActionType = actType)
             |> Option.iter (fun act ->
                 updateHwAddress act (tag.Input, tag.Output) hwTarget
-                updatePptHwParam act (inSym, inType) (outSym, outType)
+                updateHwParam act (inSym, inType) (outSym, outType)
             )
 
 

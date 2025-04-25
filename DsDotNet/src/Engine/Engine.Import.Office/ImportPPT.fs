@@ -297,7 +297,7 @@ module ImportPptModule =
 
         static member GetRuntimeZipFromPpt(fullName: string, pptParams:PptParams)=
             let ret = ImportPpt.GetDSFromPptWithLib(fullName, false, pptParams)
-            DsAddressModule.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
+            DsAddressAutoGen.assignAutoAddress(ret.System, pptParams.StartMemory, pptParams.OpMemory, pptParams.HwTarget)
             let zipPath = LoaderExt.saveModelZip(ret.LoadingPaths, ret.ActivePath, ret.LayoutImgPaths, ret.ModelConfig)
             zipPath, ret.System
 

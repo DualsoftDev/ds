@@ -31,8 +31,7 @@ module ExportIOTable =
         row.ItemArray <- cols.Select(fun f -> "" |> box).ToArray()
         row |> dt.Rows.Add |> ignore
 
-
-    let  addIOColumn(dt:DataTable) =
+    let addIOColumn(dt:DataTable) =
 
         dt.Columns.Add($"{IOColumn.Case}", typeof<string>) |> ignore
         dt.Columns.Add($"{IOColumn.Flow}", typeof<string>) |> ignore
@@ -44,6 +43,7 @@ module ExportIOTable =
         dt.Columns.Add($"{IOColumn.OutSymbol}", typeof<string>)  |> ignore
 
     let emptyLine (dt:DataTable) = emptyRow (Enum.GetNames(typedefof<IOColumn>)) dt
+
     let getFlowExportName(hw:HwSystemDef)  =
         if hw.IsGlobalSystemHw
             then "ALL"
@@ -59,7 +59,7 @@ module ExportIOTable =
             for btn in btns do
                 if containSys then
                     updateHwAddress (btn) (btn.InAddress, btn.OutAddress) target
-                    let dType = getPptHwDevDataTypeText btn
+                    let dType = getHwDevDataTypeText btn
                     dt.Rows.Add(xlsCase.ToText(), getFlowExportName(btn), btn.Name, dType,  btn.InAddress, btn.OutAddress ,"", "")
                     |> ignore
 
@@ -67,7 +67,7 @@ module ExportIOTable =
             for lamp in lamps do
                 if containSys then
                     updateHwAddress (lamp) (lamp.InAddress, lamp.OutAddress) target
-                    let dType = getPptHwDevDataTypeText lamp
+                    let dType = getHwDevDataTypeText lamp
                     dt.Rows.Add(xlsCase.ToText(), getFlowExportName(lamp), lamp.Name, dType,  lamp.InAddress, lamp.OutAddress ,"", "")
                     |> ignore
 
@@ -112,7 +112,7 @@ module ExportIOTable =
             TextTagIOAddress
             flow
             name
-            getPptDevDataTypeText (dev)
+            getDevDataTypeText (dev)
             getValidAddress(dev.InAddress,  dev.InDataType,  dev.QualifiedName, inSkip,  IOType.In,  target )
             getValidAddress(dev.OutAddress, dev.OutDataType, dev.QualifiedName, outSkip, IOType.Out, target )
             inSym
@@ -236,11 +236,11 @@ module ExportIOTable =
         let variRows =
             sys.Variables.Map(fun vari->
                 [
-                    vari.VariableType = Mutable ?= (TextTagIOVariable, TextTagIOConst)
+                    vari.VariableType = VariableType ?= (TextTagIOVariable, TextTagIOConst)
                     TextTagIOAllFlow
                     vari.Name
                     vari.Type.ToText()
-                    vari.VariableType = Mutable ?= (TextNotUsed, vari.InitValue)
+                    vari.VariableType = VariableType ?= (TextNotUsed, vari.InitValue)
                     TextNotUsed
                     TextNotUsed
                     TextNotUsed
@@ -264,7 +264,7 @@ module ExportIOTable =
                     getTagIOConditionLabel cond.ConditionType
                     getFlowExportName (cond)
                     name
-                    getPptHwDevDataTypeText cond
+                    getHwDevDataTypeText cond
                     cond.InAddress
                     cond.OutAddress
                     cond.TaskDevParamIO.InParam.Symbol
@@ -286,7 +286,7 @@ module ExportIOTable =
                     getTagIOActionLabel action.ActionType
                     getFlowExportName (action)
                     name
-                    getPptHwDevDataTypeText action
+                    getHwDevDataTypeText action
                     action.InAddress
                     action.OutAddress
                     action.TaskDevParamIO.InParam.Symbol
@@ -406,9 +406,6 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-
-
-
     let getLabelTable(name:string) =
         let dt=  new System.Data.DataTable($"{name}")
         dt.Columns.Add($"{TextColumn.Name}", typeof<string>) |> ignore
@@ -457,7 +454,6 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-
     let ToFlowNamesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "Flow이름"
@@ -472,7 +468,6 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-
     let ToWorkNamesTable (sys: DsSystem)  : DataTable =
 
         let dt = getLabelTable "Work이름"
@@ -486,7 +481,6 @@ module ExportIOTable =
 
         emptyLine ()
         dt
-
 
     let ToDevicesTable (sys: DsSystem)  : DataTable =
 
@@ -504,8 +498,6 @@ module ExportIOTable =
 
         emptyLine ()
         dt
-
-
 
     let ToAutoWorkTable (sys: DsSystem) target: DataTable =
         let dt = new System.Data.DataTable("Work자동조작")
@@ -540,7 +532,6 @@ module ExportIOTable =
         emptyLine ()
         dt
 
-
     let ToAutoFlowTable (sys: DsSystem)  target: DataTable =
         let dt = new System.Data.DataTable("Flow자동조작")
         dt.Columns.Add($"{AutoColumn.Name}", typeof<string>) |> ignore
@@ -570,7 +561,6 @@ module ExportIOTable =
 
         emptyLine ()
         dt
-
 
     let ToManualTable (sys: DsSystem) (iomType:IOType) : DataTable =
         let tableName =
@@ -627,7 +617,6 @@ module ExportIOTable =
                 if isSim then ExternalXGIAddressON else ExternalXGIAddressOFF
             |_ -> failwith $"{target.HwIO} Invalid simAddress tag" 
 
-
     let ToManualTable_BtnLamp (sys: DsSystem) (target:HwTarget)  (pakage:RuntimeMode) : DataTable =
 
         let dt = new System.Data.DataTable($"조작반(M)")
@@ -661,7 +650,6 @@ module ExportIOTable =
 
         emptyLine ()
         dt
-
 
     let GetDeviceTags (sys: DsSystem) : DeviceTag[] =
 
@@ -697,8 +685,6 @@ module ExportIOTable =
             tag  TagIODriveLamp "DriveLamp" "bool"        TextNotUsed  hws["DriveLamp"]
         |]
 
-        
-
     let ToIOListDataTables (system: DsSystem) (rowSize:int) (target:HwTarget) =
         let tableDeviceIOs = ToDeviceIOTables system rowSize target
         let tablePanelIO = ToPanelIOTable system  true target
@@ -707,7 +693,6 @@ module ExportIOTable =
         let tables = tableDeviceIOs @ [tablePanelIO ] @ tabletableFuncVariExternal
 
         tables
-
 
     let toDataTablesToJSON (dataTables: seq<DataTable>) (fileName: string) =
         // Helper function to convert DataTable to a list of dictionaries
@@ -751,11 +736,6 @@ module ExportIOTable =
             let dataTables =  ToIOListDataTables sys ExcelchunkBySize target
             createSpreadsheet filePath (dataTables) 25.0 true
 
-        //[<Extension>] //convertDataSetToPdf 구현 필요 opensource 찾아야함
-        //static member ExportIOListToPDF (system: DsSystem) (filePath: string) target=
-        //    let dataTables =  ToIOListDataTables system PDFchunkBySize target
-        //    convertDataSetToPdf filePath dataTables
-
         [<Extension>]
         static member ExportHMITableToExcel (sys: DsSystem) (filePath: string) (target:HwTarget) (package:RuntimeMode)=
             let dataTables = [|
@@ -776,11 +756,6 @@ module ExportIOTable =
 
                                 |]
             createSpreadsheet filePath dataTables 25.0 false
-
-        [<Extension>]
-        static member ToDataJsonFlows  (system: DsSystem) (flowNames:string seq) (conatinSys:bool) target =
-            let dataTables = ToIOListDataTables system IOchunkBySize target
-            toDataTablesToJSON dataTables "IOTABLE"
 
         [<Extension>]
         static member ToDataJsonLayouts (xs: Flow seq) =

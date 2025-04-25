@@ -143,7 +143,7 @@ module ConvertCPU =
     let private applyVariables(s:DsSystem) =
         [|
             for v in s.Variables do
-                if v.VariableType = Immutable then
+                if v.VariableType = ConstType then
                     yield v.VM.V1_ConstMove(s)
 
             for v in s.ActionVariables do

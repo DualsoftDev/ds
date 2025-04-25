@@ -459,6 +459,8 @@ module rec CoreModule =
 
             member x.InAddress  with get() = x.TaskDevParamIO.InParam.Address  and set(v) = x.TaskDevParamIO.InParam.Address <- v
             member x.OutAddress with get() = x.TaskDevParamIO.OutParam.Address and set(v) = x.TaskDevParamIO.OutParam.Address <- v
+            member x.InSymbol = x.TaskDevParamIO.InParam.Symbol
+            member x.OutSymbol = x.TaskDevParamIO.OutParam.Symbol
             member x.IsAnalogSensor = x.InTag.IsNonNull() && x.InTag.DataType <> typedefof<bool>
             member x.IsAnalogActuator = x.OutTag.IsNonNull() && x.OutTag.DataType <> typedefof<bool>
             member x.IsAnalog = x.IsAnalogSensor || x.IsAnalogActuator

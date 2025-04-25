@@ -7,9 +7,6 @@ open Engine.Common
 [<AutoOpen>]
 module rec CodeElements =
 
-    type VariableType =
-        | Mutable
-        | Immutable
 
 
     type VariableData(name:string, varType:DataType, variableType:VariableType)  =
@@ -19,8 +16,8 @@ module rec CodeElements =
         member x.VariableType = variableType
         member x.ToDsText() =
             match variableType with
-            | Mutable ->  $"{varType.ToText()} {name}"
-            | Immutable -> $"const {varType.ToText()} {name} = {x.InitValue}"
+            | VariableType ->  $"{varType.ToText()} {name}"
+            | ConstType -> $"const {varType.ToText()} {name} = {x.InitValue}"
         member val InitValue = getNull<string>() with get, set
 
     //action 주소를 가지는 변수

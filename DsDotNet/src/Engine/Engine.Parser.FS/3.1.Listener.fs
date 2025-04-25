@@ -248,7 +248,7 @@ type DsParserListener(parser: dsParser, options: ParserOptions) =
     override x.EnterVariableBlock(ctx: VariableBlockContext) =
 
         let addVari varName varType (value:string) (isImmutable:bool)=
-            let variableData = VariableData (varName, varType, if isImmutable then Immutable else Mutable)
+            let variableData = VariableData (varName, varType, if isImmutable then ConstType else VariableType)
 
             let variable = createVariableByType varName varType
             variableData.InitValue <- value

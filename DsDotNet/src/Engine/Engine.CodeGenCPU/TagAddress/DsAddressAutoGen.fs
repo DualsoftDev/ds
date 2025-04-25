@@ -10,7 +10,7 @@ open System.Linq
 open Engine.Core.MapperDataModule
 
 [<AutoOpen>]
-module DsAddressModule =
+module DsAddressAutoGen =
 
 
     let private getValidHwItem (hwItem:HwSystemDef) (skipIn:bool) (skipOut:bool) (target:HwTarget)=
@@ -33,7 +33,7 @@ module DsAddressModule =
         hwItem.InAddress <- inA
         hwItem.OutAddress <- outA
 
-    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn:int, target:HwTarget) =
+    let assignAutoAddress (sys: DsSystem, startMemory:int, offsetOpModeLampBtn:int, target:HwTarget) : DeviceTag seq =
         setMemoryIndex(startMemory);
 
         for b in sys.HWButtons do
@@ -76,27 +76,4 @@ module DsAddressModule =
                     )
 
         setMemoryIndex(startMemory + offsetOpModeLampBtn);
-
-
-    let checkDataType name (taskDevParamDataType:DataType) (dataType:DataType)=
-          if taskDevParamDataType <> dataType
-                then failWithLog $"error datatype : {name}\r\n [{taskDevParamDataType.ToPLCText()}]  <> {dataType.ToPLCText()}]"
-
-    let updatePptTaskDevParam (dev:TaskDev) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
-        if inSym.IsSome then  dev.SetInSymbol(inSym.Value)
-        if outSym.IsSome then  dev.SetOutSymbol(outSym.Value)
-
-        checkDataType $"IN {dev.QualifiedName}" dev.InDataType inDataType
-        checkDataType $"OUT {dev.QualifiedName}" dev.OutDataType outDataType
-
-    let getPptDevDataTypeText (dev:TaskDev) =   DsTaskDevTypeModule.getTaskDevDataTypeText dev.TaskDevParamIO
-    let getPptHwDevDataTypeText (hwDev:HwSystemDef) = DsTaskDevTypeModule.getTaskDevDataTypeText hwDev.TaskDevParamIO
-
-    let updatePptHwParam (hwDev:HwSystemDef) (inSym:string option, inDataType:DataType)  (outSym:string option, outDataType:DataType)  =
-        if inSym.IsSome 
-        then hwDev.TaskDevParamIO.InParam.Symbol <- inSym.Value
-        if outSym.IsSome 
-        then hwDev.TaskDevParamIO.InParam.Symbol <- outSym.Value
-
-        checkDataType  $"IN {hwDev.QualifiedName}" hwDev.InDataType inDataType
-        checkDataType  $"OUT {hwDev.QualifiedName}" hwDev.OutDataType outDataType
+        ExportDeviceTags sys

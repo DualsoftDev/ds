@@ -50,28 +50,22 @@ module ImportUtilForDev =
             mySys.AddLoadedSystem(dev)
             dev
 
-    let getLibraryConfig()=
-        //let runDir = Assembly.GetEntryAssembly().Location |> Path.GetDirectoryName
-        let runDir = AppDomain.CurrentDomain.BaseDirectory
-
+    let getLibraryConfig() =
+        let baseDir = AppContext.BaseDirectory
         let runDir =
-            if Net48Path.Exists (Path.Combine(runDir, "dsLib")) then
-                runDir
+            if Net48Path.Exists(Path.Combine(baseDir, "dsLib")) then
+                baseDir
             else
                 @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils"
 
-        let curDir = currentFileName |> Path.GetDirectoryName
-
         let libConfigPath = Path.Combine(runDir, "dsLib", "Library.config")
 
-        let libPath =
-            if not <| Net48Path.Exists libConfigPath then
-                failWithLog $"{libConfigPath} file not found"
+        if not (Net48Path.Exists libConfigPath) then
+            failWithLog $"{libConfigPath} file not found"
 
-            libConfigPath
-
-        let libConfig = LoadLibraryConfig(libPath)
+        let libConfig = LoadLibraryConfig libConfigPath
         libConfig, runDir
+
 
     let getLibraryInfos()= 
         getLibraryConfig() 

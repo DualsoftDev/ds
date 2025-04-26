@@ -144,7 +144,7 @@ type XmlReader =
             let comment = XgxXml.tryGetAttribute node "Comment" 
             
             if device <> "" && comment <> "" && (not usedOnly || used = "1") then
-                
+                let comment = if String.IsNullOrWhiteSpace(comment) then "_" else comment
                 let uniqName = getUniqName (comment|> validName, device)
                 let size, offset =
                     match isXGI with

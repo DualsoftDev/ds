@@ -51,11 +51,13 @@ module ImportUtilForDev =
             dev
 
     let getLibraryConfig() =
-        let baseDir = AppContext.BaseDirectory
+        let appPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        let baseDir = Path.Combine(appPath, "Dualsoft", "PowerPointAddIn For Dualsoft")
         let runDir =
             if Net48Path.Exists(Path.Combine(baseDir, "dsLib")) then
                 baseDir
             else
+                //failWithLog $"dsLib not found in {baseDir}" 
                 @$"{__SOURCE_DIRECTORY__}../../../../Apps/OfficeAddIn/PowerPointAddInHelper/Utils"
 
         let libConfigPath = Path.Combine(runDir, "dsLib", "Library.config")

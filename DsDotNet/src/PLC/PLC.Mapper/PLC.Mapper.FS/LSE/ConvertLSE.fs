@@ -15,10 +15,10 @@ module ConvertLSEModule =
         let lines = File.ReadLines(filePath) // Stream 방식으로 메모리 절약
         let isXGI = IsXg5kXGI filePath
 
-        let tags = XmlReader.ReadTags (filePath, false) |> fun (tag, _, _) -> tag
-        let tagsByAddress = tags |> Seq.map(fun t -> t.Address, t) |> dict
+        let tags = XmlReader.ReadTags (filePath, false) |> fun (tag, _, _)  -> tag |> Seq.cast<XGTTag>
+        let tagsByAddress = tags |> Seq.map(fun t -> t.GetAddressAlias(Boolean), t) |> dict
         let tagsByName = tags |> Seq.map(fun t -> t.Name, t) |> dict
-        let _DirectTagNames = Dictionary<string, PlcTagBase>()
+        let _newTagAddressDic = Dictionary<string, XGTTag>()
 
         let networks = ResizeArray<Rung>()
         let mutable currentTitle = ""
@@ -34,31 +34,43 @@ module ConvertLSEModule =
                 line.Contains($"ElementType=\"{etype |> int}\"")
 
             let getTerminal (variable: string) (tType: TerminalType) =
-                let lsTag = 
-                    if isXGI then tryParseXgiTag variable else tryParseXgkTag variable
-
-                if lsTag.IsNone then None
+                let lsNotTag = variable |> Seq.forall System.Char.IsDigit 
+                                || variable.Contains("#")
+                                || variable.StartsWith("_")
+                if lsNotTag then None
                 else
-                    let tag =   
-                        if tagsByAddress.ContainsKey variable then
-                            tagsByAddress.[variable]
-                        elif tagsByName.ContainsKey variable then
-                            tagsByName.[variable]
-                        else
-                            if _DirectTagNames.ContainsKey (variable)
-                            then
-                                _DirectTagNames.[variable]
+                    let tag = 
+                        let isAddress  = 
+                            if isXGI 
+                            then (tryParseXgiTag variable).IsSome 
+                            else (tryParseXgkTag variable).IsSome
+                        
+                        if isAddress then 
+                            let newTag = XGTTag(variable, isXGI, false)
+                            let boolAddress = newTag.GetAddressAlias(Boolean)
+                            if tagsByAddress.ContainsKey boolAddress then
+                                tagsByAddress.[boolAddress]  |> Some
                             else 
-                                let newTag =
-                                    XGTTag(
-                                        variable,
-                                        isXGI,
-                                        false
-                                    ) :>PlcTagBase
-                                _DirectTagNames.Add(variable, newTag)   
-                                newTag
+                                if _newTagAddressDic.ContainsKey (boolAddress)
+                                then
+                                    _newTagAddressDic.[boolAddress] |> Some
+                                else 
+                                    _newTagAddressDic.Add(newTag.GetAddressAlias(Boolean), newTag)   
+                                    newTag  |> Some
+                       
+                        else 
+                            if tagsByName.ContainsKey variable then
+                                tagsByName.[variable]  |> Some
+                            else
+                                None
 
-                    PlcTerminal(tag, tType) |> Some
+
+
+
+                    if tag.IsSome then 
+                        PlcTerminal(tag.Value, tType) |> Some
+                    else 
+                        None
 
 
             match () with
@@ -80,7 +92,7 @@ module ConvertLSEModule =
         let titlePattern = Regex("<Program Task\s*=(.*)")
         let networkStartPattern = Regex("<Rung BlockMask")
 
-        let addLine(line) =   
+        let tryAddLine(line) =   
             match classifyContent line with
                 | Some content -> currentContent.Add(content)
                 | None -> ()
@@ -90,16 +102,15 @@ module ConvertLSEModule =
             if networkStartPattern.IsMatch(line) then
                 if currentContent.Count > 0 then
                     networks.Add({ Title = currentTitle; Items = currentContent.ToArray() })
-                currentTitle <- ""
                 currentContent.Clear()
-                addLine(line)
+                tryAddLine(line)
             elif titlePattern.IsMatch(line) then
-                let m = titlePattern.Match(line)
-                currentTitle <- m.Groups.[1].Value.Trim()
+                let mm = Regex.Match(line, @">([^<]+)");
+                currentTitle <- mm.Groups.[1].Value.Trim()
             else 
-                addLine(line)
+                tryAddLine(line)
         
-           // addressTitles 생성: 주소 → 타이틀 리스트 매핑
+        // addressTitles 생성: 주소 → 타이틀 리스트 매핑
         let addressTitles =
             networks
             |> Seq.collect (fun net ->

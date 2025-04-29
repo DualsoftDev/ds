@@ -28,14 +28,14 @@ type VertexTagManager with
         let real = v.Vertex :?> Real
         let coins = real.Graph.Vertices.Select(getVMCall)
         let f = getFuncName()
-        let initSrcs = real.Graph.HeadConnectedOrSingleVertex
+        //let initSrcs = real.Graph.HeadConnectedOrSingleVertex
         [|
             for coin in coins do
-                let sets =
-                    if initSrcs.Contains coin.Vertex then
-                        coin.CallOut.Expr  
-                    else
-                        coin.CallOut.Expr <&&> initSrcs.Select(fun f->f.VC.ET).ToAndElseOn()
+                let sets = coin.CallOut.Expr  
+                    //if initSrcs.Contains coin.Vertex then
+                    //    coin.CallOut.Expr  
+                    //else
+                    //    coin.CallOut.Expr <&&> initSrcs.Select(fun f->f.VC.ET).ToOrElseOn()
 
                 let rsts = coin.ET.Expr <||> coin.RT.Expr 
 

@@ -74,8 +74,8 @@ module DsAddressApplyIO =
                 dev.OutAddress <- outAddrValid 
 
                 updateTaskDevParam dev (inSym, inType) (outSym, outType)
-            else
-                failwith $"모델에 {name} 이름이 없습니다."
+            //else
+            //    failwith $"모델에 {name} 이름이 없습니다."
 
         let updateVarOrConst (tag: DeviceTag) (isConst: bool) =
             let name = tag.Name.Trim()

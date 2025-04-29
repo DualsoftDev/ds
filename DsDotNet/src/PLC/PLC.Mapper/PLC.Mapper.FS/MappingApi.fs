@@ -21,7 +21,8 @@ module MappingApiModule =
         let area = validName (defaultValueIfEmpty groupName "UnknownGroup")
         DeviceApi(
             Area = area,
-            Work = (if usingPouGroup then  area else validName (defaultValueIfEmpty work "UnknownWork")),
+            //Work = (if usingPouGroup then  area else validName (defaultValueIfEmpty work "UnknownWork")),
+            Work = area,
             Device = validName (defaultValueIfEmpty device "UnknownDevice"),
             Api = validName (defaultValueIfEmpty api "Default"),
             MapperTag = tag,

@@ -100,45 +100,17 @@ module TagManagerModule =
             et
 
         ///OPC Server에서 계산 endTag 횟수 
-        member val CalcCount = 
-            if isActive
-            then createData(v, VertexTag.calcCount, DuUINT32)
-            else sysM.TempDataDuUINT32
-        member val CalcAverage = 
-            if isActive 
-            then createData(v, VertexTag.calcAverage, DuFLOAT32)
-            else sysM.TempDataDuFLOAT32
-        member val CalcStandardDeviation = 
-            if isActive
-            then createData(v, VertexTag.calcStandardDeviation, DuFLOAT32)
-            else sysM.TempDataDuFLOAT32
-        member val CalcWaitingDuration = 
-            if isActive
-            then createData(v, VertexTag.calcWaitingDuration, DuUINT32)
-            else sysM.TempDataDuUINT32
-        member val CalcActiveDuration = 
-            if isActive
-            then createData(v, VertexTag.calcActiveDuration, DuUINT32)
-            else sysM.TempDataDuUINT32
-        member val CalcMovingDuration = 
-            if isActive
-            then createData(v, VertexTag.calcMovingDuration, DuUINT32)
-            else sysM.TempDataDuUINT32
-
-        member val CalcActiveStartTime = 
-            if isActive
-            then createData(v, VertexTag.calcActiveStartTime, DuSTRING)
-            else sysM.TempDataDuString
-
-        member val CalcStatWorkFinish = 
-            if isActive
-            then createData(v, VertexTag.calcStatWorkFinish, DuBOOL)
-            else sysM.TempDataDuBool
-       
-        member val CalcStatActionFinish = 
-            if isActive
-            then createData(v, VertexTag.calcStatActionFinish, DuBOOL)
-            else sysM.TempDataDuBool
+        member val CalcCount = if isActive then createData(v, VertexTag.calcCount, DuUINT32) else sysM.TempDataDuUINT32
+        member val CalcAverage = if isActive then createData(v, VertexTag.calcAverage, DuFLOAT32) else sysM.TempDataDuFLOAT32
+        member val CalcStandardDeviation = if isActive then createData(v, VertexTag.calcStandardDeviation, DuFLOAT32) else sysM.TempDataDuFLOAT32
+        member val CalcWaitingDuration = if isActive then createData(v, VertexTag.calcWaitingDuration, DuUINT32) else sysM.TempDataDuUINT32
+        member val CalcActiveDuration = if isActive then createData(v, VertexTag.calcActiveDuration, DuUINT32) else sysM.TempDataDuUINT32
+        member val CalcMovingDuration = if isActive then createData(v, VertexTag.calcMovingDuration, DuUINT32) else sysM.TempDataDuUINT32
+        member val CalcActiveStartTime = if isActive then createData(v, VertexTag.calcActiveStartTime, DuSTRING) else sysM.TempDataDuString
+        member val CalcStatWorkFinish = if isActive then createData(v, VertexTag.calcStatWorkFinish, DuBOOL) else sysM.TempDataDuBool
+        member val CalcStatActionFinish = if isActive then createData(v, VertexTag.calcStatActionFinish, DuBOOL) else sysM.TempDataDuBool
+        //모니터링 전용
+        member val CalcTimeoutDetected = if isActive then createData(v, VertexTag.calcTimeoutDetected, DuBOOL) else sysM.TempDataDuBool
 
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member val ON = createTag true VertexTag.forceOn
@@ -198,6 +170,8 @@ module TagManagerModule =
             | VertexTag.calcWaitingDuration     -> x.CalcWaitingDuration
             | VertexTag.calcActiveDuration      -> x.CalcActiveDuration
             | VertexTag.calcMovingDuration      -> x.CalcMovingDuration
+            | VertexTag.calcTimeoutDetected     -> x.CalcTimeoutDetected
+            
             | VertexTag.calcActiveStartTime     -> x.CalcActiveStartTime
             | VertexTag.calcStatWorkFinish      -> x.CalcStatWorkFinish
             | VertexTag.calcStatActionFinish    -> x.CalcStatActionFinish

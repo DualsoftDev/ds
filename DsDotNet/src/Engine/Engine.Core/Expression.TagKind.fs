@@ -284,6 +284,19 @@ type TagKindExt =
         x.TagKind.IsOneOf(
                int MonitorTag.UserTagType
               )
+    [<Extension>]
+    static member IsControlErrorStg(x:IStorage) =
+        x.TagKind.IsOneOf(
+                int VertexTag.txErrOnTimeUnder,   
+                int VertexTag.txErrOnTimeOver,    
+                int VertexTag.txErrOffTimeUnder,  
+                int VertexTag.txErrOffTimeOver,   
+                int VertexTag.rxErrShort,         
+                int VertexTag.rxErrOpen,          
+                int VertexTag.rxErrInterlock,     
+                int VertexTag.workErrOriginGoing,
+                int VertexTag.errorWork  //calcTimeoutDetected는 제외 자동으로 OPC Server에서 처리
+              )
 
     [<Extension>]
     static member IsMotionStartStg(x:IStorage) = x.TagKind = int VertexTag.motionStart

@@ -24,111 +24,135 @@ module DsTimeAnalysisMoudle =
         let mutable count = 0u
         let mutable mean = 0.0f
         let mutable M2 = 0.0f
-        let mutable activeDuration = 0u // StatsStart → finishTag
-        let mutable movingDuration = 0u // MovingStart → finishTag
-        
+        let mutable activeDuration = 0u
+        let mutable movingDuration = 0u
         let mutable activeLastLog = 0u 
         let mutable movingLastLog = 0u 
-
-
         let mutable statsStart = DateTime.MinValue 
         let mutable movingStart = DateTime.MinValue 
-        let mutable updateAble = false //drive_state tag가 켜지고 finishTag가 살고 다음부터 저장
+        let mutable updateAble = false
+        let mutable isTimeoutTracking = false
+        let mutable timeoutDetected = false
+        let k = 2.0f
 
-
-        /// 모집단 분산
         let getPopulationVariance() = if count > 0u then (float M2) / (float count) else 0.0
-        /// 모집단 표준편차
         let getStandardDeviation() = getPopulationVariance() |> Math.Sqrt |> float32
 
-        let resetStat(vertex:Vertex) =  
+        let checkTimeout(duration: float32) =
+            if isTimeoutTracking && count >= 5u then
+                let stdDev = getStandardDeviation()
+                let threshold = mean + (k * stdDev)
+                duration > threshold
+            else false
+
+        let resetStat(vertex: Vertex) =  
             let tm = vertex.TagManager :?> VertexTagManager
             tm.CalcWaitingDuration.BoxedValue <- 0u
-            tm.CalcActiveDuration.BoxedValue <-  0u
-            tm.CalcMovingDuration.BoxedValue <-  0u
+            tm.CalcActiveDuration.BoxedValue <- 0u
+            tm.CalcMovingDuration.BoxedValue <- 0u
             tm.CalcStatWorkFinish.BoxedValue <- false  
 
-        /// 데이터 추가 및 평균/분산 업데이트
-        let updateStat(vertex:Vertex) =  
+        let resetTimeoutTracking(vertex: Vertex) =  
+            let tm = vertex.TagManager :?> VertexTagManager
+            tm.CalcTimeoutDetected.BoxedValue <- false
+            isTimeoutTracking <- false
+
+
+        let updateStat(vertex: Vertex) =  
             let tm = vertex.TagManager :?> VertexTagManager
 
-            if updateAble = false then 
-                updateAble <- tm.FlowManager.GetFlowTag(FlowTag.drive_state).Value   
-            else 
-                let duration =  movingDuration |> float32
+            if not updateAble  then
+                updateAble <- tm.FlowManager.GetFlowTag(FlowTag.drive_state).Value
+            elif not timeoutDetected
+            then
+                let duration = movingDuration |> float32
                 count <- count + 1u
                 let delta = duration - mean
                 mean <- mean + (delta / float32 count)
                 let delta2 = duration - mean
                 M2 <- M2 + (delta * delta2)
-             
+
                 tm.CalcAverage.BoxedValue <- mean
                 tm.CalcStandardDeviation.BoxedValue <- getStandardDeviation() 
                 tm.CalcCount.BoxedValue <- count
-
                 tm.CalcWaitingDuration.BoxedValue <- activeDuration - movingDuration
                 tm.CalcActiveDuration.BoxedValue <- activeDuration  
                 tm.CalcMovingDuration.BoxedValue <- movingDuration  
 
                 activeLastLog <- activeDuration
                 movingLastLog <- movingDuration
-        //member x.StatsStart = statsStart
-        //member val MovingStart = DateTime.MinValue with get, set
-    
-        member this.StartTracking(vertex:Vertex, startTime:DateTime) =  
+
+
+
+        /// 🔹 실시간 타임아웃 감지 (StartTracking 이후 호출됨)
+/// 🔹 실시간 타임아웃 감지 루프 (StartTracking 이후 자동 실행)
+        member this.CheckTimeoutWhileRunningLoop(vertex: Vertex) =
+            async {
+                let tm = vertex.TagManager :?> VertexTagManager
+
+                while isTimeoutTracking && movingStart <> DateTime.MinValue do
+                    let now = DateTime.UtcNow
+                    let duration = (now - movingStart).TotalMilliseconds |> float32
+                    let isTimeoutNow = checkTimeout(duration)
+
+                    if tm.CalcTimeoutDetected.BoxedValue <> isTimeoutNow then
+                        tm.CalcTimeoutDetected.BoxedValue <- isTimeoutNow
+
+                    timeoutDetected <- isTimeoutNow
+
+                    do! Async.Sleep(50) // 주기
+            }
+            |> Async.Start
+
+
+        member this.StartTracking(vertex: Vertex, startTime: DateTime) =  
             statsStart <- startTime
+            isTimeoutTracking <- true
+
             let tm = vertex.TagManager :?> VertexTagManager
             tm.CalcActiveStartTime.BoxedValue <- 
                 TimeZoneInfo.ConvertTime(statsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
-                            .ToString("yyyy-MM-dd HH:mm:ss.fff");
-        /// Moving 기록 시작
+                    .ToString("yyyy-MM-dd HH:mm:ss.fff");
+
+            this.CheckTimeoutWhileRunningLoop(vertex) // 🔹 백그라운드 실시간 감지 시작
+
         member this.StartMoving() =  
             movingStart <- DateTime.UtcNow
-        
-        /// 시간 기록 종료 및 지속 시간 계산
-        member this.EndTracking(vertex:Vertex) =
+
+        member this.EndTracking(vertex: Vertex) =
             let tm = vertex.TagManager :?> VertexTagManager
             let endTime = DateTime.UtcNow
-            if statsStart <> DateTime.MinValue then
-                activeDuration <-  (endTime - statsStart).TotalMilliseconds |> uint32
-            if movingStart <> DateTime.MinValue then
-                movingDuration <-  (endTime - movingStart).TotalMilliseconds |> uint32
-            //else 
-            //    failwithf $"{vertex.QualifiedName} 신호놓침 planStart"
 
-            resetStat vertex  //opc rising 위해서 값 초기화
-            updateStat vertex  
-            
-            tm.CalcStatWorkFinish.BoxedValue <- true //rising 처리
+            if statsStart <> DateTime.MinValue then
+                activeDuration <- (endTime - statsStart).TotalMilliseconds |> uint32
+            if movingStart <> DateTime.MinValue then
+                movingDuration <- (endTime - movingStart).TotalMilliseconds |> uint32
+
+            resetStat vertex
+            updateStat vertex
+            tm.CalcStatWorkFinish.BoxedValue <- true
 
             statsStart <- DateTime.MinValue
             movingStart <- DateTime.MinValue
             activeDuration <- 0u
             movingDuration <- 0u
+            resetTimeoutTracking vertex
 
+        member this.WaitingDuration = activeDuration - movingDuration
+        member this.ActiveLastLog = activeLastLog
+        member this.MovingLastLog = movingLastLog
 
-      
-        /// 대기 시간 계산
-        member this.WaitingDuration  =  activeDuration - movingDuration
-        /// 동작 시간
-        member this.ActiveLastLog  = activeLastLog
-        member this.MovingLastLog  = movingLastLog
-
-
-        member this.DriveStateChaged(driveOn:bool) =   
-            if not(driveOn) then    //drive_state가 꺼지면 초기화
+        member this.DriveStateChaged(driveOn: bool) =   
+            if not driveOn then
                 updateAble <- false
+                isTimeoutTracking <- false
 
-        member x.Count with get () = count and set v = count <- v
-        member x.Mean with get () = mean and set v = mean <- v
-        member x.MeanTemp with get () = M2 and set v = M2 <- v
-
-        member x.ActiveDuration with get () = activeDuration and set v = activeDuration <- v
-        member x.MovingDuration with get () = movingDuration and set v = movingDuration <- v
-
-        /// 모집단 표준편차
-        member this.StandardDeviation = getStandardDeviation() 
-
+        member x.Count with get() = count and set v = count <- v
+        member x.Mean with get() = mean and set v = mean <- v
+        member x.MeanTemp with get() = M2 and set v = M2 <- v
+        member x.ActiveDuration with get() = activeDuration and set v = activeDuration <- v
+        member x.MovingDuration with get() = movingDuration and set v = movingDuration <- v
+        member this.StandardDeviation = getStandardDeviation()
 
     /// 태그별 통계 관리
     let statsMap = ConcurrentDictionary<string, CalcStats>()
@@ -191,17 +215,22 @@ module DsTimeAnalysisMoudle =
                 )
        
     /// 태그별 시간 처리 로직
+/// 태그별 시간 처리 로직 (Call)
     let processCallTag tagKind (call: Call) =
         let stats = getOrCreateStats call.QualifiedName
         match tagKind with
         | VertexTag.startTag ->
-            stats.StartTracking(call, DateTime.UtcNow) 
-        | VertexTag.going    ->
-            stats.StartMoving() 
+            stats.StartTracking(call, DateTime.UtcNow)
+
+        | VertexTag.going ->
+            stats.StartMoving()
+            stats.CheckTimeoutWhileRunningLoop(call) // 🔹 진행 중 실시간 타임아웃 감지
 
         | VertexTag.calcStatActionFinish ->
             stats.EndTracking(call)
-        | _ -> debugfn "Unhandled VertexTag: %A" tagKind
+
+        | _ ->
+            debugfn "Unhandled VertexTag: %A" tagKind
 
 
     /// 태그별 시간 처리 로직

@@ -294,7 +294,13 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         // 태그가 있는 경우 OPC 노드 생성
                         if target.IsSome && not(isJob) && not(isTaskDev) then
                             let tags = getTags target.Value
-                            this.CreateOpcNodes tags folder nIndex    
+                            match mode with 
+                            | RuntimeMode.Control -> 
+                                this.CreateOpcNodes tags folder nIndex    
+                            | _->
+                                //calcTimeoutDetected는 제외 자동으로 OPC Server에서 처리
+                                let tags = tags |> Seq.filter(fun tag -> not(tag.IsControlErrorStg())) 
+                                this.CreateOpcNodes tags folder nIndex    
 
                         printfn "Adding Folder: %s under Parent: %s" treeNode.Node.Name parentNode.BrowseName.Name
 

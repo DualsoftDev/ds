@@ -205,7 +205,7 @@ module TagKindList =
     /// Plan end: PlanStart on 이후에 특별히 내부적 문제 없으면 on 된다.
     | planEnd                   = 11091
      
-
+    | calcTimeoutDetected       = 11100 //calc Action 통계측정 완료  planStart와 callFinish 되면 true
     | calcActiveStartTime       = 11101
     | calcActiveDuration        = 11102
     | calcWaitingDuration       = 11103

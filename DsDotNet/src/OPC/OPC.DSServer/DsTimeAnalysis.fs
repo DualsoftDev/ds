@@ -32,18 +32,24 @@ module DsTimeAnalysisMoudle =
         let mutable movingStart = DateTime.MinValue 
         let mutable updateAble = false
         let mutable isTimeoutTracking = false
-        let mutable timeoutDetected = false
-        let k = 2.0f
+        let k = 5.0f
 
         let getPopulationVariance() = if count > 0u then (float M2) / (float count) else 0.0
         let getStandardDeviation() = getPopulationVariance() |> Math.Sqrt |> float32
 
         let checkTimeout(duration: float32) =
-            if isTimeoutTracking && count >= 5u then
-                let stdDev = getStandardDeviation()
-                let threshold = mean + (k * stdDev)
-                duration > threshold
-            else false
+            let timeout = 
+                if isTimeoutTracking && count >= 5u then
+                    let stdDev = getStandardDeviation()
+                    let threshold = mean + (k * stdDev)
+                    duration > threshold
+                else false
+
+            if timeout
+            then 
+                ()
+
+            timeout
 
         let resetStat(vertex: Vertex) =  
             let tm = vertex.TagManager :?> VertexTagManager
@@ -58,19 +64,21 @@ module DsTimeAnalysisMoudle =
             isTimeoutTracking <- false
 
 
-        let updateStat(vertex: Vertex) =  
+        let updateStat(vertex: Vertex) (timeout:bool)=  
             let tm = vertex.TagManager :?> VertexTagManager
 
             if not updateAble  then
                 updateAble <- tm.FlowManager.GetFlowTag(FlowTag.drive_state).Value
-            elif not timeoutDetected
-            then
+            else
                 let duration = movingDuration |> float32
                 count <- count + 1u
-                let delta = duration - mean
-                mean <- mean + (delta / float32 count)
-                let delta2 = duration - mean
-                M2 <- M2 + (delta * delta2)
+
+                if not timeout 
+                then 
+                    let delta = duration - mean
+                    mean <- mean + (delta / float32 count)
+                    let delta2 = duration - mean
+                    M2 <- M2 + (delta * delta2)
 
                 tm.CalcAverage.BoxedValue <- mean
                 tm.CalcStandardDeviation.BoxedValue <- getStandardDeviation() 
@@ -96,8 +104,6 @@ module DsTimeAnalysisMoudle =
 
                     if tm.CalcTimeoutDetected.Value <> isTimeoutNow then
                         tm.CalcTimeoutDetected.Value <- isTimeoutNow
-
-                    timeoutDetected <- isTimeoutNow
 
                     do! Async.Sleep(50) // 주기
             }
@@ -128,8 +134,13 @@ module DsTimeAnalysisMoudle =
             if movingStart <> DateTime.MinValue then
                 movingDuration <- (endTime - movingStart).TotalMilliseconds |> uint32
 
+            let timeoutCall = 
+                match vertex with
+                | :? Call as c -> (c.TagManager:?> CoinVertexTagManager).CalcTimeoutDetected.Value
+                | _ -> false 
+
             resetStat vertex
-            updateStat vertex
+            updateStat vertex timeoutCall
             tm.CalcStatWorkFinish.BoxedValue <- true
 
             statsStart <- DateTime.MinValue

@@ -114,7 +114,8 @@ module DsTimeAnalysisMoudle =
                 TimeZoneInfo.ConvertTime(statsStart, TimeZoneInfo.Utc, TimeZoneInfo.Local)
                     .ToString("yyyy-MM-dd HH:mm:ss.fff");
 
-            this.CheckTimeoutWhileRunningLoop(vertex) // 🔹 백그라운드 실시간 감지 시작
+            if vertex :? Call then
+                this.CheckTimeoutWhileRunningLoop(vertex) // 🔹 백그라운드 실시간 감지 시작
 
         member this.StartMoving() =  
             movingStart <- DateTime.UtcNow

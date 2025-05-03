@@ -84,7 +84,6 @@ module DsTimeAnalysisMoudle =
 
 
 
-        /// 🔹 실시간 타임아웃 감지 (StartTracking 이후 호출됨)
 /// 🔹 실시간 타임아웃 감지 루프 (StartTracking 이후 자동 실행)
         member this.CheckTimeoutWhileRunningLoop(call: Call) =
             async {

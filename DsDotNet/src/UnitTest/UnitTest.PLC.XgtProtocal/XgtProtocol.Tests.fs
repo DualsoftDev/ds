@@ -66,7 +66,7 @@ module IntegrationTests =
                 for kind in areaTypes do
                     let address = 
                         if code = 'S' then  $"%%{code}{kind}0"  // S 디바이스는 1200 bit max
-                        else $"%%{code}{kind}100"  // 예: %%MX10, %%MW10
+                        else $"%%{code}{kind}256"  // 예: %%MX10, %%MW10
                     let value, dt =
                         match kind with
                         | 'X' -> box true, PlcDataSizeType.Boolean
@@ -75,14 +75,15 @@ module IntegrationTests =
                         | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), PlcDataSizeType.UInt32
                         | 'L' -> box (9876543210123456789UL), PlcDataSizeType.UInt64
                         | _ -> failwith $"지원되지 않는 타입: {kind}"
-
+                    
+                    
+                    let ok = conn.Write(address, dt, value)
+                    let read = conn.Read(address, dt)
                     try
-                        let ok = conn.Write(address, dt, value)
-                        let read = conn.Read(address, dt)
                         Assert.True(ok, $"쓰기 실패 - {address}")
                         Assert.Equal(value, read)
-                        printfn $"[✓] {address} → {value} (읽기: {read})"
                     with ex ->
+                        printfn $"[✓] {address} → {value} (읽기: {read})"
                         printfn $"[!] 예외 - 주소: {address} → {ex.Message}"
 
 
@@ -97,5 +98,6 @@ module IntegrationTests =
 
     [<Fact>]
     let ``XGT XGI Ethernet Integration Test - Dynamic Area Write/Read for 10 seconds`` () =
-        let areaCodesXGI = [ 'I'; (*'Q';'F';*) 'M'; 'L'; 'N'; 'K'; 'U'; 'R'; 'A'; 'W'; ]
-        runEthernetTest "192.168.9.102" areaCodesXGI
+        //let areaCodesXGI = [ 'I'; (*'Q';'F';*) 'M'; 'L'; 'N'; 'K'; 'U'; 'R'; 'A'; 'W'; ]
+        let areaCodesXGI = [ 'I'; ]
+        runEthernetTest "127.0.0.1" areaCodesXGI

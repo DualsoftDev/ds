@@ -32,7 +32,7 @@ module DsTimeAnalysisMoudle =
         let mutable movingStart = DateTime.MinValue 
         let mutable updateAble = false
         let mutable isTimeoutTracking = false
-        let k = 5.0f
+        let timeoutK = 5.0f
 
         let getPopulationVariance() = if count > 0u then (float M2) / (float count) else 0.0
         let getStandardDeviation() = getPopulationVariance() |> Math.Sqrt |> float32
@@ -41,7 +41,7 @@ module DsTimeAnalysisMoudle =
             let timeout = 
                 if isTimeoutTracking && count >= 5u then
                     let stdDev = getStandardDeviation()
-                    let threshold = mean + (k * stdDev)
+                    let threshold = mean + (timeoutK * stdDev)
                     duration > threshold
                 else false
 

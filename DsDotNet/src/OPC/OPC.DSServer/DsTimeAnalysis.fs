@@ -45,10 +45,6 @@ module DsTimeAnalysisMoudle =
                     duration > threshold
                 else false
 
-            if timeout
-            then 
-                ()
-
             timeout
 
         let resetStat(vertex: Vertex) =  

@@ -109,8 +109,6 @@ module TagManagerModule =
         member val CalcActiveStartTime = if isActive then createData(v, VertexTag.calcActiveStartTime, DuSTRING) else sysM.TempDataDuString
         member val CalcStatWorkFinish = if isActive then createData(v, VertexTag.calcStatWorkFinish, DuBOOL) else sysM.TempDataDuBool
         member val CalcStatActionFinish = if isActive then createData(v, VertexTag.calcStatActionFinish, DuBOOL) else sysM.TempDataDuBool
-        //모니터링 전용
-        member val CalcTimeoutDetected = if isActive then createData(v, VertexTag.calcTimeoutDetected, DuBOOL) else sysM.TempDataDuBool
 
         ///forceOnBit HMI , forceOffBit HMI 는 RF 사용
         member val ON = createTag true VertexTag.forceOn
@@ -170,20 +168,20 @@ module TagManagerModule =
             | VertexTag.calcWaitingDuration     -> x.CalcWaitingDuration
             | VertexTag.calcActiveDuration      -> x.CalcActiveDuration
             | VertexTag.calcMovingDuration      -> x.CalcMovingDuration
-            | VertexTag.calcTimeoutDetected     -> x.CalcTimeoutDetected
-            
+     
             | VertexTag.calcActiveStartTime     -> x.CalcActiveStartTime
             | VertexTag.calcStatWorkFinish      -> x.CalcStatWorkFinish
             | VertexTag.calcStatActionFinish    -> x.CalcStatActionFinish
             
-            | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder     :> IStorage
-            | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver      :> IStorage
-            | VertexTag.txErrOffTimeUnder    -> callM().ErrOffTimeUnder    :> IStorage
-            | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver     :> IStorage
-            | VertexTag.rxErrShort           -> callM().ErrShort           :> IStorage
-            | VertexTag.rxErrOpen            -> callM().ErrOpen            :> IStorage
-            | VertexTag.rxErrInterlock       -> callM().ErrInterlock       :> IStorage
-            | VertexTag.errorAction          -> callM().ErrAction         :> IStorage
+            | VertexTag.txErrOnTimeUnder     -> callM().ErrOnTimeUnder      :> IStorage
+            | VertexTag.txErrOnTimeOver      -> callM().ErrOnTimeOver       :> IStorage
+            | VertexTag.txErrOffTimeUnder    -> callM().ErrOffTimeUnder     :> IStorage
+            | VertexTag.txErrOffTimeOver     -> callM().ErrOffTimeOver      :> IStorage
+            | VertexTag.rxErrShort           -> callM().ErrShort            :> IStorage
+            | VertexTag.rxErrOpen            -> callM().ErrOpen             :> IStorage
+            | VertexTag.rxErrInterlock       -> callM().ErrInterlock        :> IStorage
+            | VertexTag.errorAction          -> callM().ErrAction           :> IStorage
+            | VertexTag.calcTimeoutDetected  -> callM().CalcTimeoutDetected :> IStorage
 
             | VertexTag.callIn               -> callM().CallIn            :> IStorage
             | VertexTag.callOut              -> callM().CallOut           :> IStorage
@@ -321,15 +319,16 @@ module TagManagerModule =
         member val PS   = createTag  true VertexTag.planStart
         member val PE   = createTag  true VertexTag.planEnd
 
-        member val ErrOnTimeUnder     = createTag true VertexTag.txErrOnTimeUnder
-        member val ErrOnTimeOver      = createTag true VertexTag.txErrOnTimeOver
-        member val ErrOffTimeUnder    = createTag true VertexTag.txErrOffTimeUnder
-        member val ErrOffTimeOver     = createTag true VertexTag.txErrOffTimeOver
-
-        member val ErrShort           = createTag true VertexTag.rxErrShort
-        member val ErrOpen            = createTag true VertexTag.rxErrOpen
-        member val ErrInterlock       = createTag true VertexTag.rxErrInterlock
-        member val ErrAction          = createTag false VertexTag.errorAction
+        member val ErrOnTimeUnder      = createTag true VertexTag.txErrOnTimeUnder
+        member val ErrOnTimeOver       = createTag true VertexTag.txErrOnTimeOver
+        member val ErrOffTimeUnder     = createTag true VertexTag.txErrOffTimeUnder
+        member val ErrOffTimeOver      = createTag true VertexTag.txErrOffTimeOver
+                                     
+        member val ErrShort            = createTag true VertexTag.rxErrShort
+        member val ErrOpen             = createTag true VertexTag.rxErrOpen
+        member val ErrInterlock        = createTag true VertexTag.rxErrInterlock
+        member val ErrAction           = createTag false VertexTag.errorAction
+        member val CalcTimeoutDetected = createTag false VertexTag.calcTimeoutDetected
         
         member val CallIn             =  createTag  true VertexTag.callIn
         member val CallOut            =  createTag  true VertexTag.callOut

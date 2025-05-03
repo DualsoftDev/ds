@@ -52,9 +52,9 @@ module DsTimeAnalysisMoudle =
             tm.CalcMovingDuration.BoxedValue <- 0u
             tm.CalcStatWorkFinish.BoxedValue <- false  
 
-        let resetTimeoutTracking(vertex: Vertex) =  
-            let tm = vertex.TagManager :?> VertexTagManager
-            tm.CalcTimeoutDetected.BoxedValue <- false
+        let resetTimeoutTracking(call: Call) =  
+            let tm = call.TagManager :?> CoinVertexTagManager
+            tm.CalcTimeoutDetected.Value <- false
             isTimeoutTracking <- false
 
 
@@ -86,17 +86,17 @@ module DsTimeAnalysisMoudle =
 
         /// 🔹 실시간 타임아웃 감지 (StartTracking 이후 호출됨)
 /// 🔹 실시간 타임아웃 감지 루프 (StartTracking 이후 자동 실행)
-        member this.CheckTimeoutWhileRunningLoop(vertex: Vertex) =
+        member this.CheckTimeoutWhileRunningLoop(call: Call) =
             async {
-                let tm = vertex.TagManager :?> VertexTagManager
+                let tm = call.TagManager :?> CoinVertexTagManager
 
                 while isTimeoutTracking && movingStart <> DateTime.MinValue do
                     let now = DateTime.UtcNow
                     let duration = (now - movingStart).TotalMilliseconds |> float32
                     let isTimeoutNow = checkTimeout(duration)
 
-                    if tm.CalcTimeoutDetected.BoxedValue <> isTimeoutNow then
-                        tm.CalcTimeoutDetected.BoxedValue <- isTimeoutNow
+                    if tm.CalcTimeoutDetected.Value <> isTimeoutNow then
+                        tm.CalcTimeoutDetected.Value <- isTimeoutNow
 
                     timeoutDetected <- isTimeoutNow
 
@@ -115,7 +115,7 @@ module DsTimeAnalysisMoudle =
                     .ToString("yyyy-MM-dd HH:mm:ss.fff");
 
             if vertex :? Call then
-                this.CheckTimeoutWhileRunningLoop(vertex) // 🔹 백그라운드 실시간 감지 시작
+                this.CheckTimeoutWhileRunningLoop(vertex :?> Call) // 🔹 백그라운드 실시간 감지 시작
 
         member this.StartMoving() =  
             movingStart <- DateTime.UtcNow
@@ -137,7 +137,8 @@ module DsTimeAnalysisMoudle =
             movingStart <- DateTime.MinValue
             activeDuration <- 0u
             movingDuration <- 0u
-            resetTimeoutTracking vertex
+            if vertex :? Call then
+                resetTimeoutTracking (vertex :?> Call)
 
         member this.WaitingDuration = activeDuration - movingDuration
         member this.ActiveLastLog = activeLastLog

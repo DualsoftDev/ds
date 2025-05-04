@@ -10,7 +10,7 @@ type ScanManagerFixture() =
 
 module ScanManagerTests =
 
-    let dummyTags = [ "%MW00010"; "%MW00012" ]
+    let dummyTags = [ "%LW00000"; "%LW00010"; "%LW00020"; "%LW00030"; "%LW16"; "%LW17" ]
     let ip100 = "192.168.9.100"
     let ip102 = "192.168.9.102"
     let ip103 = "192.168.9.103"
@@ -21,6 +21,21 @@ module ScanManagerTests =
         let scanMgr = XgtScanManager(20, 3000, false)
         let result = scanMgr.GetScanner(ipUnknown) |> Option.map (fun s -> s.IsConnected) |> Option.defaultValue false
         Assert.False(result)
+
+    [<Fact>]
+    let ``Scan simple test`` () =
+        let scanMgr = XgtScanManager(20, 3000, false)
+        let result = scanMgr.GetScanner(ip100) |> Option.map (fun s -> s.IsConnected) |> Option.defaultValue false
+        Assert.False(result)
+
+        scanMgr.StartScanReadOnly(ip100, dummyTags) |> ignore
+        scanMgr.ActiveIPs |> Seq.iter (fun ip ->
+            let scanner = scanMgr.GetScanner(ip)
+            scanner.Value.TagValueChangedNotify.AddHandler(fun _ e ->
+                let log = printf "Tag value changed: %s, %A" e.Tag.Name e.Tag.Value
+                log |> ignore
+                )
+            )   
 
     [<Fact>]
     let ``StopScan should clear all scans`` () =

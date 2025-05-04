@@ -28,7 +28,7 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
         | _      -> $"알 수 없는 에러 코드: 0x{code:X2}"
 
     
-    override _.CreateMultiReadFrame(addresses: string[], dataType: PlcDataSizeType) : byte[] =
+    member _.CreateMultiReadFrame(addresses: string[], dataType: PlcDataSizeType) : byte[] =
         if addresses.Length = 0 || addresses.Length > 16 then
             failwith "읽기 가능한 주소 수는 1~16개입니다."
 
@@ -79,10 +79,10 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
 
         frame
 
-    override x.CreateReadFrame(address: string, dataType: PlcDataSizeType) =
+    member x.CreateReadFrame(address: string, dataType: PlcDataSizeType) =
         x.CreateMultiReadFrame([| address |], dataType) 
 
-    override _.ParseMultiReadResponse(buffer: byte[], count: int, dataType: PlcDataSizeType, readBuffer: byte[]) =
+    member _.ParseMultiReadResponse(buffer: byte[], count: int, dataType: PlcDataSizeType, readBuffer: byte[]) =
         if buffer.Length < 32 then
             failwith "응답 데이터가 너무 짧습니다."
         if buffer.[20] <> 0x55uy then
@@ -111,7 +111,7 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
             srcOffset <- srcOffset + 8         // fixed LWord data size
 
 
-    override _.CreateWriteFrame(address: string, dataType: PlcDataSizeType, value: obj) =
+    member _.CreateWriteFrame(address: string, dataType: PlcDataSizeType, value: obj) =
         let device = address.Substring(1, 2)
         let addr = address.Substring(3).PadLeft(5, '0')
         let valueBytes =
@@ -150,7 +150,7 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
         Array.Copy(valueBytes, 0, frame, 40, valueBytes.Length)
         frame
 
-    override _.ParseReadResponse(buffer: byte[], dataType: PlcDataSizeType) : obj =
+    member _.ParseReadResponse(buffer: byte[], dataType: PlcDataSizeType) : obj =
         let errorState = BitConverter.ToUInt16(buffer, 26)
         if errorState <> 0us then
             let errorCode = buffer.[26]
@@ -161,9 +161,34 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
         if buffer.[20] <> 0x55uy then failwith "응답 명령어가 아닙니다."
 
         match dataType with
-        | Boolean -> buffer.[30] = 1uy |> box
-        | Byte    -> buffer.[30]       |> box
-        | UInt16  -> BitConverter.ToUInt16(buffer, 30) |> box
-        | UInt32  -> BitConverter.ToUInt32(buffer, 30) |> box
-        | UInt64  -> BitConverter.ToUInt64(buffer, 30) |> box
+        | Boolean -> buffer.[32] = 1uy |> box
+        | Byte    -> buffer.[32]       |> box
+        | UInt16  -> BitConverter.ToUInt16(buffer, 32) |> box
+        | UInt32  -> BitConverter.ToUInt32(buffer, 32) |> box
+        | UInt64  -> BitConverter.ToUInt64(buffer, 32) |> box
         | _ -> failwith $"지원하지 않는 데이터 타입입니다: {dataType}"
+
+
+            /// 단일 주소 데이터 읽기
+    member this.Read(address: string, dataType: PlcDataSizeType) : obj =
+        let frame = this.CreateReadFrame(address, dataType)
+        this.SendFrame(frame)
+        let buffer = this.ReceiveFrame(256)
+        this.ParseReadResponse(buffer, dataType)
+
+    /// 복수 주소 읽기 기본 구현
+    member this.Reads(addresses: string[], dataType: PlcDataSizeType, readBuffer:byte[]) =
+        if addresses.Length = 0 then failwith "주소가 없습니다."
+        let frame = this.CreateMultiReadFrame(addresses, dataType)
+        this.SendFrame(frame)
+        let buffer = this.ReceiveFrame(512) // 제조사에 따라 버퍼 크기 조정
+        this.ParseMultiReadResponse(buffer, addresses.Length, dataType, readBuffer)
+
+    /// 단일 주소 데이터 쓰기
+    member this.Write(address: string, dataType: PlcDataSizeType, value: obj) : bool =
+        try
+            let frame = this.CreateWriteFrame(address, dataType, value)
+            this.SendFrame(frame)
+            let _ = this.ReceiveFrame(256)
+            true
+        with _ -> false

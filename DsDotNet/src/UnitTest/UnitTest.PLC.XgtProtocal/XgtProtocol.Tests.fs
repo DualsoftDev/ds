@@ -46,8 +46,6 @@ module XgtTagTests =
 
 
 
-
-
 module IntegrationTests =
 
     let runEthernetTest (plcIp: string) (areaCodes: char list) =
@@ -76,7 +74,6 @@ module IntegrationTests =
                         | 'L' -> box (9876543210123456789UL), PlcDataSizeType.UInt64
                         | _ -> failwith $"지원되지 않는 타입: {kind}"
                     
-                    
                     let ok = conn.Write(address, dt, value)
                     let read = conn.Read(address, dt)
                     try
@@ -98,6 +95,6 @@ module IntegrationTests =
 
     [<Fact>]
     let ``XGT XGI Ethernet Integration Test - Dynamic Area Write/Read for 10 seconds`` () =
-        //let areaCodesXGI = [ 'I'; (*'Q';'F';*) 'M'; 'L'; 'N'; 'K'; 'U'; 'R'; 'A'; 'W'; ]
-        let areaCodesXGI = [ 'I'; ]
-        runEthernetTest "127.0.0.1" areaCodesXGI
+        let areaCodesXGI = [ 'I'; (*'Q';'F';*) 'M'; 'L'; 'N'; 'K'; 'U'; 'R'; 'A'; 'W'; ]
+        //let areaCodesXGI = [ 'M'; ]
+        runEthernetTest "192.168.9.102" areaCodesXGI

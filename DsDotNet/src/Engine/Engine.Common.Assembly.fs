@@ -22,5 +22,5 @@ open System.Reflection
 ///DS Language Version (Language Parser 수정시만 변경 Ver : 1.0.0.1)
 [<assembly: AssemblyInformationalVersion($"1.0.0.1")>]
 ///DS Engine Version
-[<assembly: AssemblyFileVersion($"0.9.11.21")>]
+[<assembly: AssemblyFileVersion($"0.9.11.22")>]
 do ()

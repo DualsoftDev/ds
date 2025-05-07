@@ -39,7 +39,7 @@ module DsTimeAnalysisMoudle =
 
         let checkTimeout(duration: float32) =
             let timeout = 
-                if isTimeoutTracking && count >= 5u then
+                if isTimeoutTracking && count >= 3u then
                     let stdDev = getStandardDeviation()
                     let threshold = mean + (timeoutK * stdDev)
                     duration > threshold

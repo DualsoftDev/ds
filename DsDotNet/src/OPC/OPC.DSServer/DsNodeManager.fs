@@ -12,6 +12,7 @@ open Engine.Core.TagKindModule
 open Engine.Runtime
 open Dual.Common.Core.FS
 open System.Diagnostics
+open SQLiteLogger
 
 
 [<AutoOpen>]
@@ -400,8 +401,15 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                 Some(
                     ValueSubject.Subscribe(fun (sys, stg, value) ->
                         
-                        if stg.IsVertexOpcDataTag() && dsSys = (sys:?>DsSystem) then 
-                            handleCalcTag (stg) |> ignore  // active만 처리
+                        if  dsSys = (sys:?>DsSystem) then   // active만 처리
+                            if stg.IsVertexOpcDataTag() then
+                                handleCalcTag (stg) |> ignore 
+                                
+                            if mode <> RuntimeMode.Control && TagKindExt.IsNeedSaveDBLogForDSPilot stg then //Control 아니면 DB 로깅  
+                                logTagChange sys.Name stg.Name (value.ToString())
+                            else 
+                                //Control 모드일때는 DB 로깅 하지 않음
+                                () //test ahn 리테인 처리 필요
 
                         if _variables.ContainsKey(stg.Name) then
                             let variable = _variables[stg.Name]

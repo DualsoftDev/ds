@@ -18,6 +18,7 @@
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
+		<Compile Include="SqliteDB.fs" />
 		<Compile Include="Utils.fs" />
 		<Compile Include="ServerConfig.fs" />
 		<Compile Include="DsTimeAnalysis.fs" />

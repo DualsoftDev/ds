@@ -59,9 +59,10 @@ module SQLiteLogger =
 
     let logQueue = ConcurrentQueue<string * string * string>()
     let lockObj = obj()
-    let batchSize = 10
+    let batchSize = 20
     let mutable isSaving = false
     let mutable isInitialized = false
+    let tagIdCache = Dictionary<string, int64>()
 
     let FlushIfAnyAsync (sysName: string) : Task =
         task {
@@ -95,7 +96,6 @@ module SQLiteLogger =
                     enableForeignKeys conn
 
                     use tx = conn.BeginTransaction()
-                    let tagIdCache = Dictionary<string, int64>()
 
                     for (time, tagName, newValue) in itemsToSave do
                         let tagNameId =

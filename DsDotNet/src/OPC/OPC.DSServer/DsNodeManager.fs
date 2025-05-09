@@ -107,13 +107,13 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
             printfn "Exception in handleWriteValue: %s" ex.Message
             ServiceResult.Good
 
-    let createVariable(folder: FolderState, name: string, tagKind: string , namespaceIndex: uint16, initialValue: Variant, typ: Type) =
+    let createVariable(folder: FolderState, name: string, address: string, tagKind: string , namespaceIndex: uint16, initialValue: Variant, typ: Type) =
         let variable = 
             new BaseDataVariableState(folder, 
                 SymbolicName = name, 
                 NodeId = NodeId(name, namespaceIndex),
                 BrowseName = QualifiedName($"({tagKind}){name}", namespaceIndex),
-                Description = "",
+                Description = address,
                 DisplayName = name,
                 DataType = mapToDataTypeId(typ),
                 Value = initialValue.Value,
@@ -174,6 +174,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                     createVariable(
                         parentNode,
                         tag.Name,
+                        tag.Address,
                         getTagKindName tag.TagKind,
                         namespaceIndex,
                         Variant(tag.ObjValue),
@@ -353,26 +354,26 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         let dsData = dsSys.ToDsText(false, false)
         let graphData = dsSys.ToJsonGraph()
         let dsVariable =
-            createVariable(rootNode, $"{dsSys.Name}.ds", "Metadata",
+            createVariable(rootNode, $"{dsSys.Name}.ds", "Metadata", "",
                 this.NamespaceIndexes.[0], Variant(dsData), typeof<string>
             )
         let graphVariable =
-            createVariable(rootNode, $"{dsSys.Name}.json", "Metadata",
+            createVariable(rootNode, $"{dsSys.Name}.json", "Metadata","",
                 this.NamespaceIndexes.[0], Variant(graphData), typeof<string>
             )
 
         let totalOpcItemFolder=
-            createVariable(rootNode, $"folderCount", "Count",
+            createVariable(rootNode, $"folderCount", "Count","",
                 this.NamespaceIndexes.[0], Variant(_folders.Count), typeof<string>
             )
         let totalOpcItemVariable =
-            createVariable(rootNode, $"variableCount", "Count",
+            createVariable(rootNode, $"variableCount", "Count","",
                 this.NamespaceIndexes.[0], Variant(_variables.Count), typeof<string>
             )
 
 
         let heartBit =
-            createVariable(rootNode, "HeartBit",  $"HeartBit", 
+            createVariable(rootNode, "HeartBit",  $"HeartBit", "",
                 this.NamespaceIndexes.[0], Variant(false), typeof<bool>
             )
         this.AddPredefinedNode(this.SystemContext, heartBit)

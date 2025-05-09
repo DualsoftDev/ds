@@ -201,6 +201,7 @@ type MxEthernet(ip: string, port: int, timeoutMs: int, isUDP:bool) =
             ms.ToArray()
 
         | _, Some udp ->
+
             let ep = IPEndPoint(IPAddress.Any, 0)
             let mutable remote = ep
             udp.Send(data, data.Length) |> ignore

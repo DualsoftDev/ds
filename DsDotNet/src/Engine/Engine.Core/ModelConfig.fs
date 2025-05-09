@@ -92,6 +92,11 @@ module ModelConfigModule =
         | OPC
         | REDIS
 
+    //제어 Driver IO Ethernet 타입
+    type HwEthernet =
+        | TCP
+        | UDP
+
     //HW CPU,  Driver IO, Slot 정보 조합
     type HwTarget(hwCPU:HwCPU, hwIO:HwIO, slots:SlotDataType[], startM:int) =
         member x.HwCPU = hwCPU
@@ -136,6 +141,8 @@ module ModelConfigModule =
     type ModelConfig = {
         DsFilePath: string
         HwIP: string
+        HwPort : uint16
+        HwEthernet : HwEthernet
         HwOPC : string
         TagConfig : TagConfig   
         ExternalApi: ExternalApi
@@ -182,6 +189,8 @@ module ModelConfigModule =
         { 
             DsFilePath = ""
             HwIP = "127.0.0.1"
+            HwPort = 5000us
+            HwEthernet = UDP
             HwOPC = "opc.tcp://127.0.0.1:2747"
             TagConfig = createDefaultTagConfig()    
             ExternalApi = ExternalApi.OPC
@@ -193,6 +202,8 @@ module ModelConfigModule =
 
     let createModelConfig(path:string,
             hwIP:string, 
+            hwPort:uint16, 
+            hwEthernet:HwEthernet, 
             hwOPC:string, 
             tagConfig:TagConfig, 
             externalApi:ExternalApi, 
@@ -203,6 +214,8 @@ module ModelConfigModule =
         { 
             DsFilePath = path
             HwIP = hwIP
+            HwPort = hwPort
+            HwEthernet = hwEthernet
             HwOPC = hwOPC
             TagConfig = tagConfig
             ExternalApi = externalApi
@@ -258,6 +271,14 @@ module ModelConfigModule =
         hw
 
     //let getDefaltHwTarget() = defaultHwTarget
+module HwEthernetExtensions = 
+    let fromString s =
+        match s with
+        | "TCP"  -> TCP
+        | "UDP"  -> UDP
+        | _ -> failwithf $"Error ToHwEthernet: {s}"
+    let allEthernet =
+        [ UDP; TCP;]
 
 module HwCPUExtensions =
         let fromString s =

@@ -11,20 +11,20 @@ class Program
         const int delay = 20;         // 스캔 주기 (ms)
         const int timeout = 2000;      // 통신 타임아웃 (ms)
         const bool isMonitorOnly = true;
-        const string plcIp = "192.168.9.109";  // 실제 MELSEC PLC IP 주소
+        const string plcIp = "192.168.9.108";  // 실제 MELSEC PLC IP 주소
 
-        var scanMgr = new MxScanManager(delay, timeout, isMonitorOnly);
+        var scanMgr = new MxScanManager(delay, timeout, isMonitorOnly, 7777, false);
         var scanner = scanMgr.CreateScanner(plcIp);
 
         // 테스트 태그 구성
         //const int count = 0x1ff0;
-        const int start = 0x1300;
+        const int start = 0x0;
         const int count = 11;
 
-        //string[] bitDeviceTypes = { "M", "L", "X", "Y", "B", "DX", "DY", "F" };
-        //string[] wordDeviceTypes = { "T", "D", "W", "C" };
-        string[] bitDeviceTypes = { "Y",  "M" };
-        string[] wordDeviceTypes = { /*"D" */};
+        string[] bitDeviceTypes = { "M", "L", "X", "Y", "B", "DX", "DY", "F" };
+        string[] wordDeviceTypes = { "T", "D", "W", "C" };
+        //string[] bitDeviceTypes = {/* "Y", */ "M" };
+        //string[] wordDeviceTypes = { /*"D" */};
 
         var tags = new List<TagInfo>();
 

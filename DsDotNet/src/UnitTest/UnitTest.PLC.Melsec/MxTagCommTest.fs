@@ -15,7 +15,7 @@ type MxCommTests() =
 
     [<Test>]
     member _.``Connect Should Succeed And Report Connected`` () =
-        let scan = MxPlcScan(ip, delay, timeout, isMonitorOnly)
+        let scan = MxPlcScan(ip, 7777us , false, delay, timeout, isMonitorOnly)
 
         let mutable state = ""
         scan.ConnectChangedNotify.Add(fun e ->

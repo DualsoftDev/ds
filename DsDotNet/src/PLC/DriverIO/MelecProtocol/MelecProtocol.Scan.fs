@@ -5,10 +5,10 @@ open System.Collections.Generic
 open Dual.PLC.Common.FS
 
 /// MELSEC PLC 스캔 구현 (DWord 랜덤 읽기 최적화 기반)
-type MxPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) =
+type MxPlcScan(ip: string, port:uint16, isUPD, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) =
     inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
 
-    let connection = new MxEthernet(ip, 5000, timeoutMs, true)
+    let connection = new MxEthernet(ip, port|>int, timeoutMs, isUPD)
     let mutable tags: MelsecTag[] = [||]
     let mutable batches: DWBatch[] = [||]
     let notifiedOnce = HashSet<DWBatch>()

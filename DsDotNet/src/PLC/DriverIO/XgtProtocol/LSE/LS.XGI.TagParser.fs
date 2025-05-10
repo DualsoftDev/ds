@@ -145,7 +145,7 @@ type LsXgiTagParser =
         tryParseXgiTag tag |? (getNull<string * int * int>())
 
     [<Extension>]
-    static member ParseAddressIO(device:string, offset: int, bitSize:int, iSlot:int, sumBit:int) : string =
+    static member ParseAddressIO(device:string, bitSize:int, offset: int, iSlot:int, sumBit:int) : string =
         match bitSize with  //test ahn  xgi 규격확인
             | 1 ->  $"%%{device}X0.{iSlot}.{(offset-sumBit) % 64}"  //test ahn 아날로그 base 1로 일단 고정
             | 8  when offset%8 = 0  -> $"%%{device}B{offset/8}"
@@ -155,7 +155,7 @@ type LsXgiTagParser =
             | _ -> failwithf $"Invalid size :{bitSize}" 
 
     [<Extension>]
-    static member ParseAddressMemory(device:string, offset: int, bitSize:int) : string =
+    static member ParseAddressMemory(device:string,  bitSize:int, offset: int) : string =
         match bitSize with  //test ahn  xgi 규격확인
             | 1   -> $"%%{device}X{offset}"
             | 8  when offset%8 = 0  -> $"%%{device}B{offset/8}"

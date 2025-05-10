@@ -87,10 +87,10 @@ module DsAddressCore =
             | LS_XGI_IO ->
                 let prefix = match ioType with In -> "I" | Out -> "Q" | Memory -> "M" | _ -> failwith $"지원 안됨: {ioType}"
                 if ioType = Memory
-                    then LsXgiTagParser.ParseAddressMemory(prefix, cnt, sizeBit)    
+                    then LsXgiTagParser.ParseAddressMemory(prefix, sizeBit, cnt)    
                 else
                     let iSlot, sumBit = getSlotInfoIEC(ioType, cnt, target.Slots)
-                    LsXgiTagParser.ParseAddressIO(prefix, cnt, sizeBit, iSlot, sumBit)
+                    LsXgiTagParser.ParseAddressIO(prefix,  sizeBit, cnt, iSlot, sumBit)
             | LS_XGK_IO ->
                 let isBool = dataType = DuBOOL
 

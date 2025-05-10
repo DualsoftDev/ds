@@ -543,10 +543,28 @@ module IntegrationTests =
             ()
         else 
 
-
-            for tag in tests do
-                let ok = conn.Write(tag, PlcDataSizeType.Boolean, true)
-                conn.Read(tag, PlcDataSizeType.Boolean) |> ignore
+            while true do
+ 
+                for tag in tests do
+                    let head, size, offset = tryParseXgiTag tag |> Option.get 
+                    let address =  LsXgiTagParser.ParseAddressMemory(head, size, offset)
+                    match size with
+                    | 1 -> 
+                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        conn.Write(address, PlcDataSizeType.Boolean, not(Convert.ToBoolean data)) |> ignore
+                    | 8 -> 
+                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        conn.Write(address, PlcDataSizeType.Byte, byte (Convert.ToByte data + 1uy)) |> ignore
+                    | 16 ->
+                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        conn.Write(address, PlcDataSizeType.UInt16, uint16 (Convert.ToUInt16 data + 1us)) |> ignore
+                    | 32 ->
+                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        conn.Write(address, PlcDataSizeType.UInt32, uint32 (Convert.ToUInt32 data + 1u)) |> ignore
+                    | 64 ->
+                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        conn.Write(address, PlcDataSizeType.UInt64, uint64 (Convert.ToUInt64 data + 1UL)) |> ignore
+                    | _ -> failwithf $"지원하지 않는 데이터 타입: {size}"
               
             //let rnd = Random()
             //let start = DateTime.Now

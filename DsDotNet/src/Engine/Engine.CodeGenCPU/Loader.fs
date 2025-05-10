@@ -96,8 +96,6 @@ module CpuLoader =
         /// DsSystem 으로부터 PouGen seq 생성
         member sys.GeneratePOUs (storages:Storages) (modelCnf:ModelConfig) : PouGen seq =
             UniqueName.resetAll()
-            let mode = modelCnf.RuntimeMode
-            let hwCPU = modelCnf.HwCPU
             applyTagManager (sys, storages,  modelCnf)
 
             let pous =
@@ -109,13 +107,13 @@ module CpuLoader =
                 |> Seq.map(fun s ->
                     try
                         match s with
-                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys, mode, hwCPU))
-                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys, mode, hwCPU))
+                        | :? Device as d         -> DevicePou   (d, d.ReferenceSystem.GenerateStatements(activeSys, modelCnf))
+                        | :? ExternalSystem as e -> ExternalPou (e, e.ReferenceSystem.GenerateStatements(activeSys, modelCnf))
                         | _ -> failwithlog (getFuncName())
                     with e -> failwithlog $"{e.Message}\r\n\r\n{s.AbsoluteFilePath}"
                     )
                 //자신(Acitve) system을  CPU 변환
-                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys, mode, hwCPU))]
+                |> Seq.append [ActivePou (sys, sys.GenerateStatements(activeSys, modelCnf))]
 
             pous
 

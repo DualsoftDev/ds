@@ -61,7 +61,7 @@ type CoinVertexTagManager with
                     if d.InAddress.IsOneOf(TextAddrEmpty, TextNotUsed) then //주소가 없으면 Plan 으로 처리
                         d.ApiItem.ApiItemEnd.Expr
                     else
-                        d.GetInExpr(call)
+                        d.GetInExpr(call) 
                 )
 
         if inOps.IsEmpty() then

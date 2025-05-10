@@ -192,24 +192,69 @@ module ConvertCpuDsSystem =
                 rm.F.Address       <- getMemory rm.F target
                 rm.H.Address      <- getMemory rm.H target
 
-        member private x.GenerationTaskDevIOM() =
+        member private x.GenerationTaskDevIOM(mode:RuntimeMode, hw:HwIO) =
 
-            let jobDevices =x.GetTaskDevsWithoutSkipAddress().Distinct()
+            let callDevices = x.GetTaskDevsCall()
+            let hwTypeData(address) =
+                let getType size =
+                    match size with
+                    | 1 -> DuBOOL
+                    | 8 -> DuUINT8
+                    | 16 -> DuUINT16
+                    | 32 -> DuUINT32
+                    | 64 -> DuUINT64
+                    | _ -> failwithf $"XGI IO Address Size Error {address}"
 
-            for dev, _job in jobDevices do
+                match hw with 
+                |LS_XGI_IO -> 
+                    let _, size, _ = XgtProtocol.LsXgiTagParser.Parse address 
+                    getType  size   
+                |LS_XGK_IO -> 
+                    let _, size, _ = XgtProtocol.LsXgkTagParser.Parse address 
+                    getType  size
+                |MELSEC_IO -> 
+                    let _, _, size = MelsecProtocol.MxTagParser.ParseToSegment address
+                    getType size.Value
+                | _ -> 
+                    failwithf $"IO Address Size Error {address}"
+
+            for dev, call in callDevices do
                 let apiStgName = dev.FullName
                 if  dev.InAddress <> TextNotUsed then
-                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.TaskDevice, Some x, dev, dev.TaskDevParamIO.InParam.DataType).Value
+                    let dt = 
+                        if mode = Monitoring
+                        then hwTypeData dev.InAddress
+                        else dev.TaskDevParamIO.InParam.DataType
+                    let inParam = dev.TaskDevParamIO.InParam
+                    dev.TaskDevParamIO.InParam <- TaskDevParam(inParam.Address, dt, inParam.Symbol)
+
+                    let inT = createBridgeTag(x.Storages, apiStgName, dev.InAddress, (int)TaskDevTag.actionIn, BridgeType.TaskDevice, Some x, dev, dt).Value
                     dev.InTag <- inT  ; dev.InAddress <- (inT.Address)
 
                   //외부입력 전용 확인하여 출력 생성하지 않는다.
-                if not(dev.IsRootOnlyDevice) then
-                    if dev.OutAddress <> TextNotUsed then
-                        let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.TaskDevice, Some x , dev, dev.TaskDevParamIO.OutParam.DataType).Value
-                        dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
+                if dev.OutAddress <> TextNotUsed && not(dev.IsRootOnlyDevice) then
+                    let dt = 
+                        if mode = Monitoring
+                        then hwTypeData dev.OutAddress
+                        else dev.TaskDevParamIO.OutParam.DataType
+                    let outParam = dev.TaskDevParamIO.OutParam
+                    dev.TaskDevParamIO.OutParam <- TaskDevParam(outParam.Address, dt, outParam.Symbol)
 
-        member x.GenerationIO() =
-            x.GenerationTaskDevIOM()
+                    let outT = createBridgeTag(x.Storages, apiStgName, dev.OutAddress, (int)TaskDevTag.actionOut, BridgeType.TaskDevice, Some x , dev, dt).Value
+                    dev.OutTag <- outT; dev.OutAddress <- (outT.Address)
+
+                if mode = Monitoring
+                then
+                    let inVParam = if dev.TaskDevParamIO.InParam.IsDefault 
+                                   then call.ValueParamIO.In
+                                   else createValueParam("!"+dev.TaskDevParamIO.InParam.DataType.DefaultValue().ToString())
+                    let outVParam = if dev.TaskDevParamIO.OutParam.IsDefault 
+                                    then call.ValueParamIO.Out
+                                    else createValueParam(dev.TaskDevParamIO.OutParam.DataType.DefaultValue().ToString())
+                    call.ValueParamIO <-ValueParamIO(inVParam, outVParam)
+
+        member x.GenerationIO(mode:RuntimeMode, hw:HwIO) =
+            x.GenerationTaskDevIOM(mode, hw)
             x.GenerationButtonIO()
             x.GenerationLampIO()
             x.GenerationCondition()

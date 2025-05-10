@@ -345,7 +345,7 @@ module rec CoreModule =
             member val CallActionType = CallActionType.ActionNormal with get, set
             member val CallExternalTags = Dictionary<ExternalTag, IStorage>()
             member val Disabled:bool = false with get, set
-            member val ValueParamIO = valueParamIO
+            member val ValueParamIO = valueParamIO with get, set
 
             interface ISafetyAutoPreRequisiteHolder with
                 member x.GetCall() = x

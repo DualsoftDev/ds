@@ -165,8 +165,10 @@ module ConvertCPU =
 
     type DsSystem with
         /// DsSystem 으로부터 CommentedStatement list 생성.
-        member sys.GenerateStatements(activeSys:DsSystem, mode:RuntimeMode, target:HwCPU) : CommentedStatement list =
-
+        member sys.GenerateStatements(activeSys:DsSystem, modelCnf:ModelConfig) : CommentedStatement list =
+            let mode:RuntimeMode = modelCnf.RuntimeMode
+            let targetCPU:HwCPU = modelCnf.HwTarget.HwCPU
+            let targetIO:HwIO = modelCnf.HwTarget.HwIO
             let isActive = activeSys = sys
             sys.GenerationOrigins()
             sys.ClearExteralTags()
@@ -174,7 +176,7 @@ module ConvertCPU =
 
             if isActive then //직접 제어하는 대상만 정렬(원위치) 정보 추출
                 sys.GenerationMemory()
-                sys.GenerationIO()
+                sys.GenerationIO(mode, targetIO)
                 updateSourceTokenOrder( sys,  mode = Monitoring) 
                 if mode = Control || mode = Monitoring
                 then
@@ -211,7 +213,7 @@ module ConvertCPU =
                 //else 
                 //    yield! sys.Y1_SystemActiveBtnForPassiveFlow(activeSys)
                     
-                    if target.IsPLC then 
+                    if targetCPU.IsPLC then 
                         yield! sys.Y6_SystemClearBtnForFlow()
 
 

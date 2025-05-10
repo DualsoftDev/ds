@@ -16,12 +16,12 @@ open System.Linq
 module CpuTestUtil =
 
     type CpuTestSample(hwCPU:HwCPU) =
+        let cnf = createModelConfigReplaceHwCPU (createDefaultModelConfig(), hwCPU)
         let LoadSampleSystem()  =
             let systemRepo   = ShareableSystemRepository ()
             let referenceDir = @$"{__SOURCE_DIRECTORY__}/../../UnitTest.Model/UnitTestExample/dsSimple"
             let sys = parseText systemRepo referenceDir Program.CpuTestText
             RuntimeDS.ReplaceSystem sys
-            let cnf = createModelConfigReplaceHwCPU (createDefaultModelConfig(),hwCPU)
             applyTagManager (sys, Storages(),  cnf)
             checkCausalModel sys
             sys
@@ -45,7 +45,7 @@ module CpuTestUtil =
 
             //DsAddressModule.assignAutoAddress(sys, 0, 100000, defaultHwTarget) 
 
-            sys.GenerationIO()
+            sys.GenerationIO(cnf.RuntimeMode, cnf.HwTarget.HwIO)
             sys.GenerationOrigins()
 
         member x.Sys    =  sys

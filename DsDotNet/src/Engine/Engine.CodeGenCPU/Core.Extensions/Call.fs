@@ -80,16 +80,16 @@ module ConvertCpuCall =
                 .Any(fun td-> td.IsAnalogActuator || td.IsAnalogSensor)
 
 
-        member c.GetEndAction() =
-            let tds =
-                c.TaskDefs
-                    .Where(fun td->td.ExistInput)
-                    .Select(fun td->td.GetInExpr(c))
+        //member c.GetEndAction() =
+        //    let tds =
+        //        c.TaskDefs
+        //            .Where(fun td->td.ExistInput)
+        //            .Select(fun td->td.GetInExpr(c))
 
-            if tds.Any() then
-                Some(tds.ToAnd())
-            else
-                None
+        //    if tds.Any() then
+        //        Some(tds.ToAnd())
+        //    else
+        //        None
 
 
         member c.RealLinkExpr =

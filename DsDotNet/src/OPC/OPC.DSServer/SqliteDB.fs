@@ -63,79 +63,63 @@ module SQLiteLogger =
     let mutable isSaving = false
     let mutable isInitialized = false
     let tagIdCache = Dictionary<string, int64>()
+    let flushIfAny (sysName: string) =
+        if isSaving then () else
 
-    let FlushIfAnyAsync (sysName: string) : Task =
-        task {
-            if isSaving then
-                return ()
-        
-            let shouldSave =
-                lock lockObj (fun () ->
-                    if isSaving then false
-                    else
-                        isSaving <- true
-                        true
-                )
+        let shouldSave =
+            lock lockObj (fun () ->
+                if isSaving then false
+                else
+                    isSaving <- true
+                    true
+            )
 
-            if not shouldSave then
-                return ()
+        if not shouldSave || logQueue.IsEmpty then () else
 
-            try
-                if logQueue.IsEmpty then return ()
+        try
+            let itemsToSave = ResizeArray<_>()
+            while itemsToSave.Count < batchSize do
+                match logQueue.TryDequeue() with
+                | true, log -> itemsToSave.Add(log)
+                | _ -> ()
 
-                let itemsToSave = ResizeArray<_>()
-                while itemsToSave.Count < batchSize do
-                    match logQueue.TryDequeue() with
-                    | true, log -> itemsToSave.Add(log)
-                    | _ -> ()
+            if itemsToSave.Count = 0 then () else
 
-                if itemsToSave.Count = 0 then return ()
+            use conn = createConnection sysName
+            enableForeignKeys conn
+            use tx = conn.BeginTransaction()
 
-                do! Task.Run(fun () ->
-                    use conn = createConnection sysName
-                    enableForeignKeys conn
+            for (time, tagName, newValue) in itemsToSave do
+                let tagNameId =
+                    match tagIdCache.TryGetValue(tagName) with
+                    | true, id -> id
+                    | false, _ ->
+                        use cmd = conn.CreateCommand()
+                        cmd.CommandText <- "INSERT OR IGNORE INTO TagNameTable (Name) VALUES (@name);"
+                        cmd.Parameters.AddWithValue("@name", tagName) |> ignore
+                        cmd.ExecuteNonQuery() |> ignore
 
-                    use tx = conn.BeginTransaction()
+                        cmd.CommandText <- "SELECT Id FROM TagNameTable WHERE Name = @name;"
+                        let idObj = cmd.ExecuteScalar()
+                        let id = if isNull idObj then 0L else Convert.ToInt64(idObj)
+                        tagIdCache[tagName] <- id
+                        id
 
-                    for (time, tagName, newValue) in itemsToSave do
-                        let tagNameId =
-                            match tagIdCache.TryGetValue(tagName) with
-                            | true, id -> id
-                            | false, _ ->
-                                use insertCmd = conn.CreateCommand()
-                                insertCmd.CommandText <- "INSERT OR IGNORE INTO TagNameTable (Name) VALUES (@name);"
-                                insertCmd.Parameters.AddWithValue("@name", tagName) |> ignore
-                                insertCmd.ExecuteNonQuery() |> ignore
+                use cmd = conn.CreateCommand()
+                cmd.CommandText <- "INSERT INTO TagLog (Time, TagNameId, NewValue) VALUES (@time, @tagNameId, @newValue);"
+                cmd.Parameters.AddWithValue("@time", time) |> ignore
+                cmd.Parameters.AddWithValue("@tagNameId", tagNameId) |> ignore
+                cmd.Parameters.AddWithValue("@newValue", newValue) |> ignore
+                cmd.ExecuteNonQuery() |> ignore
 
-                                use selectCmd = conn.CreateCommand()
-                                selectCmd.CommandText <- "SELECT Id FROM TagNameTable WHERE Name = @name;"
-                                selectCmd.Parameters.AddWithValue("@name", tagName) |> ignore
-                                let idObj = selectCmd.ExecuteScalar()
-                                let id =
-                                    if isNull idObj then
-                                        0L
-                                    else
-                                        Convert.ToInt64(idObj)
-                                tagIdCache[tagName] <- id
-                                id
-
-                        use logCmd = conn.CreateCommand()
-                        logCmd.CommandText <- "INSERT INTO TagLog (Time, TagNameId, NewValue) VALUES (@time, @tagNameId, @newValue);"
-                        logCmd.Parameters.AddWithValue("@time", time) |> ignore
-                        logCmd.Parameters.AddWithValue("@tagNameId", tagNameId) |> ignore
-                        logCmd.Parameters.AddWithValue("@newValue", newValue) |> ignore
-                        logCmd.ExecuteNonQuery() |> ignore
-
-                    tx.Commit()
-                )
-            finally
-                isSaving <- false
-        }
+            tx.Commit()
+        finally
+            isSaving <- false
 
 
     let startFlushTimer (sysName: string) =
         let timer = new Timer(5000.0)
-        timer.Elapsed.Add(fun _ -> FlushIfAnyAsync(sysName) |> ignore)
+        timer.Elapsed.Add(fun _ -> flushIfAny sysName)
         timer.AutoReset <- true
         timer.Start()
         timer
@@ -156,4 +140,4 @@ module SQLiteLogger =
         let now = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff")
         logQueue.Enqueue(now, tagName, newValue)
         if logQueue.Count >= batchSize then
-            FlushIfAnyAsync(sysName) |> ignore
+            flushIfAny(sysName) |> ignore

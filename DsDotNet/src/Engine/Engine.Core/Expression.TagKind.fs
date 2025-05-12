@@ -359,10 +359,10 @@ type TagKindExt =
 
     [<Extension>]
     static member IsNeedSaveDBLogForDSPilot(stg:IStorage) =
-        if stg.IsControlErrorStg()
-        then 
-            true
-        else 
+        //if stg.IsControlErrorStg()
+        //then 
+        //    true
+        //else 
             stg.TagKind.IsOneOf(
                 int MonitorTag.UserTagType,   
                 int TaskDevTag.actionIn,    

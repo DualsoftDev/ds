@@ -90,6 +90,7 @@ module CpuLoader =
         activeSys.GetRecursiveLoadedSystems()
             .Distinct()
             .Iter(createTagM)
+        RuntimeDS.ReplaceSystem activeSys //active로 원위치
 
 
     type DsSystem with

@@ -39,7 +39,8 @@ type VertexTagManager with
         let rootStart = 
             if not(bVirtaulPlant)
                     then
-                        real.Graph.HeadConnectedOrSingleVertex 
+                        real.Graph.Vertices  //임의의 동전
+                        //real.Graph.HeadConnectedOrSingleVertex 
                     else
                         real.Graph.Vertices
         let rootStart = rootStart.Select(fun v->v.VC.CallOut).ToOrElseOff()

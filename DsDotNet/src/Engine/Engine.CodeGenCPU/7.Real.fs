@@ -49,7 +49,8 @@ type RealVertexTagManager with
         let fn = getFuncName()
         [|
             let setNormal = real.CoinETContacts.ToAndElseOn() 
-            let initSrcs = real.Graph.HeadConnectedOrSingleVertex
+            let initSrcs = real.Graph.Vertices  //임의의 동전
+            //let initSrcs = real.Graph.HeadConnectedOrSingleVertex
             let dict = Dictionary<string, PlanVar<bool>>()
             for coin in initSrcs do
                 let tempRising = v.System.GetTempBoolTag("tempCallOut")

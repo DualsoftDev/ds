@@ -405,7 +405,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                         if  dsSys = (sys:?>DsSystem) then   // active만 처리
                             if stg.IsVertexOpcDataTag() then
                                 handleCalcTag (stg) |> ignore 
-                                
+
                             if mode <> RuntimeMode.Control && TagKindExt.IsNeedSaveDBLogForDSPilot stg then //Control 아니면 DB 로깅  
                                 logTagChange sys.Name stg.Name (value.ToString())
                             else 

@@ -25,8 +25,8 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
 
         scanner.Scan(tags)
 
-    member this.StartScanReadOnly(ip: string, tags: seq<string*bool>) : IDictionary<string, PlcTagBase> =
-        let scanTags = tags |> Seq.map (fun (x, lowSpeed) -> { Name = x; Address = x; Comment = "" ;IsLowSpeedArea = lowSpeed;IsOutput = false }) 
+    member this.StartScanReadOnly(ip: string, tags: seq<string>) : IDictionary<string, PlcTagBase> =
+        let scanTags = tags |> Seq.map (fun (x) -> { Name = x; Address = x; Comment = "" ;IsLowSpeedArea = false;IsOutput = false }) 
         this.StartScan(ip, scanTags) 
 
     /// 여러 PLC에 대해 스캔 시작 - IP 별 태그 목록 입력
@@ -41,8 +41,8 @@ type PlcScanManagerBase<'T when 'T :> PlcScanBase>() =
         | true, scanner -> ignore (scanner.Scan(tags))
         | _ -> failwith $"[UpdateScan] IP {ip}에 대한 스캐너가 존재하지 않습니다."
 
-    member this.UpdateScanReadOnly(ip: string, tags: seq<string*bool>)  =
-        let scanTags = tags |> Seq.map (fun (x, lowSpeed) -> { Name = x; Address = x; Comment = "" ;IsLowSpeedArea = lowSpeed;IsOutput = false }) |> Seq.toList
+    member this.UpdateScanReadOnly(ip: string, tags: seq<string>)  =
+        let scanTags = tags |> Seq.map (fun (x) -> { Name = x; Address = x; Comment = "" ;IsLowSpeedArea = false;IsOutput = false }) |> Seq.toList
         this.UpdateScan(ip, scanTags)
 
     /// 현재 연결 상태 확인

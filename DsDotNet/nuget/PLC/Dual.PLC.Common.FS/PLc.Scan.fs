@@ -10,6 +10,7 @@ type TagInfo =
         Name : string 
         Address : ScanAddress
         Comment : string
+        IsLowSpeedArea : bool
         IsOutput : bool
     }
 
@@ -46,7 +47,8 @@ type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
     abstract member Disconnect: unit -> unit
     abstract member IsConnected: bool
     abstract member WriteTags: unit -> unit
-    abstract member ReadTags: int -> unit
+    abstract member ReadHighSpeedArea: int -> unit
+    abstract member ReadLowSpeedArea: int -> unit
     abstract member PrepareTags: TagInfo seq -> IDictionary<ScanAddress, PlcTagBase>
 
     // ---------------------------
@@ -61,6 +63,8 @@ type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
         cancelToken.Cancel()
 
         let tagMap = this.PrepareTags(tags)
+        let lowSpeedDelay = scanDelay * 10
+        let mutable elapsed = 0
 
         async {
             while isRunning do
@@ -80,7 +84,12 @@ type PlcScanBase(ip: string, scanDelay: int, isMonitorOnly:bool) =
                         else 
                             this.WriteTags()
 
-                        this.ReadTags(scanDelay)
+                        this.ReadHighSpeedArea(scanDelay)
+                        // 누적 시간 기준으로 저속 영역 실행
+                        elapsed <- elapsed + scanDelay
+                        if elapsed >= lowSpeedDelay then
+                            this.ReadLowSpeedArea(scanDelay)
+                            elapsed <- 0
 
                         do! Async.Sleep scanDelay
                 with ex ->

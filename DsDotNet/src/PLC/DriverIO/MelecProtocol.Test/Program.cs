@@ -37,6 +37,7 @@ class Program
                     name: $"{dev}_bit_{i}",
                     address: address,
                     comment: $"Test Bit {address}",
+                    isLowSpeedArea: false,
                     isOutput: false
                 ));
             }
@@ -52,6 +53,7 @@ class Program
                     name: $"{dev}_word_{i}",
                     address: address,
                     comment: $"Test Word {address}",
+                    isLowSpeedArea: false,
                     isOutput: false
                 ));
             }

@@ -17,7 +17,7 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
             | true  -> LsXgiTagParser.Parse address |> fun (_, s, o) -> s, o
             | false -> LsXgkTagParser.Parse address |> fun (_, s, o) -> s, o
         let dataType = PlcDataSizeType.FromBitSize size
-        XGTTag(address, address, dataType, offset, isOutput)
+        XGTTag(address, address, dataType,  offset, isOutput)
 
         
     member val LWordOffset = -1 with get, set

@@ -4,7 +4,7 @@ open System
 open System.ComponentModel
 
 [<AbstractClass>]
-type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType, 
+type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
                 ?comment: string, ?initialValue: obj) =
 
     do
@@ -18,11 +18,11 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
     let mutable value     = defaultArg initialValue null
     let mutable writeVal  = None: obj option
 
-    
     member _.Name     = name
     member _.Address  = address
     member _.DataType = dataType
-    
+    member val IsLowSpeedArea = false with get, set
+
     member this.Value
         with get() = value
         and set(v) = value <- v

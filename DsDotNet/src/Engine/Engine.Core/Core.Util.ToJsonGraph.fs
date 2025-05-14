@@ -140,7 +140,7 @@ module rec ToJsonGraphModule =
             "Type", "Flow" :> obj
             "Vertices", vertices :> obj
             "Edges", edges :> obj
-            "Aliases", aliases :> obj
+            "Aliases", aliases
         ]
 
     let flowsToJson (flows: Flow seq) =

@@ -12,7 +12,7 @@ open Engine.Core.TagKindModule
 open Engine.Runtime
 open Dual.Common.Core.FS
 open System.Diagnostics
-open SQLiteLogger
+open DB.DuckDB
 
 
 [<AutoOpen>]
@@ -73,6 +73,8 @@ module DsNodeManagerExt =
 
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem, mode:RuntimeMode) =
     inherit CustomNodeManager2(server, configuration, "ds")
+
+    let logger = DuckDBWriter.LoggerPG(dsSys.Name)
     //start TagName, end Tag
     let _motionDic = dsSys |> getDsPlanInterfaces 
                            |> Seq.map(fun tag -> tag.MotionStartTag|>fst, tag.MotionEndTag|>fst) 
@@ -407,7 +409,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                                 handleCalcTag (stg) |> ignore 
 
                             if mode <> RuntimeMode.Control && TagKindExt.IsNeedSaveDBLogForDSPilot stg then //Control 아니면 DB 로깅  
-                                logTagChange sys.Name stg.Name (value.ToString())
+                                logger.LogTagChange (stg.Name, value)
                             else 
                                 //Control 모드일때는 DB 로깅 하지 않음
                                 () //test ahn 리테인 처리 필요

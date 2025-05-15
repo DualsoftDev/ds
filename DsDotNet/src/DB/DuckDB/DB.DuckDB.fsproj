@@ -1,11 +1,10 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
 		<TargetFramework>netstandard2.0</TargetFramework>
-		<RootNamespace>OPC.DSServer</RootNamespace>
+		<RootNamespace>DB.DuckDB</RootNamespace>
         <LangVersion>8.0</LangVersion>
 		<SatelliteResourceLanguages>en;ko</SatelliteResourceLanguages>
-        <OutputType>Exe</OutputType>
         <OutputPath>$(SolutionDir)\bin\</OutputPath>
         <OtherFlags>--warnon:1182</OtherFlags>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -18,13 +17,9 @@
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</None>
 		<Compile Include="..\..\Engine\Engine.Common.Assembly.fs" Link="Engine.Common.Assembly.fs" />
-		<Compile Include="Utils.fs" />
-		<Compile Include="ServerConfig.fs" />
-		<Compile Include="DsTimeAnalysis.fs" />
-        <Compile Include="DsNodeManager.fs" />
-        <Compile Include="DsOPCServer.fs" />
-        <Compile Include="ServerStartStop.fs" />
-        <Compile Include="Program.fs" />
+		<Compile Include="DBCommon.fs" />
+		<Compile Include="DuckDBWriter.fs" />
+		<Compile Include="DuckDBReader.fs" />
     </ItemGroup>
 
 	<ItemGroup Condition="'$(UseNugetProjectReference)' == 'true'">
@@ -34,15 +29,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Client" Version="1.5.375.457" />
-		<PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Configuration" Version="1.5.375.457" />
-		<PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Core" Version="1.5.375.457" />
-	    <PackageReference Include="OPCFoundation.NetStandard.Opc.Ua.Server" Version="1.5.375.457" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <ProjectReference Include="..\..\DB\DuckDB\DB.DuckDB.fsproj" />
-	  <ProjectReference Include="..\..\Engine\Engine.Runtime\Engine.Runtime.fsproj" />
+		<PackageReference Include="DuckDB.NET.Bindings.Full" Version="1.2.1" />
+		<PackageReference Include="DuckDB.NET.Data" Version="1.2.1" />
 	</ItemGroup>
 
 	<ItemGroup>

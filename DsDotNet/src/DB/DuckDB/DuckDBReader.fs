@@ -8,11 +8,8 @@ open DuckDB.NET.Data
 
 module DuckDBReader =
 
-    let getDBPath systemName =
-        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dualsoft", "DB", $"{systemName}.duckdb")
-
-    let openConnection systemName =
-        let conn = new DuckDBConnection($"DataSource={getDBPath systemName}")
+    let openConnection (dbPath: string) =
+        let conn = new DuckDBConnection($"DataSource={dbPath}")
         conn.Open()
         conn
 
@@ -35,12 +32,14 @@ module DuckDBReader =
             insert.Parameters.Add(p) |> ignore
             insert.ExecuteNonQuery() |> ignore
 
-    let loadLogs systemName (tagNames: List<string>) (start: DateTime) (end': DateTime) (boolTypeOnly: bool) =
+    let loadLogs (systemName: string) (tagNames: List<string>) (start: DateTime) (end': DateTime) (boolTypeOnly: bool) =
         task {
+            let setting = DuckDBSetting.loadSettings()
             if tagNames = null || tagNames.Count = 0 then
                 return Dictionary<string, List<TagLogEntry>>()
             else
-                use conn = openConnection systemName
+                let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
+                use conn = openConnection dbPath 
                 createTempTagTable conn
                 clearTempTags conn
                 populateTempTags conn (tagNames |> Seq.distinct)
@@ -77,12 +76,14 @@ module DuckDBReader =
                     |> dict |> Dictionary<string, List<TagLogEntry>>
         }
 
-    let loadLogRecents systemName (tagNames: List<string>) (count: int) =
+    let loadLogRecents (systemName: string) (tagNames: List<string>) (count: int) =
         task {
+            let setting = DuckDBSetting.loadSettings()
             if tagNames = null || tagNames.Count = 0 || count <= 0 then
                 return Dictionary<string, List<TagLogEntry>>() 
             else
-                use conn = openConnection systemName
+                let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
+                use conn = openConnection dbPath 
                 createTempTagTable conn
                 clearTempTags conn
                 populateTempTags conn (tagNames |> Seq.distinct)

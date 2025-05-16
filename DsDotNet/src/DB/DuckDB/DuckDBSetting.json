@@ -1,0 +1,5 @@
+{
+	"DatabaseDir": "\\\\AHN\\Users\\ahn\\AppData\\Roaming\\Dualsoft\\DB\\",
+	"LogFlushIntervalMs": 5000,
+	"EnableBooleanFiltering": true
+}

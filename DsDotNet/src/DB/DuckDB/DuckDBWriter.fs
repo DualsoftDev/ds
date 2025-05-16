@@ -6,17 +6,12 @@ open System.Timers
 open System.Collections.Concurrent
 open System.Collections.Generic
 open DuckDB.NET.Data
-
 module DuckDBWriter =
-
-    let getDBPath systemName =
-        let baseDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Dualsoft", "DB")
-        Directory.CreateDirectory(baseDir) |> ignore
-        Path.Combine(baseDir, $"{systemName}.duckdb")
 
     type LoggerPG(systemName: string) =
 
-        let dbPath = getDBPath systemName
+        let setting = DuckDBSetting.loadSettings()
+        let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
 
         let createConnection () =
             let conn = new DuckDBConnection($"DataSource={dbPath}")
@@ -105,7 +100,7 @@ module DuckDBWriter =
                 idCounter <- idCounter + 1L
 
         let timer =
-            let t = new Timer(5000.0)
+            let t = new Timer(float setting.LogFlushIntervalMs)
             t.Elapsed.Add(fun _ -> flushAll ())
             t.AutoReset <- true
             t.Start()

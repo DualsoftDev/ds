@@ -116,5 +116,5 @@ module DuckDBWriter =
             timer |> ignore
 
         member _.LogTagChange(tagName: string, newValue: obj) =
-            let now = DateTime.UtcNow
+            let now = DateTime.Now
             logQueue.Enqueue((now, tagName, newValue))

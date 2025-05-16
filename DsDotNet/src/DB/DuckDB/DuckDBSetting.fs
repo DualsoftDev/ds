@@ -13,7 +13,6 @@ module DuckDBSetting =
     type DuckDBSetting = {
         DatabaseDir: string
         LogFlushIntervalMs: int
-        EnableBooleanFiltering: bool
     }
 
     let loadSettings () : DuckDBSetting =

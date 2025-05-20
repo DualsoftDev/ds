@@ -79,7 +79,7 @@ module DBReaderModule =
             task {
                 if !! isItNull(DbHandler.TheDbHandler) then
                     DbHandler.TheDbHandler.Dispose()
-                let loggerDBSettings = queryCriteria.CommonAppSettings.LoggerDBSettings
+                let loggerDBSettings = queryCriteria.CommonAppSettings.WriterDBSettings
                 let! logSet = createLogSetForReaderAsync (queryCriteria, queryCriteria.CommonAppSettings, systems)
                 let dbReader = new DbReader(queryCriteria, Some logSet)
 

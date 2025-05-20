@@ -74,7 +74,7 @@ module DsNodeManagerExt =
 type DsNodeManager(server: IServerInternal, configuration: ApplicationConfiguration, dsSys: DsSystem, mode:RuntimeMode) =
     inherit CustomNodeManager2(server, configuration, "ds")
 
-    let logger = DuckDBWriter.LoggerPG(dsSys.Name)
+    let logger = DuckDBWriter.WriterDB(dsSys.Name)
     //start TagName, end Tag
     let _motionDic = dsSys |> getDsPlanInterfaces 
                            |> Seq.map(fun tag -> tag.MotionStartTag|>fst, tag.MotionEndTag|>fst) 

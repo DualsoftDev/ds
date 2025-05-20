@@ -28,7 +28,7 @@ module RuntimeTestCommon =
         (*시뮬레이션 구동 테스트*)
         let systems = [| runtimeModel.System|]
         let commonAppSettings = DSCommonAppSettings.Load(Path.Combine(AppContext.BaseDirectory, "CommonAppSettings.json"));
-        let loggerDBSettings = commonAppSettings.LoggerDBSettings
+        let loggerDBSettings = commonAppSettings.WriterDBSettings
         loggerDBSettings.ModelFilePath <- runtimeModel.SourceDsZipPath
         loggerDBSettings.DbWriter <- "PCSIM"
 

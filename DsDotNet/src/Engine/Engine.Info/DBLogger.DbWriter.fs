@@ -56,7 +56,7 @@ module DBWriterModule =
                 conn.InsertAndQueryLastRowIdAsync(
                     null,
                     $"INSERT INTO {Tn.Token} (at, originalToken, modelId) VALUES (@At, @OriginalToken, @ModelId)",
-                    {|At = at; OriginalToken=originalToken; ModelId=x.CommonAppSettings.LoggerDBSettings.ModelId|}).Result
+                    {|At = at; OriginalToken=originalToken; ModelId=x.CommonAppSettings.WriterDBSettings.ModelId|}).Result
 
             originalToken2TokenIdDic.Add(originalToken, tokenId) |> ignore
             tokenId
@@ -101,7 +101,7 @@ module DBWriterModule =
                     if (x.LogSet.Value.ReaderWriterType.HasFlag(DBLoggerType.Reader)) then
                         let newLogs = newLogs |> map (ormLog2Log x.LogSet.Value) |> toList
                         x.LogSet.Value.BuildIncremental newLogs
-                    let currentModelId = x.CommonAppSettings.LoggerDBSettings.ModelId
+                    let currentModelId = x.CommonAppSettings.WriterDBSettings.ModelId
                     for l in newLogs do
                         let! stg = conn.QueryFirstAsync<ORMStorage>($"SELECT * FROM [{Tn.Storage}] WHERE id = {l.StorageId}", tr)
                         let modelId = stg.ModelId
@@ -139,7 +139,7 @@ module DBWriterModule =
             task {
                 let commonAppSettings = queryCriteria.CommonAppSettings
 
-                let! dbSckeleton = ORMDBSkeletonDTOExt.CreateLoggerDBAsync(queryCriteria.ModelId, $"Data Source={commonAppSettings.LoggerDBSettings.ConnectionPath}")
+                let! dbSckeleton = ORMDBSkeletonDTOExt.CreateWriterDBAsync(queryCriteria.ModelId, $"Data Source={commonAppSettings.WriterDBSettings.ConnectionPath}")
                 ORMDBSkeleton4Debug <- dbSckeleton
 
                 use conn = commonAppSettings.CreateConnection()
@@ -203,7 +203,7 @@ module DBWriterModule =
         static member CreateSchemaAsync (commonAppSettings: DSCommonAppSettings) (cleanExistingDb:bool) =
             task {
                 logDebug $":::initializeLogDbOnDemandAsync()"
-                let loggerDBSettings = commonAppSettings.LoggerDBSettings
+                let loggerDBSettings = commonAppSettings.WriterDBSettings
                 if cleanExistingDb then
                     loggerDBSettings.DropDatabase()
                 loggerDBSettings.FillModelId() |> ignore
@@ -223,7 +223,7 @@ module DBWriterModule =
                 let! logSet = dbWriter.createLogSetForWriterAsync queryCriteria systems
                 dbWriter.LogSet <- Some logSet
 
-                commonAppSettings.LoggerDBSettings.SyncInterval
+                commonAppSettings.WriterDBSettings.SyncInterval
                     .Subscribe(fun counter -> dbWriter.writePeriodicAsync(counter).Wait())
                     |> dbWriter.Disposables.Add
 

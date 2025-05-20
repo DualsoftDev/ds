@@ -224,25 +224,25 @@ module DBLoggerORM2 =
             return tagKindInfos |> filter (fun t -> not <| existingTagKindHash.Contains(t))
         }
 
-type LoggerDBSettingsExt =
+type WriterDBSettingsExt =
     [<Extension>]
-    static member CreateConnection(loggerDBSettings:LoggerDBSettings): SqliteConnection =
+    static member CreateConnection(loggerDBSettings:WriterDBSettings): SqliteConnection =
         let connStr = $"Data Source={loggerDBSettings.ConnectionPath}"
         createConnectionWith connStr
 
     [<Extension>]
-    static member DropDatabase(loggerDBSettings:LoggerDBSettings) =
+    static member DropDatabase(loggerDBSettings:WriterDBSettings) =
         use conn = loggerDBSettings.CreateConnection()
         conn.DropDatabase()
 
     [<Extension>]
-    static member ComputeModelId(loggerDBSettings:LoggerDBSettings): int =
+    static member ComputeModelId(loggerDBSettings:WriterDBSettings): int =
         use conn = loggerDBSettings.CreateConnection()
         // db 가 아직 초기화되지 않은 경우의 처리???
         failwith "Not implemented"
 
     [<Extension>]
-    static member FillModelId(loggerDBSettings:LoggerDBSettings): int*string =
+    static member FillModelId(loggerDBSettings:WriterDBSettings): int*string =
         Directory.CreateDirectory(Path.GetDirectoryName(loggerDBSettings.ConnectionPath)) |> ignore
         use conn = loggerDBSettings.CreateConnection()
         use tr = conn.BeginTransaction()
@@ -313,6 +313,6 @@ type LoggerDBSettingsExt =
 [<AutoOpen>]
 module DBLoggerORM3 =
     type DSCommonAppSettings with
-        member x.ConnectionString = $"Data Source={x.LoggerDBSettings.ConnectionPath}"
-        member x.CreateConnection(): SqliteConnection = x.LoggerDBSettings.CreateConnection()
+        member x.ConnectionString = $"Data Source={x.WriterDBSettings.ConnectionPath}"
+        member x.CreateConnection(): SqliteConnection = x.WriterDBSettings.CreateConnection()
 

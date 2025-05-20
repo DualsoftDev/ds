@@ -66,7 +66,7 @@ module internal DBLoggerImpl =
             readerWriterType: DBLoggerType
         ) : Task<LogSet> =
 
-        let modelId = queryCriteria.CommonAppSettings.LoggerDBSettings.ModelId
+        let modelId = queryCriteria.CommonAppSettings.WriterDBSettings.ModelId
 
         /// ormStorage 의 MaintenanceId 및 이에 해당하는 Maintenance row 를 수정 (add/delete/update)
         /// - System storage 의 Maintenance 정보가 신규추가 / 삭제 시, Maintenance Id 를 추가/삭제

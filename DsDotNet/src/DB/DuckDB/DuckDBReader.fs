@@ -3,43 +3,49 @@ namespace DB.DuckDB
 open System
 open System.IO
 open System.Collections.Generic
-open System.Threading.Tasks
+open System.Text.Json
 open DuckDB.NET.Data
 
 module DuckDBReader =
 
-    let openConnection (dbPath: string) =
-        let conn = new DuckDBConnection($"DataSource={dbPath}")
-        conn.Open()
-        conn
+    type ReaderDB(systemName: string) =
 
-    let createTempTagTable (conn: DuckDBConnection) =
-        use cmd = conn.CreateCommand()
-        cmd.CommandText <- "CREATE TEMP TABLE IF NOT EXISTS TempTags (TagName TEXT PRIMARY KEY);"
-        cmd.ExecuteNonQuery() |> ignore
+        let setting = DuckDBSetting.loadSettings()
+        let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
 
-    let clearTempTags (conn: DuckDBConnection) =
-        use cmd = conn.CreateCommand()
-        cmd.CommandText <- "DELETE FROM TempTags;"
-        cmd.ExecuteNonQuery() |> ignore
+        let openConnection () =
+            let conn = new DuckDBConnection($"DataSource={dbPath}")
+            conn.Open()
+            conn
 
-    let populateTempTags (conn: DuckDBConnection) (tagNames: seq<string>) =
-        for tag in tagNames do
-            use insert = conn.CreateCommand()
-            insert.CommandText <- "INSERT OR IGNORE INTO TempTags (TagName) VALUES (?);"
-            let p = insert.CreateParameter()
-            p.Value <- tag
-            insert.Parameters.Add(p) |> ignore
-            insert.ExecuteNonQuery() |> ignore
+        let addParam (cmd: DuckDBCommand) (value: obj) =
+            let p = cmd.CreateParameter()
+            p.Value <- value
+            cmd.Parameters.Add(p) |> ignore
 
-    let loadLogs (systemName: string) (tagNames: List<string>) (start: DateTime) (end': DateTime) (boolTypeOnly: bool) =
-        task {
-            let setting = DuckDBSetting.loadSettings()
+        let createTempTagTable (conn: DuckDBConnection) =
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "CREATE TEMP TABLE IF NOT EXISTS TempTags (TagName TEXT PRIMARY KEY);"
+            cmd.ExecuteNonQuery() |> ignore
+
+        let clearTempTags (conn: DuckDBConnection) =
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "DELETE FROM TempTags;"
+            cmd.ExecuteNonQuery() |> ignore
+
+        let populateTempTags (conn: DuckDBConnection) (tagNames: seq<string>) =
+            for tag in tagNames do
+                use insert = conn.CreateCommand()
+                insert.CommandText <- "INSERT OR IGNORE INTO TempTags (TagName) VALUES (?);"
+                addParam insert (tag :> obj)
+                insert.ExecuteNonQuery() |> ignore
+
+        /// ✅ 태그 로그 조회 (기간 내)
+        member _.LoadLogs(tagNames: List<string>, start: DateTime, end': DateTime, boolTypeOnly: bool) : Dictionary<string, List<TagLogEntry>> =
             if tagNames = null || tagNames.Count = 0 then
-                return Dictionary<string, List<TagLogEntry>>()
+                Dictionary<string, List<TagLogEntry>>() 
             else
-                let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
-                use conn = openConnection dbPath 
+                use conn = openConnection ()
                 createTempTagTable conn
                 clearTempTags conn
                 populateTempTags conn (tagNames |> Seq.distinct)
@@ -52,13 +58,8 @@ module DuckDBReader =
                       AND Time BETWEEN ? AND ?
                     ORDER BY TagName, Time;
                 """
-                let addParam (v: obj) =
-                    let p = cmd.CreateParameter()
-                    p.Value <- v
-                    cmd.Parameters.Add(p) |> ignore
-
-                addParam (start :> obj)
-                addParam (end' :> obj)
+                addParam cmd (start :> obj)
+                addParam cmd (end' :> obj)
 
                 let logs = ResizeArray<TagLogEntry>()
                 use reader = cmd.ExecuteReader()
@@ -69,21 +70,18 @@ module DuckDBReader =
                     if not boolTypeOnly || (value <> null && Boolean.TryParse(value.ToString()) |> fst) then
                         logs.Add(TagLogEntry(tag, time, value))
 
-                return
-                    logs
-                    |> Seq.groupBy (fun x -> x.TagName)
-                    |> Seq.map (fun (k, v) -> k, v |> List)
-                    |> dict |> Dictionary<string, List<TagLogEntry>>
-        }
+                logs
+                |> Seq.groupBy (fun x -> x.TagName)
+                |> Seq.map (fun (k, v) -> k, v |> List)
+                |> dict
+                |> Dictionary
 
-    let loadLogRecents (systemName: string) (tagNames: List<string>) (count: int) =
-        task {
-            let setting = DuckDBSetting.loadSettings()
+        /// ✅ 태그 로그 조회 (최신 N건)
+        member _.LoadLogRecents(tagNames: List<string>, count: int) : Dictionary<string, List<TagLogEntry>> =
             if tagNames = null || tagNames.Count = 0 || count <= 0 then
-                return Dictionary<string, List<TagLogEntry>>() 
+                Dictionary<string, List<TagLogEntry>>() 
             else
-                let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
-                use conn = openConnection dbPath 
+                use conn = openConnection ()
                 createTempTagTable conn
                 clearTempTags conn
                 populateTempTags conn (tagNames |> Seq.distinct)
@@ -100,9 +98,7 @@ module DuckDBReader =
                     WHERE rn <= ?
                     ORDER BY TagName, Time DESC;
                 """
-                let p = cmd.CreateParameter()
-                p.Value <- count
-                cmd.Parameters.Add(p) |> ignore
+                addParam cmd (count :> obj)
 
                 let logs = ResizeArray<TagLogEntry>()
                 use reader = cmd.ExecuteReader()
@@ -112,23 +108,52 @@ module DuckDBReader =
                     let value = if not (reader.IsDBNull(2)) then reader.GetString(2) :> obj else null
                     logs.Add(TagLogEntry(tag, time, value))
 
-                return
-                    logs
-                    |> Seq.groupBy (fun x -> x.TagName)
-                    |> Seq.map (fun (k, v) -> k, v |> List)
-                    |> dict |> Dictionary<string, List<TagLogEntry>>
-        }
+                logs
+                |> Seq.groupBy (fun x -> x.TagName)
+                |> Seq.map (fun (k, v) -> k, v |> List)
+                |> dict
+                |> Dictionary
 
-    let getParameter (systemName: string) (name: string) =
-        let setting = DuckDBSetting.loadSettings()
-        let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
-        use conn = openConnection dbPath
-        use cmd = conn.CreateCommand()
-        cmd.CommandText <- "SELECT Value FROM SystemParameter WHERE Name = ?;"
-        let p = cmd.CreateParameter()
-        p.Value <- name
-        cmd.Parameters.Add(p) |> ignore
+        /// ✅ 개별 파라미터 조회
+        member _.GetParameter(name: string) : string option =
+            use conn = openConnection ()
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "SELECT Value FROM SystemParameter WHERE Name = ?;"
+            addParam cmd (name :> obj)
+            let result = cmd.ExecuteScalar()
+            if result = null || result = DBNull.Value then None
+            else Some(result.ToString())
 
-        let result = cmd.ExecuteScalar()
-        if result = null || result = DBNull.Value then None
-        else Some (result.ToString())
+        /// ✅ 전체 파라미터 조회
+        member _.GetAllParameters() : Dictionary<string, string> =
+            use conn = openConnection ()
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "SELECT Name, Value FROM SystemParameter;"
+            let result = Dictionary<string, string>()
+            use reader = cmd.ExecuteReader()
+            while reader.Read() do
+                let name = reader.GetString(0)
+                let value = reader.GetString(1)
+                result[name] <- value
+            result
+
+        /// ✅ 그룹별 HeadTag 조회
+        member this.GetHeadTag(groupName: string) : string option =
+            let key = $"HeadTag:{groupName}"
+            this.GetParameter(key)
+
+        /// ✅ 모든 HeadTag 조회
+        member this.GetAllHeadTags() : Dictionary<string, string> =
+            this.GetAllParameters()
+            |> Seq.filter (fun kvp -> kvp.Key.StartsWith("HeadTag:"))
+            |> Seq.map (fun kvp -> kvp.Key.Substring("HeadTag:".Length), kvp.Value)
+            |> dict
+            |> Dictionary
+
+        /// ✅ JSON 파라미터 역직렬화
+        member this.GetJson<'T>(name: string) : 'T option =
+            match this.GetParameter(name) with
+            | Some json ->
+                try Some(JsonSerializer.Deserialize<'T>(json))
+                with _ -> None
+            | None -> None

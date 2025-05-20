@@ -13,7 +13,7 @@ open Dual.Common.Base.FS
 open Newtonsoft.Json
 
 [<AutoOpen>]
-module LoggerDB =
+module WriterDB =
     let DBLogSubject = new Subject<ORMLog>()
     /// ORMLog 제외한 나머지 DB 항목의 subject
     let DBSubject = new Subject<IDBRow>()
@@ -87,7 +87,7 @@ type ORMDBSkeletonDTOExt =
         ORMDBSkeletonDTOExt.CreateAsync(modelId, conn, null)
 
     [<Extension>]
-    static member CreateLoggerDBAsync(modelId:int, connStr:string): Task<ORMDBSkeleton> =
+    static member CreateWriterDBAsync(modelId:int, connStr:string): Task<ORMDBSkeleton> =
         task {
             let! dbDTO = ORMDBSkeletonDTOExt.CreateAsync(modelId, connStr)
             return dbDTO |> ORMDBSkeleton

@@ -5,10 +5,12 @@ open System.IO
 open System.Timers
 open System.Collections.Concurrent
 open System.Collections.Generic
+open System.Text.Json
 open DuckDB.NET.Data
+
 module DuckDBWriter =
 
-    type LoggerPG(systemName: string) =
+    type WriterDB(systemName: string) =
 
         let setting = DuckDBSetting.loadSettings()
         let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
@@ -53,7 +55,6 @@ module DuckDBWriter =
                 );
             """
             cmd.ExecuteNonQuery() |> ignore
-
 
         let logQueue = ConcurrentQueue<DateTime * string * obj>()
         let tagIdCache = Dictionary<string, int>()
@@ -119,10 +120,12 @@ module DuckDBWriter =
             createSchema () |> ignore
             timer |> ignore
 
+        // ✅ 태그 로그
         member _.LogTagChange(tagName: string, newValue: obj) =
             let now = DateTime.Now
             logQueue.Enqueue((now, tagName, newValue))
 
+        // ✅ 시스템 파라미터 저장
         member _.SetParameter(name: string, value: obj) =
             use conn = createConnection ()
             use cmd = conn.CreateCommand()
@@ -138,3 +141,55 @@ module DuckDBWriter =
             addParam cmd (DateTime.Now :> obj)
             cmd.ExecuteNonQuery() |> ignore
 
+        // ✅ 시스템 파라미터 읽기
+        member _.GetParameter(name: string) : string option =
+            use conn = createConnection ()
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "SELECT Value FROM SystemParameter WHERE Name = ?;"
+            addParam cmd (name :> obj)
+            let result = cmd.ExecuteScalar()
+            if result = null || result = DBNull.Value then None
+            else Some(result.ToString())
+
+        // ✅ 전체 파라미터 조회
+        member _.GetAllParameters() : Dictionary<string, string> =
+            use conn = createConnection ()
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- "SELECT Name, Value FROM SystemParameter;"
+            let result = Dictionary<string, string>()
+            use reader = cmd.ExecuteReader()
+            while reader.Read() do
+                let key = reader.GetString(0)
+                let value = reader.GetString(1)
+                result[key] <- value
+            result
+
+        // ✅ HeadTag 저장
+        member this.SetHeadTag(groupName: string, headTag: string) =
+            let key = $"HeadTag:{groupName}"
+            this.SetParameter(key, headTag)
+
+        // ✅ HeadTag 조회
+        member this.GetHeadTag(groupName: string) : string option =
+            let key = $"HeadTag:{groupName}"
+            this.GetParameter(key)
+
+        // ✅ 모든 HeadTag 조회
+        member this.GetAllHeadTags() : Dictionary<string, string> =
+            this.GetAllParameters()
+            |> Seq.filter (fun kvp -> kvp.Key.StartsWith("HeadTag:"))
+            |> Seq.map (fun kvp -> kvp.Key.Substring("HeadTag:".Length), kvp.Value)
+            |> dict |> Dictionary
+
+        // ✅ JSON 파라미터 저장
+        member this.SetJson<'T>(name: string, value: 'T) =
+            let json = JsonSerializer.Serialize(value)
+            this.SetParameter(name, json)
+
+        // ✅ JSON 파라미터 읽기
+        member this.GetJson<'T>(name: string) : 'T option =
+            match this.GetParameter(name) with
+            | Some json ->
+                try Some(JsonSerializer.Deserialize<'T>(json))
+                with _ -> None
+            | None -> None

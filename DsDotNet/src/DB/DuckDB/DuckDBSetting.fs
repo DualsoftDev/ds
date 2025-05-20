@@ -13,12 +13,11 @@ module DuckDBSetting =
         LogFlushIntervalMs: int
     }
 
-    let private getAppDataPath () =
-        let baseDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
-        Path.Combine(baseDir, "Dualsoft", "DB")
-
     let private defaultSetting = {
-        DatabaseDir = getAppDataPath()
+        DatabaseDir = 
+            let baseDir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+            Path.Combine(baseDir, "Dualsoft", "DB")
+
         LogFlushIntervalMs = 5000
     }
 

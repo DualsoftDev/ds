@@ -390,6 +390,9 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
         timer.Start()
 
 
+        //logger.SetParameter ("TIME", DateTime.Now)
+
+
         // NodeState로 형변환 후 AddPredefinedNode 호출
         this.AddPredefinedNode(this.SystemContext, dsVariable)
         this.AddPredefinedNode(this.SystemContext, graphVariable)

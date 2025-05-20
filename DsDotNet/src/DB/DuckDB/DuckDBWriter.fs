@@ -31,6 +31,7 @@ module DuckDBWriter =
                     Id BIGINT PRIMARY KEY,
                     Name TEXT UNIQUE NOT NULL
                 );
+
                 CREATE TABLE IF NOT EXISTS TagLog (
                     Id BIGINT PRIMARY KEY,
                     Time TIMESTAMP NOT NULL,
@@ -38,13 +39,21 @@ module DuckDBWriter =
                     NewValue TEXT,
                     FOREIGN KEY(TagNameId) REFERENCES TagNameTable(Id)
                 );
+
                 CREATE OR REPLACE VIEW TagLogView AS
                 SELECT l.Id, l.Time, t.Name AS TagName, l.NewValue
                 FROM TagLog l
                 JOIN TagNameTable t ON l.TagNameId = t.Id
                 ORDER BY l.Id DESC;
+
+                CREATE TABLE IF NOT EXISTS SystemParameter (
+                    Name TEXT PRIMARY KEY,
+                    Value TEXT,
+                    UpdatedAt TIMESTAMP
+                );
             """
             cmd.ExecuteNonQuery() |> ignore
+
 
         let logQueue = ConcurrentQueue<DateTime * string * obj>()
         let tagIdCache = Dictionary<string, int>()
@@ -113,3 +122,19 @@ module DuckDBWriter =
         member _.LogTagChange(tagName: string, newValue: obj) =
             let now = DateTime.Now
             logQueue.Enqueue((now, tagName, newValue))
+
+        member _.SetParameter(name: string, value: obj) =
+            use conn = createConnection ()
+            use cmd = conn.CreateCommand()
+            cmd.CommandText <- """
+                INSERT INTO SystemParameter (Name, Value, UpdatedAt)
+                VALUES (?, ?, ?)
+                ON CONFLICT(Name) DO UPDATE SET
+                    Value = excluded.Value,
+                    UpdatedAt = excluded.UpdatedAt;
+            """
+            addParam cmd (name :> obj)
+            addParam cmd (if value <> null then value.ToString() :> obj else null)
+            addParam cmd (DateTime.Now :> obj)
+            cmd.ExecuteNonQuery() |> ignore
+

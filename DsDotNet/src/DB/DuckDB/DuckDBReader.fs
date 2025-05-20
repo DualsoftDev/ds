@@ -118,3 +118,17 @@ module DuckDBReader =
                     |> Seq.map (fun (k, v) -> k, v |> List)
                     |> dict |> Dictionary<string, List<TagLogEntry>>
         }
+
+    let getParameter (systemName: string) (name: string) =
+        let setting = DuckDBSetting.loadSettings()
+        let dbPath = Path.Combine(setting.DatabaseDir, $"{systemName}.duckdb")
+        use conn = openConnection dbPath
+        use cmd = conn.CreateCommand()
+        cmd.CommandText <- "SELECT Value FROM SystemParameter WHERE Name = ?;"
+        let p = cmd.CreateParameter()
+        p.Value <- name
+        cmd.Parameters.Add(p) |> ignore
+
+        let result = cmd.ExecuteScalar()
+        if result = null || result = DBNull.Value then None
+        else Some (result.ToString())

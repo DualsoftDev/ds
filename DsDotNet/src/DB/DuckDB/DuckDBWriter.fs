@@ -151,36 +151,6 @@ module DuckDBWriter =
             if result = null || result = DBNull.Value then None
             else Some(result.ToString())
 
-        // ✅ 전체 파라미터 조회
-        member _.GetAllParameters() : Dictionary<string, string> =
-            use conn = createConnection ()
-            use cmd = conn.CreateCommand()
-            cmd.CommandText <- "SELECT Name, Value FROM SystemParameter;"
-            let result = Dictionary<string, string>()
-            use reader = cmd.ExecuteReader()
-            while reader.Read() do
-                let key = reader.GetString(0)
-                let value = reader.GetString(1)
-                result[key] <- value
-            result
-
-        // ✅ HeadTag 저장
-        member this.SetHeadTag(groupName: string, headTag: string) =
-            let key = $"HeadTag:{groupName}"
-            this.SetParameter(key, headTag)
-
-        // ✅ HeadTag 조회
-        member this.GetHeadTag(groupName: string) : string option =
-            let key = $"HeadTag:{groupName}"
-            this.GetParameter(key)
-
-        // ✅ 모든 HeadTag 조회
-        member this.GetAllHeadTags() : Dictionary<string, string> =
-            this.GetAllParameters()
-            |> Seq.filter (fun kvp -> kvp.Key.StartsWith("HeadTag:"))
-            |> Seq.map (fun kvp -> kvp.Key.Substring("HeadTag:".Length), kvp.Value)
-            |> dict |> Dictionary
-
         // ✅ JSON 파라미터 저장
         member this.SetJson<'T>(name: string, value: 'T) =
             let json = JsonSerializer.Serialize(value)

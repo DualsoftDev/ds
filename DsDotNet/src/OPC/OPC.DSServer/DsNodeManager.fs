@@ -411,7 +411,7 @@ type DsNodeManager(server: IServerInternal, configuration: ApplicationConfigurat
                             if stg.IsVertexOpcDataTag() then
                                 handleCalcTag (stg) |> ignore 
 
-                            if mode <> RuntimeMode.Control && TagKindExt.IsNeedSaveDBLogForDSPilot stg then //Control 아니면 DB 로깅  
+                            if (*mode <> RuntimeMode.Control &&*) TagKindExt.IsNeedSaveDBLogForDSPilot stg then // DB 로깅  
                                 logger.LogTagChange (stg.Name, value)
                             else 
                                 //Control 모드일때는 DB 로깅 하지 않음

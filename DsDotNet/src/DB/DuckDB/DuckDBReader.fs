@@ -114,20 +114,3 @@ module DuckDBReader =
                 |> dict
                 |> Dictionary
 
-        /// ✅ 개별 파라미터 조회
-        member _.GetParameter(name: string) : string option =
-            use conn = openConnection ()
-            use cmd = conn.CreateCommand()
-            cmd.CommandText <- "SELECT Value FROM SystemParameter WHERE Name = ?;"
-            addParam cmd (name :> obj)
-            let result = cmd.ExecuteScalar()
-            if result = null || result = DBNull.Value then None
-            else Some(result.ToString())
-
-        /// ✅ JSON 파라미터 역직렬화
-        member this.GetJson<'T>(name: string) : 'T option =
-            match this.GetParameter(name) with
-            | Some json ->
-                try Some(JsonSerializer.Deserialize<'T>(json))
-                with _ -> None
-            | None -> None

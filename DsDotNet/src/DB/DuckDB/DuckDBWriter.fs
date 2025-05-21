@@ -48,11 +48,6 @@ module DuckDBWriter =
                 JOIN TagNameTable t ON l.TagNameId = t.Id
                 ORDER BY l.Id DESC;
 
-                CREATE TABLE IF NOT EXISTS SystemParameter (
-                    Name TEXT PRIMARY KEY,
-                    Value TEXT,
-                    UpdatedAt TIMESTAMP
-                );
             """
             cmd.ExecuteNonQuery() |> ignore
 
@@ -125,41 +120,4 @@ module DuckDBWriter =
             let now = DateTime.Now
             logQueue.Enqueue((now, tagName, newValue))
 
-        // ✅ 시스템 파라미터 저장
-        member _.SetParameter(name: string, value: obj) =
-            use conn = createConnection ()
-            use cmd = conn.CreateCommand()
-            cmd.CommandText <- """
-                INSERT INTO SystemParameter (Name, Value, UpdatedAt)
-                VALUES (?, ?, ?)
-                ON CONFLICT(Name) DO UPDATE SET
-                    Value = excluded.Value,
-                    UpdatedAt = excluded.UpdatedAt;
-            """
-            addParam cmd (name :> obj)
-            addParam cmd (if value <> null then value.ToString() :> obj else null)
-            addParam cmd (DateTime.Now :> obj)
-            cmd.ExecuteNonQuery() |> ignore
 
-        // ✅ 시스템 파라미터 읽기
-        member _.GetParameter(name: string) : string option =
-            use conn = createConnection ()
-            use cmd = conn.CreateCommand()
-            cmd.CommandText <- "SELECT Value FROM SystemParameter WHERE Name = ?;"
-            addParam cmd (name :> obj)
-            let result = cmd.ExecuteScalar()
-            if result = null || result = DBNull.Value then None
-            else Some(result.ToString())
-
-        // ✅ JSON 파라미터 저장
-        member this.SetJson<'T>(name: string, value: 'T) =
-            let json = JsonSerializer.Serialize(value)
-            this.SetParameter(name, json)
-
-        // ✅ JSON 파라미터 읽기
-        member this.GetJson<'T>(name: string) : 'T option =
-            match this.GetParameter(name) with
-            | Some json ->
-                try Some(JsonSerializer.Deserialize<'T>(json))
-                with _ -> None
-            | None -> None

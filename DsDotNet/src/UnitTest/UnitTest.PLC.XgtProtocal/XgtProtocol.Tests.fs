@@ -612,7 +612,7 @@ module IntegrationTests =
             ()
         else 
 
-            while true do
+            //while true do
  
                 for tag in tests do
                     let head, size, offset = tryParseXgiTag tag |> Option.get 
@@ -663,7 +663,7 @@ module IntegrationTests =
             //            printfn $"[!] 예외 - 주소: {address} → {ex.Message}"
 
 
-            conn.Disconnect() |> ignore
+                conn.Disconnect() |> ignore
 
 
     [<Fact>]

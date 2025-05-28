@@ -4,7 +4,7 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
-type XgtPlcScan(ip: string, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) as this =
+type XgtPlcScan(ip: string, localEthernet:bool, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) as this =
     inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
 
     let connection = XgtEthernet(ip, 2004, timeoutMs)

@@ -8,6 +8,7 @@ type PlcDataSizeType =
     | Int16    | UInt16
     | Int32    | UInt32  | Float     // REAL
     | Int64    | UInt64  | Double    // LREAL
+    | Int128   | UInt128
     | String
     | DateTime
     | UserDefined
@@ -21,7 +22,9 @@ type PlcDataSizeType =
             Int32
             UInt32
             Int64
-            UInt64
+            UInt64      
+            Int128
+            UInt128
             Float
             Double
             String
@@ -50,6 +53,8 @@ type PlcDataSizeType =
         | UInt32     -> 32
         | Int64      -> 64
         | UInt64     -> 64
+        | Int128     -> 128
+        | UInt128    -> 128
         | Float      -> 32
         | Double     -> 64
         | String     -> 8 * 64   // 예: 문자열 최대 길이 기반. 수정 가능

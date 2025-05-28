@@ -142,6 +142,7 @@ module ModelConfigModule =
         DsFilePath: string
         HwIP: string
         HwPort : uint16
+        HwLocalCpuEthernet : bool
         HwEthernet : HwEthernet
         HwOPC : string
         TagConfig : TagConfig   
@@ -191,6 +192,7 @@ module ModelConfigModule =
             HwIP = "127.0.0.1"
             HwPort = 5000us
             HwEthernet = UDP
+            HwLocalCpuEthernet = false
             HwOPC = "opc.tcp://127.0.0.1:2747"
             TagConfig = createDefaultTagConfig()    
             ExternalApi = ExternalApi.OPC
@@ -203,6 +205,7 @@ module ModelConfigModule =
     let createModelConfig(path:string,
             hwIP:string, 
             hwPort:uint16, 
+            hwLocalCpuEthernet:bool, 
             hwEthernet:HwEthernet, 
             hwOPC:string, 
             tagConfig:TagConfig, 
@@ -215,6 +218,7 @@ module ModelConfigModule =
             DsFilePath = path
             HwIP = hwIP
             HwPort = hwPort
+            HwLocalCpuEthernet = hwLocalCpuEthernet
             HwEthernet = hwEthernet
             HwOPC = hwOPC
             TagConfig = tagConfig

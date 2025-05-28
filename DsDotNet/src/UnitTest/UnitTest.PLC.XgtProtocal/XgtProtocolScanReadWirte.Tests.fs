@@ -22,7 +22,7 @@ module IntegrationScanTests =
 
     [<Fact>]
     let ``Integration - Random Write & Read for 5 Seconds`` () =
-        let scanMgr = XgtScanManager(20, 3000, false)
+        let scanMgr = XgtScanManager(false, 20, 3000, false)
         let ip = "192.168.9.102"
 
         let tags = 

@@ -195,7 +195,7 @@ module ConvertCpuDsSystem =
         member private x.GenerationTaskDevIOM(mode:RuntimeMode, hw:HwIO) =
 
             let callDevices = x.GetTaskDevsCall()
-            let hwTypeData(address) =
+            let hwTypeData address =
                 let getType size =
                     match size with
                     | 1 -> DuBOOL
@@ -203,20 +203,31 @@ module ConvertCpuDsSystem =
                     | 16 -> DuUINT16
                     | 32 -> DuUINT32
                     | 64 -> DuUINT64
-                    | _ -> failwithf $"XGI IO Address Size Error {address}"
+                    | _ -> failwithf $"Invalid IO size for address: {address}"
 
-                match hw with 
-                |LS_XGI_IO -> 
-                    let _, size, _ = XgtProtocol.LsXgiTagParser.Parse address 
-                    getType  size   
-                |LS_XGK_IO -> 
-                    let _, size, _ = XgtProtocol.LsXgkTagParser.Parse address 
-                    getType  size
-                |MELSEC_IO -> 
-                    let _, _, size = MelsecProtocol.MxTagParser.ParseToSegment address
-                    getType size.Value
-                | _ -> 
-                    failwithf $"IO Address Size Error {address}"
+                let unwrapOrFail msg opt =
+                    match opt with
+                    | Some v -> v
+                    | None -> failwith msg
+
+                let size =
+                    match hw with
+                    | LS_XGI_IO ->
+                        let _, size, _ =
+                            unwrapOrFail $"XGI IO Address 주소타입이 아닙니다. 입력주소: {address}" (XgtProtocol.LsXgiTagParser.TryParse address)
+                        size
+                    | LS_XGK_IO ->
+                        let _, size, _ =
+                            unwrapOrFail $"XGK IO Address 주소타입이 아닙니다. 입력주소: {address}" (XgtProtocol.LsXgkTagParser.TryParse address)
+                        size
+                    | MELSEC_IO ->
+                        let _, _, sizeOpt = MelsecProtocol.MxTagParser.ParseToSegment address
+                        unwrapOrFail $"MELSEC IO Address 주소타입이 아닙니다. 입력주소: {address}" sizeOpt
+                    | _ ->
+                        failwithf $"Unsupported hardware type for address: {address}"
+
+                getType size
+
 
             for dev, call in callDevices do
                 let apiStgName = dev.FullName

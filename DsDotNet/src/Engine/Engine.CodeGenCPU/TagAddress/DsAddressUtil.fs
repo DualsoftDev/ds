@@ -118,7 +118,9 @@ module DsAddressUtil =
         | PlcDataSizeType.Double  -> DuFLOAT64
         | PlcDataSizeType.String  -> DuSTRING
         | PlcDataSizeType.DateTime -> DuUINT64
-        | PlcDataSizeType.UserDefined -> failwith "UserDefined는 지원되지 않습니다."
+        | PlcDataSizeType.UserDefined
+        | PlcDataSizeType.UInt128
+        | PlcDataSizeType.Int128 -> failwith "UserDefined, UInt128, Int128지원되지 않습니다."
 
     
     let matchPlcDataSizeType (plcType, duType) =

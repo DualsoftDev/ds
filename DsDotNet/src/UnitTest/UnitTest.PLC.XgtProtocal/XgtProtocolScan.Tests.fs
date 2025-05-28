@@ -6,7 +6,7 @@ open Dual.PLC.Common.FS
 open XgtProtocol
 
 type ScanManagerFixture() =
-    member val Manager = XgtScanManager(20, 3000, false) :> PlcScanManagerBase<XgtPlcScan>
+    member val Manager = XgtScanManager(false, 20, 3000, false) :> PlcScanManagerBase<XgtPlcScan>
 
 module ScanManagerTests =
 
@@ -18,13 +18,13 @@ module ScanManagerTests =
 
     [<Fact>]
     let ``IsConnected should return false for unknown IP`` () =
-        let scanMgr = XgtScanManager(20, 3000, false)
+        let scanMgr = XgtScanManager(false, 20, 3000, false)
         let result = scanMgr.GetScanner(ipUnknown) |> Option.map (fun s -> s.IsConnected) |> Option.defaultValue false
         Assert.False(result)
 
     [<Fact>]
     let ``Scan simple test`` () =
-        let scanMgr = XgtScanManager(20, 3000, false)
+        let scanMgr = XgtScanManager(false, 20, 3000, false)
         try
 
         scanMgr.StartScanReadOnly(ip100, dummyTags) |> ignore
@@ -45,7 +45,7 @@ module ScanManagerTests =
 
     [<Fact>]
     let ``StopScan should clear all scans`` () =
-        let scanMgr = XgtScanManager(20, 3000, false)
+        let scanMgr = XgtScanManager(false, 20, 3000, false)
 
         let input =
             dict [

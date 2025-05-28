@@ -145,6 +145,10 @@ type LsXgiTagParser =
         tryParseXgiTag tag |? (getNull<string * int * int>())
 
     [<Extension>]
+    static member TryParse(tag:string): (string * int * int) option =
+        tryParseXgiTag tag
+
+    [<Extension>]
     static member ParseAddressIO(device:string, bitSize:int, offset: int, iSlot:int, sumBit:int) : string =
         match bitSize with  //test ahn  xgi 규격확인
             | 1 ->  $"%%{device}X0.{iSlot}.{(offset-sumBit) % 64}"  //test ahn 아날로그 base 1로 일단 고정

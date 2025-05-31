@@ -14,7 +14,6 @@
 		<SignAssembly>false</SignAssembly>
 		<!--서명사용시 런타임에 XGComm COM 로딩안됨 -->
 		<AssemblyOriginatorKeyFile>$(SolutionDir)\dualsoft.snk</AssemblyOriginatorKeyFile>
-		<PlatformTarget>x86</PlatformTarget>
 	</PropertyGroup>
 
 

@@ -32,35 +32,35 @@ module MxComponentModule  =
         let mutable errorCode = 0
         let mutable errorMessage = ""
         let mutable connected = false
-        //let mx = ActUtlType64Lib.ActUtlType64Class()
-        let mx = ActProgType64Lib.ActProgType64Class()
+        let mx = ActUtlType64Lib.ActUtlType64Class()
+        //let mx = ActProgType64Lib.ActProgType64Class()
 
          /// 오류 코드에 대한 메시지 매핑
   
         do 
-            //mx.ActLogicalStationNumber <- logicalStationNumber
+            mx.ActLogicalStationNumber <- logicalStationNumber
 
-            mx.ActUnitType <- (int)UnitType.UNIT_SIMULATOR2
-            mx.ActProtocolType <- (int)ProtocolType.PROTOCOL_SHAREDMEMORY
-            mx.ActCpuType <- MxTypeModule.CpuTypeMap["Q02CPU"]   
-            mx.ActBaudRate <- 0
-            mx.ActControl <- 0
-            mx.ActDataBits <- 0
-            mx.ActDestinationPortNumber <- 0
-            mx.ActDidPropertyBit <- 0
-            mx.ActDsidPropertyBit <- 0
-            mx.ActHostAddress <- "127.0.0.1"
-            mx.ActDestinationIONumber <- 0
-            mx.ActNetworkNumber <- 0
-            mx.ActPacketType <- 1
-            mx.ActParity <- 0
-            mx.ActPassword <- ""
-            mx.ActPortNumber <- 0
-            mx.ActSourceStationNumber <- 1
-            mx.ActStopBits <- 0
-            mx.ActSumCheck <- 0
-            mx.ActThroughNetworkType <- 0
-            mx.ActTargetSimulator <- (int)0
+            //mx.ActUnitType <- (int)UnitType.UNIT_SIMULATOR2
+            //mx.ActProtocolType <- (int)ProtocolType.PROTOCOL_SHAREDMEMORY
+            //mx.ActCpuType <- MxTypeModule.CpuTypeMap["Q02CPU"]   
+            //mx.ActBaudRate <- 0
+            //mx.ActControl <- 0
+            //mx.ActDataBits <- 0
+            //mx.ActDestinationPortNumber <- 0
+            //mx.ActDidPropertyBit <- 0
+            //mx.ActDsidPropertyBit <- 0
+            //mx.ActHostAddress <- "127.0.0.1"
+            //mx.ActDestinationIONumber <- 0
+            //mx.ActNetworkNumber <- 0
+            //mx.ActPacketType <- 1
+            //mx.ActParity <- 0
+            //mx.ActPassword <- ""
+            //mx.ActPortNumber <- 0
+            //mx.ActSourceStationNumber <- 1
+            //mx.ActStopBits <- 0
+            //mx.ActSumCheck <- 0
+            //mx.ActThroughNetworkType <- 0
+            //mx.ActTargetSimulator <- (int)0
 
             let ret = mx.Open() 
             if 0 <> ret

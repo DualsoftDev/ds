@@ -21,6 +21,7 @@ type PlcTagBase(name: string, address: string, dataType: PlcDataSizeType,
     member _.Name     = name
     member _.Address  = address
     member _.DataType = dataType
+    [<Browsable(false)>]
     member val IsLowSpeedArea = false with get, set
 
     member this.Value

@@ -160,9 +160,9 @@ module ModelConfigModule =
             let baseMsg = $"RuntimeMode: {x.RuntimeMode}"
             let hwIOInfo = 
                 match x.HwTarget.HwIO with
-                | LS_XGI_IO -> x.HwIP
-                | LS_XGK_IO -> x.HwIP
-                | MELSEC_IO -> x.HwIP
+                | LS_XGI_IO 
+                | LS_XGK_IO -> $"{x.HwIP} (LocalCpuEthernet : {x.HwLocalCpuEthernet})"
+                | MELSEC_IO -> $"{x.HwIP}:{x.HwPort} ({x.HwEthernet})"
                 | OPC_IO -> x.HwOPC
             let hwIOHwCPU = 
                 match x.HwCPU with
@@ -175,11 +175,11 @@ module ModelConfigModule =
                 baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}"
             | Control -> 
                 baseMsg + $"\r\nHwCPU: {x.HwCPU}
-                \r\nHwDriver: {x.HwTarget.HwIO} ({hwIOHwCPU}) 
+                \r\nHwDriver: {x.HwTarget.HwIO} {hwIOHwCPU}
                 \r\nTimeoutCall: {x.TimeoutCall}"
             | Monitoring 
             | VirtualPlant -> 
-                baseMsg + $"\r\nHwDriver: {x.HwTarget.HwIO}({hwIOInfo})
+                baseMsg + $"\r\nHwDriver: {x.HwTarget.HwIO}{hwIOInfo}
                 \r\nTimeoutCall: {x.TimeoutCall}"
             | VirtualLogic -> 
                 baseMsg + $"\r\nTimeSimutionMode: {x.TimeSimutionMode}\r\nExternalApi: {x.ExternalApi}

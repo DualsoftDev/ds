@@ -39,7 +39,7 @@ module XgtTagTests =
         let tags = [| for i in 0..16*batchCnt-1 -> 
                         XGTTag($"%%ML000{i}", true, false) 
                     |]
-        let batches = prepareReadBatches tags
+        let batches = prepareRead64Batches tags
         Assert.Equal(batchCnt, batches.Length)
         let offsets = batches |> Array.map (fun b -> b.Tags[0].LWordTag)
         Assert.Equal<string[]>([|"%ML0"; "%ML16";|], offsets)
@@ -620,19 +620,19 @@ module IntegrationTests =
                     match size with
                     | 1 -> 
                         let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
-                        conn.Write(address, PlcDataSizeType.Boolean, not(Convert.ToBoolean data)) |> ignore
+                        conn.Write(address, false, PlcDataSizeType.Boolean, not(Convert.ToBoolean data)) |> ignore
                     | 8 -> 
                         let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
-                        conn.Write(address, PlcDataSizeType.Byte, byte (Convert.ToByte data + 1uy)) |> ignore
+                        conn.Write(address, false, PlcDataSizeType.Byte, byte (Convert.ToByte data + 1uy)) |> ignore
                     | 16 ->
                         let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
-                        conn.Write(address, PlcDataSizeType.UInt16, uint16 (Convert.ToUInt16 data + 1us)) |> ignore
+                        conn.Write(address, false, PlcDataSizeType.UInt16, uint16 (Convert.ToUInt16 data + 1us)) |> ignore
                     | 32 ->
                         let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
-                        conn.Write(address, PlcDataSizeType.UInt32, uint32 (Convert.ToUInt32 data + 1u)) |> ignore
+                        conn.Write(address, false, PlcDataSizeType.UInt32, uint32 (Convert.ToUInt32 data + 1u)) |> ignore
                     | 64 ->
                         let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
-                        conn.Write(address, PlcDataSizeType.UInt64, uint64 (Convert.ToUInt64 data + 1UL)) |> ignore
+                        conn.Write(address, false, PlcDataSizeType.UInt64, uint64 (Convert.ToUInt64 data + 1UL)) |> ignore
                     | _ -> failwithf $"지원하지 않는 데이터 타입: {size}"
               
             //let rnd = Random()

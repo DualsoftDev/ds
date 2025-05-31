@@ -37,7 +37,7 @@ module LoaderModule =
         JsonConvert.DeserializeObject<ModelConfig>(json, jsonSettings)
 
     let SaveConfig (path: string) (modelConfig:ModelConfig) =
-        let json = JsonConvert.SerializeObject(modelConfig, jsonSettings)
+        let json = JsonConvert.SerializeObject(modelConfig, Formatting.Indented, jsonSettings)
         File.WriteAllText(path, json)
 
 

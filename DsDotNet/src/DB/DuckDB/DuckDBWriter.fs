@@ -79,18 +79,25 @@ module DuckDBWriter =
                     match tagIdCache.TryGetValue(tagName) with
                     | true, id -> id
                     | false, _ ->
-                        try
-                            use insertCmd = conn.CreateCommand()
-                            insertCmd.CommandText <- "INSERT INTO TagNameTable (Id, Name) VALUES (?, ?);"
-                            addParam insertCmd (idCounter :> obj)
-                            addParam insertCmd (tagName :> obj)
-                            insertCmd.ExecuteNonQuery() |> ignore
-                        with _ -> ()
+                        // 먼저 존재하는지 확인
+                        use checkCmd = conn.CreateCommand()
+                        checkCmd.CommandText <- "SELECT Id FROM TagNameTable WHERE Name = ?;"
+                        addParam checkCmd (tagName :> obj)
+                        let existingId = checkCmd.ExecuteScalar()
 
-                        use selectCmd = conn.CreateCommand()
-                        selectCmd.CommandText <- "SELECT Id FROM TagNameTable WHERE Name = ?;"
-                        addParam selectCmd (tagName :> obj)
-                        let id = Convert.ToInt32(selectCmd.ExecuteScalar())
+                        let id =
+                            if existingId <> null && existingId <> box DBNull.Value then
+                                Convert.ToInt32(existingId)
+                            else
+                                use insertCmd = conn.CreateCommand()
+                                insertCmd.CommandText <- "INSERT INTO TagNameTable (Id, Name) VALUES (?, ?);"
+                                addParam insertCmd (idCounter :> obj)
+                                addParam insertCmd (tagName :> obj)
+                                insertCmd.ExecuteNonQuery() |> ignore
+                                let newId = idCounter
+                                idCounter <- idCounter + 1L
+                                int newId
+
                         tagIdCache[tagName] <- id
                         id
 

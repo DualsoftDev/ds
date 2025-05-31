@@ -21,12 +21,20 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
 
         
     member val LWordOffset = -1 with get, set
+    member val QWordOffset = -1 with get, set
     /// LWord 태그 이름 (e.g., %ML0)
     member x.LWordTag =
         if address.StartsWith("%") then
             sprintf "%%%sL%d" x.Device (x.BitOffset / 64)
         else
             sprintf "%sL%d" x.Device (x.BitOffset / 64)
+
+    /// QWord 태그 이름 (e.g., %MQ0)
+    member x.QWordTag =
+        if address.StartsWith("%") then
+            sprintf "%%%sQ%d" x.Device (x.BitOffset / 128)
+        else
+            sprintf "%sQ%d" x.Device (x.BitOffset / 128)
 
     ///같은주소 다른표기때문에 동일 주소 확인용 %MW10 = %MX16 
     member x.AddressKey = $"{x.Device}_{x.BitOffset}"
@@ -82,27 +90,45 @@ type XGTTag(name: string, address: string, dataSizeType: PlcDataSizeType, bitOff
             | "I" | "A"  -> false
             | _ -> true
 
-
     /// 버퍼 값을 읽어 현재 값으로 설정, 변경 여부 반환
     override x.UpdateValue(buffer: byte[]) : bool =
-        
-        /// 시작 바이트 위치 (LWordOffset * 8 + 내부 오프셋)
-        let startByteOffset = x.LWordOffset * 8 + (x.BitOffset % 64) / 8
+
+        // 128bit 여부 판단: LWordOffset = -1이면 128bit (QWordOffset 사용)
+        let is128bit = x.LWordOffset = -1
+
+        // 기준 오프셋 및 워드 단위 크기 선택
+        let offset = if is128bit then x.QWordOffset else x.LWordOffset
+        let wordSize = if is128bit then 16 else 8
+
+        // 비트 단위 시작 위치 계산 (bit 단위 -> byte 단위)
+        let startByteOffset = offset * wordSize + (x.BitOffset % (wordSize * 8)) / 8
 
         let newValue : obj =
             match x.DataType with
             | Boolean ->
                 if x.Device = "S" then
-                    let lw = BitConverter.ToUInt16(buffer, startByteOffset) |> int
-                    (lw = (bitOffset % step)) :> obj
+                    let sVal = BitConverter.ToUInt16(buffer, startByteOffset) |> int
+                    (sVal = (x.BitOffset % 64)) :> obj
                 else
-                    let lw = BitConverter.ToUInt64(buffer, x.LWordOffset * 8)
-                    (lw &&& (1UL <<< (x.BitOffset % 64)) <> 0UL) :> obj
-            | Byte  -> buffer.[startByteOffset] :> obj
-            | UInt16  -> BitConverter.ToUInt16(buffer, startByteOffset) :> obj
-            | UInt32-> BitConverter.ToUInt32(buffer  , startByteOffset) :> obj
-            | UInt64-> BitConverter.ToUInt64(buffer  , startByteOffset) :> obj
-            | _-> failwith $"Unsupported data type: {x.DataType}"
+                    let bitPos = x.BitOffset % (if is128bit then 128 else 64)
+                    let baseOffset = offset * wordSize
+                    if bitPos < 64 then
+                        let low = BitConverter.ToUInt64(buffer, baseOffset)
+                        (low &&& (1UL <<< bitPos)) <> 0UL :> obj
+                    else
+                        let high = BitConverter.ToUInt64(buffer, baseOffset + 8)
+                        (high &&& (1UL <<< (bitPos - 64))) <> 0UL :> obj
+
+            | Byte   -> buffer.[startByteOffset] :> obj
+            | UInt16 -> BitConverter.ToUInt16(buffer, startByteOffset) :> obj
+            | UInt32 -> BitConverter.ToUInt32(buffer, startByteOffset) :> obj
+            | UInt64 -> BitConverter.ToUInt64(buffer, startByteOffset) :> obj
+            //| UInt128 ->
+            //    let baseOffset = offset * 16
+            //    let low  = BitConverter.ToUInt64(buffer, baseOffset)
+            //    let high = BitConverter.ToUInt64(buffer, baseOffset + 8)
+            //    struct (high, low) :> obj
+            | _ -> failwith $"Unsupported data type: {x.DataType}"
 
         if base.Value <> newValue then
             base.Value <- newValue

@@ -4,43 +4,40 @@ open System
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
-type XgtPlcScan(ip: string, localEthernet:bool, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) as this =
+type XgtPlcScan(ip: string, localEthernet: bool, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) as this =
     inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
 
     let connection = XgtEthernet(ip, 2004, timeoutMs)
     let mutable xgtTags: XGTTag[] = [||]
-    let mutable lowSpeedAreaBatches: LWBatch[] = [||]
-    let mutable highSpeedAreaBatches: LWBatch[] = [||]
-    let notifiedOnce = HashSet<LWBatch>()
+    let mutable lowSpeedAreaBatches: PlcBatchBase<XGTTag>[] = [||]
+    let mutable highSpeedAreaBatches: PlcBatchBase<XGTTag>[] = [||]
+    let notifiedOnce = HashSet<PlcBatchBase<XGTTag>>()
     let tagMap = Dictionary<ScanAddress, PlcTagBase>()
-      /// 공통 읽기 함수
-    let readAreaBatches ((batches: LWBatch[]), (delayMs: int)) =
+
+    /// 공통 읽기 함수
+    let readAreaBatches (batches: PlcBatchBase<XGTTag>[], delayMs: int) =
         try
             for batch in batches do
-                // 중복 제거된 LWord 주소만 추출하여 읽기 요청
                 let addresses =
                     batch.Tags
-                    |> Seq.map (fun tag -> tag.LWordTag)
+                    |> Seq.map (fun tag -> if localEthernet then tag.LWordTag else tag.QWordTag)
                     |> Seq.distinct
                     |> Seq.toArray
 
-                connection.Reads(addresses, PlcDataSizeType.UInt64, batch.Buffer)
 
-                // 태그별 값 업데이트 및 변경 이벤트 발생
+                connection.Reads(addresses, localEthernet, batch.Buffer)
+
                 for tag in batch.Tags do
                     if tag.UpdateValue(batch.Buffer) then
                         this.TriggerTagChanged { Ip = ip; Tag = tag }
 
-                // 최초 읽기 알림만 등록
                 if notifiedOnce.Add(batch) then
-                    () // 추후 알림 로직 확장 여지
+                    () // 최초 알림 시점에 필요한 로직 확장 가능
 
-                Async.Sleep(delayMs) |> Async.RunSynchronously  
-
+                Async.Sleep(delayMs) |> Async.RunSynchronously
         with ex ->
             eprintfn $"[⚠️ XGT Read Error] IP: {ip}, 예외: {ex.Message}"
             connection.ReConnect() |> ignore
-
 
     // ---------------------------
     // 연결 관련
@@ -67,22 +64,26 @@ type XgtPlcScan(ip: string, localEthernet:bool, scanDelay: int, timeoutMs: int, 
         for tag in xgtTags do
             match tag.GetWriteValue() with
             | Some value ->
-                if not (connection.Write(tag.Address, tag.DataType, value)) then
+                if not (connection.Write(tag.Address, localEthernet, tag.DataType, value)) then
                     failwith $"Write 실패: {tag.Address}"
                 tag.ClearWriteValue()
             | None -> ()
 
+    // ---------------------------
+    // 읽기 영역
+    // ---------------------------
     override _.ReadLowSpeedArea(delayMs: int) =
         readAreaBatches (lowSpeedAreaBatches, delayMs)
+
     override _.ReadHighSpeedArea(delayMs: int) =
         readAreaBatches (highSpeedAreaBatches, delayMs)
 
     // ---------------------------
     // 태그 준비 및 파싱
     // ---------------------------
-    override _.PrepareTags(tags: TagInfo seq)  =
+    override _.PrepareTags(tags: TagInfo seq) =
         tagMap.Clear()
-        let isXGI = LsTagParser.IsXGI(tags |> Seq.map(fun s-> s.Address))
+        let isXGI = LsTagParser.IsXGI(tags |> Seq.map (fun s -> s.Address))
 
         let parsed =
             tags
@@ -101,6 +102,22 @@ type XgtPlcScan(ip: string, localEthernet:bool, scanDelay: int, timeoutMs: int, 
             |> Seq.toArray
 
         xgtTags <- parsed
-        highSpeedAreaBatches <- prepareReadBatches (parsed |> Array.filter (fun b ->not  b.IsLowSpeedArea))
-        lowSpeedAreaBatches   <- prepareReadBatches (parsed |> Array.filter (fun b ->  b.IsLowSpeedArea))
+
+        /// 공용 배치 생성 함수
+        let prepareBatches (tags: XGTTag[]) =
+            if localEthernet then
+                prepareRead64Batches tags |> Array.map (fun b -> b :> PlcBatchBase<XGTTag>)
+            else
+                prepareRead128Batches tags |> Array.map (fun b -> b :> PlcBatchBase<XGTTag>)
+
+        highSpeedAreaBatches <-
+            parsed
+            |> Array.filter (fun b -> not b.IsLowSpeedArea)
+            |> prepareBatches
+
+        lowSpeedAreaBatches <-
+            parsed
+            |> Array.filter (fun b -> b.IsLowSpeedArea)
+            |> prepareBatches
+
         upcast tagMap

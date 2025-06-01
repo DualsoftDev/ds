@@ -17,7 +17,7 @@ module MappingApiModule =
         elif tag.Name = device then "DO"
         else failwithf "extractApiFromTag tag %s device %s" tag.Name device
 
-    let createDeviceApi (groupName: string) (device: string) (work: string) (api: string) (tag: MapperTag) (color: int) (usingPouGroup:bool): DeviceApi =
+    let createDeviceApi (groupName: string) (device: string) (_work: string) (api: string) (tag: MapperTag) (color: int) (_usingPouGroup:bool): DeviceApi =
         let area = validName (defaultValueIfEmpty groupName "UnknownGroup")
         DeviceApi(
             Area = area,

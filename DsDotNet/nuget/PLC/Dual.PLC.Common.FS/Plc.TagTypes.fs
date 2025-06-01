@@ -61,6 +61,10 @@ type PlcDataSizeType =
         | DateTime   -> 64       // 일반적으로 8바이트 (예: ticks)
         | UserDefined -> 0        // 사용자 정의 타입은 비트 수를 알 수 없음
 
+    /// PlcDataSizeType → 바이트 수
+    static member TypeByteSize(dataType: PlcDataSizeType) =
+            (PlcDataSizeType.TypeBitSize dataType + 7) / 8
+
     static member TryFromString(txt: string) : PlcDataSizeType option =
         match txt.Trim().ToUpperInvariant() with
         | "BOOL" | "BOOLEAN" | "BIT"            -> Some PlcDataSizeType.Boolean

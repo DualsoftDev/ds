@@ -20,7 +20,11 @@
     <Compile Include="LSE\LS.XGK.TagParser.fs" />
     <Compile Include="LSE\LS.TagParser.fs" />
     <Compile Include="XgtProtocol.Tag.fs" />
-    <Compile Include="XgtProtoc0l.Batch.fs" />
+    <Compile Include="XgtProtocol.Batch.fs" />
+    <Compile Include="XgtProtocol.Type.fs" />
+    <Compile Include="XgtProtocol.Util.fs" />
+    <Compile Include="XgtProtocol.FrameBuilder.fs" />
+    <Compile Include="XgtProtocol.Response.fs" />
     <Compile Include="XgtProtocol.Comm.fs" />
     <Compile Include="XgtProtocol.Scan.fs" />
     <Compile Include="XgtProtocol.ScanController.fs" />

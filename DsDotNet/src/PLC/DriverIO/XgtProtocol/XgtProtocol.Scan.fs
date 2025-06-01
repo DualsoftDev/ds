@@ -1,11 +1,13 @@
 namespace XgtProtocol
 
 open System
+open System.Linq
 open System.Collections.Generic
 open Dual.PLC.Common.FS
 
 type XgtPlcScan(ip: string, localEthernet: bool, scanDelay: int, timeoutMs: int, isMonitorOnly: bool) as this =
     inherit PlcScanBase(ip, scanDelay, isMonitorOnly)
+    let localEthernet = true //임시  
 
     let connection = XgtEthernet(ip, 2004, timeoutMs)
     let mutable xgtTags: XGTTag[] = [||]
@@ -24,8 +26,13 @@ type XgtPlcScan(ip: string, localEthernet: bool, scanDelay: int, timeoutMs: int,
                     |> Seq.distinct
                     |> Seq.toArray
 
+                let dataType = 
+                    if localEthernet then PlcDataSizeType.UInt64 
+                    else PlcDataSizeType.UInt128
 
-                connection.Reads(addresses, localEthernet, batch.Buffer)
+                let dataTypes = Array.create addresses.Length dataType
+
+                connection.Reads(addresses, localEthernet, dataTypes, batch.Buffer)
 
                 for tag in batch.Tags do
                     if tag.UpdateValue(batch.Buffer) then
@@ -51,15 +58,28 @@ type XgtPlcScan(ip: string, localEthernet: bool, scanDelay: int, timeoutMs: int,
                 failwith $"XGT 연결 실패: {ip}"
 
     override _.Disconnect() =
-        if connection.IsConnected then
-            connection.Disconnect() |> ignore
-            base.TriggerConnectChanged { Ip = ip; State = Disconnected }
+        this.StopScan() |> ignore
+        base.TriggerConnectChanged { Ip = ip; State = Disconnected }
 
     override _.IsConnected = connection.IsConnected
 
     // ---------------------------
     // 태그 쓰기
     // ---------------------------
+    //override _.WriteTags() =
+    //    let tags = xgtTags |> Seq.filter (fun f -> f.GetWriteValue().IsSome)
+    //    if tags.Any()
+    //    then
+    //        let addresses = tags |> Seq.map (fun tag -> tag.Address) |> Seq.toArray
+    //        let dataTypes = tags |> Seq.map (fun tag -> tag.DataType) |> Seq.toArray
+    //        let values    = tags |> Seq.map (fun tag -> tag.GetWriteValue().Value) |> Seq.toArray
+
+    //        if not (connection.Writes(addresses, localEthernet, dataTypes, values)) then
+    //            failwith $"Write 실패: {addresses}"
+
+    //        tags |> Seq.iter(fun f-> f.ClearWriteValue())
+
+
     override _.WriteTags() =
         for tag in xgtTags do
             match tag.GetWriteValue() with
@@ -68,7 +88,6 @@ type XgtPlcScan(ip: string, localEthernet: bool, scanDelay: int, timeoutMs: int,
                     failwith $"Write 실패: {tag.Address}"
                 tag.ClearWriteValue()
             | None -> ()
-
     // ---------------------------
     // 읽기 영역
     // ---------------------------

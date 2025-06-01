@@ -50,7 +50,7 @@ type MxPlcScan(ip: string, port:uint16, isUPD, scanDelay: int, timeoutMs: int, i
             failwith $"[❌ 연결 실패] MELSEC ({ip}): {ex.Message}"
 
     override _.Disconnect() =
-        connection.Close()
+        this.StopScan() |> ignore
         base.TriggerConnectChanged { Ip = ip; State = Disconnected }
 
     override _.IsConnected = true

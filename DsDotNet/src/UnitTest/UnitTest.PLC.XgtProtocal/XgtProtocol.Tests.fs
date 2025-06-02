@@ -9,27 +9,7 @@ open System.Threading
 open Dual.PLC.Common.FS
 
 module XgtTagTests =
-    
-    //[<Fact>]   
-    //let ``XGTTag UpdateValue should detect change for UInt16`` () =
-    //    let tag = XGTTag("%MW00010", true, false)
-    //    tag.LWordOffset <- 20 // StartByteOffset = 160
-    //    let buf = Array.zeroCreate<byte> 256
-    //    BitConverter.GetBytes(123us).CopyTo(buf, tag.StartByteOffset)
-    //    let changed = tag.UpdateValue(buf)
-    //    Assert.True(changed)
-    //    Assert.Equal(box 123us, tag.Value)
-
-    //[<Fact>]
-    //let ``XGTTag UpdateValue should return false for no change`` () =
-    //    let tag = XGTTag("%MW00010", true, false)
-    //    tag.LWordOffset <- 20
-    //    let buf = Array.zeroCreate<byte> 256
-    //    BitConverter.GetBytes(321us).CopyTo(buf, tag.StartByteOffset)
-    //    tag.UpdateValue(buf) |> ignore // 첫 번째 업데이트
-    //    let changed = tag.UpdateValue(buf) // 두 번째는 변경 없어야 함
-    //    Assert.False(changed)
-
+   
 
 //module BatchTests =
 
@@ -614,57 +594,57 @@ module IntegrationTests =
 
             //while true do
  
-                for tag in tests do
-                    let head, size, offset = tryParseXgiTag tag |> Option.get 
-                    let address =  LsXgiTagParser.ParseAddressMemory(head, size, offset)
-                    let readBuffer = Array.zeroCreate<byte> 2048 
-                    match size with
-                    | 1 -> 
-                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
-                        conn.Write(address, false, PlcDataSizeType.Boolean, not(Convert.ToBoolean data)) |> ignore
-                    | 8 -> 
-                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
-                        conn.Write(address, false, PlcDataSizeType.Byte, byte (Convert.ToByte data + 1uy)) |> ignore
-                    | 16 ->
-                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
-                        conn.Write(address, false, PlcDataSizeType.UInt16, uint16 (Convert.ToUInt16 data + 1us)) |> ignore
-                    | 32 ->
-                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
-                        conn.Write(address, false, PlcDataSizeType.UInt32, uint32 (Convert.ToUInt32 data + 1u)) |> ignore
-                    | 64 ->
-                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
-                        conn.Write(address, false, PlcDataSizeType.UInt64, uint64 (Convert.ToUInt64 data + 1UL)) |> ignore
-                    | _ -> failwithf $"지원하지 않는 데이터 타입: {size}"
+            //    for tag in tests do
+            //        let head, size, offset = tryParseXgiTag tag |> Option.get 
+            //        let address =  LsXgiTagParser.ParseAddressMemory(head, size, offset)
+            //        let readBuffer = Array.zeroCreate<byte> 2048 
+            //        match size with
+            //        | 1 -> 
+            //            let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
+            //            conn.Write(address, false, PlcDataSizeType.Boolean, not(Convert.ToBoolean data)) |> ignore
+            //        | 8 -> 
+            //            let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
+            //            conn.Write(address, false, PlcDataSizeType.Byte, byte (Convert.ToByte data + 1uy)) |> ignore
+            //        | 16 ->
+            //            let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
+            //            conn.Write(address, false, PlcDataSizeType.UInt16, uint16 (Convert.ToUInt16 data + 1us)) |> ignore
+            //        | 32 ->
+            //            let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
+            //            conn.Write(address, false, PlcDataSizeType.UInt32, uint32 (Convert.ToUInt32 data + 1u)) |> ignore
+            //        | 64 ->
+            //            let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
+            //            conn.Write(address, false, PlcDataSizeType.UInt64, uint64 (Convert.ToUInt64 data + 1UL)) |> ignore
+            //        | _ -> failwithf $"지원하지 않는 데이터 타입: {size}"
               
-            //let rnd = Random()
-            //let start = DateTime.Now
-            //let areaTypes = [ 'X'; 'B'; 'W'; 'D'; 'L' ]  // 디바이스 타입
+            let rnd = Random()
+            let start = DateTime.Now
+            let areaTypes = [ 'X'; 'B'; 'W'; 'D'; 'L' ]  // 디바이스 타입
 
-            //for code in areaCodes do
-            //    for kind in areaTypes do
-            //        let address = 
-            //            if code = 'S' then  $"%%{code}{kind}0"  // S 디바이스는 1200 bit max
-            //            else $"%%{code}{kind}256"  // 예: %%MX10, %%MW10
-            //        let value, dt =
-            //            match kind with
-            //            | 'X' -> box true, PlcDataSizeType.Boolean
-            //            | 'B' -> box (byte (rnd.Next(0, 256))), PlcDataSizeType.Byte
-            //            | 'W' -> box (uint16 (rnd.Next(0, 65536))), PlcDataSizeType.UInt16
-            //            | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), PlcDataSizeType.UInt32
-            //            | 'L' -> box (9876543210123456789UL), PlcDataSizeType.UInt64
-            //            | _ -> failwith $"지원되지 않는 타입: {kind}"
+            for code in areaCodes do
+                for kind in areaTypes do
+                    let address = 
+                        if code = 'S' then  $"%%{code}{kind}0"  // S 디바이스는 1200 bit max
+                        else $"%%{code}{kind}256"  // 예: %%MX10, %%MW10
+                    let value, dt =
+                        match kind with
+                        | 'X' -> box true, PlcDataSizeType.Boolean
+                        | 'B' -> box (byte (rnd.Next(0, 256))), PlcDataSizeType.Byte
+                        | 'W' -> box (uint16 (rnd.Next(0, 65536))), PlcDataSizeType.UInt16
+                        | 'D' -> box (uint32 (rnd.Next(0, Int32.MaxValue))), PlcDataSizeType.UInt32
+                        | 'L' -> box (9876543210123456789UL), PlcDataSizeType.UInt64
+                        | _ -> failwith $"지원되지 않는 타입: {kind}"
                     
-            //        let ok = conn.Write(address, dt, value)
-            //        let read = conn.Read(address, dt)
-            //        try
-            //            Assert.True(ok, $"쓰기 실패 - {address}")
-            //            Assert.Equal(value, read)
-            //        with ex ->
-            //            printfn $"[✓] {address} → {value} (읽기: {read})"
-            //            printfn $"[!] 예외 - 주소: {address} → {ex.Message}"
+                    let ok = conn.Write(address, true,  dt, value)
+                    let read = conn.Read(address, true, dt)
+                    try
+                        Assert.True(ok, $"쓰기 실패 - {address}")
+                        Assert.Equal(value, read)
+                    with ex ->
+                        printfn $"[✓] {address} → {value} (읽기: {read})"
+                        printfn $"[!] 예외 - 주소: {address} → {ex.Message}"
 
+        conn.Disconnect() |> ignore
 
-                conn.Disconnect() |> ignore
 
 
     [<Fact>]
@@ -676,5 +656,5 @@ module IntegrationTests =
     [<Fact>]
     let ``XGT XGI Ethernet Integration Test - Dynamic Area Write/Read for 10 seconds`` () =
         let areaCodesXGI = [ 'I'; (*'Q';'F';*) 'M'; 'L'; 'N'; 'K'; 'U'; 'R'; 'A'; 'W'; ]
-        //let areaCodesXGI = [ 'M'; ]
+        //let areaCodesXGI = [  'M' ; 'A'; ]
         runEthernetTest "192.168.9.102" areaCodesXGI

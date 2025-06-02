@@ -163,10 +163,20 @@ module ReadWriteBlockFactory =
     let getAddressInfo (addr: string) (dataType: PlcDataSizeType) = 
         if addr.StartsWith("%") then
             // XGI 태그 형식 파싱 (예: %MD100)
-            LsXgiTagParser.Parse addr 
+            match LsXgiTagParser.TryParse addr with
+            | Some (deviceName, addressDataType, bitOffset) -> 
+                (deviceName, addressDataType, bitOffset)
+            | None ->
+                failwithf "잘못된 XGI 태그 형식입니다: %s" addr
         else
             // XGK 태그 형식 파싱 (예: M100)
-            LsXgkTagParser.Parse (addr, (dataType = PlcDataSizeType.Boolean))
+            match LsXgkTagParser.TryParseWithIsBoolType (addr, (dataType = PlcDataSizeType.Boolean)) with
+            | Some (deviceName, addressDataType, bitOffset) -> 
+                (deviceName, addressDataType, bitOffset)
+            | None ->
+                failwithf "잘못된 XGK 태그 형식입니다: %s" addr
+
+            //LsXgkTagParser.Parse (addr, )
 
     /// 쓰기 작업용 ReadWriteBlock 생성
     /// addr: PLC 주소 문자열

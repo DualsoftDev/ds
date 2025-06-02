@@ -142,6 +142,12 @@ type LsXgkTagParser =
     [<Extension>]
     static member TryParse(tag:string): (string * int * int) option =
         tryParseXgkTag tag 
+
+    [<Extension>]
+    static member TryParseWithIsBoolType(tag:string, isBit:bool): (string * int * int) option =
+        match tryParseXgkValidText tag isBit with
+        | Some standardText -> tryParseXgkTag standardText  
+        | None -> None
     
     ///// 약식 tag 이므로, "P1" 등도 지원.  bit type 인지 word type 인지 isBit 에 지정
     [<Extension>]

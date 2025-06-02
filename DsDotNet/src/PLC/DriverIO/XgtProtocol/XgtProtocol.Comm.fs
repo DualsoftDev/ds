@@ -63,8 +63,10 @@ type XgtEthernet(ip: string, port: int, timeoutMs: int) =
         | _ -> false
 
     /// Read data from a single address
-    member this.Read(address: string, localEthernet: bool, dataType: PlcDataSizeType, readBuffer: byte[]) =
+    member this.Read(address: string, localEthernet: bool, dataType: PlcDataSizeType) =
+        let readBuffer = Array.zeroCreate (DataExtractor.calculateElementSize dataType)
         this.Reads([| address |], localEthernet, [| dataType |], readBuffer)
+        DataExtractor.extractValue readBuffer 0 dataType
     
     /// Write data to a single address
     member this.Write(address: string, localEthernet: bool, dataType: PlcDataSizeType, value: obj) : bool =

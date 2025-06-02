@@ -617,21 +617,22 @@ module IntegrationTests =
                 for tag in tests do
                     let head, size, offset = tryParseXgiTag tag |> Option.get 
                     let address =  LsXgiTagParser.ParseAddressMemory(head, size, offset)
+                    let readBuffer = Array.zeroCreate<byte> 2048 
                     match size with
                     | 1 -> 
-                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
                         conn.Write(address, false, PlcDataSizeType.Boolean, not(Convert.ToBoolean data)) |> ignore
                     | 8 -> 
-                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
                         conn.Write(address, false, PlcDataSizeType.Byte, byte (Convert.ToByte data + 1uy)) |> ignore
                     | 16 ->
-                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
                         conn.Write(address, false, PlcDataSizeType.UInt16, uint16 (Convert.ToUInt16 data + 1us)) |> ignore
                     | 32 ->
-                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
                         conn.Write(address, false, PlcDataSizeType.UInt32, uint32 (Convert.ToUInt32 data + 1u)) |> ignore
                     | 64 ->
-                        let data = conn.Read(address, PlcDataSizeType.FromBitSize size)
+                        let data = conn.Read(address, true, PlcDataSizeType.FromBitSize size, readBuffer)
                         conn.Write(address, false, PlcDataSizeType.UInt64, uint64 (Convert.ToUInt64 data + 1UL)) |> ignore
                     | _ -> failwithf $"지원하지 않는 데이터 타입: {size}"
               
